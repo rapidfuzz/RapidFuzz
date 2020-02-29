@@ -1,9 +1,9 @@
 # RapidFuzz
 
 # Roadmap
-- [] add string matching for strings with a big length difference
-- [] add Python wrapper
-- [] add Rust version of the code
+- [ ] add string matching for strings with a big length difference
+- [ ] add Python wrapper
+- [ ] add Rust version of the code
 
 # License
 RapidFuzz itself is licensed under the MIT license, so feel free to do what you want with the code.
