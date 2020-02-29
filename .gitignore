@@ -1,1 +1,4 @@
 .vscode/
+*.data
+*.so
+test.py

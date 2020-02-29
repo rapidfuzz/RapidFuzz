@@ -55,7 +55,7 @@ uint8_t full_ratio(const std::string &query, const std::string &choice,
 }
 
 
-uint8_t partial_ratio(const std::string &query, const std::string &choice,
+/*uint8_t partial_ratio(const std::string &query, const std::string &choice,
                       uint8_t partial_scale, uint8_t score_cutoff)
 {
   float sratio = normalized_levenshtein(query, choice);
@@ -69,7 +69,7 @@ uint8_t partial_ratio(const std::string &query, const std::string &choice,
     }
   }
   return static_cast<uint8_t>(std::round(sratio * 100.0));
-}
+}*/
 
 
 uint8_t ratio(const std::string &query, const std::string &choice,
