@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include "concepts.hpp"
+#include <iostream>
 
 struct Affix {
   size_t prefix_len;
@@ -108,77 +109,62 @@ Intersection intersection_count_sorted_vec(std::vector<std::string_view> a,
   return Intersection{vec_sect, vec_ab, b};
 }
 
-void remove_common_affix(std::string_view &a, std::string_view &b) {
-  size_t a_len = a.length();
-  size_t b_len = b.length();
 
-  while (a_len > 0 && b_len > 0 && a[a_len - 1] == b[b_len - 1]) {
-    --a_len;
-    --b_len;
-  }
-
-  size_t prefix_len = 0;
-  while (a_len > 0 && b_len > 0 && a[prefix_len] == b[prefix_len]) {
-    --a_len;
-    --b_len;
-    ++prefix_len;
-  }
-
-  size_t suffix_len = a.length() - a_len;
-
-  a = a.substr(prefix_len, a_len);
-  b = b.substr(prefix_len, b_len);
+/**
+ * Finds the longest common prefix between two ranges
+ */
+template <typename InputIterator1, typename InputIterator2>
+auto common_prefix_length(InputIterator1 first1, InputIterator1 last1,
+	                        InputIterator2 first2, InputIterator2 last2)
+{
+    return std::distance(first1, std::mismatch(first1, last1, first2, last2).first);
 }
 
-void remove_common_affix(std::vector<std::string_view> &a,
-                         std::vector<std::string_view> &b) {
-  // remove common prefix
-  // maybe erasing whole prefix at once is faster
-  auto a_it = a.begin();
-  auto b_it = b.begin();
-  while (a_it != a.end() && b_it != b.end()) {
-    size_t common_len = 0;
-    auto a_letter_it = a_it->begin();
-    auto b_letter_it = b_it->begin();
-    while (a_letter_it != a_it->end() && b_letter_it != b_it->end() &&
-           *a_letter_it == *b_letter_it) {
-      ++a_letter_it;
-      ++b_letter_it;
-      ++common_len;
-    }
-    if (a_letter_it != a_it->end() || b_letter_it != b_it->end()) {
-      *a_it = a_it->substr(common_len);
-      *b_it = b_it->substr(common_len);
-      break;
-    }
-    a_it = a.erase(a_it);
-    b_it = b.erase(b_it);
-  }
+/**
+ * Removes common prefix of two string views
+ */
+void remove_common_prefix(std::string_view& a, std::string_view& b) {
+  auto prefix = common_prefix_length(a.begin(), a.end(), b.begin(), b.end());
+	a.remove_prefix(prefix);
+	b.remove_prefix(prefix);
+}
 
-  // remove common suffix
-  auto a_it_rev = a.rbegin();
-  auto b_it_rev = b.rbegin();
-  while (a_it_rev != a.rend() && b_it_rev != b.rend()) {
-    size_t common_len = 0;
-    auto a_letter_it = a_it_rev->rbegin();
-    auto b_letter_it = b_it_rev->rbegin();
-    while (a_letter_it != a_it_rev->rend() && b_letter_it != b_it_rev->rend() &&
-           *a_letter_it == *b_letter_it) {
-      ++a_letter_it;
-      ++b_letter_it;
-      ++common_len;
-    }
-    if (a_letter_it != a_it_rev->rend() || b_letter_it != b_it_rev->rend()) {
-      *a_it_rev = a_it_rev->substr(0, a_it_rev->size() - common_len);
-      *b_it_rev = b_it_rev->substr(0, b_it_rev->size() - common_len);
-      break;
-    }
-    ++a_it_rev;
-    ++b_it_rev;
-    a.pop_back();
-    b.pop_back();
+/**
+ * Removes common suffix of two string views
+ */
+void remove_common_suffix(std::string_view& a, std::string_view& b) {
+  auto suffix = common_prefix_length(a.rbegin(), a.rend(), b.rbegin(), b.rend());
+	a.remove_suffix(suffix);
+  b.remove_suffix(suffix);
+}
+
+/**
+ * Removes common affix of two string views
+ */
+void remove_common_affix(std::string_view& a, std::string_view& b) {
+	remove_common_prefix(a, b);
+  remove_common_suffix(a, b);
+}
+
+
+/**
+ * Removes common affix of two vectors of string views
+ */
+void remove_common_affix(std::vector<std::string_view> &a, std::vector<std::string_view> &b)
+{
+  auto prefix = std::mismatch(a.begin(), a.end(), b.begin(), b.end());
+  a.erase(a.begin(), prefix.first);
+  b.erase(b.begin(), prefix.second);
+  auto suffix = common_prefix_length(a.rbegin(), a.rend(), b.rbegin(), b.rend());
+  a.erase(a.end()-suffix, a.end());
+  b.erase(b.end()-suffix, b.end());
+
+  if (!a.empty() && !b.empty()) {
+    remove_common_prefix(a.front(), b.front());
+    remove_common_suffix(a.back(), b.back());
   }
 }
+
 
 size_t joinedStringViewLength(const std::vector<std::string_view> &words) {
   if (words.empty()) {
