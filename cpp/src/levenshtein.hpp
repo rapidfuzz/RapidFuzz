@@ -1,4 +1,4 @@
-#pragma once
+//#pragma once
 #include <string_view>
 #include <vector>
 
@@ -11,15 +11,15 @@ namespace levenshtein {
      * required to change one sequence into the other according to Levenshtein.
      * Each edit operation has a similar cost of 1.
      */
-    size_t distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2);
-    size_t distance(std::string_view sentence1, std::string_view sentence2);
+    //size_t distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2);
+    //size_t distance(std::string_view sentence1, std::string_view sentence2);
 
     /**
     * Calculates a normalized score of the Levenshtein algorithm between 0.0 and
     * 1.0 (inclusive), where 1.0 means the sequences are the same.
     */
-    float normalized_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2);
-    float normalized_distance(std::string_view sentence1, std::string_view sentence2);
+    //float normalized_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2);
+    //float normalized_distance(std::string_view sentence1, std::string_view sentence2);
 
 
     // should be more generic so at least any combination of string view and vector of string view can be used

@@ -1,4 +1,6 @@
 .vscode/
 *.data
 *.so
+*.o
+*.out
 test.py

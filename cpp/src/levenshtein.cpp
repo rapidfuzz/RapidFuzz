@@ -1,23 +1,24 @@
 #include "levenshtein.hpp"
 #include "utils.hpp"
 #include <numeric>
+#include <iostream>
 
 
 void levenshtein_word_cmp(const char &letter_cmp,
                           const std::vector<std::string_view> &words,
                           std::vector<size_t> &cache, size_t distance_b)
 {
-  size_t result = distance_b + 1;
+  size_t result = distance_b;
   auto cache_iter = cache.begin();
   auto word_iter = words.begin();
 
   auto charCmp = [&] (const char &char2) {
-	if (letter_cmp == char2) { result = distance_b - 1; }
-	else { ++result; }
+	  if (letter_cmp == char2) { result = distance_b - 1; }
+	  else { ++result; }
 
-    distance_b = *cache_iter;
-    if (result > distance_b + 1) {
-      result = distance_b + 1;
+    distance_b = *cache_iter + 1;
+    if (result > distance_b) {
+      result = distance_b;
     }
     *cache_iter = result;
     ++cache_iter;
@@ -29,16 +30,16 @@ void levenshtein_word_cmp(const char &letter_cmp,
 
   // no whitespace should be added in front of the first word
   for (const auto &letter : *word_iter) {
-	charCmp(letter);
+	  charCmp(letter);
   }
   ++word_iter;
 
   for (; word_iter != words.end(); ++word_iter) {
     // between every word there should be a whitespace
-	charCmp(' ');
+	  charCmp(' ');
     // check following word
     for (const auto &letter : *word_iter) {
-	  charCmp(letter);
+	    charCmp(letter);
     }
   }
 }
@@ -65,24 +66,22 @@ size_t levenshtein::weighted_distance(std::vector<std::string_view> sentence1, s
   auto word1_iter = sentence1.begin();
 
   // no whitespace in front of first word
-  size_t distance_b = range1_pos;
+  size_t distance_b;
   for (const auto &letter : *word1_iter) {
-    distance_b = range1_pos;
+    distance_b = range1_pos + 1;
     levenshtein_word_cmp(letter, sentence2, cache, distance_b);
     ++range1_pos;
   }
 
   ++word1_iter;
   for (; word1_iter != sentence1.end(); ++word1_iter) {
-    distance_b = range1_pos;
-
     // whitespace between words
-    distance_b = range1_pos;
+    distance_b = range1_pos + 1;
     levenshtein_word_cmp(' ', sentence2, cache, distance_b);
     ++range1_pos;
 
     for (const auto &letter : *word1_iter) {
-      distance_b = range1_pos;
+      distance_b = range1_pos + 1;
       levenshtein_word_cmp(letter, sentence2, cache, distance_b);
       ++range1_pos;
     }
@@ -93,7 +92,6 @@ size_t levenshtein::weighted_distance(std::vector<std::string_view> sentence1, s
 
 size_t levenshtein::weighted_distance(std::string_view sentence1, std::string_view sentence2) {
   remove_common_affix(sentence1, sentence2);
-
   if (sentence1.empty()) {
     return sentence2.length();
   }
@@ -101,31 +99,33 @@ size_t levenshtein::weighted_distance(std::string_view sentence1, std::string_vi
     return sentence1.length();
   }
 
+  if (sentence1.length() > sentence2.length()) std::swap(sentence1, sentence2);
+
   std::vector<size_t> cache(sentence2.length());
   std::iota(cache.begin(), cache.end(), 1);
 
   size_t sentence1_pos = 0;
-  size_t result = sentence2.length();
   for (const auto &char1 : sentence1) {
-    size_t distance_b = sentence1_pos;
-    result = sentence1_pos + 1;
     auto cache_iter = cache.begin();
+    size_t distance_b = sentence1_pos+1;
+    size_t result = sentence1_pos+1;
     for (const auto &char2 : sentence2) {
       if (char1 == char2) {
         result = distance_b - 1;
       } else {
         ++result;
       }
-      distance_b = *cache_iter;
-      if (result > distance_b + 1) {
-        result = distance_b + 1;
+      distance_b = *cache_iter + 1;
+      if (result > distance_b) {
+        result = distance_b;
       }
       *cache_iter = result;
       ++cache_iter;
     }
     ++sentence1_pos;
   }
-  return result;
+
+  return cache.back();
 }
 
 
