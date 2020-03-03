@@ -136,7 +136,7 @@ float levenshtein::normalized_weighted_distance(std::vector<std::string_view> se
   }
 
   size_t lensum = joinedStringViewLength(sentence1) + joinedStringViewLength(sentence2);
-  size_t distance = levenshtein(sentence1, sentence2);
+  size_t distance = weighted_distance(sentence1, sentence2);
   return 1.0 - (float)distance / (float)lensum;
 }
 
@@ -147,6 +147,6 @@ float levenshtein::normalized_weighted_distance(std::string_view sentence1, std:
   }
 
   size_t lensum = sentence1.length() + sentence2.length();
-  size_t distance = levenshtein(sentence1, sentence2);
+  size_t distance = weighted_distance(sentence1, sentence2);
   return 1.0 - (float)distance / (float)lensum;
 }

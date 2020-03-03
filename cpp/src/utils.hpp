@@ -2,6 +2,7 @@
 #include <string_view>
 #include <vector>
 #include <algorithm>
+#include "concepts.hpp"
 
 struct Affix {
   size_t prefix_len;
@@ -189,4 +190,19 @@ size_t joinedStringViewLength(const std::vector<std::string_view> &words) {
     length += word.length();
   }
   return length;
+}
+
+
+template<Iterable T>
+size_t recursiveIterableSize(const T &x, size_t delimiter_length=0){
+	return x.size();
+}
+
+template<IterableOfIterables T>
+size_t recursiveIterableSize(const T &x, size_t delimiter_length=0){
+	size_t result = (x.size() - 1) * delimiter_length;
+	for (const auto &y: x) {
+		result += recursiveIterableSize(y, delimiter_length);
+	}
+	return result;
 }

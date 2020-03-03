@@ -18,8 +18,8 @@ namespace levenshtein {
     * Calculates a normalized score of the Levenshtein algorithm between 0.0 and
     * 1.0 (inclusive), where 1.0 means the sequences are the same.
     */
-    size_t normalized_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2);
-    size_t normalized_distance(std::string_view sentence1, std::string_view sentence2);
+    float normalized_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2);
+    float normalized_distance(std::string_view sentence1, std::string_view sentence2);
 
 
     // should be more generic so at least any combination of string view and vector of string view can be used
@@ -48,6 +48,6 @@ namespace levenshtein {
     * Calculates a normalized score of the weighted Levenshtein algorithm between 0.0 and
     * 1.0 (inclusive), where 1.0 means the sequences are the same.
     */
-    size_t normalized_weighted_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2);
-    size_t normalized_weighted_distance(std::string_view sentence1, std::string_view sentence2);
+    float normalized_weighted_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2);
+    float normalized_weighted_distance(std::string_view sentence1, std::string_view sentence2);
 }
