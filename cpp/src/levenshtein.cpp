@@ -6,7 +6,8 @@
 
 void levenshtein_word_cmp(const char &letter_cmp,
                           const std::vector<std::string_view> &words,
-                          std::vector<size_t> &cache, size_t distance_b)
+                          std::vector<size_t> &cache, size_t distance_b,
+                          std::string_view delimiter="")
 {
   size_t result = distance_b;
   auto cache_iter = cache.begin();
@@ -28,15 +29,17 @@ void levenshtein_word_cmp(const char &letter_cmp,
   // might be worth a retry when it is added in c++20 since then compilers might
   // improve the runtime
 
-  // no whitespace should be added in front of the first word
+  // no delimiter should be added in front of the first word
   for (const auto &letter : *word_iter) {
 	  charCmp(letter);
   }
   ++word_iter;
 
   for (; word_iter != words.end(); ++word_iter) {
-    // between every word there should be a whitespace
-	  charCmp(' ');
+    // between every word there should be a delimiter
+    for (const auto &letter : delimiter) {
+      charCmp(letter);
+    }
     // check following word
     for (const auto &letter : *word_iter) {
 	    charCmp(letter);
@@ -45,13 +48,13 @@ void levenshtein_word_cmp(const char &letter_cmp,
 }
 
 
-size_t levenshtein::weighted_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2) {
+size_t levenshtein::weighted_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2, std::string_view delimiter) {
   remove_common_affix(sentence1, sentence2);
-  size_t sentence1_len = joinedStringViewLength(sentence1);
-  size_t sentence2_len = joinedStringViewLength(sentence2);
+  size_t sentence1_len = recursiveIterableSize(sentence1, delimiter.length());
+  size_t sentence2_len = recursiveIterableSize(sentence2, delimiter.length());
 
   // exit early when one sentence is empty
-  // (empty sentence would cause undefinded behaviour)
+  // would cause problems in algorithm
   if (!sentence1_len) {
     return sentence2_len;
   }
@@ -65,24 +68,26 @@ size_t levenshtein::weighted_distance(std::vector<std::string_view> sentence1, s
   size_t range1_pos = 0;
   auto word1_iter = sentence1.begin();
 
-  // no whitespace in front of first word
+  // no delimiter in front of first word
   size_t distance_b;
   for (const auto &letter : *word1_iter) {
     distance_b = range1_pos + 1;
-    levenshtein_word_cmp(letter, sentence2, cache, distance_b);
+    levenshtein_word_cmp(letter, sentence2, cache, distance_b, delimiter);
     ++range1_pos;
   }
 
   ++word1_iter;
   for (; word1_iter != sentence1.end(); ++word1_iter) {
-    // whitespace between words
-    distance_b = range1_pos + 1;
-    levenshtein_word_cmp(' ', sentence2, cache, distance_b);
-    ++range1_pos;
+    // delimiter between words
+    for (const auto &letter : delimiter) {
+      distance_b = range1_pos + 1;
+      levenshtein_word_cmp(letter, sentence2, cache, distance_b, delimiter);
+      ++range1_pos;
+    }
 
     for (const auto &letter : *word1_iter) {
       distance_b = range1_pos + 1;
-      levenshtein_word_cmp(letter, sentence2, cache, distance_b);
+      levenshtein_word_cmp(letter, sentence2, cache, distance_b, delimiter);
       ++range1_pos;
     }
   }
@@ -130,13 +135,14 @@ size_t levenshtein::weighted_distance(std::string_view sentence1, std::string_vi
 
 
 float levenshtein::normalized_weighted_distance(std::vector<std::string_view> sentence1,
-                             std::vector<std::string_view> sentence2) {
+                                                std::vector<std::string_view> sentence2,
+                                                std::string_view delimiter) {
   if (sentence1.empty() && sentence2.empty()) {
     return 1.0;
   }
 
-  size_t lensum = joinedStringViewLength(sentence1) + joinedStringViewLength(sentence2);
-  size_t distance = weighted_distance(sentence1, sentence2);
+  size_t lensum = recursiveIterableSize(sentence1, delimiter.length()) + recursiveIterableSize(sentence2, delimiter.length());
+  size_t distance = weighted_distance(sentence1, sentence2, delimiter);
   return 1.0 - (float)distance / (float)lensum;
 }
 

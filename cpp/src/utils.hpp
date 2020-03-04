@@ -186,6 +186,9 @@ size_t recursiveIterableSize(const T &x, size_t delimiter_length=0){
 
 template<IterableOfIterables T>
 size_t recursiveIterableSize(const T &x, size_t delimiter_length=0){
+  if (x.empty()) {
+    return 0;
+  }
 	size_t result = (x.size() - 1) * delimiter_length;
 	for (const auto &y: x) {
 		result += recursiveIterableSize(y, delimiter_length);
