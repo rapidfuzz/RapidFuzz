@@ -1,9 +1,19 @@
-//#pragma once
+#pragma once
 #include <string_view>
 #include <vector>
 
 
 namespace levenshtein {
+    struct Matrix {
+        size_t prefix_len;
+        std::vector<size_t> matrix;
+        size_t matrix_columns;
+        size_t matrix_rows;
+    };
+
+    Matrix matrix(std::string_view sentence1, std::string_view sentence2);
+
+
     //Not implemented yet
 
     /**

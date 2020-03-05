@@ -4,22 +4,66 @@
 #include <iostream>
 
 
+levenshtein::Matrix levenshtein::matrix(std::string_view sentence1, std::string_view sentence2) {
+  Affix affix = remove_common_affix(sentence1, sentence2);
+
+  size_t matrix_columns = sentence1.length() + 1;
+  size_t matrix_rows = sentence2.length() + 1;
+
+  std::vector<size_t> cache_matrix(matrix_rows*matrix_columns, 0);
+
+  for (size_t i = 0; i < matrix_rows; ++i) {
+    cache_matrix[i] = i;
+  }
+
+  for (size_t i = 1; i < matrix_columns; ++i) {
+    cache_matrix[matrix_rows*i] = i;
+  }
+
+  size_t sentence1_pos = 0;
+  for (const auto &char1 : sentence1) {
+    auto prev_cache = cache_matrix.begin() + sentence1_pos * matrix_rows;
+    auto result_cache = cache_matrix.begin() + (sentence1_pos + 1) * matrix_rows + 1;
+    size_t result = sentence1_pos + 1;
+    size_t sentence2_pos = 0;
+    for (const auto &char2 : sentence2) {
+      result = std::min({
+        result + 1,
+        *(prev_cache++) + (char1 != char2),
+        *prev_cache + 1
+      });
+      *result_cache = result;
+      ++result_cache;
+    }
+    ++sentence1_pos;
+  }
+
+  return Matrix {
+      affix.prefix_len,
+      cache_matrix,
+      matrix_columns,
+      matrix_rows
+  };
+}
+
+
+
 void levenshtein_word_cmp(const char &letter_cmp,
                           const std::vector<std::string_view> &words,
-                          std::vector<size_t> &cache, size_t distance_b,
+                          std::vector<size_t> &cache, size_t distance,
                           std::string_view delimiter="")
 {
-  size_t result = distance_b;
+  size_t result = distance;
   auto cache_iter = cache.begin();
   auto word_iter = words.begin();
 
   auto charCmp = [&] (const char &char2) {
-	  if (letter_cmp == char2) { result = distance_b - 1; }
+	  if (letter_cmp == char2) { result = distance - 1; }
 	  else { ++result; }
 
-    distance_b = *cache_iter + 1;
-    if (result > distance_b) {
-      result = distance_b;
+    distance = *cache_iter + 1;
+    if (result > distance) {
+      result = distance;
     }
     *cache_iter = result;
     ++cache_iter;
@@ -69,10 +113,10 @@ size_t levenshtein::weighted_distance(std::vector<std::string_view> sentence1, s
   auto word1_iter = sentence1.begin();
 
   // no delimiter in front of first word
-  size_t distance_b;
+  size_t distance;
   for (const auto &letter : *word1_iter) {
-    distance_b = range1_pos + 1;
-    levenshtein_word_cmp(letter, sentence2, cache, distance_b, delimiter);
+    distance = range1_pos + 1;
+    levenshtein_word_cmp(letter, sentence2, cache, distance, delimiter);
     ++range1_pos;
   }
 
@@ -80,14 +124,14 @@ size_t levenshtein::weighted_distance(std::vector<std::string_view> sentence1, s
   for (; word1_iter != sentence1.end(); ++word1_iter) {
     // delimiter between words
     for (const auto &letter : delimiter) {
-      distance_b = range1_pos + 1;
-      levenshtein_word_cmp(letter, sentence2, cache, distance_b, delimiter);
+      distance = range1_pos + 1;
+      levenshtein_word_cmp(letter, sentence2, cache, distance, delimiter);
       ++range1_pos;
     }
 
     for (const auto &letter : *word1_iter) {
-      distance_b = range1_pos + 1;
-      levenshtein_word_cmp(letter, sentence2, cache, distance_b, delimiter);
+      distance = range1_pos + 1;
+      levenshtein_word_cmp(letter, sentence2, cache, distance, delimiter);
       ++range1_pos;
     }
   }
@@ -112,17 +156,17 @@ size_t levenshtein::weighted_distance(std::string_view sentence1, std::string_vi
   size_t sentence1_pos = 0;
   for (const auto &char1 : sentence1) {
     auto cache_iter = cache.begin();
-    size_t distance_b = sentence1_pos+1;
+    size_t distance = sentence1_pos+1;
     size_t result = sentence1_pos+1;
     for (const auto &char2 : sentence2) {
       if (char1 == char2) {
-        result = distance_b - 1;
+        result = distance - 1;
       } else {
         ++result;
       }
-      distance_b = *cache_iter + 1;
-      if (result > distance_b) {
-        result = distance_b;
+      distance = *cache_iter + 1;
+      if (result > distance) {
+        result = distance;
       }
       *cache_iter = result;
       ++cache_iter;

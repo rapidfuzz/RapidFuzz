@@ -123,27 +123,31 @@ auto common_prefix_length(InputIterator1 first1, InputIterator1 last1,
 /**
  * Removes common prefix of two string views
  */
-void remove_common_prefix(std::string_view& a, std::string_view& b) {
+size_t remove_common_prefix(std::string_view& a, std::string_view& b) {
   auto prefix = common_prefix_length(a.begin(), a.end(), b.begin(), b.end());
 	a.remove_prefix(prefix);
 	b.remove_prefix(prefix);
+  return prefix;
 }
 
 /**
  * Removes common suffix of two string views
  */
-void remove_common_suffix(std::string_view& a, std::string_view& b) {
+size_t remove_common_suffix(std::string_view& a, std::string_view& b) {
   auto suffix = common_prefix_length(a.rbegin(), a.rend(), b.rbegin(), b.rend());
 	a.remove_suffix(suffix);
   b.remove_suffix(suffix);
+  return suffix;
 }
 
 /**
  * Removes common affix of two string views
  */
-void remove_common_affix(std::string_view& a, std::string_view& b) {
-	remove_common_prefix(a, b);
-  remove_common_suffix(a, b);
+Affix remove_common_affix(std::string_view& a, std::string_view& b) {
+	return Affix {
+    remove_common_prefix(a, b),
+    remove_common_suffix(a, b)
+  };
 }
 
 
