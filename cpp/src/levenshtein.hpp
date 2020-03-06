@@ -54,6 +54,9 @@ namespace levenshtein {
     size_t weighted_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2, std::string_view delimiter="");
     size_t weighted_distance(std::string_view sentence1, std::string_view sentence2);
 
+    size_t weighted_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2, size_t max_distance, std::string_view delimiter="");
+    size_t weighted_distance(std::string_view sentence1, std::string_view sentence2, size_t max_distance);
+
     /**
     * Calculates a normalized score of the weighted Levenshtein algorithm between 0.0 and
     * 1.0 (inclusive), where 1.0 means the sequences are the same.
