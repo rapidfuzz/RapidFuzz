@@ -14,7 +14,7 @@ namespace levenshtein {
     Matrix matrix(std::string_view sentence1, std::string_view sentence2);
 
 
-    //Not implemented yet
+    /* Not implemented yet */
 
     /**
      * Calculates the minimum number of insertions, deletions, and substitutions
@@ -32,13 +32,6 @@ namespace levenshtein {
     //float normalized_distance(std::string_view sentence1, std::string_view sentence2);
 
 
-    // should be more generic so at least any combination of string view and vector of string view can be used
-    // should be even possible to use for other types like a vector of integers
-    // the delimiter like e.g. ' ' for a vector of string views should be specified by the user of the function
-    // should be possible to use any iterable/single value. e.g. when using a string it could be any iterable that returns chars aswell like e.g. a string_view
-    // or with a vector of integers could be both a iterable of integers or a single integer
-    // iterable of iterable is probably the maximum that is needed for now since it allows using e.g. a vector of string views
-
     /**
      * Calculates the minimum number of insertions, deletions, and substitutions
      * required to change one sequence into the other according to Levenshtein.
@@ -51,16 +44,33 @@ namespace levenshtein {
      * Remove         | 1
      * Replace        | 2
      */
-    size_t weighted_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2, std::string_view delimiter="");
     size_t weighted_distance(std::string_view sentence1, std::string_view sentence2);
+    size_t weighted_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2,
+                             std::string_view delimiter="");
 
-    size_t weighted_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2, size_t max_distance, std::string_view delimiter="");
-    size_t weighted_distance(std::string_view sentence1, std::string_view sentence2, size_t max_distance);
+
+    /**
+     * These functions allow providing a max_distance parameter that can be used to exit early when the
+     * calculated levenshtein distance is at least as big as max_distance and will return the maximal
+     * possible value for size_t.
+     * This range check makes the levenshtein calculation about 20% slower, so it should be only used
+     * when it can usually exit early.
+     */
+    size_t weighted_distance(std::string_view sentence1, std::string_view sentence2,
+                             size_t max_distance);
+    size_t weighted_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2,
+                             size_t max_distance, std::string_view delimiter="");
 
     /**
     * Calculates a normalized score of the weighted Levenshtein algorithm between 0.0 and
     * 1.0 (inclusive), where 1.0 means the sequences are the same.
     */
-    float normalized_weighted_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2, std::string_view delimiter="");
     float normalized_weighted_distance(std::string_view sentence1, std::string_view sentence2);
+    float normalized_weighted_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2,
+                                       std::string_view delimiter="");
+
+    float normalized_weighted_distance(std::string_view sentence1, std::string_view sentence2,
+                                       float min_ratio);
+    float normalized_weighted_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2,
+                                       float min_ratio, std::string_view delimiter="");
 }

@@ -1,6 +1,7 @@
 #include "levenshtein.hpp"
 #include "utils.hpp"
 #include <numeric>
+#include <cmath>
 #include <iostream>
 
 
@@ -50,20 +51,20 @@ levenshtein::Matrix levenshtein::matrix(std::string_view sentence1, std::string_
 
 void levenshtein_word_cmp(const char &letter_cmp,
                           const std::vector<std::string_view> &words,
-                          std::vector<size_t> &cache, size_t distance,
+                          std::vector<size_t> &cache, size_t current_cache,
                           std::string_view delimiter="")
 {
-  size_t result = distance;
+  size_t result = current_cache + 1;
   auto cache_iter = cache.begin();
   auto word_iter = words.begin();
 
   auto charCmp = [&] (const char &char2) {
-	  if (letter_cmp == char2) { result = distance - 1; }
+	  if (letter_cmp == char2) { result = current_cache; }
 	  else { ++result; }
 
-    distance = *cache_iter + 1;
-    if (result > distance) {
-      result = distance;
+    current_cache = *cache_iter;
+    if (result > current_cache + 1) {
+      result = current_cache + 1;
     }
     *cache_iter = result;
     ++cache_iter;
@@ -110,28 +111,24 @@ size_t levenshtein::weighted_distance(std::vector<std::string_view> sentence1, s
   std::iota(cache.begin(), cache.end(), 1);
 
   size_t range1_pos = 0;
-  auto word1_iter = sentence1.begin();
+  auto word_iter = sentence1.begin();
 
   // no delimiter in front of first word
-  size_t distance;
-  for (const auto &letter : *word1_iter) {
-    distance = range1_pos + 1;
-    levenshtein_word_cmp(letter, sentence2, cache, distance, delimiter);
+  for (const auto &letter : *word_iter) {
+    levenshtein_word_cmp(letter, sentence2, cache, range1_pos, delimiter);
     ++range1_pos;
   }
 
-  ++word1_iter;
-  for (; word1_iter != sentence1.end(); ++word1_iter) {
+  ++word_iter;
+  for (; word_iter != sentence1.end(); ++word_iter) {
     // delimiter between words
     for (const auto &letter : delimiter) {
-      distance = range1_pos + 1;
-      levenshtein_word_cmp(letter, sentence2, cache, distance, delimiter);
+      levenshtein_word_cmp(letter, sentence2, cache, range1_pos, delimiter);
       ++range1_pos;
     }
 
-    for (const auto &letter : *word1_iter) {
-      distance = range1_pos + 1;
-      levenshtein_word_cmp(letter, sentence2, cache, distance, delimiter);
+    for (const auto &letter : *word_iter) {
+      levenshtein_word_cmp(letter, sentence2, cache, range1_pos, delimiter);
       ++range1_pos;
     }
   }
@@ -142,23 +139,26 @@ size_t levenshtein::weighted_distance(std::vector<std::string_view> sentence1, s
 
 size_t levenshtein_word_cmp_limited(const char &letter_cmp,
                           const std::vector<std::string_view> &words,
-                          std::vector<size_t> &cache, size_t distance,
+                          std::vector<size_t> &cache, size_t current_cache,
                           std::string_view delimiter="")
 {
-  size_t result = distance;
+  size_t result = current_cache + 1;
   auto cache_iter = cache.begin();
   auto word_iter = words.begin();
   auto min_distance = std::numeric_limits<size_t>::max();
 
   auto charCmp = [&] (const char &char2) {
-	  if (letter_cmp == char2) { result = distance - 1; }
+	  if (letter_cmp == char2) { result = current_cache; }
 	  else { ++result; }
 
-    distance = *cache_iter + 1;
-    if (result > distance) {
-      result = distance;
+    current_cache = *cache_iter;
+    if (result > current_cache + 1) {
+      result = current_cache + 1;
     }
-    min_distance = std::min(*cache_iter, min_distance);
+
+    if (current_cache < min_distance) {
+      min_distance = current_cache;
+    }
     *cache_iter = result;
     ++cache_iter;
   };
@@ -205,34 +205,30 @@ size_t levenshtein::weighted_distance(std::vector<std::string_view> sentence1, s
   std::iota(cache.begin(), cache.end(), 1);
 
   size_t range1_pos = 0;
-  auto word1_iter = sentence1.begin();
+  auto word_iter = sentence1.begin();
 
   // no delimiter in front of first word
-  size_t distance;
-  for (const auto &letter : *word1_iter) {
-    distance = range1_pos + 1;
-    auto min_distance = levenshtein_word_cmp_limited(letter, sentence2, cache, distance, delimiter);
+  for (const auto &letter : *word_iter) {
+    auto min_distance = levenshtein_word_cmp_limited(letter, sentence2, cache, range1_pos, delimiter);
     if (min_distance > max_distance) {
       return std::numeric_limits<size_t>::max();
     }
     ++range1_pos;
   }
 
-  ++word1_iter;
-  for (; word1_iter != sentence1.end(); ++word1_iter) {
+  ++word_iter;
+  for (; word_iter != sentence1.end(); ++word_iter) {
     // delimiter between words
     for (const auto &letter : delimiter) {
-      distance = range1_pos + 1;
-      auto min_distance = levenshtein_word_cmp_limited(letter, sentence2, cache, distance, delimiter);
+      auto min_distance = levenshtein_word_cmp_limited(letter, sentence2, cache, range1_pos, delimiter);
       if (min_distance > max_distance) {
         return std::numeric_limits<size_t>::max();
       }
       ++range1_pos;
     }
 
-    for (const auto &letter : *word1_iter) {
-      distance = range1_pos + 1;
-      auto min_distance = levenshtein_word_cmp_limited(letter, sentence2, cache, distance, delimiter);
+    for (const auto &letter : *word_iter) {
+      auto min_distance = levenshtein_word_cmp_limited(letter, sentence2, cache, range1_pos, delimiter);
       if (min_distance > max_distance) {
         return std::numeric_limits<size_t>::max();
       }
@@ -242,8 +238,6 @@ size_t levenshtein::weighted_distance(std::vector<std::string_view> sentence1, s
 
   return cache.back();
 }
-
-
 
 
 size_t levenshtein::weighted_distance(std::string_view sentence1, std::string_view sentence2) {
@@ -354,3 +348,36 @@ float levenshtein::normalized_weighted_distance(std::string_view sentence1, std:
   size_t distance = weighted_distance(sentence1, sentence2);
   return 1.0 - (float)distance / (float)lensum;
 }
+
+
+float levenshtein::normalized_weighted_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2,
+                                   float min_ratio, std::string_view delimiter)
+{
+  if (sentence1.empty() && sentence2.empty()) {
+    return 1.0;
+  }
+
+  size_t lensum = recursiveIterableSize(sentence1, delimiter.length()) + recursiveIterableSize(sentence2, delimiter.length());
+  size_t min_distance = static_cast<size_t>(std::ceil((float)lensum - min_ratio * lensum));
+  size_t distance = weighted_distance(sentence1, sentence2, min_distance, delimiter);
+  if (distance == std::numeric_limits<size_t>::max()) {
+    return 0.0;
+  }
+  return 1.0 - (float)distance / (float)lensum;
+}
+
+
+float levenshtein::normalized_weighted_distance(std::string_view sentence1, std::string_view sentence2, float min_ratio) {
+  if (sentence1.empty() && sentence2.empty()) {
+    return 1.0;
+  }
+
+  size_t lensum = sentence1.length() + sentence2.length();
+  size_t min_distance = static_cast<size_t>(std::ceil((float)lensum - min_ratio * lensum));
+  size_t distance = weighted_distance(sentence1, sentence2, min_distance);
+  if (distance == std::numeric_limits<size_t>::max()) {
+    return 0.0;
+  }
+  return 1.0 - (float)distance / (float)lensum;
+}
+
