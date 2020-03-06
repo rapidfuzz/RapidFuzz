@@ -255,7 +255,7 @@ size_t levenshtein::weighted_distance(std::string_view sentence1, std::string_vi
     return sentence1.length();
   }
 
-  if (sentence1.length() > sentence2.length()) std::swap(sentence1, sentence2);
+  if (sentence2.length() > sentence1.length()) std::swap(sentence1, sentence2);
 
   std::vector<size_t> cache(sentence2.length());
   std::iota(cache.begin(), cache.end(), 1);
@@ -263,17 +263,17 @@ size_t levenshtein::weighted_distance(std::string_view sentence1, std::string_vi
   size_t sentence1_pos = 0;
   for (const auto &char1 : sentence1) {
     auto cache_iter = cache.begin();
-    size_t distance = sentence1_pos+1;
+    size_t current_cache = sentence1_pos;
     size_t result = sentence1_pos+1;
     for (const auto &char2 : sentence2) {
       if (char1 == char2) {
-        result = distance - 1;
+        result = current_cache;
       } else {
         ++result;
       }
-      distance = *cache_iter + 1;
-      if (result > distance) {
-        result = distance;
+      current_cache = *cache_iter;
+      if (result > current_cache + 1) {
+        result = current_cache + 1;
       }
       *cache_iter = result;
       ++cache_iter;
@@ -294,7 +294,7 @@ size_t levenshtein::weighted_distance(std::string_view sentence1, std::string_vi
     return sentence1.length();
   }
 
-  if (sentence1.length() > sentence2.length()) std::swap(sentence1, sentence2);
+  if (sentence2.length() > sentence1.length()) std::swap(sentence1, sentence2);
 
   std::vector<size_t> cache(sentence2.length());
   std::iota(cache.begin(), cache.end(), 1);
@@ -302,30 +302,31 @@ size_t levenshtein::weighted_distance(std::string_view sentence1, std::string_vi
   size_t sentence1_pos = 0;
   for (const auto &char1 : sentence1) {
     auto cache_iter = cache.begin();
-    size_t distance = sentence1_pos+1;
+    size_t current_cache = sentence1_pos;
     size_t result = sentence1_pos+1;
     auto min_distance = std::numeric_limits<size_t>::max();
     for (const auto &char2 : sentence2) {
       if (char1 == char2) {
-        result = distance - 1;
+        result = current_cache;
       } else {
         ++result;
       }
-      distance = *cache_iter + 1;
-      if (result > distance) {
-        result = distance;
+      current_cache = *cache_iter;
+      if (result > current_cache + 1) {
+        result = current_cache + 1;
       }
-      min_distance = std::min(*cache_iter, min_distance);
+      
+      if (current_cache < min_distance) {
+        min_distance = current_cache;
+      }
       *cache_iter = result;
       ++cache_iter;
     }
     if (min_distance > max_distance) {
       return std::numeric_limits<size_t>::max();
     }
-
     ++sentence1_pos;
   }
-
   return cache.back();
 }
 
