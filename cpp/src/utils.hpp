@@ -46,7 +46,7 @@ public:
 // http://www.cplusplus.com/reference/algorithm/set_intersection/
 template <class InputIterator1, class InputIterator2, class OutputIterator1,
           class OutputIterator2, class OutputIterator3>
-OutputIterator3 set_decomposition(InputIterator1 first1, InputIterator1 last1,
+inline OutputIterator3 set_decomposition(InputIterator1 first1, InputIterator1 last1,
                                   InputIterator2 first2, InputIterator2 last2,
                                   OutputIterator1 result1,
                                   OutputIterator2 result2,
@@ -66,7 +66,7 @@ OutputIterator3 set_decomposition(InputIterator1 first1, InputIterator1 last1,
   return result3;
 }
 
-std::vector<std::string_view> splitSV(std::string_view str,
+inline std::vector<std::string_view> splitSV(std::string_view str,
                                       std::string_view delims = " ") {
   std::vector<std::string_view> output;
   // assume a word length of 6 + 1 whitespace
@@ -91,7 +91,7 @@ struct Intersection {
 };
 
 // attention this is changing b !!!!
-Intersection intersection_count_sorted_vec(std::vector<std::string_view> a,
+inline Intersection intersection_count_sorted_vec(std::vector<std::string_view> a,
                                            std::vector<std::string_view> b) {
   std::vector<std::string_view> vec_sect;
   std::vector<std::string_view> vec_ab;
@@ -114,7 +114,7 @@ Intersection intersection_count_sorted_vec(std::vector<std::string_view> a,
  * Finds the longest common prefix between two ranges
  */
 template <typename InputIterator1, typename InputIterator2>
-auto common_prefix_length(InputIterator1 first1, InputIterator1 last1,
+inline auto common_prefix_length(InputIterator1 first1, InputIterator1 last1,
 	                        InputIterator2 first2, InputIterator2 last2)
 {
     return std::distance(first1, std::mismatch(first1, last1, first2, last2).first);
@@ -123,7 +123,7 @@ auto common_prefix_length(InputIterator1 first1, InputIterator1 last1,
 /**
  * Removes common prefix of two string views
  */
-size_t remove_common_prefix(std::string_view& a, std::string_view& b) {
+inline size_t remove_common_prefix(std::string_view& a, std::string_view& b) {
   auto prefix = common_prefix_length(a.begin(), a.end(), b.begin(), b.end());
 	a.remove_prefix(prefix);
 	b.remove_prefix(prefix);
@@ -133,7 +133,7 @@ size_t remove_common_prefix(std::string_view& a, std::string_view& b) {
 /**
  * Removes common suffix of two string views
  */
-size_t remove_common_suffix(std::string_view& a, std::string_view& b) {
+inline size_t remove_common_suffix(std::string_view& a, std::string_view& b) {
   auto suffix = common_prefix_length(a.rbegin(), a.rend(), b.rbegin(), b.rend());
 	a.remove_suffix(suffix);
   b.remove_suffix(suffix);
@@ -143,7 +143,7 @@ size_t remove_common_suffix(std::string_view& a, std::string_view& b) {
 /**
  * Removes common affix of two string views
  */
-Affix remove_common_affix(std::string_view& a, std::string_view& b) {
+inline Affix remove_common_affix(std::string_view& a, std::string_view& b) {
 	return Affix {
     remove_common_prefix(a, b),
     remove_common_suffix(a, b)
@@ -154,7 +154,7 @@ Affix remove_common_affix(std::string_view& a, std::string_view& b) {
 /**
  * Removes common affix of two vectors of string views
  */
-void remove_common_affix(std::vector<std::string_view> &a, std::vector<std::string_view> &b)
+inline void remove_common_affix(std::vector<std::string_view> &a, std::vector<std::string_view> &b)
 {
   auto prefix = std::mismatch(a.begin(), a.end(), b.begin(), b.end());
   a.erase(a.begin(), prefix.first);
@@ -170,26 +170,13 @@ void remove_common_affix(std::vector<std::string_view> &a, std::vector<std::stri
 }
 
 
-size_t joinedStringViewLength(const std::vector<std::string_view> &words) {
-  if (words.empty()) {
-    return 0;
-  }
-  // init length with whitespaces between words
-  size_t length = words.size() - 1;
-  for (const auto &word : words) {
-    length += word.length();
-  }
-  return length;
-}
-
-
 template<Iterable T>
-size_t recursiveIterableSize(const T &x, size_t delimiter_length=0){
+inline size_t recursiveIterableSize(const T &x, size_t delimiter_length=0){
 	return x.size();
 }
 
 template<IterableOfIterables T>
-size_t recursiveIterableSize(const T &x, size_t delimiter_length=0){
+inline size_t recursiveIterableSize(const T &x, size_t delimiter_length=0){
   if (x.empty()) {
     return 0;
   }

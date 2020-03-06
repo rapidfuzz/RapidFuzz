@@ -72,5 +72,5 @@ namespace levenshtein {
     float normalized_weighted_distance(std::string_view sentence1, std::string_view sentence2,
                                        float min_ratio);
     float normalized_weighted_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2,
-                                       float min_ratio, std::string_view delimiter="");
+                                       const float &min_ratio, std::string_view delimiter="");
 }
