@@ -32,7 +32,6 @@ ext_modules = [
             get_pybind_include(user=True),
             "cpp/src"
         ],
-        #extra_compile_args = ["-O3", "-fconcepts"], 
         language='c++',
     ),
 ]

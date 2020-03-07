@@ -42,10 +42,14 @@ float token_ratio(const std::string &a, const std::string &b, float score_cutoff
     (float)1.0 - (float)ab_len / (float)(ab_len + double_prefix));
   result = std::max(result,
     (float)1.0 - (float)ba_len / (float)(ba_len + double_prefix));
+
+  size_t sect_distance = levenshtein::weighted_distance(intersection.ab, intersection.ba, score_cutoff, " ");
+  if (sect_distance == std::numeric_limits<size_t>::max()) {
+    return result;
+  }
   size_t lensum = ab_len + ba_len + double_prefix;
-  // should use score cutoff aswell
   return std::max(result,
-    (float)1.0 - levenshtein::weighted_distance(intersection.ab, intersection.ba, " ") / (float)lensum);
+    (float)1.0 - sect_distance / (float)lensum);
 }
 
 
@@ -55,7 +59,7 @@ float token_ratio(const std::string &a, const std::string &b) {
   std::vector<std::string_view> tokens_b = splitSV(b);
   std::sort(tokens_b.begin(), tokens_b.end());
 
-  float result = levenshtein::normalized_weighted_distance(tokens_a, tokens_b, " ");
+  float result = levenshtein::normalized_weighted_distance(tokens_a, tokens_b, 0.0, " ");
 
   tokens_a.erase(std::unique(tokens_a.begin(), tokens_a.end()), tokens_a.end());
   tokens_b.erase(std::unique(tokens_b.begin(), tokens_b.end()), tokens_b.end());
@@ -86,7 +90,7 @@ float token_ratio(const std::string &a, const std::string &b) {
     (float)1.0 - (float)ba_len / (float)(ba_len + double_prefix));
   size_t lensum = ab_len + ba_len + double_prefix;
   return std::max(result,
-    (float)1.0 - levenshtein::weighted_distance(intersection.ab, intersection.ba, " ") / (float)lensum);
+    (float)1.0 - levenshtein::weighted_distance(intersection.ab, intersection.ba, 0.0, " ") / (float)lensum);
 }
 
 
@@ -96,6 +100,7 @@ float full_ratio(const std::string &query, const std::string &choice,
   float normalized_score_cutoff = score_cutoff / (float)100.0;
   float sratio = 0.0;
   // this needs more thoughts when to start using score cutoff, since it performs slower when it can not exit early
+  // has to be tested with some real training examples
   if (normalized_score_cutoff > 0.7) {
     sratio = levenshtein::normalized_weighted_distance(query, choice, normalized_score_cutoff);
   } else {
@@ -110,7 +115,6 @@ float full_ratio(const std::string &query, const std::string &choice,
       sratio = std::max(sratio, token_ratio(query, choice) * UNBASE_SCALE);
     }
   }
-
   return sratio * 100.0;
 }
 
