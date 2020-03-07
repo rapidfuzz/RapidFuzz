@@ -25,15 +25,15 @@ class get_pybind_include(object):
 ext_modules = [
     Extension(
         'rapidfuzz',
-        ['python/rapidfuzz.cpp'],
+        ['python/rapidfuzz.cpp', 'cpp/src/levenshtein.cpp'],
         include_dirs=[
             # Path to pybind11 headers
             get_pybind_include(),
             get_pybind_include(user=True),
-            "cpp"
+            "cpp/src"
         ],
-        extra_compile_args = ["-O3"], 
-        language='c++'
+        #extra_compile_args = ["-O3", "-fconcepts"], 
+        language='c++',
     ),
 ]
 
@@ -55,21 +55,19 @@ def has_flag(compiler, flagname):
 
 
 def cpp_flag(compiler):
-    """Return the -std=c++17 compiler flag.
-
-    The newer version is prefered over c++17 (when it is available).
+    """Return the -std=c++2a compiler flag.
     """
-    if has_flag(compiler, '-std=c++17'): return '-std=c++17'
+    if has_flag(compiler, '-std=c++2a'): return '-std=c++2a'
 
-    raise RuntimeError('Unsupported compiler -- at least C++17 support '
+    raise RuntimeError('Unsupported compiler -- at least C++2a support '
                        'is needed!')
 
 
 class BuildExt(build_ext):
     """A custom build extension for adding compiler-specific options."""
     c_opts = {
-        'msvc': ['/EHsc'],
-        'unix': ['-ffast-math'],
+        'msvc': ['/EHsc', '-O3'],
+        'unix': ['-ffast-math', '-O3', '-fconcepts'],
     }
     l_opts = {
         'msvc': [],

@@ -6,6 +6,48 @@
 #include <string>
 #include <vector>
 
+// this is pretty much useless duplication
+float token_ratio(const std::string &a, const std::string &b, float score_cutoff) {
+  std::vector<std::string_view> tokens_a = splitSV(a);
+  std::sort(tokens_a.begin(), tokens_a.end());
+  std::vector<std::string_view> tokens_b = splitSV(b);
+  std::sort(tokens_b.begin(), tokens_b.end());
+
+  float result = levenshtein::normalized_weighted_distance(tokens_a, tokens_b, score_cutoff, " ");
+
+  tokens_a.erase(std::unique(tokens_a.begin(), tokens_a.end()), tokens_a.end());
+  tokens_b.erase(std::unique(tokens_b.begin(), tokens_b.end()), tokens_b.end());
+
+  auto intersection = intersection_count_sorted_vec(tokens_a, tokens_b);
+
+  size_t ab_len = recursiveIterableSize(intersection.ab, 1);
+  size_t ba_len = recursiveIterableSize(intersection.ba, 1);
+
+  if (!ab_len || !ba_len) {
+    return 1.0;
+  }
+
+  size_t double_prefix = 2 * recursiveIterableSize(intersection.sect, 1);
+  // it would perform the same calculations as above again so exit early
+  if (!double_prefix) {
+    return result;
+  }
+
+  // fuzzywuzzy joined sect and ab/ba for comparisions
+  // this is not done here as an optimisation, since levenshtein would remove it again anyways
+  ++ab_len;
+  ++ba_len;
+
+  result = std::max(result,
+    (float)1.0 - (float)ab_len / (float)(ab_len + double_prefix));
+  result = std::max(result,
+    (float)1.0 - (float)ba_len / (float)(ba_len + double_prefix));
+  size_t lensum = ab_len + ba_len + double_prefix;
+  // should use score cutoff aswell
+  return std::max(result,
+    (float)1.0 - levenshtein::weighted_distance(intersection.ab, intersection.ba, " ") / (float)lensum);
+}
+
 
 float token_ratio(const std::string &a, const std::string &b) {
   std::vector<std::string_view> tokens_a = splitSV(a);
@@ -48,12 +90,10 @@ float token_ratio(const std::string &a, const std::string &b) {
 }
 
 
-uint8_t full_ratio(const std::string &query, const std::string &choice,
-                   uint8_t score_cutoff)
+float full_ratio(const std::string &query, const std::string &choice,
+                   float score_cutoff)
 {
-  // TODO: rounding of the percent might cause problems here
-  // maybe it should simply always use floats so no precision is lost
-  float normalized_score_cutoff = (float)(score_cutoff - 1) / (float)100.0;
+  float normalized_score_cutoff = score_cutoff / (float)100.0;
   float sratio = 0.0;
   // this needs more thoughts when to start using score cutoff, since it performs slower when it can not exit early
   if (normalized_score_cutoff > 0.7) {
@@ -64,11 +104,14 @@ uint8_t full_ratio(const std::string &query, const std::string &choice,
   const float UNBASE_SCALE = 0.95;
   float min_ratio = std::max(normalized_score_cutoff, sratio);
   if (min_ratio < UNBASE_SCALE) {
-    // possibly add score cutoff here aswell
-    sratio = std::max(sratio, token_ratio(query, choice) * UNBASE_SCALE);
+    if (normalized_score_cutoff > 0.7) {
+      sratio = std::max(sratio, token_ratio(query, choice, normalized_score_cutoff/UNBASE_SCALE) * UNBASE_SCALE);
+    } else {
+      sratio = std::max(sratio, token_ratio(query, choice) * UNBASE_SCALE);
+    }
   }
 
-  return static_cast<uint8_t>(std::round(sratio * 100.0));
+  return sratio * 100.0;
 }
 
 

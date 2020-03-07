@@ -2,11 +2,11 @@
 #include "fuzz.hpp"
 #include <execution>
 
-uint8_t extract_one(std::string query, std::vector<std::string> choices,
+float extract_one(std::string query, std::vector<std::string> choices,
                     uint8_t score_cutoff = 0) {
-  uint8_t max_score = 0;
+  float max_score = 0;
   for (const auto &choice : choices) {
-    uint8_t score = ratio(query, choice, score_cutoff);
+    float score = ratio(query, choice, score_cutoff);
     if (score > score_cutoff) {
       score_cutoff = score;
       max_score = score;
