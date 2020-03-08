@@ -1,7 +1,7 @@
 #include "levenshtein.hpp"
 #include <numeric>
 #include <iostream>
-
+#include <stdexcept>
 
 levenshtein::Matrix levenshtein::matrix(std::string_view sentence1, std::string_view sentence2) {
   Affix affix = remove_common_affix(sentence1, sentence2);
@@ -45,19 +45,6 @@ levenshtein::Matrix levenshtein::matrix(std::string_view sentence1, std::string_
   };
 }
 
-/*eturn editops_from_cost_matrix(matrix_columns, matrix_rows,
-                                  affix.prefix_len, cache_matrix);*/
-/*
-std::vector<EditOp> editops_from_cost_matrix(size_t len1,
-                                             size_t len2, size_t prefix_len,
-                                             std::vector<size_t> cache_matrix) {*/
-                                             /*
-                                             struct Matrix {
-        size_t prefix_len;
-        std::vector<size_t> matrix;
-        size_t matrix_columns;
-        size_t matrix_rows;
-    };*/
 
 std::vector<levenshtein::EditOp> levenshtein::editops(std::string_view sentence1, std::string_view sentence2) {
   auto lev_matrix = matrix(sentence1, sentence2);
@@ -86,21 +73,20 @@ std::vector<levenshtein::EditOp> levenshtein::editops(std::string_view sentence1
     return matrix[pos - matrix_rows - 1] == matrix[pos];
   };
   
-
   while (i > 0 || j > 0) {
     size_t current_value = matrix[pos];
     EditType op_type;
 
-    if (is_replace(pos)) {
+    if (i && j && is_replace(pos)) {
       op_type = EditType::EditReplace;
       --i;
       --j;
       pos -= matrix_rows + 1;
-    } else if (is_insert(pos)) {
+    } else if (j && is_insert(pos)) {
       op_type = EditType::EditInsert;
       --j;
       --pos;
-    }  else if (is_delete(pos)) {
+    }  else if (i && is_delete(pos)) {
       op_type = EditType::EditDelete;
       --i;
       pos -= matrix_rows;
@@ -110,6 +96,8 @@ std::vector<levenshtein::EditOp> levenshtein::editops(std::string_view sentence1
       pos -= matrix_rows + 1;
       // EditKeep does not has to be stored
       continue;
+    } else {
+      throw std::logic_error("something went wrong extracting the editops from the levenshtein matrix");
     }
 
     EditOp edit_op{
@@ -144,10 +132,6 @@ void levenshtein_word_cmp(const char &letter_cmp,
     *cache_iter = result;
     ++cache_iter;
   };
-
-  // words | view::join(' ') would be a bit nicer to write here but is a lot slower
-  // might be worth a retry when it is added in c++20 since then compilers might
-  // improve the runtime
 
   // no delimiter should be added in front of the first word
   for (const auto &letter : *word_iter) {
@@ -238,10 +222,6 @@ size_t levenshtein_word_cmp_limited(const char &letter_cmp,
     ++cache_iter;
   };
 
-  // words | view::join(' ') would be a bit nicer to write here but is a lot slower
-  // might be worth a retry when it is added in c++20 since then compilers might
-  // improve the runtime
-
   // no delimiter should be added in front of the first word
   for (const auto &letter : *word_iter) {
 	  charCmp(letter);
@@ -315,6 +295,12 @@ size_t levenshtein::weighted_distance(std::vector<std::string_view> sentence1, s
 }
 
 
+/*template<IterableOfIterable Sentence1, Iterable Sentence2>
+size_t weighted_distance(Sentence1 sentence1, Sentence2 sentence2, std::string_view delimiter="") {
+  remove_common_affix(sentence1, sentence2);
+}*/
+
+
 size_t levenshtein::weighted_distance(std::string_view sentence1, std::string_view sentence2, std::string_view delimiter) {
   remove_common_affix(sentence1, sentence2);
 
@@ -355,7 +341,7 @@ size_t levenshtein::weighted_distance(std::string_view sentence1, std::string_vi
 size_t levenshtein::weighted_distance(std::string_view sentence1, std::string_view sentence2, size_t max_distance, std::string_view delimiter) {
   remove_common_affix(sentence1, sentence2);
 
-  if (sentence2.length() > sentence1.length()) std::swap(sentence1, sentence2);
+  if (sentence2.size() > sentence1.size()) std::swap(sentence1, sentence2);
 
   if (sentence2.empty()) {
     return sentence1.length();

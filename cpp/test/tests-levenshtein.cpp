@@ -61,6 +61,58 @@ TEST_CASE( "levenshtein works with string_views", "[string_view]" ) {
         REQUIRE( result.matrix_columns == 5);
         REQUIRE( result.matrix_rows == 5);
     }
+
+    SECTION( "levenshtein calculates correct levenshtein editops" ) {
+        auto edit_op_comp = [](auto res, auto check) {
+            bool result = true;
+            auto res_iter = res.begin();
+            auto check_iter = check.begin();
+            while (res_iter != res.end() && check_iter != check.end()) {
+                result &= res_iter->op_type == check_iter->op_type;
+                result &= res_iter->first_start == check_iter->first_start;
+                result &= res_iter->second_start == check_iter->second_start;
+                ++res_iter;
+                ++check_iter;
+            }
+            result &= res_iter == res.end();
+            result &= check_iter == check.end();
+            return result;
+        };
+
+
+        {
+            auto result = levenshtein::editops("test", "test");
+            REQUIRE(result.empty());
+        }
+        {
+            auto result = levenshtein::editops("test", "tes");
+            levenshtein::EditOp edit_op{ levenshtein::EditType::EditDelete, 3, 3 };
+            std::vector<levenshtein::EditOp> check_result { edit_op };
+            REQUIRE(edit_op_comp(result, check_result));
+        }
+        {
+            auto result = levenshtein::editops("te", "et");
+            levenshtein::EditOp edit_op1{ levenshtein::EditType::EditReplace, 0, 0};
+            levenshtein::EditOp edit_op2{ levenshtein::EditType::EditReplace, 1, 1};
+            std::vector<levenshtein::EditOp> check_result { edit_op1, edit_op2 };
+            REQUIRE(edit_op_comp(result, check_result));
+        }
+        {
+            auto result = levenshtein::editops("test", "tess");
+            levenshtein::EditOp edit_op{ levenshtein::EditType::EditReplace, 3, 3};
+            std::vector<levenshtein::EditOp> check_result { edit_op };
+            REQUIRE(edit_op_comp(result, check_result));
+        }
+        {
+            auto result = levenshtein::editops("test", "xxxx");
+            levenshtein::EditOp edit_op1{ levenshtein::EditType::EditReplace, 0, 0};
+            levenshtein::EditOp edit_op2{ levenshtein::EditType::EditReplace, 1, 1};
+            levenshtein::EditOp edit_op3{ levenshtein::EditType::EditReplace, 2, 2};
+            levenshtein::EditOp edit_op4{ levenshtein::EditType::EditReplace, 3, 3};
+            std::vector<levenshtein::EditOp> check_result { edit_op1, edit_op2, edit_op3, edit_op4 };
+            REQUIRE(edit_op_comp(result, check_result));
+        }
+    }
 }
 
 TEST_CASE( "levenshtein works with vectors of string_views", "[vector<string_view>]" ) {

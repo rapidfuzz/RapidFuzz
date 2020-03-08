@@ -109,6 +109,10 @@ inline Intersection intersection_count_sorted_vec(std::vector<std::string_view> 
   return Intersection{vec_sect, vec_ab, b};
 }
 
+/*
+this needs more work to make it generic
+*/
+
 
 /**
  * Finds the longest common prefix between two ranges
@@ -151,18 +155,25 @@ inline Affix remove_common_affix(std::string_view& a, std::string_view& b) {
 }
 
 
-/**
- * Removes common affix of two vectors of string views
- */
-inline void remove_common_affix(std::vector<std::string_view> &a, std::vector<std::string_view> &b)
-{
+template<Iterable T>
+inline void vec_remove_common_affix(T &a, T &b) {
   auto prefix = std::mismatch(a.begin(), a.end(), b.begin(), b.end());
   a.erase(a.begin(), prefix.first);
   b.erase(b.begin(), prefix.second);
   auto suffix = common_prefix_length(a.rbegin(), a.rend(), b.rbegin(), b.rend());
   a.erase(a.end()-suffix, a.end());
   b.erase(b.end()-suffix, b.end());
+}
 
+template<typename T>
+inline void vec_common_affix(std::vector<T> &a, std::vector<T> &b) {
+  iterable_remove_common_affix(a, b);
+}
+
+template<Iterable T>
+inline void remove_common_affix(std::vector<T> &a, std::vector<T> &b)
+{
+  vec_remove_common_affix(a, b);
   if (!a.empty() && !b.empty()) {
     remove_common_prefix(a.front(), b.front());
     remove_common_suffix(a.back(), b.back());
@@ -175,8 +186,8 @@ inline size_t recursiveIterableSize(const T &x, size_t delimiter_length=0){
 	return x.size();
 }
 
-template<IterableOfIterables T>
-inline size_t recursiveIterableSize(const T &x, size_t delimiter_length=0){
+template<Iterable T>
+inline size_t recursiveIterableSize(const std::vector<T> &x, size_t delimiter_length=0){
   if (x.empty()) {
     return 0;
   }
