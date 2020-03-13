@@ -39,7 +39,7 @@ float token_ratio(const std::string &a, const std::string &b, float score_cutoff
   size_t sect_distance = levenshtein::weighted_distance(intersection.ab, intersection.ba, score_cutoff, " ");
   float sect_result = (sect_distance >= lensum)
     ? (float)0.0
-    : (float)1.0 - sect_distance / (float)lensum
+    : (float)1.0 - sect_distance / (float)lensum;
 
   // exit early since the other ratios are 0
   // (when a or b was empty they would cause a segfault)

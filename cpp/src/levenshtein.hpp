@@ -87,7 +87,7 @@ namespace levenshtein {
     * 1.0 (inclusive), where 1.0 means the sequences are the same.
     */
     template<Iterable Sentence1, Iterable Sentence2>
-    float normalized_weighted_distance(Sentence1 sentence1, Sentence2 sentence2,
+    float normalized_weighted_distance(const Sentence1 &sentence1, const Sentence2 &sentence2,
                                        float min_ratio=0.0, std::string_view delimiter="")
     {
         if (sentence1.empty() && sentence2.empty()) {
