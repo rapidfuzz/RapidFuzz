@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 
-// this is pretty much useless duplication
-float token_ratio(const std::string &a, const std::string &b, float score_cutoff) {
+
+float token_ratio(const std::string &a, const std::string &b, float score_cutoff=0.0) {
   std::vector<std::string_view> tokens_a = splitSV(a);
   std::sort(tokens_a.begin(), tokens_a.end());
   std::vector<std::string_view> tokens_b = splitSV(b);
@@ -50,47 +50,6 @@ float token_ratio(const std::string &a, const std::string &b, float score_cutoff
   size_t lensum = ab_len + ba_len + double_prefix;
   return std::max(result,
     (float)1.0 - sect_distance / (float)lensum);
-}
-
-
-float token_ratio(const std::string &a, const std::string &b) {
-  std::vector<std::string_view> tokens_a = splitSV(a);
-  std::sort(tokens_a.begin(), tokens_a.end());
-  std::vector<std::string_view> tokens_b = splitSV(b);
-  std::sort(tokens_b.begin(), tokens_b.end());
-
-  float result = levenshtein::normalized_weighted_distance(tokens_a, tokens_b, 0.0, " ");
-
-  tokens_a.erase(std::unique(tokens_a.begin(), tokens_a.end()), tokens_a.end());
-  tokens_b.erase(std::unique(tokens_b.begin(), tokens_b.end()), tokens_b.end());
-
-  auto intersection = intersection_count_sorted_vec(tokens_a, tokens_b);
-
-  size_t ab_len = recursiveIterableSize(intersection.ab, 1);
-  size_t ba_len = recursiveIterableSize(intersection.ba, 1);
-
-  if (!ab_len || !ba_len) {
-    return 1.0;
-  }
-
-  size_t double_prefix = 2 * recursiveIterableSize(intersection.sect, 1);
-  // it would perform the same calculations as above again so exit early
-  if (!double_prefix) {
-    return result;
-  }
-
-  // fuzzywuzzy joined sect and ab/ba for comparisions
-  // this is not done here as an optimisation, since levenshtein would remove it again anyways
-  ++ab_len;
-  ++ba_len;
-
-  result = std::max(result,
-    (float)1.0 - (float)ab_len / (float)(ab_len + double_prefix));
-  result = std::max(result,
-    (float)1.0 - (float)ba_len / (float)(ba_len + double_prefix));
-  size_t lensum = ab_len + ba_len + double_prefix;
-  return std::max(result,
-    (float)1.0 - levenshtein::weighted_distance(intersection.ab, intersection.ba, 0.0, " ") / (float)lensum);
 }
 
 
