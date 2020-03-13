@@ -42,6 +42,7 @@ float token_ratio(const std::string &a, const std::string &b, float score_cutoff
     : (float)1.0 - sect_distance / (float)lensum
 
   // exit early since the other ratios are 0
+  // (when a or b was empty they would cause a segfault)
   if (!double_prefix) {
     return std::max(result, sect_result);
   }
