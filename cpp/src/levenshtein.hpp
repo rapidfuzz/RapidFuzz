@@ -94,6 +94,10 @@ namespace levenshtein {
             return 1.0;
         }
 
+        if (sentence1.empty() || sentence1.empty()) {
+          return 0.0;
+        }
+
         size_t lensum = recursiveIterableSize(sentence1, delimiter.size()) + recursiveIterableSize(sentence2, delimiter.size());
         if (!min_ratio) {
             return 1.0 - (float)weighted_distance(sentence1, sentence2, delimiter) / (float)lensum;
