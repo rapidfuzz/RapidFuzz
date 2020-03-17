@@ -12,7 +12,11 @@ PYBIND11_MODULE(rapidfuzz, m) {
 
     auto mprocess = m.def_submodule("process");
 
-    mprocess.def("extractOne", &extract_one,
+    mprocess.def("extract", &process::extract,
+                 py::arg("query"), py::arg("choices"), py::arg("score_cutoff") = 0,
+                 R"pbdoc(Find all matches with a ratio above score_cutoff)pbdoc");
+
+    mprocess.def("extractOne", &process::extract_one,
                  py::arg("query"), py::arg("choices"), py::arg("score_cutoff") = 0,
                  R"pbdoc(Find the best match in a list of matches)pbdoc");
 
@@ -20,8 +24,6 @@ PYBIND11_MODULE(rapidfuzz, m) {
     auto mfuzz = m.def_submodule("fuzz");
     mfuzz.def("ratio", &fuzz::ratio,
               py::arg("a"), py::arg("b"), py::arg("score_cutoff") = 0);
-
-    //mfu
 
     mfuzz.def("QRatio", &fuzz::QRatio,
               py::arg("a"), py::arg("b"), py::arg("score_cutoff") = 0);

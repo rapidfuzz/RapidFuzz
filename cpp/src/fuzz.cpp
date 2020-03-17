@@ -1,4 +1,3 @@
-#pragma once
 #include "fuzz.hpp"
 #include "levenshtein.hpp"
 #include "utils.hpp"
@@ -26,8 +25,8 @@ float fuzz::ratio(const std::string &a, const std::string &b, float score_cutoff
   // this needs more thoughts when to start using score cutoff, since it performs slower when it can not exit early
   // has to be tested with some real training examples
   float sratio = (score_cutoff > 70)
-    ? levenshtein::normalized_weighted_distance(query, choice, score_cutoff / (float)100.0)
-    : levenshtein::normalized_weighted_distance(query, choice);
+    ? levenshtein::normalized_weighted_distance(a, b, score_cutoff / (float)100.0)
+    : levenshtein::normalized_weighted_distance(a, b);
 
   return sratio * 100.0;
 }
@@ -64,7 +63,7 @@ float fuzz::token_ratio(const std::string &a, const std::string &b, float score_
   size_t lensum = ab_len + ba_len + double_prefix;
   size_t sect_distance = levenshtein::weighted_distance(intersection.ab, intersection.ba, score_cutoff, " ");
   if (sect_distance != std::numeric_limits<size_t>::max()) {
-    result = std::max(result, (float)1.0 - sect_distance / (float)lensum)
+    result = std::max(result, (float)1.0 - sect_distance / (float)lensum);
   }
 
   // exit early since the other ratios are 0
@@ -105,7 +104,7 @@ float fuzz::QRatio(const std::string &a, const std::string &b, float score_cutof
     return 0;
   }
 
-  return ratio(a, b, score_cutoff)
+  return ratio(a, b, score_cutoff);
 }
 
 
