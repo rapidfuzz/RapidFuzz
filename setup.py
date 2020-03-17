@@ -25,7 +25,7 @@ class get_pybind_include(object):
 ext_modules = [
     Extension(
         'rapidfuzz',
-        ['python/rapidfuzz.cpp', 'cpp/src/levenshtein.cpp'],
+        ['python/src/rapidfuzz.cpp', 'cpp/src/levenshtein.cpp'],
         include_dirs=[
             # Path to pybind11 headers
             get_pybind_include(),
