@@ -54,7 +54,9 @@ def has_flag(compiler, flagname):
 
 
 def cpp_flag(compiler):
-    """Return the -std=c++2a compiler flag.
+    """
+    Return the latest compiler flag supported by the compiler
+    (at least c++17)
     """
     if has_flag(compiler, '-std=c++20'): return '-std=c++2a'
     elif has_flag(compiler, '-std=c++17'): return '-std=c++17'
@@ -67,7 +69,7 @@ class BuildExt(build_ext):
     """A custom build extension for adding compiler-specific options."""
     c_opts = {
         'msvc': ['/EHsc', '-O3'],
-        'unix': ['-ffast-math', '-O3', '-fconcepts'],
+        'unix': ['-O3', '-fconcepts'],
     }
     l_opts = {
         'msvc': [],
@@ -101,7 +103,7 @@ setup(
     author='Max Bachmann',
     author_email='contact@maxbachmann.de',
     url='https://github.com/rhasspy/rapidfuzz',
-    description='rapid string matching library',
+    description='rapid fuzzy string matching',
     long_description='',
     ext_modules=ext_modules,
     install_requires=['pybind11>=2.4'],
