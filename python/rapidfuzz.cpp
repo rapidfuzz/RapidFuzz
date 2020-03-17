@@ -12,7 +12,7 @@ PYBIND11_MODULE(rapidfuzz, m) {
     auto mprocess = m.def_submodule("process");
  
     mprocess.def("extractOne", &extract_one,
-                 py::arg("query"), py::arg("choices"), py::arg("score_cutoff") = 0
+                 py::arg("query"), py::arg("choices"), py::arg("score_cutoff") = 0,
                  R"pbdoc(
                     Find the best match in a list of matches
                  )pbdoc");
