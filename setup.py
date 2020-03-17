@@ -25,15 +25,19 @@ class get_pybind_include(object):
 ext_modules = [
     Extension(
         'rapidfuzz',
-        ['python/rapidfuzz.cpp'],
+        [
+            'python/src/rapidfuzz.cpp',
+            'cpp/src/levenshtein.cpp',
+            'cpp/src/fuzz.cpp',
+            'cpp/src/process.cpp'
+        ],
         include_dirs=[
             # Path to pybind11 headers
             get_pybind_include(),
             get_pybind_include(user=True),
-            "cpp"
+            "cpp/src"
         ],
-        extra_compile_args = ["-O3"], 
-        language='c++'
+        language='c++',
     ),
 ]
 
@@ -55,11 +59,12 @@ def has_flag(compiler, flagname):
 
 
 def cpp_flag(compiler):
-    """Return the -std=c++17 compiler flag.
-
-    The newer version is prefered over c++17 (when it is available).
     """
-    if has_flag(compiler, '-std=c++17'): return '-std=c++17'
+    Return the latest compiler flag supported by the compiler
+    (at least c++17)
+    """
+    if has_flag(compiler, '-std=c++20'): return '-std=c++2a'
+    elif has_flag(compiler, '-std=c++17'): return '-std=c++17'
 
     raise RuntimeError('Unsupported compiler -- at least C++17 support '
                        'is needed!')
@@ -68,8 +73,8 @@ def cpp_flag(compiler):
 class BuildExt(build_ext):
     """A custom build extension for adding compiler-specific options."""
     c_opts = {
-        'msvc': ['/EHsc'],
-        'unix': ['-ffast-math'],
+        'msvc': ['/EHsc', '-O3'],
+        'unix': ['-O3', '-fconcepts'],
     }
     l_opts = {
         'msvc': [],
@@ -103,7 +108,7 @@ setup(
     author='Max Bachmann',
     author_email='contact@maxbachmann.de',
     url='https://github.com/rhasspy/rapidfuzz',
-    description='rapid string matching library',
+    description='rapid fuzzy string matching',
     long_description='',
     ext_modules=ext_modules,
     install_requires=['pybind11>=2.4'],
