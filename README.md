@@ -1,7 +1,7 @@
 <h1 align="center">
 <img src="https://raw.githubusercontent.com/maxbachmann/rapidfuzz/dev/.github/RapidFuzz.png" alt="RapidFuzz" width="400">
 </h1>
-<h4 align="center">rapid fuzzy string matching in python and C++/h4>
+<h4 align="center">rapid fuzzy string matching in Python and C++ </h4>
 
 <p align="center">
   <a href="#how-to-use">How To Use</a> •
