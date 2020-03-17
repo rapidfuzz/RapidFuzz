@@ -1,5 +1,5 @@
 <h1 align="center">
-<img src="https://raw.githubusercontent.com/maxbachmann/rapidfuzz/dev/.github/RapidFuzz.png" alt="RapidFuzz" width="200">
+<img src="https://raw.githubusercontent.com/maxbachmann/rapidfuzz/dev/.github/RapidFuzz.png" alt="RapidFuzz" width="400">
 </h1>
 <h4 align="center">rapid string matching library</h4>
 
