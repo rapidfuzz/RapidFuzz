@@ -4,9 +4,21 @@
 <h4 align="center">Rapid fuzzy string matching in Python and C++ </h4>
 
 <p align="center">
+  <a href="https://github.com/maxbachmann/rapidfuzz/actions">
+    <img src="https://github.com/maxbachmann/rapidfuzz/workflows/Tests/badge.svg"
+         alt="Continous Integration">
+  </a>
+  <a href="https://github.com/maxbachmann/rapidfuzz/blob/dev/LICENSE">
+    <img src="https://img.shields.io/github/license/rhasspy/rapidfuzz">
+  </a>
+</p>
+
+<p align="center">
   <a href="#how-to-use">How To Use</a> •
   <a href="#license">License</a>
 </p>
+
+---
 
 # Roadmap
 - [ ] add string matching for strings with a big length difference
