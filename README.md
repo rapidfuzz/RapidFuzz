@@ -20,6 +20,5 @@
 ## How To Use
 
 ## License
-RapidFuzz itself is licensed under the MIT license, so feel free to do what you want with the code.
-It is based on an old version of fuzzywuzzy that was Licensed under a MIT License.
-A Fork of this old version can be found [here](https://github.com/rhasspy/fuzzywuzzy).
+RapidFuzz is licensed under the MIT license since we believe that everyone should be able to use it without being forced to adopt our license. Thats why the library is based on an older version of fuzzywuzzy that was MIT licensed aswell.
+A Fork of this old version of fuzzywuzzy can be found [here](https://github.com/rhasspy/fuzzywuzzy).
