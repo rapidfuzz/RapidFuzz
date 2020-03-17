@@ -1,5 +1,17 @@
 # RapidFuzz
 
+<h1 align="center">
+  <br>
+  <img src="https://raw.githubusercontent.com/maxbachmann/rapidfuzz/dev/.github/rapidfuzz.png" alt="RapidFuzz" width="200">
+</h1>
+
+<h4 align="center">rapid string matching library</h4>
+
+<p align="center">
+  <a href="#how-to-use">How To Use</a> •
+  <a href="#license">License</a>
+</p>
+
 # Roadmap
 - [ ] add string matching for strings with a big length difference
 - [ ] add Unit tests
@@ -9,7 +21,9 @@
 - [ ] add Python wrapper
 - [ ] add Rust version of the code
 
-# License
+## How To Use
+
+## License
 RapidFuzz itself is licensed under the MIT license, so feel free to do what you want with the code.
 It is based on an old version of fuzzywuzzy that was Licensed under a MIT License.
 A Fork of this old version can be found [here](https://github.com/rhasspy/fuzzywuzzy).

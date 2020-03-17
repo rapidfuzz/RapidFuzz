@@ -5,22 +5,21 @@
 #include <algorithm>
 #include <cmath>
 #include <vector>
+#include <limits>
 
 
-static float full_ratio(const std::string &query, const std::string &choice, float score_cutoff=0)
-{
+static float full_ratio(const std::string &query, const std::string &choice, float score_cutoff=0) {
   float sratio = fuzz::ratio(query, choice, score_cutoff);
 
   const float UNBASE_SCALE = 95;
   float min_ratio = std::max(score_cutoff, sratio);
   if (min_ratio < UNBASE_SCALE) {
-    sratio = (score_cutoff > 70)
-      ? std::max(sratio, fuzz::token_ratio(query, choice, score_cutoff/UNBASE_SCALE) * UNBASE_SCALE)
-      : std::max(sratio, fuzz::token_ratio(query, choice) * UNBASE_SCALE);
+    float unbased_score_cutoff = (score_cutoff > 70) ? score_cutoff/UNBASE_SCALE : 0;
+    sratio = std::max(sratio, fuzz::token_ratio(query, choice, unbased_score_cutoff) * UNBASE_SCALE);
   }
+
   return sratio * 100.0;
 }
-
 
 
 float fuzz::ratio(const std::string &a, const std::string &b, float score_cutoff) {
@@ -64,19 +63,18 @@ float fuzz::token_ratio(const std::string &a, const std::string &b, float score_
 
   size_t lensum = ab_len + ba_len + double_prefix;
   size_t sect_distance = levenshtein::weighted_distance(intersection.ab, intersection.ba, score_cutoff, " ");
-  float sect_result = (sect_distance >= lensum)
-    ? (float)0.0
-    : (float)1.0 - sect_distance / (float)lensum;
+  if (sect_distance != std::numeric_limits<size_t>::max()) {
+    result = std::max(result, (float)1.0 - sect_distance / (float)lensum)
+  }
 
   // exit early since the other ratios are 0
   // (when a or b was empty they would cause a segfault)
   if (!double_prefix) {
-    return std::max(result, sect_result);
+    return result;
   }
 
   return std::max({
     result,
-    sect_result,
     // levenshtein distances sect+ab <-> sect and sect+ba <-> sect
     // would exit early after removing the prefix sect, so the distance can be directly calculated
     (float)1.0 - (float)ab_len / (float)(ab_len + double_prefix),
@@ -85,7 +83,7 @@ float fuzz::token_ratio(const std::string &a, const std::string &b, float score_
 }
 
 
-/*uint8_t partial_ratio(const std::string &query, const std::string &choice,
+/*float partial_ratio(const std::string &query, const std::string &choice,
                       uint8_t partial_scale, uint8_t score_cutoff)
 {
   float sratio = normalized_levenshtein(query, choice);
@@ -98,7 +96,7 @@ float fuzz::token_ratio(const std::string &a, const std::string &b, float score_
       sratio = std::max(sratio, partial_token_ratio(query, choice) * UNBASE_SCALE * partial_scale );
     }
   }
-  return static_cast<uint8_t>(std::round(sratio * 100.0));
+  return sratio * 100.0;
 }*/
 
 
