@@ -9,14 +9,14 @@
 
 static float full_ratio(const std::string &query, const std::string &choice, float score_cutoff=0)
 {
-  float sratio = ratio(query, choice, score_cutoff);
+  float sratio = fuzz::ratio(query, choice, score_cutoff);
 
   const float UNBASE_SCALE = 95;
   float min_ratio = std::max(score_cutoff, sratio);
   if (min_ratio < UNBASE_SCALE) {
     sratio = (score_cutoff > 70)
-      ? std::max(sratio, token_ratio(query, choice, score_cutoff/UNBASE_SCALE) * UNBASE_SCALE)
-      : std::max(sratio, token_ratio(query, choice) * UNBASE_SCALE);
+      ? std::max(sratio, fuzz::token_ratio(query, choice, score_cutoff/UNBASE_SCALE) * UNBASE_SCALE)
+      : std::max(sratio, fuzz::token_ratio(query, choice) * UNBASE_SCALE);
   }
   return sratio * 100.0;
 }
