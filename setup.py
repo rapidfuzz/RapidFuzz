@@ -57,7 +57,7 @@ def cpp_flag(compiler):
     """Return the -std=c++2a compiler flag.
     """
     if has_flag(compiler, '-std=c++20'): return '-std=c++2a'
-    else if has_flag(compiler, '-std=c++17'): return '-std=c++17'
+    elif has_flag(compiler, '-std=c++17'): return '-std=c++17'
 
     raise RuntimeError('Unsupported compiler -- at least C++17 support '
                        'is needed!')
