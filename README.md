@@ -5,7 +5,7 @@
 
 <p align="center">
   <a href="https://github.com/maxbachmann/rapidfuzz/actions">
-    <img src="https://github.com/maxbachmann/rapidfuzz/workflows/Tests/badge.svg"
+    <img src="https://github.com/maxbachmann/rapidfuzz/workflows/Python%20package/badge.svg"
          alt="Continous Integration">
   </a>
   <a href="https://github.com/maxbachmann/rapidfuzz/blob/dev/LICENSE">
