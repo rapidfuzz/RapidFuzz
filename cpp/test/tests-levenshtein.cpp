@@ -32,35 +32,33 @@ TEST_CASE( "levenshtein works with string_views", "[string_view]" ) {
 
 
     SECTION( "levenshtein calculates correct levenshtein matrix" ) {
-        auto result = levenshtein::matrix(test, test);
-        REQUIRE( result.prefix_len == 4);
-        REQUIRE( result.matrix == std::vector<size_t>{0});
-        REQUIRE( result.matrix_columns == 1);
-        REQUIRE( result.matrix_rows == 1);
+        auto matrix_cmp = [](levenshtein::Matrix a, levenshtein::Matrix b) {
+            REQUIRE( a.prefix_len == b.prefix_len);
+            REQUIRE( a.matrix == b.matrix);
+            REQUIRE( a.matrix_columns == b.matrix_columns);
+            REQUIRE( a.matrix_rows == b.matrix_rows);
+        };
 
-        result = levenshtein::matrix(test, no_suffix);
-        REQUIRE( result.prefix_len == 3);
-        REQUIRE( result.matrix == std::vector<size_t>{0,1});
-        REQUIRE( result.matrix_columns == 2);
-        REQUIRE( result.matrix_rows == 1);
 
-        result = levenshtein::matrix(swapped1, swapped2);
-        REQUIRE( result.prefix_len == 0);
-        REQUIRE( result.matrix == std::vector<size_t>{ 0, 1, 2, 1, 1, 1, 2, 1, 2 });
-        REQUIRE( result.matrix_columns == 3);
-        REQUIRE( result.matrix_rows == 3);
-
-        result = levenshtein::matrix(test, no_suffix2);
-        REQUIRE( result.prefix_len == 3);
-        REQUIRE( result.matrix == std::vector<size_t>{0, 1, 1, 1});
-        REQUIRE( result.matrix_columns == 2);
-        REQUIRE( result.matrix_rows == 2);
-
-        result = levenshtein::matrix(test, replace_all);
-        REQUIRE( result.prefix_len == 0);
-        REQUIRE( result.matrix == std::vector<size_t>{0, 1, 2, 3, 4, 1, 1, 2, 3, 4, 2, 2, 2, 3, 4, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4});
-        REQUIRE( result.matrix_columns == 5);
-        REQUIRE( result.matrix_rows == 5);
+        matrix_cmp(
+            levenshtein::matrix(test, test),
+            {4, std::vector<size_t>{0}, 1, 1});
+        
+        matrix_cmp(
+            levenshtein::matrix(test, no_suffix),
+            {3, std::vector<size_t>{0, 1}, 2, 1});
+        
+        matrix_cmp(
+            levenshtein::matrix(swapped1, swapped2),
+            {0, std::vector<size_t>{ 0, 1, 2, 1, 1, 1, 2, 1, 2 }, 3, 3});
+        
+        matrix_cmp(
+            levenshtein::matrix(test, no_suffix2),
+            {3, std::vector<size_t>{0, 1, 1, 1}, 2, 2});
+        
+        matrix_cmp(
+            levenshtein::matrix(test, replace_all),
+            {0, std::vector<size_t>{0, 1, 2, 3, 4, 1, 1, 2, 3, 4, 2, 2, 2, 3, 4, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4}, 5, 5});
     }
 
     SECTION( "levenshtein calculates correct levenshtein editops" ) {
@@ -76,7 +74,6 @@ TEST_CASE( "levenshtein works with string_views", "[string_view]" ) {
             }
             REQUIRE(res_iter == res.end());
             REQUIRE(check_iter == check.end());
-            return 0;
         };
 
         auto ed_replace = [](size_t pos1, size_t pos2) {
@@ -92,33 +89,27 @@ TEST_CASE( "levenshtein works with string_views", "[string_view]" ) {
         };
 
 
-        auto result = levenshtein::editops(test, test);
-        REQUIRE(result.empty());
+        edit_op_cmp(levenshtein::editops(test, test), {});
 
-        REQUIRE_NOTHROW(edit_op_cmp(
+        edit_op_cmp(
             levenshtein::editops(test, no_suffix),
-            { ed_delete(3, 3) })
-        );
+            { ed_delete(3, 3) });
 
-        REQUIRE_NOTHROW(edit_op_cmp(
+        edit_op_cmp(
             levenshtein::editops(no_suffix, test),
-            { ed_insert(3, 3) })
-        );
+            { ed_insert(3, 3) });
 
-        REQUIRE_NOTHROW(edit_op_cmp(
+        edit_op_cmp(
             levenshtein::editops(swapped1, swapped2),
-            { ed_replace(0, 0), ed_replace(1, 1) })
-        );
+            { ed_replace(0, 0), ed_replace(1, 1) });
 
-        REQUIRE_NOTHROW(edit_op_cmp(
+        edit_op_cmp(
             levenshtein::editops(test, no_suffix2),
-            { ed_replace(3, 3) })
-        );
+            { ed_replace(3, 3) });
 
-        REQUIRE_NOTHROW(edit_op_cmp(
+        edit_op_cmp(
             levenshtein::editops(test, replace_all),
-            { ed_replace(0, 0), ed_replace(1, 1), ed_replace(2, 2), ed_replace(3, 3) })
-        );
+            { ed_replace(0, 0), ed_replace(1, 1), ed_replace(2, 2), ed_replace(3, 3) });
     }
 }
 

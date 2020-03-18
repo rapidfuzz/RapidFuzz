@@ -53,7 +53,7 @@ static percent full_ratio(const std::string &a, const std::string &b, percent sc
     sratio = std::max(sratio, fuzz::token_ratio(a, b, score_cutoff/UNBASE_SCALE) * UNBASE_SCALE);
   }
 
-  return sratio * 100;
+  return sratio;
 }
 
 

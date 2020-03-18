@@ -1,4 +1,6 @@
 .vscode/
+rapidfuzz.egg-info/
+dist/
 *.data
 *.so
 *.o
