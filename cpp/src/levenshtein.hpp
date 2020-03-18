@@ -2,7 +2,6 @@
 #include <string_view>
 #include <vector>
 #include <cmath>
-#include "concepts.hpp"
 #include "utils.hpp"
 
 
@@ -78,7 +77,7 @@ namespace levenshtein {
     * Calculates a normalized score of the weighted Levenshtein algorithm between 0.0 and
     * 1.0 (inclusive), where 1.0 means the sequences are the same.
     */
-    template<Iterable Sentence1, Iterable Sentence2>
+    template<typename Sentence1, typename Sentence2>
     float normalized_weighted_distance(const Sentence1 &sentence1, const Sentence2 &sentence2,
                                        float min_ratio=0.0, std::string_view delimiter="")
     {

@@ -68,11 +68,11 @@ decimal fuzz::token_ratio(const std::string &a, const std::string &b, decimal sc
   std::vector<std::string_view> tokens_b = splitSV(b);
   std::sort(tokens_b.begin(), tokens_b.end());
 
-  auto intersection = intersection_count_sorted_vec(tokens_a, tokens_b);
+  auto decomposition = set_decomposition(tokens_a, tokens_b);
 
-  size_t ab_len = recursiveIterableSize(intersection.ab, 1);
-  size_t ba_len = recursiveIterableSize(intersection.ba, 1);
-  size_t double_prefix = 2 * recursiveIterableSize(intersection.sect, 1);
+  size_t ab_len = recursiveIterableSize(decomposition.difference_ab, 1);
+  size_t ba_len = recursiveIterableSize(decomposition.difference_ba, 1);
+  size_t double_prefix = 2 * recursiveIterableSize(decomposition.intersection, 1);
 
   // fuzzywuzzy joined sect and ab/ba for comparisions
   // this is not done here as an optimisation, so the lengths get incremented by 1
@@ -90,7 +90,7 @@ decimal fuzz::token_ratio(const std::string &a, const std::string &b, decimal sc
 
   // could add score cutoff aswell, but would need to copy most things from normalized_score_cutoff
   // as an alternative add another utility function to levenshtein for this case
-  size_t sect_distance = levenshtein::weighted_distance(intersection.ab, intersection.ba, " ");
+  size_t sect_distance = levenshtein::weighted_distance(decomposition.difference_ab, decomposition.difference_ba, " ");
   if (sect_distance != std::numeric_limits<size_t>::max()) {
     result = std::max(result, (float)1.0 - sect_distance / (float)lensum);
   }
@@ -111,6 +111,8 @@ decimal fuzz::token_ratio(const std::string &a, const std::string &b, decimal sc
 }
 
 
+// combines token_set and token_sort ratio from fuzzywuzzy so it is only required to
+// do a lot of operations once
 decimal partial_token_ratio(const std::string &a, const std::string &b, decimal score_cutoff=0.0) {
   // probably faster to split the String view already sorted
   std::vector<std::string_view> tokens_a = splitSV(a);
@@ -118,18 +120,27 @@ decimal partial_token_ratio(const std::string &a, const std::string &b, decimal 
   std::vector<std::string_view> tokens_b = splitSV(b);
   std::sort(tokens_b.begin(), tokens_b.end());
 
-  auto intersection = intersection_count_sorted_vec(tokens_a, tokens_b);
+  auto unique_a = tokens_a;
+  auto unique_b = tokens_b;
+  unique_a.erase(std::unique(unique_a.begin(), unique_a.end()), unique_a.end());
+  unique_b.erase(std::unique(unique_b.begin(), unique_b.end()), unique_b.end());
+    
+  std::vector<std::string_view> difference_ab;
+  std::vector<std::string_view> difference_ba;
 
-  // the implementation in fuzzywuzzy would always return 1 here but calculate
-  // the levenshtein distance at least 8 times to get to this result
-  if (!intersection.sect.empty()) {
+  std::set_difference(unique_a.begin(), unique_a.end(), unique_b.begin(), unique_b.end(), 
+                      std::inserter(difference_ab, difference_ab.begin()));
+  std::set_difference(unique_b.begin(), unique_b.end(), unique_a.begin(), unique_a.end(), 
+                      std::inserter(difference_ba, difference_ba.begin()));
+
+  // exit early when there is a common word in both sequences
+  if (difference_ab.size() < unique_a.size()) {
     return 1.0;
   }
 
-  // TODO: joining the sentences here is probably not the fastest way
   return std::max(
-    partial_string_ratio(sentenceJoin(tokens_a), sentenceJoin(tokens_b), score_cutoff),
-    partial_string_ratio(sentenceJoin(intersection.ab), sentenceJoin(intersection.ba), score_cutoff)
+    partial_string_ratio(sentence_join(tokens_a), sentence_join(tokens_b), score_cutoff),
+    partial_string_ratio(sentence_join(difference_ab), sentence_join(difference_ba), score_cutoff)
   );
 }
 

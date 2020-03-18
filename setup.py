@@ -3,8 +3,14 @@ from setuptools.command.build_ext import build_ext
 import sys
 import setuptools
 
-with open("VERSION", "r") as version_file:
+from os import path
+this_dir = path.abspath(path.dirname(__file__))
+with open(path.join(this_dir, "VERSION"), encoding='utf-8') as version_file:
     version = version_file.read().strip()
+
+
+with open(path.join(this_dir, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
 
 
 class get_pybind_include(object):
@@ -74,7 +80,7 @@ class BuildExt(build_ext):
     """A custom build extension for adding compiler-specific options."""
     c_opts = {
         'msvc': ['/EHsc', '-O3'],
-        'unix': ['-O3', '-fconcepts'],
+        'unix': ['-O3'],
     }
     l_opts = {
         'msvc': [],
@@ -109,10 +115,22 @@ setup(
     author_email='contact@maxbachmann.de',
     url='https://github.com/rhasspy/rapidfuzz',
     description='rapid fuzzy string matching',
-    long_description='',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     ext_modules=ext_modules,
     install_requires=['pybind11>=2.4'],
     setup_requires=['pybind11>=2.4'],
     cmdclass={'build_ext': BuildExt},
+    package_data={'': ['LICENSE', 'VERSION']},
+    include_package_data=True,
     zip_safe=False,
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "License :: OSI Approved :: MIT License",
+    ],
+    python_requires=">=3.5",
 )

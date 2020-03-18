@@ -1,0 +1,3 @@
+include README.md
+include VERSION
+include cpp/src/*.hpp
