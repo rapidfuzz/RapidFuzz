@@ -90,12 +90,14 @@ struct Intersection {
   std::vector<std::string_view> ba;
 };
 
-// attention this is changing b !!!!
+
 inline Intersection intersection_count_sorted_vec(std::vector<std::string_view> a,
                                            std::vector<std::string_view> b) {
   std::vector<std::string_view> vec_sect;
   std::vector<std::string_view> vec_ab;
-
+  a.erase(std::unique(a.begin(), a.end()), a.end());
+  b.erase(std::unique(b.begin(), b.end()), b.end());
+  
   for (const auto &current_a : a) {
     auto element_b = std::find(b.begin(), b.end(), current_a);
     if (element_b != b.end()) {
@@ -196,4 +198,19 @@ inline size_t recursiveIterableSize(const std::vector<T> &x, size_t delimiter_le
 		result += recursiveIterableSize(y, delimiter_length);
 	}
 	return result;
+}
+
+
+inline std::string sentenceJoin(const std::vector<std::string_view> &sentence) {
+  if (sentence.empty()) {
+    return "";
+  }
+
+  auto sentence_iter = sentence.begin();
+  std::string result = std::string {*sentence_iter};
+  ++sentence_iter;
+  for (; sentence_iter != sentence.end(); ++sentence_iter) {
+    result +=  " " + std::string {*sentence_iter};
+  }
+  return result;
 }

@@ -7,6 +7,60 @@
 #include <limits>
 
 
+float partial_string_ratio(std::string a, std::string b, float score_cutoff=0.0) {
+  if (a.empty() || b.empty()) {
+    return 0.0;
+  }
+
+  return 0.0;
+}
+
+/*
+fn partial_string_ratio(query: &str, choice: &str) -> f32 {
+	if query.is_empty() || choice.is_empty() {
+		return 0.0;
+	}
+
+	let shorter;
+	let longer;
+	
+	if query.len() <= choice.len() {
+		shorter = query;
+		longer = choice;
+	} else {
+		longer = query;
+		shorter = choice;
+	}
+
+	let edit_ops = editops::editops_find(shorter, longer);
+	let blocks = editops::editops_matching_blocks(shorter.len(), longer.len(), &edit_ops);
+
+	let mut scores: Vec<f32> = vec![];
+	for block in blocks {
+		let long_start = if block.second_start > block.first_start {
+			block.second_start - block.first_start
+		} else {
+			0
+		};
+
+		let long_end = long_start + shorter.chars().count();
+		let long_substr = &longer[long_start..long_end];
+
+		let ls_ratio = normalized_weighted_levenshtein(shorter, long_substr);
+	
+		if ls_ratio > 0.995 {
+			return 1.0;
+		} else {
+			scores.push(ls_ratio)
+		}
+			
+	}
+
+	scores.iter().fold(0.0f32, |max, &val| max.max(val))
+}
+*/
+
+
 static float full_ratio(const std::string &query, const std::string &choice, float score_cutoff=0) {
   float sratio = fuzz::ratio(query, choice, score_cutoff);
 
@@ -38,11 +92,6 @@ float fuzz::token_ratio(const std::string &a, const std::string &b, float score_
   std::vector<std::string_view> tokens_b = splitSV(b);
   std::sort(tokens_b.begin(), tokens_b.end());
 
-  float result = levenshtein::normalized_weighted_distance(tokens_a, tokens_b, score_cutoff, " ");
-
-  tokens_a.erase(std::unique(tokens_a.begin(), tokens_a.end()), tokens_a.end());
-  tokens_b.erase(std::unique(tokens_b.begin(), tokens_b.end()), tokens_b.end());
-
   auto intersection = intersection_count_sorted_vec(tokens_a, tokens_b);
 
   size_t ab_len = recursiveIterableSize(intersection.ab, 1);
@@ -60,6 +109,7 @@ float fuzz::token_ratio(const std::string &a, const std::string &b, float score_
     ++ba_len;
   }
 
+  float result = levenshtein::normalized_weighted_distance(tokens_a, tokens_b, score_cutoff, " ");
   size_t lensum = ab_len + ba_len + double_prefix;
   size_t sect_distance = levenshtein::weighted_distance(intersection.ab, intersection.ba, score_cutoff, " ");
   if (sect_distance != std::numeric_limits<size_t>::max()) {
@@ -82,21 +132,50 @@ float fuzz::token_ratio(const std::string &a, const std::string &b, float score_
 }
 
 
-/*float partial_ratio(const std::string &query, const std::string &choice,
-                      uint8_t partial_scale, uint8_t score_cutoff)
-{
-  float sratio = normalized_levenshtein(query, choice);
-  float min_ratio = std::max(sratio, (float)score_cutoff / (float)100);
+float partial_token_ratio(const std::string &a, const std::string &b, float score_cutoff=0.0) {
+  // probably faster to split the String view already sorted
+  std::vector<std::string_view> tokens_a = splitSV(a);
+  std::sort(tokens_a.begin(), tokens_a.end());
+  std::vector<std::string_view> tokens_b = splitSV(b);
+  std::sort(tokens_b.begin(), tokens_b.end());
+
+  auto intersection = intersection_count_sorted_vec(tokens_a, tokens_b);
+
+  // the implementation in fuzzywuzzy would always return 1 here but calculate
+  // the levenshtein distance at least 8 times to get to this result
+  if (!intersection.sect.empty()) {
+    return 1.0;
+  }
+
+  // joining the sentences here is probably not the fastest way
+  return std::max(
+    partial_string_ratio(sentenceJoin(tokens_a), sentenceJoin(tokens_b), score_cutoff),
+    partial_string_ratio(sentenceJoin(intersection.ab), sentenceJoin(intersection.ba), score_cutoff)
+  );
+}
+
+
+float partial_ratio(const std::string &query, const std::string &choice, float partial_scale, float score_cutoff) {
+  const float UNBASE_SCALE = 0.95;
+  float normalized_score_cutoff = score_cutoff / (float)100.0;
+
+  // TODO: this needs more thoughts when to start using score cutoff, since it performs slower when it can not exit early
+  // has to be tested with some real training examples
+  float sratio = (score_cutoff > 70)
+    ? levenshtein::normalized_weighted_distance(query, choice, normalized_score_cutoff)
+    : levenshtein::normalized_weighted_distance(query, choice);
+
+  float min_ratio = std::max(normalized_score_cutoff, sratio);
   if (min_ratio < partial_scale) {
     sratio = std::max(sratio, partial_string_ratio(query, choice) * partial_scale);
     min_ratio = std::max(sratio, min_ratio);
-    const float UNBASE_SCALE = 0.95;
+
     if (min_ratio < UNBASE_SCALE * partial_scale) {
       sratio = std::max(sratio, partial_token_ratio(query, choice) * UNBASE_SCALE * partial_scale );
     }
   }
   return sratio * 100.0;
-}*/
+}
 
 
 float fuzz::QRatio(const std::string &a, const std::string &b, float score_cutoff) {
