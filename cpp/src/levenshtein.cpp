@@ -120,9 +120,9 @@ std::vector<levenshtein::MatchingBlock> levenshtein::matching_blocks(std::string
     }
 
     if (first_start < op.first_start || second_start < op.second_start) {
-      mblocks.push_back(first_start, second_start, op.first_start - first_start);
+      mblocks.emplace_back(first_start, second_start, op.first_start - first_start);
       first_start = op.first_start;
-			second_start = op.second_start;
+      second_start = op.second_start;
     }
 
     switch (op.op_type) {
@@ -139,7 +139,7 @@ std::vector<levenshtein::MatchingBlock> levenshtein::matching_blocks(std::string
     }
   }
 
-  mblocks.push_back(len1, len2, 0);
+  mblocks.emplace_back(len1, len2, 0);
   return mblocks;
 }
 
