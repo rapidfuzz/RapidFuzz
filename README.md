@@ -1,5 +1,5 @@
 <h1 align="center">
-<img src="https://raw.githubusercontent.com/maxbachmann/rapidfuzz/dev/.github/RapidFuzz.svg" alt="RapidFuzz" width="400">
+<img src="https://raw.githubusercontent.com/maxbachmann/rapidfuzz/master/.github/RapidFuzz.svg" alt="RapidFuzz" width="400">
 </h1>
 <h4 align="center">Rapid fuzzy string matching in Python and C++ </h4>
 
