@@ -110,7 +110,7 @@ namespace levenshtein {
         // has to be tested with some more real examples
         size_t distance = (min_ratio > 0.7)
           ? weighted_distance(sentence1, sentence2, std::ceil((float)lensum - min_ratio * lensum), delimiter)
-          : weighted_distance(sentence1, sentence2, delimiter)
+          : weighted_distance(sentence1, sentence2, delimiter);
 
         if (distance == std::numeric_limits<size_t>::max()) {
             return 0.0;

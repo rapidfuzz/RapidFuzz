@@ -100,7 +100,7 @@ std::vector<levenshtein::EditOp> levenshtein::editops(std::string_view sentence1
       throw std::logic_error("something went wrong extracting the editops from the levenshtein matrix");
     }
 
-    ops.emplace_back(op_type, i + prefix_len, j + prefix_len)
+    ops.emplace_back(op_type, i + prefix_len, j + prefix_len);
   }
 
   std::reverse(ops.begin(), ops.end());
@@ -108,7 +108,7 @@ std::vector<levenshtein::EditOp> levenshtein::editops(std::string_view sentence1
 }
 
 
-std::vector<MatchingBlock> levenshtein::matching_blocks(std::string_view sentence1, std::string_view sentence2) {
+std::vector<levenshtein::MatchingBlock> levenshtein::matching_blocks(std::string_view sentence1, std::string_view sentence2) {
   auto edit_ops = editops(sentence1, sentence2);
   size_t first_start = 0;
 	size_t second_start = 0;
