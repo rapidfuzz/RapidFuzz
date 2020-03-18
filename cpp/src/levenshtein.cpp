@@ -139,7 +139,7 @@ std::vector<levenshtein::MatchingBlock> levenshtein::matching_blocks(std::string
     }
   }
 
-  mblocks.emplace_back(len1, len2, 0);
+  mblocks.emplace_back(sentence1.length(), sentence2.length(), 0);
   return mblocks;
 }
 
