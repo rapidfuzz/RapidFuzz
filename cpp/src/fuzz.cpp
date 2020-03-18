@@ -175,8 +175,8 @@ percent fuzz::WRatio(const std::string &a, const std::string &b, percent score_c
   if (len_ratio < 1.5) {
     return full_ratio(a, b, score_cutoff);
   } else if (len_ratio < 8.0) {
-    return partial_ratio(query, choice, 0.9, score_cutoff);
+    return partial_ratio(a, b, 0.9, score_cutoff);
   } else {
-    return partial_ratio(query, choice, 0.6, score_cutoff);
+    return partial_ratio(a, b, 0.6, score_cutoff);
   }
 }
