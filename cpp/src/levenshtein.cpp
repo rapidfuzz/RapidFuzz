@@ -24,7 +24,6 @@ levenshtein::Matrix levenshtein::matrix(std::string_view sentence1, std::string_
     auto prev_cache = cache_matrix.begin() + sentence1_pos * matrix_rows;
     auto result_cache = cache_matrix.begin() + (sentence1_pos + 1) * matrix_rows + 1;
     size_t result = sentence1_pos + 1;
-    size_t sentence2_pos = 0;
     for (const auto &char2 : sentence2) {
       result = std::min({
         result + 1,
@@ -74,7 +73,6 @@ std::vector<levenshtein::EditOp> levenshtein::editops(std::string_view sentence1
   };
 
   while (i > 0 || j > 0) {
-    size_t current_value = matrix[pos];
     EditType op_type;
 
     if (i && j && is_replace(pos)) {
