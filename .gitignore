@@ -1,4 +1,8 @@
 .vscode/
+rapidfuzz.egg-info/
+dist/
 *.data
 *.so
+*.o
+*.out
 test.py

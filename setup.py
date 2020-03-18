@@ -3,8 +3,14 @@ from setuptools.command.build_ext import build_ext
 import sys
 import setuptools
 
-with open("VERSION", "r") as version_file:
+from os import path
+this_dir = path.abspath(path.dirname(__file__))
+with open(path.join(this_dir, "VERSION"), encoding='utf-8') as version_file:
     version = version_file.read().strip()
+
+
+with open(path.join(this_dir, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
 
 
 class get_pybind_include(object):
@@ -25,15 +31,19 @@ class get_pybind_include(object):
 ext_modules = [
     Extension(
         'rapidfuzz',
-        ['python/rapidfuzz.cpp'],
+        [
+            'python/src/rapidfuzz.cpp',
+            'cpp/src/levenshtein.cpp',
+            'cpp/src/fuzz.cpp',
+            'cpp/src/process.cpp'
+        ],
         include_dirs=[
             # Path to pybind11 headers
             get_pybind_include(),
             get_pybind_include(user=True),
-            "cpp"
+            "cpp/src"
         ],
-        extra_compile_args = ["-O3"], 
-        language='c++'
+        language='c++',
     ),
 ]
 
@@ -55,11 +65,12 @@ def has_flag(compiler, flagname):
 
 
 def cpp_flag(compiler):
-    """Return the -std=c++17 compiler flag.
-
-    The newer version is prefered over c++17 (when it is available).
     """
-    if has_flag(compiler, '-std=c++17'): return '-std=c++17'
+    Return the latest compiler flag supported by the compiler
+    (at least c++17)
+    """
+    if has_flag(compiler, '-std=c++2a'): return '-std=c++2a'
+    elif has_flag(compiler, '-std=c++17'): return '-std=c++17'
 
     raise RuntimeError('Unsupported compiler -- at least C++17 support '
                        'is needed!')
@@ -68,8 +79,8 @@ def cpp_flag(compiler):
 class BuildExt(build_ext):
     """A custom build extension for adding compiler-specific options."""
     c_opts = {
-        'msvc': ['/EHsc'],
-        'unix': ['-ffast-math'],
+        'msvc': ['/EHsc', '-O3'],
+        'unix': ['-O3'],
     }
     l_opts = {
         'msvc': [],
@@ -103,11 +114,23 @@ setup(
     author='Max Bachmann',
     author_email='contact@maxbachmann.de',
     url='https://github.com/rhasspy/rapidfuzz',
-    description='rapid string matching library',
-    long_description='',
+    description='rapid fuzzy string matching',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     ext_modules=ext_modules,
     install_requires=['pybind11>=2.4'],
     setup_requires=['pybind11>=2.4'],
     cmdclass={'build_ext': BuildExt},
+    package_data={'': ['LICENSE', 'VERSION']},
+    include_package_data=True,
     zip_safe=False,
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "License :: OSI Approved :: MIT License",
+    ],
+    python_requires=">=3.5",
 )
