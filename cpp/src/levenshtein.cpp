@@ -136,6 +136,8 @@ std::vector<levenshtein::MatchingBlock> levenshtein::matching_blocks(std::string
     case EditType::EditInsert:
       second_start += 1;
       break;
+    case EditType::EditKeep:
+      break;
     }
   }
 
