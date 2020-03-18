@@ -1,14 +1,14 @@
 <h1 align="center">
-<img src="https://raw.githubusercontent.com/maxbachmann/rapidfuzz/master/.github/RapidFuzz.svg?sanitize=true" alt="RapidFuzz" width="400">
+<img src="https://raw.githubusercontent.com/rhasspy/rapidfuzz/master/.github/RapidFuzz.svg?sanitize=true" alt="RapidFuzz" width="400">
 </h1>
 <h4 align="center">Rapid fuzzy string matching in Python and C++ using the Levenshtein Distance</h4>
 
 <p align="center">
-  <a href="https://github.com/maxbachmann/rapidfuzz/actions">
-    <img src="https://github.com/maxbachmann/rapidfuzz/workflows/Python%20package/badge.svg"
+  <a href="https://github.com/rhasspy/rapidfuzz/actions">
+    <img src="https://github.com/rhasspy/rapidfuzz/workflows/Python%20package/badge.svg"
          alt="Continous Integration">
   </a>
-  <a href="https://github.com/maxbachmann/rapidfuzz/blob/dev/LICENSE">
+  <a href="https://github.com/rhasspy/rapidfuzz/blob/dev/LICENSE">
     <img src="https://img.shields.io/github/license/rhasspy/rapidfuzz">
   </a>
 </p>
