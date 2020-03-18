@@ -1,0 +1,1 @@
+from _rapidfuzz_cpp.fuzz import *

@@ -5,21 +5,14 @@
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(rapidfuzz, m) {
+PYBIND11_MODULE(_rapidfuzz_cpp, m) {
     m.doc() = R"pbdoc(
         rapid string matching library
     )pbdoc";
 
     auto mprocess = m.def_submodule("process");
-
-    mprocess.def("extract", &process::extract,
-                 py::arg("query"), py::arg("choices"), py::arg("score_cutoff") = 0,
-                 R"pbdoc(Find all matches with a ratio above score_cutoff)pbdoc");
-
-    mprocess.def("extractOne", &process::extract_one,
-                 py::arg("query"), py::arg("choices"), py::arg("score_cutoff") = 0,
-                 R"pbdoc(Find the best match in a list of matches)pbdoc");
-
+    mprocess.def("extract", &process::extract);
+    mprocess.def("extractOne", &process::extract_one);
 
     auto mfuzz = m.def_submodule("fuzz");
     mfuzz.def("ratio", &fuzz::ratio,

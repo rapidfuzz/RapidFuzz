@@ -30,7 +30,7 @@ class get_pybind_include(object):
 
 ext_modules = [
     Extension(
-        'rapidfuzz',
+        '_rapidfuzz_cpp',
         [
             'python/src/rapidfuzz.cpp',
             'cpp/src/levenshtein.cpp',
@@ -122,6 +122,8 @@ setup(
     setup_requires=['pybind11>=2.4'],
     cmdclass={'build_ext': BuildExt},
     package_data={'': ['LICENSE', 'VERSION']},
+    package_dir={'': 'python/src'},
+    packages=['rapidfuzz'],
     include_package_data=True,
     zip_safe=False,
     classifiers=[
