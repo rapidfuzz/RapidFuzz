@@ -72,7 +72,7 @@ std::vector<levenshtein::EditOp> levenshtein::editops(std::string_view sentence1
   auto is_keep = [=](size_t pos) {
     return matrix[pos - matrix_rows - 1] == matrix[pos];
   };
-  
+
   while (i > 0 || j > 0) {
     size_t current_value = matrix[pos];
     EditType op_type;
@@ -100,22 +100,52 @@ std::vector<levenshtein::EditOp> levenshtein::editops(std::string_view sentence1
       throw std::logic_error("something went wrong extracting the editops from the levenshtein matrix");
     }
 
-    EditOp edit_op{
-        op_type,
-        i + prefix_len,
-        j + prefix_len,
-    };
-    // maybe place in the back instead
-    ops.insert(ops.begin(), edit_op);
+    ops.emplace_back(op_type, i + prefix_len, j + prefix_len)
   }
+
+  std::reverse(ops.begin(), ops.end());
   return ops;
 }
 
 
-void levenshtein_word_cmp(const char &letter_cmp,
-                          const std::vector<std::string_view> &words,
-                          std::vector<size_t> &cache, size_t current_cache,
-                          std::string_view delimiter="")
+std::vector<MatchingBlock> levenshtein::matching_blocks(std::string_view sentence1, std::string_view sentence2) {
+  auto edit_ops = editops(sentence1, sentence2);
+  size_t first_start = 0;
+	size_t second_start = 0;
+  std::vector<MatchingBlock> mblocks;
+
+  for (const auto &op : edit_ops) {
+    if (op.op_type == EditType::EditKeep) {
+      continue;
+    }
+
+    if (first_start < op.first_start || second_start < op.second_start) {
+      mblocks.push_back(first_start, second_start, op.first_start - first_start);
+      first_start = op.first_start;
+			second_start = op.second_start;
+    }
+
+    switch (op.op_type) {
+    case EditType::EditReplace:
+      first_start += 1;
+      second_start += 1;
+      break;
+    case EditType::EditDelete:
+      first_start += 1;
+      break;
+    case EditType::EditInsert:
+      second_start += 1;
+      break;
+    }
+  }
+
+  mblocks.push_back(len1, len2, 0);
+  return mblocks;
+}
+
+
+void levenshtein_word_cmp(const char &letter_cmp, const std::vector<std::string_view> &words,
+                          std::vector<size_t> &cache, size_t current_cache, std::string_view delimiter="")
 {
   size_t result = current_cache + 1;
   auto cache_iter = cache.begin();
@@ -293,12 +323,6 @@ size_t levenshtein::weighted_distance(std::vector<std::string_view> sentence1, s
 
   return cache.back();
 }
-
-
-/*template<IterableOfIterable Sentence1, Iterable Sentence2>
-size_t weighted_distance(Sentence1 sentence1, Sentence2 sentence2, std::string_view delimiter="") {
-  remove_common_affix(sentence1, sentence2);
-}*/
 
 
 size_t levenshtein::weighted_distance(std::string_view sentence1, std::string_view sentence2, std::string_view delimiter) {

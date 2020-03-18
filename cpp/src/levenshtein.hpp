@@ -18,6 +18,8 @@ namespace levenshtein {
       EditType op_type;
       size_t first_start;
       size_t second_start;
+      EditOp(EditType op_type, size_t first_start, size_t second_start)
+        : op_type(op_type), first_start(first_start), second_start(second_start) {}
     };
 
     struct Matrix {
@@ -31,25 +33,15 @@ namespace levenshtein {
 
     std::vector<EditOp> editops(std::string_view sentence1, std::string_view sentence2);
 
+    struct MatchingBlock {
+    	size_t first_start;
+    	size_t second_start;
+    	size_t len;
+      MatchingBlock(size_t first_start, size_t second_start, size_t len)
+        : first_start(first_start), second_start(second_start), len(len) {}
+    };
 
-
-
-    /* Not implemented yet */
-
-    /**
-     * Calculates the minimum number of insertions, deletions, and substitutions
-     * required to change one sequence into the other according to Levenshtein.
-     * Each edit operation has a similar cost of 1.
-     */
-    //size_t distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2);
-    //size_t distance(std::string_view sentence1, std::string_view sentence2);
-
-    /**
-    * Calculates a normalized score of the Levenshtein algorithm between 0.0 and
-    * 1.0 (inclusive), where 1.0 means the sequences are the same.
-    */
-    //float normalized_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2);
-    //float normalized_distance(std::string_view sentence1, std::string_view sentence2);
+    std::vector<MatchingBlock> matching_blocks(std::string_view sentence1, std::string_view sentence2);
 
 
     /**
@@ -98,13 +90,28 @@ namespace levenshtein {
           return 0.0;
         }
 
-        size_t lensum = recursiveIterableSize(sentence1, delimiter.size()) + recursiveIterableSize(sentence2, delimiter.size());
-        if (!min_ratio) {
-            return 1.0 - (float)weighted_distance(sentence1, sentence2, delimiter) / (float)lensum;
+        size_t sentence1_len = recursiveIterableSize(sentence1, delimiter.size());
+        size_t sentence2_len = recursiveIterableSize(sentence2, delimiter.size());
+        size_t lensum = sentence1_len + sentence2_len;
+
+        // constant time calculation to find a string ratio based on the string length
+        // so it can exit early without running any levenshtein calculations
+        size_t min_distance = (sentence1_len > sentence2_len)
+          ? sentence1_len - sentence2_len
+          : sentence2_len - sentence1_len;
+
+        float len_ratio = 1.0 - (float)min_distance / (float)lensum;
+        if (len_ratio < min_ratio) {
+          return 0.0;
         }
 
-        size_t max_distance = static_cast<size_t>(std::ceil((float)lensum - min_ratio * lensum));
-        size_t distance = weighted_distance(sentence1, sentence2, max_distance, delimiter);
+        // TODO: this needs more thoughts when to start using score cutoff, since it performs slower when it can not exit early
+        // -> just because it has a smaller ratio does not mean levenshtein can always exit early
+        // has to be tested with some more real examples
+        size_t distance = (min_ratio > 0.7)
+          ? weighted_distance(sentence1, sentence2, std::ceil((float)lensum - min_ratio * lensum), delimiter)
+          : weighted_distance(sentence1, sentence2, delimiter)
+
         if (distance == std::numeric_limits<size_t>::max()) {
             return 0.0;
         }
