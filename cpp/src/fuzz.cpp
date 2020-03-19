@@ -138,8 +138,14 @@ decimal partial_token_ratio(const std::string &a, const std::string &b, decimal 
     return 1.0;
   }
 
+  float result = partial_string_ratio(sentence_join(tokens_a), sentence_join(tokens_b), score_cutoff);
+  // do not calculate the same partial_ratio twice
+  if (tokens_a.size() == unique_a.size() && tokens_b.size() == unique_b.size()) {
+    return result;
+  }
+
   return std::max(
-    partial_string_ratio(sentence_join(tokens_a), sentence_join(tokens_b), score_cutoff),
+    result,
     partial_string_ratio(sentence_join(difference_ab), sentence_join(difference_ba), score_cutoff)
   );
 }

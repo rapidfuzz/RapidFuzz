@@ -1,8 +1,9 @@
 #include "process.hpp"
 #include "fuzz.hpp"
+#include <algorithm>
 
 std::vector<std::pair<std::string, float>>
-process::extract(std::string query, std::vector<std::string> choices, uint8_t score_cutoff) {
+process::extract(std::string query, std::vector<std::string> choices, size_t limit, uint8_t score_cutoff) {
   std::vector<std::pair<std::string, float>> results;
   results.reserve(choices.size());
 
@@ -11,6 +12,13 @@ process::extract(std::string query, std::vector<std::string> choices, uint8_t sc
     if (score > score_cutoff) {
       results.emplace_back(std::make_pair(choice, score));
     }
+  }
+
+  // TODO: possibly could use a similar improvement to extract_one
+  // but when using limits close to choices.size() might actually be slower
+  if (limit < choices.size()) {
+    std::sort(results.rbegin(), results.rend());
+    results.resize(limit);
   }
   
   return results;
