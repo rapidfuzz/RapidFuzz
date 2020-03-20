@@ -29,7 +29,7 @@ percent fuzz::partial_ratio(const std::wstring &a, const std::wstring &b, percen
       std::size_t long_start = (block.second_start > block.first_start) ? block.second_start - block.first_start : 0;
       std::wstring_view long_substr = longer.substr(long_start, shorter.length());
 
-      float ls_ratio = levenshtein::normalized_weighted_distance(shorter, long_substr, score_cutoff);
+      float ls_ratio = levenshtein::normalized_weighted_distance(shorter, long_substr, score_cutoff / 100);
 
       if (ls_ratio > 0.995) {
   			return 100;
