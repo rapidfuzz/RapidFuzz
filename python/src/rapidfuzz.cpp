@@ -17,6 +17,9 @@ PYBIND11_MODULE(_rapidfuzz_cpp, m) {
     auto mfuzz = m.def_submodule("fuzz");
     mfuzz.def("ratio", &fuzz::ratio,
               py::arg("a"), py::arg("b"), py::arg("score_cutoff") = 0);
+    
+    mfuzz.def("partial_ratio", &fuzz::partial_ratio,
+              py::arg("a"), py::arg("b"), py::arg("score_cutoff") = 0);
 
     mfuzz.def("QRatio", &fuzz::QRatio,
               py::arg("a"), py::arg("b"), py::arg("score_cutoff") = 0);

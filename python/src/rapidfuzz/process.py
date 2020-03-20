@@ -1,5 +1,4 @@
 import _rapidfuzz_cpp.process
-import _rapidfuzz_cpp.fuzz
 from typing import Iterable
 
 def extract(query: str, choices: Iterable, limit: int = 5, score_cutoff: int = 0):

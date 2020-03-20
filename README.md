@@ -47,18 +47,22 @@ it requires Python 3.5 or later and a C++ Compiler with C++17 support, which sho
 
 
 ## Usage
-```
+```console
 > from rapidfuzz import fuzz
 > from rapidfuzz import process
 ```
 
 ### Simple Ratio
-```
+```console
 > fuzz.ratio("this is a test", "this is a test!")
-  96.55171966552734
+96.55171966552734
 ```
 
 ### Partial Ratio
+```console
+>>> fuzz.partial_ratio("this is a test", "this is a test!")
+100
+```
 
 ### Token Sort Ratio
 
@@ -67,12 +71,12 @@ it requires Python 3.5 or later and a C++ Compiler with C++17 support, which sho
 ### Process
 currently no string preprocessing is done so your responsible for removing unwanted characters and to lowercase the strings
 if thats what you want
-```
-> choices = ["atlanta falcons", "new york jets", "new york giants", "dallas cowboys"]
-> process.extract("new york jets", choices, limit=2)
-  [('new york jets', 100), ('new york giants', 78.57142639160156)]
-> process.extractOne("cowboys", choices)
-  ("dallas cowboys", 90)
+```console
+>>> choices = ["atlanta falcons", "new york jets", "new york giants", "dallas cowboys"]
+>>> process.extract("new york jets", choices, limit=2)
+[('new york jets', 100), ('new york giants', 78.57142639160156)]
+>>> process.extractOne("cowboys", choices)
+("dallas cowboys", 90)
 ```
 
 
