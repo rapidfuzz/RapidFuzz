@@ -3,7 +3,7 @@
 #include <algorithm>
 
 std::vector<std::pair<std::string, float>>
-process::extract(std::string query, std::vector<std::string> choices, size_t limit, uint8_t score_cutoff) {
+process::extract(std::string query, std::vector<std::string> choices, std::size_t limit, uint8_t score_cutoff) {
   std::vector<std::pair<std::string, float>> results;
   results.reserve(choices.size());
 

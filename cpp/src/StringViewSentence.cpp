@@ -4,7 +4,7 @@
 #include <string>
 #include <string_view>
 
-//template <typename T, size_t N>
+//template <typename T, std::size_t N>
 class SampleVector
 {
     std::vector<std::string_view> vector;

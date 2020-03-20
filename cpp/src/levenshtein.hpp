@@ -15,17 +15,17 @@ namespace levenshtein {
 
     struct EditOp {
       EditType op_type;
-      size_t first_start;
-      size_t second_start;
-      EditOp(EditType op_type, size_t first_start, size_t second_start)
+      std::size_t first_start;
+      std::size_t second_start;
+      EditOp(EditType op_type, std::size_t first_start, std::size_t second_start)
         : op_type(op_type), first_start(first_start), second_start(second_start) {}
     };
 
     struct Matrix {
-        size_t prefix_len;
-        std::vector<size_t> matrix;
-        size_t matrix_columns;
-        size_t matrix_rows;
+        std::size_t prefix_len;
+        std::vector<std::size_t> matrix;
+        std::size_t matrix_columns;
+        std::size_t matrix_rows;
     };
 
     Matrix matrix(std::string_view sentence1, std::string_view sentence2);
@@ -33,10 +33,10 @@ namespace levenshtein {
     std::vector<EditOp> editops(std::string_view sentence1, std::string_view sentence2);
 
     struct MatchingBlock {
-    	size_t first_start;
-    	size_t second_start;
-    	size_t len;
-      MatchingBlock(size_t first_start, size_t second_start, size_t len)
+    	std::size_t first_start;
+    	std::size_t second_start;
+    	std::size_t len;
+      MatchingBlock(std::size_t first_start, std::size_t second_start, std::size_t len)
         : first_start(first_start), second_start(second_start), len(len) {}
     };
 
@@ -55,23 +55,23 @@ namespace levenshtein {
      * Remove         | 1
      * Replace        | 2
      */
-    size_t weighted_distance(std::string_view sentence1, std::string_view sentence2,
+    std::size_t weighted_distance(std::string_view sentence1, std::string_view sentence2,
                              std::string_view delimiter="");
-    size_t weighted_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2,
+    std::size_t weighted_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2,
                              std::string_view delimiter="");
 
 
     /**
      * These functions allow providing a max_distance parameter that can be used to exit early when the
      * calculated levenshtein distance is at least as big as max_distance and will return the maximal
-     * possible value for size_t.
+     * possible value for std::size_t.
      * This range check makes the levenshtein calculation about 20% slower, so it should be only used
      * when it can usually exit early.
      */
-    size_t weighted_distance(std::string_view sentence1, std::string_view sentence2,
-                             size_t max_distance, std::string_view delimiter="");
-    size_t weighted_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2,
-                             size_t max_distance, std::string_view delimiter="");
+    std::size_t weighted_distance(std::string_view sentence1, std::string_view sentence2,
+                             std::size_t max_distance, std::string_view delimiter="");
+    std::size_t weighted_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2,
+                             std::size_t max_distance, std::string_view delimiter="");
 
     /**
     * Calculates a normalized score of the weighted Levenshtein algorithm between 0.0 and
@@ -89,13 +89,13 @@ namespace levenshtein {
           return 0.0;
         }
 
-        size_t sentence1_len = recursiveIterableSize(sentence1, delimiter.size());
-        size_t sentence2_len = recursiveIterableSize(sentence2, delimiter.size());
-        size_t lensum = sentence1_len + sentence2_len;
+        std::size_t sentence1_len = recursiveIterableSize(sentence1, delimiter.size());
+        std::size_t sentence2_len = recursiveIterableSize(sentence2, delimiter.size());
+        std::size_t lensum = sentence1_len + sentence2_len;
 
         // constant time calculation to find a string ratio based on the string length
         // so it can exit early without running any levenshtein calculations
-        size_t min_distance = (sentence1_len > sentence2_len)
+        std::size_t min_distance = (sentence1_len > sentence2_len)
           ? sentence1_len - sentence2_len
           : sentence2_len - sentence1_len;
 
@@ -107,11 +107,11 @@ namespace levenshtein {
         // TODO: this needs more thoughts when to start using score cutoff, since it performs slower when it can not exit early
         // -> just because it has a smaller ratio does not mean levenshtein can always exit early
         // has to be tested with some more real examples
-        size_t distance = (min_ratio > 0.7)
+        std::size_t distance = (min_ratio > 0.7)
           ? weighted_distance(sentence1, sentence2, std::ceil((float)lensum - min_ratio * lensum), delimiter)
           : weighted_distance(sentence1, sentence2, delimiter);
 
-        if (distance == std::numeric_limits<size_t>::max()) {
+        if (distance == std::numeric_limits<std::size_t>::max()) {
             return 0.0;
         }
         return 1.0 - (float)distance / (float)lensum;

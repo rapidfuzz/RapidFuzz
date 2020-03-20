@@ -62,7 +62,7 @@ inline auto common_prefix_length(InputIterator1 first1, InputIterator1 last1,
 /**
  * Removes common prefix of two string views
  */
-inline size_t remove_common_prefix(std::string_view& a, std::string_view& b) {
+inline std::size_t remove_common_prefix(std::string_view& a, std::string_view& b) {
   auto prefix = common_prefix_length(a.begin(), a.end(), b.begin(), b.end());
 	a.remove_prefix(prefix);
 	b.remove_prefix(prefix);
@@ -72,7 +72,7 @@ inline size_t remove_common_prefix(std::string_view& a, std::string_view& b) {
 /**
  * Removes common suffix of two string views
  */
-inline size_t remove_common_suffix(std::string_view& a, std::string_view& b) {
+inline std::size_t remove_common_suffix(std::string_view& a, std::string_view& b) {
   auto suffix = common_prefix_length(a.rbegin(), a.rend(), b.rbegin(), b.rend());
 	a.remove_suffix(suffix);
   b.remove_suffix(suffix);
@@ -80,8 +80,8 @@ inline size_t remove_common_suffix(std::string_view& a, std::string_view& b) {
 }
 
 struct Affix {
-  size_t prefix_len;
-  size_t suffix_len;
+  std::size_t prefix_len;
+  std::size_t suffix_len;
 };
 
 /**
@@ -123,16 +123,16 @@ inline void remove_common_affix(std::vector<T> &a, std::vector<T> &b)
 
 
 template<typename T>
-inline size_t recursiveIterableSize(const T &x, size_t delimiter_length=0){
+inline std::size_t recursiveIterableSize(const T &x, std::size_t delimiter_length=0){
 	return x.size();
 }
 
 template<typename T>
-inline size_t recursiveIterableSize(const std::vector<T> &x, size_t delimiter_length=0){
+inline std::size_t recursiveIterableSize(const std::vector<T> &x, std::size_t delimiter_length=0){
   if (x.empty()) {
     return 0;
   }
-	size_t result = (x.size() - 1) * delimiter_length;
+	std::size_t result = (x.size() - 1) * delimiter_length;
 	for (const auto &y: x) {
 		result += recursiveIterableSize(y, delimiter_length);
 	}

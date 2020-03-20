@@ -26,7 +26,6 @@
   <a href="#why-should-you-care">Why Should You Care?</a> •
   <a href="#installation">Installation</a> •
   <a href="#usage">Usage</a> •
-  <a href="#roadmap">Roadmap</a> •
   <a href="#license">License</a>
 </p>
 
@@ -35,7 +34,7 @@
 ## Why Should You Care?
 Since there is already [FuzzyWuzzy](https://github.com/seatgeek/fuzzywuzzy) that implements the same string similarity calculations you might wonder why you would want to use RapidFuzz. There are mainly two reasons:
 1) It is MIT licensed so in contrast to FuzzyWuzzy it can be used in projects where you do not want to adopt the GPL License
-2) While FuzzyWuzzy only used python-Levenshtein for the levenshtein calculations and implements the other functionalities in Python, RapidFuzz's implementation is mostly written in C++ and on Top of this comes with a lot of Algorithmic improvements. This results in a 5-100x Speedup in String Matching.
+2) While FuzzyWuzzy only uses python-Levenshtein for the levenshtein calculations and implements the other functionalities in Python, RapidFuzz's implementation is mostly written in C++ and on Top of this comes with a lot of Algorithmic improvements. This results in a 5-100x Speedup in String Matching.
 
 
 ## Installation
@@ -60,31 +59,36 @@ it requires Python 3.5 or later and a C++ Compiler with C++17 support, which sho
 
 ### Partial Ratio
 ```console
->>> fuzz.partial_ratio("this is a test", "this is a test!")
-100
+> fuzz.partial_ratio("this is a test", "this is a test!")
+100.0
 ```
 
 ### Token Sort Ratio
+```console
+> fuzz.ratio("fuzzy wuzzy was a bear", "wuzzy fuzzy was a bear")
+90.90908813476562
+> fuzz.token_sort_ratio("fuzzy wuzzy was a bear", "wuzzy fuzzy was a bear")
+100.0
+```
 
 ### Token Set Ratio
+```console
+> fuzz.token_sort_ratio("fuzzy was a bear", "fuzzy fuzzy was a bear")
+83.8709716796875
+> fuzz.token_set_ratio("fuzzy was a bear", "fuzzy fuzzy was a bear")
+100.0
+```
 
 ### Process
 currently no string preprocessing is done so your responsible for removing unwanted characters and to lowercase the strings
 if thats what you want
 ```console
->>> choices = ["atlanta falcons", "new york jets", "new york giants", "dallas cowboys"]
->>> process.extract("new york jets", choices, limit=2)
+> choices = ["atlanta falcons", "new york jets", "new york giants", "dallas cowboys"]
+> process.extract("new york jets", choices, limit=2)
 [('new york jets', 100), ('new york giants', 78.57142639160156)]
->>> process.extractOne("cowboys", choices)
+> process.extractOne("cowboys", choices)
 ("dallas cowboys", 90)
 ```
-
-
-## Roadmap
-- [ ] build python wheels using manylinux container in CI
-- [ ] add more Unit tests and run them in CI
-- [ ] add more Benchmarks and run them in CI
-- [ ] add functions for string preprocessing (e.g. lowercase and remove everything but characters and numbers)
 
 ## License
 RapidFuzz is licensed under the MIT license since we believe that everyone should be able to use it without being forced to adopt our license. Thats why the library is based on an older version of fuzzywuzzy that was MIT licensed aswell.

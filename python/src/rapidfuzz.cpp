@@ -1,5 +1,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <string>
 #include "process.hpp"
 #include "fuzz.hpp"
 
@@ -19,6 +20,18 @@ PYBIND11_MODULE(_rapidfuzz_cpp, m) {
               py::arg("a"), py::arg("b"), py::arg("score_cutoff") = 0);
     
     mfuzz.def("partial_ratio", &fuzz::partial_ratio,
+              py::arg("a"), py::arg("b"), py::arg("score_cutoff") = 0);
+    
+    mfuzz.def("token_sort_ratio", &fuzz::token_sort_ratio,
+              py::arg("a"), py::arg("b"), py::arg("score_cutoff") = 0);
+    
+    mfuzz.def("partial_token_sort_ratio", &fuzz::partial_token_sort_ratio,
+              py::arg("a"), py::arg("b"), py::arg("score_cutoff") = 0);
+    
+    mfuzz.def("token_set_ratio", &fuzz::token_set_ratio,
+              py::arg("a"), py::arg("b"), py::arg("score_cutoff") = 0);
+    
+    mfuzz.def("partial_token_set_ratio", &fuzz::partial_token_set_ratio,
               py::arg("a"), py::arg("b"), py::arg("score_cutoff") = 0);
 
     mfuzz.def("QRatio", &fuzz::QRatio,

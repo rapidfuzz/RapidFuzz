@@ -19,7 +19,7 @@ TEST_CASE( "levenshtein works with string_views", "[string_view]" ) {
         REQUIRE( levenshtein::weighted_distance(swapped1, swapped2) == 2 ); 
         REQUIRE( levenshtein::weighted_distance(test, no_suffix2) == 2 );
         REQUIRE( levenshtein::weighted_distance(test, replace_all) == 8 );
-        REQUIRE( levenshtein::weighted_distance(test, replace_all, 3) == std::numeric_limits<size_t>::max() );
+        REQUIRE( levenshtein::weighted_distance(test, replace_all, 3) == std::numeric_limits<std::size_t>::max() );
     }
 
     SECTION( "weighted levenshtein calculates correct ratios" ) {
@@ -42,23 +42,23 @@ TEST_CASE( "levenshtein works with string_views", "[string_view]" ) {
 
         matrix_cmp(
             levenshtein::matrix(test, test),
-            {4, std::vector<size_t>{0}, 1, 1});
+            {4, std::vector<std::size_t>{0}, 1, 1});
         
         matrix_cmp(
             levenshtein::matrix(test, no_suffix),
-            {3, std::vector<size_t>{0, 1}, 2, 1});
+            {3, std::vector<std::size_t>{0, 1}, 2, 1});
         
         matrix_cmp(
             levenshtein::matrix(swapped1, swapped2),
-            {0, std::vector<size_t>{ 0, 1, 2, 1, 1, 1, 2, 1, 2 }, 3, 3});
+            {0, std::vector<std::size_t>{ 0, 1, 2, 1, 1, 1, 2, 1, 2 }, 3, 3});
         
         matrix_cmp(
             levenshtein::matrix(test, no_suffix2),
-            {3, std::vector<size_t>{0, 1, 1, 1}, 2, 2});
+            {3, std::vector<std::size_t>{0, 1, 1, 1}, 2, 2});
         
         matrix_cmp(
             levenshtein::matrix(test, replace_all),
-            {0, std::vector<size_t>{0, 1, 2, 3, 4, 1, 1, 2, 3, 4, 2, 2, 2, 3, 4, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4}, 5, 5});
+            {0, std::vector<std::size_t>{0, 1, 2, 3, 4, 1, 1, 2, 3, 4, 2, 2, 2, 3, 4, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4}, 5, 5});
     }
 
     SECTION( "levenshtein calculates correct levenshtein editops" ) {
@@ -76,15 +76,15 @@ TEST_CASE( "levenshtein works with string_views", "[string_view]" ) {
             REQUIRE(check_iter == check.end());
         };
 
-        auto ed_replace = [](size_t pos1, size_t pos2) {
+        auto ed_replace = [](std::size_t pos1, std::size_t pos2) {
             return levenshtein::EditOp{levenshtein::EditType::EditReplace, pos1, pos2};
         };
 
-        auto ed_delete = [](size_t pos1, size_t pos2) {
+        auto ed_delete = [](std::size_t pos1, std::size_t pos2) {
             return levenshtein::EditOp{levenshtein::EditType::EditDelete, pos1, pos2};
         };
 
-        auto ed_insert = [](size_t pos1, size_t pos2) {
+        auto ed_insert = [](std::size_t pos1, std::size_t pos2) {
             return levenshtein::EditOp{levenshtein::EditType::EditInsert, pos1, pos2};
         };
 
@@ -127,7 +127,7 @@ TEST_CASE( "levenshtein works with vectors of string_views", "[vector<string_vie
         REQUIRE( levenshtein::weighted_distance(test, insert_delete) == 2 ); 
         REQUIRE( levenshtein::weighted_distance(test, replace) == 2 );
         REQUIRE( levenshtein::weighted_distance(test, replace_all) == 16 );
-        REQUIRE( levenshtein::weighted_distance(test, replace_all, 7) == std::numeric_limits<size_t>::max() );
+        REQUIRE( levenshtein::weighted_distance(test, replace_all, 7) == std::numeric_limits<std::size_t>::max() );
         REQUIRE( levenshtein::weighted_distance(test, combined) == 0 );
         REQUIRE( levenshtein::weighted_distance(test, combined, 0.0, " ") == 1 );
     }
