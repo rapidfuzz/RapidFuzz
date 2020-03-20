@@ -4,16 +4,15 @@
 #include <algorithm>
 #include <iostream>
 
-inline std::vector<std::string_view> splitSV(std::string_view str,
-                                      std::string_view delims = " ") {
-  std::vector<std::string_view> output;
+inline std::vector<std::wstring_view> splitSV(std::wstring_view str) {
+  std::vector<std::wstring_view> output;
   // assume a word length of 6 + 1 whitespace
   output.reserve(str.size() / 7);
 
   for (auto first = str.data(), second = str.data(), last = first + str.size();
-       second != last && first != last; first = second + 1) {
-    second =
-        std::find_first_of(first, last, std::cbegin(delims), std::cend(delims));
+      second != last && first != last; first = second + 1) {
+
+    second = std::find_if(first, last, [](unsigned char c){ return std::iswspace(c); });
 
     if (first != second)
       output.emplace_back(first, second - first);
@@ -23,15 +22,15 @@ inline std::vector<std::string_view> splitSV(std::string_view str,
 }
 
 struct Decomposition {
-  std::vector<std::string_view> intersection;
-  std::vector<std::string_view> difference_ab;
-  std::vector<std::string_view> difference_ba;
+  std::vector<std::wstring_view> intersection;
+  std::vector<std::wstring_view> difference_ab;
+  std::vector<std::wstring_view> difference_ba;
 };
 
 
-inline Decomposition set_decomposition(std::vector<std::string_view> a, std::vector<std::string_view> b) {
-  std::vector<std::string_view> intersection;
-  std::vector<std::string_view> difference_ab;
+inline Decomposition set_decomposition(std::vector<std::wstring_view> a, std::vector<std::wstring_view> b) {
+  std::vector<std::wstring_view> intersection;
+  std::vector<std::wstring_view> difference_ab;
   a.erase(std::unique(a.begin(), a.end()), a.end());
   b.erase(std::unique(b.begin(), b.end()), b.end());
   
@@ -62,7 +61,7 @@ inline auto common_prefix_length(InputIterator1 first1, InputIterator1 last1,
 /**
  * Removes common prefix of two string views
  */
-inline std::size_t remove_common_prefix(std::string_view& a, std::string_view& b) {
+inline std::size_t remove_common_prefix(std::wstring_view& a, std::wstring_view& b) {
   auto prefix = common_prefix_length(a.begin(), a.end(), b.begin(), b.end());
 	a.remove_prefix(prefix);
 	b.remove_prefix(prefix);
@@ -72,7 +71,7 @@ inline std::size_t remove_common_prefix(std::string_view& a, std::string_view& b
 /**
  * Removes common suffix of two string views
  */
-inline std::size_t remove_common_suffix(std::string_view& a, std::string_view& b) {
+inline std::size_t remove_common_suffix(std::wstring_view& a, std::wstring_view& b) {
   auto suffix = common_prefix_length(a.rbegin(), a.rend(), b.rbegin(), b.rend());
 	a.remove_suffix(suffix);
   b.remove_suffix(suffix);
@@ -87,7 +86,7 @@ struct Affix {
 /**
  * Removes common affix of two string views
  */
-inline Affix remove_common_affix(std::string_view& a, std::string_view& b) {
+inline Affix remove_common_affix(std::wstring_view& a, std::wstring_view& b) {
 	return Affix {
     remove_common_prefix(a, b),
     remove_common_suffix(a, b)
@@ -140,16 +139,16 @@ inline std::size_t recursiveIterableSize(const std::vector<T> &x, std::size_t de
 }
 
 
-inline std::string sentence_join(const std::vector<std::string_view> &sentence) {
+inline std::wstring sentence_join(const std::vector<std::wstring_view> &sentence) {
   if (sentence.empty()) {
-    return "";
+    return L"";
   }
 
   auto sentence_iter = sentence.begin();
-  std::string result = std::string {*sentence_iter};
+  std::wstring result = std::wstring {*sentence_iter};
   ++sentence_iter;
   for (; sentence_iter != sentence.end(); ++sentence_iter) {
-    result.append(" ").append(std::string {*sentence_iter});
+    result.append(L" ").append(std::wstring {*sentence_iter});
   }
   return result;
 }

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 
-levenshtein::Matrix levenshtein::matrix(std::string_view sentence1, std::string_view sentence2) {
+levenshtein::Matrix levenshtein::matrix(std::wstring_view sentence1, std::wstring_view sentence2) {
   Affix affix = remove_common_affix(sentence1, sentence2);
 
   std::size_t matrix_columns = sentence1.length() + 1;
@@ -45,7 +45,7 @@ levenshtein::Matrix levenshtein::matrix(std::string_view sentence1, std::string_
 }
 
 
-std::vector<levenshtein::EditOp> levenshtein::editops(std::string_view sentence1, std::string_view sentence2) {
+std::vector<levenshtein::EditOp> levenshtein::editops(std::wstring_view sentence1, std::wstring_view sentence2) {
   auto lev_matrix = matrix(sentence1, sentence2);
   std::size_t matrix_columns = lev_matrix.matrix_columns;
   std::size_t matrix_rows = lev_matrix.matrix_rows;
@@ -106,7 +106,7 @@ std::vector<levenshtein::EditOp> levenshtein::editops(std::string_view sentence1
 }
 
 
-std::vector<levenshtein::MatchingBlock> levenshtein::matching_blocks(std::string_view sentence1, std::string_view sentence2) {
+std::vector<levenshtein::MatchingBlock> levenshtein::matching_blocks(std::wstring_view sentence1, std::wstring_view sentence2) {
   auto edit_ops = editops(sentence1, sentence2);
   std::size_t first_start = 0;
 	std::size_t second_start = 0;
@@ -144,8 +144,8 @@ std::vector<levenshtein::MatchingBlock> levenshtein::matching_blocks(std::string
 }
 
 
-void levenshtein_word_cmp(const char &letter_cmp, const std::vector<std::string_view> &words,
-                          std::vector<std::size_t> &cache, std::size_t current_cache, std::string_view delimiter="")
+void levenshtein_word_cmp(const char &letter_cmp, const std::vector<std::wstring_view> &words,
+                          std::vector<std::size_t> &cache, std::size_t current_cache, std::wstring_view delimiter=L"")
 {
   std::size_t result = current_cache + 1;
   auto cache_iter = cache.begin();
@@ -182,7 +182,7 @@ void levenshtein_word_cmp(const char &letter_cmp, const std::vector<std::string_
 }
 
 
-std::size_t levenshtein::weighted_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2, std::string_view delimiter) {
+std::size_t levenshtein::weighted_distance(std::vector<std::wstring_view> sentence1, std::vector<std::wstring_view> sentence2, std::wstring_view delimiter) {
   remove_common_affix(sentence1, sentence2);
   std::size_t sentence1_len = recursiveIterableSize(sentence1, delimiter.length());
   std::size_t sentence2_len = recursiveIterableSize(sentence2, delimiter.length());
@@ -227,9 +227,9 @@ std::size_t levenshtein::weighted_distance(std::vector<std::string_view> sentenc
 
 
 std::size_t levenshtein_word_cmp_limited(const char &letter_cmp,
-                          const std::vector<std::string_view> &words,
+                          const std::vector<std::wstring_view> &words,
                           std::vector<std::size_t> &cache, std::size_t current_cache,
-                          std::string_view delimiter="")
+                          std::wstring_view delimiter=L"")
 {
   std::size_t result = current_cache + 1;
   auto cache_iter = cache.begin();
@@ -272,7 +272,7 @@ std::size_t levenshtein_word_cmp_limited(const char &letter_cmp,
 }
 
 
-std::size_t levenshtein::weighted_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2, std::size_t max_distance, std::string_view delimiter) {
+std::size_t levenshtein::weighted_distance(std::vector<std::wstring_view> sentence1, std::vector<std::wstring_view> sentence2, std::size_t max_distance, std::wstring_view delimiter) {
   remove_common_affix(sentence1, sentence2);
   std::size_t sentence1_len = recursiveIterableSize(sentence1, delimiter.length());
   std::size_t sentence2_len = recursiveIterableSize(sentence2, delimiter.length());
@@ -325,7 +325,7 @@ std::size_t levenshtein::weighted_distance(std::vector<std::string_view> sentenc
 }
 
 
-std::size_t levenshtein::weighted_distance(std::string_view sentence1, std::string_view sentence2, std::string_view delimiter) {
+std::size_t levenshtein::weighted_distance(std::wstring_view sentence1, std::wstring_view sentence2, std::wstring_view delimiter) {
   remove_common_affix(sentence1, sentence2);
 
   if (sentence2.length() > sentence1.length()) std::swap(sentence1, sentence2);
@@ -362,7 +362,7 @@ std::size_t levenshtein::weighted_distance(std::string_view sentence1, std::stri
 }
 
 
-std::size_t levenshtein::weighted_distance(std::string_view sentence1, std::string_view sentence2, std::size_t max_distance, std::string_view delimiter) {
+std::size_t levenshtein::weighted_distance(std::wstring_view sentence1, std::wstring_view sentence2, std::size_t max_distance, std::wstring_view delimiter) {
   remove_common_affix(sentence1, sentence2);
 
   if (sentence2.size() > sentence1.size()) std::swap(sentence1, sentence2);

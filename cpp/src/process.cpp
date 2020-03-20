@@ -2,9 +2,9 @@
 #include "fuzz.hpp"
 #include <algorithm>
 
-std::vector<std::pair<std::string, float>>
-process::extract(std::string query, std::vector<std::string> choices, std::size_t limit, uint8_t score_cutoff) {
-  std::vector<std::pair<std::string, float>> results;
+std::vector<std::pair<std::wstring, float>>
+process::extract(std::wstring query, std::vector<std::wstring> choices, std::size_t limit, uint8_t score_cutoff) {
+  std::vector<std::pair<std::wstring, float>> results;
   results.reserve(choices.size());
 
   for (const auto &choice : choices) {
@@ -25,10 +25,10 @@ process::extract(std::string query, std::vector<std::string> choices, std::size_
 }
 
 
-std::optional<std::pair<std::string, float>>
-process::extract_one(std::string query, std::vector<std::string> choices, uint8_t score_cutoff) {
+std::optional<std::pair<std::wstring, float>>
+process::extract_one(std::wstring query, std::vector<std::wstring> choices, uint8_t score_cutoff) {
   float max_score = 0;
-  std::string result_choice;
+  std::wstring result_choice;
   for (const auto &choice : choices) {
     float score = fuzz::WRatio(query, choice, score_cutoff);
     if (score > score_cutoff) {

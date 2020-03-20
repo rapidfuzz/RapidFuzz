@@ -28,9 +28,9 @@ namespace levenshtein {
         std::size_t matrix_rows;
     };
 
-    Matrix matrix(std::string_view sentence1, std::string_view sentence2);
+    Matrix matrix(std::wstring_view sentence1, std::wstring_view sentence2);
 
-    std::vector<EditOp> editops(std::string_view sentence1, std::string_view sentence2);
+    std::vector<EditOp> editops(std::wstring_view sentence1, std::wstring_view sentence2);
 
     struct MatchingBlock {
     	std::size_t first_start;
@@ -40,7 +40,7 @@ namespace levenshtein {
         : first_start(first_start), second_start(second_start), len(len) {}
     };
 
-    std::vector<MatchingBlock> matching_blocks(std::string_view sentence1, std::string_view sentence2);
+    std::vector<MatchingBlock> matching_blocks(std::wstring_view sentence1, std::wstring_view sentence2);
 
 
     /**
@@ -55,10 +55,10 @@ namespace levenshtein {
      * Remove         | 1
      * Replace        | 2
      */
-    std::size_t weighted_distance(std::string_view sentence1, std::string_view sentence2,
-                             std::string_view delimiter="");
-    std::size_t weighted_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2,
-                             std::string_view delimiter="");
+    std::size_t weighted_distance(std::wstring_view sentence1, std::wstring_view sentence2,
+                             std::wstring_view delimiter=L"");
+    std::size_t weighted_distance(std::vector<std::wstring_view> sentence1, std::vector<std::wstring_view> sentence2,
+                             std::wstring_view delimiter=L"");
 
 
     /**
@@ -68,10 +68,10 @@ namespace levenshtein {
      * This range check makes the levenshtein calculation about 20% slower, so it should be only used
      * when it can usually exit early.
      */
-    std::size_t weighted_distance(std::string_view sentence1, std::string_view sentence2,
-                             std::size_t max_distance, std::string_view delimiter="");
-    std::size_t weighted_distance(std::vector<std::string_view> sentence1, std::vector<std::string_view> sentence2,
-                             std::size_t max_distance, std::string_view delimiter="");
+    std::size_t weighted_distance(std::wstring_view sentence1, std::wstring_view sentence2,
+                             std::size_t max_distance, std::wstring_view delimiter=L"");
+    std::size_t weighted_distance(std::vector<std::wstring_view> sentence1, std::vector<std::wstring_view> sentence2,
+                             std::size_t max_distance, std::wstring_view delimiter=L"");
 
     /**
     * Calculates a normalized score of the weighted Levenshtein algorithm between 0.0 and
@@ -79,7 +79,7 @@ namespace levenshtein {
     */
     template<typename Sentence1, typename Sentence2>
     float normalized_weighted_distance(const Sentence1 &sentence1, const Sentence2 &sentence2,
-                                       float min_ratio=0.0, std::string_view delimiter="")
+                                       float min_ratio=0.0, std::wstring_view delimiter=L"")
     {
         if (sentence1.empty() && sentence2.empty()) {
             return 1.0;
