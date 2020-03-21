@@ -1,18 +1,69 @@
 #pragma once
-#include <string_view>
+#include <string>
 #include <vector>
 #include <algorithm>
-#include <iostream>
+#include <tuple>
+#include <locale>
 
-inline std::vector<std::wstring_view> splitSV(std::wstring_view str) {
-  std::vector<std::wstring_view> output;
+
+template<typename CharT>
+using string_view_vec = std::vector<std::basic_string_view<CharT>>;
+
+template<typename CharT>
+using decomposed_set = std::tuple<string_view_vec<CharT>, string_view_vec<CharT>, string_view_vec<CharT>>;
+
+
+namespace detail {
+    template<typename T>
+    auto char_type(T const*) -> T;
+
+    template<typename T, typename U = typename T::const_iterator>
+    auto char_type(T const&) -> typename std::iterator_traits<U>::value_type;
+}
+
+template<typename T>
+using char_type = decltype(detail::char_type(std::declval<T const&>()));
+
+
+
+namespace utils {
+
+  template<
+      typename T, typename CharT = char_type<T>,
+      typename = std::enable_if_t<std::is_convertible<T const&, std::basic_string_view<CharT>>{}>
+  >
+  string_view_vec<CharT> splitSV(const T &str);
+
+
+  template<typename CharT>
+  decomposed_set<CharT> set_decomposition(string_view_vec<CharT> a, string_view_vec<CharT> b);
+
+
+  template<typename T, typename Delimiter=std::nullopt_t>
+  inline std::size_t joined_size(const T &x, const Delimiter &delimiter=std::nullopt);
+
+  template<typename T, typename Delimiter=std::nullopt_t>
+  inline std::size_t joined_size(const std::vector<T> &x, const Delimiter &delimiter=std::nullopt);
+
+
+  template<typename CharT>
+  std::basic_string<CharT> join(const string_view_vec<CharT> &sentence);
+}
+
+
+template<
+  typename T, typename CharT = char_type<T>,
+  typename = std::enable_if_t<std::is_convertible<T const&, std::basic_string_view<CharT>>{}>
+>
+string_view_vec<CharT> utils::splitSV(const T &str) {
+  string_view_vec<CharT> output;
   // assume a word length of 6 + 1 whitespace
   output.reserve(str.size() / 7);
 
-  for (auto first = str.data(), second = str.data(), last = first + str.size();
-      second != last && first != last; first = second + 1) {
-
-    second = std::find_if(first, last, [](unsigned char c){ return std::iswspace(c); });
+  auto first = str.data(), second = str.data(), last = first + str.size();
+  for (; second != last && first != last; first = second + 1) {
+    // maybe use localisation
+    second = std::find_if(first, last, [](unsigned char c){ return std::isspace(c); });
 
     if (first != second)
       output.emplace_back(first, second - first);
@@ -21,16 +72,11 @@ inline std::vector<std::wstring_view> splitSV(std::wstring_view str) {
   return output;
 }
 
-struct Decomposition {
-  std::vector<std::wstring_view> intersection;
-  std::vector<std::wstring_view> difference_ab;
-  std::vector<std::wstring_view> difference_ba;
-};
 
-
-inline Decomposition set_decomposition(std::vector<std::wstring_view> a, std::vector<std::wstring_view> b) {
-  std::vector<std::wstring_view> intersection;
-  std::vector<std::wstring_view> difference_ab;
+template<typename CharT>
+decomposed_set<CharT> utils::set_decomposition(string_view_vec<CharT> a, string_view_vec<CharT> b) {
+  string_view_vec<CharT> intersection;
+  string_view_vec<CharT> difference_ab;
   a.erase(std::unique(a.begin(), a.end()), a.end());
   b.erase(std::unique(b.begin(), b.end()), b.end());
   
@@ -44,7 +90,7 @@ inline Decomposition set_decomposition(std::vector<std::wstring_view> a, std::ve
     }
   }
 
-  return Decomposition{intersection, difference_ab, b};
+  return std::make_tuple(intersection, difference_ab, b);
 }
 
 
@@ -61,7 +107,8 @@ inline auto common_prefix_length(InputIterator1 first1, InputIterator1 last1,
 /**
  * Removes common prefix of two string views
  */
-inline std::size_t remove_common_prefix(std::wstring_view& a, std::wstring_view& b) {
+template<typename CharT>
+inline std::size_t remove_common_prefix(std::basic_string_view<CharT>& a, std::basic_string_view<CharT>& b) {
   auto prefix = common_prefix_length(a.begin(), a.end(), b.begin(), b.end());
 	a.remove_prefix(prefix);
 	b.remove_prefix(prefix);
@@ -71,7 +118,8 @@ inline std::size_t remove_common_prefix(std::wstring_view& a, std::wstring_view&
 /**
  * Removes common suffix of two string views
  */
-inline std::size_t remove_common_suffix(std::wstring_view& a, std::wstring_view& b) {
+template<typename CharT>
+inline std::size_t remove_common_suffix(std::basic_string_view<CharT>& a, std::basic_string_view<CharT>& b) {
   auto suffix = common_prefix_length(a.rbegin(), a.rend(), b.rbegin(), b.rend());
 	a.remove_suffix(suffix);
   b.remove_suffix(suffix);
@@ -86,7 +134,8 @@ struct Affix {
 /**
  * Removes common affix of two string views
  */
-inline Affix remove_common_affix(std::wstring_view& a, std::wstring_view& b) {
+template<typename CharT>
+inline Affix remove_common_affix(std::basic_string_view<CharT>& a, std::basic_string_view<CharT>& b) {
 	return Affix {
     remove_common_prefix(a, b),
     remove_common_suffix(a, b)
@@ -121,34 +170,47 @@ inline void remove_common_affix(std::vector<T> &a, std::vector<T> &b)
 }
 
 
-template<typename T>
-inline std::size_t recursiveIterableSize(const T &x, std::size_t delimiter_length=0){
+template<typename T, typename Delimiter=std::nullopt_t>
+inline std::size_t utils::joined_size(const T &x, const Delimiter &delimiter){
 	return x.size();
 }
 
-template<typename T>
-inline std::size_t recursiveIterableSize(const std::vector<T> &x, std::size_t delimiter_length=0){
+template<typename T, typename Delimiter=std::nullopt_t>
+inline std::size_t utils::joined_size(const std::vector<T> &x, const Delimiter &delimiter){
   if (x.empty()) {
     return 0;
   }
-	std::size_t result = (x.size() - 1) * delimiter_length;
+  std::size_t result;
+
+  if constexpr(!std::is_same<std::nullopt_t, Delimiter>::value) {
+    if constexpr(std::is_integral<Delimiter>::value) {
+      result = (x.size() - 1) * delimiter;
+    } else {
+      result = (x.size() - 1) * delimiter.size();
+    }
+  } else {
+      result = 0;
+  }
+
 	for (const auto &y: x) {
-		result += recursiveIterableSize(y, delimiter_length);
+		result += joined_size(y, delimiter);
 	}
 	return result;
 }
 
 
-inline std::wstring sentence_join(const std::vector<std::wstring_view> &sentence) {
+template<typename CharT>
+std::basic_string<CharT> utils::join(const string_view_vec<CharT> &sentence) {
   if (sentence.empty()) {
-    return L"";
+    return std::basic_string<CharT>();
   }
 
   auto sentence_iter = sentence.begin();
-  std::wstring result = std::wstring {*sentence_iter};
+  std::basic_string<CharT> result {*sentence_iter};
+  std::basic_string<CharT> whitespace {0x20};
   ++sentence_iter;
   for (; sentence_iter != sentence.end(); ++sentence_iter) {
-    result.append(L" ").append(std::wstring {*sentence_iter});
+    result.append(whitespace).append(std::basic_string<CharT> {*sentence_iter});
   }
   return result;
 }

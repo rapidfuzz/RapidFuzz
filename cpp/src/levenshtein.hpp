@@ -2,6 +2,7 @@
 #include <string_view>
 #include <vector>
 #include <cmath>
+#include <stdexcept>
 #include "utils.hpp"
 
 
@@ -28,9 +29,11 @@ namespace levenshtein {
         std::size_t matrix_rows;
     };
 
-    Matrix matrix(std::wstring_view sentence1, std::wstring_view sentence2);
+    template<typename CharT>
+    Matrix matrix(std::basic_string_view<CharT> sentence1, std::basic_string_view<CharT> sentence2);
 
-    std::vector<EditOp> editops(std::wstring_view sentence1, std::wstring_view sentence2);
+    template<typename CharT>
+    std::vector<EditOp> editops(std::basic_string_view<CharT> sentence1, std::basic_string_view<CharT> sentence2);
 
     struct MatchingBlock {
     	std::size_t first_start;
@@ -40,7 +43,8 @@ namespace levenshtein {
         : first_start(first_start), second_start(second_start), len(len) {}
     };
 
-    std::vector<MatchingBlock> matching_blocks(std::wstring_view sentence1, std::wstring_view sentence2);
+    template<typename CharT>
+    std::vector<MatchingBlock> matching_blocks(std::basic_string_view<CharT> sentence1, std::basic_string_view<CharT> sentence2);
 
 
     /**
@@ -89,8 +93,8 @@ namespace levenshtein {
           return 0.0;
         }
 
-        std::size_t sentence1_len = recursiveIterableSize(sentence1, delimiter.size());
-        std::size_t sentence2_len = recursiveIterableSize(sentence2, delimiter.size());
+        std::size_t sentence1_len = utils::joined_size(sentence1, delimiter);
+        std::size_t sentence2_len = utils::joined_size(sentence2, delimiter);
         std::size_t lensum = sentence1_len + sentence2_len;
 
         // constant time calculation to find a string ratio based on the string length
@@ -116,4 +120,151 @@ namespace levenshtein {
         }
         return 1.0 - (float)distance / (float)lensum;
     }
+}
+
+
+
+template<typename CharT>
+inline levenshtein::Matrix levenshtein::matrix(std::basic_string_view<CharT> sentence1, std::basic_string_view<CharT> sentence2) {
+  Affix affix = remove_common_affix(sentence1, sentence2);
+
+  std::size_t matrix_columns = sentence1.length() + 1;
+  std::size_t matrix_rows = sentence2.length() + 1;
+
+  std::vector<std::size_t> cache_matrix(matrix_rows*matrix_columns, 0);
+
+  for (std::size_t i = 0; i < matrix_rows; ++i) {
+    cache_matrix[i] = i;
+  }
+
+  for (std::size_t i = 1; i < matrix_columns; ++i) {
+    cache_matrix[matrix_rows*i] = i;
+  }
+
+  std::size_t sentence1_pos = 0;
+  for (const auto &char1 : sentence1) {
+    auto prev_cache = cache_matrix.begin() + sentence1_pos * matrix_rows;
+    auto result_cache = cache_matrix.begin() + (sentence1_pos + 1) * matrix_rows + 1;
+    std::size_t result = sentence1_pos + 1;
+    for (const auto &char2 : sentence2) {
+      result = std::min({
+        result + 1,
+        *prev_cache + (char1 != char2),
+        *(++prev_cache) + 1
+      });
+      *result_cache = result;
+      ++result_cache;
+    }
+    ++sentence1_pos;
+  }
+
+  return Matrix {
+      affix.prefix_len,
+      cache_matrix,
+      matrix_columns,
+      matrix_rows
+  };
+}
+
+
+template<typename CharT>
+inline std::vector<levenshtein::EditOp>
+levenshtein::editops(std::basic_string_view<CharT> sentence1, std::basic_string_view<CharT> sentence2) {
+  auto lev_matrix = matrix(sentence1, sentence2);
+  std::size_t matrix_columns = lev_matrix.matrix_columns;
+  std::size_t matrix_rows = lev_matrix.matrix_rows;
+  std::size_t prefix_len = lev_matrix.prefix_len;
+  auto matrix = lev_matrix.matrix;
+
+  std::vector<EditOp> ops;
+  ops.reserve(matrix[matrix_columns * matrix_rows - 1]);
+
+  std::size_t i = matrix_columns - 1;
+  std::size_t j = matrix_rows - 1;
+  std::size_t pos = matrix_columns * matrix_rows - 1;
+
+  auto is_replace = [=](std::size_t pos) {
+    return matrix[pos - matrix_rows - 1] < matrix[pos];
+  };
+  auto is_insert = [=](std::size_t pos) {
+    return matrix[pos - 1] < matrix[pos];
+  };
+  auto is_delete = [=](std::size_t pos) {
+    return matrix[pos - matrix_rows] < matrix[pos];
+  };
+  auto is_keep = [=](std::size_t pos) {
+    return matrix[pos - matrix_rows - 1] == matrix[pos];
+  };
+
+  while (i > 0 || j > 0) {
+    EditType op_type;
+
+    if (i && j && is_replace(pos)) {
+      op_type = EditType::EditReplace;
+      --i;
+      --j;
+      pos -= matrix_rows + 1;
+    } else if (j && is_insert(pos)) {
+      op_type = EditType::EditInsert;
+      --j;
+      --pos;
+    }  else if (i && is_delete(pos)) {
+      op_type = EditType::EditDelete;
+      --i;
+      pos -= matrix_rows;
+    } else if (is_keep(pos)) {
+      --i;
+      --j;
+      pos -= matrix_rows + 1;
+      // EditKeep does not has to be stored
+      continue;
+    } else {
+      throw std::logic_error("something went wrong extracting the editops from the levenshtein matrix");
+    }
+
+    ops.emplace_back(op_type, i + prefix_len, j + prefix_len);
+  }
+
+  std::reverse(ops.begin(), ops.end());
+  return ops;
+}
+
+
+template<typename CharT>
+inline std::vector<levenshtein::MatchingBlock>
+levenshtein::matching_blocks(std::basic_string_view<CharT> sentence1, std::basic_string_view<CharT> sentence2) {
+  auto edit_ops = editops(sentence1, sentence2);
+  std::size_t first_start = 0;
+	std::size_t second_start = 0;
+  std::vector<MatchingBlock> mblocks;
+
+  for (const auto &op : edit_ops) {
+    if (op.op_type == EditType::EditKeep) {
+      continue;
+    }
+
+    if (first_start < op.first_start || second_start < op.second_start) {
+      mblocks.emplace_back(first_start, second_start, op.first_start - first_start);
+      first_start = op.first_start;
+      second_start = op.second_start;
+    }
+
+    switch (op.op_type) {
+    case EditType::EditReplace:
+      first_start += 1;
+      second_start += 1;
+      break;
+    case EditType::EditDelete:
+      first_start += 1;
+      break;
+    case EditType::EditInsert:
+      second_start += 1;
+      break;
+    case EditType::EditKeep:
+      break;
+    }
+  }
+
+  mblocks.emplace_back(sentence1.length(), sentence2.length(), 0);
+  return mblocks;
 }
