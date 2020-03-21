@@ -33,7 +33,6 @@ ext_modules = [
         '_rapidfuzz_cpp',
         [
             'python/src/rapidfuzz.cpp',
-            'cpp/src/levenshtein.cpp',
             'cpp/src/fuzz.cpp',
             'cpp/src/process.cpp'
         ],

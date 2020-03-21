@@ -39,11 +39,11 @@ namespace utils {
   decomposed_set<CharT> set_decomposition(string_view_vec<CharT> a, string_view_vec<CharT> b);
 
 
-  template<typename T, typename Delimiter=std::nullopt_t>
-  inline std::size_t joined_size(const T &x, const Delimiter &delimiter=std::nullopt);
+  template<typename T>
+  std::size_t joined_size(const T &x);
 
-  template<typename T, typename Delimiter=std::nullopt_t>
-  inline std::size_t joined_size(const std::vector<T> &x, const Delimiter &delimiter=std::nullopt);
+  template<typename T>
+  std::size_t joined_size(const std::vector<T> &x);
 
 
   template<typename CharT>
@@ -170,31 +170,22 @@ inline void remove_common_affix(std::vector<T> &a, std::vector<T> &b)
 }
 
 
-template<typename T, typename Delimiter=std::nullopt_t>
-inline std::size_t utils::joined_size(const T &x, const Delimiter &delimiter){
+template<typename T>
+inline std::size_t utils::joined_size(const T &x){
 	return x.size();
 }
 
-template<typename T, typename Delimiter=std::nullopt_t>
-inline std::size_t utils::joined_size(const std::vector<T> &x, const Delimiter &delimiter){
+
+template<typename T>
+inline std::size_t utils::joined_size(const std::vector<T> &x){
   if (x.empty()) {
     return 0;
   }
-  std::size_t result;
 
-  if constexpr(!std::is_same<std::nullopt_t, Delimiter>::value) {
-    if constexpr(std::is_integral<Delimiter>::value) {
-      result = (x.size() - 1) * delimiter;
-    } else {
-      result = (x.size() - 1) * delimiter.size();
-    }
-  } else {
-      result = 0;
-  }
+  // there is a whitespace between each word
+  std::size_t result = x.size() - 1;
+	for (const auto &y: x) result += y.size();
 
-	for (const auto &y: x) {
-		result += joined_size(y, delimiter);
-	}
 	return result;
 }
 

@@ -3,8 +3,9 @@
 #include <vector>
 #include <cmath>
 #include <stdexcept>
+#include <optional>
+#include <numeric>
 #include "utils.hpp"
-
 
 namespace levenshtein {
     enum EditType {
@@ -47,6 +48,10 @@ namespace levenshtein {
     std::vector<MatchingBlock> matching_blocks(std::basic_string_view<CharT> sentence1, std::basic_string_view<CharT> sentence2);
 
 
+    template<typename MinDistanceCalc=std::false_type, typename CharT>
+    auto levenshtein_word_cmp(const CharT &letter_cmp, const string_view_vec<CharT> &words,
+                            std::vector<std::size_t> &cache, std::size_t current_cache);
+
     /**
      * Calculates the minimum number of insertions, deletions, and substitutions
      * required to change one sequence into the other according to Levenshtein.
@@ -58,68 +63,31 @@ namespace levenshtein {
      * Insert         | 1
      * Remove         | 1
      * Replace        | 2
+     * 
+     * @param sentence1 first sentence to match (can be either a string type or a vector of strings)
+     * @param sentence2 second sentence to match (can be either a string type or a vector of strings)
+     * @param max_distance maximum distance to exit early. When using this the calculation is about 20% slower
+     *                     so when it can not exit early it should not be used
+     * @return weighted levenshtein distance
      */
-    std::size_t weighted_distance(std::wstring_view sentence1, std::wstring_view sentence2,
-                             std::wstring_view delimiter=L"");
-    std::size_t weighted_distance(std::vector<std::wstring_view> sentence1, std::vector<std::wstring_view> sentence2,
-                             std::wstring_view delimiter=L"");
+    template<typename CharT, typename MinDistance=std::nullopt_t>
+    std::size_t weighted_distance_impl(std::basic_string_view<CharT> sentence1, std::basic_string_view<CharT> sentence2, MinDistance max_distance=std::nullopt);
 
+    template<typename MinDistance=std::nullopt_t>
+    std::size_t weighted_distance(std::wstring_view sentence1, std::wstring_view sentence2, MinDistance max_distance=std::nullopt);
 
-    /**
-     * These functions allow providing a max_distance parameter that can be used to exit early when the
-     * calculated levenshtein distance is at least as big as max_distance and will return the maximal
-     * possible value for std::size_t.
-     * This range check makes the levenshtein calculation about 20% slower, so it should be only used
-     * when it can usually exit early.
-     */
-    std::size_t weighted_distance(std::wstring_view sentence1, std::wstring_view sentence2,
-                             std::size_t max_distance, std::wstring_view delimiter=L"");
-    std::size_t weighted_distance(std::vector<std::wstring_view> sentence1, std::vector<std::wstring_view> sentence2,
-                             std::size_t max_distance, std::wstring_view delimiter=L"");
+    template<typename MinDistance=std::nullopt_t>
+    std::size_t weighted_distance(std::string_view sentence1, std::string_view sentence2, MinDistance max_distance=std::nullopt);
+
+    template<typename CharT, typename MinDistance=std::nullopt_t>
+    std::size_t weighted_distance(string_view_vec<CharT> sentence1, string_view_vec<CharT> sentence2, MinDistance max_distance=std::nullopt);
 
     /**
     * Calculates a normalized score of the weighted Levenshtein algorithm between 0.0 and
     * 1.0 (inclusive), where 1.0 means the sequences are the same.
     */
     template<typename Sentence1, typename Sentence2>
-    float normalized_weighted_distance(const Sentence1 &sentence1, const Sentence2 &sentence2,
-                                       float min_ratio=0.0, std::wstring_view delimiter=L"")
-    {
-        if (sentence1.empty() && sentence2.empty()) {
-            return 1.0;
-        }
-
-        if (sentence1.empty() || sentence1.empty()) {
-          return 0.0;
-        }
-
-        std::size_t sentence1_len = utils::joined_size(sentence1, delimiter);
-        std::size_t sentence2_len = utils::joined_size(sentence2, delimiter);
-        std::size_t lensum = sentence1_len + sentence2_len;
-
-        // constant time calculation to find a string ratio based on the string length
-        // so it can exit early without running any levenshtein calculations
-        std::size_t min_distance = (sentence1_len > sentence2_len)
-          ? sentence1_len - sentence2_len
-          : sentence2_len - sentence1_len;
-
-        float len_ratio = 1.0 - (float)min_distance / (float)lensum;
-        if (len_ratio < min_ratio) {
-          return 0.0;
-        }
-
-        // TODO: this needs more thoughts when to start using score cutoff, since it performs slower when it can not exit early
-        // -> just because it has a smaller ratio does not mean levenshtein can always exit early
-        // has to be tested with some more real examples
-        std::size_t distance = (min_ratio > 0.7)
-          ? weighted_distance(sentence1, sentence2, std::ceil((float)lensum - min_ratio * lensum), delimiter)
-          : weighted_distance(sentence1, sentence2, delimiter);
-
-        if (distance == std::numeric_limits<std::size_t>::max()) {
-            return 0.0;
-        }
-        return 1.0 - (float)distance / (float)lensum;
-    }
+    float normalized_weighted_distance(const Sentence1 &sentence1, const Sentence2 &sentence2, float min_ratio=0.0);
 }
 
 
@@ -267,4 +235,224 @@ levenshtein::matching_blocks(std::basic_string_view<CharT> sentence1, std::basic
 
   mblocks.emplace_back(sentence1.length(), sentence2.length(), 0);
   return mblocks;
+}
+
+
+template<typename MinDistanceCalc=std::false_type, typename CharT>
+inline auto levenshtein::levenshtein_word_cmp(const CharT &letter_cmp, const string_view_vec<CharT> &words,
+                          std::vector<std::size_t> &cache, std::size_t current_cache)
+{
+  std::size_t result = current_cache + 1;
+  auto cache_iter = cache.begin();
+  auto word_iter = words.begin();
+  auto min_distance = std::numeric_limits<std::size_t>::max();
+
+  auto charCmp = [&] (const CharT &char2) {
+	  if (letter_cmp == char2) { result = current_cache; }
+	  else { ++result; }
+
+    current_cache = *cache_iter;
+    if (result > current_cache + 1) {
+      result = current_cache + 1;
+    }
+
+    if constexpr(!std::is_same_v<std::false_type, MinDistanceCalc>) {
+      if (current_cache < min_distance) {
+        min_distance = current_cache;
+      }
+    }
+
+    *cache_iter = result;
+    ++cache_iter;
+  };
+
+  // no whitespace should be added in front of the first word
+  for (const auto &letter : *word_iter) {
+	  charCmp(letter);
+  }
+  ++word_iter;
+
+  for (; word_iter != words.end(); ++word_iter) {
+    // between every word there should be one whitespace
+    charCmp(0x20);
+
+    // check following word
+    for (const auto &letter : *word_iter) {
+	    charCmp(letter);
+    }
+  }
+
+  if constexpr(!std::is_same_v<std::false_type, MinDistanceCalc>) {
+    return min_distance;
+  }
+}
+
+
+template<typename CharT, typename MinDistance=std::nullopt_t>
+inline std::size_t levenshtein::weighted_distance(string_view_vec<CharT> sentence1, string_view_vec<CharT> sentence2,
+                                           MinDistance max_distance) {
+  remove_common_affix(sentence1, sentence2);
+  std::size_t sentence1_len = utils::joined_size(sentence1);
+  std::size_t sentence2_len = utils::joined_size(sentence2);
+
+  if (sentence2_len > sentence1_len) {
+    std::swap(sentence1, sentence2);
+    std::swap(sentence1_len, sentence2_len);
+  }
+
+  if (!sentence2_len) {
+    return sentence1_len;
+  }
+
+  std::vector<std::size_t> cache(sentence2_len);
+  std::iota(cache.begin(), cache.end(), 1);
+
+  std::size_t range1_pos = 0;
+  auto word_iter = sentence1.begin();
+
+  // no delimiter in front of first word
+  for (const auto &letter : *word_iter) {
+    if constexpr(!std::is_same_v<MinDistance, std::nullopt_t>) {
+      size_t min_distance = levenshtein_word_cmp<std::true_type>(letter, sentence2, cache, range1_pos);
+      if (min_distance > max_distance) {
+        return std::numeric_limits<std::size_t>::max();
+      }
+    } else {
+      levenshtein_word_cmp(letter, sentence2, cache, range1_pos);
+    }
+
+    ++range1_pos;
+  }
+
+  ++word_iter;
+  for (; word_iter != sentence1.end(); ++word_iter) {
+    // whitespace between words
+    if constexpr(!std::is_same_v<MinDistance, std::nullopt_t>) {
+      size_t min_distance = levenshtein_word_cmp<std::true_type>((CharT)0x20, sentence2, cache, range1_pos);
+      if (min_distance > max_distance) {
+        return std::numeric_limits<std::size_t>::max();
+      }
+    } else {
+      levenshtein_word_cmp((CharT)0x20, sentence2, cache, range1_pos);
+    }
+
+    ++range1_pos;
+
+    for (const auto &letter : *word_iter) {
+      if constexpr(!std::is_same_v<MinDistance, std::nullopt_t>) {
+        size_t min_distance = levenshtein_word_cmp<std::true_type>(letter, sentence2, cache, range1_pos);
+        if (min_distance > max_distance) {
+          return std::numeric_limits<std::size_t>::max();
+        }
+      } else {
+        levenshtein_word_cmp(letter, sentence2, cache, range1_pos);
+      }
+
+      ++range1_pos;
+    }
+  }
+
+  return cache.back();
+}
+
+
+template<typename MinDistance=std::nullopt_t>
+inline std::size_t levenshtein::weighted_distance(std::wstring_view sentence1, std::wstring_view sentence2, MinDistance max_distance) {
+  return weighted_distance_impl(sentence1, sentence2, max_distance);
+}
+
+
+template<typename MinDistance=std::nullopt_t>
+inline std::size_t levenshtein::weighted_distance(std::string_view sentence1, std::string_view sentence2, MinDistance max_distance) {
+  return weighted_distance_impl(sentence1, sentence2, max_distance);
+}
+
+
+template<typename CharT, typename MinDistance=std::nullopt_t>
+inline std::size_t levenshtein::weighted_distance_impl(std::basic_string_view<CharT> sentence1, std::basic_string_view<CharT> sentence2, MinDistance max_distance) {
+
+  remove_common_affix(sentence1, sentence2);
+
+  if (sentence2.size() > sentence1.size()) std::swap(sentence1, sentence2);
+
+  if (sentence2.empty()) {
+    return sentence1.length();
+  }
+
+  std::vector<std::size_t> cache(sentence2.length());
+  std::iota(cache.begin(), cache.end(), 1);
+
+  std::size_t sentence1_pos = 0;
+  for (const auto &char1 : sentence1) {
+    auto cache_iter = cache.begin();
+    std::size_t current_cache = sentence1_pos;
+    std::size_t result = sentence1_pos+1;
+    auto min_distance = std::numeric_limits<std::size_t>::max();
+    for (const auto &char2 : sentence2) {
+      if (char1 == char2) {
+        result = current_cache;
+      } else {
+        ++result;
+      }
+      current_cache = *cache_iter;
+      if (result > current_cache + 1) {
+        result = current_cache + 1;
+      }
+      if constexpr(!std::is_same_v<MinDistance, std::nullopt_t>) {
+        if (current_cache < min_distance) {
+          min_distance = current_cache;
+        }
+      }
+      *cache_iter = result;
+      ++cache_iter;
+    }
+    if constexpr(!std::is_same_v<MinDistance, std::nullopt_t>) {
+      if (min_distance > max_distance) {
+        return std::numeric_limits<std::size_t>::max();
+      }
+    }
+    ++sentence1_pos;
+  }
+  return cache.back();
+}
+
+
+
+template<typename Sentence1, typename Sentence2>
+inline float levenshtein::normalized_weighted_distance(const Sentence1 &sentence1, const Sentence2 &sentence2, float min_ratio)
+{
+  if (sentence1.empty() && sentence2.empty()) {
+    return 1.0;
+  }
+
+  if (sentence1.empty() || sentence1.empty()) {
+    return 0.0;
+  }
+
+  std::size_t sentence1_len = utils::joined_size(sentence1);
+  std::size_t sentence2_len = utils::joined_size(sentence2);
+  std::size_t lensum = sentence1_len + sentence2_len;
+
+  // constant time calculation to find a string ratio based on the string length
+  // so it can exit early without running any levenshtein calculations
+  std::size_t min_distance = (sentence1_len > sentence2_len)
+    ? sentence1_len - sentence2_len
+    : sentence2_len - sentence1_len;
+
+  float len_ratio = 1.0 - (float)min_distance / (float)lensum;
+  if (len_ratio < min_ratio) {
+    return 0.0;
+  }
+
+  // TODO: this needs more thoughts when to start using score cutoff, since it performs slower when it can not exit early
+  // -> just because it has a smaller ratio does not mean levenshtein can always exit early
+  // has to be tested with some more real examples
+  std::size_t distance = (min_ratio > 0.7)
+    ? weighted_distance(sentence1, sentence2, std::ceil((float)lensum - min_ratio * lensum))
+    : weighted_distance(sentence1, sentence2);
+
+  if (distance == std::numeric_limits<std::size_t>::max()) {
+      return 0.0;
+  }
+  return 1.0 - (float)distance / (float)lensum;
 }

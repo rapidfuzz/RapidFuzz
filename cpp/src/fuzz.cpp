@@ -61,9 +61,9 @@ percent _token_ratio(const std::wstring &a, const std::wstring &b, percent score
 
   auto [intersection, difference_ab, difference_ba] = utils::set_decomposition(tokens_a, tokens_b);
 
-  std::size_t ab_len = utils::joined_size(difference_ab, 1);
-  std::size_t ba_len = utils::joined_size(difference_ba, 1);
-  std::size_t double_prefix = 2 * utils::joined_size(intersection, 1);
+  std::size_t ab_len = utils::joined_size(difference_ab);
+  std::size_t ba_len = utils::joined_size(difference_ba);
+  std::size_t double_prefix = 2 * utils::joined_size(intersection);
 
   // fuzzywuzzy joined sect and ab/ba for comparisions
   // this is not done here as an optimisation, so the lengths get incremented by 1
@@ -76,11 +76,11 @@ percent _token_ratio(const std::wstring &a, const std::wstring &b, percent score
     ++ba_len;
   }
 
-  float result = levenshtein::normalized_weighted_distance(tokens_a, tokens_b, score_cutoff / 100, L" ");
+  float result = levenshtein::normalized_weighted_distance(tokens_a, tokens_b, score_cutoff / 100);
 
   // TODO: could add score cutoff aswell, but would need to copy most things from normalized_score_cutoff
   // as an alternative add another utility function to levenshtein for this case
-  std::size_t sect_distance = levenshtein::weighted_distance(difference_ab, difference_ba, L" ");
+  std::size_t sect_distance = levenshtein::weighted_distance(difference_ab, difference_ba);
   if (sect_distance != std::numeric_limits<std::size_t>::max()) {
     std::size_t lensum = ab_len + ba_len + double_prefix;
     result = std::max(result, (float)1.0 - sect_distance / (float)lensum);
@@ -184,9 +184,9 @@ percent fuzz::token_set_ratio(const std::wstring &a, const std::wstring &b, perc
 
   auto [intersection, difference_ab, difference_ba] = utils::set_decomposition(tokens_a, tokens_b);
 
-  std::size_t ab_len = utils::joined_size(difference_ab, 1);
-  std::size_t ba_len = utils::joined_size(difference_ba, 1);
-  std::size_t double_prefix = 2 * utils::joined_size(intersection, 1);
+  std::size_t ab_len = utils::joined_size(difference_ab);
+  std::size_t ba_len = utils::joined_size(difference_ba);
+  std::size_t double_prefix = 2 * utils::joined_size(intersection);
 
   // fuzzywuzzy joined sect and ab/ba for comparisions
   // this is not done here as an optimisation, so the lengths get incremented by 1
@@ -201,7 +201,7 @@ percent fuzz::token_set_ratio(const std::wstring &a, const std::wstring &b, perc
 
   // TODO: could add score cutoff aswell, but would need to copy most things from normalized_score_cutoff
   // as an alternative add another utility function to levenshtein for this case
-  std::size_t sect_distance = levenshtein::weighted_distance(difference_ab, difference_ba, L" ");
+  std::size_t sect_distance = levenshtein::weighted_distance(difference_ab, difference_ba);
   float result = 0;
   if (sect_distance != std::numeric_limits<std::size_t>::max()) {
     std::size_t lensum = ab_len + ba_len + double_prefix;
