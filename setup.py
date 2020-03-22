@@ -63,23 +63,11 @@ def has_flag(compiler, flagname):
     return True
 
 
-def cpp_flag(compiler):
-    """
-    Return the latest compiler flag supported by the compiler
-    (at least c++17)
-    """
-    if has_flag(compiler, '-std=c++2a'): return '-std=c++2a'
-    elif has_flag(compiler, '-std=c++17'): return '-std=c++17'
-
-    raise RuntimeError('Unsupported compiler -- at least C++17 support '
-                       'is needed!')
-
-
 class BuildExt(build_ext):
     """A custom build extension for adding compiler-specific options."""
     c_opts = {
-        'msvc': ['/EHsc', '-O3'],
-        'unix': ['-O3'],
+        'msvc': ['/EHsc', '/O2', '/std:c++17'],
+        'unix': ['-O3', '-std=c++17],
     }
     l_opts = {
         'msvc': [],
@@ -97,7 +85,6 @@ class BuildExt(build_ext):
         link_opts = self.l_opts.get(ct, [])
         if ct == 'unix':
             opts.append('-DVERSION_INFO="%s"' % self.distribution.get_version())
-            opts.append(cpp_flag(self.compiler))
             if has_flag(self.compiler, '-fvisibility=hidden'):
                 opts.append('-fvisibility=hidden')
         elif ct == 'msvc':
