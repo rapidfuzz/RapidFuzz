@@ -3,7 +3,7 @@
 #include <algorithm>
 
 std::vector<std::pair<std::wstring, float>>
-process::extract(std::wstring query, std::vector<std::wstring> choices, std::size_t limit, uint8_t score_cutoff) {
+process::extract(const std::wstring &query, const std::vector<std::wstring> &choices, std::size_t limit, uint8_t score_cutoff) {
   std::vector<std::pair<std::wstring, float>> results;
   results.reserve(choices.size());
 
@@ -26,7 +26,7 @@ process::extract(std::wstring query, std::vector<std::wstring> choices, std::siz
 
 
 std::optional<std::pair<std::wstring, float>>
-process::extract_one(std::wstring query, std::vector<std::wstring> choices, uint8_t score_cutoff) {
+process::extract_one(const std::wstring &query, const std::vector<std::wstring> &choices, uint8_t score_cutoff) {
   float max_score = 0;
   std::wstring result_choice;
   for (const auto &choice : choices) {

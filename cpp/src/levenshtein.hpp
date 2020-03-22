@@ -135,55 +135,56 @@ inline levenshtein::Matrix levenshtein::matrix(std::basic_string_view<CharT> sen
 }
 
 
+
 template<typename CharT>
 inline std::vector<levenshtein::EditOp>
 levenshtein::editops(std::basic_string_view<CharT> sentence1, std::basic_string_view<CharT> sentence2) {
-  auto lev_matrix = matrix(sentence1, sentence2);
-  std::size_t matrix_columns = lev_matrix.matrix_columns;
-  std::size_t matrix_rows = lev_matrix.matrix_rows;
-  std::size_t prefix_len = lev_matrix.prefix_len;
-  auto matrix = lev_matrix.matrix;
+  auto m = matrix(sentence1, sentence2);
+  std::size_t matrix_columns = m.matrix_columns;
+  std::size_t matrix_rows = m.matrix_rows;
+  std::size_t prefix_len = m.prefix_len;
+  auto lev_matrix = m.matrix;
 
   std::vector<EditOp> ops;
-  ops.reserve(matrix[matrix_columns * matrix_rows - 1]);
+  ops.reserve(lev_matrix[matrix_columns * matrix_rows - 1]);
 
   std::size_t i = matrix_columns - 1;
   std::size_t j = matrix_rows - 1;
-  std::size_t pos = matrix_columns * matrix_rows - 1;
+  std::size_t position = matrix_columns * matrix_rows - 1;
 
   auto is_replace = [=](std::size_t pos) {
-    return matrix[pos - matrix_rows - 1] < matrix[pos];
+    return lev_matrix[pos - matrix_rows - 1] < lev_matrix[pos];
   };
   auto is_insert = [=](std::size_t pos) {
-    return matrix[pos - 1] < matrix[pos];
+    return lev_matrix[pos - 1] < lev_matrix[pos];
   };
   auto is_delete = [=](std::size_t pos) {
-    return matrix[pos - matrix_rows] < matrix[pos];
+    return lev_matrix[pos - matrix_rows] < lev_matrix[pos];
   };
   auto is_keep = [=](std::size_t pos) {
-    return matrix[pos - matrix_rows - 1] == matrix[pos];
+    return lev_matrix[pos - matrix_rows - 1] == lev_matrix[pos];
   };
 
   while (i > 0 || j > 0) {
     EditType op_type;
 
-    if (i && j && is_replace(pos)) {
+    if (i && j && is_replace(position)) {
       op_type = EditType::EditReplace;
       --i;
       --j;
-      pos -= matrix_rows + 1;
-    } else if (j && is_insert(pos)) {
+      position -= matrix_rows + 1;
+    } else if (j && is_insert(position)) {
       op_type = EditType::EditInsert;
       --j;
-      --pos;
-    }  else if (i && is_delete(pos)) {
+      --position;
+    }  else if (i && is_delete(position)) {
       op_type = EditType::EditDelete;
       --i;
-      pos -= matrix_rows;
-    } else if (is_keep(pos)) {
+      position -= matrix_rows;
+    } else if (is_keep(position)) {
       --i;
       --j;
-      pos -= matrix_rows + 1;
+      position -= matrix_rows + 1;
       // EditKeep does not has to be stored
       continue;
     } else {
@@ -238,7 +239,7 @@ levenshtein::matching_blocks(std::basic_string_view<CharT> sentence1, std::basic
 }
 
 
-template<typename MinDistanceCalc=std::false_type, typename CharT>
+template<typename MinDistanceCalc, typename CharT>
 inline auto levenshtein::levenshtein_word_cmp(const CharT &letter_cmp, const string_view_vec<CharT> &words,
                           std::vector<std::size_t> &cache, std::size_t current_cache)
 {
@@ -288,9 +289,8 @@ inline auto levenshtein::levenshtein_word_cmp(const CharT &letter_cmp, const str
 }
 
 
-template<typename CharT, typename MinDistance=std::nullopt_t>
-inline std::size_t levenshtein::weighted_distance(string_view_vec<CharT> sentence1, string_view_vec<CharT> sentence2,
-                                           MinDistance max_distance) {
+template<typename CharT, typename MinDistance>
+inline std::size_t levenshtein::weighted_distance(string_view_vec<CharT> sentence1, string_view_vec<CharT> sentence2, MinDistance max_distance) {
   remove_common_affix(sentence1, sentence2);
   std::size_t sentence1_len = utils::joined_size(sentence1);
   std::size_t sentence2_len = utils::joined_size(sentence2);
@@ -356,19 +356,19 @@ inline std::size_t levenshtein::weighted_distance(string_view_vec<CharT> sentenc
 }
 
 
-template<typename MinDistance=std::nullopt_t>
+template<typename MinDistance>
 inline std::size_t levenshtein::weighted_distance(std::wstring_view sentence1, std::wstring_view sentence2, MinDistance max_distance) {
   return weighted_distance_impl(sentence1, sentence2, max_distance);
 }
 
 
-template<typename MinDistance=std::nullopt_t>
+template<typename MinDistance>
 inline std::size_t levenshtein::weighted_distance(std::string_view sentence1, std::string_view sentence2, MinDistance max_distance) {
   return weighted_distance_impl(sentence1, sentence2, max_distance);
 }
 
 
-template<typename CharT, typename MinDistance=std::nullopt_t>
+template<typename CharT, typename MinDistance>
 inline std::size_t levenshtein::weighted_distance_impl(std::basic_string_view<CharT> sentence1, std::basic_string_view<CharT> sentence2, MinDistance max_distance) {
 
   remove_common_affix(sentence1, sentence2);

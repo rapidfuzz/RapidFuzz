@@ -585,21 +585,21 @@ namespace Catch {
     /// it may not be null terminated.
     class StringRef {
     public:
-        using std::size_type = std::size_t;
+        using size_type = std::size_t;
         using const_iterator = const char*;
 
     private:
         static constexpr char const* const s_empty = "";
 
         char const* m_start = s_empty;
-        std::size_type m_size = 0;
+        size_type m_size = 0;
 
     public: // construction
         constexpr StringRef() noexcept = default;
 
         StringRef( char const* rawChars ) noexcept;
 
-        constexpr StringRef( char const* rawChars, std::size_type size ) noexcept
+        constexpr StringRef( char const* rawChars, size_type size ) noexcept
         :   m_start( rawChars ),
             m_size( size )
         {}
@@ -619,7 +619,7 @@ namespace Catch {
             return !(*this == other);
         }
 
-        auto operator[] ( std::size_type index ) const noexcept -> char {
+        auto operator[] ( size_type index ) const noexcept -> char {
             assert(index < m_size);
             return m_start[index];
         }
@@ -628,7 +628,7 @@ namespace Catch {
         constexpr auto empty() const noexcept -> bool {
             return m_size == 0;
         }
-        constexpr auto size() const noexcept -> std::size_type {
+        constexpr auto size() const noexcept -> size_type {
             return m_size;
         }
 
@@ -640,7 +640,7 @@ namespace Catch {
         // Returns a substring of [start, start + length).
         // If start + length > size(), then the substring is [start, size()).
         // If start > size(), then the substring is empty.
-        auto substr( std::size_type start, std::size_type length ) const noexcept -> StringRef;
+        auto substr( size_type start, size_type length ) const noexcept -> StringRef;
 
         // Returns the current start pointer. May not be null-terminated.
         auto data() const noexcept -> char const*;
@@ -2613,20 +2613,20 @@ namespace Catch {
     class Capturer {
         std::vector<MessageInfo> m_messages;
         IResultCapture& m_resultCapture = getResultCapture();
-        std::size_t m_captured = 0;
+        size_t m_captured = 0;
     public:
         Capturer( StringRef macroName, SourceLineInfo const& lineInfo, ResultWas::OfType resultType, StringRef names );
         ~Capturer();
 
-        void captureValue( std::size_t index, std::string const& value );
+        void captureValue( size_t index, std::string const& value );
 
         template<typename T>
-        void captureValues( std::size_t index, T const& value ) {
+        void captureValues( size_t index, T const& value ) {
             captureValue( index, Catch::Detail::stringify( value ) );
         }
 
         template<typename T, typename... Ts>
-        void captureValues( std::size_t index, T const& value, Ts const&... values ) {
+        void captureValues( size_t index, T const& value, Ts const&... values ) {
             captureValue( index, Catch::Detail::stringify(value) );
             captureValues( index+1, values... );
         }
@@ -3926,7 +3926,7 @@ namespace Generators {
             "FixedValuesGenerator does not support bools because of std::vector<bool>"
             "specialization, use SingleValue Generator instead.");
         std::vector<T> m_values;
-        std::size_t m_idx = 0;
+        size_t m_idx = 0;
     public:
         FixedValuesGenerator( std::initializer_list<T> values ) : m_values( values ) {}
 
@@ -3966,7 +3966,7 @@ namespace Generators {
     template<typename T>
     class Generators : public IGenerator<T> {
         std::vector<GeneratorWrapper<T>> m_generators;
-        std::size_t m_current = 0;
+        size_t m_current = 0;
 
         void populate(GeneratorWrapper<T>&& generator) {
             m_generators.emplace_back(std::move(generator));
@@ -4070,10 +4070,10 @@ namespace Generators {
     template <typename T>
     class TakeGenerator : public IGenerator<T> {
         GeneratorWrapper<T> m_generator;
-        std::size_t m_returned = 0;
-        std::size_t m_target;
+        size_t m_returned = 0;
+        size_t m_target;
     public:
-        TakeGenerator(std::size_t target, GeneratorWrapper<T>&& generator):
+        TakeGenerator(size_t target, GeneratorWrapper<T>&& generator):
             m_generator(std::move(generator)),
             m_target(target)
         {
@@ -4099,7 +4099,7 @@ namespace Generators {
     };
 
     template <typename T>
-    GeneratorWrapper<T> take(std::size_t target, GeneratorWrapper<T>&& generator) {
+    GeneratorWrapper<T> take(size_t target, GeneratorWrapper<T>&& generator) {
         return GeneratorWrapper<T>(pf::make_unique<TakeGenerator<T>>(target, std::move(generator)));
     }
 
@@ -4149,11 +4149,11 @@ namespace Generators {
             "because of std::vector<bool> specialization");
         GeneratorWrapper<T> m_generator;
         mutable std::vector<T> m_returned;
-        std::size_t m_target_repeats;
-        std::size_t m_current_repeat = 0;
-        std::size_t m_repeat_index = 0;
+        size_t m_target_repeats;
+        size_t m_current_repeat = 0;
+        size_t m_repeat_index = 0;
     public:
-        RepeatGenerator(std::size_t repeats, GeneratorWrapper<T>&& generator):
+        RepeatGenerator(size_t repeats, GeneratorWrapper<T>&& generator):
             m_generator(std::move(generator)),
             m_target_repeats(repeats)
         {
@@ -4194,7 +4194,7 @@ namespace Generators {
     };
 
     template <typename T>
-    GeneratorWrapper<T> repeat(std::size_t repeats, GeneratorWrapper<T>&& generator) {
+    GeneratorWrapper<T> repeat(size_t repeats, GeneratorWrapper<T>&& generator) {
         return GeneratorWrapper<T>(pf::make_unique<RepeatGenerator<T>>(repeats, std::move(generator)));
     }
 
@@ -4242,17 +4242,17 @@ namespace Generators {
     template <typename T>
     class ChunkGenerator final : public IGenerator<std::vector<T>> {
         std::vector<T> m_chunk;
-        std::size_t m_chunk_size;
+        size_t m_chunk_size;
         GeneratorWrapper<T> m_generator;
         bool m_used_up = false;
     public:
-        ChunkGenerator(std::size_t size, GeneratorWrapper<T> generator) :
+        ChunkGenerator(size_t size, GeneratorWrapper<T> generator) :
             m_chunk_size(size), m_generator(std::move(generator))
         {
             m_chunk.reserve(m_chunk_size);
             if (m_chunk_size != 0) {
                 m_chunk.push_back(m_generator.get());
-                for (std::size_t i = 1; i < m_chunk_size; ++i) {
+                for (size_t i = 1; i < m_chunk_size; ++i) {
                     if (!m_generator.next()) {
                         Catch::throw_exception(GeneratorException("Not enough values to initialize the first chunk"));
                     }
@@ -4265,7 +4265,7 @@ namespace Generators {
         }
         bool next() override {
             m_chunk.clear();
-            for (std::size_t idx = 0; idx < m_chunk_size; ++idx) {
+            for (size_t idx = 0; idx < m_chunk_size; ++idx) {
                 if (!m_generator.next()) {
                     return false;
                 }
@@ -4276,7 +4276,7 @@ namespace Generators {
     };
 
     template <typename T>
-    GeneratorWrapper<std::vector<T>> chunk(std::size_t size, GeneratorWrapper<T>&& generator) {
+    GeneratorWrapper<std::vector<T>> chunk(size_t size, GeneratorWrapper<T>&& generator) {
         return GeneratorWrapper<std::vector<T>>(
             pf::make_unique<ChunkGenerator<T>>(size, std::move(generator))
         );
@@ -4658,7 +4658,7 @@ class IteratorGenerator final : public IGenerator<T> {
         "because of std::vector<bool> specialization");
 
     std::vector<T> m_elems;
-    std::size_t m_current = 0;
+    size_t m_current = 0;
 public:
     template <typename InputIterator, typename InputSentinel>
     IteratorGenerator(InputIterator first, InputSentinel last):m_elems(first, last) {
@@ -8424,29 +8424,29 @@ class Columns;
 
 class Column {
 	std::vector<std::string> m_strings;
-	std::size_t m_width = CATCH_CLARA_TEXTFLOW_CONFIG_CONSOLE_WIDTH;
-	std::size_t m_indent = 0;
-	std::size_t m_initialIndent = std::string::npos;
+	size_t m_width = CATCH_CLARA_TEXTFLOW_CONFIG_CONSOLE_WIDTH;
+	size_t m_indent = 0;
+	size_t m_initialIndent = std::string::npos;
 
 public:
 	class iterator {
 		friend Column;
 
 		Column const& m_column;
-		std::size_t m_stringIndex = 0;
-		std::size_t m_pos = 0;
+		size_t m_stringIndex = 0;
+		size_t m_pos = 0;
 
-		std::size_t m_len = 0;
-		std::size_t m_end = 0;
+		size_t m_len = 0;
+		size_t m_end = 0;
 		bool m_suffix = false;
 
-		iterator(Column const& column, std::size_t stringIndex)
+		iterator(Column const& column, size_t stringIndex)
 			: m_column(column),
 			m_stringIndex(stringIndex) {}
 
 		auto line() const -> std::string const& { return m_column.m_strings[m_stringIndex]; }
 
-		auto isBoundary(std::size_t at) const -> bool {
+		auto isBoundary(size_t at) const -> bool {
 			assert(at > 0);
 			assert(at <= line().size());
 
@@ -8471,7 +8471,7 @@ public:
 			if (m_end < m_pos + width) {
 				m_len = m_end - m_pos;
 			} else {
-				std::size_t len = width;
+				size_t len = width;
 				while (len > 0 && !isBoundary(m_pos + len))
 					--len;
 				while (len > 0 && isWhitespace(line()[m_pos + len - 1]))
@@ -8486,7 +8486,7 @@ public:
 			}
 		}
 
-		auto indent() const -> std::size_t {
+		auto indent() const -> size_t {
 			auto initial = m_pos == 0 && m_stringIndex == 0 ? m_column.m_initialIndent : std::string::npos;
 			return initial == std::string::npos ? m_column.m_indent : initial;
 		}
@@ -8552,21 +8552,21 @@ public:
 
 	explicit Column(std::string const& text) { m_strings.push_back(text); }
 
-	auto width(std::size_t newWidth) -> Column& {
+	auto width(size_t newWidth) -> Column& {
 		assert(newWidth > 0);
 		m_width = newWidth;
 		return *this;
 	}
-	auto indent(std::size_t newIndent) -> Column& {
+	auto indent(size_t newIndent) -> Column& {
 		m_indent = newIndent;
 		return *this;
 	}
-	auto initialIndent(std::size_t newIndent) -> Column& {
+	auto initialIndent(size_t newIndent) -> Column& {
 		m_initialIndent = newIndent;
 		return *this;
 	}
 
-	auto width() const -> std::size_t { return m_width; }
+	auto width() const -> size_t { return m_width; }
 	auto begin() const -> iterator { return iterator(*this); }
 	auto end() const -> iterator { return { *this, m_strings.size() }; }
 
@@ -8594,7 +8594,7 @@ public:
 class Spacer : public Column {
 
 public:
-	explicit Spacer(std::size_t spaceWidth) : Column("") {
+	explicit Spacer(size_t spaceWidth) : Column("") {
 		width(spaceWidth);
 	}
 };
@@ -8610,7 +8610,7 @@ public:
 
 		std::vector<Column> const& m_columns;
 		std::vector<Column::iterator> m_iterators;
-		std::size_t m_activeIterators;
+		size_t m_activeIterators;
 
 		iterator(Columns const& columns, EndTag)
 			: m_columns(columns.m_columns),
@@ -8646,7 +8646,7 @@ public:
 		auto operator *() const -> std::string {
 			std::string row, padding;
 
-			for (std::size_t i = 0; i < m_columns.size(); ++i) {
+			for (size_t i = 0; i < m_columns.size(); ++i) {
 				auto width = m_columns[i].width();
 				if (m_iterators[i] != m_columns[i].end()) {
 					std::string col = *m_iterators[i];
@@ -8662,7 +8662,7 @@ public:
 			return row;
 		}
 		auto operator ++() -> iterator& {
-			for (std::size_t i = 0; i < m_columns.size(); ++i) {
+			for (size_t i = 0; i < m_columns.size(); ++i) {
 				if (m_iterators[i] != m_columns[i].end())
 					++m_iterators[i];
 			}
@@ -8817,7 +8817,7 @@ namespace detail {
                     } else {
                         if( next[1] != '-' && next.size() > 2 ) {
                             std::string opt = "- ";
-                            for( std::size_t i = 1; i < next.size(); ++i ) {
+                            for( size_t i = 1; i < next.size(); ++i ) {
                                 opt[1] = next[i];
                                 m_tokenBuffer.push_back( { TokenType::Option, opt } );
                             }
@@ -8842,7 +8842,7 @@ namespace detail {
             return !m_tokenBuffer.empty() || it != itEnd;
         }
 
-        auto count() const -> std::size_t { return m_tokenBuffer.size() + (itEnd - it); }
+        auto count() const -> size_t { return m_tokenBuffer.size() + (itEnd - it); }
 
         auto operator*() const -> Token {
             assert( !m_tokenBuffer.empty() );
@@ -9159,7 +9159,7 @@ namespace detail {
         virtual ~ParserBase() = default;
         virtual auto validate() const -> Result { return Result::ok(); }
         virtual auto parse( std::string const& exeName, TokenStream const &tokens) const -> InternalParseResult  = 0;
-        virtual auto cardinality() const -> std::size_t { return 1; }
+        virtual auto cardinality() const -> size_t { return 1; }
 
         auto parse( Args const &args ) const -> InternalParseResult {
             return parse( args.exeName(), TokenStream( args ) );
@@ -9219,7 +9219,7 @@ namespace detail {
             return m_optionality == Optionality::Optional;
         }
 
-        auto cardinality() const -> std::size_t override {
+        auto cardinality() const -> size_t override {
             if( m_ref->isContainer() )
                 return 0;
             else
@@ -9492,8 +9492,8 @@ namespace detail {
             }
 
             auto rows = getHelpColumns();
-            std::size_t consoleWidth = CATCH_CLARA_CONFIG_CONSOLE_WIDTH;
-            std::size_t optWidth = 0;
+            size_t consoleWidth = CATCH_CLARA_CONFIG_CONSOLE_WIDTH;
+            size_t optWidth = 0;
             for( auto const &cols : rows )
                 optWidth = (std::max)(optWidth, cols.left.size() + 2);
 
@@ -9533,15 +9533,15 @@ namespace detail {
 
             struct ParserInfo {
                 ParserBase const* parser = nullptr;
-                std::size_t count = 0;
+                size_t count = 0;
             };
-            const std::size_t totalParsers = m_options.size() + m_args.size();
+            const size_t totalParsers = m_options.size() + m_args.size();
             assert( totalParsers < 512 );
             // ParserInfo parseInfos[totalParsers]; // <-- this is what we really want to do
             ParserInfo parseInfos[512];
 
             {
-                std::size_t i = 0;
+                size_t i = 0;
                 for (auto const &opt : m_options) parseInfos[i++].parser = &opt;
                 for (auto const &arg : m_args) parseInfos[i++].parser = &arg;
             }
@@ -9552,7 +9552,7 @@ namespace detail {
             while( result.value().remainingTokens() ) {
                 bool tokenParsed = false;
 
-                for( std::size_t i = 0; i < totalParsers; ++i ) {
+                for( size_t i = 0; i < totalParsers; ++i ) {
                     auto&  parseInfo = parseInfos[i];
                     if( parseInfo.parser->cardinality() == 0 || parseInfo.count < parseInfo.parser->cardinality() ) {
                         result = parseInfo.parser->parse(exeName, result.value().remainingTokens());
@@ -10487,7 +10487,7 @@ namespace Catch {
             // In other words, it returns the Blue part of Bikeshed::Colour::Blue
             StringRef extractInstanceName(StringRef enumInstance) {
                 // Find last occurence of ":"
-                std::size_t name_start = enumInstance.size();
+                size_t name_start = enumInstance.size();
                 while (name_start > 0 && enumInstance[name_start - 1] != ':') {
                     --name_start;
                 }
@@ -11156,7 +11156,7 @@ namespace Catch {
     }
 
     std::string TagInfo::all() const {
-        std::size_t size = 0;
+        size_t size = 0;
         for (auto const& spelling : spellings) {
             // Add 2 for the brackes
             size += spelling.size() + 2;
@@ -11729,7 +11729,7 @@ namespace Catch {
     }
 
     Capturer::Capturer( StringRef macroName, SourceLineInfo const& lineInfo, ResultWas::OfType resultType, StringRef names ) {
-        auto trimmed = [&] (std::size_t start, std::size_t end) {
+        auto trimmed = [&] (size_t start, size_t end) {
             while (names[start] == ',' || isspace(names[start])) {
                 ++start;
             }
@@ -11738,7 +11738,7 @@ namespace Catch {
             }
             return names.substr(start, end - start + 1);
         };
-        auto skipq = [&] (std::size_t start, char quote) {
+        auto skipq = [&] (size_t start, char quote) {
             for (auto i = start + 1; i < names.size() ; ++i) {
                 if (names[i] == quote)
                     return i;
@@ -11748,9 +11748,9 @@ namespace Catch {
             CATCH_INTERNAL_ERROR("CAPTURE parsing encountered unmatched quote");
         };
 
-        std::size_t start = 0;
+        size_t start = 0;
         std::stack<char> openings;
-        for (std::size_t pos = 0; pos < names.size(); ++pos) {
+        for (size_t pos = 0; pos < names.size(); ++pos) {
             char c = names[pos];
             switch (c) {
             case '[':
@@ -11788,12 +11788,12 @@ namespace Catch {
     Capturer::~Capturer() {
         if ( !uncaught_exceptions() ){
             assert( m_captured == m_messages.size() );
-            for( std::size_t i = 0; i < m_captured; ++i  )
+            for( size_t i = 0; i < m_captured; ++i  )
                 m_resultCapture.popScopedMessage( m_messages[i] );
         }
     }
 
-    void Capturer::captureValue( std::size_t index, std::string const& value ) {
+    void Capturer::captureValue( size_t index, std::string const& value ) {
         assert( index < m_messages.size() );
         m_messages[index].message += value;
         m_resultCapture.pushScopedMessage( m_messages[index] );
@@ -13451,7 +13451,7 @@ namespace Catch {
 
             int sync() override {
                 if( pbase() != pptr() ) {
-                    m_writer( std::string( pbase(), static_cast<std::string::std::size_type>( pptr() - pbase() ) ) );
+                    m_writer( std::string( pbase(), static_cast<std::string::size_type>( pptr() - pbase() ) ) );
                     setp( pbase(), epptr() );
                 }
                 return 0;
@@ -13620,8 +13620,8 @@ namespace Catch {
     }
     std::string trim( std::string const& str ) {
         static char const* whitespaceChars = "\n\r\t ";
-        std::string::std::size_type start = str.find_first_not_of( whitespaceChars );
-        std::string::std::size_type end = str.find_last_not_of( whitespaceChars );
+        std::string::size_type start = str.find_first_not_of( whitespaceChars );
+        std::string::size_type end = str.find_last_not_of( whitespaceChars );
 
         return start != std::string::npos ? str.substr( start, 1+end-start ) : std::string();
     }
@@ -13630,9 +13630,9 @@ namespace Catch {
         const auto is_ws = [](char c) {
             return c == ' ' || c == '\t' || c == '\n' || c == '\r';
         };
-        std::size_t real_begin = 0;
+        size_t real_begin = 0;
         while (real_begin < ref.size() && is_ws(ref[real_begin])) { ++real_begin; }
-        std::size_t real_end = ref.size();
+        size_t real_end = ref.size();
         while (real_end > real_begin && is_ws(ref[real_end - 1])) { --real_end; }
 
         return ref.substr(real_begin, real_end - real_begin);
@@ -13690,7 +13690,7 @@ namespace Catch {
 
 namespace Catch {
     StringRef::StringRef( char const* rawChars ) noexcept
-    : StringRef( rawChars, static_cast<StringRef::std::size_type>(std::strlen(rawChars) ) )
+    : StringRef( rawChars, static_cast<StringRef::size_type>(std::strlen(rawChars) ) )
     {}
 
     auto StringRef::c_str() const -> char const* {
@@ -13701,7 +13701,7 @@ namespace Catch {
         return m_start;
     }
 
-    auto StringRef::substr( std::size_type start, std::size_type size ) const noexcept -> StringRef {
+    auto StringRef::substr( size_type start, size_type size ) const noexcept -> StringRef {
         if (start < m_size) {
             return StringRef(m_start + start, (std::min)(m_size - start, size));
         } else {
@@ -15124,7 +15124,7 @@ namespace Catch {
 
 namespace {
 
-    std::size_t trailingBytes(unsigned char c) {
+    size_t trailingBytes(unsigned char c) {
         if ((c & 0xE0) == 0xC0) {
             return 2;
         }

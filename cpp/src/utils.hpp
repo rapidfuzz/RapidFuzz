@@ -9,9 +9,6 @@
 template<typename CharT>
 using string_view_vec = std::vector<std::basic_string_view<CharT>>;
 
-template<typename CharT>
-using decomposed_set = std::tuple<string_view_vec<CharT>, string_view_vec<CharT>, string_view_vec<CharT>>;
-
 
 namespace detail {
     template<typename T>
@@ -25,6 +22,15 @@ template<typename T>
 using char_type = decltype(detail::char_type(std::declval<T const&>()));
 
 
+template<typename CharT>
+struct DecomposedSet {
+  string_view_vec<CharT> intersection;
+  string_view_vec<CharT> difference_ab;
+  string_view_vec<CharT> difference_ba;
+  DecomposedSet(string_view_vec<CharT> intersection, string_view_vec<CharT> difference_ab, string_view_vec<CharT> difference_ba)
+    : intersection(std::move(intersection)), difference_ab(std::move(difference_ab)), difference_ba(std::move(difference_ba)) {}
+};
+
 
 namespace utils {
 
@@ -36,7 +42,7 @@ namespace utils {
 
 
   template<typename CharT>
-  decomposed_set<CharT> set_decomposition(string_view_vec<CharT> a, string_view_vec<CharT> b);
+  DecomposedSet<CharT> set_decomposition(string_view_vec<CharT> a, string_view_vec<CharT> b);
 
 
   template<typename T>
@@ -51,10 +57,7 @@ namespace utils {
 }
 
 
-template<
-  typename T, typename CharT = char_type<T>,
-  typename = std::enable_if_t<std::is_convertible<T const&, std::basic_string_view<CharT>>{}>
->
+template<typename T, typename CharT, typename>
 string_view_vec<CharT> utils::splitSV(const T &str) {
   string_view_vec<CharT> output;
   // assume a word length of 6 + 1 whitespace
@@ -74,7 +77,7 @@ string_view_vec<CharT> utils::splitSV(const T &str) {
 
 
 template<typename CharT>
-decomposed_set<CharT> utils::set_decomposition(string_view_vec<CharT> a, string_view_vec<CharT> b) {
+DecomposedSet<CharT> utils::set_decomposition(string_view_vec<CharT> a, string_view_vec<CharT> b) {
   string_view_vec<CharT> intersection;
   string_view_vec<CharT> difference_ab;
   a.erase(std::unique(a.begin(), a.end()), a.end());
@@ -90,7 +93,7 @@ decomposed_set<CharT> utils::set_decomposition(string_view_vec<CharT> a, string_
     }
   }
 
-  return std::make_tuple(intersection, difference_ab, b);
+  return DecomposedSet{intersection, difference_ab, b};
 }
 
 
@@ -198,7 +201,7 @@ std::basic_string<CharT> utils::join(const string_view_vec<CharT> &sentence) {
 
   auto sentence_iter = sentence.begin();
   std::basic_string<CharT> result {*sentence_iter};
-  std::basic_string<CharT> whitespace {0x20};
+  const std::basic_string<CharT> whitespace {0x20};
   ++sentence_iter;
   for (; sentence_iter != sentence.end(); ++sentence_iter) {
     result.append(whitespace).append(std::basic_string<CharT> {*sentence_iter});

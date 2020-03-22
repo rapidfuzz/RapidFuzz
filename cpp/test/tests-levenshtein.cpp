@@ -128,17 +128,15 @@ TEST_CASE( "levenshtein works with vectors of string_views", "[vector<string_vie
         REQUIRE( levenshtein::weighted_distance(test, replace) == 2 );
         REQUIRE( levenshtein::weighted_distance(test, replace_all) == 16 );
         REQUIRE( levenshtein::weighted_distance(test, replace_all, 7) == std::numeric_limits<std::size_t>::max() );
-        REQUIRE( levenshtein::weighted_distance(test, combined) == 0 );
-        REQUIRE( levenshtein::weighted_distance(test, combined, 0.0, " ") == 1 );
+        REQUIRE( levenshtein::weighted_distance(test, combined) == 1 );
     }
 
     SECTION( "weighted levenshtein calculates correct ratio") {
         REQUIRE( levenshtein::normalized_weighted_distance(test, test) == 1.0 );
-        REQUIRE( levenshtein::normalized_weighted_distance(test, insert) == Approx(0.93).epsilon(0.01) );
-        REQUIRE( levenshtein::normalized_weighted_distance(test, insert_delete) == Approx(0.875).epsilon(0.01) ); 
-        REQUIRE( levenshtein::normalized_weighted_distance(test, replace) == Approx(0.875).epsilon(0.01) );
-        REQUIRE( levenshtein::normalized_weighted_distance(test, replace_all) == 0.0 );
-        REQUIRE( levenshtein::normalized_weighted_distance(test, combined) == 1.0 );
-        REQUIRE( levenshtein::normalized_weighted_distance(test, combined, 0.0, " ") == Approx(0.94).epsilon(0.01) );
+        REQUIRE( levenshtein::normalized_weighted_distance(test, insert) == Approx(0.941).epsilon(0.01) );
+        REQUIRE( levenshtein::normalized_weighted_distance(test, insert_delete) == Approx(0.89).epsilon(0.01) ); 
+        REQUIRE( levenshtein::normalized_weighted_distance(test, replace) == Approx(0.89).epsilon(0.01) );
+        REQUIRE( levenshtein::normalized_weighted_distance(test, replace_all) == Approx(0.111).epsilon(0.01) );
+        REQUIRE( levenshtein::normalized_weighted_distance(test, combined) == Approx(0.94).epsilon(0.01) );
     }
 }
