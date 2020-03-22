@@ -12,6 +12,7 @@ jobs:
     env:
       CIBW_SKIP: cp27-*
       CIBW_BEFORE_BUILD: "pip install pybind11"
+      MACOSX_DEPLOYMENT_TARGET: "10.14"
 
     steps:
     - uses: actions/checkout@v1
