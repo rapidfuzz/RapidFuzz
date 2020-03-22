@@ -34,6 +34,12 @@ PYBIND11_MODULE(_rapidfuzz_cpp, m) {
     mfuzz.def("partial_token_set_ratio", &fuzz::partial_token_set_ratio,
               py::arg("a"), py::arg("b"), py::arg("score_cutoff") = 0);
 
+    mfuzz.def("token_ratio", &fuzz::token_ratio,
+              py::arg("a"), py::arg("b"), py::arg("score_cutoff") = 0);
+    
+    mfuzz.def("partial_token_ratio", &fuzz::partial_token_ratio,
+              py::arg("a"), py::arg("b"), py::arg("score_cutoff") = 0);
+
     mfuzz.def("QRatio", &fuzz::QRatio,
               py::arg("a"), py::arg("b"), py::arg("score_cutoff") = 0);
 

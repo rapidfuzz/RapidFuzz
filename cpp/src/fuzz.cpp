@@ -49,7 +49,7 @@ percent fuzz::ratio(const std::wstring &a, const std::wstring &b, percent score_
 }
 
 
-percent _token_ratio(const std::wstring &a, const std::wstring &b, percent score_cutoff=0.0) {
+percent fuzz::token_ratio(const std::wstring &a, const std::wstring &b, percent score_cutoff) {
   if (score_cutoff >= 100) {
     return 0;
   }
@@ -104,7 +104,7 @@ percent _token_ratio(const std::wstring &a, const std::wstring &b, percent score
 
 // combines token_set and token_sort ratio from fuzzywuzzy so it is only required to
 // do a lot of operations once
-percent _partial_token_ratio(const std::wstring &a, const std::wstring &b, percent score_cutoff=0.0) {
+percent fuzz::partial_token_ratio(const std::wstring &a, const std::wstring &b, percent score_cutoff) {
   if (score_cutoff >= 100) {
     return 0;
   }
@@ -132,7 +132,7 @@ percent _partial_token_ratio(const std::wstring &a, const std::wstring &b, perce
     return 100;
   }
 
-  percent result = fuzz::partial_ratio(utils::join(tokens_a), utils::join(tokens_b), score_cutoff);
+  percent result = partial_ratio(utils::join(tokens_a), utils::join(tokens_b), score_cutoff);
   // do not calculate the same partial_ratio twice
   if (tokens_a.size() == unique_a.size() && tokens_b.size() == unique_b.size()) {
     return result;
@@ -141,7 +141,7 @@ percent _partial_token_ratio(const std::wstring &a, const std::wstring &b, perce
   score_cutoff = std::max(score_cutoff, result);
   return std::max(
     result,
-    fuzz::partial_ratio(utils::join(difference_ab), utils::join(difference_ba), score_cutoff)
+    partial_ratio(utils::join(difference_ab), utils::join(difference_ba), score_cutoff)
   );
 }
 
@@ -278,7 +278,7 @@ percent fuzz::WRatio(const std::wstring &a, const std::wstring &b, percent score
 
   if (len_ratio < 1.5) {
     score_cutoff = std::max(score_cutoff, sratio);
-    return std::max(sratio, _token_ratio(a, b, score_cutoff/UNBASE_SCALE) * UNBASE_SCALE);
+    return std::max(sratio, token_ratio(a, b, score_cutoff/UNBASE_SCALE) * UNBASE_SCALE);
   }
 
   float partial_scale = (len_ratio < 8.0) ? 0.9 : 0.6;
@@ -287,5 +287,5 @@ percent fuzz::WRatio(const std::wstring &a, const std::wstring &b, percent score
   sratio = std::max(sratio, partial_ratio(a, b, score_cutoff) * partial_scale);
 
   score_cutoff = std::max(score_cutoff, sratio)/UNBASE_SCALE;
-  return std::max(sratio, _partial_token_ratio(a, b, score_cutoff) * UNBASE_SCALE * partial_scale );
+  return std::max(sratio, partial_token_ratio(a, b, score_cutoff) * UNBASE_SCALE * partial_scale );
 }
