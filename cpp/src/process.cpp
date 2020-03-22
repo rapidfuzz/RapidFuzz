@@ -26,7 +26,7 @@ process::extract(const std::wstring &query, const std::vector<std::wstring> &cho
 
 
 std::optional<std::pair<std::wstring, float>>
-process::extract_one(const std::wstring &query, const std::vector<std::wstring> &choices, uint8_t score_cutoff) {
+process::extractOne(const std::wstring &query, const std::vector<std::wstring> &choices, uint8_t score_cutoff) {
   float max_score = 0;
   std::wstring result_choice;
   for (const auto &choice : choices) {

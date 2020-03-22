@@ -8,7 +8,7 @@ namespace process {
   extract(const std::wstring &query, const std::vector<std::wstring> &choices, std::size_t limit = 5, uint8_t score_cutoff = 0);
 
   std::optional<std::pair<std::wstring, float>>
-  extract_one(const std::wstring &query, const std::vector<std::wstring> &choices, uint8_t score_cutoff = 0);
+  extractOne(const std::wstring &query, const std::vector<std::wstring> &choices, uint8_t score_cutoff = 0);
 }
 
 

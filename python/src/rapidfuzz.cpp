@@ -13,7 +13,7 @@ PYBIND11_MODULE(_rapidfuzz_cpp, m) {
 
     auto mprocess = m.def_submodule("process");
     mprocess.def("extract", &process::extract);
-    mprocess.def("extractOne", &process::extract_one);
+    mprocess.def("extractOne", &process::extractOne);
 
     auto mfuzz = m.def_submodule("fuzz");
     mfuzz.def("ratio", &fuzz::ratio,

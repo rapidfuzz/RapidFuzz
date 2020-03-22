@@ -1,7 +1,6 @@
 #include <benchmark/benchmark.h>
 #include "../src/levenshtein.hpp"
-#include "../src/utils.hpp"
-#include <string_view>
+#include <string>
 #include <vector>
 
 // Define another benchmark
