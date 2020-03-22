@@ -27,19 +27,19 @@ process::extract(const std::wstring &query, const std::vector<std::wstring> &cho
 
 std::optional<std::pair<std::wstring, float>>
 process::extractOne(const std::wstring &query, const std::vector<std::wstring> &choices, uint8_t score_cutoff) {
-  float max_score = 0;
+  bool match_found = false;
   std::wstring result_choice;
   for (const auto &choice : choices) {
     float score = fuzz::WRatio(query, choice, score_cutoff);
     if (score > score_cutoff) {
       score_cutoff = score;
-      max_score = score;
+      match_found = true;
       result_choice = choice;
     }
   }
   
-  if (!max_score) {
+  if (!match_found) {
     return {};
   }
-  return std::make_pair(result_choice, max_score);
+  return std::make_pair(result_choice, score_cutoff);
 }

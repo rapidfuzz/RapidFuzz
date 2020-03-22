@@ -23,7 +23,7 @@
 </p>
 
 <p align="center">
-  <a href="#why-should-you-care">Why Should You Care?</a> •
+  <a href="#description">Description</a> •
   <a href="#installation">Installation</a> •
   <a href="#usage">Usage</a> •
   <a href="#license">License</a>
@@ -31,10 +31,10 @@
 
 ---
 
-## Why Should You Care?
-Since there is already [FuzzyWuzzy](https://github.com/seatgeek/fuzzywuzzy) that implements the same string similarity calculations you might wonder why you would want to use RapidFuzz. There are mainly two reasons:
-1) It is MIT licensed so in contrast to FuzzyWuzzy it can be used in projects where you do not want to adopt the GPL License
-2) While FuzzyWuzzy only uses python-Levenshtein for the levenshtein calculations and implements the other functionalities in Python, RapidFuzz's implementation is mostly written in C++ and on Top of this comes with a lot of Algorithmic improvements. This results in a 5-100x Speedup in String Matching.
+## Description
+RapidFuzz is a fast string matching library for Python and C++, which is using the string similarity calculations from [FuzzyWuzzy](https://github.com/seatgeek/fuzzywuzzy). However there are two aspects that set RapidFuzz apart from FuzzyWuzzy:
+1) It is MIT licensed so it can be used whichever License you might want to choose for your project, while your forced to adopt the GPLv2 license when using FuzzyWuzzy
+2) It is mostly written in C++ and on top of this comes with a lot of Algorithmic improvements to make string matching even faster, while still providing the same results. These changes result in a 5-100x Speedup in String Matching. More details on benchmark results can be found [here](https://github.com/rhasspy/rapidfuzz/blob/master/Benchmarks.md)
 
 
 ## Installation
@@ -80,10 +80,8 @@ it requires Python 3.5 or later and a C++ Compiler with C++17 support, which sho
 ```
 
 ### Process
-currently no string preprocessing is done so your responsible for removing unwanted characters and to lowercase the strings
-if thats what you want
 ```console
-> choices = ["atlanta falcons", "new york jets", "new york giants", "dallas cowboys"]
+> choices = ["Atlanta Falcons", "New York Jets", "New York Giants", "Dallas Cowboys"]
 > process.extract("new york jets", choices, limit=2)
 [('new york jets', 100), ('new york giants', 78.57142639160156)]
 > process.extractOne("cowboys", choices)

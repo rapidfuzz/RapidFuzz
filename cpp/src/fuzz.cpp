@@ -146,10 +146,18 @@ percent fuzz::partial_token_ratio(const std::wstring &a, const std::wstring &b, 
 }
 
 
-percent _token_sort(const std::wstring &a, const std::wstring &b, bool partial, percent score_cutoff=0.0) {
+percent _token_sort(std::wstring a, std::wstring b, bool partial, percent score_cutoff=0.0) {
   if (score_cutoff >= 100) {
     return 0;
   }
+
+  std::for_each(a.begin(), a.end(), [](wchar_t & c){
+	  c = ::tolower(c);
+  });
+
+  std::for_each(b.begin(), b.end(), [](wchar_t & c){
+	  c = ::tolower(c);
+  });
 
   std::vector<std::wstring_view> tokens_a = utils::splitSV(a);
   std::sort(tokens_a.begin(), tokens_a.end());
@@ -172,10 +180,18 @@ percent fuzz::partial_token_sort_ratio(const std::wstring &a, const std::wstring
 }
 
 
-percent fuzz::token_set_ratio(const std::wstring &a, const std::wstring &b, percent score_cutoff) {
+percent fuzz::token_set_ratio(std::wstring a, std::wstring b, percent score_cutoff) {
   if (score_cutoff >= 100) {
     return 0;
   }
+
+  std::for_each(a.begin(), a.end(), [](wchar_t & c){
+	  c = ::tolower(c);
+  });
+
+  std::for_each(b.begin(), b.end(), [](wchar_t & c){
+	  c = ::tolower(c);
+  });
 
   std::vector<std::wstring_view> tokens_a = utils::splitSV(a);
   std::sort(tokens_a.begin(), tokens_a.end());
@@ -224,10 +240,18 @@ percent fuzz::token_set_ratio(const std::wstring &a, const std::wstring &b, perc
 }
 
 
-percent fuzz::partial_token_set_ratio(const std::wstring &a, const std::wstring &b, percent score_cutoff) {
+percent fuzz::partial_token_set_ratio(std::wstring a, std::wstring b, percent score_cutoff) {
   if (score_cutoff >= 100) {
     return 0;
   }
+
+  std::for_each(a.begin(), a.end(), [](wchar_t & c){
+	  c = ::tolower(c);
+  });
+
+  std::for_each(b.begin(), b.end(), [](wchar_t & c){
+	  c = ::tolower(c);
+  });
 
   std::vector<std::wstring_view> tokens_a = utils::splitSV(a);
   std::sort(tokens_a.begin(), tokens_a.end());
@@ -254,19 +278,35 @@ percent fuzz::partial_token_set_ratio(const std::wstring &a, const std::wstring 
 }
 
 
-percent fuzz::QRatio(const std::wstring &a, const std::wstring &b, percent score_cutoff) {
+percent fuzz::QRatio(std::wstring a, std::wstring b, percent score_cutoff) {
   if (score_cutoff >= 100) {
     return 0;
   }
+
+  std::for_each(a.begin(), a.end(), [](wchar_t & c){
+	  c = ::tolower(c);
+  });
+
+  std::for_each(b.begin(), b.end(), [](wchar_t & c){
+	  c = ::tolower(c);
+  });
 
   return ratio(a, b, score_cutoff);
 }
 
 
-percent fuzz::WRatio(const std::wstring &a, const std::wstring &b, percent score_cutoff) {
+percent fuzz::WRatio(std::wstring a, std::wstring b, percent score_cutoff) {
   if (score_cutoff >= 100) {
     return 0;
   }
+
+  std::for_each(a.begin(), a.end(), [](wchar_t & c){
+	  c = ::tolower(c);
+  });
+
+  std::for_each(b.begin(), b.end(), [](wchar_t & c){
+	  c = ::tolower(c);
+  });
 
   const float UNBASE_SCALE = 0.95;
 
