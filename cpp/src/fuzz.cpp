@@ -5,6 +5,7 @@
 #include <cmath>
 #include <vector>
 #include <limits>
+#include <iterator>
 
 
 percent fuzz::partial_ratio(const std::wstring &a, const std::wstring &b, percent score_cutoff) {
