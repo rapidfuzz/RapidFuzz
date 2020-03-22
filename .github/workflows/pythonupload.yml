@@ -11,7 +11,7 @@ jobs:
       matrix:
         os: [ubuntu-18.04, windows-latest, macos-latest]
     env:
-      CIBW_SKIP: cp27-* pp27-* pp36-win32
+      CIBW_SKIP: cp27-* pp*
       CIBW_BEFORE_BUILD: "pip install pybind11"
       MACOSX_DEPLOYMENT_TARGET: "10.15"
 
