@@ -42,7 +42,10 @@ RapidFuzz can be installed using [pip](https://pypi.org/project/rapidfuzz/)
 ```bash
 $ pip install rapidfuzz
 ```
-it requires Python 3.5 or later and a C++ Compiler with C++17 support, which should be given on all current systems
+
+We currently have pre-built binaries (wheels) for `RapidFuzz` and its dependencies for MacOS (10.14 and later), Linux x86_64 and Windows.
+
+For any other architecture/os `RapidFuzz` can be installed from the source distribution. To do so, a C++17 capable compiler must be installed before running the `pip install rapidfuzz` command. While Linux and MacOs usually come with a compiler it is required to install [C++-Buildtools](https://visualstudio.microsoft.com/visual-cpp-build-tools) on Windows.
 
 
 ## Usage

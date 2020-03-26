@@ -1,0 +1,12 @@
+## [0.3.0] - 2020 Mar 26
+
+### Changed
+
+- When using score_cutoff there is now a guarantee that it returns 0 when result < score_cutoff
+- each function has now a preprocess argument to specify whether strings should be preprocessed
+- the default preprocessing does now lower case and trim
+- extract and extractOne accept a custom processor method instead of utils.default_processor now
+
+### Removed
+
+- QRatio was removed since it does now exactly the same as normal ratio

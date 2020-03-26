@@ -5,6 +5,7 @@
 #include <tuple>
 #include <locale>
 
+using percent = float;
 
 template<typename CharT>
 using string_view_vec = std::vector<std::basic_string_view<CharT>>;
@@ -54,6 +55,13 @@ namespace utils {
 
   template<typename CharT>
   std::basic_string<CharT> join(const string_view_vec<CharT> &sentence);
+
+  percent result_cutoff(float result, percent score_cutoff);
+
+  void trim(std::wstring &s);
+  void lower_case(std::wstring &s);
+
+  std::wstring default_process(std::wstring s);
 }
 
 
@@ -207,4 +215,45 @@ std::basic_string<CharT> utils::join(const string_view_vec<CharT> &sentence) {
     result.append(whitespace).append(std::basic_string<CharT> {*sentence_iter});
   }
   return result;
+}
+
+
+inline percent utils::result_cutoff(float result, percent score_cutoff) {
+  return (result >= score_cutoff) ? result : 0;
+}
+
+
+// trim from start (in place)
+inline void ltrim(std::wstring &s) {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {
+        return !std::isspace(ch);
+    }));
+}
+
+
+// trim from end (in place)
+inline void rtrim(std::wstring &s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) {
+        return !std::isspace(ch);
+    }).base(), s.end());
+}
+
+
+// trim from both ends (in place)
+inline void utils::trim(std::wstring &s) {
+    ltrim(s);
+    rtrim(s);
+}
+
+
+inline void utils::lower_case(std::wstring &s) {
+   std::for_each(s.begin(), s.end(), [](wchar_t & c){
+	  c = ::tolower(c);
+  });
+}
+
+inline std::wstring utils::default_process(std::wstring s) {
+  trim(s);
+  lower_case(s);
+  return s;
 }
