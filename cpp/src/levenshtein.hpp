@@ -289,8 +289,8 @@ inline auto levenshtein::levenshtein_word_cmp(const CharT &letter_cmp, const str
 }
 
 
-template<typename CharT, typename MinDistance>
-inline std::size_t levenshtein::weighted_distance(string_view_vec<CharT> sentence1, string_view_vec<CharT> sentence2, MinDistance max_distance) {
+template<typename CharT, typename MaxDistance>
+inline std::size_t levenshtein::weighted_distance(string_view_vec<CharT> sentence1, string_view_vec<CharT> sentence2, MaxDistance max_distance) {
   remove_common_affix(sentence1, sentence2);
   std::size_t sentence1_len = utils::joined_size(sentence1);
   std::size_t sentence2_len = utils::joined_size(sentence2);
@@ -312,7 +312,7 @@ inline std::size_t levenshtein::weighted_distance(string_view_vec<CharT> sentenc
 
   // no delimiter in front of first word
   for (const auto &letter : *word_iter) {
-    if constexpr(!std::is_same_v<MinDistance, std::nullopt_t>) {
+    if constexpr(!std::is_same_v<MaxDistance, std::nullopt_t>) {
       size_t min_distance = levenshtein_word_cmp<std::true_type>(letter, sentence2, cache, range1_pos);
       if (min_distance > max_distance) {
         return std::numeric_limits<std::size_t>::max();
@@ -327,7 +327,7 @@ inline std::size_t levenshtein::weighted_distance(string_view_vec<CharT> sentenc
   ++word_iter;
   for (; word_iter != sentence1.end(); ++word_iter) {
     // whitespace between words
-    if constexpr(!std::is_same_v<MinDistance, std::nullopt_t>) {
+    if constexpr(!std::is_same_v<MaxDistance, std::nullopt_t>) {
       size_t min_distance = levenshtein_word_cmp<std::true_type>((CharT)0x20, sentence2, cache, range1_pos);
       if (min_distance > max_distance) {
         return std::numeric_limits<std::size_t>::max();
@@ -339,7 +339,7 @@ inline std::size_t levenshtein::weighted_distance(string_view_vec<CharT> sentenc
     ++range1_pos;
 
     for (const auto &letter : *word_iter) {
-      if constexpr(!std::is_same_v<MinDistance, std::nullopt_t>) {
+      if constexpr(!std::is_same_v<MaxDistance, std::nullopt_t>) {
         size_t min_distance = levenshtein_word_cmp<std::true_type>(letter, sentence2, cache, range1_pos);
         if (min_distance > max_distance) {
           return std::numeric_limits<std::size_t>::max();
@@ -368,8 +368,8 @@ inline std::size_t levenshtein::weighted_distance(std::string_view sentence1, st
 }
 
 
-template<typename CharT, typename MinDistance>
-inline std::size_t levenshtein::weighted_distance_impl(std::basic_string_view<CharT> sentence1, std::basic_string_view<CharT> sentence2, MinDistance max_distance) {
+template<typename CharT, typename MaxDistance>
+inline std::size_t levenshtein::weighted_distance_impl(std::basic_string_view<CharT> sentence1, std::basic_string_view<CharT> sentence2, MaxDistance max_distance) {
 
   remove_common_affix(sentence1, sentence2);
 
@@ -398,7 +398,9 @@ inline std::size_t levenshtein::weighted_distance_impl(std::basic_string_view<Ch
       if (result > current_cache + 1) {
         result = current_cache + 1;
       }
-      if constexpr(!std::is_same_v<MinDistance, std::nullopt_t>) {
+
+      // only check max distance when one is supplied
+      if constexpr(!std::is_same_v<MaxDistance, std::nullopt_t>) {
         if (current_cache < min_distance) {
           min_distance = current_cache;
         }
@@ -406,7 +408,9 @@ inline std::size_t levenshtein::weighted_distance_impl(std::basic_string_view<Ch
       *cache_iter = result;
       ++cache_iter;
     }
-    if constexpr(!std::is_same_v<MinDistance, std::nullopt_t>) {
+
+    // only check max distance when one is supplied
+    if constexpr(!std::is_same_v<MaxDistance, std::nullopt_t>) {
       if (min_distance > max_distance) {
         return std::numeric_limits<std::size_t>::max();
       }
@@ -421,12 +425,8 @@ inline std::size_t levenshtein::weighted_distance_impl(std::basic_string_view<Ch
 template<typename Sentence1, typename Sentence2>
 inline float levenshtein::normalized_weighted_distance(const Sentence1 &sentence1, const Sentence2 &sentence2, float min_ratio)
 {
-  if (sentence1.empty() && sentence2.empty()) {
-    return 1.0;
-  }
-
-  if (sentence1.empty() || sentence1.empty()) {
-    return 0.0;
+  if (sentence1.empty() || sentence2.empty()) {
+    return sentence1.empty() && sentence2.empty();
   }
 
   std::size_t sentence1_len = utils::joined_size(sentence1);
