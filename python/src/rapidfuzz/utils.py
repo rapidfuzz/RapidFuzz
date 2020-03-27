@@ -1,1 +1,3 @@
-from _rapidfuzz_cpp.utils import *
+
+def default_process(s):
+	return s.strip().lower()

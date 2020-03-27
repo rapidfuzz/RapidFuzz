@@ -191,12 +191,6 @@ PYBIND11_MODULE(_rapidfuzz_cpp, m) {
                 float: ratio between s1 and s2 as a float between 0 and 100
         )pbdoc",
         py::arg("s1"), py::arg("s2"), py::arg("score_cutoff") = 0, py::arg("preprocess") = true);
-    
-
-    auto mutils = m.def_submodule("utils");
-    mutils.def("default_process", &utils::default_process,
-        R"pbdoc(
-        )pbdoc");
 
     m.attr("__version__") = VERSION_INFO;
 }
