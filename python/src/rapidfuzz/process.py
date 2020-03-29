@@ -37,7 +37,7 @@ def extract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, proce
         if score >= score_cutoff:
             results.append((choice, score))
 
-    return heapq.nlargest(limit, results)
+    return heapq.nlargest(limit, results, key=lambda x: x[1])
 
 
 def extractBests(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, processor: Callable = utils.default_process,
