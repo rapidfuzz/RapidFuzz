@@ -48,7 +48,7 @@ We currently have pre-built binaries (wheels) for `RapidFuzz` and its dependenci
 For any other architecture/os `RapidFuzz` can be installed from the source distribution. To do so, a C++17 capable compiler must be installed before running the `pip install rapidfuzz` command. While Linux and MacOs usually come with a compiler it is required to install [C++-Buildtools](https://visualstudio.microsoft.com/visual-cpp-build-tools) on Windows.
 
 ### PyInstaller
-When using RapidFuzz in PyInstaller it is required to pass the following option to it:
+When using RapidFuzz with PyInstaller it is required to pass the following option to it:
 ```
 --hidden-import _rapidfuzz_cpp
 ```
