@@ -1,6 +1,7 @@
 #include "process.hpp"
 #include "fuzz.hpp"
 #include <algorithm>
+#include <utility>
 #include "utils.hpp"
 
 
@@ -27,15 +28,18 @@ process::extract(const std::wstring &query, const std::vector<std::wstring> &cho
     }
 
     float score = fuzz::WRatio(query, choice, score_cutoff, false);
-    if (score > score_cutoff) {
+    if (score >= score_cutoff) {
       results.emplace_back(std::make_pair(choice, score));
     }
   }
 
   // TODO: possibly could use a similar improvement to extract_one
   // but when using limits close to choices.size() might actually be slower
-  if (limit < choices.size()) {
-    std::sort(results.rbegin(), results.rend());
+  std::sort(results.rbegin(), results.rend(), [](auto const &t1, auto const &t2) {
+    return std::get<1>(t1) < std::get<1>(t2);
+  });
+
+  if (limit < results.size()) {
     results.resize(limit);
   }
   
@@ -65,7 +69,7 @@ process::extractOne(const std::wstring &query, const std::vector<std::wstring> &
     }
 
     float score = fuzz::WRatio(a, b, score_cutoff, false);
-    if (score > score_cutoff) {
+    if (score >= score_cutoff) {
       score_cutoff = score;
       match_found = true;
       result_choice = choice;

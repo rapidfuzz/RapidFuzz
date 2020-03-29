@@ -1,3 +1,17 @@
+## [0.4.0] - 2020 Mar 29
+
+### Added
+- levenshtein module that provides access to
+  - weighted distance
+  - normalized weighted distance
+  - distance
+  - normalized distance
+
+### Fixed
+- extract returned a list of tuples of empty string and 0 when not enough elements had a ratio
+  bigger than score_cutoff
+- fix wrong sorting of results causing wrong results to be removed in extract
+
 ## [0.3.2] - 2020 Mar 29
 
 ### Added
