@@ -3,20 +3,36 @@ name: Build
 on: [push, pull_request]
 
 jobs:
-  test_cpp:
-    name: test C++ sources
-    runs-on: ubuntu-18.04
+  test_python:
+    name: run linting, tests and benchmarks for the python module
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.5, 3.6, 3.7, 3.8]
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
 
-    - name: linting
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
       run: |
-        clang-tidy *.cpp -checks=boost-*,bugprone-*,performance-*,readability-*,portability-*,modernize-*,clang-analyzer-cplusplus-*,clang-analyzer-*,cppcoreguidelines-*
-        cppcheck --enable=all --std=c++17 --language=c++
+        python -m pip install --upgrade pip
+        pip install wheel pybind11
 
+    - name: Lint with flake8
+      run: |
+        pip install flake8
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
   build_tarball:
+    needs: [test_python]
     name: create a tarball of RapidFuzz for pypi
     runs-on: ubuntu-18.04
 
@@ -27,7 +43,6 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: '3.7'
-        architecture: 'x64'
 
     - name: create tarball
       run: python3 setup.py sdist
@@ -39,6 +54,7 @@ jobs:
         path: ./dist
 
   build_wheels:
+    needs: [test_python]
     name: Build wheel on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -73,6 +89,7 @@ jobs:
         path: ./wheelhouse
 
   deploy-wheels:
+    if: github.ref == 'ref/head/master'
     needs: [build_tarball, build_wheels]
     name: deploy wheels to pypi
     runs-on: ubuntu-18.04

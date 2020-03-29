@@ -24,7 +24,6 @@ PYBIND11_MODULE(_rapidfuzz_cpp, m) {
             Args:
                 s1 (str): first string to compare
                 s2 (str): second string to compare
-                score_cutoff (float): floating point betwee
                 score_cutoff (float): Optional argument for a score threshold as a float between 0 and 100.
                     For ratio < score_cutoff 0 is returned instead. Defaults to 0.
                 preprocess (bool): Optional argument to specify whether the strings should be preprocessed

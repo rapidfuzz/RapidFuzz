@@ -40,6 +40,11 @@ def extract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, proce
     return heapq.nlargest(limit, results)
 
 
+def extractBests(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, processor: Callable = utils.default_process,
+            limit: int = 5, score_cutoff: float = 0) -> List[Tuple[str, float]]:
+    return extract(query, choices, scorer, processor, limit, score_cutoff)
+
+
 def extractOne(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, processor: Callable = utils.default_process,
                score_cutoff: float = 0) -> Optional[Tuple[str, float]]:
     """
