@@ -1,3 +1,10 @@
+## [0.3.2] - 2020 Mar 29
+
+### Added
+- Readded QRatio as alias for ratio to stay conform with fuzzywuzzy
+- add extractBests process as alias for extract since it is a better name for it
+
+
 ## [0.3.1] - 2020 Mar 27
 
 ### Changed
