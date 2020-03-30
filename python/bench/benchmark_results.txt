@@ -1,0 +1,156 @@
+Test fuzz.ratio for string: "cirque du soleil - zarkana - las vegas"
+-------------------------------
+Total time: 0.002205s. Average run: 2.205us.
+Total time: 0.000522s. Average run: 522.423ns.
+RapidFuzz is 4.221 times faster than FuzzyWuzzy
+
+Test fuzz.ratio for string: "cirque du soleil "
+-------------------------------
+Total time: 0.002163s. Average run: 2.163us.
+Total time: 0.000516s. Average run: 515.595ns.
+RapidFuzz is 4.194 times faster than FuzzyWuzzy
+
+Test fuzz.ratio for string: "cirque du soleil"
+-------------------------------
+Total time: 0.000332s. Average run: 331.925ns.
+Total time: 0.000452s. Average run: 451.798ns.
+RapidFuzz is 0.735 times faster than FuzzyWuzzy
+
+Test fuzz.ratio for string: "cirque du soleil las vegas"
+-------------------------------
+Total time: 0.002166s. Average run: 2.166us.
+Total time: 0.000481s. Average run: 481.355ns.
+RapidFuzz is 4.500 times faster than FuzzyWuzzy
+
+Test fuzz.ratio for string: "zarkana las vegas"
+-------------------------------
+Total time: 0.002404s. Average run: 2.404us.
+Total time: 0.000701s. Average run: 701.098ns.
+RapidFuzz is 3.428 times faster than FuzzyWuzzy
+
+Test fuzz.ratio for string: "las vegas cirque du soleil at the bellagio"
+-------------------------------
+Total time: 0.002753s. Average run: 2.753us.
+Total time: 0.001151s. Average run: 1.151us.
+RapidFuzz is 2.393 times faster than FuzzyWuzzy
+
+Test fuzz.ratio for string: "zarakana - cirque du soleil - bellagio"
+-------------------------------
+Total time: 0.002731s. Average run: 2.731us.
+Total time: 0.001092s. Average run: 1.092us.
+RapidFuzz is 2.500 times faster than FuzzyWuzzy
+
+Test fuzz.partial_ratio for string: "cirque du soleil - zarkana - las vegas"
+-------------------------------
+Total time: 0.004042s. Average run: 4.042us.
+Total time: 0.000834s. Average run: 833.545ns.
+RapidFuzz is 4.850 times faster than FuzzyWuzzy
+
+Test fuzz.partial_ratio for string: "cirque du soleil "
+-------------------------------
+Total time: 0.003888s. Average run: 3.888us.
+Total time: 0.000595s. Average run: 594.831ns.
+RapidFuzz is 6.536 times faster than FuzzyWuzzy
+
+Test fuzz.partial_ratio for string: "cirque du soleil"
+-------------------------------
+Total time: 0.000336s. Average run: 335.991ns.
+Total time: 0.000587s. Average run: 586.752ns.
+RapidFuzz is 0.573 times faster than FuzzyWuzzy
+
+Test fuzz.partial_ratio for string: "cirque du soleil las vegas"
+-------------------------------
+Total time: 0.003847s. Average run: 3.847us.
+Total time: 0.000746s. Average run: 746.272ns.
+RapidFuzz is 5.155 times faster than FuzzyWuzzy
+
+Test fuzz.partial_ratio for string: "zarkana las vegas"
+-------------------------------
+Total time: 0.010170s. Average run: 10.170us.
+Total time: 0.002544s. Average run: 2.544us.
+RapidFuzz is 3.998 times faster than FuzzyWuzzy
+
+Test fuzz.partial_ratio for string: "las vegas cirque du soleil at the bellagio"
+-------------------------------
+Total time: 0.005372s. Average run: 5.372us.
+Total time: 0.002900s. Average run: 2.900us.
+RapidFuzz is 1.852 times faster than FuzzyWuzzy
+
+Test fuzz.partial_ratio for string: "zarakana - cirque du soleil - bellagio"
+-------------------------------
+Total time: 0.005208s. Average run: 5.208us.
+Total time: 0.002584s. Average run: 2.584us.
+RapidFuzz is 2.016 times faster than FuzzyWuzzy
+
+Test fuzz.WRatio for string: "cirque du soleil - zarkana - las vegas"
+-------------------------------
+Total time: 0.040031s. Average run: 40.031us.
+Total time: 0.001491s. Average run: 1.491us.
+RapidFuzz is 26.851 times faster than FuzzyWuzzy
+
+Test fuzz.WRatio for string: "cirque du soleil "
+-------------------------------
+Total time: 0.008991s. Average run: 8.991us.
+Total time: 0.000563s. Average run: 562.574ns.
+RapidFuzz is 15.981 times faster than FuzzyWuzzy
+
+Test fuzz.WRatio for string: "cirque du soleil"
+-------------------------------
+Total time: 0.008759s. Average run: 8.759us.
+Total time: 0.000503s. Average run: 502.509ns.
+RapidFuzz is 17.430 times faster than FuzzyWuzzy
+
+Test fuzz.WRatio for string: "cirque du soleil las vegas"
+-------------------------------
+Total time: 0.038304s. Average run: 38.304us.
+Total time: 0.001285s. Average run: 1.285us.
+RapidFuzz is 29.812 times faster than FuzzyWuzzy
+
+Test fuzz.WRatio for string: "zarkana las vegas"
+-------------------------------
+Total time: 0.021282s. Average run: 21.282us.
+Total time: 0.001889s. Average run: 1.889us.
+RapidFuzz is 11.264 times faster than FuzzyWuzzy
+
+Test fuzz.WRatio for string: "las vegas cirque du soleil at the bellagio"
+-------------------------------
+Total time: 0.043843s. Average run: 43.843us.
+Total time: 0.004232s. Average run: 4.232us.
+RapidFuzz is 10.359 times faster than FuzzyWuzzy
+
+Test fuzz.WRatio for string: "zarakana - cirque du soleil - bellagio"
+-------------------------------
+Total time: 0.038362s. Average run: 38.362us.
+Total time: 0.003854s. Average run: 3.854us.
+RapidFuzz is 9.953 times faster than FuzzyWuzzy
+
+Test process.extract(scorer =  fuzz.QRatio) for string: "zarakana - cirque du soleil - bellagio"
+-------------------------------
+Total time: 0.373829s. Average run: 37.383ms.
+Total time: 0.069651s. Average run: 6.965ms.
+RapidFuzz is 5.367 times faster than FuzzyWuzzy
+
+Test process.extract(scorer =  fuzz.WRatio) for string: "zarakana - cirque du soleil - bellagio"
+-------------------------------
+Total time: 2.659891s. Average run: 265.989ms.
+Total time: 0.262201s. Average run: 26.220ms.
+RapidFuzz is 10.144 times faster than FuzzyWuzzy
+
+Test process.extractOne(scorer =  fuzz.WRatio) for string: "zarakana - cirque du soleil - bellagio"
+-------------------------------
+Total time: 2.659970s. Average run: 265.997ms.
+Total time: 0.370528s. Average run: 37.053ms.
+RapidFuzz is 7.179 times faster than FuzzyWuzzy
+
+Test process.extractOne(scorer =  fuzz.WRatio, score_cutoff=90) for string: "zarakana - cirque du soleil - bellagio"
+-------------------------------
+Total time: 2.651922s. Average run: 265.192ms.
+Total time: 0.014315s. Average run: 1.431ms.
+RapidFuzz is 185.256 times faster than FuzzyWuzzy
+
+Real world ratio(): "New York Yankees"
+-------------------------------
+Total time: 0.993305s. Average run: 9.933ms.
+Total time: 0.440019s. Average run: 4.400ms.
+RapidFuzz is 2.257 times faster than FuzzyWuzzy
+
