@@ -33,7 +33,7 @@
 
 ## Description
 RapidFuzz is a fast string matching library for Python and C++, which is using the string similarity calculations from [FuzzyWuzzy](https://github.com/seatgeek/fuzzywuzzy). However there are two aspects that set RapidFuzz apart from FuzzyWuzzy:
-1) It is MIT licensed so it can be used whichever License you might want to choose for your project, while your forced to adopt the GPLv2 license when using FuzzyWuzzy
+1) It is MIT licensed so it can be used whichever License you might want to choose for your project, while you're forced to adopt the GPLv2 license when using FuzzyWuzzy
 2) It is mostly written in C++ and on top of this comes with a lot of Algorithmic improvements to make string matching even faster, while still providing the same results. These changes result in a 5-100x Speedup in String Matching. More details on benchmark results can be found [here](https://github.com/rhasspy/rapidfuzz/blob/master/Benchmarks.md)
 
 
@@ -99,5 +99,5 @@ The reason for this is that `rapidfuzz` included all the C++ components from a M
 ```
 
 ## License
-RapidFuzz is licensed under the MIT license since we believe that everyone should be able to use it without being forced to adopt our license. Thats why the library is based on an older version of fuzzywuzzy that was MIT licensed aswell.
+RapidFuzz is licensed under the MIT license since we believe that everyone should be able to use it without being forced to adopt our license. Thats why the library is based on an older version of fuzzywuzzy that was MIT licensed as well.
 A Fork of this old version of fuzzywuzzy can be found [here](https://github.com/rhasspy/fuzzywuzzy).
