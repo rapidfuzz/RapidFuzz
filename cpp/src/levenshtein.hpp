@@ -290,21 +290,21 @@ inline std::size_t levenshtein::distance(std::wstring_view sentence1, std::wstri
     size_t temp = *cache_iter;
     *cache_iter += 1;
 
-		for (size_t j = 1; j < cache.size(); ++j)
-		{
-			size_t p = *cache_iter;
-      ++cache_iter;
-			size_t r = *cache_iter;
-			temp = std::min(
-			    std::min(r, p) + 1,
-			    temp + (char1 == sentence2[j - 1] ? 0 : 1)
-			);
+    for (const auto& char2 : sentence2) {
+      if (char1 != char2) {
+        ++temp;
+      }
+
+			temp = std::min({
+          *cache_iter + 1,
+          *(++cache_iter) + 1,
+			    temp
+      });
 			std::swap(*cache_iter, temp);
 		}
   }
   return cache.back();
 }
-
 
 template<typename MaxDistanceCalc, typename CharT>
 inline auto levenshtein::levenshtein_word_cmp(const CharT &letter_cmp, const string_view_vec<CharT> &words,
@@ -512,7 +512,7 @@ inline size_t levenshtein::generic_distance(std::wstring_view sentence1, std::ws
 
         for (const auto &char1 : sentence1) {
             if (char1 != char2) {
-                temp= std::min({
+                temp = std::min({
                   *cache_iter + delete_cost,
                   *(cache_iter+1) + insert_cost,
                   temp + replace_cost
