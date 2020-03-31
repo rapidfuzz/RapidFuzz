@@ -1,6 +1,7 @@
 .vscode/
 __pycache__/
 .idea/
+build/
 rapidfuzz.egg-info/
 dist/
 *.data

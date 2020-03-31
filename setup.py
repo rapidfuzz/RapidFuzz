@@ -34,7 +34,9 @@ ext_modules = [
         [
             'python/src/rapidfuzz.cpp',
             'cpp/src/fuzz.cpp',
-            'cpp/src/process.cpp'
+            'cpp/src/process.cpp',
+            'cpp/src/levenshtein.cpp',
+            'cpp/src/utils.cpp'
         ],
         include_dirs=[
             # Path to pybind11 headers
