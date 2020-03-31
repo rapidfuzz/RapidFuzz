@@ -269,18 +269,18 @@ percent fuzz::WRatio(const std::wstring_view &s1, const std::wstring_view &s2, p
   float sratio = ratio(s1, s2, score_cutoff);
 
   if (len_ratio < 1.5) {
-    // increase the value by a small step so it might be able to exit early
+    // increase the score_cutoff by a small step so it might be able to exit early
     score_cutoff = std::max(score_cutoff, sratio + (float)0.00001)/UNBASE_SCALE;
     return std::max(sratio, token_ratio(s1, s2, score_cutoff) * UNBASE_SCALE);
   }
 
   float partial_scale = (len_ratio < 8.0) ? 0.9 : 0.6;
 
-  // increase the value by a small step so it might be able to exit early
+  // increase the score_cutoff by a small step so it might be able to exit early
   score_cutoff = std::max(score_cutoff, sratio + (float)0.00001)/partial_scale;
   sratio = std::max(sratio, partial_ratio(s1, s2, score_cutoff) * partial_scale);
 
-  // increase the value by a small step so it might be able to exit early
+  // increase the score_cutoff by a small step so it might be able to exit early
   score_cutoff = std::max(score_cutoff, sratio + (float)0.00001)/UNBASE_SCALE;
   return std::max(sratio, partial_token_ratio(s1, s2, score_cutoff) * UNBASE_SCALE * partial_scale );
 }

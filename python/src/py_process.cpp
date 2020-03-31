@@ -53,7 +53,7 @@ PyObject* extractOne(PyObject *self, PyObject *args, PyObject *keywds) {
         }
 
         if (score >= score_cutoff) {
-			// increase the value by a small step so it might be able to exit early
+			// increase the score_cutoff by a small step so it might be able to exit early
             score_cutoff = score + (float)0.00001;
             match_found = true;
             result_choice = choice;
