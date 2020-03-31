@@ -233,29 +233,32 @@ PYBIND11_MODULE(_rapidfuzz_cpp, m) {
         py::arg("s1"), py::arg("s2"), py::arg("score_cutoff") = 0);
 
     mlevenshtein.def("weighted_distance",
-        [](std::wstring_view s1, std::wstring_view s2){
-            return levenshtein::weighted_distance(s1, s2);
+        [](std::wstring_view s1, std::wstring_view s2, size_t insert_cost, size_t delete_cost, size_t replace_cost){
+            if (insert_cost == 1 && delete_cost == 1) {
+                if (replace_cost == 1) {
+                    return levenshtein::distance(s1, s2);
+                } else if (replace_cost == 2) {
+                    return levenshtein::weighted_distance(s1, s2);
+                }
+            }
+            return levenshtein::generic_distance(s1, s2, insert_cost, delete_cost, replace_cost);
         },
         R"pbdoc(
             Calculates the minimum number of insertions, deletions, and substitutions
-            required to change one sequence into the other according to Levenshtein.
-            Opposed to the normal distance function which has a cost of 1 for all edit operations,
-            it uses the following costs for edit operations:
-
-            edit operation | cost
-            :------------- | :---
-            Insert         | 1
-            Remove         | 1
-            Replace        | 2
+            required to change one sequence into the other according to Levenshtein with custom
+            costs for insertion, deletion and substitution
 
             Args:
                 s1 (str):  first string to compare
                 s2 (str):  second string to compare
+                insert_cost (int): cost for insertions
+                delete_cost (int): cost for deletions
+                replace_cost (int): cost for substitutions
 
             Returns:
                 int: weighted levenshtein distance between s1 and s2
         )pbdoc",
-        py::arg("s1"), py::arg("s2"));
+        py::arg("s1"), py::arg("s2"), py::arg("insert_cost")=1, py::arg("delete_cost")=1, py::arg("replace_cost")=1);
 
     mlevenshtein.def("normalized_weighted_distance",
         [](std::wstring_view s1, std::wstring_view s2, float score_cutoff){
@@ -263,6 +266,13 @@ PYBIND11_MODULE(_rapidfuzz_cpp, m) {
         },
         R"pbdoc(
             Calculates a normalized levenshtein distance based on levenshtein.weighted_distance
+            It uses the following costs for edit operations:
+
+            edit operation | cost
+            :------------- | :---
+            Insert         | 1
+            Remove         | 1
+            Replace        | 2
 
             Args:
                 s1 (str):  first string to compare

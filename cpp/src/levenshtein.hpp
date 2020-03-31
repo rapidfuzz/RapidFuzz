@@ -87,6 +87,9 @@ namespace levenshtein {
     template<typename CharT, typename MaxDistance=std::nullopt_t>
     std::size_t weighted_distance(string_view_vec<CharT> sentence1, string_view_vec<CharT> sentence2, MaxDistance max_distance=std::nullopt);
 
+
+    size_t generic_distance(std::wstring_view source, std::wstring_view target, size_t insert_cost = 1, size_t delete_cost = 1, size_t replace_cost = 1);
+
     /**
     * Calculates a normalized score of the weighted Levenshtein algorithm between 0.0 and
     * 1.0 (inclusive), where 1.0 means the sequences are the same.
@@ -283,16 +286,20 @@ inline std::size_t levenshtein::distance(std::wstring_view sentence1, std::wstri
   std::iota(cache.begin(), cache.end(), 0);
 
   for (const auto &char1 : sentence1) {
-    size_t temp = cache[0]++;
+    auto cache_iter = cache.begin();
+    size_t temp = *cache_iter;
+    *cache_iter += 1;
+
 		for (size_t j = 1; j < cache.size(); ++j)
 		{
-			size_t p = cache[j - 1];
-			size_t r = cache[j];
+			size_t p = *cache_iter;
+      ++cache_iter;
+			size_t r = *cache_iter;
 			temp = std::min(
 			    std::min(r, p) + 1,
 			    temp + (char1 == sentence2[j - 1] ? 0 : 1)
 			);
-			std::swap(cache[j], temp);
+			std::swap(*cache_iter, temp);
 		}
   }
   return cache.back();
@@ -480,6 +487,44 @@ inline std::size_t levenshtein::weighted_distance_impl(std::basic_string_view<Ch
   return cache.back();
 }
 
+
+inline size_t levenshtein::generic_distance(std::wstring_view sentence1, std::wstring_view sentence2,
+                                      size_t insert_cost, size_t delete_cost, size_t replace_cost)
+{
+    remove_common_affix(sentence1, sentence2);
+    if (sentence1.size() > sentence2.size()) {
+        std::swap(sentence1, sentence2);
+        std::swap(insert_cost, delete_cost);
+    }
+
+    const size_t min_size = sentence1.size();
+    std::vector<size_t> cache(sentence1.size() + 1);
+
+    cache[0] = 0;
+    for (size_t i = 1; i < cache.size(); ++i) {
+        cache[i] = cache[i - 1] + delete_cost;
+    }
+
+    for (const auto &char2 : sentence2) {
+        auto cache_iter = cache.begin();
+        size_t temp = *cache_iter;
+        *cache_iter += insert_cost;
+
+        for (const auto &char1 : sentence1) {
+            if (char1 != char2) {
+                temp= std::min({
+                  *cache_iter + delete_cost,
+                  *(cache_iter+1) + insert_cost,
+                  temp + replace_cost
+                });
+            }
+            ++cache_iter;
+            std::swap(*cache_iter, temp);
+        }
+    }
+
+    return cache.back();
+}
 
 
 template<typename Sentence1, typename Sentence2>
