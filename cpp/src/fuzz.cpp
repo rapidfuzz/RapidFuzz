@@ -8,33 +8,29 @@
 #include <iterator>
 
 
-percent fuzz::partial_ratio(const std::wstring &s1, const std::wstring &s2, percent score_cutoff, bool preprocess) {
+percent fuzz::partial_ratio(std::wstring s1, std::wstring s2, percent score_cutoff, bool preprocess) {
   if (score_cutoff >= 100) {
     return 0;
   }
-  std::wstring a;
-  std::wstring b;
+
   if (preprocess) {
-    a = utils::default_process(s1);
-    b = utils::default_process(s2);
-  } else {
-    a = s1;
-    b = s2;
+    s1 = utils::default_process(std::move(s1));
+    s2 = utils::default_process(std::move(s2));
   }
 
-  if (a.empty() || b.empty() || score_cutoff >= 100) {
+  if (s1.empty() || s2.empty()) {
     return 0;
   }
 
   std::wstring_view shorter;
   std::wstring_view longer;
 
-  if (a.length() > b.length()) {
-    shorter = b;
-    longer = a;
+  if (s1.length() > s2.length()) {
+    shorter = s2;
+    longer = s1;
   } else {
-    shorter = a;
-    longer = b;
+    shorter = s1;
+    longer = s2;
   }
 
   auto blocks = levenshtein::matching_blocks(shorter, longer);
@@ -59,17 +55,14 @@ percent fuzz::partial_ratio(const std::wstring &s1, const std::wstring &s2, perc
 
 
 percent fuzz::ratio(const std::wstring &s1, const std::wstring &s2, percent score_cutoff, bool preprocess) {
-  std::wstring a;
-  std::wstring b;
+  float result;
   if (preprocess) {
-    a = utils::default_process(s1);
-    b = utils::default_process(s2);
+    result = levenshtein::normalized_weighted_distance(
+      utils::default_process(s1), utils::default_process(s2), score_cutoff / 100);
   } else {
-    a = s1;
-    b = s2;
+    result = levenshtein::normalized_weighted_distance(s1, s2, score_cutoff / 100);
   }
 
-  float result = levenshtein::normalized_weighted_distance(a, b, score_cutoff / 100);
   return utils::result_cutoff(result*100, score_cutoff);
 }
 

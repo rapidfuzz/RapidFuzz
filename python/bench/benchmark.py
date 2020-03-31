@@ -42,7 +42,7 @@ mixed_strings = [
 common_setup = "from {} import fuzz, process; "
 
 
-def print_result_from_timeit(stmt='pass', setup='pass', number=1000000):
+def print_result_from_timeit(stmt='pass', stmt_cpp='pass', setup='pass', number=1000000):
     """
     Clean function to know how much time took the execution of one statement
     """
@@ -53,19 +53,28 @@ def print_result_from_timeit(stmt='pass', setup='pass', number=1000000):
     avg_duration = duration_fuzzywuzzy / float(number)
     thousands = int(math.floor(math.log(avg_duration, 1000)))
 
-    print("Total time: %fs. Average run: %.3f%s." % (
+    print("Total time FuzzyWuzzy: %fs. Average run: %.3f%s." % (
         duration_fuzzywuzzy, avg_duration * (1000 ** -thousands), units[-thousands]))
     
+
     setup_rapidfuzz = setup.format("rapidfuzz")
-    duration_rapidfuzz = timeit(stmt, setup_rapidfuzz, number=int(number))
+    duration_rapidfuzz_slow = timeit(stmt, setup_rapidfuzz, number=int(number))
+    avg_duration = duration_rapidfuzz_slow / float(number)
+    thousands = int(math.floor(math.log(avg_duration, 1000)))
+
+    print("Total time RapidFuzz: %fs. Average run: %.3f%s." % (
+        duration_rapidfuzz_slow, avg_duration * (1000 ** -thousands), units[-thousands]))
+
+
+    duration_rapidfuzz = timeit(stmt_cpp, setup_rapidfuzz, number=int(number))
     avg_duration = duration_rapidfuzz / float(number)
     thousands = int(math.floor(math.log(avg_duration, 1000)))
 
-    print("Total time: %fs. Average run: %.3f%s." % (
+    print("Total time RapidFuzz CPP: %fs. Average run: %.3f%s." % (
         duration_rapidfuzz, avg_duration * (1000 ** -thousands), units[-thousands]))
     
-    relative_duration = duration_fuzzywuzzy / duration_rapidfuzz
-    print("RapidFuzz is %.3f times faster than FuzzyWuzzy" % relative_duration)
+    #relative_duration = duration_fuzzywuzzy / duration_rapidfuzz
+    #print("RapidFuzz is %.3f times faster than FuzzyWuzzy" % relative_duration)
 
     print()
 
@@ -76,44 +85,51 @@ for s in cirque_strings:
     print('Test fuzz.ratio for string: "%s"' % s)
     print('-------------------------------')
     print_result_from_timeit('fuzz.ratio(u\'cirque du soleil\', u\'%s\')' % s,
+                             'fuzz.fuzz_cpp.ratio(u\'cirque du soleil\', u\'%s\', 0, False)' % s,
                              common_setup, number=iterations / 100)
 
 for s in cirque_strings:
     print('Test fuzz.partial_ratio for string: "%s"' % s)
     print('-------------------------------')
     print_result_from_timeit('fuzz.partial_ratio(u\'cirque du soleil\', u\'%s\')' % s,
+                            'fuzz.fuzz_cpp.partial_ratio(u\'cirque du soleil\', u\'%s\', 0, False)' % s,
                              common_setup, number=iterations / 100)
 
 for s in cirque_strings:
     print('Test fuzz.WRatio for string: "%s"' % s)
     print('-------------------------------')
     print_result_from_timeit('fuzz.WRatio(u\'cirque du soleil\', u\'%s\')' % s,
+                            'fuzz.fuzz_cpp.WRatio(u\'cirque du soleil\', u\'%s\', 0, True)' % s,
                              common_setup, number=iterations / 100)
 
 print('Test process.extract(scorer =  fuzz.QRatio) for string: "%s"' % s)
 print('-------------------------------')
-print_result_from_timeit('process.extract(u\'cirque du soleil\', choices, scorer =  fuzz.QRatio)',
+stmt = 'process.extract(u\'cirque du soleil\', choices, scorer =  fuzz.QRatio)'
+print_result_from_timeit(stmt, stmt,
                              common_setup + " import string,random; random.seed(18);"
                              " choices = [\'\'.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(30)) for s in range(5000)]",
                               number=10)
 
 print('Test process.extract(scorer =  fuzz.WRatio) for string: "%s"' % s)
 print('-------------------------------')
-print_result_from_timeit('process.extract(u\'cirque du soleil\', choices, scorer =  fuzz.WRatio)',
+stmt = 'process.extract(u\'cirque du soleil\', choices, scorer =  fuzz.WRatio)'
+print_result_from_timeit(stmt, stmt,
                              common_setup + " import string,random; random.seed(18);"
                              " choices = [\'\'.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(30)) for s in range(5000)]",
                               number=10)
 
 print('Test process.extractOne(scorer =  fuzz.WRatio) for string: "%s"' % s)
 print('-------------------------------')
-print_result_from_timeit('process.extractOne(u\'cirque du soleil\', choices, scorer =  fuzz.WRatio)',
+stmt = 'process.extractOne(u\'cirque du soleil\', choices, scorer =  fuzz.WRatio)'
+print_result_from_timeit(stmt, stmt,
                              common_setup + " import string,random; random.seed(18);"
                              " choices = [\'\'.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(30)) for s in range(5000)]",
                               number=10)
 
 print('Test process.extractOne(scorer =  fuzz.WRatio, score_cutoff=90) for string: "%s"' % s)
 print('-------------------------------')
-print_result_from_timeit('process.extractOne(u\'cirque du soleil\', choices, scorer =  fuzz.WRatio, score_cutoff=90)',
+stmt = 'process.extractOne(u\'cirque du soleil\', choices, scorer =  fuzz.WRatio, score_cutoff=90)'
+print_result_from_timeit(stmt, stmt,
                              common_setup + " import string,random; random.seed(18);"
                              " choices = [\'\'.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(30)) for s in range(5000)]",
                               number=10)
@@ -132,6 +148,6 @@ print('Real world ratio(): "%s"' % s)
 print('-------------------------------')
 test += 'prepared_ratio = functools.partial(fuzz.ratio, "%s")\n' % s
 test += 'titles.sort(key=prepared_ratio)\n'
-print_result_from_timeit(test,
+print_result_from_timeit(test, test,
                          common_setup,
                          number=100)

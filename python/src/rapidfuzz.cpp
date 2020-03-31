@@ -33,10 +33,9 @@ PYBIND11_MODULE(_rapidfuzz_cpp, m) {
             Args:
                 s1 (str): first string to compare
                 s2 (str): second string to compare
-                score_cutoff (float): Optional argument for a score threshold as a float between 0 and 100.
-                    For ratio < score_cutoff 0 is returned instead of the ratio. Defaults to 0.
-                preprocess (bool): Optional argument to specify whether the strings should be preprocessed
-                    using utils.default_process. Defaults to True.
+                score_cutoff (float): Score threshold as a float between 0 and 100.
+                    For ratio < score_cutoff 0 is returned instead of the ratio.
+                preprocess (bool): Specify whether the strings should be preprocessed using utils.default_process.
 
             Returns:
                 float: ratio between s1 and s2 as a float between 0 and 100
@@ -45,7 +44,7 @@ PYBIND11_MODULE(_rapidfuzz_cpp, m) {
                 >>> fuzz.ratio("this is a test", "this is a test!")
                 96.55171966552734
         )pbdoc",
-        py::arg("s1"), py::arg("s2"), py::arg("score_cutoff") = 0, py::arg("preprocess") = true);
+        py::arg("s1"), py::arg("s2"), py::arg("score_cutoff"), py::arg("preprocess"));
 
     mfuzz.def("partial_ratio", &fuzz::partial_ratio,
         R"pbdoc(
@@ -54,10 +53,9 @@ PYBIND11_MODULE(_rapidfuzz_cpp, m) {
             Args:
                 s1 (str): first string to compare
                 s2 (str): second string to compare
-                score_cutoff (float): Optional argument for a score threshold as a float between 0 and 100.
-                    For ratio < score_cutoff 0 is returned instead of the ratio. Defaults to 0.
-                preprocess (bool): Optional argument to specify whether the strings should be preprocessed
-                    using utils.default_process. Defaults to True.
+                score_cutoff (float): Score threshold as a float between 0 and 100.
+                    For ratio < score_cutoff 0 is returned instead of the ratio.
+                preprocess (bool): Specify whether the strings should be preprocessed using utils.default_process.
 
             Returns:
                 float: ratio between s1 and s2 as a float between 0 and 100
@@ -66,7 +64,7 @@ PYBIND11_MODULE(_rapidfuzz_cpp, m) {
                 >>> fuzz.partial_ratio("this is a test", "this is a test!")
                 100.0
         )pbdoc",
-        py::arg("s1"), py::arg("s2"), py::arg("score_cutoff") = 0, py::arg("preprocess") = true);
+        py::arg("s1"), py::arg("s2"), py::arg("score_cutoff"), py::arg("preprocess"));
 
     mfuzz.def("token_sort_ratio", &fuzz::token_sort_ratio,
         R"pbdoc(
@@ -75,10 +73,9 @@ PYBIND11_MODULE(_rapidfuzz_cpp, m) {
             Args:
                 s1 (str): first string to compare
                 s2 (str): second string to compare
-                score_cutoff (float): Optional argument for a score threshold as a float between 0 and 100.
-                    For ratio < score_cutoff 0 is returned instead of the ratio. Defaults to 0.
-                preprocess (bool): Optional argument to specify whether the strings should be preprocessed
-                    using utils.default_process. Defaults to True.
+                score_cutoff (float): Score threshold as a float between 0 and 100.
+                    For ratio < score_cutoff 0 is returned instead of the ratio.
+                preprocess (bool): Specify whether the strings should be preprocessed using utils.default_process.
 
             Returns:
                 float: ratio between s1 and s2 as a float between 0 and 100
@@ -87,7 +84,7 @@ PYBIND11_MODULE(_rapidfuzz_cpp, m) {
                 >>> fuzz.token_sort_ratio("fuzzy wuzzy was a bear", "wuzzy fuzzy was a bear")
                 100.0
         )pbdoc",
-        py::arg("s1"), py::arg("s2"), py::arg("score_cutoff") = 0, py::arg("preprocess") = true);
+        py::arg("s1"), py::arg("s2"), py::arg("score_cutoff"), py::arg("preprocess"));
 
 
     mfuzz.def("partial_token_sort_ratio", &fuzz::partial_token_sort_ratio,
@@ -97,15 +94,14 @@ PYBIND11_MODULE(_rapidfuzz_cpp, m) {
             Args:
                 s1 (str): first string to compare
                 s2 (str): second string to compare
-                score_cutoff (float): Optional argument for a score threshold as a float between 0 and 100.
-                    For ratio < score_cutoff 0 is returned instead of the ratio. Defaults to 0.
-                preprocess (bool): Optional argument to specify whether the strings should be preprocessed
-                    using utils.default_process. Defaults to True.
+                score_cutoff (float): Score threshold as a float between 0 and 100.
+                    For ratio < score_cutoff 0 is returned instead of the ratio.
+                preprocess (bool): Specify whether the strings should be preprocessed using utils.default_process.
 
             Returns:
                 float: ratio between s1 and s2 as a float between 0 and 100
         )pbdoc",
-        py::arg("s1"), py::arg("s2"), py::arg("score_cutoff") = 0, py::arg("preprocess") = true);
+        py::arg("s1"), py::arg("s2"), py::arg("score_cutoff"), py::arg("preprocess"));
 
     mfuzz.def("token_set_ratio", &fuzz::token_set_ratio,
         R"pbdoc(
@@ -114,10 +110,9 @@ PYBIND11_MODULE(_rapidfuzz_cpp, m) {
             Args:
                 s1 (str): first string to compare
                 s2 (str): second string to compare
-                score_cutoff (float): Optional argument for a score threshold as a float between 0 and 100.
-                    For ratio < score_cutoff 0 is returned instead of the ratio. Defaults to 0.
-                preprocess (bool): Optional argument to specify whether the strings should be preprocessed
-                    using utils.default_process. Defaults to True.
+                score_cutoff (float): Score threshold as a float between 0 and 100.
+                    For ratio < score_cutoff 0 is returned instead of the ratio.
+                preprocess (bool): Specify whether the strings should be preprocessed using utils.default_process.
 
             Returns:
                 float: ratio between s1 and s2 as a float between 0 and 100
@@ -128,7 +123,7 @@ PYBIND11_MODULE(_rapidfuzz_cpp, m) {
                 >>> fuzz.token_set_ratio("fuzzy was a bear", "fuzzy fuzzy was a bear")
                 100.0
         )pbdoc",
-        py::arg("s1"), py::arg("s2"), py::arg("score_cutoff") = 0, py::arg("preprocess") = true);
+        py::arg("s1"), py::arg("s2"), py::arg("score_cutoff"), py::arg("preprocess"));
 
     mfuzz.def("partial_token_set_ratio", &fuzz::partial_token_set_ratio,
         R"pbdoc(
@@ -137,15 +132,14 @@ PYBIND11_MODULE(_rapidfuzz_cpp, m) {
             Args:
                 s1 (str): first string to compare
                 s2 (str): second string to compare
-                score_cutoff (float): Optional argument for a score threshold as a float between 0 and 100.
-                    For ratio < score_cutoff 0 is returned instead of the ratio. Defaults to 0.
-                preprocess (bool): Optional argument to specify whether the strings should be preprocessed
-                    using utils.default_process. Defaults to True.
+                score_cutoff (float): Score threshold as a float between 0 and 100.
+                    For ratio < score_cutoff 0 is returned instead of the ratio.
+                preprocess (bool): Specify whether the strings should be preprocessed using utils.default_process.
 
             Returns:
                 float: ratio between s1 and s2 as a float between 0 and 100
         )pbdoc",
-        py::arg("s1"), py::arg("s2"), py::arg("score_cutoff") = 0, py::arg("preprocess") = true);
+        py::arg("s1"), py::arg("s2"), py::arg("score_cutoff"), py::arg("preprocess"));
 
     mfuzz.def("token_ratio", &fuzz::token_ratio,
         R"pbdoc(
@@ -155,15 +149,14 @@ PYBIND11_MODULE(_rapidfuzz_cpp, m) {
             Args:
                 s1 (str): first string to compare
                 s2 (str): second string to compare
-                score_cutoff (float): Optional argument for a score threshold as a float between 0 and 100.
-                    For ratio < score_cutoff 0 is returned instead of the ratio. Defaults to 0.
-                preprocess (bool): Optional argument to specify whether the strings should be preprocessed
-                    using utils.default_process. Defaults to True.
+                score_cutoff (float): Score threshold as a float between 0 and 100.
+                    For ratio < score_cutoff 0 is returned instead of the ratio.
+                preprocess (bool): Specify whether the strings should be preprocessed using utils.default_process.
 
             Returns:
                 float: ratio between s1 and s2 as a float between 0 and 100
         )pbdoc",
-        py::arg("s1"), py::arg("s2"), py::arg("score_cutoff") = 0, py::arg("preprocess") = true);
+        py::arg("s1"), py::arg("s2"), py::arg("score_cutoff"), py::arg("preprocess"));
 
     mfuzz.def("partial_token_ratio", &fuzz::partial_token_ratio,
         R"pbdoc(
@@ -173,15 +166,14 @@ PYBIND11_MODULE(_rapidfuzz_cpp, m) {
             Args:
                 s1 (str): first string to compare
                 s2 (str): second string to compare
-                score_cutoff (float): Optional argument for a score threshold as a float between 0 and 100.
-                    For ratio < score_cutoff 0 is returned instead of the ratio. Defaults to 0.
-                preprocess (bool): Optional argument to specify whether the strings should be preprocessed
-                    using utils.default_process. Defaults to True.
+                score_cutoff (float): Score threshold as a float between 0 and 100.
+                    For ratio < score_cutoff 0 is returned instead of the ratio.
+                preprocess (bool): Specify whether the strings should be preprocessed using utils.default_process.
 
             Returns:
                 float: ratio between s1 and s2 as a float between 0 and 100
         )pbdoc",
-        py::arg("s1"), py::arg("s2"), py::arg("score_cutoff") = 0, py::arg("preprocess") = true);
+        py::arg("s1"), py::arg("s2"), py::arg("score_cutoff"), py::arg("preprocess"));
 
     mfuzz.def("WRatio", &fuzz::WRatio,
         R"pbdoc(
@@ -190,15 +182,14 @@ PYBIND11_MODULE(_rapidfuzz_cpp, m) {
             Args:
                 s1 (str): first string to compare
                 s2 (str): second string to compare
-                score_cutoff (float): Optional argument for a score threshold as a float between 0 and 100.
-                    For ratio < score_cutoff 0 is returned instead of the ratio. Defaults to 0.
-                preprocess (bool): Optional argument to specify whether the strings should be preprocessed 
-                    using utils.default_process. Defaults to True.
+                score_cutoff (float): Score threshold as a float between 0 and 100.
+                    For ratio < score_cutoff 0 is returned instead of the ratio.
+                preprocess (bool): Specify whether the strings should be preprocessed using utils.default_process.
 
             Returns:
                 float: ratio between s1 and s2 as a float between 0 and 100
         )pbdoc",
-        py::arg("s1"), py::arg("s2"), py::arg("score_cutoff") = 0, py::arg("preprocess") = true);
+        py::arg("s1"), py::arg("s2"), py::arg("score_cutoff"), py::arg("preprocess"));
 
 
 /********************************************************/

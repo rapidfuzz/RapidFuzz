@@ -6,7 +6,7 @@ using percent = float;
 
 namespace fuzz {
   percent ratio(const std::wstring &s1, const std::wstring &s2, percent score_cutoff=0, bool preprocess = true);
-  percent partial_ratio(const std::wstring &s1, const std::wstring &s2, percent score_cutoff=0, bool preprocess = true);
+  percent partial_ratio(std::wstring s1, std::wstring s2, percent score_cutoff=0, bool preprocess = true);
 
   percent token_sort_ratio(const std::wstring &a, const std::wstring &b, percent score_cutoff=0, bool preprocess = true);
   percent partial_token_sort_ratio(const std::wstring &a, const std::wstring &b, percent score_cutoff=0, bool preprocess = true);
