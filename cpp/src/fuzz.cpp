@@ -8,82 +8,50 @@
 #include <iterator>
 
 
-percent fuzz::partial_ratio(std::wstring s1, std::wstring s2, percent score_cutoff, bool preprocess) {
-  if (score_cutoff >= 100) {
+percent fuzz::partial_ratio(std::wstring_view s1, std::wstring_view s2, percent score_cutoff) {
+  if (s1.empty() || s2.empty() || score_cutoff > 100) {
     return 0;
   }
-
-  if (preprocess) {
-    s1 = utils::default_process(std::move(s1));
-    s2 = utils::default_process(std::move(s2));
-  }
-
-  if (s1.empty() || s2.empty()) {
-    return 0;
-  }
-
-  std::wstring_view shorter;
-  std::wstring_view longer;
 
   if (s1.length() > s2.length()) {
-    shorter = s2;
-    longer = s1;
-  } else {
-    shorter = s1;
-    longer = s2;
+    std::swap(s1, s2);
   }
 
-  auto blocks = levenshtein::matching_blocks(shorter, longer);
+  auto blocks = levenshtein::matching_blocks(s1, s2);
   float max_ratio = 0;
   for (const auto &block : blocks) {
       std::size_t long_start = (block.second_start > block.first_start) ? block.second_start - block.first_start : 0;
-      std::wstring_view long_substr = longer.substr(long_start, shorter.length());
+      std::wstring_view long_substr = s2.substr(long_start, s1.length());
 
-      float ls_ratio = levenshtein::normalized_weighted_distance(shorter, long_substr, score_cutoff / 100);
+      float ls_ratio = levenshtein::normalized_weighted_distance(s1, long_substr, score_cutoff / 100);
 
       if (ls_ratio > 0.995) {
-  			return 100;
-  		}
+              return 100;
+          }
 
       if (ls_ratio > max_ratio) {
-  			max_ratio = ls_ratio;
-  		}
+              max_ratio = ls_ratio;
+          }
   }
 
   return utils::result_cutoff(max_ratio*100, score_cutoff);
 }
 
 
-percent fuzz::ratio(const std::wstring &s1, const std::wstring &s2, percent score_cutoff, bool preprocess) {
-  float result;
-  if (preprocess) {
-    result = levenshtein::normalized_weighted_distance(
-      utils::default_process(s1), utils::default_process(s2), score_cutoff / 100);
-  } else {
-    result = levenshtein::normalized_weighted_distance(s1, s2, score_cutoff / 100);
-  }
-
+percent fuzz::ratio(const std::wstring_view &s1, const std::wstring_view &s2, percent score_cutoff) {
+  float result = levenshtein::normalized_weighted_distance(s1, s2, score_cutoff / 100);
   return utils::result_cutoff(result*100, score_cutoff);
 }
 
 
-percent fuzz::token_ratio(const std::wstring &s1, const std::wstring &s2, percent score_cutoff, bool preprocess) {
-  if (score_cutoff >= 100) {
+percent fuzz::token_ratio(const std::wstring_view &s1, const std::wstring_view &s2, percent score_cutoff) {
+  if (score_cutoff > 100) {
     return 0;
   }
 
-  std::wstring a;
-  std::wstring b;
-  if (preprocess) {
-    a = utils::default_process(s1);
-    b = utils::default_process(s2);
-  } else {
-    a = s1;
-    b = s2;
-  }
-  std::vector<std::wstring_view> tokens_a = utils::splitSV(a);
+  std::vector<std::wstring_view> tokens_a = utils::splitSV(s1);
   std::sort(tokens_a.begin(), tokens_a.end());
-  std::vector<std::wstring_view> tokens_b = utils::splitSV(b);
+  std::vector<std::wstring_view> tokens_b = utils::splitSV(s2);
   std::sort(tokens_b.begin(), tokens_b.end());
 
   auto [intersection, difference_ab, difference_ba] = utils::set_decomposition(tokens_a, tokens_b);
@@ -132,24 +100,14 @@ percent fuzz::token_ratio(const std::wstring &s1, const std::wstring &s2, percen
 
 // combines token_set and token_sort ratio from fuzzywuzzy so it is only required to
 // do a lot of operations once
-percent fuzz::partial_token_ratio(const std::wstring &s1, const std::wstring &s2, percent score_cutoff, bool preprocess) {
-  if (score_cutoff >= 100) {
+percent fuzz::partial_token_ratio(const std::wstring_view &s1, const std::wstring_view &s2, percent score_cutoff) {
+  if (score_cutoff > 100) {
     return 0;
   }
 
-  std::wstring a;
-  std::wstring b;
-  if (preprocess) {
-    a = utils::default_process(s1);
-    b = utils::default_process(s2);
-  } else {
-    a = s1;
-    b = s2;
-  }
-
-  std::vector<std::wstring_view> tokens_a = utils::splitSV(a);
+  std::vector<std::wstring_view> tokens_a = utils::splitSV(s1);
   std::sort(tokens_a.begin(), tokens_a.end());
-  std::vector<std::wstring_view> tokens_b = utils::splitSV(b);
+  std::vector<std::wstring_view> tokens_b = utils::splitSV(s2);
   std::sort(tokens_b.begin(), tokens_b.end());
 
   auto unique_a = tokens_a;
@@ -170,7 +128,7 @@ percent fuzz::partial_token_ratio(const std::wstring &s1, const std::wstring &s2
     return 100;
   }
 
-  percent result = partial_ratio(utils::join(tokens_a), utils::join(tokens_b), score_cutoff, false);
+  percent result = partial_ratio(utils::join(tokens_a), utils::join(tokens_b), score_cutoff);
   // do not calculate the same partial_ratio twice
   if (tokens_a.size() == unique_a.size() && tokens_b.size() == unique_b.size()) {
     return result;
@@ -179,33 +137,23 @@ percent fuzz::partial_token_ratio(const std::wstring &s1, const std::wstring &s2
   score_cutoff = std::max(score_cutoff, result);
   return std::max(
     result,
-    partial_ratio(utils::join(difference_ab), utils::join(difference_ba), score_cutoff, false)
+    partial_ratio(utils::join(difference_ab), utils::join(difference_ba), score_cutoff)
   );
 }
 
 
-percent _token_sort(const std::wstring &s1, const std::wstring &s2, bool partial, percent score_cutoff=0.0, bool preprocess = true) {
-  if (score_cutoff >= 100) {
+percent _token_sort(const std::wstring_view &s1, const std::wstring_view &s2, bool partial, percent score_cutoff=0.0) {
+  if (score_cutoff > 100) {
     return 0;
   }
 
-  std::wstring a;
-  std::wstring b;
-  if (preprocess) {
-    a = utils::default_process(s1);
-    b = utils::default_process(s2);
-  } else {
-    a = s1;
-    b = s2;
-  }
-
-  std::vector<std::wstring_view> tokens_a = utils::splitSV(a);
+  std::vector<std::wstring_view> tokens_a = utils::splitSV(s1);
   std::sort(tokens_a.begin(), tokens_a.end());
-  std::vector<std::wstring_view> tokens_b = utils::splitSV(b);
+  std::vector<std::wstring_view> tokens_b = utils::splitSV(s2);
   std::sort(tokens_b.begin(), tokens_b.end());
 
   if (partial) {
-    return fuzz::partial_ratio(utils::join(tokens_a), utils::join(tokens_b), score_cutoff, false);
+    return fuzz::partial_ratio(utils::join(tokens_a), utils::join(tokens_b), score_cutoff);
   } else {
     float result = levenshtein::normalized_weighted_distance(tokens_a, tokens_b, score_cutoff / 100);
     return utils::result_cutoff(result*100, score_cutoff);
@@ -213,34 +161,24 @@ percent _token_sort(const std::wstring &s1, const std::wstring &s2, bool partial
 }
 
 
-percent fuzz::token_sort_ratio(const std::wstring &a, const std::wstring &b, percent score_cutoff, bool preprocess) {
+percent fuzz::token_sort_ratio(const std::wstring_view &a, const std::wstring_view &b, percent score_cutoff) {
   return _token_sort(a, b, false, score_cutoff);
 }
 
 
-percent fuzz::partial_token_sort_ratio(const std::wstring &a, const std::wstring &b, percent score_cutoff, bool preprocess) {
+percent fuzz::partial_token_sort_ratio(const std::wstring_view &a, const std::wstring_view &b, percent score_cutoff) {
   return _token_sort(a, b, true, score_cutoff);
 }
 
 
-percent fuzz::token_set_ratio(const std::wstring &s1, const std::wstring &s2, percent score_cutoff, bool preprocess) {
-  if (score_cutoff >= 100) {
+percent fuzz::token_set_ratio(const std::wstring_view &s1, const std::wstring_view &s2, percent score_cutoff) {
+  if (score_cutoff > 100) {
     return 0;
   }
 
-  std::wstring a;
-  std::wstring b;
-  if (preprocess) {
-    a = utils::default_process(s1);
-    b = utils::default_process(s2);
-  } else {
-    a = s1;
-    b = s2;
-  }
-
-  std::vector<std::wstring_view> tokens_a = utils::splitSV(a);
+  std::vector<std::wstring_view> tokens_a = utils::splitSV(s1);
   std::sort(tokens_a.begin(), tokens_a.end());
-  std::vector<std::wstring_view> tokens_b = utils::splitSV(b);
+  std::vector<std::wstring_view> tokens_b = utils::splitSV(s2);
   std::sort(tokens_b.begin(), tokens_b.end());
 
   auto [intersection, difference_ab, difference_ba] = utils::set_decomposition(tokens_a, tokens_b);
@@ -287,24 +225,14 @@ percent fuzz::token_set_ratio(const std::wstring &s1, const std::wstring &s2, pe
 }
 
 
-percent fuzz::partial_token_set_ratio(const std::wstring &s1, const std::wstring &s2, percent score_cutoff, bool preprocess) {
-  if (score_cutoff >= 100) {
+percent fuzz::partial_token_set_ratio(const std::wstring_view &s1, const std::wstring_view &s2, percent score_cutoff) {
+  if (score_cutoff > 100) {
     return 0;
   }
 
-  std::wstring a;
-  std::wstring b;
-  if (preprocess) {
-    a = utils::default_process(s1);
-    b = utils::default_process(s2);
-  } else {
-    a = s1;
-    b = s2;
-  }
-
-  std::vector<std::wstring_view> tokens_a = utils::splitSV(a);
+  std::vector<std::wstring_view> tokens_a = utils::splitSV(s1);
   std::sort(tokens_a.begin(), tokens_a.end());
-  std::vector<std::wstring_view> tokens_b = utils::splitSV(b);
+  std::vector<std::wstring_view> tokens_b = utils::splitSV(s2);
   std::sort(tokens_b.begin(), tokens_b.end());
 
   tokens_a.erase(std::unique(tokens_a.begin(), tokens_a.end()), tokens_a.end());
@@ -323,43 +251,33 @@ percent fuzz::partial_token_set_ratio(const std::wstring &s1, const std::wstring
     return 100;
   }
 
-  return partial_ratio(utils::join(difference_ab), utils::join(difference_ba), score_cutoff, false);
+  return partial_ratio(utils::join(difference_ab), utils::join(difference_ba), score_cutoff);
 }
 
 
-percent fuzz::WRatio(const std::wstring &s1, const std::wstring &s2, percent score_cutoff, bool preprocess) {
-  if (score_cutoff >= 100) {
+percent fuzz::WRatio(const std::wstring_view &s1, const std::wstring_view &s2, percent score_cutoff) {
+  if (score_cutoff > 100) {
     return 0;
-  }
-
-  std::wstring a;
-  std::wstring b;
-  if (preprocess) {
-    a = utils::default_process(s1);
-    b = utils::default_process(s2);
-  } else {
-    a = s1;
-    b = s2;
   }
 
   const float UNBASE_SCALE = 0.95;
 
-  std::size_t len_a = a.length();
-  std::size_t len_b = b.length();
+  std::size_t len_a = s1.length();
+  std::size_t len_b = s2.length();
   float len_ratio = (len_a > len_b) ? (float)len_a / (float)len_b : (float)len_b / (float)len_a;
 
-  float sratio = ratio(a, b, score_cutoff, false);
+  float sratio = ratio(s1, s2, score_cutoff);
 
   if (len_ratio < 1.5) {
     score_cutoff = std::max(score_cutoff, sratio);
-    return std::max(sratio, token_ratio(a, b, score_cutoff/UNBASE_SCALE, false) * UNBASE_SCALE);
+    return std::max(sratio, token_ratio(s1, s2, score_cutoff/UNBASE_SCALE) * UNBASE_SCALE);
   }
 
   float partial_scale = (len_ratio < 8.0) ? 0.9 : 0.6;
 
   score_cutoff = std::max(score_cutoff, sratio)/partial_scale;
-  sratio = std::max(sratio, partial_ratio(a, b, score_cutoff, false) * partial_scale);
+  sratio = std::max(sratio, partial_ratio(s1, s2, score_cutoff) * partial_scale);
 
   score_cutoff = std::max(score_cutoff, sratio)/UNBASE_SCALE;
-  return std::max(sratio, partial_token_ratio(a, b, score_cutoff, false) * UNBASE_SCALE * partial_scale );
+  return std::max(sratio, partial_token_ratio(s1, s2, score_cutoff) * UNBASE_SCALE * partial_scale );
 }

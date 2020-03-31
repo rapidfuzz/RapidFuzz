@@ -106,7 +106,7 @@ std::vector<levenshtein::EditOp> levenshtein::editops(std::wstring_view sentence
 std::vector<levenshtein::MatchingBlock> levenshtein::matching_blocks(std::wstring_view sentence1, std::wstring_view sentence2) {
   auto edit_ops = editops(sentence1, sentence2);
   std::size_t first_start = 0;
-	std::size_t second_start = 0;
+    std::size_t second_start = 0;
   std::vector<MatchingBlock> mblocks;
 
   for (const auto &op : edit_ops) {
@@ -191,13 +191,13 @@ std::size_t levenshtein::distance(std::wstring_view sentence1, std::wstring_view
         ++temp;
       }
 
-			temp = std::min({
-          *cache_iter + 1,
-          *(++cache_iter) + 1,
-			    temp
+      temp = std::min({
+        *cache_iter + 1,
+        *(++cache_iter) + 1,
+        temp
       });
-			std::swap(*cache_iter, temp);
-		}
+      std::swap(*cache_iter, temp);
+    }
   }
   return cache.back();
 }

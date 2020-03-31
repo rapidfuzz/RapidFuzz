@@ -35,9 +35,9 @@ namespace levenshtein {
     std::vector<EditOp> editops(std::wstring_view sentence1, std::wstring_view sentence2);
 
     struct MatchingBlock {
-    	std::size_t first_start;
-    	std::size_t second_start;
-    	std::size_t len;
+        std::size_t first_start;
+        std::size_t second_start;
+        std::size_t len;
       MatchingBlock(std::size_t first_start, std::size_t second_start, std::size_t len)
         : first_start(first_start), second_start(second_start), len(len) {}
     };
@@ -90,7 +90,6 @@ namespace levenshtein {
 }
 
 
-
 template<typename MaxDistanceCalc>
 inline auto levenshtein::levenshtein_word_cmp(const wchar_t &letter_cmp, const std::vector<std::wstring_view> &words,
                           std::vector<std::size_t> &cache, std::size_t current_cache)
@@ -101,8 +100,8 @@ inline auto levenshtein::levenshtein_word_cmp(const wchar_t &letter_cmp, const s
   auto min_distance = std::numeric_limits<std::size_t>::max();
 
   auto charCmp = [&] (const wchar_t &char2) {
-	  if (letter_cmp == char2) { result = current_cache; }
-	  else { ++result; }
+      if (letter_cmp == char2) { result = current_cache; }
+      else { ++result; }
 
     current_cache = *cache_iter;
     if (result > current_cache + 1) {
@@ -121,7 +120,7 @@ inline auto levenshtein::levenshtein_word_cmp(const wchar_t &letter_cmp, const s
 
   // no whitespace should be added in front of the first word
   for (const auto &letter : *word_iter) {
-	  charCmp(letter);
+      charCmp(letter);
   }
   ++word_iter;
 
@@ -131,7 +130,7 @@ inline auto levenshtein::levenshtein_word_cmp(const wchar_t &letter_cmp, const s
 
     // check following word
     for (const auto &letter : *word_iter) {
-	    charCmp(letter);
+        charCmp(letter);
     }
   }
 
@@ -260,16 +259,12 @@ inline std::size_t levenshtein::weighted_distance(std::wstring_view sentence1, s
 }
 
 
-
-
-
 template<typename Sentence1, typename Sentence2>
 inline float levenshtein::normalized_weighted_distance(const Sentence1 &sentence1, const Sentence2 &sentence2, float min_ratio)
 {
   if (sentence1.empty() || sentence2.empty()) {
     return sentence1.empty() && sentence2.empty();
   }
-  return 1;
 
   std::size_t sentence1_len = utils::joined_size(sentence1);
   std::size_t sentence2_len = utils::joined_size(sentence2);

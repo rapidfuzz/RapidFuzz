@@ -1,7 +1,6 @@
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 import sys
-import setuptools
 
 from os import path
 this_dir = path.abspath(path.dirname(__file__))
@@ -12,64 +11,11 @@ with open(path.join(this_dir, "VERSION"), encoding='utf-8') as version_file:
 with open(path.join(this_dir, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-
-class get_pybind_include(object):
-    """Helper class to determine the pybind11 include path
-
-    The purpose of this class is to postpone importing pybind11
-    until it is actually installed, so that the ``get_include()``
-    method can be invoked. """
-
-    def __init__(self, user=False):
-        self.user = user
-
-    def __str__(self):
-        import pybind11
-        return pybind11.get_include(self.user)
-
-
-ext_modules = [
-    Extension(
-        '_rapidfuzz_cpp',
-        [
-            'python/src/rapidfuzz.cpp',
-            'cpp/src/fuzz.cpp',
-            'cpp/src/process.cpp',
-            'cpp/src/levenshtein.cpp',
-            'cpp/src/utils.cpp'
-        ],
-        include_dirs=[
-            # Path to pybind11 headers
-            get_pybind_include(),
-            get_pybind_include(user=True),
-            "cpp/src"
-        ],
-        language='c++',
-    ),
-]
-
-
-# As of Python 3.6, CCompiler has a `has_flag` method.
-# cf http://bugs.python.org/issue26689
-def has_flag(compiler, flagname):
-    """Return a boolean indicating whether a flag name is supported on
-    the specified compiler.
-    """
-    import tempfile
-    with tempfile.NamedTemporaryFile('w', suffix='.cpp') as f:
-        f.write('int main (int argc, char **argv) { return 0; }')
-        try:
-            compiler.compile([f.name], extra_postargs=[flagname])
-        except setuptools.distutils.errors.CompileError:
-            return False
-    return True
-
-
 class BuildExt(build_ext):
     """A custom build extension for adding compiler-specific options."""
     c_opts = {
         'msvc': ['/EHsc', '/O2', '/std:c++17'],
-        'unix': ['-O3', '-std=c++17'],
+        'unix': ['-O3', '-std=c++17', '-Werror'],
     }
     l_opts = {
         'msvc': [],
@@ -87,8 +33,6 @@ class BuildExt(build_ext):
         link_opts = self.l_opts.get(ct, [])
         if ct == 'unix':
             opts.append('-DVERSION_INFO="%s"' % self.distribution.get_version())
-            if has_flag(self.compiler, '-fvisibility=hidden'):
-                opts.append('-fvisibility=hidden')
         elif ct == 'msvc':
             opts.append('/DVERSION_INFO=\\"%s\\"' % self.distribution.get_version())
         for ext in self.extensions:
@@ -105,14 +49,31 @@ setup(
     description='rapid fuzzy string matching',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    ext_modules=ext_modules,
-    install_requires=['pybind11>=2.4'],
-    setup_requires=['pybind11>=2.4'],
-    cmdclass={'build_ext': BuildExt},
-    package_data={'': ['LICENSE', 'VERSION']},
+    ext_modules = [
+		Extension(
+			'rapidfuzz.levenshtein',
+			['python/src/py_levenshtein.cpp', 'cpp/src/levenshtein.cpp', 'cpp/src/utils.cpp'],
+        	include_dirs=["cpp/src"],
+        	language='c++',
+		),
+		Extension(
+			'rapidfuzz.fuzz',
+			['python/src/py_fuzz.cpp', 'cpp/src/fuzz.cpp', 'cpp/src/levenshtein.cpp', 'cpp/src/utils.cpp'],
+        	include_dirs=["cpp/src"],
+        	language='c++',
+		),
+		Extension(
+			'rapidfuzz._process',
+			['python/src/py_process.cpp', 'cpp/src/process.cpp', 'cpp/src/fuzz.cpp', 'cpp/src/levenshtein.cpp', 'cpp/src/utils.cpp'],
+        	include_dirs=["cpp/src"],
+        	language='c++',
+		),
+	],
+	cmdclass={'build_ext': BuildExt},
+	package_data={'': ['LICENSE', 'VERSION']},
     package_dir={'': 'python/src'},
-    packages=['rapidfuzz'],
-    include_package_data=True,
+	packages=['rapidfuzz'],
+	include_package_data=True,
     zip_safe=False,
     classifiers=[
         "Programming Language :: Python :: 3",

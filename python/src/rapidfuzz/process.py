@@ -1,4 +1,4 @@
-import _rapidfuzz_cpp.process
+import rapidfuzz._process
 from rapidfuzz import fuzz, utils
 from typing import Iterable, List, Tuple, Optional, Union, Callable
 import heapq
@@ -22,8 +22,8 @@ def extract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, proce
         List[Tuple[str, float]]: returns a list of all matches that have a score >= score_cutoff
   
     """
-    if (not scorer or scorer == fuzz.WRatio) and (not processor or processor == utils.default_process):
-        return _rapidfuzz_cpp.process.extract(query, list(choices), limit, score_cutoff, bool(processor))
+    #if (not scorer or scorer == fuzz.WRatio) and (not processor or processor == utils.default_process):
+    #    return _rapidfuzz_cpp.process.extract(query, list(choices), limit, score_cutoff, bool(processor))
 
     # evaluate score inside python since scorer is a python function and so it would be required
     # to add the python layer from C++ aswell
@@ -63,8 +63,8 @@ def extractOne(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, pr
         Optional[Tuple[str, float]]: returns the best match in form of a tuple or None when there is
             no match with a score >= score_cutoff
     """
-    if (not scorer or scorer == fuzz.WRatio) and (not processor or processor == utils.default_process):
-        return _rapidfuzz_cpp.process.extractOne(query, list(choices), score_cutoff, bool(processor))
+    #if (not scorer or scorer == fuzz.WRatio) and (not processor or processor == utils.default_process):
+    #    return _rapidfuzz_cpp.process.extractOne(query, list(choices), score_cutoff, bool(processor))
 
     # evaluate score inside python since scorer is a python function and so it would be required
     # to add the python layer from C++ aswell

@@ -27,7 +27,7 @@ process::extract(const std::wstring &query, const std::vector<std::wstring> &cho
       b = choice;
     }
 
-    float score = fuzz::WRatio(query, choice, score_cutoff, false);
+    float score = fuzz::WRatio(query, choice, score_cutoff);
     if (score >= score_cutoff) {
       results.emplace_back(std::make_pair(choice, score));
     }
@@ -68,7 +68,7 @@ process::extractOne(const std::wstring &query, const std::vector<std::wstring> &
       b = choice;
     }
 
-    float score = fuzz::WRatio(a, b, score_cutoff, false);
+    float score = fuzz::WRatio(a, b, score_cutoff);
     if (score >= score_cutoff) {
       score_cutoff = score;
       match_found = true;

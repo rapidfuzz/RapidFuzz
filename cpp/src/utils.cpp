@@ -5,7 +5,7 @@
  */
 template <typename InputIterator1, typename InputIterator2>
 inline auto common_prefix_length(InputIterator1 first1, InputIterator1 last1,
-	                        InputIterator2 first2, InputIterator2 last2)
+                            InputIterator2 first2, InputIterator2 last2)
 {
     return std::distance(first1, std::mismatch(first1, last1, first2, last2).first);
 }
@@ -15,8 +15,8 @@ inline auto common_prefix_length(InputIterator1 first1, InputIterator1 last1,
  */
 std::size_t remove_common_prefix(std::wstring_view& a, std::wstring_view& b) {
   auto prefix = common_prefix_length(a.begin(), a.end(), b.begin(), b.end());
-	a.remove_prefix(prefix);
-	b.remove_prefix(prefix);
+    a.remove_prefix(prefix);
+    b.remove_prefix(prefix);
   return prefix;
 }
 
@@ -25,7 +25,7 @@ std::size_t remove_common_prefix(std::wstring_view& a, std::wstring_view& b) {
  */
 std::size_t remove_common_suffix(std::wstring_view& a, std::wstring_view& b) {
   auto suffix = common_prefix_length(a.rbegin(), a.rend(), b.rbegin(), b.rend());
-	a.remove_suffix(suffix);
+    a.remove_suffix(suffix);
   b.remove_suffix(suffix);
   return suffix;
 }
@@ -34,7 +34,7 @@ std::size_t remove_common_suffix(std::wstring_view& a, std::wstring_view& b) {
  * Removes common affix of two string views
  */
 Affix utils::remove_common_affix(std::wstring_view& a, std::wstring_view& b) {
-	return Affix {
+    return Affix {
     remove_common_prefix(a, b),
     remove_common_suffix(a, b)
   };
@@ -104,7 +104,7 @@ void utils::trim(std::wstring &s) {
 
 void utils::lower_case(std::wstring &s) {
    std::for_each(s.begin(), s.end(), [](wchar_t & c){
-	  c = ::tolower(c);
+      c = std::tolower(c);
   });
 }
 
@@ -113,6 +113,7 @@ std::wstring utils::default_process(std::wstring s) {
   lower_case(s);
   return s;
 }
+
 
 DecomposedSet utils::set_decomposition(std::vector<std::wstring_view> a, std::vector<std::wstring_view> b) {
   std::vector<std::wstring_view> intersection;
@@ -134,7 +135,7 @@ DecomposedSet utils::set_decomposition(std::vector<std::wstring_view> a, std::ve
 }
 
 std::size_t utils::joined_size(const std::wstring_view &x){
-	return x.size();
+    return x.size();
 }
 
 
@@ -145,7 +146,7 @@ std::size_t utils::joined_size(const std::vector<std::wstring_view> &x){
 
   // there is a whitespace between each word
   std::size_t result = x.size() - 1;
-	for (const auto &y: x) result += y.size();
+    for (const auto &y: x) result += y.size();
 
-	return result;
+    return result;
 }

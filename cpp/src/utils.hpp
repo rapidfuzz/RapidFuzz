@@ -40,6 +40,7 @@ namespace utils {
 
   void trim(std::wstring &s);
   void lower_case(std::wstring &s);
+  void lower_case(std::wstring &s);
 
   std::wstring default_process(std::wstring s);
 
