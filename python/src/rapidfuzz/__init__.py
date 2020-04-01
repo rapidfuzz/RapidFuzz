@@ -1,7 +1,4 @@
 """
 rapid string matching library
 """
-import rapidfuzz.process
-import rapidfuzz.fuzz
-import rapidfuzz.levenshtein
-import rapidfuzz.utils
+from rapidfuzz import process, fuzz, levenshtein, utils

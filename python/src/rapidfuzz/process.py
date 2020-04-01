@@ -1,4 +1,4 @@
-import _rapidfuzz_cpp.process
+import rapidfuzz._process
 from rapidfuzz import fuzz, utils
 from typing import Iterable, List, Tuple, Optional, Union, Callable
 import heapq
@@ -14,6 +14,8 @@ def extract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, proce
         choices (Iterable): list of all strings the query should be compared with
         scorer (Callable): optional callable that is used to calculate the matching score between
             the query and each choice. WRatio is used by default
+        processor (Callable): optional callable that reformats the strings. utils.default_process
+            is used by default, which lowercases the strings and trims whitespace
         limit (int): maximum amount of results to return
         score_cutoff (float): Optional argument for a score threshold. Matches with
             a lower score than this number will not be returned. Defaults to 0
@@ -22,8 +24,8 @@ def extract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, proce
         List[Tuple[str, float]]: returns a list of all matches that have a score >= score_cutoff
   
     """
-    if (not scorer or scorer == fuzz.WRatio) and (not processor or processor == utils.default_process):
-        return _rapidfuzz_cpp.process.extract(query, list(choices), limit, score_cutoff, bool(processor))
+    #if (not scorer or scorer == fuzz.WRatio) and (not processor or processor == utils.default_process):
+    #    return rapidfuzz._process.extract(query, choices, limit, score_cutoff, bool(processor))
 
     # evaluate score inside python since scorer is a python function and so it would be required
     # to add the python layer from C++ aswell
@@ -55,7 +57,8 @@ def extractOne(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, pr
         choices (Iterable): list of all strings the query should be compared with
         scorer (Callable): optional callable that is used to calculate the matching score between
             the query and each choice. WRatio is used by default
-        processor (Callable): optional callable that is used
+        processor (Callable): optional callable that reformats the strings. utils.default_process
+            is used by default, which lowercases the strings and trims whitespace
         score_cutoff (float): Optional argument for a score threshold. Matches with
             a lower score than this number will not be returned. Defaults to 0
 
@@ -64,7 +67,7 @@ def extractOne(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, pr
             no match with a score >= score_cutoff
     """
     if (not scorer or scorer == fuzz.WRatio) and (not processor or processor == utils.default_process):
-        return _rapidfuzz_cpp.process.extractOne(query, list(choices), score_cutoff, bool(processor))
+        return rapidfuzz._process.extractOne(query, choices, score_cutoff, bool(processor))
 
     # evaluate score inside python since scorer is a python function and so it would be required
     # to add the python layer from C++ aswell
