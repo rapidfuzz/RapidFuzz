@@ -112,9 +112,7 @@ void utils::trim(std::wstring& s)
 
 void utils::lower_case(std::wstring& s)
 {
-    std::for_each(s.begin(), s.end(), [](wchar_t& c) {
-        c = std::tolower(c);
-    });
+    std::transform(s.begin(), s.end(), s.begin(), ::tolower);
 }
 
 std::wstring utils::default_process(std::wstring s)

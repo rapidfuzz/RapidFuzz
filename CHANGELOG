@@ -1,3 +1,9 @@
+## [0.5.1] - 2020 Apr 1
+
+### Fixed
+- Fixed a error in the Windows build
+
+
 ## [0.5.0] - 2020 Apr 1
 
 ### Changed
@@ -6,6 +12,7 @@
 
 ### Fixed
 - There is no longer a hidden module so this issue with pyinstaller can not occur anymore
+
 
 ## [0.4.0] - 2020 Mar 29
 
@@ -20,6 +27,7 @@
 - extract returned a list of tuples of empty string and 0 when not enough elements had a ratio
   bigger than score_cutoff
 - fix wrong sorting of results causing wrong results to be removed in extract
+
 
 ## [0.3.2] - 2020 Mar 29
 
