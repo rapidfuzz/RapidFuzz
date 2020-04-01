@@ -13,7 +13,7 @@ title_blob = '\n'.join(titles)
 cirque_strings = [
     "cirque du soleil - zarkana - las vegas",
     "cirque du soleil ",
-	"cirque du soleil",
+    "cirque du soleil",
     "cirque du soleil las vegas",
     "zarkana las vegas",
     "las vegas cirque du soleil at the bellagio",
@@ -58,23 +58,15 @@ def print_result_from_timeit(stmt='pass', stmt_cpp='pass', setup='pass', number=
     
 
     setup_rapidfuzz = setup.format("rapidfuzz")
-    duration_rapidfuzz_slow = timeit(stmt, setup_rapidfuzz, number=int(number))
-    avg_duration = duration_rapidfuzz_slow / float(number)
-    thousands = int(math.floor(math.log(avg_duration, 1000)))
-
-    print("Total time RapidFuzz: %fs. Average run: %.3f%s." % (
-        duration_rapidfuzz_slow, avg_duration * (1000 ** -thousands), units[-thousands]))
-
-
     duration_rapidfuzz = timeit(stmt_cpp, setup_rapidfuzz, number=int(number))
     avg_duration = duration_rapidfuzz / float(number)
     thousands = int(math.floor(math.log(avg_duration, 1000)))
 
-    print("Total time RapidFuzz CPP: %fs. Average run: %.3f%s." % (
+    print("Total time RapidFuzz: %fs. Average run: %.3f%s." % (
         duration_rapidfuzz, avg_duration * (1000 ** -thousands), units[-thousands]))
     
-    #relative_duration = duration_fuzzywuzzy / duration_rapidfuzz
-    #print("RapidFuzz is %.3f times faster than FuzzyWuzzy" % relative_duration)
+    relative_duration = duration_fuzzywuzzy / duration_rapidfuzz
+    print("RapidFuzz is %.3f times faster than FuzzyWuzzy" % relative_duration)
 
     print()
 
@@ -85,21 +77,21 @@ for s in cirque_strings:
     print('Test fuzz.ratio for string: "%s"' % s)
     print('-------------------------------')
     print_result_from_timeit('fuzz.ratio(u\'cirque du soleil\', u\'%s\')' % s,
-                             'fuzz.fuzz_cpp.ratio(u\'cirque du soleil\', u\'%s\', 0, False)' % s,
+                             'fuzz.ratio(u\'cirque du soleil\', u\'%s\', preprocess=False)' % s,
                              common_setup, number=iterations / 100)
 
 for s in cirque_strings:
     print('Test fuzz.partial_ratio for string: "%s"' % s)
     print('-------------------------------')
     print_result_from_timeit('fuzz.partial_ratio(u\'cirque du soleil\', u\'%s\')' % s,
-                            'fuzz.fuzz_cpp.partial_ratio(u\'cirque du soleil\', u\'%s\', 0, False)' % s,
+                            'fuzz.partial_ratio(u\'cirque du soleil\', u\'%s\', preprocess=False)' % s,
                              common_setup, number=iterations / 100)
 
 for s in cirque_strings:
     print('Test fuzz.WRatio for string: "%s"' % s)
     print('-------------------------------')
     print_result_from_timeit('fuzz.WRatio(u\'cirque du soleil\', u\'%s\')' % s,
-                            'fuzz.fuzz_cpp.WRatio(u\'cirque du soleil\', u\'%s\', 0, True)' % s,
+                            'fuzz.WRatio(u\'cirque du soleil\', u\'%s\')' % s,
                              common_setup, number=iterations / 100)
 
 print('Test process.extract(scorer =  fuzz.QRatio) for string: "%s"' % s)
@@ -120,18 +112,20 @@ print_result_from_timeit(stmt, stmt,
 
 print('Test process.extractOne(scorer =  fuzz.WRatio) for string: "%s"' % s)
 print('-------------------------------')
-stmt = 'process.extractOne(u\'cirque du soleil\', choices, scorer =  fuzz.WRatio)'
-print_result_from_timeit(stmt, stmt,
-                             common_setup + " import string,random; random.seed(18);"
+stmt = 'process.extractOne(u\'cirque du soleil\', choices)'
+stmt2 = 'process.extractOne("please add bananas to my shopping list", choices)'
+print_result_from_timeit(stmt, stmt2,
+                             common_setup + " from rapidfuzz import _process as rprocess; import string,random; random.seed(18);"
                              " choices = [\'\'.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(30)) for s in range(5000)]",
                               number=10)
 
-print('Test process.extractOne(scorer =  fuzz.WRatio, score_cutoff=90) for string: "%s"' % s)
+print('Test process.extractOne(scorer =  fuzz.WRatio) for string: "%s"' % s)
 print('-------------------------------')
-stmt = 'process.extractOne(u\'cirque du soleil\', choices, scorer =  fuzz.WRatio, score_cutoff=90)'
-print_result_from_timeit(stmt, stmt,
+stmt = 'process.extractOne("please add bananas to my shopping list", choices)'
+stmt2 = 'process.extractOne("please add bananas to my shopping list", choices)'
+print_result_from_timeit(stmt, stmt2,
                              common_setup + " import string,random; random.seed(18);"
-                             " choices = [\'\'.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(30)) for s in range(5000)]",
+                             " choices = ['can you add bananas to my shopping list please' for s in range(1000)]",
                               number=10)
 
 

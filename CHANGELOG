@@ -1,3 +1,12 @@
+## [0.5.0] - 2020 Apr 1
+
+### Changed
+- levenshtein.weighted_distance does now support custom weighted
+- PyBind11 is replaced by the Python C API, which makes the function calls a bit faster
+
+### Fixed
+- There is no longer a hidden module so this issue with pyinstaller can not occur anymore
+
 ## [0.4.0] - 2020 Mar 29
 
 ### Added

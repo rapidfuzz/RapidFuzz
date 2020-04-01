@@ -62,7 +62,7 @@ jobs:
       matrix:
         os: [ubuntu-18.04, windows-latest, macos-latest]
     env:
-      CIBW_SKIP: cp27-* pp27-*
+      CIBW_SKIP: cp27-* pp*
       MACOSX_DEPLOYMENT_TARGET: "10.15"
 
     steps:
