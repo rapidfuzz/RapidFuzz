@@ -24,8 +24,8 @@ def extract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, proce
         List[Tuple[str, float]]: returns a list of all matches that have a score >= score_cutoff
   
     """
-    #if (not scorer or scorer == fuzz.WRatio) and (not processor or processor == utils.default_process):
-    #    return rapidfuzz._process.extract(query, choices, limit, score_cutoff, bool(processor))
+    if (not scorer or scorer == fuzz.WRatio) and (not processor or processor == utils.default_process):
+        return rapidfuzz._process.extract(query, choices, limit, score_cutoff, bool(processor))
 
     # evaluate score inside python since scorer is a python function and so it would be required
     # to add the python layer from C++ aswell

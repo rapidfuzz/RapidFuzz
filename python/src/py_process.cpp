@@ -22,15 +22,15 @@ Returns:
 )";
 
 PyObject* extract(PyObject *self, PyObject *args, PyObject *keywds) {
-    const wchar_t *query;
+    wchar_t *query_buffer;
     PyObject* py_choices;
-	std::size_t limit = 5;
-    float score_cutoff = 0;
-    bool preprocess = true;
+    std::size_t limit = 5;
+    double score_cutoff = 0;
+    short int preprocess = 0;
     static const char *kwlist[] = {"query", "choices", "limit", "score_cutoff", "preprocess", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uO|nfp", const_cast<char **>(kwlist),
-                                     &query, &py_choices, &limit, &score_cutoff, &preprocess)) {
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uO|ndh", const_cast<char **>(kwlist),
+                                     &query_buffer, &py_choices, &limit, &score_cutoff, &preprocess)) {
         return NULL;
     }
 
@@ -38,22 +38,24 @@ PyObject* extract(PyObject *self, PyObject *args, PyObject *keywds) {
     if (!choices) {
         return NULL;
     }
-
     std::size_t choice_count = PySequence_Fast_GET_SIZE(choices);
-    std::wstring cleaned_query = (preprocess) ? utils::default_process(query) : std::wstring(query, wcslen(query));
 
-    std::vector<std::pair<const wchar_t*, double> > results;
+    std::wstring cleaned_query = (preprocess) ? utils::default_process(query_buffer) : std::wstring(query_buffer);
+
+    std::vector<std::pair<std::wstring, double> > results;
     results.reserve(choice_count);
 
     for (std::size_t i = 0; i < choice_count; ++i) {
         PyObject* py_choice = PySequence_Fast_GET_ITEM(choices, i);
 
-        const wchar_t *choice;
-        if (!PyArg_Parse(py_choice, "u", &choice)) {
+        const wchar_t *choice_buffer;
+        if (!PyArg_Parse(py_choice, "u", &choice_buffer)) {
             PyErr_SetString(PyExc_TypeError, "Choices must be a sequence of strings");
             Py_DECREF(choices);
             return NULL;
         }
+
+        std::wstring choice(choice_buffer);
 
         double score;
         if (preprocess) {
@@ -64,7 +66,7 @@ PyObject* extract(PyObject *self, PyObject *args, PyObject *keywds) {
         } else {
             score = fuzz::WRatio(
                 cleaned_query,
-                std::wstring_view(choice, wcslen(choice)),
+                choice,
                 score_cutoff);
         }
 
@@ -87,7 +89,7 @@ PyObject* extract(PyObject *self, PyObject *args, PyObject *keywds) {
 
     for (std::size_t i = 0; i < results.size(); ++i) {
         auto const& [choice, score] = results[i];
-        PyObject* py_tuple = Py_BuildValue("(ud)", choice, score);
+        PyObject* py_tuple = Py_BuildValue("(ud)", choice.c_str(), score);
         PyList_SetItem(py_return, i, py_tuple);
     }
 
@@ -110,14 +112,15 @@ Returns:
 )";
 
 PyObject* extractOne(PyObject *self, PyObject *args, PyObject *keywds) {
-    const wchar_t *query;
+    const wchar_t* query_buffer;
     PyObject* py_choices;
-    float score_cutoff = 0;
-    bool preprocess = true;
+    double score_cutoff = 0;
+    // for unknown reasons using bool here with the converter p raises a segfault
+    short int preprocess = 0;
     static const char *kwlist[] = {"query", "choices", "score_cutoff", "preprocess", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uO|fp", const_cast<char **>(kwlist),
-                                     &query, &py_choices, &score_cutoff, &preprocess)) {
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uO|dh", const_cast<char **>(kwlist),
+                                     &query_buffer, &py_choices, &score_cutoff, &preprocess)) {
         return NULL;
     }
 
@@ -125,22 +128,24 @@ PyObject* extractOne(PyObject *self, PyObject *args, PyObject *keywds) {
     if (!choices) {
         return NULL;
     }
-
     std::size_t choice_count = PySequence_Fast_GET_SIZE(choices);
-    std::wstring cleaned_query = (preprocess) ? utils::default_process(query) : std::wstring(query, wcslen(query));
 
-    bool match_found = false;
-    const wchar_t* result_choice;
+    std::wstring cleaned_query = (preprocess) ? utils::default_process(query_buffer) : std::wstring(query_buffer);
+
+    double end_score = 0;
+    std::wstring result_choice;
 
     for (std::size_t i = 0; i < choice_count; ++i) {
         PyObject* py_choice = PySequence_Fast_GET_ITEM(choices, i);
 
-        const wchar_t *choice;
-        if (!PyArg_Parse(py_choice, "u", &choice)) {
+        const wchar_t *choice_buffer;
+        if (!PyArg_Parse(py_choice, "u", &choice_buffer)) {
             PyErr_SetString(PyExc_TypeError, "Choices must be a sequence of strings");
             Py_DECREF(choices);
             return NULL;
         }
+
+        std::wstring choice(choice_buffer);
 
         double score;
         if (preprocess) {
@@ -151,25 +156,25 @@ PyObject* extractOne(PyObject *self, PyObject *args, PyObject *keywds) {
         } else {
             score = fuzz::WRatio(
                 cleaned_query,
-                std::wstring_view(choice, wcslen(choice)),
+                choice,
                 score_cutoff);
         }
 
         if (score >= score_cutoff) {
             // increase the score_cutoff by a small step so it might be able to exit early
             score_cutoff = score + 0.00001;
-            match_found = true;
-            result_choice = choice;
+            end_score = score;
+            result_choice = std::move(choice);
         }
     }
 
     Py_DECREF(choices);
 
-    if (!match_found) {
+    if (!end_score) {
         Py_RETURN_NONE;
     }
 
-    return Py_BuildValue("(ud)", result_choice, std::min(score_cutoff, static_cast<float>(100)));
+    return Py_BuildValue("(ud)", result_choice.c_str(), end_score);
 }
 
 

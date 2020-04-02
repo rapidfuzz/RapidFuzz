@@ -1,3 +1,10 @@
+## [0.5.2] - 2020 Apr 3
+
+### Fixed
+- Fixed a segfault that occured when extracting the boolean for unknown reason
+  replacing it by a short int appears to solve the problem
+
+
 ## [0.5.1] - 2020 Apr 1
 
 ### Fixed

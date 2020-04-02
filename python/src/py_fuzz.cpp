@@ -27,11 +27,11 @@ Example:
 static PyObject* ratio(PyObject *self, PyObject *args, PyObject *keywds) {
     const wchar_t *s1;
     const wchar_t *s2;
-    float score_cutoff = 0;
-    bool preprocess = true;
+    double score_cutoff = 0;
+    short int preprocess = 0;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", "preprocess", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uu|fp", const_cast<char **>(kwlist),
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uu|dh", const_cast<char **>(kwlist),
                                      &s1, &s2, &score_cutoff, &preprocess))
         return NULL;
 
@@ -74,11 +74,11 @@ Example:
 static PyObject* partial_ratio(PyObject *self, PyObject *args, PyObject *keywds) {
     const wchar_t *s1;
     const wchar_t *s2;
-    float score_cutoff = 0;
-    bool preprocess = true;
+    double score_cutoff = 0;
+    short int preprocess = true;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", "preprocess", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uu|fp", const_cast<char **>(kwlist),
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uu|dh", const_cast<char **>(kwlist),
                                      &s1, &s2, &score_cutoff, &preprocess))
         return NULL;
 
@@ -121,11 +121,11 @@ Example:
 static PyObject* token_sort_ratio(PyObject *self, PyObject *args, PyObject *keywds) {
     const wchar_t *s1;
     const wchar_t *s2;
-    float score_cutoff = 0;
-    bool preprocess = true;
+    double score_cutoff = 0;
+    short int preprocess = true;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", "preprocess", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uu|fp", const_cast<char **>(kwlist),
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uu|dh", const_cast<char **>(kwlist),
                                      &s1, &s2, &score_cutoff, &preprocess))
         return NULL;
 
@@ -164,11 +164,11 @@ Returns:
 static PyObject* partial_token_sort_ratio(PyObject *self, PyObject *args, PyObject *keywds) {
     const wchar_t *s1;
     const wchar_t *s2;
-    float score_cutoff = 0;
-    bool preprocess = true;
+    double score_cutoff = 0;
+    short int preprocess = true;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", "preprocess", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uu|fp", const_cast<char **>(kwlist),
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uu|dh", const_cast<char **>(kwlist),
                                      &s1, &s2, &score_cutoff, &preprocess))
         return NULL;
 
@@ -213,11 +213,11 @@ Example:
 static PyObject* token_set_ratio(PyObject *self, PyObject *args, PyObject *keywds) {
     const wchar_t *s1;
     const wchar_t *s2;
-    float score_cutoff = 0;
-    bool preprocess = true;
+    double score_cutoff = 0;
+    short int preprocess = true;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", "preprocess", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uu|fp", const_cast<char **>(kwlist),
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uu|dh", const_cast<char **>(kwlist),
                                      &s1, &s2, &score_cutoff, &preprocess))
         return NULL;
 
@@ -256,11 +256,11 @@ Returns:
 static PyObject* partial_token_set_ratio(PyObject *self, PyObject *args, PyObject *keywds) {
     const wchar_t *s1;
     const wchar_t *s2;
-    float score_cutoff = 0;
-    bool preprocess = true;
+    double score_cutoff = 0;
+    short int preprocess = true;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", "preprocess", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uu|fp", const_cast<char **>(kwlist),
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uu|dh", const_cast<char **>(kwlist),
                                      &s1, &s2, &score_cutoff, &preprocess))
         return NULL;
 
@@ -300,24 +300,24 @@ Returns:
 static PyObject* token_ratio(PyObject *self, PyObject *args, PyObject *keywds) {
     const wchar_t *s1;
     const wchar_t *s2;
-    float score_cutoff = 0;
-    bool preprocess = true;
+    double score_cutoff = 0;
+    short int preprocess = true;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", "preprocess", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uu|fp", const_cast<char **>(kwlist),
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uu|dh", const_cast<char **>(kwlist),
                                      &s1, &s2, &score_cutoff, &preprocess))
         return NULL;
 
     double result;
     if (preprocess) {
         result = fuzz::token_ratio(
-            utils::default_process(s1),
-            utils::default_process(s2),
+            {utils::default_process(s1)},
+            {utils::default_process(s2)},
             score_cutoff);
     } else {
         result = fuzz::token_ratio(
-            std::wstring_view(s1, wcslen(s1)),
-            std::wstring_view(s2, wcslen(s2)),
+            {std::wstring_view(s1, wcslen(s1))},
+            {std::wstring_view(s2, wcslen(s2))},
             score_cutoff);
     }
 
@@ -344,11 +344,11 @@ Returns:
 static PyObject* partial_token_ratio(PyObject *self, PyObject *args, PyObject *keywds) {
     const wchar_t *s1;
     const wchar_t *s2;
-    float score_cutoff = 0;
-    bool preprocess = true;
+    double score_cutoff = 0;
+    short int preprocess = true;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", "preprocess", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uu|fp", const_cast<char **>(kwlist),
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uu|dh", const_cast<char **>(kwlist),
                                      &s1, &s2, &score_cutoff, &preprocess))
         return NULL;
 
@@ -411,24 +411,24 @@ Example:
 static PyObject* WRatio(PyObject *self, PyObject *args, PyObject *keywds) {
     const wchar_t *s1;
     const wchar_t *s2;
-    float score_cutoff = 0;
-    bool preprocess = true;
+    double score_cutoff = 0;
+    short int preprocess = true;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", "preprocess", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uu|fp", const_cast<char **>(kwlist),
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uu|dh", const_cast<char **>(kwlist),
                                      &s1, &s2, &score_cutoff, &preprocess))
         return NULL;
 
     double result;
     if (preprocess) {
         result = fuzz::WRatio(
-            utils::default_process(s1),
-            utils::default_process(s2),
+            {utils::default_process(s1)},
+            {utils::default_process(s2)},
             score_cutoff);
     } else {
         result = fuzz::WRatio(
-            std::wstring_view(s1, wcslen(s1)),
-            std::wstring_view(s2, wcslen(s2)),
+            {std::wstring_view(s1, wcslen(s1))},
+            {std::wstring_view(s2, wcslen(s2))},
             score_cutoff);
     }
 
