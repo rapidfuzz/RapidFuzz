@@ -98,7 +98,7 @@ PyObject* extract(PyObject *self, PyObject *args, PyObject *keywds) {
 
     for (std::size_t i = 0; i < results.size(); ++i) {
         auto const& [choice, score] = results[i];
-        PyObject* py_tuple = Py_BuildValue("(ud)", choice.c_str(), score);
+        PyObject* py_tuple = Py_BuildValue("(u#d)", choice.c_str(), choice.length(), score);
         PyList_SetItem(py_return, i, py_tuple);
     }
 
@@ -190,7 +190,7 @@ PyObject* extractOne(PyObject *self, PyObject *args, PyObject *keywds) {
         Py_RETURN_NONE;
     }
 
-    return Py_BuildValue("(ud)", result_choice.c_str(), end_score);
+    return Py_BuildValue("(u#d)", result_choice.c_str(), result_choice.length(), end_score);
 }
 
 

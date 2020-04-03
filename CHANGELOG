@@ -1,4 +1,11 @@
-## [0.5.3] - 2020 Apr 3
+## [0.5.3] - 2020 Apr 4
+
+### Fixed
+- Process methods with embedded null characters in the returned string did only
+  return a string until the first null character
+
+
+## [0.5.2] - 2020 Apr 3
 
 ### Changed
 - the default processor replaces null characters in the string by whitespaces now
