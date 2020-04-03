@@ -1,3 +1,3 @@
 
 def default_process(s):
-	return s.strip().lower()
+	return s.replace('\x00', ' ').strip().lower()

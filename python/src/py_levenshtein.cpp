@@ -2,6 +2,7 @@
 #include <Python.h>
 #include <string>
 #include "levenshtein.hpp"
+#include "py_utils.hpp"
 
 
 constexpr const char * distance_docstring = R"(
@@ -17,17 +18,23 @@ Returns:
 )";
 
 PyObject* distance(PyObject *self, PyObject *args, PyObject *keywds) {
-    const wchar_t *s1;
-    const wchar_t *s2;
+    PyObject *py_s1;
+    PyObject *py_s2;
     static const char *kwlist[] = {"s1", "s2", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uu", const_cast<char **>(kwlist),
-                                     &s1, &s2))
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU", const_cast<char **>(kwlist),
+                                     &py_s1, &py_s2)) {
         return NULL;
+    }
 
-    std::size_t result = levenshtein::distance(
-        std::wstring_view(s1, wcslen(s1)),
-        std::wstring_view(s2, wcslen(s2)));
+    if (PyUnicode_READY(py_s1) || PyUnicode_READY(py_s2)) {
+        return NULL;
+    }
+
+    std::wstring s1 = PyObject_To_Wstring(py_s1);
+    std::wstring s2 = PyObject_To_Wstring(py_s2);
+
+    std::size_t result = levenshtein::distance(s1, s2);
     return PyLong_FromSize_t(result);
 }
 
@@ -46,19 +53,24 @@ Returns:
 )";
 
 PyObject* normalized_distance(PyObject *self, PyObject *args, PyObject *keywds) {
-    const wchar_t *s1;
-    const wchar_t *s2;
-    float score_cutoff = 0;
+    PyObject *py_s1;
+    PyObject *py_s2;
+    double score_cutoff = 0;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uu|f", const_cast<char **>(kwlist),
-                                     &s1, &s2, &score_cutoff))
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU|d", const_cast<char **>(kwlist),
+                                     &py_s1, &py_s2, &score_cutoff)) {
         return NULL;
+    }
 
-    double result = levenshtein::normalized_distance(
-        std::wstring_view(s1, wcslen(s1)),
-        std::wstring_view(s2, wcslen(s2)),
-        score_cutoff/100);
+    if (PyUnicode_READY(py_s1) || PyUnicode_READY(py_s2)) {
+        return NULL;
+    }
+
+    std::wstring s1 = PyObject_To_Wstring(py_s1);
+    std::wstring s2 = PyObject_To_Wstring(py_s2);
+
+    double result = levenshtein::normalized_distance(s1, s2, score_cutoff/100);
     return PyFloat_FromDouble(result*100);
 }
 
@@ -80,35 +92,36 @@ Returns:
 )";
 
 PyObject* weighted_distance(PyObject *self, PyObject *args, PyObject *keywds) {
-    const wchar_t *s1;
-    const wchar_t *s2;
+    PyObject *py_s1;
+    PyObject *py_s2;
     std::size_t insert_cost = 1;
     std::size_t delete_cost = 1;
     std::size_t replace_cost = 1;
-    
     static const char *kwlist[] = {"s1", "s2", "insert_cost", "delete_cost", "replace_cost", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uu|nnn", const_cast<char **>(kwlist),
-                                     &s1, &s2, &insert_cost, &delete_cost, &replace_cost))
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU|nnn", const_cast<char **>(kwlist),
+                                     &py_s1, &py_s2, &insert_cost, &delete_cost, &replace_cost)) {
         return NULL;
+    }
+
+    if (PyUnicode_READY(py_s1) || PyUnicode_READY(py_s2)) {
+        return NULL;
+    }
+
+    std::wstring s1 = PyObject_To_Wstring(py_s1);
+    std::wstring s2 = PyObject_To_Wstring(py_s2);
+
 
     if (insert_cost == 1 && delete_cost == 1) {
         if (replace_cost == 1) {
-            std::size_t result = levenshtein::distance(
-                std::wstring_view(s1, wcslen(s1)),
-                std::wstring_view(s2, wcslen(s2)));
+            std::size_t result = levenshtein::distance(s1, s2);
             return PyLong_FromSize_t(result);
         } else if (replace_cost == 2) {
-            std::size_t result = levenshtein::weighted_distance(
-                std::wstring_view(s1, wcslen(s1)),
-                std::wstring_view(s2, wcslen(s2)));
+            std::size_t result = levenshtein::weighted_distance(s1, s2);
             return PyLong_FromSize_t(result);
         }
     }
-    std::size_t result = levenshtein::generic_distance(
-        std::wstring_view(s1, wcslen(s1)),
-        std::wstring_view(s2, wcslen(s2)),
-        {insert_cost, delete_cost, replace_cost});
+    std::size_t result = levenshtein::generic_distance(s1, s2, {insert_cost, delete_cost, replace_cost});
     return PyLong_FromSize_t(result);
 }
 
@@ -134,19 +147,24 @@ Returns:
 )";
 
 PyObject* normalized_weighted_distance(PyObject *self, PyObject *args, PyObject *keywds) {
-    const wchar_t *s1;
-    const wchar_t *s2;
-    float score_cutoff = 0;
+    PyObject *py_s1;
+    PyObject *py_s2;
+    double score_cutoff = 0;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uu|f", const_cast<char **>(kwlist),
-                                     &s1, &s2, &score_cutoff))
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU|d", const_cast<char **>(kwlist),
+                                     &py_s1, &py_s2, &score_cutoff)) {
         return NULL;
+    }
 
-    double result = levenshtein::normalized_weighted_distance(
-        std::wstring_view(s1, wcslen(s1)),
-        std::wstring_view(s2, wcslen(s2)),
-        score_cutoff/100);
+    if (PyUnicode_READY(py_s1) || PyUnicode_READY(py_s2)) {
+        return NULL;
+    }
+
+    std::wstring s1 = PyObject_To_Wstring(py_s1);
+    std::wstring s2 = PyObject_To_Wstring(py_s2);
+
+    double result = levenshtein::normalized_weighted_distance(s1, s2, score_cutoff/100);
     return PyFloat_FromDouble(result*100);
 }
 

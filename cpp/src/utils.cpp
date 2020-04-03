@@ -117,6 +117,8 @@ void utils::lower_case(std::wstring& s)
 
 std::wstring utils::default_process(std::wstring s)
 {
+    // replace embedded null terminators
+    std::replace( s.begin(), s.end(), {'\x00'}, ' ');
     trim(s);
     lower_case(s);
     return s;

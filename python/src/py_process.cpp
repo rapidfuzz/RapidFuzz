@@ -5,6 +5,7 @@
 #include "process.hpp"
 #include "utils.hpp"
 #include "fuzz.hpp"
+#include "py_utils.hpp"
 
 
 constexpr const char * extract_docstring = R"(
@@ -22,15 +23,16 @@ Returns:
 )";
 
 PyObject* extract(PyObject *self, PyObject *args, PyObject *keywds) {
-    wchar_t *query_buffer;
+    PyObject *py_query;
     PyObject* py_choices;
     std::size_t limit = 5;
     double score_cutoff = 0;
+    // for unknown reasons using bool here with the converter p raises a segfault
     short int preprocess = 0;
     static const char *kwlist[] = {"query", "choices", "limit", "score_cutoff", "preprocess", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uO|ndh", const_cast<char **>(kwlist),
-                                     &query_buffer, &py_choices, &limit, &score_cutoff, &preprocess)) {
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UO|ndh", const_cast<char **>(kwlist),
+                                     &py_query, &py_choices, &limit, &score_cutoff, &preprocess)) {
         return NULL;
     }
 
@@ -40,7 +42,11 @@ PyObject* extract(PyObject *self, PyObject *args, PyObject *keywds) {
     }
     std::size_t choice_count = PySequence_Fast_GET_SIZE(choices);
 
-    std::wstring cleaned_query = (preprocess) ? utils::default_process(query_buffer) : std::wstring(query_buffer);
+    if (PyUnicode_READY(py_query)) {
+        return NULL;
+    }
+
+    std::wstring query = PyObject_To_Wstring(py_query, static_cast<bool>(preprocess));
 
     std::vector<std::pair<std::wstring, double> > results;
     results.reserve(choice_count);
@@ -48,24 +54,27 @@ PyObject* extract(PyObject *self, PyObject *args, PyObject *keywds) {
     for (std::size_t i = 0; i < choice_count; ++i) {
         PyObject* py_choice = PySequence_Fast_GET_ITEM(choices, i);
 
-        const wchar_t *choice_buffer;
-        if (!PyArg_Parse(py_choice, "u", &choice_buffer)) {
+        if (!PyUnicode_Check(py_choice)) {
             PyErr_SetString(PyExc_TypeError, "Choices must be a sequence of strings");
             Py_DECREF(choices);
             return NULL;
         }
 
-        std::wstring choice(choice_buffer);
+        Py_ssize_t len = PyUnicode_GET_LENGTH(py_choice);
+        //printf("\n%zu\n", s1_len);
+        wchar_t* buffer = PyUnicode_AsWideCharString(py_choice, &len);
+        std::wstring choice(buffer, len);
+        PyMem_Free(buffer);
 
         double score;
         if (preprocess) {
             score = fuzz::WRatio(
-                cleaned_query,
+                query,
                 utils::default_process(choice),
                 score_cutoff);
         } else {
             score = fuzz::WRatio(
-                cleaned_query,
+                query,
                 choice,
                 score_cutoff);
         }
@@ -112,15 +121,15 @@ Returns:
 )";
 
 PyObject* extractOne(PyObject *self, PyObject *args, PyObject *keywds) {
-    const wchar_t* query_buffer;
+    PyObject *py_query;
     PyObject* py_choices;
     double score_cutoff = 0;
     // for unknown reasons using bool here with the converter p raises a segfault
     short int preprocess = 0;
     static const char *kwlist[] = {"query", "choices", "score_cutoff", "preprocess", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "uO|dh", const_cast<char **>(kwlist),
-                                     &query_buffer, &py_choices, &score_cutoff, &preprocess)) {
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UO|dh", const_cast<char **>(kwlist),
+                                     &py_query, &py_choices, &score_cutoff, &preprocess)) {
         return NULL;
     }
 
@@ -130,7 +139,11 @@ PyObject* extractOne(PyObject *self, PyObject *args, PyObject *keywds) {
     }
     std::size_t choice_count = PySequence_Fast_GET_SIZE(choices);
 
-    std::wstring cleaned_query = (preprocess) ? utils::default_process(query_buffer) : std::wstring(query_buffer);
+    if (PyUnicode_READY(py_query)) {
+        return NULL;
+    }
+
+    std::wstring query = PyObject_To_Wstring(py_query, static_cast<bool>(preprocess));
 
     double end_score = 0;
     std::wstring result_choice;
@@ -138,24 +151,27 @@ PyObject* extractOne(PyObject *self, PyObject *args, PyObject *keywds) {
     for (std::size_t i = 0; i < choice_count; ++i) {
         PyObject* py_choice = PySequence_Fast_GET_ITEM(choices, i);
 
-        const wchar_t *choice_buffer;
-        if (!PyArg_Parse(py_choice, "u", &choice_buffer)) {
+        if (!PyUnicode_Check(py_choice)) {
             PyErr_SetString(PyExc_TypeError, "Choices must be a sequence of strings");
             Py_DECREF(choices);
             return NULL;
         }
 
-        std::wstring choice(choice_buffer);
+        Py_ssize_t len = PyUnicode_GET_LENGTH(py_choice);
+        //printf("\n%zu\n", s1_len);
+        wchar_t* buffer = PyUnicode_AsWideCharString(py_choice, &len);
+        std::wstring choice(buffer, len);
+        PyMem_Free(buffer);
 
         double score;
         if (preprocess) {
             score = fuzz::WRatio(
-                cleaned_query,
+                query,
                 utils::default_process(choice),
                 score_cutoff);
         } else {
             score = fuzz::WRatio(
-                cleaned_query,
+                query,
                 choice,
                 score_cutoff);
         }
@@ -183,7 +199,7 @@ PyObject* extractOne(PyObject *self, PyObject *args, PyObject *keywds) {
 */
 #define PY_METHOD(x) { #x, (PyCFunction)(void(*)(void))x, METH_VARARGS | METH_KEYWORDS, x##_docstring }
 static PyMethodDef methods[] = {
-	PY_METHOD(extract),
+    PY_METHOD(extract),
     PY_METHOD(extractOne),
     {NULL, NULL, 0, NULL}   /* sentinel */
 };
