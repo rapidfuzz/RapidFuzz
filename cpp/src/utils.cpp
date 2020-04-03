@@ -144,11 +144,6 @@ DecomposedSet utils::set_decomposition(std::vector<std::wstring_view> a, std::ve
     return DecomposedSet{ intersection, difference_ab, b };
 }
 
-std::size_t utils::joined_size(const std::wstring_view& x)
-{
-    return x.size();
-}
-
 std::size_t utils::joined_size(const std::vector<std::wstring_view>& x)
 {
     if (x.empty()) {

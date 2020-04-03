@@ -5,6 +5,12 @@
 /* 0.0% - 100.0% */
 using percent = double;
 
+
+struct Sentence {
+    std::wstring_view sentence;
+    uint64_t bitmap = 0;
+};
+
 struct DecomposedSet {
     std::vector<std::wstring_view> intersection;
     std::vector<std::wstring_view> difference_ab;
@@ -27,8 +33,6 @@ std::vector<std::wstring_view> splitSV(const std::wstring_view& str);
 
 DecomposedSet set_decomposition(std::vector<std::wstring_view> a, std::vector<std::wstring_view> b);
 
-std::size_t joined_size(const std::wstring_view& x);
-
 std::size_t joined_size(const std::vector<std::wstring_view>& x);
 
 std::wstring join(const std::vector<std::wstring_view>& sentence);
@@ -44,4 +48,16 @@ std::wstring default_process(std::wstring s);
 Affix remove_common_affix(std::wstring_view& a, std::wstring_view& b);
 
 void remove_common_affix(std::vector<std::wstring_view>& a, std::vector<std::wstring_view>& b);
+}
+
+inline uint64_t bitmap_create(const std::wstring_view& sentence) {
+    uint64_t bitmap = 0;
+    for (const unsigned int& letter : sentence) {
+        uint8_t shift = (letter % 16) * 4;
+        uint64_t bitmask = static_cast<uint64_t>(0b1111) << shift;
+        if ((bitmap & bitmask) != bitmask) {
+            bitmap += static_cast<uint64_t>(1) << shift;
+        }
+    }
+    return bitmap;
 }

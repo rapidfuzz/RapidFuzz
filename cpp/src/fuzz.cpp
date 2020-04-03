@@ -42,56 +42,66 @@ percent fuzz::ratio(const std::wstring_view& s1, const std::wstring_view& s2, pe
     return utils::result_cutoff(result * 100, score_cutoff);
 }
 
-percent fuzz::token_ratio(const std::wstring_view& s1, const std::wstring_view& s2, percent score_cutoff)
+percent fuzz::token_ratio(const Sentence& s1, const Sentence& s2, percent score_cutoff)
 {
     if (score_cutoff > 100) {
         return 0;
     }
 
-    std::vector<std::wstring_view> tokens_a = utils::splitSV(s1);
+    std::vector<std::wstring_view> tokens_a = utils::splitSV(s1.sentence);
     std::sort(tokens_a.begin(), tokens_a.end());
-    std::vector<std::wstring_view> tokens_b = utils::splitSV(s2);
+    std::vector<std::wstring_view> tokens_b = utils::splitSV(s2.sentence);
     std::sort(tokens_b.begin(), tokens_b.end());
 
     auto[intersection, difference_ab, difference_ba] = utils::set_decomposition(tokens_a, tokens_b);
 
-    std::size_t ab_len = utils::joined_size(difference_ab);
-    std::size_t ba_len = utils::joined_size(difference_ba);
-    std::size_t double_prefix = 2 * utils::joined_size(intersection);
+    std::wstring diff_ab_joined = utils::join(difference_ab);
+    std::wstring diff_ba_joined = utils::join(difference_ba);
 
-    // fuzzywuzzy joined sect and ab/ba for comparisions
-    // this is not done here as an optimisation, so the lengths get incremented by 1
-    // since there would be a whitespace between the joined strings
-    if (double_prefix) {
-        // exit early since this will always result in a ratio of 1
-        if (!ab_len || !ba_len)
-            return 100;
+    std::size_t ab_len = diff_ab_joined.length();
+    std::size_t ba_len = diff_ba_joined.length();
+    std::size_t sect_len = utils::joined_size(intersection);
 
-        ++ab_len;
-        ++ba_len;
+    // exit early since this will always result in a ratio of 1
+    if (sect_len && (!ab_len || !ba_len)) {
+        return 100;
     }
 
-    double result = levenshtein::normalized_weighted_distance(tokens_a, tokens_b, score_cutoff / 100);
+    double result = 0;
+    if (quick_lev_estimate(s1, s2, score_cutoff)) {
+        result = levenshtein::normalized_weighted_distance(
+            utils::join(tokens_a),
+            utils::join(tokens_b),
+            score_cutoff / 100);
+    }
 
-    // TODO: could add score cutoff aswell, but would need to copy most things from normalized_score_cutoff
-    // as an alternative add another utility function to levenshtein for this case
-    std::size_t sect_distance = levenshtein::weighted_distance(difference_ab, difference_ba);
-    if (sect_distance != std::numeric_limits<std::size_t>::max()) {
-        std::size_t lensum = ab_len + ba_len + double_prefix;
-        result = std::max(result, 1.0 - static_cast<double>(sect_distance) / lensum);
+    // string length sect+ab <-> sect and sect+ba <-> sect
+    std::size_t sect_ab_lensum = sect_len + !!sect_len + ab_len;
+    std::size_t sect_ba_lensum = sect_len + !!sect_len + ba_len;
+
+    Sentence diff_ab{diff_ab_joined,  bitmap_create(diff_ab_joined)};
+    Sentence diff_ba{diff_ba_joined,  bitmap_create(diff_ba_joined)};
+    double bm_ratio = 1.0 - bitmap_distance(diff_ab, diff_ba) / static_cast<double>(sect_ab_lensum + sect_ba_lensum);
+    if (bm_ratio >= score_cutoff) {
+        std::size_t sect_distance = levenshtein::weighted_distance(diff_ab_joined, diff_ba_joined);
+        result = std::max(result, 1.0 - sect_distance / static_cast<double>(sect_ab_lensum + sect_ba_lensum));
     }
 
     // exit early since the other ratios are 0
-    // (when a or b was empty they would cause a segfault)
-    if (!double_prefix) {
+    if (!sect_len) {
         return utils::result_cutoff(result * 100, score_cutoff);
     }
+
+    // levenshtein distance sect+ab <-> sect and sect+ba <-> sect
+    // would exit early after removing the prefix sect, so the distance can be directly calculated
+    std::size_t sect_ab_distance = !!sect_len + ab_len;
+    std::size_t sect_ba_distance = !!sect_len + ba_len;
 
     result = std::max({ result,
         // levenshtein distances sect+ab <-> sect and sect+ba <-> sect
         // would exit early after removing the prefix sect, so the distance can be directly calculated
-        1.0 - ab_len / static_cast<double>(ab_len + double_prefix),
-        1.0 - ba_len / static_cast<double>(ba_len + double_prefix) });
+        1.0 - sect_ab_distance / static_cast<double>(sect_len + sect_ab_lensum),
+        1.0 - sect_ba_distance / static_cast<double>(sect_len + sect_ba_lensum) });
     return utils::result_cutoff(result * 100, score_cutoff);
 }
 
@@ -150,10 +160,16 @@ percent _token_sort(const std::wstring_view& s1, const std::wstring_view& s2, bo
     std::sort(tokens_b.begin(), tokens_b.end());
 
     if (partial) {
-        return fuzz::partial_ratio(utils::join(tokens_a), utils::join(tokens_b), score_cutoff);
+        return fuzz::partial_ratio(
+            utils::join(tokens_a),
+            utils::join(tokens_b),
+            score_cutoff);
     }
     else {
-        double result = levenshtein::normalized_weighted_distance(tokens_a, tokens_b, score_cutoff / 100);
+        double result = levenshtein::normalized_weighted_distance(
+            utils::join(tokens_a),
+            utils::join(tokens_b),
+            score_cutoff / 100);
         return utils::result_cutoff(result * 100, score_cutoff);
     }
 }
@@ -181,43 +197,41 @@ percent fuzz::token_set_ratio(const std::wstring_view& s1, const std::wstring_vi
 
     auto[intersection, difference_ab, difference_ba] = utils::set_decomposition(tokens_a, tokens_b);
 
-    std::size_t ab_len = utils::joined_size(difference_ab);
-    std::size_t ba_len = utils::joined_size(difference_ba);
-    std::size_t double_prefix = 2 * utils::joined_size(intersection);
+    std::wstring diff_ab_joined = utils::join(difference_ab);
+    std::wstring diff_ba_joined = utils::join(difference_ba);
 
-    // fuzzywuzzy joined sect and ab/ba for comparisions
-    // this is not done here as an optimisation, so the lengths get incremented by 1
-    // since there would be a whitespace between the joined strings
-    if (double_prefix) {
-        // exit early since this will always result in a ratio of 1
-        if (!ab_len || !ba_len)
-            return 100;
+    std::size_t ab_len = diff_ab_joined.length();
+    std::size_t ba_len = diff_ba_joined.length();
+    std::size_t sect_len = utils::joined_size(intersection);
 
-        ++ab_len;
-        ++ba_len;
+    // exit early since this will always result in a ratio of 1
+    if (sect_len && (!ab_len || !ba_len)) {
+        return 100;
     }
 
-    // TODO: could add score cutoff aswell, but would need to copy most things from normalized_score_cutoff
-    // as an alternative add another utility function to levenshtein for this case
-    std::size_t sect_distance = levenshtein::weighted_distance(difference_ab, difference_ba);
+    // string length sect+ab <-> sect and sect+ba <-> sect
+    std::size_t sect_ab_lensum = sect_len + !!sect_len + ab_len;
+    std::size_t sect_ba_lensum = sect_len + !!sect_len + ba_len;
+
+    std::size_t sect_distance = levenshtein::weighted_distance(diff_ab_joined, diff_ba_joined);
     double result = 0;
     if (sect_distance != std::numeric_limits<std::size_t>::max()) {
-        std::size_t lensum = ab_len + ba_len + double_prefix;
-        result = 1.0 - static_cast<double>(sect_distance) / lensum;
+        result = std::max(result, 1.0 - sect_distance / static_cast<double>(sect_ab_lensum + sect_ba_lensum));
     }
 
     // exit early since the other ratios are 0
-    // (when a or b was empty they would cause a segfault)
-    if (!double_prefix) {
+    if (!sect_len) {
         return utils::result_cutoff(result * 100, score_cutoff);
     }
 
-    result = std::max({ result,
-        // levenshtein distances sect+ab <-> sect and sect+ba <-> sect
-        // would exit early after removing the prefix sect, so the distance can be directly calculated
-        1.0 - ab_len / static_cast<double>(ab_len + double_prefix),
-        1.0 - ba_len / static_cast<double>(ba_len + double_prefix) });
+    // levenshtein distance sect+ab <-> sect and sect+ba <-> sect
+    // would exit early after removing the prefix sect, so the distance can be directly calculated
+    std::size_t sect_ab_distance = !!sect_len + ab_len;
+    std::size_t sect_ba_distance = !!sect_len + ba_len;
 
+    result = std::max({ result,
+        1.0 - sect_ab_distance / static_cast<double>(sect_len + sect_ab_lensum),
+        1.0 - sect_ba_distance / static_cast<double>(sect_len + sect_ba_lensum) });
     return utils::result_cutoff(result * 100, score_cutoff);
 }
 
@@ -251,7 +265,55 @@ percent fuzz::partial_token_set_ratio(const std::wstring_view& s1, const std::ws
     return partial_ratio(utils::join(difference_ab), utils::join(difference_ba), score_cutoff);
 }
 
-percent fuzz::WRatio(const std::wstring_view& s1, const std::wstring_view& s2, percent score_cutoff)
+std::size_t fuzz::bitmap_distance(const Sentence& s1, const Sentence& s2) {
+    uint64_t bitmap1 = s1.bitmap;
+    uint64_t bitmap2 = s2.bitmap;
+
+    std::size_t distance = 0;
+    while (bitmap1 || bitmap2) {
+        uint8_t val1 = bitmap1 & 0b1111;
+        uint8_t val2 = bitmap2 & 0b1111;
+        if (val1 > val2) {
+            distance += val1 - val2;
+        } else {
+            distance += val2 - val1;
+        }
+        bitmap1 >>= 4;
+        bitmap2 >>= 4;
+    }
+    return distance;
+}
+
+percent fuzz::bitmap_ratio(const Sentence& s1, const Sentence& s2, percent score_cutoff) {
+    std::size_t distance = bitmap_distance(s1, s2);
+    std::size_t lensum = s1.sentence.length() + s2.sentence.length();
+    percent result = 1.0 - static_cast<double>(distance) / lensum;
+
+    return utils::result_cutoff(result * 100, score_cutoff);
+}
+
+
+percent fuzz::length_ratio(const Sentence& s1, const Sentence& s2, percent score_cutoff) {
+    std::size_t s1_len = s1.sentence.length();
+    std::size_t s2_len = s2.sentence.length();
+    std::size_t distance = (s1_len > s2_len)
+        ? s1_len - s2_len
+        : s2_len - s1_len;
+    
+    std::size_t lensum = s1_len + s2_len;
+    double result = 1.0 - static_cast<double>(distance) / lensum;
+    return utils::result_cutoff(result * 100, score_cutoff);
+}
+
+percent fuzz::quick_lev_estimate(const Sentence& s1, const Sentence& s2, percent score_cutoff) {
+    if (s1.bitmap || s2.bitmap) {
+        return bitmap_ratio(s1, s2, score_cutoff);
+    } else {
+        return length_ratio(s1, s2, score_cutoff);
+    }
+}
+
+percent fuzz::WRatio(const Sentence& s1, const Sentence& s2, percent score_cutoff)
 {
     if (score_cutoff > 100) {
         return 0;
@@ -259,25 +321,27 @@ percent fuzz::WRatio(const std::wstring_view& s1, const std::wstring_view& s2, p
 
     const double UNBASE_SCALE = 0.95;
 
-    std::size_t len_a = s1.length();
-    std::size_t len_b = s2.length();
+    std::size_t len_a = s1.sentence.length();
+    std::size_t len_b = s2.sentence.length();
     double len_ratio = (len_a > len_b) ? static_cast<double>(len_a) / len_b : static_cast<double>(len_b) / len_a;
 
-    double sratio = ratio(s1, s2, score_cutoff);
+    double sratio = 0;
+    if (quick_lev_estimate(s1, s2, score_cutoff)) {
+        sratio = ratio(s1.sentence, s2.sentence, score_cutoff);
+        // increase the score_cutoff by a small step so it might be able to exit early
+        score_cutoff = std::max(score_cutoff, sratio + 0.00001);
+    }
 
     if (len_ratio < 1.5) {
-        // increase the score_cutoff by a small step so it might be able to exit early
-        score_cutoff = std::max(score_cutoff, sratio + 0.00001) / UNBASE_SCALE;
-        return std::max(sratio, token_ratio(s1, s2, score_cutoff) * UNBASE_SCALE);
+        return std::max(sratio, token_ratio(s1, s2, score_cutoff / UNBASE_SCALE) * UNBASE_SCALE);
     }
 
     double partial_scale = (len_ratio < 8.0) ? 0.9 : 0.6;
 
-    // increase the score_cutoff by a small step so it might be able to exit early
-    score_cutoff = std::max(score_cutoff, sratio + 0.00001) / partial_scale;
-    sratio = std::max(sratio, partial_ratio(s1, s2, score_cutoff) * partial_scale);
+    score_cutoff /= partial_scale;
+    sratio = std::max(sratio, partial_ratio(s1.sentence, s2.sentence, score_cutoff) * partial_scale);
 
     // increase the score_cutoff by a small step so it might be able to exit early
     score_cutoff = std::max(score_cutoff, sratio + 0.00001) / UNBASE_SCALE;
-    return std::max(sratio, partial_token_ratio(s1, s2, score_cutoff) * UNBASE_SCALE * partial_scale);
+    return std::max(sratio, partial_token_ratio(s1.sentence, s2.sentence, score_cutoff) * UNBASE_SCALE * partial_scale);
 }

@@ -14,7 +14,6 @@ Find the best matches in a list of choices
 Args: 
     query (str): string we want to find
     choices (Iterable): list of all strings the query should be compared with
-    limit (int): maximum amount of results to return
     score_cutoff (float): Optional argument for a score threshold. Matches with
         a lower score than this number will not be returned. Defaults to 0
 
@@ -25,14 +24,12 @@ Returns:
 PyObject* extract(PyObject *self, PyObject *args, PyObject *keywds) {
     PyObject *py_query;
     PyObject* py_choices;
-    std::size_t limit = 5;
     double score_cutoff = 0;
-    // for unknown reasons using bool here with the converter p raises a segfault
-    short int preprocess = 0;
-    static const char *kwlist[] = {"query", "choices", "limit", "score_cutoff", "preprocess", NULL};
+    int preprocess = 0;
+    static const char *kwlist[] = {"query", "choices", "score_cutoff", "preprocess", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UO|ndh", const_cast<char **>(kwlist),
-                                     &py_query, &py_choices, &limit, &score_cutoff, &preprocess)) {
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UO|dp", const_cast<char **>(kwlist),
+                                     &py_query, &py_choices, &score_cutoff, &preprocess)) {
         return NULL;
     }
 
@@ -46,10 +43,10 @@ PyObject* extract(PyObject *self, PyObject *args, PyObject *keywds) {
         return NULL;
     }
 
-    std::wstring query = PyObject_To_Wstring(py_query, static_cast<bool>(preprocess));
+    std::wstring cleaned_query = PyObject_To_Wstring(py_query, static_cast<bool>(preprocess));
+    uint64_t query_bitmap = bitmap_create(cleaned_query);
 
-    std::vector<std::pair<std::wstring, double> > results;
-    results.reserve(choice_count);
+    PyObject* results = PyList_New(0);
 
     for (std::size_t i = 0; i < choice_count; ++i) {
         PyObject* py_choice = PySequence_Fast_GET_ITEM(choices, i);
@@ -61,48 +58,25 @@ PyObject* extract(PyObject *self, PyObject *args, PyObject *keywds) {
         }
 
         Py_ssize_t len = PyUnicode_GET_LENGTH(py_choice);
-        //printf("\n%zu\n", s1_len);
         wchar_t* buffer = PyUnicode_AsWideCharString(py_choice, &len);
         std::wstring choice(buffer, len);
         PyMem_Free(buffer);
 
-        double score;
-        if (preprocess) {
-            score = fuzz::WRatio(
-                query,
-                utils::default_process(choice),
+        std::wstring_view cleaned_choice = (preprocess) ? utils::default_process(choice) : choice;
+        uint64_t choice_bitmap = bitmap_create(cleaned_choice);
+
+        double score= fuzz::WRatio(
+                {cleaned_query, query_bitmap},
+                {cleaned_choice, choice_bitmap},
                 score_cutoff);
-        } else {
-            score = fuzz::WRatio(
-                query,
-                choice,
-                score_cutoff);
-        }
 
         if (score >= score_cutoff) {
-            results.emplace_back(std::make_pair(choice, score));
+            PyList_Append(results, Py_BuildValue("(u#d)", choice.c_str(), choice.length(), score));
         }
     }
 
     Py_DECREF(choices);
-
-    std::sort(results.rbegin(), results.rend(), [](auto const& t1, auto const& t2) {
-        return std::get<1>(t1) < std::get<1>(t2);
-    });
-
-    if (limit < results.size()) {
-        results.resize(limit);
-    }
-
-    PyObject* py_return = PyList_New(results.size());
-
-    for (std::size_t i = 0; i < results.size(); ++i) {
-        auto const& [choice, score] = results[i];
-        PyObject* py_tuple = Py_BuildValue("(u#d)", choice.c_str(), choice.length(), score);
-        PyList_SetItem(py_return, i, py_tuple);
-    }
-
-    return py_return;
+    return results;
 }
 
 
@@ -124,11 +98,10 @@ PyObject* extractOne(PyObject *self, PyObject *args, PyObject *keywds) {
     PyObject *py_query;
     PyObject* py_choices;
     double score_cutoff = 0;
-    // for unknown reasons using bool here with the converter p raises a segfault
-    short int preprocess = 0;
+    int preprocess = 0;
     static const char *kwlist[] = {"query", "choices", "score_cutoff", "preprocess", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UO|dh", const_cast<char **>(kwlist),
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UO|dp", const_cast<char **>(kwlist),
                                      &py_query, &py_choices, &score_cutoff, &preprocess)) {
         return NULL;
     }
@@ -143,7 +116,8 @@ PyObject* extractOne(PyObject *self, PyObject *args, PyObject *keywds) {
         return NULL;
     }
 
-    std::wstring query = PyObject_To_Wstring(py_query, static_cast<bool>(preprocess));
+    std::wstring cleaned_query = PyObject_To_Wstring(py_query, static_cast<bool>(preprocess));
+    uint64_t query_bitmap = bitmap_create(cleaned_query);
 
     double end_score = 0;
     std::wstring result_choice;
@@ -158,23 +132,17 @@ PyObject* extractOne(PyObject *self, PyObject *args, PyObject *keywds) {
         }
 
         Py_ssize_t len = PyUnicode_GET_LENGTH(py_choice);
-        //printf("\n%zu\n", s1_len);
         wchar_t* buffer = PyUnicode_AsWideCharString(py_choice, &len);
         std::wstring choice(buffer, len);
         PyMem_Free(buffer);
 
-        double score;
-        if (preprocess) {
-            score = fuzz::WRatio(
-                query,
-                utils::default_process(choice),
+        std::wstring_view cleaned_choice = (preprocess) ? utils::default_process(choice) : choice;
+        uint64_t choice_bitmap = bitmap_create(cleaned_choice);
+
+        double score = fuzz::WRatio(
+                {cleaned_query, query_bitmap},
+                {cleaned_choice, choice_bitmap},
                 score_cutoff);
-        } else {
-            score = fuzz::WRatio(
-                query,
-                choice,
-                score_cutoff);
-        }
 
         if (score >= score_cutoff) {
             // increase the score_cutoff by a small step so it might be able to exit early
