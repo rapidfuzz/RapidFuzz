@@ -63,7 +63,7 @@ jobs:
         os: [ubuntu-18.04, windows-latest, macos-latest]
     env:
       CIBW_SKIP: cp27-* pp*
-      MACOSX_DEPLOYMENT_TARGET: "10.15"
+      MACOSX_DEPLOYMENT_TARGET: "10.9"
 
     steps:
     - uses: actions/checkout@v1

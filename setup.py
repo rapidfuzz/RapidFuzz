@@ -14,8 +14,8 @@ with open(path.join(this_dir, 'README.md'), encoding='utf-8') as f:
 class BuildExt(build_ext):
     """A custom build extension for adding compiler-specific options."""
     c_opts = {
-        'msvc': ['/EHsc', '/O2', '/std:c++17'],
-        'unix': ['-O3', '-std=c++17'],
+        'msvc': ['/EHsc', '/O2', '/std:c++14'],
+        'unix': ['-O3', '-std=c++14'],
     }
     l_opts = {
         'msvc': [],
@@ -23,7 +23,7 @@ class BuildExt(build_ext):
     }
 
     if sys.platform == 'darwin':
-        darwin_opts = ['-stdlib=libc++', '-mmacosx-version-min=10.14']
+        darwin_opts = ['-stdlib=libc++', '-mmacosx-version-min=10.9']
         c_opts['unix'] += darwin_opts
         l_opts['unix'] += darwin_opts
 
@@ -53,19 +53,19 @@ setup(
 		Extension(
 			'rapidfuzz.levenshtein',
 			['python/src/py_levenshtein.cpp', 'cpp/src/levenshtein.cpp', 'cpp/src/utils.cpp'],
-        	include_dirs=["cpp/src"],
+        	include_dirs=["cpp/src", "cpp/extern"],
         	language='c++',
 		),
 		Extension(
 			'rapidfuzz.fuzz',
 			['python/src/py_fuzz.cpp', 'cpp/src/fuzz.cpp', 'cpp/src/levenshtein.cpp', 'cpp/src/utils.cpp'],
-        	include_dirs=["cpp/src"],
+        	include_dirs=["cpp/src", "cpp/extern"],
         	language='c++',
 		),
 		Extension(
 			'rapidfuzz._process',
-			['python/src/py_process.cpp', 'cpp/src/process.cpp', 'cpp/src/fuzz.cpp', 'cpp/src/levenshtein.cpp', 'cpp/src/utils.cpp'],
-        	include_dirs=["cpp/src"],
+			['python/src/py_process.cpp', 'cpp/src/fuzz.cpp', 'cpp/src/levenshtein.cpp', 'cpp/src/utils.cpp'],
+        	include_dirs=["cpp/src", "cpp/extern"],
         	language='c++',
 		),
 	],

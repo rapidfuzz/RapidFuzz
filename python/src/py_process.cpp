@@ -2,7 +2,7 @@
 #include <Python.h>
 #include <string>
 #include <algorithm>
-#include "process.hpp"
+#include <boost/utility/string_view.hpp>
 #include "utils.hpp"
 #include "fuzz.hpp"
 #include "py_utils.hpp"
@@ -62,7 +62,7 @@ PyObject* extract(PyObject *self, PyObject *args, PyObject *keywds) {
         std::wstring choice(buffer, len);
         PyMem_Free(buffer);
 
-        std::wstring_view cleaned_choice = (preprocess) ? utils::default_process(choice) : choice;
+        boost::wstring_view cleaned_choice = (preprocess) ? utils::default_process(choice) : choice;
         uint64_t choice_bitmap = bitmap_create(cleaned_choice);
 
         double score= fuzz::WRatio(
@@ -136,7 +136,7 @@ PyObject* extractOne(PyObject *self, PyObject *args, PyObject *keywds) {
         std::wstring choice(buffer, len);
         PyMem_Free(buffer);
 
-        std::wstring_view cleaned_choice = (preprocess) ? utils::default_process(choice) : choice;
+        boost::wstring_view cleaned_choice = (preprocess) ? utils::default_process(choice) : choice;
         uint64_t choice_bitmap = bitmap_create(cleaned_choice);
 
         double score = fuzz::WRatio(

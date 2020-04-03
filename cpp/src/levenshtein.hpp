@@ -1,5 +1,5 @@
 #pragma once
-#include <string_view>
+#include <boost/utility/string_view.hpp>
 #include <vector>
 #include <cmath>
 #include <optional>
@@ -38,9 +38,9 @@ struct Matrix {
     std::size_t matrix_rows;
 };
 
-Matrix matrix(std::wstring_view sentence1, std::wstring_view sentence2);
+Matrix matrix(boost::wstring_view sentence1, boost::wstring_view sentence2);
 
-std::vector<EditOp> editops(std::wstring_view sentence1, std::wstring_view sentence2);
+std::vector<EditOp> editops(boost::wstring_view sentence1, boost::wstring_view sentence2);
 
 struct MatchingBlock {
     std::size_t first_start;
@@ -53,11 +53,11 @@ struct MatchingBlock {
     {}
 };
 
-std::vector<MatchingBlock> matching_blocks(std::wstring_view sentence1, std::wstring_view sentence2);
+std::vector<MatchingBlock> matching_blocks(boost::wstring_view sentence1, boost::wstring_view sentence2);
 
-double normalized_distance(std::wstring_view sentence1, std::wstring_view sentence2, double min_ratio = 0.0);
+double normalized_distance(boost::wstring_view sentence1, boost::wstring_view sentence2, double min_ratio = 0.0);
 
-std::size_t distance(std::wstring_view sentence1, std::wstring_view sentence2);
+std::size_t distance(boost::wstring_view sentence1, boost::wstring_view sentence2);
 
 /**
  * Calculates the minimum number of insertions, deletions, and substitutions
@@ -75,13 +75,13 @@ std::size_t distance(std::wstring_view sentence1, std::wstring_view sentence2);
  * @param sentence2 second sentence to match (can be either a string type or a vector of strings)
  * @return weighted levenshtein distance
  */
-std::size_t weighted_distance(std::wstring_view sentence1, std::wstring_view sentence2);
+std::size_t weighted_distance(boost::wstring_view sentence1, boost::wstring_view sentence2);
 
-std::size_t generic_distance(std::wstring_view source, std::wstring_view target, WeightTable weights = { 1, 1, 1 });
+std::size_t generic_distance(boost::wstring_view source, boost::wstring_view target, WeightTable weights = { 1, 1, 1 });
 
 /**
   * Calculates a normalized score of the weighted Levenshtein algorithm between 0.0 and
   * 1.0 (inclusive), where 1.0 means the sequences are the same.
   */
-double normalized_weighted_distance(const std::wstring_view& sentence1, const std::wstring_view& sentence2, double min_ratio = 0.0);
+double normalized_weighted_distance(const boost::wstring_view& sentence1, const boost::wstring_view& sentence2, double min_ratio = 0.0);
 }
