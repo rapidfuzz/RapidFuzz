@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-levenshtein::Matrix levenshtein::matrix(std::wstring_view sentence1, std::wstring_view sentence2)
+levenshtein::Matrix levenshtein::matrix(boost::wstring_view sentence1, boost::wstring_view sentence2)
 {
     Affix affix = utils::remove_common_affix(sentence1, sentence2);
 
@@ -42,7 +42,7 @@ levenshtein::Matrix levenshtein::matrix(std::wstring_view sentence1, std::wstrin
     };
 }
 
-std::vector<levenshtein::EditOp> levenshtein::editops(std::wstring_view sentence1, std::wstring_view sentence2)
+std::vector<levenshtein::EditOp> levenshtein::editops(boost::wstring_view sentence1, boost::wstring_view sentence2)
 {
     auto m = matrix(sentence1, sentence2);
     std::size_t matrix_columns = m.matrix_columns;
@@ -103,7 +103,7 @@ std::vector<levenshtein::EditOp> levenshtein::editops(std::wstring_view sentence
     return ops;
 }
 
-std::vector<levenshtein::MatchingBlock> levenshtein::matching_blocks(std::wstring_view sentence1, std::wstring_view sentence2)
+std::vector<levenshtein::MatchingBlock> levenshtein::matching_blocks(boost::wstring_view sentence1, boost::wstring_view sentence2)
 {
     auto edit_ops = editops(sentence1, sentence2);
     std::size_t first_start = 0;
@@ -141,36 +141,8 @@ std::vector<levenshtein::MatchingBlock> levenshtein::matching_blocks(std::wstrin
     return mblocks;
 }
 
-double levenshtein::normalized_distance(std::wstring_view sentence1, std::wstring_view sentence2, double min_ratio)
+std::size_t levenshtein::distance(boost::wstring_view sentence1, boost::wstring_view sentence2)
 {
-    if (sentence1.empty() || sentence2.empty()) {
-        return sentence1.empty() && sentence2.empty();
-    }
-
-    std::size_t sentence1_len = utils::joined_size(sentence1);
-    std::size_t sentence2_len = utils::joined_size(sentence2);
-    std::size_t max_len = std::max(sentence1_len, sentence2_len);
-
-    // constant time calculation to find a string ratio based on the string length
-    // so it can exit early without running any levenshtein calculations
-    std::size_t min_distance = (sentence1_len > sentence2_len)
-        ? sentence1_len - sentence2_len
-        : sentence2_len - sentence1_len;
-
-    double len_ratio = 1.0 - static_cast<double>(min_distance) / max_len;
-    if (len_ratio < min_ratio) {
-        return 0.0;
-    }
-
-    std::size_t dist = distance(sentence1, sentence2);
-
-    double ratio = 1.0 - static_cast<double>(dist) / max_len;
-    return (ratio >= min_ratio) ? ratio : 0.0;
-}
-
-std::size_t levenshtein::distance(std::wstring_view sentence1, std::wstring_view sentence2)
-{
-
     utils::remove_common_affix(sentence1, sentence2);
 
     if (sentence2.size() > sentence1.size())
@@ -202,7 +174,47 @@ std::size_t levenshtein::distance(std::wstring_view sentence1, std::wstring_view
     return cache.back();
 }
 
-std::size_t levenshtein::generic_distance(std::wstring_view sentence1, std::wstring_view sentence2, WeightTable weights)
+std::size_t levenshtein::weighted_distance(boost::wstring_view sentence1, boost::wstring_view sentence2)
+{
+    utils::remove_common_affix(sentence1, sentence2);
+
+    if (sentence2.size() > sentence1.size()) {
+        std::swap(sentence1, sentence2);
+    }
+
+    if (sentence2.empty()) {
+        return sentence1.length();
+    }
+
+    std::vector<std::size_t> cache(sentence2.length());
+    std::iota(cache.begin(), cache.end(), 1);
+
+    std::size_t sentence1_pos = 0;
+    for (const auto& char1 : sentence1) {
+        auto cache_iter = cache.begin();
+        std::size_t current_cache = sentence1_pos;
+        std::size_t result = sentence1_pos + 1;
+        for (const auto& char2 : sentence2) {
+            if (char1 == char2) {
+                result = current_cache;
+            } else {
+                ++result;
+            }
+            current_cache = *cache_iter;
+            if (result > current_cache + 1) {
+                result = current_cache + 1;
+            }
+
+            *cache_iter = result;
+            ++cache_iter;
+        }
+
+        ++sentence1_pos;
+    }
+    return cache.back();
+}
+
+std::size_t levenshtein::generic_distance(boost::wstring_view sentence1, boost::wstring_view sentence2, WeightTable weights)
 {
     utils::remove_common_affix(sentence1, sentence2);
     if (sentence1.size() > sentence2.size()) {
@@ -234,4 +246,61 @@ std::size_t levenshtein::generic_distance(std::wstring_view sentence1, std::wstr
     }
 
     return cache.back();
+}
+
+double levenshtein::normalized_distance(boost::wstring_view sentence1, boost::wstring_view sentence2, double min_ratio)
+{
+    if (sentence1.empty() || sentence2.empty()) {
+        return sentence1.empty() && sentence2.empty();
+    }
+
+    std::size_t sentence1_len = sentence1.length();
+    std::size_t sentence2_len = sentence2.length();
+    std::size_t max_len = std::max(sentence1_len, sentence2_len);
+
+    // constant time calculation to find a string ratio based on the string length
+    // so it can exit early without running any levenshtein calculations
+    std::size_t min_distance = (sentence1_len > sentence2_len)
+        ? sentence1_len - sentence2_len
+        : sentence2_len - sentence1_len;
+
+    double len_ratio = 1.0 - static_cast<double>(min_distance) / max_len;
+    if (len_ratio < min_ratio) {
+        return 0.0;
+    }
+
+    std::size_t dist = distance(sentence1, sentence2);
+
+    double ratio = 1.0 - static_cast<double>(dist) / max_len;
+    return (ratio >= min_ratio) ? ratio : 0.0;
+}
+
+double levenshtein::normalized_weighted_distance(const boost::wstring_view& sentence1, const boost::wstring_view& sentence2, double min_ratio)
+{
+    if (sentence1.empty() || sentence2.empty()) {
+        return sentence1.empty() && sentence2.empty();
+    }
+
+    std::size_t sentence1_len = sentence1.length();
+    std::size_t sentence2_len = sentence2.length();
+    std::size_t lensum = sentence1_len + sentence2_len;
+
+    // constant time calculation to find a string ratio based on the string length
+    // so it can exit early without running any levenshtein calculations
+    std::size_t min_distance = (sentence1_len > sentence2_len)
+        ? sentence1_len - sentence2_len
+        : sentence2_len - sentence1_len;
+
+    double len_ratio = 1.0 - static_cast<double>(min_distance) / lensum;
+    if (len_ratio < min_ratio) {
+        return 0.0;
+    }
+
+    std::size_t dist =  weighted_distance(sentence1, sentence2);
+
+    if (dist > lensum) {
+        return 0.0;
+    }
+    double ratio = 1.0 - static_cast<double>(dist) / lensum;
+    return (ratio >= min_ratio) ? ratio : 0.0;
 }

@@ -25,19 +25,20 @@ def extract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, proce
   
     """
     if (not scorer or scorer == fuzz.WRatio) and (not processor or processor == utils.default_process):
-        return rapidfuzz._process.extract(query, choices, limit, score_cutoff, bool(processor))
+        results = rapidfuzz._process.extract(query, choices, score_cutoff, bool(processor))
 
     # evaluate score inside python since scorer is a python function and so it would be required
     # to add the python layer from C++ aswell
-    a = processor(query) if processor else query
-    results = []
+    else:
+        a = processor(query) if processor else query
+        results = []
 
-    for choice in choices:
-        b = processor(choice) if processor else choice
+        for choice in choices:
+            b = processor(choice) if processor else choice
 
-        score = scorer(a, b, score_cutoff, False)
-        if score >= score_cutoff:
-            results.append((choice, score))
+            score = scorer(a, b, score_cutoff, False)
+            if score >= score_cutoff:
+                results.append((choice, score))
 
     return heapq.nlargest(limit, results, key=lambda x: x[1])
 

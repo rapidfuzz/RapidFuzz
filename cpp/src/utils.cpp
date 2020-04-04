@@ -15,7 +15,7 @@ inline auto common_prefix_length(InputIterator1 first1, InputIterator1 last1,
 /**
  * Removes common prefix of two string views
  */
-std::size_t remove_common_prefix(std::wstring_view& a, std::wstring_view& b)
+std::size_t remove_common_prefix(boost::wstring_view& a, boost::wstring_view& b)
 {
     auto prefix = common_prefix_length(a.begin(), a.end(), b.begin(), b.end());
     a.remove_prefix(prefix);
@@ -26,7 +26,7 @@ std::size_t remove_common_prefix(std::wstring_view& a, std::wstring_view& b)
 /**
  * Removes common suffix of two string views
  */
-std::size_t remove_common_suffix(std::wstring_view& a, std::wstring_view& b)
+std::size_t remove_common_suffix(boost::wstring_view& a, boost::wstring_view& b)
 {
     auto suffix = common_prefix_length(a.rbegin(), a.rend(), b.rbegin(), b.rend());
     a.remove_suffix(suffix);
@@ -37,7 +37,7 @@ std::size_t remove_common_suffix(std::wstring_view& a, std::wstring_view& b)
 /**
  * Removes common affix of two string views
  */
-Affix utils::remove_common_affix(std::wstring_view& a, std::wstring_view& b)
+Affix utils::remove_common_affix(boost::wstring_view& a, boost::wstring_view& b)
 {
     return Affix{
         remove_common_prefix(a, b),
@@ -57,7 +57,7 @@ void vec_remove_common_affix(T& a, T& b)
     b.erase(b.end() - suffix, b.end());
 }
 
-void utils::remove_common_affix(std::vector<std::wstring_view>& a, std::vector<std::wstring_view>& b)
+void utils::remove_common_affix(std::vector<boost::wstring_view>& a, std::vector<boost::wstring_view>& b)
 {
     vec_remove_common_affix(a, b);
     if (!a.empty() && !b.empty()) {
@@ -66,7 +66,7 @@ void utils::remove_common_affix(std::vector<std::wstring_view>& a, std::vector<s
     }
 }
 
-std::wstring utils::join(const std::vector<std::wstring_view>& sentence)
+std::wstring utils::join(const std::vector<boost::wstring_view>& sentence)
 {
     if (sentence.empty()) {
         return std::wstring();
@@ -124,10 +124,10 @@ std::wstring utils::default_process(std::wstring s)
     return s;
 }
 
-DecomposedSet utils::set_decomposition(std::vector<std::wstring_view> a, std::vector<std::wstring_view> b)
+DecomposedSet utils::set_decomposition(std::vector<boost::wstring_view> a, std::vector<boost::wstring_view> b)
 {
-    std::vector<std::wstring_view> intersection;
-    std::vector<std::wstring_view> difference_ab;
+    std::vector<boost::wstring_view> intersection;
+    std::vector<boost::wstring_view> difference_ab;
     a.erase(std::unique(a.begin(), a.end()), a.end());
     b.erase(std::unique(b.begin(), b.end()), b.end());
 
@@ -144,12 +144,7 @@ DecomposedSet utils::set_decomposition(std::vector<std::wstring_view> a, std::ve
     return DecomposedSet{ intersection, difference_ab, b };
 }
 
-std::size_t utils::joined_size(const std::wstring_view& x)
-{
-    return x.size();
-}
-
-std::size_t utils::joined_size(const std::vector<std::wstring_view>& x)
+std::size_t utils::joined_size(const std::vector<boost::wstring_view>& x)
 {
     if (x.empty()) {
         return 0;
@@ -164,9 +159,9 @@ std::size_t utils::joined_size(const std::vector<std::wstring_view>& x)
     return result;
 }
 
-std::vector<std::wstring_view> utils::splitSV(const std::wstring_view& str)
+std::vector<boost::wstring_view> utils::splitSV(const boost::wstring_view& str)
 {
-    std::vector<std::wstring_view> output;
+    std::vector<boost::wstring_view> output;
     // assume a word length of 6 + 1 whitespace
     output.reserve(str.size() / 7);
 

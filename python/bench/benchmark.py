@@ -94,45 +94,40 @@ for s in cirque_strings:
                             'fuzz.WRatio(u\'cirque du soleil\', u\'%s\')' % s,
                              common_setup, number=iterations / 100)
 
-print('Test process.extract(scorer =  fuzz.QRatio) for string: "%s"' % s)
-print('-------------------------------')
-stmt = 'process.extract(u\'cirque du soleil\', choices, scorer =  fuzz.QRatio)'
-print_result_from_timeit(stmt, stmt,
-                             common_setup + " import string,random; random.seed(18);"
-                             " choices = [\'\'.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(30)) for s in range(5000)]",
-                              number=10)
-
 print('Test process.extract(scorer =  fuzz.WRatio) for string: "%s"' % s)
 print('-------------------------------')
-stmt = 'process.extract(u\'cirque du soleil\', choices, scorer =  fuzz.WRatio)'
+stmt = 'process.extract("%s", choices, scorer =  fuzz.WRatio)' % s
 print_result_from_timeit(stmt, stmt,
                              common_setup + " import string,random; random.seed(18);"
                              " choices = [\'\'.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(30)) for s in range(5000)]",
                               number=10)
 
-print('Test process.extractOne(scorer =  fuzz.WRatio) for string: "%s"' % s)
+print('Test process.extract(scorer =  fuzz.WRatio, score_cutoff=70) for string: "%s"' % s)
 print('-------------------------------')
-stmt = 'process.extractOne(u\'cirque du soleil\', choices)'
-stmt2 = 'process.extractOne("please add bananas to my shopping list", choices)'
+stmt = 'process.extract("%s", choices, scorer =  fuzz.WRatio)' %s
+stmt2 = 'process.extract("%s", choices, scorer =  fuzz.WRatio, score_cutoff=70)' % s
 print_result_from_timeit(stmt, stmt2,
-                             common_setup + " from rapidfuzz import _process as rprocess; import string,random; random.seed(18);"
+                             common_setup + " import string,random; random.seed(18);"
                              " choices = [\'\'.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(30)) for s in range(5000)]",
                               number=10)
 
 print('Test process.extractOne(scorer =  fuzz.WRatio) for string: "%s"' % s)
 print('-------------------------------')
-stmt = 'process.extractOne("please add bananas to my shopping list", choices)'
-stmt2 = 'process.extractOne("please add bananas to my shopping list", choices)'
-print_result_from_timeit(stmt, stmt2,
+stmt = 'process.extractOne("%s", choices)' % s
+print_result_from_timeit(stmt, stmt,
                              common_setup + " import string,random; random.seed(18);"
-                             " choices = ['can you add bananas to my shopping list please' for s in range(1000)]",
+                             " choices = [\'\'.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(30)) for s in range(5000)]",
                               number=10)
 
-
-# let me show you something
+print('Test process.extractOne(scorer =  fuzz.WRatio, score_cutoff=70) for string: "%s"' % s)
+print('-------------------------------')
+stmt = 'process.extractOne("%s", choices, score_cutoff=70)' % s
+print_result_from_timeit(stmt, stmt,
+                             common_setup + " import string,random; random.seed(18);"
+                             " choices = [\'\'.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(30)) for s in range(5000)]",
+                              number=10)
 
 s = 'New York Yankees'
-
 test = 'import functools\n'
 test += 'title_blob = """%s"""\n' % title_blob
 test += 'title_blob = title_blob.strip()\n'

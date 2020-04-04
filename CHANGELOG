@@ -1,3 +1,11 @@
+## [0.6.0] - 2020 Apr 4
+
+### Changed
+- Remove vector of word based levenshtein since it was not much faster but added complexity
+- use a bitmap based ratio to reduce the usage of levenshtein in extractOne for bad matches
+- replace std::wstring_view with boost::wstring_view to add C++14 support
+
+
 ## [0.5.3] - 2020 Apr 4
 
 ### Fixed
