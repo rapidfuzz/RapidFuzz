@@ -12,6 +12,10 @@
     <img src="https://img.shields.io/pypi/v/rapidfuzz"
          alt="PyPI package version">
   </a>
+  <a href="https://anaconda.org/conda-forge/rapidfuzz">
+    <img src="https://img.shields.io/conda/vn/conda-forge/rapidfuzz.svg"
+         alt="Conda Version">
+  </a>
   <a href="https://www.python.org">
     <img src="https://img.shields.io/pypi/pyversions/rapidfuzz"
          alt="Python versions">
