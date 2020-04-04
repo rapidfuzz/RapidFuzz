@@ -21,9 +21,9 @@ Afterwards a ratio between the runtime of both results is calculated. The benchm
 
 ## process.extract
 
-<img src="https://raw.githubusercontent.com/rhasspy/rapidfuzz/master/.github/fuzz.extract.svg?sanitize=true">
+<img src="https://raw.githubusercontent.com/rhasspy/rapidfuzz/master/.github/process.extract.svg?sanitize=true">
 
 
 ## process.extractOne
 
-<img src="https://raw.githubusercontent.com/rhasspy/rapidfuzz/master/.github/fuzz.extractOne.svg?sanitize=true">
+<img src="https://raw.githubusercontent.com/rhasspy/rapidfuzz/master/.github/process.extractOne.svg?sanitize=true">
