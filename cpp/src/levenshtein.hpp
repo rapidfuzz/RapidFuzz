@@ -2,7 +2,6 @@
 #include <boost/utility/string_view.hpp>
 #include <vector>
 #include <cmath>
-#include <optional>
 #include <numeric>
 #include "utils.hpp"
 

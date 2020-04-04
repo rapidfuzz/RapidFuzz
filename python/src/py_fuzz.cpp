@@ -41,8 +41,8 @@ static PyObject* ratio(PyObject *self, PyObject *args, PyObject *keywds) {
         return NULL;
     }
 
-    std::wstring s1 = PyObject_To_Wstring(py_s1, static_cast<bool>(preprocess));
-    std::wstring s2 = PyObject_To_Wstring(py_s2, static_cast<bool>(preprocess));
+    std::wstring s1 = PyObject_To_Wstring(py_s1, preprocess);
+    std::wstring s2 = PyObject_To_Wstring(py_s2, preprocess);
     
     double result;
     if (preprocess) {
@@ -96,8 +96,8 @@ static PyObject* partial_ratio(PyObject *self, PyObject *args, PyObject *keywds)
         return NULL;
     }
 
-    std::wstring s1 = PyObject_To_Wstring(py_s1, static_cast<bool>(preprocess));
-    std::wstring s2 = PyObject_To_Wstring(py_s2, static_cast<bool>(preprocess));
+    std::wstring s1 = PyObject_To_Wstring(py_s1, preprocess);
+    std::wstring s2 = PyObject_To_Wstring(py_s2, preprocess);
 
     double result;
     if (preprocess) {
@@ -151,8 +151,8 @@ static PyObject* token_sort_ratio(PyObject *self, PyObject *args, PyObject *keyw
         return NULL;
     }
 
-    std::wstring s1 = PyObject_To_Wstring(py_s1, static_cast<bool>(preprocess));
-    std::wstring s2 = PyObject_To_Wstring(py_s2, static_cast<bool>(preprocess));
+    std::wstring s1 = PyObject_To_Wstring(py_s1, preprocess);
+    std::wstring s2 = PyObject_To_Wstring(py_s2, preprocess);
 
     double result;
     if (preprocess) {
@@ -202,8 +202,8 @@ static PyObject* partial_token_sort_ratio(PyObject *self, PyObject *args, PyObje
         return NULL;
     }
 
-    std::wstring s1 = PyObject_To_Wstring(py_s1, static_cast<bool>(preprocess));
-    std::wstring s2 = PyObject_To_Wstring(py_s2, static_cast<bool>(preprocess));
+    std::wstring s1 = PyObject_To_Wstring(py_s1, preprocess);
+    std::wstring s2 = PyObject_To_Wstring(py_s2, preprocess);
 
     double result;
     if (preprocess) {
@@ -259,8 +259,8 @@ static PyObject* token_set_ratio(PyObject *self, PyObject *args, PyObject *keywd
         return NULL;
     }
 
-    std::wstring s1 = PyObject_To_Wstring(py_s1, static_cast<bool>(preprocess));
-    std::wstring s2 = PyObject_To_Wstring(py_s2, static_cast<bool>(preprocess));
+    std::wstring s1 = PyObject_To_Wstring(py_s1, preprocess);
+    std::wstring s2 = PyObject_To_Wstring(py_s2, preprocess);
 
     double result;
     if (preprocess) {
@@ -310,8 +310,8 @@ static PyObject* partial_token_set_ratio(PyObject *self, PyObject *args, PyObjec
         return NULL;
     }
 
-    std::wstring s1 = PyObject_To_Wstring(py_s1, static_cast<bool>(preprocess));
-    std::wstring s2 = PyObject_To_Wstring(py_s2, static_cast<bool>(preprocess));
+    std::wstring s1 = PyObject_To_Wstring(py_s1, preprocess);
+    std::wstring s2 = PyObject_To_Wstring(py_s2, preprocess);
 
     double result;
     if (preprocess) {
@@ -362,8 +362,8 @@ static PyObject* token_ratio(PyObject *self, PyObject *args, PyObject *keywds) {
         return NULL;
     }
 
-    std::wstring s1 = PyObject_To_Wstring(py_s1, static_cast<bool>(preprocess));
-    std::wstring s2 = PyObject_To_Wstring(py_s2, static_cast<bool>(preprocess));
+    std::wstring s1 = PyObject_To_Wstring(py_s1, preprocess);
+    std::wstring s2 = PyObject_To_Wstring(py_s2, preprocess);
 
     double result;
     if (preprocess) {
@@ -414,8 +414,8 @@ static PyObject* partial_token_ratio(PyObject *self, PyObject *args, PyObject *k
         return NULL;
     }
 
-    std::wstring s1 = PyObject_To_Wstring(py_s1, static_cast<bool>(preprocess));
-    std::wstring s2 = PyObject_To_Wstring(py_s2, static_cast<bool>(preprocess));
+    std::wstring s1 = PyObject_To_Wstring(py_s1, preprocess);
+    std::wstring s2 = PyObject_To_Wstring(py_s2, preprocess);
 
     double result;
     if (preprocess) {
@@ -489,8 +489,8 @@ static PyObject* WRatio(PyObject *self, PyObject *args, PyObject *keywds) {
         return NULL;
     }
 
-    std::wstring s1 = PyObject_To_Wstring(py_s1, static_cast<bool>(preprocess));
-    std::wstring s2 = PyObject_To_Wstring(py_s2, static_cast<bool>(preprocess));
+    std::wstring s1 = PyObject_To_Wstring(py_s1, preprocess);
+    std::wstring s2 = PyObject_To_Wstring(py_s2, preprocess);
 
     double result = fuzz::WRatio(
             {s1},

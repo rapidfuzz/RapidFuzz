@@ -43,7 +43,7 @@ PyObject* extract(PyObject *self, PyObject *args, PyObject *keywds) {
         return NULL;
     }
 
-    std::wstring cleaned_query = PyObject_To_Wstring(py_query, static_cast<bool>(preprocess));
+    std::wstring cleaned_query = PyObject_To_Wstring(py_query, preprocess);
     uint64_t query_bitmap = bitmap_create(cleaned_query);
 
     PyObject* results = PyList_New(0);
@@ -116,7 +116,7 @@ PyObject* extractOne(PyObject *self, PyObject *args, PyObject *keywds) {
         return NULL;
     }
 
-    std::wstring cleaned_query = PyObject_To_Wstring(py_query, static_cast<bool>(preprocess));
+    std::wstring cleaned_query = PyObject_To_Wstring(py_query, preprocess);
     uint64_t query_bitmap = bitmap_create(cleaned_query);
 
     double end_score = 0;

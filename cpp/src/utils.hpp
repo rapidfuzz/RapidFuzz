@@ -9,6 +9,10 @@ using percent = double;
 struct Sentence {
     boost::wstring_view sentence;
     uint64_t bitmap = 0;
+    Sentence(boost::wstring_view sentence, uint64_t bitmap)
+        : sentence(sentence), bitmap(bitmap) {}
+    Sentence(boost::wstring_view sentence)
+        : sentence(sentence), bitmap(0) {}
 };
 
 struct DecomposedSet {
