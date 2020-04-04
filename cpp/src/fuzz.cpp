@@ -280,11 +280,7 @@ std::size_t fuzz::bitmap_distance(const Sentence& s1, const Sentence& s2) {
     while (bitmap1 || bitmap2) {
         uint8_t val1 = bitmap1 & 0b1111;
         uint8_t val2 = bitmap2 & 0b1111;
-        if (val1 > val2) {
-            distance += val1 - val2;
-        } else {
-            distance += val2 - val1;
-        }
+        distance += std::abs(val1 - val2);
         bitmap1 >>= 4;
         bitmap2 >>= 4;
     }

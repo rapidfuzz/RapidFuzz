@@ -54,6 +54,9 @@ inline uint64_t bitmap_create(const boost::wstring_view& sentence) {
     uint64_t bitmap = 0;
     for (const unsigned int& letter : sentence) {
         uint8_t shift = (letter % 16) * 4;
+
+        // make sure there is no overflow when more than 8 characters
+        // with the same shift exist
         uint64_t bitmask = static_cast<uint64_t>(0b1111) << shift;
         if ((bitmap & bitmask) != bitmask) {
             bitmap += static_cast<uint64_t>(1) << shift;

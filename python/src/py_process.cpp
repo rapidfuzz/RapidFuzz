@@ -25,7 +25,7 @@ PyObject* extract(PyObject *self, PyObject *args, PyObject *keywds) {
     PyObject *py_query;
     PyObject* py_choices;
     double score_cutoff = 0;
-    int preprocess = 0;
+    int preprocess = 1;
     static const char *kwlist[] = {"query", "choices", "score_cutoff", "preprocess", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, keywds, "UO|dp", const_cast<char **>(kwlist),
@@ -98,7 +98,7 @@ PyObject* extractOne(PyObject *self, PyObject *args, PyObject *keywds) {
     PyObject *py_query;
     PyObject* py_choices;
     double score_cutoff = 0;
-    int preprocess = 0;
+    int preprocess = 1;
     static const char *kwlist[] = {"query", "choices", "score_cutoff", "preprocess", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, keywds, "UO|dp", const_cast<char **>(kwlist),

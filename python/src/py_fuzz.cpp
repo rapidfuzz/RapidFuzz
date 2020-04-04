@@ -29,7 +29,7 @@ static PyObject* ratio(PyObject *self, PyObject *args, PyObject *keywds) {
     PyObject *py_s1;
     PyObject *py_s2;
     double score_cutoff = 0;
-    int preprocess = 0;
+    int preprocess = 1;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", "preprocess", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU|dp", const_cast<char **>(kwlist),
@@ -84,7 +84,7 @@ static PyObject* partial_ratio(PyObject *self, PyObject *args, PyObject *keywds)
     PyObject *py_s1;
     PyObject *py_s2;
     double score_cutoff = 0;
-    int preprocess = 0;
+    int preprocess = 1;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", "preprocess", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU|dp", const_cast<char **>(kwlist),
@@ -139,7 +139,7 @@ static PyObject* token_sort_ratio(PyObject *self, PyObject *args, PyObject *keyw
     PyObject *py_s1;
     PyObject *py_s2;
     double score_cutoff = 0;
-    int preprocess = 0;
+    int preprocess = 1;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", "preprocess", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU|dp", const_cast<char **>(kwlist),
@@ -190,7 +190,7 @@ static PyObject* partial_token_sort_ratio(PyObject *self, PyObject *args, PyObje
     PyObject *py_s1;
     PyObject *py_s2;
     double score_cutoff = 0;
-    int preprocess = 0;
+    int preprocess = 1;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", "preprocess", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU|dp", const_cast<char **>(kwlist),
@@ -247,7 +247,7 @@ static PyObject* token_set_ratio(PyObject *self, PyObject *args, PyObject *keywd
     PyObject *py_s1;
     PyObject *py_s2;
     double score_cutoff = 0;
-    int preprocess = 0;
+    int preprocess = 1;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", "preprocess", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU|dp", const_cast<char **>(kwlist),
@@ -298,7 +298,7 @@ static PyObject* partial_token_set_ratio(PyObject *self, PyObject *args, PyObjec
     PyObject *py_s1;
     PyObject *py_s2;
     double score_cutoff = 0;
-    int preprocess = 0;
+    int preprocess = 1;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", "preprocess", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU|dp", const_cast<char **>(kwlist),
@@ -350,7 +350,7 @@ static PyObject* token_ratio(PyObject *self, PyObject *args, PyObject *keywds) {
     PyObject *py_s1;
     PyObject *py_s2;
     double score_cutoff = 0;
-    int preprocess = 0;
+    int preprocess = 1;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", "preprocess", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU|dp", const_cast<char **>(kwlist),
@@ -402,7 +402,7 @@ static PyObject* partial_token_ratio(PyObject *self, PyObject *args, PyObject *k
     PyObject *py_s1;
     PyObject *py_s2;
     double score_cutoff = 0;
-    int preprocess = 0;
+    int preprocess = 1;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", "preprocess", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU|dp", const_cast<char **>(kwlist),
@@ -477,7 +477,7 @@ static PyObject* WRatio(PyObject *self, PyObject *args, PyObject *keywds) {
     PyObject *py_s1;
     PyObject *py_s2;
     double score_cutoff = 0;
-    int preprocess = 0;
+    int preprocess = 1;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", "preprocess", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU|dp", const_cast<char **>(kwlist),
