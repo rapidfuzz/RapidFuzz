@@ -1,4 +1,6 @@
 include README.md
 include VERSION
 include LICENSE
-include cpp/src/*.hpp
+recursive-include cpp/src *.hpp
+recursive-include cpp/extern/boost *
+recursive-include python/src *.hpp
