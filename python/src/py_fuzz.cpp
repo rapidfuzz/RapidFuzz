@@ -368,13 +368,13 @@ static PyObject* token_ratio(PyObject *self, PyObject *args, PyObject *keywds) {
     double result;
     if (preprocess) {
         result = fuzz::token_ratio(
-            {s1},
-            {s2},
+            Sentence<wchar_t>(s1),
+            Sentence<wchar_t>(s2),
             score_cutoff);
     } else {
         result = fuzz::token_ratio(
-            {s1},
-            {s2},
+            Sentence<wchar_t>(s1),
+            Sentence<wchar_t>(s2),
             score_cutoff);
     }
 
@@ -493,8 +493,8 @@ static PyObject* WRatio(PyObject *self, PyObject *args, PyObject *keywds) {
     std::wstring s2 = PyObject_To_Wstring(py_s2, preprocess);
 
     double result = fuzz::WRatio(
-            {s1},
-            {s2},
+            Sentence<wchar_t>(s1),
+            Sentence<wchar_t>(s2),
             score_cutoff);
 
     return PyFloat_FromDouble(result);

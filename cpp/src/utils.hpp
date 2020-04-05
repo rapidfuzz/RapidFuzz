@@ -5,21 +5,29 @@
 /* 0.0% - 100.0% */
 using percent = double;
 
+template<typename CharT>
+using string_view_vec = std::vector<boost::basic_string_view<CharT>>;
 
+template<typename CharT>
 struct Sentence {
-    boost::wstring_view sentence;
+    boost::basic_string_view<CharT> sentence;
     uint64_t bitmap = 0;
-    Sentence(boost::wstring_view sentence, uint64_t bitmap)
+    Sentence(boost::basic_string_view<CharT> sentence, uint64_t bitmap)
         : sentence(sentence), bitmap(bitmap) {}
-    Sentence(boost::wstring_view sentence)
+    Sentence(boost::basic_string_view<CharT> sentence)
         : sentence(sentence), bitmap(0) {}
+    Sentence(std::basic_string<CharT> sentence, uint64_t bitmap)
+        : sentence(boost::basic_string_view<CharT>(sentence)), bitmap(bitmap) {}
+    Sentence(std::basic_string<CharT> sentence)
+        : sentence(boost::basic_string_view<CharT>(sentence)), bitmap(0) {}
 };
 
+template<typename CharT>
 struct DecomposedSet {
-    std::vector<boost::wstring_view> intersection;
-    std::vector<boost::wstring_view> difference_ab;
-    std::vector<boost::wstring_view> difference_ba;
-    DecomposedSet(std::vector<boost::wstring_view> intersection, std::vector<boost::wstring_view> difference_ab, std::vector<boost::wstring_view> difference_ba)
+    string_view_vec<CharT> intersection;
+    string_view_vec<CharT> difference_ab;
+    string_view_vec<CharT> difference_ba;
+    DecomposedSet(string_view_vec<CharT> intersection, string_view_vec<CharT> difference_ab, string_view_vec<CharT> difference_ba)
         : intersection(std::move(intersection))
         , difference_ab(std::move(difference_ab))
         , difference_ba(std::move(difference_ba))
@@ -33,38 +41,40 @@ struct Affix {
 
 namespace utils {
 
-std::vector<boost::wstring_view> splitSV(const boost::wstring_view& str);
+template<typename CharT>
+string_view_vec<CharT> splitSV(const boost::basic_string_view<CharT>& str);
 
-DecomposedSet set_decomposition(std::vector<boost::wstring_view> a, std::vector<boost::wstring_view> b);
+template<typename CharT>
+string_view_vec<CharT> splitSV(const std::basic_string<CharT>& str);
 
-std::size_t joined_size(const std::vector<boost::wstring_view>& x);
+template<typename CharT>
+std::size_t joined_size(const string_view_vec<CharT>& x);
 
-std::wstring join(const std::vector<boost::wstring_view>& sentence);
+template<typename CharT>
+std::basic_string<CharT> join(const string_view_vec<CharT>& sentence);
+
+template<typename CharT>
+DecomposedSet<CharT> set_decomposition(string_view_vec<CharT> a, string_view_vec<CharT> b);
+
+template<typename CharT>
+Affix remove_common_affix(boost::basic_string_view<CharT>& a, boost::basic_string_view<CharT>& b);
+
+template<typename CharT>
+void trim(std::basic_string<CharT>& s);
+
+template<typename CharT>
+void lower_case(std::basic_string<CharT>& s);
+
+template<typename CharT>
+std::basic_string<CharT> default_process(std::basic_string<CharT> s);
+
+template<typename CharT>
+uint64_t bitmap_create(const boost::basic_string_view<CharT>& sentence);
+
+template<typename CharT>
+uint64_t bitmap_create(const std::basic_string<CharT>& sentence);
 
 percent result_cutoff(double result, percent score_cutoff);
-
-void trim(std::wstring& s);
-
-void lower_case(std::wstring& s);
-
-std::wstring default_process(std::wstring s);
-
-Affix remove_common_affix(boost::wstring_view& a, boost::wstring_view& b);
-
-void remove_common_affix(std::vector<boost::wstring_view>& a, std::vector<boost::wstring_view>& b);
 }
 
-inline uint64_t bitmap_create(const boost::wstring_view& sentence) {
-    uint64_t bitmap = 0;
-    for (const unsigned int& letter : sentence) {
-        uint8_t shift = (letter % 16) * 4;
-
-        // make sure there is no overflow when more than 8 characters
-        // with the same shift exist
-        uint64_t bitmask = static_cast<uint64_t>(0b1111) << shift;
-        if ((bitmap & bitmask) != bitmask) {
-            bitmap += static_cast<uint64_t>(1) << shift;
-        }
-    }
-    return bitmap;
-}
+#include "utils.txx"

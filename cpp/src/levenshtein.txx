@@ -2,7 +2,11 @@
 #include <algorithm>
 #include <stdexcept>
 
-levenshtein::Matrix levenshtein::matrix(boost::wstring_view sentence1, boost::wstring_view sentence2)
+
+template<typename CharT>
+levenshtein::Matrix levenshtein::matrix(
+    boost::basic_string_view<CharT> sentence1,
+    boost::basic_string_view<CharT> sentence2)
 {
     Affix affix = utils::remove_common_affix(sentence1, sentence2);
 
@@ -42,20 +46,20 @@ levenshtein::Matrix levenshtein::matrix(boost::wstring_view sentence1, boost::ws
     };
 }
 
-std::vector<levenshtein::EditOp> levenshtein::editops(boost::wstring_view sentence1, boost::wstring_view sentence2)
+template <typename CharT>
+levenshtein::Matrix levenshtein::matrix(
+    const std::basic_string<CharT>& sentence1,
+    const std::basic_string<CharT>& sentence2)
 {
-    auto m = matrix(sentence1, sentence2);
-    std::size_t matrix_columns = m.matrix_columns;
-    std::size_t matrix_rows = m.matrix_rows;
-    std::size_t prefix_len = m.prefix_len;
-    auto lev_matrix = m.matrix;
+    return matrix(
+        boost::basic_string_view<CharT>(sentence1),
+        boost::basic_string_view<CharT>(sentence2));
+}
 
-    std::vector<EditOp> ops;
-    ops.reserve(lev_matrix[matrix_columns * matrix_rows - 1]);
-
-    std::size_t i = matrix_columns - 1;
-    std::size_t j = matrix_rows - 1;
-    std::size_t position = matrix_columns * matrix_rows - 1;
+levenshtein::EditType get_EditType(levenshtein::Matrix matrix, std::size_t row, std::size_t column)
+{
+    auto lev_matrix = matrix.matrix;
+    std::size_t matrix_rows = matrix.matrix_rows;
 
     auto is_replace = [=](std::size_t pos) {
         return lev_matrix[pos - matrix_rows - 1] < lev_matrix[pos];
@@ -70,58 +74,67 @@ std::vector<levenshtein::EditOp> levenshtein::editops(boost::wstring_view senten
         return lev_matrix[pos - matrix_rows - 1] == lev_matrix[pos];
     };
 
-    while (i > 0 || j > 0) {
-        EditType op_type;
+    std::size_t position = column*matrix_rows + row;
 
-        if (i && j && is_replace(position)) {
-            op_type = EditType::EditReplace;
-            --i;
-            --j;
-            position -= matrix_rows + 1;
-        } else if (j && is_insert(position)) {
-            op_type = EditType::EditInsert;
-            --j;
-            --position;
-        } else if (i && is_delete(position)) {
-            op_type = EditType::EditDelete;
-            --i;
-            position -= matrix_rows;
-        } else if (is_keep(position)) {
-            --i;
-            --j;
-            position -= matrix_rows + 1;
-            // EditKeep does not has to be stored
-            continue;
-        } else {
-            throw std::logic_error("something went wrong extracting the editops from the levenshtein matrix");
-        }
-
-        ops.emplace_back(op_type, i + prefix_len, j + prefix_len);
+    if (column && row && is_replace(position)) {
+        return levenshtein::EditType::EditReplace;
+    } else if (row && is_insert(position)) {
+        return levenshtein::EditType::EditInsert;
+    } else if (column && is_delete(position)) {
+        return levenshtein::EditType::EditDelete;
+    } else if (is_keep(position)) {
+        return levenshtein::EditType::EditKeep;
+    } else {
+        throw std::logic_error("something went wrong extracting the editops from the levenshtein matrix");
     }
-
-    std::reverse(ops.begin(), ops.end());
-    return ops;
 }
 
-std::vector<levenshtein::MatchingBlock> levenshtein::matching_blocks(boost::wstring_view sentence1, boost::wstring_view sentence2)
+template<typename CharT>
+std::vector<levenshtein::MatchingBlock> levenshtein::matching_blocks(
+    boost::basic_string_view<CharT> sentence1,
+    boost::basic_string_view<CharT> sentence2)
 {
-    auto edit_ops = editops(sentence1, sentence2);
+    auto m = matrix(sentence1, sentence2);
+    std::size_t prefix_len = m.prefix_len;
+
+    // current position in the the levenshtein matrix
+    std::size_t matrix_column = m.matrix_columns - 1;
+    std::size_t matrix_row = m.matrix_rows - 1;
+
     std::size_t first_start = 0;
     std::size_t second_start = 0;
     std::vector<MatchingBlock> mblocks;
+    mblocks.emplace_back(sentence1.length(), sentence2.length(), 0);
 
-    for (const auto& op : edit_ops) {
-        if (op.op_type == EditType::EditKeep) {
+    while (matrix_column > 0 || matrix_row > 0) {
+        EditType op_type =  get_EditType(m, matrix_row, matrix_column);
+
+        switch (op_type) {
+        case EditType::EditReplace:
+            --matrix_column;
+            --matrix_row;
+            break;
+        case EditType::EditInsert:
+            --matrix_row;
+            break;
+        case EditType::EditDelete:
+            --matrix_column;
+            break;
+        case EditType::EditKeep:
+            --matrix_column;
+            --matrix_row;
             continue;
         }
 
-        if (first_start < op.first_start || second_start < op.second_start) {
-            mblocks.emplace_back(first_start, second_start, op.first_start - first_start);
-            first_start = op.first_start;
-            second_start = op.second_start;
+        std::size_t cur_first_start = matrix_column + prefix_len;
+        std::size_t cur_second_start = matrix_row + prefix_len;
+        if (first_start < cur_first_start || second_start < cur_second_start) {
+            mblocks.emplace_back(first_start, second_start, cur_first_start - first_start);
+            first_start = cur_first_start;
+            second_start = cur_second_start;
         }
 
-        switch (op.op_type) {
+        switch (op_type) {
         case EditType::EditReplace:
             first_start += 1;
             second_start += 1;
@@ -132,16 +145,29 @@ std::vector<levenshtein::MatchingBlock> levenshtein::matching_blocks(boost::wstr
         case EditType::EditInsert:
             second_start += 1;
             break;
-        case EditType::EditKeep:
+        default:
             break;
         }
     }
 
-    mblocks.emplace_back(sentence1.length(), sentence2.length(), 0);
+    std::reverse(mblocks.begin(), mblocks.end());
     return mblocks;
 }
 
-std::size_t levenshtein::distance(boost::wstring_view sentence1, boost::wstring_view sentence2)
+template <typename CharT>
+std::vector<levenshtein::MatchingBlock> levenshtein::matching_blocks(
+    const std::basic_string<CharT>& sentence1,
+    const std::basic_string<CharT>& sentence2)
+{
+    return matching_blocks(
+        boost::basic_string_view<CharT>(sentence1),
+        boost::basic_string_view<CharT>(sentence2));
+}
+
+template<typename CharT>
+std::size_t levenshtein::weighted_distance(
+    boost::basic_string_view<CharT> sentence1,
+    boost::basic_string_view<CharT> sentence2)
 {
     utils::remove_common_affix(sentence1, sentence2);
 
@@ -174,7 +200,20 @@ std::size_t levenshtein::distance(boost::wstring_view sentence1, boost::wstring_
     return cache.back();
 }
 
-std::size_t levenshtein::weighted_distance(boost::wstring_view sentence1, boost::wstring_view sentence2)
+template <typename CharT>
+std::size_t levenshtein::weighted_distance(
+    const std::basic_string<CharT>& sentence1,
+    const std::basic_string<CharT>& sentence2)
+{
+    return weighted_distance(
+        boost::basic_string_view<CharT>(sentence1),
+        boost::basic_string_view<CharT>(sentence2));
+}
+
+template<typename CharT>
+std::size_t levenshtein::distance(
+    boost::basic_string_view<CharT> sentence1,
+    boost::basic_string_view<CharT> sentence2)
 {
     utils::remove_common_affix(sentence1, sentence2);
 
@@ -214,7 +253,21 @@ std::size_t levenshtein::weighted_distance(boost::wstring_view sentence1, boost:
     return cache.back();
 }
 
-std::size_t levenshtein::generic_distance(boost::wstring_view sentence1, boost::wstring_view sentence2, WeightTable weights)
+template <typename CharT>
+std::size_t levenshtein::distance(
+    const std::basic_string<CharT>& sentence1,
+    const std::basic_string<CharT>& sentence2)
+{
+    return distance(
+        boost::basic_string_view<CharT>(sentence1),
+        boost::basic_string_view<CharT>(sentence2));
+}
+
+template<typename CharT>
+std::size_t levenshtein::generic_distance(
+    boost::basic_string_view<CharT> sentence1,
+    boost::basic_string_view<CharT> sentence2,
+    WeightTable weights)
 {
     utils::remove_common_affix(sentence1, sentence2);
     if (sentence1.size() > sentence2.size()) {
@@ -248,7 +301,23 @@ std::size_t levenshtein::generic_distance(boost::wstring_view sentence1, boost::
     return cache.back();
 }
 
-double levenshtein::normalized_distance(boost::wstring_view sentence1, boost::wstring_view sentence2, double min_ratio)
+template <typename CharT>
+std::size_t levenshtein::generic_distance(
+    const std::basic_string<CharT>& sentence1,
+    const std::basic_string<CharT>& sentence2,
+    WeightTable weights)
+{
+    return generic_distance(
+        boost::basic_string_view<CharT>(sentence1),
+        boost::basic_string_view<CharT>(sentence2),
+        weights);
+}
+
+template<typename CharT>
+double levenshtein::normalized_distance(
+    boost::basic_string_view<CharT> sentence1,
+    boost::basic_string_view<CharT> sentence2,
+    double min_ratio)
 {
     if (sentence1.empty() || sentence2.empty()) {
         return sentence1.empty() && sentence2.empty();
@@ -275,7 +344,24 @@ double levenshtein::normalized_distance(boost::wstring_view sentence1, boost::ws
     return (ratio >= min_ratio) ? ratio : 0.0;
 }
 
-double levenshtein::normalized_weighted_distance(const boost::wstring_view& sentence1, const boost::wstring_view& sentence2, double min_ratio)
+template <typename CharT>
+double levenshtein::normalized_distance(
+    const std::basic_string<CharT>& sentence1,
+    const std::basic_string<CharT>& sentence2,
+    double min_ratio)
+{
+    return normalized_distance(
+        boost::basic_string_view<CharT>(sentence1),
+        boost::basic_string_view<CharT>(sentence2),
+        min_ratio);
+}
+
+
+template<typename CharT>
+double levenshtein::normalized_weighted_distance(
+    boost::basic_string_view<CharT> sentence1,
+    boost::basic_string_view<CharT> sentence2,
+    double min_ratio)
 {
     if (sentence1.empty() || sentence2.empty()) {
         return sentence1.empty() && sentence2.empty();
@@ -303,4 +389,16 @@ double levenshtein::normalized_weighted_distance(const boost::wstring_view& sent
     }
     double ratio = 1.0 - static_cast<double>(dist) / lensum;
     return (ratio >= min_ratio) ? ratio : 0.0;
+}
+
+template <typename CharT>
+double levenshtein::normalized_weighted_distance(
+    const std::basic_string<CharT>& sentence1,
+    const std::basic_string<CharT>& sentence2,
+    double min_ratio)
+{
+    return normalized_weighted_distance(
+        boost::basic_string_view<CharT>(sentence1),
+        boost::basic_string_view<CharT>(sentence2),
+        min_ratio);
 }

@@ -28,10 +28,11 @@ PyObject* extract(PyObject *self, PyObject *args, PyObject *keywds) {
     int preprocess = 1;
     static const char *kwlist[] = {"query", "choices", "score_cutoff", "preprocess", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UO|dp", const_cast<char **>(kwlist),
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UO|dh", const_cast<char **>(kwlist),
                                      &py_query, &py_choices, &score_cutoff, &preprocess)) {
         return NULL;
     }
+
 
     PyObject* choices = PySequence_Fast(py_choices, "Choices must be a sequence of strings");
     if (!choices) {
@@ -44,7 +45,7 @@ PyObject* extract(PyObject *self, PyObject *args, PyObject *keywds) {
     }
 
     std::wstring cleaned_query = PyObject_To_Wstring(py_query, preprocess);
-    uint64_t query_bitmap = bitmap_create(cleaned_query);
+    uint64_t query_bitmap = utils::bitmap_create(cleaned_query);
 
     PyObject* results = PyList_New(0);
 
@@ -62,12 +63,12 @@ PyObject* extract(PyObject *self, PyObject *args, PyObject *keywds) {
         std::wstring choice(buffer, len);
         PyMem_Free(buffer);
 
-        boost::wstring_view cleaned_choice = (preprocess) ? utils::default_process(choice) : choice;
-        uint64_t choice_bitmap = bitmap_create(cleaned_choice);
+        std::wstring cleaned_choice = (preprocess) ? utils::default_process(choice) : choice;
+        uint64_t choice_bitmap = utils::bitmap_create(cleaned_choice);
 
         double score= fuzz::WRatio(
-                {cleaned_query, query_bitmap},
-                {cleaned_choice, choice_bitmap},
+                Sentence<wchar_t>(cleaned_query, query_bitmap),
+                Sentence<wchar_t>(cleaned_choice, choice_bitmap),
                 score_cutoff);
 
         if (score >= score_cutoff) {
@@ -117,7 +118,7 @@ PyObject* extractOne(PyObject *self, PyObject *args, PyObject *keywds) {
     }
 
     std::wstring cleaned_query = PyObject_To_Wstring(py_query, preprocess);
-    uint64_t query_bitmap = bitmap_create(cleaned_query);
+    uint64_t query_bitmap = utils::bitmap_create(cleaned_query);
 
     double end_score = 0;
     std::wstring result_choice;
@@ -136,12 +137,12 @@ PyObject* extractOne(PyObject *self, PyObject *args, PyObject *keywds) {
         std::wstring choice(buffer, len);
         PyMem_Free(buffer);
 
-        boost::wstring_view cleaned_choice = (preprocess) ? utils::default_process(choice) : choice;
-        uint64_t choice_bitmap = bitmap_create(cleaned_choice);
+        std::wstring cleaned_choice = (preprocess) ? utils::default_process(choice) : choice;
+        uint64_t choice_bitmap = utils::bitmap_create(cleaned_choice);
 
         double score = fuzz::WRatio(
-                {cleaned_query, query_bitmap},
-                {cleaned_choice, choice_bitmap},
+                Sentence<wchar_t>(cleaned_query, query_bitmap),
+                Sentence<wchar_t>(cleaned_choice, choice_bitmap),
                 score_cutoff);
 
         if (score >= score_cutoff) {
