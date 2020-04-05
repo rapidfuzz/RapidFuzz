@@ -1,3 +1,5 @@
+import re
 
 def default_process(s):
-	return s.replace('\x00', ' ').strip().lower()
+	alnum_re = re.compile(r"(?ui)\W")
+	return alnum_re.sub(" ", s).strip().lower()

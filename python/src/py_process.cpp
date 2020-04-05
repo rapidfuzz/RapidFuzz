@@ -33,7 +33,6 @@ PyObject* extract(PyObject *self, PyObject *args, PyObject *keywds) {
         return NULL;
     }
 
-
     PyObject* choices = PySequence_Fast(py_choices, "Choices must be a sequence of strings");
     if (!choices) {
         return NULL;

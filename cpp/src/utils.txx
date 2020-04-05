@@ -1,6 +1,7 @@
 #include "utils.hpp"
 #include <algorithm>
 #include <locale>
+#include <regex>
 
 template<typename CharT>
 string_view_vec<CharT> utils::splitSV(const boost::basic_string_view<CharT>& str)
@@ -132,16 +133,16 @@ template<typename CharT>
 void ltrim(std::basic_string<CharT>& s)
 {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](const CharT& ch) {
-                return !std::isspace(ch, std::locale(""));
-            }));
+            return !std::isspace(ch, std::locale(""));
+        }));
 }
 
 template<typename CharT>
 void rtrim(std::basic_string<CharT>& s)
 {
     s.erase(std::find_if(s.rbegin(), s.rend(), [](const CharT& ch) {
-                return !std::isspace(ch, std::locale(""));
-            }).base(), s.end());
+            return !std::isspace(ch, std::locale(""));
+        }).base(), s.end());
 }
 
 template<typename CharT>
@@ -160,8 +161,8 @@ void utils::lower_case(std::basic_string<CharT>& s)
 template<typename CharT>
 std::basic_string<CharT> utils::default_process(std::basic_string<CharT> s)
 {
-    // replace embedded null terminators
-    std::replace( s.begin(), s.end(), CharT{0}, CharT{0x20});
+    std::basic_regex<CharT> alnum_re(CHARTYPE_STR(CharT, "[^[:alnum:]]"));
+    s = std::regex_replace(s, alnum_re, CHARTYPE_STR(CharT, " "));
     trim(s);
     lower_case(s);
     return s;

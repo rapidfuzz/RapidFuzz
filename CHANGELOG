@@ -1,3 +1,12 @@
+## [0.6.6] - 2020 Apr 5
+
+### Changed
+- default_process is no replacing all non alphanumeric characters with a whitespace
+
+### Fixed
+- fixed a couple issues with MSVC
+
+
 ## [0.6.0] - 2020 Apr 4
 
 ### Changed
