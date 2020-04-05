@@ -28,7 +28,7 @@ PyObject* extract(PyObject *self, PyObject *args, PyObject *keywds) {
     int preprocess = 1;
     static const char *kwlist[] = {"query", "choices", "score_cutoff", "preprocess", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UO|dh", const_cast<char **>(kwlist),
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UO|dp", const_cast<char **>(kwlist),
                                      &py_query, &py_choices, &score_cutoff, &preprocess)) {
         return NULL;
     }

@@ -9,8 +9,9 @@ string_view_vec<CharT> utils::splitSV(const boost::basic_string_view<CharT>& str
 
     auto first = str.data(), second = str.data(), last = first + str.size();
     for (; second != last && first != last; first = second + 1) {
-        // TODO: maybe use localisation
-        second = std::find_if(first, last, [](const CharT& c) { return std::isspace(c); });
+        second = std::find_if(first, last, [](const CharT& c) {
+            return std::isspace(c, std::locale(""));
+            });
 
         if (first != second) {
             output.emplace_back(first, second - first);
@@ -131,7 +132,7 @@ template<typename CharT>
 void ltrim(std::basic_string<CharT>& s)
 {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](const CharT& ch) {
-                return !std::isspace(ch);
+                return !std::isspace(ch, std::locale(""));
             }));
 }
 
@@ -139,7 +140,7 @@ template<typename CharT>
 void rtrim(std::basic_string<CharT>& s)
 {
     s.erase(std::find_if(s.rbegin(), s.rend(), [](const CharT& ch) {
-                return !std::isspace(ch);
+                return !std::isspace(ch, std::locale(""));
             }).base(), s.end());
 }
 
