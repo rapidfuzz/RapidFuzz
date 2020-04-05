@@ -47,7 +47,7 @@ inline percent fuzz::partial_ratio(
     double max_ratio = 0;
     for (const auto& block : blocks) {
         std::size_t long_start = (block.second_start > block.first_start) ? block.second_start - block.first_start : 0;
-        boost::wstring_view long_substr = s2.substr(long_start, s1.length());
+        boost::basic_string_view<CharT> long_substr = s2.substr(long_start, s1.length());
 
         double ls_ratio = levenshtein::normalized_weighted_distance(s1, long_substr, score_cutoff / 100);
 
@@ -214,7 +214,7 @@ percent fuzz::token_set_ratio(
 {
     return token_set_ratio(
         boost::basic_string_view<CharT>(s1), 
-        boost::basic_string_view<CharT>(s1), 
+        boost::basic_string_view<CharT>(s2), 
         score_cutoff);
 }
 
@@ -260,7 +260,7 @@ percent fuzz::partial_token_set_ratio(
 {
     return partial_token_set_ratio(
         boost::basic_string_view<CharT>(s1), 
-        boost::basic_string_view<CharT>(s1), 
+        boost::basic_string_view<CharT>(s2), 
         score_cutoff);
 }
 

@@ -56,10 +56,23 @@ levenshtein::Matrix levenshtein::matrix(
         boost::basic_string_view<CharT>(sentence2));
 }
 
-levenshtein::EditType get_EditType(levenshtein::Matrix matrix, std::size_t row, std::size_t column)
+template<typename CharT>
+inline std::vector<levenshtein::EditOp> editops(
+    boost::basic_string_view<CharT> sentence1,
+    boost::basic_string_view<CharT> sentence2)
 {
-    auto lev_matrix = matrix.matrix;
-    std::size_t matrix_rows = matrix.matrix_rows;
+    auto m =  levenshtein::matrix(sentence1, sentence2);
+    std::size_t matrix_columns = m.matrix_columns;
+    std::size_t matrix_rows = m.matrix_rows;
+    std::size_t prefix_len = m.prefix_len;
+    auto lev_matrix = m.matrix;
+
+    std::vector<levenshtein::EditOp> ops;
+    ops.reserve(lev_matrix[matrix_columns * matrix_rows - 1]);
+
+    std::size_t i = matrix_columns - 1;
+    std::size_t j = matrix_rows - 1;
+    std::size_t position = matrix_columns * matrix_rows - 1;
 
     auto is_replace = [=](std::size_t pos) {
         return lev_matrix[pos - matrix_rows - 1] < lev_matrix[pos];
@@ -74,19 +87,37 @@ levenshtein::EditType get_EditType(levenshtein::Matrix matrix, std::size_t row, 
         return lev_matrix[pos - matrix_rows - 1] == lev_matrix[pos];
     };
 
-    std::size_t position = column*matrix_rows + row;
+    while (i > 0 || j > 0) {
+         levenshtein::EditType op_type;
 
-    if (column && row && is_replace(position)) {
-        return levenshtein::EditType::EditReplace;
-    } else if (row && is_insert(position)) {
-        return levenshtein::EditType::EditInsert;
-    } else if (column && is_delete(position)) {
-        return levenshtein::EditType::EditDelete;
-    } else if (is_keep(position)) {
-        return levenshtein::EditType::EditKeep;
-    } else {
-        throw std::logic_error("something went wrong extracting the editops from the levenshtein matrix");
+        if (i && j && is_replace(position)) {
+            op_type =  levenshtein::EditType::EditReplace;
+            --i;
+            --j;
+            position -= matrix_rows + 1;
+        } else if (j && is_insert(position)) {
+            op_type =  levenshtein::EditType::EditInsert;
+            --j;
+            --position;
+        } else if (i && is_delete(position)) {
+            op_type =  levenshtein::EditType::EditDelete;
+            --i;
+            position -= matrix_rows;
+        } else if (is_keep(position)) {
+            --i;
+            --j;
+            position -= matrix_rows + 1;
+            // EditKeep does not has to be stored
+            continue;
+        } else {
+            throw std::logic_error("something went wrong extracting the editops from the levenshtein matrix");
+        }
+
+        ops.emplace_back(op_type, i + prefix_len, j + prefix_len);
     }
+
+    std::reverse(ops.begin(), ops.end());
+    return ops;
 }
 
 template<typename CharT>
@@ -94,47 +125,23 @@ std::vector<levenshtein::MatchingBlock> levenshtein::matching_blocks(
     boost::basic_string_view<CharT> sentence1,
     boost::basic_string_view<CharT> sentence2)
 {
-    auto m = matrix(sentence1, sentence2);
-    std::size_t prefix_len = m.prefix_len;
-
-    // current position in the the levenshtein matrix
-    std::size_t matrix_column = m.matrix_columns - 1;
-    std::size_t matrix_row = m.matrix_rows - 1;
-
+    auto edit_ops = editops(sentence1, sentence2);
     std::size_t first_start = 0;
     std::size_t second_start = 0;
     std::vector<MatchingBlock> mblocks;
-    mblocks.emplace_back(sentence1.length(), sentence2.length(), 0);
 
-    while (matrix_column > 0 || matrix_row > 0) {
-        EditType op_type =  get_EditType(m, matrix_row, matrix_column);
-
-        switch (op_type) {
-        case EditType::EditReplace:
-            --matrix_column;
-            --matrix_row;
-            break;
-        case EditType::EditInsert:
-            --matrix_row;
-            break;
-        case EditType::EditDelete:
-            --matrix_column;
-            break;
-        case EditType::EditKeep:
-            --matrix_column;
-            --matrix_row;
+    for (const auto& op : edit_ops) {
+        if (op.op_type == EditType::EditKeep) {
             continue;
         }
 
-        std::size_t cur_first_start = matrix_column + prefix_len;
-        std::size_t cur_second_start = matrix_row + prefix_len;
-        if (first_start < cur_first_start || second_start < cur_second_start) {
-            mblocks.emplace_back(first_start, second_start, cur_first_start - first_start);
-            first_start = cur_first_start;
-            second_start = cur_second_start;
+        if (first_start < op.first_start || second_start < op.second_start) {
+            mblocks.emplace_back(first_start, second_start, op.first_start - first_start);
+            first_start = op.first_start;
+            second_start = op.second_start;
         }
 
-        switch (op_type) {
+        switch (op.op_type) {
         case EditType::EditReplace:
             first_start += 1;
             second_start += 1;
@@ -145,12 +152,12 @@ std::vector<levenshtein::MatchingBlock> levenshtein::matching_blocks(
         case EditType::EditInsert:
             second_start += 1;
             break;
-        default:
+        case EditType::EditKeep:
             break;
         }
     }
 
-    std::reverse(mblocks.begin(), mblocks.end());
+    mblocks.emplace_back(sentence1.length(), sentence2.length(), 0);
     return mblocks;
 }
 
@@ -165,7 +172,7 @@ std::vector<levenshtein::MatchingBlock> levenshtein::matching_blocks(
 }
 
 template<typename CharT>
-std::size_t levenshtein::weighted_distance(
+std::size_t levenshtein::distance(
     boost::basic_string_view<CharT> sentence1,
     boost::basic_string_view<CharT> sentence2)
 {
@@ -201,17 +208,17 @@ std::size_t levenshtein::weighted_distance(
 }
 
 template <typename CharT>
-std::size_t levenshtein::weighted_distance(
+std::size_t levenshtein::distance(
     const std::basic_string<CharT>& sentence1,
     const std::basic_string<CharT>& sentence2)
 {
-    return weighted_distance(
+    return distance(
         boost::basic_string_view<CharT>(sentence1),
         boost::basic_string_view<CharT>(sentence2));
 }
 
 template<typename CharT>
-std::size_t levenshtein::distance(
+std::size_t levenshtein::weighted_distance(
     boost::basic_string_view<CharT> sentence1,
     boost::basic_string_view<CharT> sentence2)
 {
@@ -254,11 +261,11 @@ std::size_t levenshtein::distance(
 }
 
 template <typename CharT>
-std::size_t levenshtein::distance(
+std::size_t levenshtein::weighted_distance(
     const std::basic_string<CharT>& sentence1,
     const std::basic_string<CharT>& sentence2)
 {
-    return distance(
+    return weighted_distance(
         boost::basic_string_view<CharT>(sentence1),
         boost::basic_string_view<CharT>(sentence2));
 }

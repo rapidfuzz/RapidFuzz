@@ -37,6 +37,17 @@ struct MatchingBlock {
     {}
 };
 
+struct EditOp {
+    EditType op_type;
+    std::size_t first_start;
+    std::size_t second_start;
+    EditOp(EditType op_type, std::size_t first_start, std::size_t second_start)
+        : op_type(op_type)
+        , first_start(first_start)
+        , second_start(second_start)
+    {}
+};
+
 
 template<typename CharT>
 Matrix matrix(

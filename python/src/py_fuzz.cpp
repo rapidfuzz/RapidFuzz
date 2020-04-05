@@ -44,18 +44,7 @@ static PyObject* ratio(PyObject *self, PyObject *args, PyObject *keywds) {
     std::wstring s1 = PyObject_To_Wstring(py_s1, preprocess);
     std::wstring s2 = PyObject_To_Wstring(py_s2, preprocess);
     
-    double result;
-    if (preprocess) {
-        result = fuzz::ratio(
-            s1,
-            s2,
-            score_cutoff);
-    } else {
-        result = fuzz::ratio(
-            s1,
-            s2,
-            score_cutoff);
-    }
+    double result = fuzz::ratio(s1, s2, score_cutoff);
 
     return PyFloat_FromDouble(result);
 }
@@ -99,18 +88,7 @@ static PyObject* partial_ratio(PyObject *self, PyObject *args, PyObject *keywds)
     std::wstring s1 = PyObject_To_Wstring(py_s1, preprocess);
     std::wstring s2 = PyObject_To_Wstring(py_s2, preprocess);
 
-    double result;
-    if (preprocess) {
-        result = fuzz::partial_ratio(
-            s1,
-            s2,
-            score_cutoff);
-    } else {
-        result = fuzz::partial_ratio(
-            s1,
-            s2,
-            score_cutoff);
-    }
+    double result = fuzz::partial_ratio(s1, s2, score_cutoff);
 
     return PyFloat_FromDouble(result);
 }
@@ -154,18 +132,7 @@ static PyObject* token_sort_ratio(PyObject *self, PyObject *args, PyObject *keyw
     std::wstring s1 = PyObject_To_Wstring(py_s1, preprocess);
     std::wstring s2 = PyObject_To_Wstring(py_s2, preprocess);
 
-    double result;
-    if (preprocess) {
-        result = fuzz::token_sort_ratio(
-            s1,
-            s2,
-            score_cutoff);
-    } else {
-        result = fuzz::token_sort_ratio(
-            s1,
-            s2,
-            score_cutoff);
-    }
+    double result = fuzz::token_sort_ratio(s1, s2, score_cutoff);
 
     return PyFloat_FromDouble(result);
 }
@@ -205,18 +172,7 @@ static PyObject* partial_token_sort_ratio(PyObject *self, PyObject *args, PyObje
     std::wstring s1 = PyObject_To_Wstring(py_s1, preprocess);
     std::wstring s2 = PyObject_To_Wstring(py_s2, preprocess);
 
-    double result;
-    if (preprocess) {
-        result = fuzz::partial_token_sort_ratio(
-            s1,
-            s2,
-            score_cutoff);
-    } else {
-        result = fuzz::partial_token_sort_ratio(
-            s1,
-            s2,
-            score_cutoff);
-    }
+    double result = fuzz::partial_token_sort_ratio(s1, s2, score_cutoff);
 
     return PyFloat_FromDouble(result);
 }
@@ -262,18 +218,7 @@ static PyObject* token_set_ratio(PyObject *self, PyObject *args, PyObject *keywd
     std::wstring s1 = PyObject_To_Wstring(py_s1, preprocess);
     std::wstring s2 = PyObject_To_Wstring(py_s2, preprocess);
 
-    double result;
-    if (preprocess) {
-        result = fuzz::token_set_ratio(
-            s1,
-            s2,
-            score_cutoff);
-    } else {
-        result = fuzz::token_set_ratio(
-            s1,
-            s2,
-            score_cutoff);
-    }
+    double result = fuzz::token_set_ratio(s1, s2, score_cutoff);
 
     return PyFloat_FromDouble(result);
 }
@@ -313,18 +258,8 @@ static PyObject* partial_token_set_ratio(PyObject *self, PyObject *args, PyObjec
     std::wstring s1 = PyObject_To_Wstring(py_s1, preprocess);
     std::wstring s2 = PyObject_To_Wstring(py_s2, preprocess);
 
-    double result;
-    if (preprocess) {
-        result = fuzz::partial_token_set_ratio(
-            s1,
-            s2,
-            score_cutoff);
-    } else {
-        result = fuzz::partial_token_set_ratio(
-            s1,
-            s2,
-            score_cutoff);
-    }
+    printf("%ls - %ls - %f\n", s1.c_str(), s2.c_str(), score_cutoff);
+    double result = fuzz::partial_token_set_ratio(s1, s2, score_cutoff);
 
     return PyFloat_FromDouble(result);
 }
@@ -365,18 +300,10 @@ static PyObject* token_ratio(PyObject *self, PyObject *args, PyObject *keywds) {
     std::wstring s1 = PyObject_To_Wstring(py_s1, preprocess);
     std::wstring s2 = PyObject_To_Wstring(py_s2, preprocess);
 
-    double result;
-    if (preprocess) {
-        result = fuzz::token_ratio(
+    double result = fuzz::token_ratio(
             Sentence<wchar_t>(s1),
             Sentence<wchar_t>(s2),
             score_cutoff);
-    } else {
-        result = fuzz::token_ratio(
-            Sentence<wchar_t>(s1),
-            Sentence<wchar_t>(s2),
-            score_cutoff);
-    }
 
     return PyFloat_FromDouble(result);
 }
