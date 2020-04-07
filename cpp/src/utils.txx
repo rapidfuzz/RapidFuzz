@@ -161,8 +161,8 @@ void utils::lower_case(std::basic_string<CharT>& s)
 template<typename CharT>
 std::basic_string<CharT> utils::default_process(std::basic_string<CharT> s)
 {
-    std::basic_regex<CharT> alnum_re(CHARTYPE_STR(CharT, "[^[:alnum:]]"));
-    s = std::regex_replace(s, alnum_re, CHARTYPE_STR(CharT, " "));
+    std::basic_regex<CharT> alnum_re(CHARTYPE_STR(CharT, "[[:punct:][:cntrl:]]"));
+    s = std::regex_replace(s, alnum_re, CHARTYPE_STR(CharT, ""));
     trim(s);
     lower_case(s);
     return s;

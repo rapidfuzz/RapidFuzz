@@ -5,7 +5,7 @@ import heapq
 
 
 def extract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, processor: Callable = utils.default_process,
-            limit: int = 5, score_cutoff: float = 0) -> List[Tuple[str, float]]:
+            limit: Optional[int] = 5, score_cutoff: float = 0) -> List[Tuple[str, float]]:
     """ 
     Find the best matches in a list of choices
 
@@ -40,11 +40,14 @@ def extract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, proce
             if score >= score_cutoff:
                 results.append((choice, score))
 
+    if limit is None:
+        return sorted(results, key=lambda x: x[1])
+
     return heapq.nlargest(limit, results, key=lambda x: x[1])
 
 
 def extractBests(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, processor: Callable = utils.default_process,
-            limit: int = 5, score_cutoff: float = 0) -> List[Tuple[str, float]]:
+            limit: Optional[int] = 5, score_cutoff: float = 0) -> List[Tuple[str, float]]:
     return extract(query, choices, scorer, processor, limit, score_cutoff)
 
 

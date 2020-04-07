@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <cmath>
 #include <vector>
-#include <limits>
 #include <tuple>
 #include <iterator>
 
@@ -185,10 +184,7 @@ percent fuzz::token_set_ratio(
     std::size_t sect_ba_lensum = sect_len + !!sect_len + ba_len;
 
     std::size_t sect_distance = levenshtein::weighted_distance(diff_ab_joined, diff_ba_joined);
-    double result = 0;
-    if (sect_distance != std::numeric_limits<std::size_t>::max()) {
-        result = std::max(result, 1.0 - sect_distance / static_cast<double>(sect_ab_lensum + sect_ba_lensum));
-    }
+    double result = std::max(result, 1.0 - sect_distance / static_cast<double>(sect_ab_lensum + sect_ba_lensum));
 
     // exit early since the other ratios are 0
     if (!sect_len) {
