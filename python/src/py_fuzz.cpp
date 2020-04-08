@@ -15,7 +15,7 @@ Args:
     score_cutoff (float): Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead of the ratio. Defaults to 0.
     preprocess (bool): Optional argument to specify whether the strings should be preprocessed
-        using utils.default_process. Defaults to True.
+        using utils.default_process. Defaults to False.
 
 Returns:
     float: ratio between s1 and s2 as a float between 0 and 100
@@ -29,7 +29,7 @@ static PyObject* ratio(PyObject *self, PyObject *args, PyObject *keywds) {
     PyObject *py_s1;
     PyObject *py_s2;
     double score_cutoff = 0;
-    int preprocess = 1;
+    int preprocess = 0;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", "preprocess", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU|dp", const_cast<char **>(kwlist),
@@ -59,7 +59,7 @@ Args:
     score_cutoff (float): Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead of the ratio. Defaults to 0.
     preprocess (bool): Optional argument to specify whether the strings should be preprocessed
-        using utils.default_process. Defaults to True.
+        using utils.default_process. Defaults to False.
 
 Returns:
     float: ratio between s1 and s2 as a float between 0 and 100
@@ -73,7 +73,7 @@ static PyObject* partial_ratio(PyObject *self, PyObject *args, PyObject *keywds)
     PyObject *py_s1;
     PyObject *py_s2;
     double score_cutoff = 0;
-    int preprocess = 1;
+    int preprocess = 0;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", "preprocess", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU|dp", const_cast<char **>(kwlist),

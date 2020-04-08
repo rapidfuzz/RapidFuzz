@@ -1,4 +1,3 @@
-import rapidfuzz._process
 from rapidfuzz import fuzz, utils
 from typing import Iterable, List, Tuple, Optional, Union, Callable
 import heapq
@@ -24,21 +23,15 @@ def extract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, proce
         List[Tuple[str, float]]: returns a list of all matches that have a score >= score_cutoff
   
     """
-    if (not scorer or scorer == fuzz.WRatio) and (not processor or processor == utils.default_process):
-        results = rapidfuzz._process.extract(query, choices, score_cutoff, bool(processor))
+    a = processor(query) if processor else query
+    results = []
 
-    # evaluate score inside python since scorer is a python function and so it would be required
-    # to add the python layer from C++ aswell
-    else:
-        a = processor(query) if processor else query
-        results = []
+    for choice in choices:
+        b = processor(choice) if processor else choice
 
-        for choice in choices:
-            b = processor(choice) if processor else choice
-
-            score = scorer(a, b, score_cutoff, False)
-            if score >= score_cutoff:
-                results.append((choice, score))
+        score = scorer(a, b, score_cutoff, False)
+        if score >= score_cutoff:
+            results.append((choice, score))
 
     if limit is None:
         return sorted(results, key=lambda x: x[1])
@@ -66,21 +59,15 @@ def extractIndices(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio
         List[Tuple[int, float]]: returns a list of all incides in the list that have a score >= score_cutoff
   
     """
-    if (not scorer or scorer == fuzz.WRatio) and (not processor or processor == utils.default_process):
-        results = rapidfuzz._process.extractIndices(query, choices, score_cutoff, bool(processor))
+    a = processor(query) if processor else query
+    results = []
 
-    # evaluate score inside python since scorer is a python function and so it would be required
-    # to add the python layer from C++ aswell
-    else:
-        a = processor(query) if processor else query
-        results = []
+    for (i, choice) in enumerate(choices):
+        b = processor(choice) if processor else choice
 
-        for (i, choice) in enumerate(choices):
-            b = processor(choice) if processor else choice
-
-            score = scorer(a, b, score_cutoff, False)
-            if score >= score_cutoff:
-                results.append((i, score))
+        score = scorer(a, b, score_cutoff, False)
+        if score >= score_cutoff:
+            results.append((i, score))
 
     if limit is None:
         return sorted(results, key=lambda x: x[1])
@@ -112,9 +99,6 @@ def extractOne(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, pr
         Optional[Tuple[str, float]]: returns the best match in form of a tuple or None when there is
             no match with a score >= score_cutoff
     """
-    if (not scorer or scorer == fuzz.WRatio) and (not processor or processor == utils.default_process):
-        return rapidfuzz._process.extractOne(query, choices, score_cutoff, bool(processor))
-
     # evaluate score inside python since scorer is a python function and so it would be required
     # to add the python layer from C++ aswell
     a = processor(query) if processor else query

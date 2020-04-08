@@ -47,8 +47,9 @@ struct Affix {
 
 namespace utils {
 
-template<typename CharT>
-string_view_vec<CharT> splitSV(const boost::basic_string_view<CharT>& str);
+string_view_vec<char> splitSV(const boost::basic_string_view<char>& str);
+
+string_view_vec<wchar_t> splitSV(const boost::basic_string_view<wchar_t>& str);
 
 template<typename CharT>
 string_view_vec<CharT> splitSV(const std::basic_string<CharT>& str);

@@ -1,17 +1,35 @@
 #include "utils.hpp"
 #include <algorithm>
-#include <locale>
+#include <cwctype>
+#include <cctype>
 #include <regex>
 
-template<typename CharT>
-string_view_vec<CharT> utils::splitSV(const boost::basic_string_view<CharT>& str)
+inline string_view_vec<char> utils::splitSV(const boost::basic_string_view<char>& str)
 {
-    string_view_vec<CharT> output;
+    string_view_vec<char> output;
 
     auto first = str.data(), second = str.data(), last = first + str.size();
     for (; second != last && first != last; first = second + 1) {
-        second = std::find_if(first, last, [](const CharT& c) {
-            return std::isspace(c, std::locale(""));
+        second = std::find_if(first, last, [](const char& c) {
+            return std::isspace(c);
+            });
+
+        if (first != second) {
+            output.emplace_back(first, second - first);
+        }
+    }
+
+    return output;
+}
+
+inline string_view_vec<wchar_t> utils::splitSV(const boost::basic_string_view<wchar_t>& str)
+{
+    string_view_vec<wchar_t> output;
+
+    auto first = str.data(), second = str.data(), last = first + str.size();
+    for (; second != last && first != last; first = second + 1) {
+        second = std::find_if(first, last, [](const wchar_t& c) {
+            return std::iswspace(c);
             });
 
         if (first != second) {
@@ -129,11 +147,17 @@ Affix utils::remove_common_affix(boost::basic_string_view<CharT>& a, boost::basi
     };
 }
 
-template<typename CharT>
-void ltrim(std::basic_string<CharT>& s)
+inline void ltrim(std::basic_string<char>& s)
 {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](const CharT& ch) {
-            return !std::isspace(ch, std::locale(""));
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](const char& ch) {
+            return !std::isspace(ch);
+        }));
+}
+
+inline void ltrim(std::basic_string<wchar_t>& s)
+{
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](const wchar_t& ch) {
+            return !std::iswspace(ch);
         }));
 }
 
@@ -141,7 +165,22 @@ template<typename CharT>
 void rtrim(std::basic_string<CharT>& s)
 {
     s.erase(std::find_if(s.rbegin(), s.rend(), [](const CharT& ch) {
-            return !std::isspace(ch, std::locale(""));
+            return !std::isspace(ch);
+        }).base(), s.end());
+}
+
+
+inline void rtrim(std::basic_string<char>& s)
+{
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](const char& ch) {
+            return !std::isspace(ch);
+        }).base(), s.end());
+}
+
+inline void rtrim(std::basic_string<wchar_t>& s)
+{
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](const wchar_t& ch) {
+            return !std::iswspace(ch);
         }).base(), s.end());
 }
 

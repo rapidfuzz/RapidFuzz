@@ -45,7 +45,7 @@ setup(
     version=version,
     author='Max Bachmann',
     author_email='contact@maxbachmann.de',
-    url='https://github.com/rhasspy/rapidfuzz',
+    url='https://github.com/maxbachmann/rapidfuzz',
     description='rapid fuzzy string matching',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -59,12 +59,6 @@ setup(
 		Extension(
 			'rapidfuzz.fuzz',
 			['python/src/py_fuzz.cpp'],
-        	include_dirs=["cpp/src", "cpp/extern"],
-        	language='c++',
-		),
-		Extension(
-			'rapidfuzz._process',
-			['python/src/py_process.cpp'],
         	include_dirs=["cpp/src", "cpp/extern"],
         	language='c++',
 		),
