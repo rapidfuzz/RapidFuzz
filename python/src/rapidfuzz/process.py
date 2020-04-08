@@ -46,6 +46,48 @@ def extract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, proce
     return heapq.nlargest(limit, results, key=lambda x: x[1])
 
 
+def extractIndices(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, processor: Callable = utils.default_process,
+            limit: Optional[int] = 5, score_cutoff: float = 0) -> List[Tuple[str, float]]:
+    """ 
+    Find the best matches in a list of choices
+
+    Args: 
+        query (str): string we want to find
+        choices (Iterable): list of all strings the query should be compared with
+        scorer (Callable): optional callable that is used to calculate the matching score between
+            the query and each choice. WRatio is used by default
+        processor (Callable): optional callable that reformats the strings. utils.default_process
+            is used by default, which lowercases the strings and trims whitespace
+        limit (int): maximum amount of results to return
+        score_cutoff (float): Optional argument for a score threshold. Matches with
+            a lower score than this number will not be returned. Defaults to 0
+
+    Returns: 
+        List[Tuple[int, float]]: returns a list of all incides in the list that have a score >= score_cutoff
+  
+    """
+    if (not scorer or scorer == fuzz.WRatio) and (not processor or processor == utils.default_process):
+        results = rapidfuzz._process.extractIndices(query, choices, score_cutoff, bool(processor))
+
+    # evaluate score inside python since scorer is a python function and so it would be required
+    # to add the python layer from C++ aswell
+    else:
+        a = processor(query) if processor else query
+        results = []
+
+        for (i, choice) in enumerate(choices):
+            b = processor(choice) if processor else choice
+
+            score = scorer(a, b, score_cutoff, False)
+            if score >= score_cutoff:
+                results.append((i, score))
+
+    if limit is None:
+        return sorted(results, key=lambda x: x[1])
+
+    return heapq.nlargest(limit, results, key=lambda x: x[1])
+
+
 def extractBests(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, processor: Callable = utils.default_process,
             limit: Optional[int] = 5, score_cutoff: float = 0) -> List[Tuple[str, float]]:
     return extract(query, choices, scorer, processor, limit, score_cutoff)

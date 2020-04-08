@@ -79,6 +79,77 @@ PyObject* extract(PyObject *self, PyObject *args, PyObject *keywds) {
     return results;
 }
 
+constexpr const char * extractIndices_docstring = R"(
+Find the best matches in a list of choices
+
+Args: 
+    query (str): string we want to find
+    choices (Iterable): list of all strings the query should be compared with
+    score_cutoff (float): Optional argument for a score threshold. Matches with
+        a lower score than this number will not be returned. Defaults to 0
+
+Returns: 
+    List[Tuple[int, float]]: returns a list of all indices in the list that have a score >= score_cutoff
+)";
+
+PyObject* extractIndices(PyObject *self, PyObject *args, PyObject *keywds) {
+    PyObject *py_query;
+    PyObject* py_choices;
+    double score_cutoff = 0;
+    int preprocess = 1;
+    static const char *kwlist[] = {"query", "choices", "score_cutoff", "preprocess", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UO|dp", const_cast<char **>(kwlist),
+                                     &py_query, &py_choices, &score_cutoff, &preprocess)) {
+        return NULL;
+    }
+
+    PyObject* choices = PySequence_Fast(py_choices, "Choices must be a sequence of strings");
+    if (!choices) {
+        return NULL;
+    }
+    std::size_t choice_count = PySequence_Fast_GET_SIZE(choices);
+
+    if (PyUnicode_READY(py_query)) {
+        return NULL;
+    }
+
+    std::wstring cleaned_query = PyObject_To_Wstring(py_query, preprocess);
+    uint64_t query_bitmap = utils::bitmap_create(cleaned_query);
+
+    PyObject* results = PyList_New(0);
+
+    for (std::size_t i = 0; i < choice_count; ++i) {
+        PyObject* py_choice = PySequence_Fast_GET_ITEM(choices, i);
+
+        if (!PyUnicode_Check(py_choice)) {
+            PyErr_SetString(PyExc_TypeError, "Choices must be a sequence of strings");
+            Py_DECREF(choices);
+            return NULL;
+        }
+
+        Py_ssize_t len = PyUnicode_GET_LENGTH(py_choice);
+        wchar_t* buffer = PyUnicode_AsWideCharString(py_choice, &len);
+        std::wstring choice(buffer, len);
+        PyMem_Free(buffer);
+
+        std::wstring cleaned_choice = (preprocess) ? utils::default_process(choice) : choice;
+        uint64_t choice_bitmap = utils::bitmap_create(cleaned_choice);
+
+        double score = fuzz::WRatio(
+                Sentence<wchar_t>(cleaned_query, query_bitmap),
+                Sentence<wchar_t>(cleaned_choice, choice_bitmap),
+                score_cutoff);
+
+        if (score >= score_cutoff) {
+            PyList_Append(results, Py_BuildValue("(nd)", i, score));
+        }
+    }
+
+    Py_DECREF(choices);
+    return results;
+}
+
 
 constexpr const char * extractOne_docstring = R"(
 Find the best match in a list of choices
@@ -168,6 +239,7 @@ PyObject* extractOne(PyObject *self, PyObject *args, PyObject *keywds) {
 #define PY_METHOD(x) { #x, (PyCFunction)(void(*)(void))x, METH_VARARGS | METH_KEYWORDS, x##_docstring }
 static PyMethodDef methods[] = {
     PY_METHOD(extract),
+    PY_METHOD(extractIndices),
     PY_METHOD(extractOne),
     {NULL, NULL, 0, NULL}   /* sentinel */
 };
