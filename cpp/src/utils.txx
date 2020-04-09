@@ -11,7 +11,7 @@ inline string_view_vec<char> utils::splitSV(const boost::basic_string_view<char>
     auto first = str.data(), second = str.data(), last = first + str.size();
     for (; second != last && first != last; first = second + 1) {
         second = std::find_if(first, last, [](const char& c) {
-            return std::isspace(c);
+                return std::isspace(c);
             });
 
         if (first != second) {
@@ -29,7 +29,7 @@ inline string_view_vec<wchar_t> utils::splitSV(const boost::basic_string_view<wc
     auto first = str.data(), second = str.data(), last = first + str.size();
     for (; second != last && first != last; first = second + 1) {
         second = std::find_if(first, last, [](const wchar_t& c) {
-            return std::iswspace(c);
+                return std::iswspace(c);
             });
 
         if (first != second) {
@@ -96,6 +96,7 @@ DecomposedSet<CharT> utils::set_decomposition(string_view_vec<CharT> a, string_v
             difference_ab.emplace_back(current_a);
         }
     }
+
 
     return DecomposedSet<CharT>{ intersection, difference_ab, b };
 }

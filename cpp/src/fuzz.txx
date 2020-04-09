@@ -5,6 +5,7 @@
 #include <vector>
 #include <tuple>
 #include <iterator>
+#include <unordered_set>
 
 template<typename CharT>
 inline percent fuzz::ratio(

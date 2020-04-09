@@ -77,21 +77,21 @@ for s in cirque_strings:
     print('Test fuzz.ratio for string: "%s"' % s)
     print('-------------------------------')
     print_result_from_timeit('fuzz.ratio(u\'cirque du soleil\', u\'%s\')' % s,
-                             'fuzz.ratio(u\'cirque du soleil\', u\'%s\', preprocess=False)' % s,
+                             'fuzz.ratio(u\'cirque du soleil\', u\'%s\')' % s,
                              common_setup, number=iterations / 100)
 
 for s in cirque_strings:
     print('Test fuzz.partial_ratio for string: "%s"' % s)
     print('-------------------------------')
     print_result_from_timeit('fuzz.partial_ratio(u\'cirque du soleil\', u\'%s\')' % s,
-                            'fuzz.partial_ratio(u\'cirque du soleil\', u\'%s\', preprocess=False)' % s,
+                            'fuzz.partial_ratio(u\'cirque du soleil\', u\'%s\')' % s,
                              common_setup, number=iterations / 100)
 
 for s in cirque_strings:
     print('Test fuzz.WRatio for string: "%s"' % s)
     print('-------------------------------')
-    print_result_from_timeit('fuzz.WRatio(u\'cirque du soleil\', u\'%s\')' % s,
-                            'fuzz.WRatio(u\'cirque du soleil\', u\'%s\')' % s,
+    print_result_from_timeit('fuzz.WRatio(u\'cirque du soleil\', u\'%s\', full_process=False)' % s,
+                            'fuzz.WRatio(u\'cirque du soleil\', u\'%s\', processor=False)' % s,
                              common_setup, number=iterations / 100)
 
 print('Test process.extract(scorer =  fuzz.WRatio) for string: "%s"' % s)
