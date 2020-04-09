@@ -56,7 +56,7 @@ def extract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, proce
     results = iterExtract(query, choices, scorer, processor, score_cutoff)
 
     if limit is None:
-        return sorted(results, key=lambda x: x[1])
+        return sorted(results, key=lambda x: x[1], reverse=True)
 
     return heapq.nlargest(limit, results, key=lambda x: x[1])
 
@@ -84,7 +84,7 @@ def extractIndices(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio
     results = iterExtractIndices(query, choices, scorer, processor, score_cutoff)
 
     if limit is None:
-        return sorted(results, key=lambda x: x[1])
+        return sorted(results, key=lambda x: x[1], reverse=True)
 
     return heapq.nlargest(limit, results, key=lambda x: x[1])
 

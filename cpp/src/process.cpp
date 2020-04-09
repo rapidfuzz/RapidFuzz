@@ -17,7 +17,9 @@ process::extract(const std::wstring& query, const std::vector<std::wstring>& cho
 
         double score = fuzz::WRatio(Sentence<wchar_t>(query), Sentence<wchar_t>(choice), score_cutoff);
         if (score >= score_cutoff) {
-            results.emplace_back(std::make_pair(choice, score));
+            results.emplace_back(std::piecewise_construct,
+                std::forward_as_tuple(choice),
+                std::forward_as_tuple(score));
         }
     }
 

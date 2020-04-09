@@ -91,9 +91,9 @@ DecomposedSet<CharT> utils::set_decomposition(string_view_vec<CharT> a, string_v
         auto element_b = std::find(b.begin(), b.end(), current_a);
         if (element_b != b.end()) {
             b.erase(element_b);
-            intersection.emplace_back(current_a);
+            intersection.push_back(current_a);
         } else {
-            difference_ab.emplace_back(current_a);
+            difference_ab.push_back(current_a);
         }
     }
 

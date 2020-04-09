@@ -30,7 +30,7 @@ def ratio(s1: str, s2: str, processor: Union[bool, Callable] = False, score_cuto
         s1 = utils.default_process(s1)
         s2 = utils.default_process(s2)
 
-    return rapidfuzz._fuzz.ratio(s1, s1, score_cutoff=score_cutoff)
+    return rapidfuzz._fuzz.ratio(s1, s2, score_cutoff=score_cutoff)
 
 
 def partial_ratio(s1: str, s2: str, processor: Union[bool, Callable] = False, score_cutoff: float = 0) -> float:
@@ -60,7 +60,7 @@ def partial_ratio(s1: str, s2: str, processor: Union[bool, Callable] = False, sc
         s1 = utils.default_process(s1)
         s2 = utils.default_process(s2)
 
-    return rapidfuzz._fuzz.partial_ratio(s1, s1, score_cutoff=score_cutoff)
+    return rapidfuzz._fuzz.partial_ratio(s1, s2, score_cutoff=score_cutoff)
 
 
 def token_sort_ratio(s1: str, s2: str, processor: Union[bool, Callable] = True, score_cutoff: float = 0) -> float:
@@ -90,7 +90,7 @@ def token_sort_ratio(s1: str, s2: str, processor: Union[bool, Callable] = True, 
         s1 = utils.default_process(s1)
         s2 = utils.default_process(s2)
 
-    return rapidfuzz._fuzz.token_sort_ratio(s1, s1, score_cutoff=score_cutoff)
+    return rapidfuzz._fuzz.token_sort_ratio(s1, s2, score_cutoff=score_cutoff)
 
 
 def partial_token_sort_ratio(s1: str, s2: str, processor: Union[bool, Callable] = True, score_cutoff: float = 0) -> float:
@@ -116,7 +116,7 @@ def partial_token_sort_ratio(s1: str, s2: str, processor: Union[bool, Callable] 
         s1 = utils.default_process(s1)
         s2 = utils.default_process(s2)
 
-    return rapidfuzz._fuzz.partial_token_sort_ratio(s1, s1, score_cutoff=score_cutoff)
+    return rapidfuzz._fuzz.partial_token_sort_ratio(s1, s2, score_cutoff=score_cutoff)
 
 
 def token_set_ratio(s1: str, s2: str, processor: Union[bool, Callable] = True, score_cutoff: float = 0) -> float:
@@ -148,7 +148,7 @@ def token_set_ratio(s1: str, s2: str, processor: Union[bool, Callable] = True, s
         s1 = utils.default_process(s1)
         s2 = utils.default_process(s2)
 
-    return rapidfuzz._fuzz.token_set_ratio(s1, s1, score_cutoff=score_cutoff)
+    return rapidfuzz._fuzz.token_set_ratio(s1, s2, score_cutoff=score_cutoff)
 
 
 def partial_token_set_ratio(s1: str, s2: str, processor: Union[bool, Callable] = True, score_cutoff: float = 0) -> float:
@@ -201,7 +201,7 @@ def token_ratio(s1: str, s2: str, processor: Union[bool, Callable] = True, score
         s1 = utils.default_process(s1)
         s2 = utils.default_process(s2)
 
-    return rapidfuzz._fuzz.token_ratio(s1, s1, score_cutoff=score_cutoff)
+    return rapidfuzz._fuzz.token_ratio(s1, s2, score_cutoff=score_cutoff)
 
 
 def partial_token_ratio(s1: str, s2: str, processor: Union[bool, Callable] = True, score_cutoff: float = 0) -> float:
@@ -228,7 +228,7 @@ def partial_token_ratio(s1: str, s2: str, processor: Union[bool, Callable] = Tru
         s1 = utils.default_process(s1)
         s2 = utils.default_process(s2)
 
-    return rapidfuzz._fuzz.partial_token_ratio(s1, s1, score_cutoff=score_cutoff)
+    return rapidfuzz._fuzz.partial_token_ratio(s1, s2, score_cutoff=score_cutoff)
 
 
 def WRatio(s1: str, s2: str, processor: Union[bool, Callable] = True, score_cutoff: float = 0) -> float:
