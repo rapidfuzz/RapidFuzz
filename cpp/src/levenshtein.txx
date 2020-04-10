@@ -1,3 +1,6 @@
+/* SPDX-License-Identifier: MIT */
+/* Copyright © 2020 Max Bachmann */
+
 #include "levenshtein.hpp"
 #include <algorithm>
 #include <stdexcept>
@@ -198,9 +201,11 @@ std::size_t levenshtein::distance(
                 ++temp;
             }
 
-            temp = std::min({ *cache_iter + 1,
+            temp = std::min({
+                *cache_iter + 1,
                 *(++cache_iter) + 1,
-                temp });
+                temp
+            });
             std::swap(*cache_iter, temp);
         }
     }

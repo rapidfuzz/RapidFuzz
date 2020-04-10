@@ -1,3 +1,7 @@
+/* SPDX-License-Identifier: MIT */
+/* Copyright © 2020 Max Bachmann */
+/* Copyright © 2011 Adam Cohen */
+
 #include "process.hpp"
 #include "fuzz.hpp"
 #include "utils.hpp"

@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: MIT
+# Copyright © 2020 Max Bachmann
+# Copyright © 2011 Adam Cohen
+
 from rapidfuzz._fuzz import *
 import rapidfuzz._fuzz
 from typing import Union, Callable, Tuple

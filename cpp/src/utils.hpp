@@ -1,3 +1,6 @@
+/* SPDX-License-Identifier: MIT */
+/* Copyright © 2020 Max Bachmann */
+
 #pragma once
 #include <boost/utility/string_view.hpp>
 #include <vector>

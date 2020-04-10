@@ -1,3 +1,6 @@
+/* SPDX-License-Identifier: MIT */
+/* Copyright © 2020 Max Bachmann */
+
 #include "utils.hpp"
 #include <algorithm>
 #include <cwctype>
@@ -100,7 +103,6 @@ DecomposedSet<CharT> utils::set_decomposition(string_view_vec<CharT> a, string_v
 
     return DecomposedSet<CharT>{ intersection, difference_ab, b };
 }
-
 
 /**
  * Finds the longest common prefix between two ranges

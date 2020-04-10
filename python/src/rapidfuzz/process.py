@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: MIT
+# Copyright © 2020 Max Bachmann
+# Copyright © 2011 Adam Cohen
+
 from rapidfuzz import fuzz, utils
 from typing import Iterable, List, Tuple, Optional, Union, Callable, Generator
 import heapq

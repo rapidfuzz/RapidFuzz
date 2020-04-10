@@ -1,4 +1,8 @@
+/* SPDX-License-Identifier: MIT */
+/* Copyright © 2020 Max Bachmann */
+
 #pragma once
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <string>
 #include "utils.hpp"

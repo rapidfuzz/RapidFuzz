@@ -1,3 +1,7 @@
+/* SPDX-License-Identifier: MIT */
+/* Copyright © 2020 Max Bachmann */
+/* Copyright © 2011 Adam Cohen */
+
 #pragma once
 #include <boost/utility/string_view.hpp>
 #include "utils.hpp"

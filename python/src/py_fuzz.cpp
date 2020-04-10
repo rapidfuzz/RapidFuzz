@@ -1,4 +1,7 @@
-#define PY_SSIZE_T_CLEAN  /* Make "s#" use Py_ssize_t rather than int. */
+/* SPDX-License-Identifier: MIT */
+/* Copyright © 2020 Max Bachmann */
+
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <string>
 #include "fuzz.hpp"

@@ -1,3 +1,7 @@
+/* SPDX-License-Identifier: MIT */
+/* Copyright © 2020 Max Bachmann */
+/* Copyright © 2011 Adam Cohen */
+
 #include "fuzz.hpp"
 #include "levenshtein.hpp"
 #include <algorithm>
