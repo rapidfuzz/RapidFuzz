@@ -72,8 +72,8 @@ Affix remove_common_affix(boost::basic_string_view<CharT>& a, boost::basic_strin
 template<typename CharT>
 void trim(std::basic_string<CharT>& s);
 
-template<typename CharT>
-void lower_case(std::basic_string<CharT>& s);
+void lower_case(std::string& s);
+void lower_case(std::wstring& s);
 
 template<typename CharT>
 std::basic_string<CharT> default_process(std::basic_string<CharT> s);

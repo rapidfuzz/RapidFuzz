@@ -150,37 +150,28 @@ Affix utils::remove_common_affix(boost::basic_string_view<CharT>& a, boost::basi
     };
 }
 
-inline void ltrim(std::basic_string<char>& s)
+inline void ltrim(std::string& s)
 {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](const char& ch) {
             return !std::isspace(ch);
         }));
 }
 
-inline void ltrim(std::basic_string<wchar_t>& s)
+inline void ltrim(std::wstring& s)
 {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](const wchar_t& ch) {
             return !std::iswspace(ch);
         }));
 }
 
-template<typename CharT>
-void rtrim(std::basic_string<CharT>& s)
-{
-    s.erase(std::find_if(s.rbegin(), s.rend(), [](const CharT& ch) {
-            return !std::isspace(ch);
-        }).base(), s.end());
-}
-
-
-inline void rtrim(std::basic_string<char>& s)
+inline void rtrim(std::string& s)
 {
     s.erase(std::find_if(s.rbegin(), s.rend(), [](const char& ch) {
             return !std::isspace(ch);
         }).base(), s.end());
 }
 
-inline void rtrim(std::basic_string<wchar_t>& s)
+inline void rtrim(std::wstring& s)
 {
     s.erase(std::find_if(s.rbegin(), s.rend(), [](const wchar_t& ch) {
             return !std::iswspace(ch);
@@ -194,17 +185,23 @@ void utils::trim(std::basic_string<CharT>& s)
     rtrim(s);
 }
 
-template<typename CharT>
-void utils::lower_case(std::basic_string<CharT>& s)
+void utils::lower_case(std::string& s)
 {
     std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+}
+
+void utils::lower_case(std::wstring& s)
+{
+    std::transform(s.begin(), s.end(), s.begin(), ::towlower);
 }
 
 template<typename CharT>
 std::basic_string<CharT> utils::default_process(std::basic_string<CharT> s)
 {
-    std::basic_regex<CharT> alnum_re(CHARTYPE_STR(CharT, "[[:punct:][:cntrl:]]"));
-    s = std::regex_replace(s, alnum_re, CHARTYPE_STR(CharT, " "));
+    std::replace_if(s.begin(), s.end(), [](CharT ch) {
+        return std::ispunct(ch) || (int)ch < 0x1F || (int)ch == 0x7F;
+    }, (CharT)0x20);
+
     trim(s);
     lower_case(s);
     return s;
