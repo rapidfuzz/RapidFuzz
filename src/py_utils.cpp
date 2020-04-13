@@ -1,11 +1,11 @@
 /* SPDX-License-Identifier: MIT */
 /* Copyright © 2020 Max Bachmann */
 
-#pragma once
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <string>
 #include "utils.hpp"
+#include "string_utils.hpp"
 
 constexpr const char * bitmap_create_docstring = R"(
 
@@ -29,7 +29,7 @@ static PyObject* bitmap_create(PyObject *self, PyObject *args, PyObject *keywds)
     uint64_t result = utils::bitmap_create(std::wstring(buffer, len));
     PyMem_Free(buffer);
 
-    return PyLong_FromLong(result);
+    return PyLong_FromUnsignedLongLong(result);
 }
 
 
@@ -52,10 +52,10 @@ static PyObject* default_process(PyObject *self, PyObject *args, PyObject *keywd
 
     Py_ssize_t len = PyUnicode_GET_LENGTH(py_sentence);
     wchar_t* buffer = PyUnicode_AsWideCharString(py_sentence, &len);
-    std::wstring result = utils::default_process(std::wstring(buffer, len));
+    std::wstring result = string_utils::default_process(std::wstring(buffer, len));
     PyMem_Free(buffer);
 
-    return Py_BuildValue("u#", result.c_str(), result.length());
+    return PyUnicode_FromWideChar(result.c_str(), result.length());
 }
 
 /* The cast of the function is necessary since PyCFunction values

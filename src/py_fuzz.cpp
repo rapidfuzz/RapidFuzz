@@ -5,7 +5,7 @@
 #include <Python.h>
 #include <string>
 #include "fuzz.hpp"
-#include "utils.hpp"
+#include "string_utils.hpp"
 #include <boost/utility/string_view.hpp>
 
 static PyObject* ratio(PyObject *self, PyObject *args, PyObject *keywds) {
