@@ -12,6 +12,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        submodules: 'true'
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
@@ -38,6 +40,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+      with:
+        submodules: 'true'
 
     - name: Set up Python 3.7
       uses: actions/setup-python@v1
@@ -67,6 +71,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+      with:
+        submodules: 'true'
 
     - uses: actions/setup-python@v1
       name: Install Python
