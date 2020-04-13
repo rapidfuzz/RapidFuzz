@@ -11,7 +11,7 @@ constexpr const char * bitmap_create_docstring = R"(
 
 )";
 
-static PyObject* bitmap_create(PyObject *self, PyObject *args, PyObject *keywds) {
+static PyObject* bitmap_create(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
     PyObject *py_s1;
     static const char *kwlist[] = {"s1", NULL};
 
@@ -37,7 +37,7 @@ constexpr const char * default_process_docstring = R"(
 
 )";
 
-static PyObject* default_process(PyObject *self, PyObject *args, PyObject *keywds) {
+static PyObject* default_process(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
     PyObject *py_sentence;
     static const char *kwlist[] = {"sentence", NULL};
 
@@ -73,7 +73,11 @@ static struct PyModuleDef moduledef = {
     "rapidfuzz._utils",
     NULL,
     -1,
-    methods
+    methods,
+    NULL,  /* m_slots */
+    NULL,  /* m_traverse */
+    0,     /* m_clear */
+    NULL   /* m_free */
 };
 
 PyMODINIT_FUNC PyInit__utils(void) {

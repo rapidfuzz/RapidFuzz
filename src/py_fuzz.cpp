@@ -8,7 +8,7 @@
 #include "string_utils.hpp"
 #include <boost/utility/string_view.hpp>
 
-static PyObject* ratio(PyObject *self, PyObject *args, PyObject *keywds) {
+static PyObject* ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
     PyObject *py_s1;
     PyObject *py_s2;
     double score_cutoff = 0;
@@ -39,7 +39,7 @@ static PyObject* ratio(PyObject *self, PyObject *args, PyObject *keywds) {
     return PyFloat_FromDouble(result);
 }
 
-static PyObject* partial_ratio(PyObject *self, PyObject *args, PyObject *keywds) {
+static PyObject* partial_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
     PyObject *py_s1;
     PyObject *py_s2;
     double score_cutoff = 0;
@@ -70,7 +70,7 @@ static PyObject* partial_ratio(PyObject *self, PyObject *args, PyObject *keywds)
     return PyFloat_FromDouble(result);
 }
 
-static PyObject* token_sort_ratio(PyObject *self, PyObject *args, PyObject *keywds) {
+static PyObject* token_sort_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
     PyObject *py_s1;
     PyObject *py_s2;
     double score_cutoff = 0;
@@ -101,7 +101,7 @@ static PyObject* token_sort_ratio(PyObject *self, PyObject *args, PyObject *keyw
     return PyFloat_FromDouble(result);
 }
 
-static PyObject* partial_token_sort_ratio(PyObject *self, PyObject *args, PyObject *keywds) {
+static PyObject* partial_token_sort_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
     PyObject *py_s1;
     PyObject *py_s2;
     double score_cutoff = 0;
@@ -132,7 +132,7 @@ static PyObject* partial_token_sort_ratio(PyObject *self, PyObject *args, PyObje
     return PyFloat_FromDouble(result);
 }
 
-static PyObject* token_set_ratio(PyObject *self, PyObject *args, PyObject *keywds) {
+static PyObject* token_set_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
     PyObject *py_s1;
     PyObject *py_s2;
     double score_cutoff = 0;
@@ -163,7 +163,7 @@ static PyObject* token_set_ratio(PyObject *self, PyObject *args, PyObject *keywd
     return PyFloat_FromDouble(result);
 }
 
-static PyObject* partial_token_set_ratio(PyObject *self, PyObject *args, PyObject *keywds) {
+static PyObject* partial_token_set_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
     PyObject *py_s1;
     PyObject *py_s2;
     double score_cutoff = 0;
@@ -194,7 +194,7 @@ static PyObject* partial_token_set_ratio(PyObject *self, PyObject *args, PyObjec
     return PyFloat_FromDouble(result);
 }
 
-static PyObject* token_ratio(PyObject *self, PyObject *args, PyObject *keywds) {
+static PyObject* token_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
     PyObject *py_s1;
     PyObject *py_s2;
     double score_cutoff = 0;
@@ -228,7 +228,7 @@ static PyObject* token_ratio(PyObject *self, PyObject *args, PyObject *keywds) {
     return PyFloat_FromDouble(result);
 }
 
-static PyObject* partial_token_ratio(PyObject *self, PyObject *args, PyObject *keywds) {
+static PyObject* partial_token_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
     PyObject *py_s1;
     PyObject *py_s2;
     double score_cutoff = 0;
@@ -259,7 +259,7 @@ static PyObject* partial_token_ratio(PyObject *self, PyObject *args, PyObject *k
     return PyFloat_FromDouble(result);
 }
 
-static PyObject* WRatio(PyObject *self, PyObject *args, PyObject *keywds) {
+static PyObject* WRatio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
     PyObject *py_s1;
     PyObject *py_s2;
     long long s1_bitmap = 0;
@@ -299,7 +299,7 @@ static PyObject* WRatio(PyObject *self, PyObject *args, PyObject *keywds) {
 /* The cast of the function is necessary since PyCFunction values
 * only take two PyObject* parameters, and these functions take three.
 */
-#define PY_METHOD(x) { #x, (PyCFunction)(void(*)(void))x, METH_VARARGS | METH_KEYWORDS }
+#define PY_METHOD(x) { #x, (PyCFunction)(void(*)(void))x, METH_VARARGS | METH_KEYWORDS, "" }
 static PyMethodDef methods[] = {
     PY_METHOD(ratio),
     PY_METHOD(partial_ratio),
@@ -318,7 +318,11 @@ static struct PyModuleDef moduledef = {
     "rapidfuzz._fuzz",
     NULL,
     -1,
-    methods
+    methods,
+    NULL,  /* m_slots */
+    NULL,  /* m_traverse */
+    0,     /* m_clear */
+    NULL   /* m_free */
 };
 
 PyMODINIT_FUNC PyInit__fuzz(void) {

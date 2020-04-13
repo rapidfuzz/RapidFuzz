@@ -19,7 +19,7 @@ Returns:
     int: levenshtein distance between s1 and s2
 )";
 
-PyObject* distance(PyObject *self, PyObject *args, PyObject *keywds) {
+PyObject* distance(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
     PyObject *py_s1;
     PyObject *py_s2;
     static const char *kwlist[] = {"s1", "s2", NULL};
@@ -63,7 +63,7 @@ Returns:
     float: normalized levenshtein distance between s1 and s2 as a float between 0 and 100
 )";
 
-PyObject* normalized_distance(PyObject *self, PyObject *args, PyObject *keywds) {
+PyObject* normalized_distance(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
     PyObject *py_s1;
     PyObject *py_s2;
     double score_cutoff = 0;
@@ -111,7 +111,7 @@ Returns:
     int: weighted levenshtein distance between s1 and s2
 )";
 
-PyObject* weighted_distance(PyObject *self, PyObject *args, PyObject *keywds) {
+PyObject* weighted_distance(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
     PyObject *py_s1;
     PyObject *py_s2;
     std::size_t insert_cost = 1;
@@ -175,7 +175,7 @@ Returns:
     float: normalized weighted levenshtein distance between s1 and s2 as a float between 0 and 100
 )";
 
-PyObject* normalized_weighted_distance(PyObject *self, PyObject *args, PyObject *keywds) {
+PyObject* normalized_weighted_distance(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
     PyObject *py_s1;
     PyObject *py_s2;
     double score_cutoff = 0;
@@ -224,7 +224,11 @@ static struct PyModuleDef moduledef = {
     "rapidfuzz.levenshtein",
     NULL,
     -1,
-    methods
+    methods,
+    NULL,  /* m_slots */
+    NULL,  /* m_traverse */
+    0,     /* m_clear */
+    NULL   /* m_free */
 };
 
 PyMODINIT_FUNC PyInit_levenshtein(void) {
