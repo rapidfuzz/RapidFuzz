@@ -1,6 +1,8 @@
 include README.md
 include VERSION
 include LICENSE
-recursive-include cpp/src *.hpp *.txx
-recursive-include cpp/extern/boost *
-recursive-include python/src *.hpp
+
+recursive-include src/rapidfuzz-cpp/src *.hpp *.txx
+recursive-include src/rapidfuzz-cpp/extern/boost *
+recursive-include src/rapidfuzz-cpp/extern/difflib *
+include src/rapidfuzz-cpp/LICENSE

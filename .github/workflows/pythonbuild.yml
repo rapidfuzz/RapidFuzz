@@ -49,7 +49,11 @@ jobs:
         python-version: '3.7'
 
     - name: create tarball
-      run: python3 setup.py sdist
+      run: |
+        python3 setup.py sdist
+        # test whether tarball contains all files required for compiling
+        pip3 install dist/rapidfuzz-*.tar.gz
+        pip3 uninstall rapidfuzz --yes
 
     - name: upload tarball
       uses: actions/upload-artifact@v1
