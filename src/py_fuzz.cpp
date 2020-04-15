@@ -8,6 +8,8 @@
 #include "string_utils.hpp"
 #include <boost/utility/string_view.hpp>
 
+namespace fuzz = rapidfuzz::fuzz;
+
 static PyObject* ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
     PyObject *py_s1;
     PyObject *py_s2;
@@ -218,8 +220,8 @@ static PyObject* token_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywd
     boost::wstring_view s2(buffer_s2, len_s2);
 
     double result = fuzz::token_ratio(
-            Sentence<wchar_t>(s1),
-            Sentence<wchar_t>(s2),
+            rapidfuzz::Sentence<wchar_t>(s1),
+            rapidfuzz::Sentence<wchar_t>(s2),
             score_cutoff);
     
     PyMem_Free(buffer_s1);
@@ -285,8 +287,8 @@ static PyObject* WRatio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
     boost::wstring_view s2(buffer_s2, len_s2);
 
     double result = fuzz::WRatio(
-            Sentence<wchar_t>(s1, s1_bitmap),
-            Sentence<wchar_t>(s2, s2_bitmap),
+            rapidfuzz::Sentence<wchar_t>(s1, s1_bitmap),
+            rapidfuzz::Sentence<wchar_t>(s2, s2_bitmap),
             score_cutoff);
     
     PyMem_Free(buffer_s1);

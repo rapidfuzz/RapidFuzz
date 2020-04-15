@@ -7,6 +7,9 @@
 #include "utils.hpp"
 #include "string_utils.hpp"
 
+namespace utils = rapidfuzz::utils;
+namespace string_utils = rapidfuzz::string_utils;
+
 constexpr const char * bitmap_create_docstring = R"(
 
 )";

@@ -6,6 +6,7 @@
 #include <string>
 #include "levenshtein.hpp"
 
+namespace levenshtein = rapidfuzz::levenshtein;
 
 constexpr const char * distance_docstring = R"(
 Calculates the minimum number of insertions, deletions, and substitutions
