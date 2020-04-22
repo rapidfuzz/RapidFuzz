@@ -269,7 +269,7 @@ def QRatio(s1: str, s2: str, processor: Union[bool, Callable] = True, score_cuto
     Args:
         s1 (str): first string to compare
         s2 (str): second string to compare
-		processor (Union[bool, Callable]): optional callable that reformats the strings. utils.default_process
+        processor (Union[bool, Callable]): optional callable that reformats the strings. utils.default_process
             is used by default, which lowercases the strings and trims whitespace
         score_cutoff (float): Optional argument for a score threshold as a float between 0 and 100.
             For ratio < score_cutoff 0 is returned instead. Defaults to 0.
@@ -280,3 +280,7 @@ def QRatio(s1: str, s2: str, processor: Union[bool, Callable] = True, score_cuto
     """
 
     return ratio(s1, s2, processor, score_cutoff=score_cutoff)
+
+
+def bitmap_ratio(s1: str, s2: str, s1_bitmap: int, s2_bitmap: int, score_cutoff: float = 0) -> float:
+    return rapidfuzz._fuzz.bitmap_ratio(s1, s2, s1_bitmap=s1_bitmap, s2_bitmap=s2_bitmap, score_cutoff=score_cutoff)

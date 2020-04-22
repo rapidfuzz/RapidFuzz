@@ -297,6 +297,42 @@ static PyObject* WRatio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
     return PyFloat_FromDouble(result);
 }
 
+static PyObject* bitmap_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
+    PyObject *py_s1;
+    PyObject *py_s2;
+    long long s1_bitmap = 0;
+    long long s2_bitmap = 0;
+    double score_cutoff = 0;
+    static const char *kwlist[] = {"s1", "s2", "s1_bitmap", "s2_bitmap", "score_cutoff", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU|LLd", const_cast<char **>(kwlist),
+                                     &py_s1, &py_s2, &s1_bitmap, &s2_bitmap, &score_cutoff)) {
+        return NULL;
+    }
+
+    if (PyUnicode_READY(py_s1) || PyUnicode_READY(py_s2)) {
+        return NULL;
+    }
+
+    Py_ssize_t len_s1 = PyUnicode_GET_LENGTH(py_s1);
+    wchar_t* buffer_s1 = PyUnicode_AsWideCharString(py_s1, &len_s1);
+    boost::wstring_view s1(buffer_s1, len_s1);
+    
+    Py_ssize_t len_s2 = PyUnicode_GET_LENGTH(py_s2);
+    wchar_t* buffer_s2 = PyUnicode_AsWideCharString(py_s2, &len_s2);
+    boost::wstring_view s2(buffer_s2, len_s2);
+
+    double result = fuzz::bitmap_ratio(
+            rapidfuzz::Sentence<wchar_t>(s1, s1_bitmap),
+            rapidfuzz::Sentence<wchar_t>(s2, s2_bitmap),
+            score_cutoff);
+    
+    PyMem_Free(buffer_s1);
+    PyMem_Free(buffer_s2);
+
+    return PyFloat_FromDouble(result);
+}
+
 
 /* The cast of the function is necessary since PyCFunction values
 * only take two PyObject* parameters, and these functions take three.
@@ -312,6 +348,7 @@ static PyMethodDef methods[] = {
     PY_METHOD(token_ratio),
     PY_METHOD(partial_token_ratio),
     PY_METHOD(WRatio),
+    PY_METHOD(bitmap_ratio),
     {NULL, NULL, 0, NULL}   /* sentinel */
 };
 
