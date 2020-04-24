@@ -10,7 +10,7 @@ def iterExtract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, p
             score_cutoff: float = 0) -> Generator[Tuple[str, float], None, None]:
     a = processor(query) if processor else query
 
-    try:
+    if hasattr(choices, "items"):
         for choice, match_choice in choices.items():
             b = processor(match_choice) if processor else match_choice
 
@@ -21,7 +21,7 @@ def iterExtract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, p
 
             if score >= score_cutoff:
                 yield (choice, score)
-    except AttributeError:
+    else:
         for choice in choices:
             b = processor(choice) if processor else choice
 
@@ -135,7 +135,7 @@ def extractOne(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, pr
     match_found = False
     result_choice = ""
 
-    try:
+    if hasattr(choices, "items"):
         for choice, match_choice in choices.items():
             b = processor(match_choice) if processor else match_choice
 
@@ -148,7 +148,7 @@ def extractOne(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, pr
                 score_cutoff = score
                 match_found = True
                 result_choice = choice
-    except AttributeError:
+    else:
         for choice in choices:
             b = processor(choice) if processor else choice
 
