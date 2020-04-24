@@ -10,9 +10,9 @@ def iterExtract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, p
             score_cutoff: float = 0) -> Generator[Tuple[str, float], None, None]:
     a = processor(query) if processor else query
 
-    if isinstance(choices, list):
-        for choice in choices:
-            b = processor(choice) if processor else choice
+    try:
+        for choice, match_choice in choices.items():
+            b = processor(match_choice) if processor else match_choice
 
             score = scorer(
                 a, b,
@@ -21,9 +21,9 @@ def iterExtract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, p
 
             if score >= score_cutoff:
                 yield (choice, score)
-    elif isinstance(choices, dict):
-        for choice, match_choice in choices.items():
-            b = processor(match_choice) if processor else match_choice
+    except AttributeError:
+        for choice in choices:
+            b = processor(choice) if processor else choice
 
             score = scorer(
                 a, b,
@@ -135,9 +135,9 @@ def extractOne(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, pr
     match_found = False
     result_choice = ""
 
-    if isinstance(choices, list):
-        for choice in choices:
-            b = processor(choice) if processor else choice
+    try:
+        for choice, match_choice in choices.items():
+            b = processor(match_choice) if processor else match_choice
 
             score = scorer(
                 a, b,
@@ -148,9 +148,9 @@ def extractOne(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, pr
                 score_cutoff = score
                 match_found = True
                 result_choice = choice
-    elif isinstance(choices, dict):
-        for choice, match_choice in choices.items():
-            b = processor(match_choice) if processor else match_choice
+    except AttributeError:
+        for choice in choices:
+            b = processor(choice) if processor else choice
 
             score = scorer(
                 a, b,
