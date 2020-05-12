@@ -35,16 +35,27 @@ static PyObject* fuzz_impl(T&& scorer, PyObject *processor_default, PyObject* ar
     boost::wstring_view s1;
 
     if (PyCallable_Check(processor)) {
-        //TODO: the functions might return NULL on error, which should raise an exception
         PyObject *py_proc_s1 = PyObject_CallFunctionObjArgs(processor, py_s1, NULL);
+        if (py_proc_s1 == NULL) {
+            return NULL;
+        }
         Py_ssize_t len_s1 = PyUnicode_GET_LENGTH(py_s1);
         buffer_s1 = PyUnicode_AsWideCharString(py_s1, &len_s1);
+        if (buffer_s1 == NULL) {
+            return NULL;
+        }
         s1 = boost::wstring_view(buffer_s1, len_s1);
         Py_DecRef(py_proc_s1);
 
         PyObject *py_proc_s2 = PyObject_CallFunctionObjArgs(processor, py_s2, NULL);
+        if (py_proc_s2 == NULL) {
+            return NULL;
+        }
         Py_ssize_t len_s2 = PyUnicode_GET_LENGTH(py_s2);
         buffer_s2 = PyUnicode_AsWideCharString(py_s2, &len_s2);
+        if (buffer_s2 == NULL) {
+            return NULL;
+        }
         s2 = boost::wstring_view(buffer_s2, len_s2);
         Py_DecRef(py_proc_s2);
 
@@ -52,10 +63,16 @@ static PyObject* fuzz_impl(T&& scorer, PyObject *processor_default, PyObject* ar
     } else {
         Py_ssize_t len_s1 = PyUnicode_GET_LENGTH(py_s1);
         buffer_s1 = PyUnicode_AsWideCharString(py_s1, &len_s1);
+        if (buffer_s1 == NULL) {
+            return NULL;
+        }
         s1 = boost::wstring_view(buffer_s1, len_s1);
     
         Py_ssize_t len_s2 = PyUnicode_GET_LENGTH(py_s2);
         buffer_s2 = PyUnicode_AsWideCharString(py_s2, &len_s2);
+        if (buffer_s2 == NULL) {
+            return NULL;
+        }
         s2 = boost::wstring_view(buffer_s2, len_s2);
     }
 
