@@ -8,15 +8,44 @@
 #include "fuzz.hpp"
 #include "string_utils.hpp"
 #include <boost/utility/string_view.hpp>
+#include <boost/optional.hpp>
 
 namespace fuzz = rapidfuzz::fuzz;
 namespace string_utils = rapidfuzz::string_utils;
 
+boost::optional<std::pair<wchar_t*, Py_ssize_t>> PyString_AsBuffer(PyObject* str, PyObject *processor) {
+    PyObject *proc_str = PyObject_CallFunctionObjArgs(processor, str, NULL);
+    if (proc_str == NULL) {
+        return boost::none;
+    }
+    Py_ssize_t len = PyUnicode_GET_LENGTH(proc_str);
+    wchar_t* buffer = PyUnicode_AsWideCharString(proc_str, &len);
+    if (buffer == NULL) {
+        Py_DecRef(proc_str);
+        return boost::none;
+    }
+    Py_DecRef(proc_str);
+    return std::make_pair(buffer, len);
+}
+
+boost::optional<std::pair<wchar_t*, Py_ssize_t>> PyString_AsBuffer(PyObject* str) {
+    Py_ssize_t len = PyUnicode_GET_LENGTH(str);
+    wchar_t* buffer = PyUnicode_AsWideCharString(str, &len);
+    if (buffer == NULL) {
+        return boost::none;
+    }
+    return std::make_pair(buffer, len);
+}
+
+bool use_preprocessing(PyObject* processor, bool processor_default) {
+    return processor ? PyObject_IsTrue(processor) : processor_default;
+}
+
 template<typename T>
-static PyObject* fuzz_impl(T&& scorer, PyObject *processor_default, PyObject* args, PyObject* keywds) {
+static PyObject* fuzz_impl(T&& scorer, bool processor_default, PyObject* args, PyObject* keywds) {
     PyObject *py_s1;
     PyObject *py_s2;
-    PyObject *processor = processor_default;
+    PyObject *processor = NULL;
     double score_cutoff = 0;
     static const char *kwlist[] = {"s1", "s2", "processor", "score_cutoff", NULL};
 
@@ -29,70 +58,54 @@ static PyObject* fuzz_impl(T&& scorer, PyObject *processor_default, PyObject* ar
         return NULL;
     }
 
-    Py_ssize_t len_s1;
-    wchar_t* buffer_s1;
-
-    Py_ssize_t len_s2;
-    wchar_t* buffer_s2;
-
     if (PyCallable_Check(processor)) {
-        PyObject *py_proc_s1 = PyObject_CallFunctionObjArgs(processor, py_s1, NULL);
-        if (py_proc_s1 == NULL) {
+        auto s1 = PyString_AsBuffer(py_s1, processor);
+        if(!s1) {
             return NULL;
         }
-        len_s1 = PyUnicode_GET_LENGTH(py_s1);
-        buffer_s1 = PyUnicode_AsWideCharString(py_s1, &len_s1);
-        if (buffer_s1 == NULL) {
-            Py_DecRef(py_proc_s1);
+        auto s2 = PyString_AsBuffer(py_s2, processor);
+        if(!s2) {
+            PyMem_Free(s1->first);
             return NULL;
         }
-        Py_DecRef(py_proc_s1);
+        auto result = scorer(
+            boost::wstring_view(s1->first, s1->second),
+            boost::wstring_view(s2->first, s2->second),
+            score_cutoff);
 
-        PyObject *py_proc_s2 = PyObject_CallFunctionObjArgs(processor, py_s2, NULL);
-        if (py_proc_s2 == NULL) {
-            PyMem_Free(buffer_s1);
-            return NULL;
-        }
-        len_s2 = PyUnicode_GET_LENGTH(py_s2);
-        buffer_s2 = PyUnicode_AsWideCharString(py_s2, &len_s2);
-        if (buffer_s2 == NULL) {
-            PyMem_Free(buffer_s1);
-            Py_DecRef(py_proc_s2);
-            return NULL;
-        }
-        Py_DecRef(py_proc_s2);
+        PyMem_Free(s1->first);
+        PyMem_Free(s2->first);
 
-        processor = Py_None;
-    } else {
-        len_s1 = PyUnicode_GET_LENGTH(py_s1);
-        buffer_s1 = PyUnicode_AsWideCharString(py_s1, &len_s1);
-        if (buffer_s1 == NULL) {
-            return NULL;
-        }
-    
-        len_s2 = PyUnicode_GET_LENGTH(py_s2);
-        buffer_s2 = PyUnicode_AsWideCharString(py_s2, &len_s2);
-        if (buffer_s2 == NULL) {
-            PyMem_Free(buffer_s1);
-            return NULL;
-        }
+        return PyFloat_FromDouble(result);
+
     }
+    
+    auto s1 = PyString_AsBuffer(py_s1);
+    if(!s1) {
+        return NULL;
+    }
+    auto s2 = PyString_AsBuffer(py_s2);
+    if(!s2) {
+        PyMem_Free(s1->first);
+        return NULL;
+    }
+
+    boost::wstring_view s1_view(s1->first, s1->second);
+    boost::wstring_view s2_view(s2->first, s2->second);
 
     double result;
-    if (PyObject_IsTrue(processor)) {
+
+    if (use_preprocessing(processor, processor_default)) {
         result = scorer(
-            string_utils::default_process(boost::wstring_view(buffer_s1, len_s1)),
-            string_utils::default_process(boost::wstring_view(buffer_s2, len_s2)),
+            string_utils::default_process(s1_view),
+            string_utils::default_process(s2_view),
             score_cutoff);
     } else {
-        result = scorer(
-            boost::wstring_view(buffer_s1, len_s1),
-            boost::wstring_view(buffer_s2, len_s2),
-            score_cutoff);
+        result = scorer(s1_view, s2_view, score_cutoff);
     }
     
-    PyMem_Free(buffer_s1);
-    PyMem_Free(buffer_s2);
+    PyMem_Free(s1->first);
+    PyMem_Free(s2->first);
 
     return PyFloat_FromDouble(result);
 }
@@ -117,7 +130,7 @@ PyDoc_STRVAR(ratio_docstring,
 );
 
 static PyObject* ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-    return fuzz_impl(fuzz::ratio<boost::wstring_view, boost::wstring_view>, Py_False, args, keywds);
+    return fuzz_impl(fuzz::ratio<boost::wstring_view, boost::wstring_view>, false, args, keywds);
 }
 
 
@@ -140,7 +153,7 @@ PyDoc_STRVAR(partial_ratio_docstring,
 );
 
 static PyObject* partial_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-    return fuzz_impl(fuzz::partial_ratio<boost::wstring_view, boost::wstring_view>, Py_False, args, keywds);
+    return fuzz_impl(fuzz::partial_ratio<boost::wstring_view, boost::wstring_view>, false, args, keywds);
 }
 
 PyDoc_STRVAR(token_sort_ratio_docstring,
@@ -162,7 +175,7 @@ PyDoc_STRVAR(token_sort_ratio_docstring,
 );
 
 static PyObject* token_sort_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-    return fuzz_impl(fuzz::token_sort_ratio<boost::wstring_view, boost::wstring_view>, Py_True, args, keywds);
+    return fuzz_impl(fuzz::token_sort_ratio<boost::wstring_view, boost::wstring_view>, true, args, keywds);
 }
 
 PyDoc_STRVAR(partial_token_sort_ratio_docstring,
@@ -181,7 +194,7 @@ PyDoc_STRVAR(partial_token_sort_ratio_docstring,
 );
 
 static PyObject* partial_token_sort_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-    return fuzz_impl(fuzz::partial_token_sort_ratio<boost::wstring_view, boost::wstring_view>, Py_True, args, keywds);
+    return fuzz_impl(fuzz::partial_token_sort_ratio<boost::wstring_view, boost::wstring_view>, true, args, keywds);
 }
 
 PyDoc_STRVAR(token_set_ratio_docstring,
@@ -205,7 +218,7 @@ PyDoc_STRVAR(token_set_ratio_docstring,
 );
 
 static PyObject* token_set_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-    return fuzz_impl(fuzz::token_set_ratio<boost::wstring_view, boost::wstring_view>, Py_True, args, keywds);
+    return fuzz_impl(fuzz::token_set_ratio<boost::wstring_view, boost::wstring_view>, true, args, keywds);
 }
 
 PyDoc_STRVAR(partial_token_set_ratio_docstring,
@@ -225,7 +238,7 @@ PyDoc_STRVAR(partial_token_set_ratio_docstring,
 
 
 static PyObject* partial_token_set_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-    return fuzz_impl(fuzz::partial_token_set_ratio<boost::wstring_view, boost::wstring_view>, Py_True, args, keywds);
+    return fuzz_impl(fuzz::partial_token_set_ratio<boost::wstring_view, boost::wstring_view>, true, args, keywds);
 }
 
 PyDoc_STRVAR(token_ratio_docstring,
@@ -245,7 +258,7 @@ PyDoc_STRVAR(token_ratio_docstring,
 );
 
 static PyObject* token_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-    return fuzz_impl(fuzz::token_ratio<boost::wstring_view, boost::wstring_view>, Py_True, args, keywds);
+    return fuzz_impl(fuzz::token_ratio<boost::wstring_view, boost::wstring_view>, true, args, keywds);
 }
 
 PyDoc_STRVAR(partial_token_ratio_docstring,
@@ -265,7 +278,7 @@ PyDoc_STRVAR(partial_token_ratio_docstring,
 );
 
 static PyObject* partial_token_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-    return fuzz_impl(fuzz::partial_token_ratio<boost::wstring_view, boost::wstring_view>, Py_True, args, keywds);
+    return fuzz_impl(fuzz::partial_token_ratio<boost::wstring_view, boost::wstring_view>, true, args, keywds);
 }
 
 PyDoc_STRVAR(WRatio_docstring,
@@ -284,7 +297,7 @@ PyDoc_STRVAR(WRatio_docstring,
 );
 
 static PyObject* WRatio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-    return fuzz_impl(fuzz::WRatio<boost::wstring_view, boost::wstring_view>, Py_True, args, keywds);
+    return fuzz_impl(fuzz::WRatio<boost::wstring_view, boost::wstring_view>, true, args, keywds);
 }
 
 PyDoc_STRVAR(QRatio_docstring,
@@ -306,7 +319,7 @@ PyDoc_STRVAR(QRatio_docstring,
 );
 
 static PyObject* QRatio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-    return fuzz_impl(fuzz::ratio<boost::wstring_view, boost::wstring_view>, Py_False, args, keywds);
+    return fuzz_impl(fuzz::ratio<boost::wstring_view, boost::wstring_view>, false, args, keywds);
 }
 
 PyDoc_STRVAR(quick_lev_ratio_docstring,
@@ -326,7 +339,7 @@ PyDoc_STRVAR(quick_lev_ratio_docstring,
 );
 
 static PyObject* quick_lev_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-    return fuzz_impl(fuzz::quick_lev_ratio<boost::wstring_view, boost::wstring_view>, Py_True, args, keywds);
+    return fuzz_impl(fuzz::quick_lev_ratio<boost::wstring_view, boost::wstring_view>, true, args, keywds);
 }
 
 /* The cast of the function is necessary since PyCFunction values
