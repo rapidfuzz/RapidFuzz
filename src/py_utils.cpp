@@ -10,9 +10,7 @@
 namespace utils = rapidfuzz::utils;
 namespace string_utils = rapidfuzz::string_utils;
 
-constexpr const char * default_process_docstring = R"(
-
-)";
+constexpr const char * default_process_docstring = R"()";
 
 static PyObject* default_process(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
     PyObject *py_sentence;
@@ -29,7 +27,7 @@ static PyObject* default_process(PyObject* /*self*/, PyObject* args, PyObject* k
 
     Py_ssize_t len = PyUnicode_GET_LENGTH(py_sentence);
     wchar_t* buffer = PyUnicode_AsWideCharString(py_sentence, &len);
-    std::wstring result = string_utils::default_process(std::wstring(buffer, len));
+    std::wstring result = string_utils::default_process(boost::wstring_view(buffer, len));
     PyMem_Free(buffer);
 
     return PyUnicode_FromWideChar(result.c_str(), result.length());
@@ -46,7 +44,7 @@ static PyMethodDef methods[] = {
 
 static struct PyModuleDef moduledef = {
     PyModuleDef_HEAD_INIT,
-    "rapidfuzz._utils",
+    "rapidfuzz.utils",
     NULL,
     -1,
     methods,
@@ -56,6 +54,6 @@ static struct PyModuleDef moduledef = {
     NULL   /* m_free */
 };
 
-PyMODINIT_FUNC PyInit__utils(void) {
+PyMODINIT_FUNC PyInit_utils(void) {
     return PyModule_Create(&moduledef);
 }
