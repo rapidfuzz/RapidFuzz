@@ -27,7 +27,7 @@ static PyObject* default_process(PyObject* /*self*/, PyObject* args, PyObject* k
 
     Py_ssize_t len = PyUnicode_GET_LENGTH(py_sentence);
     wchar_t* buffer = PyUnicode_AsWideCharString(py_sentence, &len);
-    std::wstring result = string_utils::default_process(boost::wstring_view(buffer, len));
+    std::wstring result = string_utils::default_process(std::wstring(buffer, len));
     PyMem_Free(buffer);
 
     return PyUnicode_FromWideChar(result.c_str(), result.length());

@@ -90,18 +90,18 @@ static PyObject* fuzz_impl(T&& scorer, bool processor_default, PyObject* args, P
         return NULL;
     }
 
-    boost::wstring_view s1_view(s1->first, s1->second);
-    boost::wstring_view s2_view(s2->first, s2->second);
-
     double result;
 
     if (use_preprocessing(processor, processor_default)) {
         result = scorer(
-            string_utils::default_process(s1_view),
-            string_utils::default_process(s2_view),
+            string_utils::default_process(std::wstring(s1->first, s1->second)),
+            string_utils::default_process(std::wstring(s2->first, s2->second)),
             score_cutoff);
     } else {
-        result = scorer(s1_view, s2_view, score_cutoff);
+        result = scorer(
+            boost::wstring_view(s1->first, s1->second),
+            boost::wstring_view(s2->first, s2->second),
+            score_cutoff);
     }
     
     PyMem_Free(s1->first);
