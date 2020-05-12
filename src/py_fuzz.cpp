@@ -29,61 +29,66 @@ static PyObject* fuzz_impl(T&& scorer, PyObject *processor_default, PyObject* ar
         return NULL;
     }
 
+    Py_ssize_t len_s1;
     wchar_t* buffer_s1;
+
+    Py_ssize_t len_s2;
     wchar_t* buffer_s2;
-    boost::wstring_view s2;
-    boost::wstring_view s1;
 
     if (PyCallable_Check(processor)) {
         PyObject *py_proc_s1 = PyObject_CallFunctionObjArgs(processor, py_s1, NULL);
         if (py_proc_s1 == NULL) {
             return NULL;
         }
-        Py_ssize_t len_s1 = PyUnicode_GET_LENGTH(py_s1);
+        len_s1 = PyUnicode_GET_LENGTH(py_s1);
         buffer_s1 = PyUnicode_AsWideCharString(py_s1, &len_s1);
         if (buffer_s1 == NULL) {
+            Py_DecRef(py_proc_s1);
             return NULL;
         }
-        s1 = boost::wstring_view(buffer_s1, len_s1);
         Py_DecRef(py_proc_s1);
 
         PyObject *py_proc_s2 = PyObject_CallFunctionObjArgs(processor, py_s2, NULL);
         if (py_proc_s2 == NULL) {
+            PyMem_Free(buffer_s1);
             return NULL;
         }
-        Py_ssize_t len_s2 = PyUnicode_GET_LENGTH(py_s2);
+        len_s2 = PyUnicode_GET_LENGTH(py_s2);
         buffer_s2 = PyUnicode_AsWideCharString(py_s2, &len_s2);
         if (buffer_s2 == NULL) {
+            PyMem_Free(buffer_s1);
+            Py_DecRef(py_proc_s2);
             return NULL;
         }
-        s2 = boost::wstring_view(buffer_s2, len_s2);
         Py_DecRef(py_proc_s2);
 
         processor = Py_None;
     } else {
-        Py_ssize_t len_s1 = PyUnicode_GET_LENGTH(py_s1);
+        len_s1 = PyUnicode_GET_LENGTH(py_s1);
         buffer_s1 = PyUnicode_AsWideCharString(py_s1, &len_s1);
         if (buffer_s1 == NULL) {
             return NULL;
         }
-        s1 = boost::wstring_view(buffer_s1, len_s1);
     
-        Py_ssize_t len_s2 = PyUnicode_GET_LENGTH(py_s2);
+        len_s2 = PyUnicode_GET_LENGTH(py_s2);
         buffer_s2 = PyUnicode_AsWideCharString(py_s2, &len_s2);
         if (buffer_s2 == NULL) {
+            PyMem_Free(buffer_s1);
             return NULL;
         }
-        s2 = boost::wstring_view(buffer_s2, len_s2);
     }
 
     double result;
     if (PyObject_IsTrue(processor)) {
         result = scorer(
-            string_utils::default_process(s1),
-            string_utils::default_process(s2),
+            string_utils::default_process(boost::wstring_view(buffer_s1, len_s1)),
+            string_utils::default_process(boost::wstring_view(buffer_s2, len_s2)),
             score_cutoff);
     } else {
-        result = scorer(s1, s2, score_cutoff);
+        result = scorer(
+            boost::wstring_view(buffer_s1, len_s1),
+            boost::wstring_view(buffer_s2, len_s2),
+            score_cutoff);
     }
     
     PyMem_Free(buffer_s1);
