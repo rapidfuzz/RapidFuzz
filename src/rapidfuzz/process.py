@@ -132,7 +132,7 @@ def extractOne(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, pr
     """
     a = processor(query) if processor else query
 
-    match_found = False
+    result_score = 0
     result_choice = ""
 
     if hasattr(choices, "items"):
@@ -145,8 +145,12 @@ def extractOne(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, pr
                 score_cutoff=score_cutoff)
 
             if score >= score_cutoff:
-                score_cutoff = score
-                match_found = True
+                # very small increment for the score_cutoff, so when multiple
+                # elements have the same score the first one is used
+                score_cutoff = score + 0.00001
+                if score_cutoff > 100:
+                    return (choice, score)
+                result_score = score
                 result_choice = choice
     else:
         for choice in choices:
@@ -158,8 +162,10 @@ def extractOne(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, pr
                 score_cutoff=score_cutoff)
 
             if score >= score_cutoff:
-                score_cutoff = score
-                match_found = True
+                score_cutoff = score + 0.00001
+                if score_cutoff > 100:
+                    return (choice, score)
+                result_score = score
                 result_choice = choice
 
-    return (result_choice, score_cutoff) if match_found else None
+    return (result_choice, result_score) if result_score else None
