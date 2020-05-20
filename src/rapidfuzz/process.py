@@ -10,7 +10,7 @@ def iterExtract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, p
             score_cutoff: float = 0) -> Generator[Tuple[str, float], None, None]:
     a = processor(query) if processor else query
 
-    if hasattr(choices, "items"):
+    if isinstance(choices, dict):
         for choice, match_choice in choices.items():
             b = processor(match_choice) if processor else match_choice
 
@@ -20,7 +20,7 @@ def iterExtract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, p
                 score_cutoff=score_cutoff)
 
             if score >= score_cutoff:
-                yield (choice, score)
+                yield (match_choice, score, choice)
     else:
         for choice in choices:
             b = processor(choice) if processor else choice
@@ -135,7 +135,8 @@ def extractOne(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, pr
     result_score = 0
     result_choice = ""
 
-    if hasattr(choices, "items"):
+    if isinstance(choices, dict):
+        choice_key = ""
         for choice, match_choice in choices.items():
             b = processor(match_choice) if processor else match_choice
 
@@ -149,23 +150,25 @@ def extractOne(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, pr
                 # elements have the same score the first one is used
                 score_cutoff = score + 0.00001
                 if score_cutoff > 100:
-                    return (choice, score)
+                    return (match_choice, score, choice)
                 result_score = score
-                result_choice = choice
-    else:
-        for choice in choices:
-            b = processor(choice) if processor else choice
+                result_choice = match_choice
+                choice_key = choice
+        return (choice_key, result_score, result_choice) if result_score else None
+    
+    for choice in choices:
+        b = processor(choice) if processor else choice
 
-            score = scorer(
-                a, b,
-                processor=None,
-                score_cutoff=score_cutoff)
+        score = scorer(
+            a, b,
+            processor=None,
+            score_cutoff=score_cutoff)
 
-            if score >= score_cutoff:
-                score_cutoff = score + 0.00001
-                if score_cutoff > 100:
-                    return (choice, score)
-                result_score = score
-                result_choice = choice
+        if score >= score_cutoff:
+            score_cutoff = score + 0.00001
+            if score_cutoff > 100:
+                return (choice, score)
+            result_score = score
+            result_choice = choice
 
     return (result_choice, result_score) if result_score else None
