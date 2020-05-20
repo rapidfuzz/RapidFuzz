@@ -137,7 +137,7 @@ static PyObject* ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
 PyDoc_STRVAR(partial_ratio_docstring,
 "partial_ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
 "--\n\n"
-"calculates a partial ratio between two strings\n\n"
+"calculates the fuzz.ratio of the optimal string alignment\n\n"
 "Args:\n"
 "    s1 (str): first string to compare\n"
 "    s2 (str): first string to compare\n"
@@ -159,7 +159,7 @@ static PyObject* partial_ratio(PyObject* /*self*/, PyObject* args, PyObject* key
 PyDoc_STRVAR(token_sort_ratio_docstring,
 "token_sort_ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
 "--\n\n"
-"Compares the words in the strings based on unique and common words between them using fuzz.ratio\n\n"
+"sorts the words in the strings and calculates the fuzz.ratio between them\n\n"
 "Args:\n"
 "    s1 (str): first string to compare\n"
 "    s2 (str): first string to compare\n"
@@ -326,7 +326,8 @@ PyDoc_STRVAR(quick_lev_ratio_docstring,
 "quick_lev_ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
 "--\n\n"
 "Calculates a quick estimation of fuzz.ratio by counting uncommon letters between the two sentences.\n"
-"Guaranteed to be equal or higher than fuzz.ratio and can therefore be used to filter results before using fuzz.ratio\n\n"
+"Guaranteed to be equal or higher than fuzz.ratio.\n"
+"(internally used by fuzz.ratio when providing it with a score_cutoff to speed up the matching)\n\n"
 "Args:\n"
 "    s1 (str): first string to compare\n"
 "    s2 (str): first string to compare\n"
