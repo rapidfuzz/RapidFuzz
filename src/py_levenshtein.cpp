@@ -3,8 +3,8 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
-#include <string>
 #include "levenshtein.hpp"
+#include "py_utils.hpp"
 
 namespace levenshtein = rapidfuzz::levenshtein;
 
@@ -34,18 +34,11 @@ PyObject* distance(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
         return NULL;
     }
 
-    Py_ssize_t len_s1 = PyUnicode_GET_LENGTH(py_s1);
-    wchar_t* buffer_s1 = PyUnicode_AsWideCharString(py_s1, &len_s1);
-    boost::wstring_view s1(buffer_s1, len_s1);
-    
-    Py_ssize_t len_s2 = PyUnicode_GET_LENGTH(py_s2);
-    wchar_t* buffer_s2 = PyUnicode_AsWideCharString(py_s2, &len_s2);
-    boost::wstring_view s2(buffer_s2, len_s2);
-
-    std::size_t result = levenshtein::distance(s1, s2);
-    
-    PyMem_Free(buffer_s1);
-    PyMem_Free(buffer_s2);
+    auto s1_view = decode_python_string(py_s1);
+    auto s2_view = decode_python_string(py_s2);
+    std::size_t result = mpark::visit([](auto&& val1, auto&& val2) {
+        return levenshtein::distance(val1, val2);
+    }, s1_view, s2_view);
     
     return PyLong_FromSize_t(result);
 }
@@ -79,18 +72,11 @@ PyObject* normalized_distance(PyObject* /*self*/, PyObject* args, PyObject* keyw
         return NULL;
     }
 
-    Py_ssize_t len_s1 = PyUnicode_GET_LENGTH(py_s1);
-    wchar_t* buffer_s1 = PyUnicode_AsWideCharString(py_s1, &len_s1);
-    boost::wstring_view s1(buffer_s1, len_s1);
-    
-    Py_ssize_t len_s2 = PyUnicode_GET_LENGTH(py_s2);
-    wchar_t* buffer_s2 = PyUnicode_AsWideCharString(py_s2, &len_s2);
-    boost::wstring_view s2(buffer_s2, len_s2);
-
-    double result = levenshtein::normalized_distance(s1, s2, score_cutoff/100);
-    
-    PyMem_Free(buffer_s1);
-    PyMem_Free(buffer_s2);
+    auto s1_view = decode_python_string(py_s1);
+    auto s2_view = decode_python_string(py_s2);
+    double result = mpark::visit([score_cutoff](auto&& val1, auto&& val2) {
+        return levenshtein::normalized_distance(val1, val2, score_cutoff/100);
+    }, s1_view, s2_view);
 
     return PyFloat_FromDouble(result*100);
 }
@@ -129,32 +115,32 @@ PyObject* weighted_distance(PyObject* /*self*/, PyObject* args, PyObject* keywds
         return NULL;
     }
 
-    Py_ssize_t len_s1 = PyUnicode_GET_LENGTH(py_s1);
-    wchar_t* buffer_s1 = PyUnicode_AsWideCharString(py_s1, &len_s1);
-    boost::wstring_view s1(buffer_s1, len_s1);
-    
-    Py_ssize_t len_s2 = PyUnicode_GET_LENGTH(py_s2);
-    wchar_t* buffer_s2 = PyUnicode_AsWideCharString(py_s2, &len_s2);
-    boost::wstring_view s2(buffer_s2, len_s2);
+    auto s1_view = decode_python_string(py_s1);
+    auto s2_view = decode_python_string(py_s2);
 
     std::size_t result = 0;
     if (insert_cost == 1 && delete_cost == 1) {
         if (replace_cost == 1) {
-            result = levenshtein::distance(s1, s2);
+            result = mpark::visit([](auto&& val1, auto&& val2) {
+                return levenshtein::distance(val1, val2);
+            }, s1_view, s2_view);
         } else if (replace_cost == 2) {
-            result = levenshtein::weighted_distance(s1, s2);
+            result = mpark::visit([](auto&& val1, auto&& val2) {
+                return levenshtein::weighted_distance(val1, val2);
+            }, s1_view, s2_view);
         } else {
-            result = levenshtein::generic_distance(s1, s2, {insert_cost, delete_cost, replace_cost});
+            result = mpark::visit([insert_cost, delete_cost, replace_cost](auto&& val1, auto&& val2) {
+                return levenshtein::generic_distance(val1, val2, {insert_cost, delete_cost, replace_cost});
+            }, s1_view, s2_view);
         }
     } else {
-        result = levenshtein::generic_distance(s1, s2, {insert_cost, delete_cost, replace_cost});
+        result = mpark::visit([insert_cost, delete_cost, replace_cost](auto&& val1, auto&& val2) {
+            return levenshtein::generic_distance(val1, val2, {insert_cost, delete_cost, replace_cost});
+        }, s1_view, s2_view);
     }
 
-    PyMem_Free(buffer_s1);
-    PyMem_Free(buffer_s2);
     return PyLong_FromSize_t(result);
 }
-
 
 constexpr const char * normalized_weighted_distance_docstring = R"(
 Calculates a normalized levenshtein distance based on levenshtein.weighted_distance
@@ -191,19 +177,12 @@ PyObject* normalized_weighted_distance(PyObject* /*self*/, PyObject* args, PyObj
         return NULL;
     }
 
-    Py_ssize_t len_s1 = PyUnicode_GET_LENGTH(py_s1);
-    wchar_t* buffer_s1 = PyUnicode_AsWideCharString(py_s1, &len_s1);
-    boost::wstring_view s1(buffer_s1, len_s1);
+    auto s1_view = decode_python_string(py_s1);
+    auto s2_view = decode_python_string(py_s2);
+    double result = mpark::visit([score_cutoff](auto&& val1, auto&& val2) {
+        return levenshtein::normalized_weighted_distance(val1, val2, score_cutoff/100);
+    }, s1_view, s2_view);
     
-    Py_ssize_t len_s2 = PyUnicode_GET_LENGTH(py_s2);
-    wchar_t* buffer_s2 = PyUnicode_AsWideCharString(py_s2, &len_s2);
-    boost::wstring_view s2(buffer_s2, len_s2);
-
-    double result = levenshtein::normalized_weighted_distance(s1, s2, score_cutoff/100);
-    
-    PyMem_Free(buffer_s1);
-    PyMem_Free(buffer_s2);
-
     return PyFloat_FromDouble(result*100);
 }
 

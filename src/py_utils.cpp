@@ -5,10 +5,8 @@
 #include <Python.h>
 #include <string>
 #include "utils.hpp"
-#include "string_utils.hpp"
 
 namespace utils = rapidfuzz::utils;
-namespace string_utils = rapidfuzz::string_utils;
 
 constexpr const char * default_process_docstring = R"()";
 
@@ -26,11 +24,35 @@ static PyObject* default_process(PyObject* /*self*/, PyObject* args, PyObject* k
     }
 
     Py_ssize_t len = PyUnicode_GET_LENGTH(py_sentence);
-    wchar_t* buffer = PyUnicode_AsWideCharString(py_sentence, &len);
-    std::wstring result = string_utils::default_process(std::wstring(buffer, len));
-    PyMem_Free(buffer);
+    void* str = PyUnicode_DATA(py_sentence);
 
-    return PyUnicode_FromWideChar(result.c_str(), result.length());
+    int str_kind = PyUnicode_KIND(py_sentence);
+
+    PyObject* result;
+
+    switch (str_kind) {
+    case PyUnicode_1BYTE_KIND:
+    {
+        auto proc_str = utils::default_process(nonstd::basic_string_view<uint8_t>(static_cast<uint8_t*>(str), len));
+        result = PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, proc_str.data(), proc_str.size());
+        break;
+    }
+    case PyUnicode_2BYTE_KIND:
+    {
+        auto proc_str = utils::default_process(nonstd::basic_string_view<uint16_t>(static_cast<uint16_t*>(str), len));
+        result = PyUnicode_FromKindAndData(PyUnicode_2BYTE_KIND, proc_str.data(), proc_str.size());
+        break;
+    }
+    default:
+    {
+        auto proc_str = utils::default_process(nonstd::basic_string_view<uint32_t>(static_cast<uint32_t*>(str), len));
+        result = PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, proc_str.data(), proc_str.size());
+        break;
+    }
+    }
+
+    return result;
+
 }
 
 /* The cast of the function is necessary since PyCFunction values
