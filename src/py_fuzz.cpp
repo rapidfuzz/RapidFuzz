@@ -9,34 +9,9 @@
 #include "utils.hpp"
 #include "py_utils.hpp"
 #include <nonstd/string_view.hpp>
-#include <boost/optional.hpp>
 
 namespace fuzz = rapidfuzz::fuzz;
 namespace utils = rapidfuzz::utils;
-
-boost::optional<std::pair<wchar_t*, Py_ssize_t>> PyString_AsBuffer(PyObject* str, PyObject *processor) {
-    PyObject *proc_str = PyObject_CallFunctionObjArgs(processor, str, NULL);
-    if (proc_str == NULL) {
-        return boost::none;
-    }
-    Py_ssize_t len = PyUnicode_GET_LENGTH(proc_str);
-    wchar_t* buffer = PyUnicode_AsWideCharString(proc_str, &len);
-    if (buffer == NULL) {
-        Py_DecRef(proc_str);
-        return boost::none;
-    }
-    Py_DecRef(proc_str);
-    return std::make_pair(buffer, len);
-}
-
-boost::optional<std::pair<wchar_t*, Py_ssize_t>> PyString_AsBuffer(PyObject* str) {
-    Py_ssize_t len = PyUnicode_GET_LENGTH(str);
-    wchar_t* buffer = PyUnicode_AsWideCharString(str, &len);
-    if (buffer == NULL) {
-        return boost::none;
-    }
-    return std::make_pair(buffer, len);
-}
 
 bool use_preprocessing(PyObject* processor, bool processor_default) {
     return processor ? PyObject_IsTrue(processor) : processor_default;
@@ -60,33 +35,51 @@ static PyObject* fuzz_impl(T&& scorer, bool processor_default, PyObject* args, P
     }
 
     if (PyCallable_Check(processor)) {
-        auto s1 = PyString_AsBuffer(py_s1, processor);
-        if(!s1) {
+        PyObject *proc_s1 = PyObject_CallFunctionObjArgs(processor, py_s1, NULL);
+        if (proc_s1 == NULL) {
             return NULL;
         }
-        auto s2 = PyString_AsBuffer(py_s2, processor);
-        if(!s2) {
-            PyMem_Free(s1->first);
+        Py_ssize_t len_s1 = PyUnicode_GET_LENGTH(proc_s1);
+        wchar_t* buffer_s1 = PyUnicode_AsWideCharString(proc_s1, &len_s1);
+        Py_DecRef(proc_s1);
+        if (buffer_s1 == NULL) {
             return NULL;
         }
+
+        PyObject *proc_s2 = PyObject_CallFunctionObjArgs(processor, py_s2, NULL);
+        if (proc_s2 == NULL) {
+            PyMem_Free(buffer_s1);
+            return NULL;
+        }
+        Py_ssize_t len_s2 = PyUnicode_GET_LENGTH(proc_s2);
+        wchar_t* buffer_s2 = PyUnicode_AsWideCharString(proc_s2, &len_s2);
+        Py_DecRef(proc_s2);
+        if (buffer_s2 == NULL) {
+            PyMem_Free(buffer_s1);
+            return NULL;
+        }
+
         auto result = scorer(
-            nonstd::wstring_view(s1->first, s1->second),
-            nonstd::wstring_view(s2->first, s2->second),
+            nonstd::wstring_view(buffer_s1, len_s1),
+            nonstd::wstring_view(buffer_s2, len_s2),
             score_cutoff);
 
-        PyMem_Free(s1->first);
-        PyMem_Free(s2->first);
+        PyMem_Free(buffer_s1);
+        PyMem_Free(buffer_s2);
 
         return PyFloat_FromDouble(result);
     }
 
-    auto s1 = PyString_AsBuffer(py_s1);
-    if(!s1) {
+    Py_ssize_t len_s1 = PyUnicode_GET_LENGTH(py_s1);
+    wchar_t* buffer_s1 = PyUnicode_AsWideCharString(py_s1, &len_s1);
+    if (buffer_s1 == NULL) {
         return NULL;
     }
-    auto s2 = PyString_AsBuffer(py_s2);
-    if(!s2) {
-        PyMem_Free(s1->first);
+
+    Py_ssize_t len_s2 = PyUnicode_GET_LENGTH(py_s2);
+    wchar_t* buffer_s2 = PyUnicode_AsWideCharString(py_s2, &len_s2);
+    if (buffer_s2 == NULL) {
+        PyMem_Free(buffer_s1);
         return NULL;
     }
 
@@ -94,18 +87,18 @@ static PyObject* fuzz_impl(T&& scorer, bool processor_default, PyObject* args, P
 
     if (use_preprocessing(processor, processor_default)) {
         result = scorer(
-            utils::default_process(std::wstring(s1->first, s1->second)),
-            utils::default_process(std::wstring(s2->first, s2->second)),
+            utils::default_process(nonstd::wstring_view(buffer_s1, len_s1)),
+            utils::default_process(nonstd::wstring_view(buffer_s2, len_s2)),
             score_cutoff);
     } else {
         result = scorer(
-            nonstd::wstring_view(s1->first, s1->second),
-            nonstd::wstring_view(s2->first, s2->second),
+            nonstd::wstring_view(buffer_s1, len_s1),
+            nonstd::wstring_view(buffer_s2, len_s2),
             score_cutoff);
     }
 
-    PyMem_Free(s1->first);
-    PyMem_Free(s2->first);
+    PyMem_Free(buffer_s1);
+    PyMem_Free(buffer_s2);
 
     return PyFloat_FromDouble(result);
 }

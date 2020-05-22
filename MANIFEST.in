@@ -7,4 +7,5 @@ recursive-include src/rapidfuzz-cpp/extern/boost *
 recursive-include src/rapidfuzz-cpp/extern/difflib *
 recursive-include src/rapidfuzz-cpp/extern/nonstd *
 recursive-include extern/variant *
+include src/py_utils.hpp
 include src/rapidfuzz-cpp/LICENSE
