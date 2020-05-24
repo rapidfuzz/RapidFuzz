@@ -8,10 +8,15 @@ import heapq
 
 def iterExtract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, processor: Callable = utils.default_process,
             score_cutoff: float = 0) -> Generator[Tuple[str, float], None, None]:
+    if query is None:
+        return
+    
     a = processor(query) if processor else query
 
     if hasattr(choices, "items"):
         for choice, match_choice in choices.items():
+            if match_choice is None:
+                continue
             b = processor(match_choice) if processor else match_choice
 
             score = scorer(
@@ -23,6 +28,8 @@ def iterExtract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, p
                 yield (match_choice, score, choice)
     else:
         for choice in choices:
+            if choice is None:
+                continue
             b = processor(choice) if processor else choice
 
             score = scorer(
@@ -35,9 +42,14 @@ def iterExtract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, p
 
 def iterExtractIndices(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, processor: Callable = utils.default_process,
             score_cutoff: float = 0) -> Generator[Tuple[int, float], None, None]:
+    if query is None:
+        return
+
     a = processor(query) if processor else query
 
     for (i, choice) in enumerate(choices):
+        if choice is None:
+            continue
         b = processor(choice) if processor else choice
         score = scorer(
             a, b,
@@ -68,7 +80,6 @@ def extract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, proce
     Returns: 
         List[Tuple[str, float]]: returns a list of all matches that have a score >= score_cutoff
     """
-    
     results = iterExtract(query, choices, scorer, processor, score_cutoff)
 
     if limit is None:
@@ -130,6 +141,9 @@ def extractOne(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, pr
         Optional[Tuple[str, float]]: returns the best match in form of a tuple or None when there is
             no match with a score >= score_cutoff
     """
+    if query is None:
+        return None
+
     a = processor(query) if processor else query
 
     result_score = None
@@ -138,6 +152,8 @@ def extractOne(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, pr
     if hasattr(choices, "items"):
         choice_key = ""
         for choice, match_choice in choices.items():
+            if match_choice is None:
+                continue
             b = processor(match_choice) if processor else match_choice
 
             score = scorer(
@@ -157,6 +173,8 @@ def extractOne(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, pr
         return (result_choice, result_score, choice_key) if not result_score is None else None
     
     for choice in choices:
+        if choice is None:
+            continue
         b = processor(choice) if processor else choice
 
         score = scorer(

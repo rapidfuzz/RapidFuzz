@@ -25,10 +25,24 @@ static PyObject* fuzz_impl(T&& scorer, bool processor_default, PyObject* args, P
     double score_cutoff = 0;
     static const char *kwlist[] = {"s1", "s2", "processor", "score_cutoff", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU|Od", const_cast<char **>(kwlist),
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|Od", const_cast<char **>(kwlist),
                                      &py_s1, &py_s2, &processor, &score_cutoff)) {
         return NULL;
     }
+
+    if (py_s1 == Py_None || py_s2 == Py_None) {
+        return PyFloat_FromDouble(0);
+    }
+
+    if (!PyUnicode_Check(py_s1)) {
+        PyErr_SetString(PyExc_TypeError, "s1 must be a string or None");
+        return NULL;
+    }
+
+    if (!PyUnicode_Check(py_s2)) {
+        PyErr_SetString(PyExc_TypeError, "s2 must be a string or None");
+        return NULL;
+    } 
 
     if (PyUnicode_READY(py_s1) || PyUnicode_READY(py_s2)) {
         return NULL;
@@ -129,10 +143,24 @@ static PyObject* ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
     double score_cutoff = 0;
     static const char *kwlist[] = {"s1", "s2", "processor", "score_cutoff", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU|Od", const_cast<char **>(kwlist),
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|Od", const_cast<char **>(kwlist),
                                      &py_s1, &py_s2, &processor, &score_cutoff)) {
         return NULL;
     }
+
+    if (py_s1 == Py_None || py_s2 == Py_None) {
+        return PyFloat_FromDouble(0);
+    }
+
+    if (!PyUnicode_Check(py_s1)) {
+        PyErr_SetString(PyExc_TypeError, "s1 must be a string or None");
+        return NULL;
+    }
+
+    if (!PyUnicode_Check(py_s2)) {
+        PyErr_SetString(PyExc_TypeError, "s2 must be a string or None");
+        return NULL;
+    } 
 
     if (PyUnicode_READY(py_s1) || PyUnicode_READY(py_s2)) {
         return NULL;
@@ -231,10 +259,24 @@ static PyObject* token_sort_ratio(PyObject* /*self*/, PyObject* args, PyObject* 
     double score_cutoff = 0;
     static const char *kwlist[] = {"s1", "s2", "processor", "score_cutoff", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU|Od", const_cast<char **>(kwlist),
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|Od", const_cast<char **>(kwlist),
                                      &py_s1, &py_s2, &processor, &score_cutoff)) {
         return NULL;
     }
+
+    if (py_s1 == Py_None || py_s2 == Py_None) {
+        return PyFloat_FromDouble(0);
+    }
+
+    if (!PyUnicode_Check(py_s1)) {
+        PyErr_SetString(PyExc_TypeError, "s1 must be a string or None");
+        return NULL;
+    }
+
+    if (!PyUnicode_Check(py_s2)) {
+        PyErr_SetString(PyExc_TypeError, "s2 must be a string or None");
+        return NULL;
+    } 
 
     if (PyUnicode_READY(py_s1) || PyUnicode_READY(py_s2)) {
         return NULL;
@@ -331,10 +373,24 @@ static PyObject* token_set_ratio(PyObject* /*self*/, PyObject* args, PyObject* k
     double score_cutoff = 0;
     static const char *kwlist[] = {"s1", "s2", "processor", "score_cutoff", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU|Od", const_cast<char **>(kwlist),
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|Od", const_cast<char **>(kwlist),
                                      &py_s1, &py_s2, &processor, &score_cutoff)) {
         return NULL;
     }
+
+    if (py_s1 == Py_None || py_s2 == Py_None) {
+        return PyFloat_FromDouble(0);
+    }
+
+    if (!PyUnicode_Check(py_s1)) {
+        PyErr_SetString(PyExc_TypeError, "s1 must be a string or None");
+        return NULL;
+    }
+
+    if (!PyUnicode_Check(py_s2)) {
+        PyErr_SetString(PyExc_TypeError, "s2 must be a string or None");
+        return NULL;
+    } 
 
     if (PyUnicode_READY(py_s1) || PyUnicode_READY(py_s2)) {
         return NULL;
@@ -428,10 +484,24 @@ static PyObject* token_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywd
     double score_cutoff = 0;
     static const char *kwlist[] = {"s1", "s2", "processor", "score_cutoff", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU|Od", const_cast<char **>(kwlist),
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|Od", const_cast<char **>(kwlist),
                                      &py_s1, &py_s2, &processor, &score_cutoff)) {
         return NULL;
     }
+
+    if (py_s1 == Py_None || py_s2 == Py_None) {
+        return PyFloat_FromDouble(0);
+    }
+
+    if (!PyUnicode_Check(py_s1)) {
+        PyErr_SetString(PyExc_TypeError, "s1 must be a string or None");
+        return NULL;
+    }
+
+    if (!PyUnicode_Check(py_s2)) {
+        PyErr_SetString(PyExc_TypeError, "s2 must be a string or None");
+        return NULL;
+    } 
 
     if (PyUnicode_READY(py_s1) || PyUnicode_READY(py_s2)) {
         return NULL;
@@ -540,7 +610,7 @@ PyDoc_STRVAR(QRatio_docstring,
 );
 
 static PyObject* QRatio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-    return fuzz_impl(fuzz::ratio<nonstd::wstring_view, nonstd::wstring_view>, false, args, keywds);
+    return fuzz_impl(fuzz::ratio<nonstd::wstring_view, nonstd::wstring_view>, true, args, keywds);
 }
 
 PyDoc_STRVAR(quick_lev_ratio_docstring,
