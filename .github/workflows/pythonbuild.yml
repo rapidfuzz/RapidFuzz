@@ -33,6 +33,12 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
+    - name: Run Unit Tests
+      run: |
+        pip install .
+        pip install pytest
+        pytest
+
   build_tarball:
     needs: [test_python]
     name: create a tarball of RapidFuzz for pypi
