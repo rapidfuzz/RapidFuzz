@@ -20,9 +20,8 @@ template: overrides/main.html
 
     !!! failure "ImportError: DLL load failed"
 
-        If you run into this error the reason is most likely, that the
-        [C++-Buildtools](https://visualstudio.microsoft.com/visual-cpp-build-tools)
-        are not installed, which are required for Python to find the dynamic library on Windows.
+        If you run into this error on Windows the reason is most likely, that the
+        [Visual C++ 2019 redistributable](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) is not installed, which is required to find C++ Libraries (The C++ 2019 version includes the 2015, 2017 and 2019 version).
 
     ## with conda <small>recommended</small>
 
