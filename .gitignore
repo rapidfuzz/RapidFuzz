@@ -9,3 +9,6 @@ dist/
 *.o
 *.out
 test.py
+
+# Sphinx documentation
+docs/_build/
