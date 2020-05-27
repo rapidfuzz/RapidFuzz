@@ -1,0 +1,98 @@
+# Project information
+site_name: RapidFuzz
+site_url: https://maxbachmann.github.io/rapidfuzz/
+site_author: Max Bachmann
+site_description: >-
+  Rapid fuzzy string matching using the Levenshtein Distance
+
+# Repository
+repo_name: maxbachmann/rapidfuzz
+repo_url: https://github.com/maxbachmann/rapidfuzz
+edit_uri: ""
+
+# Copyright
+copyright: Copyright &copy; 2020 Max Bachmann
+
+# Configuration
+theme:
+  name: null
+  custom_dir: docs/theme
+
+  # 404 page
+  static_templates:
+    - 404.html
+
+  # Don't include MkDocs' JavaScript
+  include_search_page: false
+  search_index_only: true
+
+  # Default values, taken from mkdocs_theme.yml
+  language: en
+  features:
+    - tabs
+  palette:
+    scheme: default
+    primary: indigo
+    accent: indigo
+  font: false
+  icon:
+    logo: null
+
+# Plugins
+plugins:
+  - search
+  - minify:
+      minify_html: true
+
+# Customization
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/maxbachmann
+    - icon: fontawesome/brands/gitter
+      link: https://gitter.im/rapidfuzz/community
+
+# Extensions
+markdown_extensions:
+  - markdown.extensions.admonition
+  - markdown.extensions.attr_list
+  - markdown.extensions.codehilite:
+      guess_lang: false
+  - markdown.extensions.def_list
+  - markdown.extensions.footnotes
+  - markdown.extensions.meta
+  - markdown.extensions.toc:
+      permalink: true
+  - pymdownx.arithmatex
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: squidfunk
+      repo: mkdocs-material
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.snippets:
+      check_paths: true
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+# Page tree
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Usage: usage.md
+  - Benchmarks: benchmarks.md
+  - Contributing: contributing.md
+  - License: license.md
