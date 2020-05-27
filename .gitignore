@@ -11,4 +11,4 @@ dist/
 test.py
 
 # Sphinx documentation
-docs/_build/
+site/

@@ -6,24 +6,24 @@ Afterwards a ratio between the runtime of both results is calculated. The benchm
 
 ## fuzz.ratio
 
-<img src="https://raw.githubusercontent.com/rhasspy/rapidfuzz/master/.github/fuzz.ratio.svg?sanitize=true">
+<img src="https://raw.githubusercontent.com/rhasspy/rapidfuzz/master/docs/img/fuzz.ratio.svg?sanitize=true">
 
 
 ## fuzz.partial_ratio
 
-<img src="https://raw.githubusercontent.com/rhasspy/rapidfuzz/master/.github/fuzz.partial_ratio.svg?sanitize=true">
+<img src="https://raw.githubusercontent.com/rhasspy/rapidfuzz/master/docs/img/fuzz.partial_ratio.svg?sanitize=true">
 
 
 ## fuzz.WRatio
 
-<img src="https://raw.githubusercontent.com/rhasspy/rapidfuzz/master/.github/fuzz.WRatio.svg?sanitize=true">
+<img src="https://raw.githubusercontent.com/rhasspy/rapidfuzz/master/docs/img/fuzz.WRatio.svg?sanitize=true">
 
 
 ## process.extract
 
-<img src="https://raw.githubusercontent.com/rhasspy/rapidfuzz/master/.github/process.extract.svg?sanitize=true">
+<img src="https://raw.githubusercontent.com/rhasspy/rapidfuzz/master/docs/img/process.extract.svg?sanitize=true">
 
 
 ## process.extractOne
 
-<img src="https://raw.githubusercontent.com/rhasspy/rapidfuzz/master/.github/process.extractOne.svg?sanitize=true">
+<img src="https://raw.githubusercontent.com/rhasspy/rapidfuzz/master/docs/img/process.extractOne.svg?sanitize=true">
