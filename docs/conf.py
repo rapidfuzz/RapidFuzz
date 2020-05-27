@@ -37,14 +37,14 @@ html_theme_options = {
     "fixed_sidebar": True,
 
     'logo': 'RapidFuzz.svg',
-    "description": ("Rapid fuzzy string matching in Python and C++ using the "
+    "description": ("Rapid fuzzy string matching using the "
                     "Levenshtein Distance"),
     "sidebar_collapse": True,
     "show_relbar_bottom": True,
     "show_powered_by": False,
 
-    # 'github_user': "maxbachmann",
-    # 'github_repo': "rapidfuzz",
+     'github_user': "maxbachmann",
+     'github_repo': "rapidfuzz",
     # "github_button": True,
     # "github_type": "count",
     # "github_banner": True,
@@ -56,6 +56,7 @@ html_theme_options = {
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinx_tabs.tabs'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
