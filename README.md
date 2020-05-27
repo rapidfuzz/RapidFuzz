@@ -19,7 +19,7 @@
   <a href="https://www.python.org">
     <img src="https://img.shields.io/pypi/pyversions/rapidfuzz"
          alt="Python versions">
-  </a>
+  </a><br/>
   <a href="https://gitter.im/rapidfuzz/community">
     <img src="https://badges.gitter.im/rapidfuzz/community.svg"
          alt="Gitter chat">
