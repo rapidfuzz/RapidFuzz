@@ -9,28 +9,33 @@ template: overrides/main.html
 
 Calculates a simple ratio between two strings.
 
-Parameters:
-
-- **s1**: *str*
-
-    First string to compare.
-
-- **s2**: *str*
-
-    Second string to compare.
-
-- **processor**: *(Union[bool, Callable])*, default `utils.default_process`
-
-    Optional callable that reformats the strings. `utils.default_process` is used by default, which lowercases the strings and trims whitespace.
-
-Returns:
-
-- **score**: *float*
-
-    Ratio between `s1` and `s2` as a float between 0 and 100
-
-
 === "Python"
+
+    Parameters:
+
+    - **s1**: *str*
+
+        First string to compare.
+
+    - **s2**: *str*
+
+        Second string to compare.
+
+    - **processor**: *(Union[bool, Callable])*, default `utils.default_process`
+
+        Optional callable that reformats the strings. `utils.default_process` is used by default, which lowercases the strings and trims whitespace.
+
+    - **score_cutoff**: *float*, default `0`, optional
+
+        Optional argument for a score threshold as a float between 0 and 100. For `ratio < score_cutoff`, 0 is returned instead.
+
+    Returns:
+
+    - **score**: *float*
+
+        Ratio between `s1` and `s2` as a float between 0 and 100
+
+
     ```bash
     > from rapidfuzz import fuzz
     > fuzz.ratio("this is a test", "this is a test!")
@@ -48,35 +53,15 @@ Returns:
 
 
 ### partial_ratio
-: r: r
+
 Calculates the [ratio](#ratio) of the optimal string alignment
 
-Parameters:
-
-- **s1**: *str*
-
-    First string to compare.
-
-- **s2**: *str*
-
-    Second string to compare.
-
-- **processor**: *(Union[bool, Callable])*, default `utils.default_process`
-
-    Optional callable that reformats the strings.  is used by default, which lowercases the strings and trims whitespace.
-
-- **score_cutoff**: *float*, default `0`, optional
-
-    Optional argument for a score threshold as a float between 0 and 100. For `ratio < score_cutoff`, 0 is returned instead.
-
-Returns:
-
-- **ratio**: *float*
-
-    Ratio between `s1` and `s2` as a float between 0 and 100.
-
-
 === "Python"
+
+    Parameters: Same as `fuzz.ratio` - `s1`, `s2`, `processor`. See [ratio](#ratio) for further details.
+
+    Returns: Same as `fuzz.ratio`. See [ratio](#ratio) for further details.
+
     ```bash
     > from rapidfuzz import fuzz
     > fuzz.partial_ratio("this is a test", "this is a test!")
@@ -96,16 +81,13 @@ Returns:
 
 Sorts the words in the strings and calculates the [ratio](#ratio) between them.
 
-Parameters: Same as `fuzz.ratio` - `s1`, `s2`, `processor`. See [ratio](#ratio) for further details.
-
-Returns:
-
-- **ratio**: *float*
-
-    Ratio between `s1` and `s2` as a float between 0 and 100.
-
-
 === "Python"
+
+    Parameters: Same as `fuzz.ratio` - `s1`, `s2`, `processor`. See [ratio](#ratio) for further details.
+
+    Returns: Same as `fuzz.ratio`. See [ratio](#ratio) for further details.
+
+
     ```bash
     > from rapidfuzz import fuzz
     > fuzz.token_sort_ratio("fuzzy wuzzy was a bear", "wuzzy fuzzy was a bear")
@@ -125,29 +107,20 @@ Returns:
 
 Sorts the words in the strings and calculates the [partial_ratio](#partial_ratio) between them.
 
-Parameters: Same as `fuzz.partial_ratio` - `s1`, `s2`, `processor`, `score_cutoff`. See [partial_ratio](#partial_ratio) for further details.
+Parameters: Same as `fuzz.ratio` - `s1`, `s2`, `processor`. See [ratio](#ratio) for further details.
 
-Returns:
-
-- **ratio**: *float*
-
-    Ratio between `s1` and `s2` as a float between 0 and 100.
+Returns: Same as `fuzz.ratio`. See [ratio](#ratio) for further details.
 
 
 ### token_set_ratio
 
 Compares the words in the strings based on unique and common words between them using [ratio](#ratio).
 
-Parameters: Same as `fuzz.ratio` - `s1`, `s2`, `processor`. See [ratio](#ratio) for further details.
-
-Returns:
-
-- **ratio**: *float*
-
-    Ratio between `s1` and `s2` as a float between 0 and 100.
-
-
 === "Python"
+    Parameters: Same as `fuzz.ratio` - `s1`, `s2`, `processor`. See [ratio](#ratio) for further details.
+
+    Returns: Same as `fuzz.ratio`. See [ratio](#ratio) for further details.
+
     ```bash
     > fuzz.token_sort_ratio("fuzzy was a bear", "fuzzy fuzzy was a bear")
     83.8709716796875
@@ -171,13 +144,9 @@ Returns:
 
 Compares the words in the strings based on unique and common words between them using [partial_ratio](#partial_ratio).
 
-Parameters: Same as `fuzz.partial_ratio` - `s1`, `s2`, `processor`, `score_cutoff`. See [partial_ratio](#partial_ratio) for further details.
+Parameters: Same as `fuzz.ratio` - `s1`, `s2`, `processor`. See [ratio](#ratio) for further details.
 
-Returns:
-
-- **ratio**: *float*
-
-    Ratio between `s1` and `s2` as a float between 0 and 100.
+Returns: Same as `fuzz.ratio`. See [ratio](#ratio) for further details.
 
 
 ### token_ratio
@@ -187,11 +156,7 @@ Helper method that returns the maximum of [token_set_ratio](#token_set_ratio) an
 
 Parameters: Same as `fuzz.ratio` - `s1`, `s2`, `processor`. See [ratio](#ratio) for further details.
 
-Returns:
-
-- **ratio**: *float*
-
-    Ratio between `s1` and `s2` as a float between 0 and 100.
+Returns: Same as `fuzz.ratio`. See [ratio](#ratio) for further details.
 
 
 ### partial_token_ratio
@@ -199,13 +164,9 @@ Returns:
 Helper method that returns the maximum of [partial_token_set_ratio](#partial_token_set_ratio) and
 [partial_token_sort_ratio](#partial_token_sort_ratio) (faster than manually executing the two functions)
 
-Parameters: Same as `fuzz.partial_ratio` - `s1`, `s2`, `processor`, `score_cutoff`. See [partial_ratio](#partial_ratio) for further details.
+Parameters: Same as `fuzz.ratio` - `s1`, `s2`, `processor`. See [ratio](#ratio) for further details.
 
-Returns:
-
-- **ratio**: *float*
-
-    Ratio between `s1` and `s2` as a float between 0 and 100.
+Returns: Same as `fuzz.ratio`. See [ratio](#ratio) for further details.
 
 
 ### QRatio
@@ -222,43 +183,48 @@ Calculates a weighted ratio based on the other ratio algorithms.
 
 Find the best matches in a list of choices.
 
-Parameters:
-
-- **query**: *str*
-
-    String we want to find.
-
-- **choices**: *Iterable*
-
-    List of all strings the query should be compared with or dict with a mapping `{<result>: <string to compare>}`
-
-- **scorer**: *Callable*, default `fuzz.WRatio`
-
-    Optional callable that is used to calculate the matching score between
-    the query and each choice.
-
-- **processor**: *Callable*, default `utils.default_process`
-
-    Optional callable that reformats the strings. `utils.default_process`
-    is used by default, which lowercases the strings and trims whitespace
-
-- **limit**: *int*
-
-    Maximum amount of results to return.
-
-- **score_cutoff**: *float*, default `0`
-
-    Optional argument for a score threshold. Matches with
-    a lower score than this number will not be returned.
-
-Returns:
-
-- **matches**: *List[Tuple[str, float]]*
-
-    Returns a list of all matches that have a `score >= score_cutoff`.
-
-
 === "Python"
+
+    Parameters:
+
+    - **query**: *str*
+
+        String we want to find.
+
+    - **choices**: *Iterable*
+
+        List of all strings the query should be compared with or dict with a mapping
+        in the form of `{<result>: <string to compare>}`. Mapping can be anything
+        that provides an `items` method like a python `dict` or `pandas.Series` (index: element)
+
+    - **scorer**: *Callable*, default `fuzz.WRatio`
+
+        Optional callable that is used to calculate the matching score between
+        the query and each choice.
+
+    - **processor**: *Callable*, default `utils.default_process`
+
+        Optional callable that reformats the strings. `utils.default_process`
+        is used by default, which lowercases the strings and trims whitespace
+
+    - **limit**: *int*
+
+        Maximum amount of results to return.
+
+    - **score_cutoff**: *float*, default `0`
+
+        Optional argument for a score threshold. Matches with
+        a lower score than this number will not be returned.
+
+    Returns:
+
+    - **matches**: *List[Tuple[str, float]] or List[Tuple[str, float, str]])*
+
+        Returns a list of all matches that have a `score >= score_cutoff`. The list will
+        be of either `(, )` when `choices` is a list of strings or `(, , )` when `choices` is a
+        mapping.
+
+
     ```console
     > choices = ["Atlanta Falcons", "New York Jets", "New York Giants", "Dallas Cowboys"]
     > process.extract("new york jets", choices, limit=2)
@@ -283,40 +249,18 @@ Returns:
 ### extractOne
 Finds the best match in a list of choices by comparing them using the provided scorer functions.
 
-Parameters:
-
-- **query**: *str*
-
-    String we want to find.
-
-- **choices**: *Iterable*
-
-    List of all strings the query should be compared with or dict with a mapping `{<result>: <string to compare>}`
-
-- **scorer**: *Callable*, default `fuzz.WRatio`
-
-    Optional callable that is used to calculate the matching score between
-    the query and each choice.
-
-- **processor**: *Callable*, default `utils.default_process`
-
-    Optional callable that reformats the strings. `utils.default_process`
-    is used by default, which lowercases the strings and trims whitespace
-
-- **score_cutoff**: *float*, default `0`
-
-    Optional argument for a score threshold. Matches with
-    a lower score than this number will not be returned.
-
-Returns:
-
-- **matches**: *Optional[Tuple[str, float]]*
-
-    Returns the best match in form of a tuple or None when there is
-    no match with a `score >= score_cutoff`.
-
-
 === "Python"
+
+    Parameters: Same as [extract](#extract)
+
+    Returns:
+
+    - **matches**: *Optional[Tuple[str, float]]*
+
+        Returns the best match in form of a tuple or None when there is
+        no match with a `score >= score_cutoff`.
+
+
     ```console
     > choices = ["Atlanta Falcons", "New York Jets", "New York Giants", "Dallas Cowboys"]
     > process.extractOne("cowboys", choices)
