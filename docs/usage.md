@@ -7,7 +7,28 @@ template: overrides/main.html
 ## fuzz
 ### ratio
 
-calculates a simple ratio between two strings
+Calculates a simple ratio between two strings.
+
+Parameters:
+
+- **s1**: *str*
+
+    First string to compare.
+
+- **s2**: *str*
+
+    Second string to compare.
+
+- **processor**: *(Union[bool, Callable])*, default `utils.default_process`
+
+    Optional callable that reformats the strings. `utils.default_process` is used by default, which lowercases the strings and trims whitespace.
+
+Returns:
+
+- **score**: *float*
+
+    Ratio between `s1` and `s2` as a float between 0 and 100
+
 
 === "Python"
     ```bash
@@ -27,8 +48,33 @@ calculates a simple ratio between two strings
 
 
 ### partial_ratio
+: r: r
+Calculates the [ratio](#ratio) of the optimal string alignment
 
-calculates the [ratio](#ratio) of the optimal string alignment
+Parameters:
+
+- **s1**: *str*
+
+    First string to compare.
+
+- **s2**: *str*
+
+    Second string to compare.
+
+- **processor**: *(Union[bool, Callable])*, default `utils.default_process`
+
+    Optional callable that reformats the strings.  is used by default, which lowercases the strings and trims whitespace.
+
+- **score_cutoff**: *float*, default `0`, optional
+
+    Optional argument for a score threshold as a float between 0 and 100. For `ratio < score_cutoff`, 0 is returned instead.
+
+Returns:
+
+- **ratio**: *float*
+
+    Ratio between `s1` and `s2` as a float between 0 and 100.
+
 
 === "Python"
     ```bash
@@ -50,6 +96,15 @@ calculates the [ratio](#ratio) of the optimal string alignment
 
 Sorts the words in the strings and calculates the [ratio](#ratio) between them.
 
+Parameters: Same as `fuzz.ratio` - `s1`, `s2`, `processor`. See [ratio](#ratio) for further details.
+
+Returns:
+
+- **ratio**: *float*
+
+    Ratio between `s1` and `s2` as a float between 0 and 100.
+
+
 === "Python"
     ```bash
     > from rapidfuzz import fuzz
@@ -67,10 +122,30 @@ Sorts the words in the strings and calculates the [ratio](#ratio) between them.
     ```
 
 ### partial_token_sort_ratio
+
 Sorts the words in the strings and calculates the [partial_ratio](#partial_ratio) between them.
 
+Parameters: Same as `fuzz.partial_ratio` - `s1`, `s2`, `processor`, `score_cutoff`. See [partial_ratio](#partial_ratio) for further details.
+
+Returns:
+
+- **ratio**: *float*
+
+    Ratio between `s1` and `s2` as a float between 0 and 100.
+
+
 ### token_set_ratio
+
 Compares the words in the strings based on unique and common words between them using [ratio](#ratio).
+
+Parameters: Same as `fuzz.ratio` - `s1`, `s2`, `processor`. See [ratio](#ratio) for further details.
+
+Returns:
+
+- **ratio**: *float*
+
+    Ratio between `s1` and `s2` as a float between 0 and 100.
+
 
 === "Python"
     ```bash
@@ -93,16 +168,45 @@ Compares the words in the strings based on unique and common words between them 
     ```
 
 ### partial_token_set_ratio
+
 Compares the words in the strings based on unique and common words between them using [partial_ratio](#partial_ratio).
+
+Parameters: Same as `fuzz.partial_ratio` - `s1`, `s2`, `processor`, `score_cutoff`. See [partial_ratio](#partial_ratio) for further details.
+
+Returns:
+
+- **ratio**: *float*
+
+    Ratio between `s1` and `s2` as a float between 0 and 100.
 
 
 ### token_ratio
+
 Helper method that returns the maximum of [token_set_ratio](#token_set_ratio) and
 [token_sort_ratio](#token_sort_ratio) (faster than manually executing the two functions)
 
+Parameters: Same as `fuzz.ratio` - `s1`, `s2`, `processor`. See [ratio](#ratio) for further details.
+
+Returns:
+
+- **ratio**: *float*
+
+    Ratio between `s1` and `s2` as a float between 0 and 100.
+
+
 ### partial_token_ratio
+
 Helper method that returns the maximum of [partial_token_set_ratio](#partial_token_set_ratio) and
 [partial_token_sort_ratio](#partial_token_sort_ratio) (faster than manually executing the two functions)
+
+Parameters: Same as `fuzz.partial_ratio` - `s1`, `s2`, `processor`, `score_cutoff`. See [partial_ratio](#partial_ratio) for further details.
+
+Returns:
+
+- **ratio**: *float*
+
+    Ratio between `s1` and `s2` as a float between 0 and 100.
+
 
 ### QRatio
 Similar algorithm to [ratio](#ratio), but preprocesses the strings by default, while it does not do this by default in
