@@ -21,9 +21,12 @@ Calculates a simple ratio between two strings.
 
         Second string to compare.
 
-    - **processor**: *(Union[bool, Callable])*, default `utils.default_process`
+    - **processor**: *(Union[bool, Callable])*, default `None`
 
-        Optional callable that reformats the strings. `utils.default_process` is used by default, which lowercases the strings and trims whitespace.
+        Optional callable that reformats the strings.
+
+        - `None` is use by default in `fuzz.ratio` and `fuzz.partial_ratio`.
+        - `utils.default_process`, which lowercases the strings and trims whitespaces, is used by default for all other `fuzz.*ratio` methods
 
     - **score_cutoff**: *float*, default `0`, optional
 
