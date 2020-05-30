@@ -78,7 +78,10 @@ def extract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, proce
             a lower score than this number will not be returned. Defaults to 0
 
     Returns: 
-        List[Tuple[str, float]]: returns a list of all matches that have a score >= score_cutoff
+        Union[List[Tuple[str, float]], List[Tuple[str, float, str]]]: Returns a
+        list of all matches that have a `score >= score_cutoff`. The list will
+        be of either `(, )` when `choices` is a list of strings or `(, , )` when
+        `choices` is a mapping.
     """
     results = iterExtract(query, choices, scorer, processor, score_cutoff)
 
