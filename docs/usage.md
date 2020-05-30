@@ -219,7 +219,44 @@ Calculates a weighted ratio based on the other ratio algorithms.
 ## process
 
 ### extract
+
 Find the best matches in a list of choices.
+
+Parameters:
+
+- **query**: *str*
+
+    String we want to find.
+
+- **choices**: *Iterable*
+
+    List of all strings the query should be compared with or dict with a mapping `{<result>: <string to compare>}`
+
+- **scorer**: *Callable*, default `fuzz.WRatio`
+
+    Optional callable that is used to calculate the matching score between
+    the query and each choice.
+
+- **processor**: *Callable*, default `utils.default_process`
+
+    Optional callable that reformats the strings. `utils.default_process`
+    is used by default, which lowercases the strings and trims whitespace
+
+- **limit**: *int*
+
+    Maximum amount of results to return.
+
+- **score_cutoff**: *float*, default `0`
+
+    Optional argument for a score threshold. Matches with
+    a lower score than this number will not be returned.
+
+Returns:
+
+- **matches**: *List[Tuple[str, float]]*
+
+    Returns a list of all matches that have a `score >= score_cutoff`.
+
 
 === "Python"
     ```console
@@ -245,6 +282,39 @@ Find the best matches in a list of choices.
 
 ### extractOne
 Finds the best match in a list of choices by comparing them using the provided scorer functions.
+
+Parameters:
+
+- **query**: *str*
+
+    String we want to find.
+
+- **choices**: *Iterable*
+
+    List of all strings the query should be compared with or dict with a mapping `{<result>: <string to compare>}`
+
+- **scorer**: *Callable*, default `fuzz.WRatio`
+
+    Optional callable that is used to calculate the matching score between
+    the query and each choice.
+
+- **processor**: *Callable*, default `utils.default_process`
+
+    Optional callable that reformats the strings. `utils.default_process`
+    is used by default, which lowercases the strings and trims whitespace
+
+- **score_cutoff**: *float*, default `0`
+
+    Optional argument for a score threshold. Matches with
+    a lower score than this number will not be returned.
+
+Returns:
+
+- **matches**: *Optional[Tuple[str, float]]*
+
+    Returns the best match in form of a tuple or None when there is
+    no match with a `score >= score_cutoff`.
+
 
 === "Python"
     ```console
