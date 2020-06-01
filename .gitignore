@@ -12,3 +12,6 @@ test.py
 
 # Sphinx documentation
 site/
+
+# benchmark results
+bench_results/
