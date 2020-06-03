@@ -21,11 +21,10 @@ jobs:
       run: |
         python -m pip install --upgrade pip setuptools
         python -m pip install -r docs/requirements.txt
-    - name: Deploy Files
-      run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git remote add repo "https://github.com/maxbachmann/rapidfuzz.git"
-        git fetch repo && git fetch repo gh-pages:gh-pages
-        python -m mkdocs gh-deploy --clean --remote-name repo
-        git push repo gh-pages
+    - name: Build Site
+      run: mkdocs build
+    - name: Deploy Site
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./site
