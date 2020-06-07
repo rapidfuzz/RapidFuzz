@@ -17,10 +17,9 @@ bool use_preprocessing(PyObject* processor, bool processor_default) {
     return processor ? PyObject_IsTrue(processor) : processor_default;
 }
 
-
 //TODO: make this the default when partial_ratio accepts strings of different char types
 template<typename MatchingFunc>
-static PyObject* fuzz_impl(bool processor_default, PyObject* args, PyObject* keywds) {
+static PyObject* fuzz_call(bool processor_default, PyObject* args, PyObject* keywds) {
     PyObject *py_s1;
     PyObject *py_s2;
     PyObject *processor = NULL;
@@ -96,8 +95,8 @@ static PyObject* fuzz_impl(bool processor_default, PyObject* args, PyObject* key
 }
 
 
-template<typename T>
-static PyObject* fuzz_impl(T&& scorer, bool processor_default, PyObject* args, PyObject* keywds) {
+template<typename MatchingFunc>
+static PyObject* fuzz_call_old(bool processor_default, PyObject* args, PyObject* keywds) {
     PyObject *py_s1;
     PyObject *py_s2;
     PyObject *processor = NULL;
@@ -152,7 +151,7 @@ static PyObject* fuzz_impl(T&& scorer, bool processor_default, PyObject* args, P
             return NULL;
         }
 
-        auto result = scorer(
+        auto result = MatchingFunc::call(
             nonstd::wstring_view(buffer_s1, len_s1),
             nonstd::wstring_view(buffer_s2, len_s2),
             score_cutoff);
@@ -179,12 +178,12 @@ static PyObject* fuzz_impl(T&& scorer, bool processor_default, PyObject* args, P
     double result;
 
     if (use_preprocessing(processor, processor_default)) {
-        result = scorer(
+        result = MatchingFunc::call(
             utils::default_process(nonstd::wstring_view(buffer_s1, len_s1)),
             utils::default_process(nonstd::wstring_view(buffer_s2, len_s2)),
             score_cutoff);
     } else {
-        result = scorer(
+        result = MatchingFunc::call(
             nonstd::wstring_view(buffer_s1, len_s1),
             nonstd::wstring_view(buffer_s2, len_s2),
             score_cutoff);
@@ -216,14 +215,14 @@ PyDoc_STRVAR(ratio_docstring,
 );
 
 struct ratio_func {
-    template <typename Sentence1, typename Sentence2>
-    static double call(const Sentence1& s1, const Sentence2& s2, const double score_cutoff = 0) {
-        return fuzz::ratio(s1, s2, score_cutoff);
+    template <typename... Args>
+    static double call(Args&&... args) {
+        return fuzz::ratio(std::forward<Args>(args)...);
     }
 };
 
 static PyObject* ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-    return fuzz_impl<ratio_func>(false, args, keywds);
+    return fuzz_call<ratio_func>(false, args, keywds);
 }
 
 
@@ -245,8 +244,15 @@ PyDoc_STRVAR(partial_ratio_docstring,
 "    100"
 );
 
+struct partial_ratio_func {
+    template <typename... Args>
+    static double call(Args&&... args) {
+        return fuzz::partial_ratio(std::forward<Args>(args)...);
+    }
+};
+
 static PyObject* partial_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-    return fuzz_impl(fuzz::partial_ratio<nonstd::wstring_view, nonstd::wstring_view>, false, args, keywds);
+    return fuzz_call_old<partial_ratio_func>(false, args, keywds);
 }
 
 
@@ -269,14 +275,14 @@ PyDoc_STRVAR(token_sort_ratio_docstring,
 );
 
 struct token_sort_ratio_func {
-    template <typename Sentence1, typename Sentence2>
-    static double call(const Sentence1& s1, const Sentence2& s2, const double score_cutoff = 0) {
-        return fuzz::token_sort_ratio(s1, s2, score_cutoff);
+    template <typename... Args>
+    static double call(Args&&... args) {
+        return fuzz::token_sort_ratio(std::forward<Args>(args)...);
     }
 };
 
 static PyObject* token_sort_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-    return fuzz_impl<token_sort_ratio_func>(true, args, keywds);
+    return fuzz_call<token_sort_ratio_func>(true, args, keywds);
 }
 
 
@@ -295,8 +301,15 @@ PyDoc_STRVAR(partial_token_sort_ratio_docstring,
 "    float: ratio between s1 and s2 as a float between 0 and 100"
 );
 
+struct partial_token_sort_ratio_func {
+    template <typename... Args>
+    static double call(Args&&... args) {
+        return fuzz::partial_token_sort_ratio(std::forward<Args>(args)...);
+    }
+};
+
 static PyObject* partial_token_sort_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-    return fuzz_impl(fuzz::partial_token_sort_ratio<nonstd::wstring_view, nonstd::wstring_view>, true, args, keywds);
+    return fuzz_call_old<partial_token_sort_ratio_func>(true, args, keywds);
 }
 
 
@@ -321,14 +334,14 @@ PyDoc_STRVAR(token_set_ratio_docstring,
 );
 
 struct token_set_ratio_func {
-    template <typename Sentence1, typename Sentence2>
-    static double call(const Sentence1& s1, const Sentence2& s2, const double score_cutoff = 0) {
-        return fuzz::token_set_ratio(s1, s2, score_cutoff);
+    template <typename... Args>
+    static double call(Args&&... args) {
+        return fuzz::token_set_ratio(std::forward<Args>(args)...);
     }
 };
 
 static PyObject* token_set_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-    return fuzz_impl<token_set_ratio_func>(true, args, keywds);
+    return fuzz_call<token_set_ratio_func>(true, args, keywds);
 }
 
 
@@ -347,8 +360,15 @@ PyDoc_STRVAR(partial_token_set_ratio_docstring,
 "    float: ratio between s1 and s2 as a float between 0 and 100"
 );
 
+struct partial_token_set_ratio_func {
+    template <typename... Args>
+    static double call(Args&&... args) {
+        return fuzz::partial_token_set_ratio(std::forward<Args>(args)...);
+    }
+};
+
 static PyObject* partial_token_set_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-    return fuzz_impl(fuzz::partial_token_set_ratio<nonstd::wstring_view, nonstd::wstring_view>, true, args, keywds);
+    return fuzz_call_old<partial_token_set_ratio_func>(true, args, keywds);
 }
 
 
@@ -369,14 +389,14 @@ PyDoc_STRVAR(token_ratio_docstring,
 );
 
 struct token_ratio_func {
-    template <typename Sentence1, typename Sentence2>
-    static double call(const Sentence1& s1, const Sentence2& s2, const double score_cutoff = 0) {
-        return fuzz::token_ratio(s1, s2, score_cutoff);
+    template <typename... Args>
+    static double call(Args&&... args) {
+        return fuzz::token_ratio(std::forward<Args>(args)...);
     }
 };
 
 static PyObject* token_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-    return fuzz_impl<token_ratio_func>(true, args, keywds);
+    return fuzz_call<token_ratio_func>(true, args, keywds);
 }
 
 
@@ -396,8 +416,15 @@ PyDoc_STRVAR(partial_token_ratio_docstring,
 "    float: ratio between s1 and s2 as a float between 0 and 100"
 );
 
+struct partial_token_ratio_func {
+    template <typename... Args>
+    static double call(Args&&... args) {
+        return fuzz::partial_token_ratio(std::forward<Args>(args)...);
+    }
+};
+
 static PyObject* partial_token_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-    return fuzz_impl(fuzz::partial_token_ratio<nonstd::wstring_view, nonstd::wstring_view>, true, args, keywds);
+    return fuzz_call_old<partial_token_ratio_func>(true, args, keywds);
 }
 
 
@@ -416,8 +443,16 @@ PyDoc_STRVAR(WRatio_docstring,
 "    float: ratio between s1 and s2 as a float between 0 and 100"
 );
 
+struct WRatio_func {
+    template <typename... Args>
+    static double call(Args&&... args) {
+        return fuzz::WRatio(std::forward<Args>(args)...);
+    }
+};
+
+
 static PyObject* WRatio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-    return fuzz_impl(fuzz::WRatio<nonstd::wstring_view, nonstd::wstring_view>, true, args, keywds);
+    return fuzz_call_old<WRatio_func>(true, args, keywds);
 }
 
 
@@ -440,7 +475,7 @@ PyDoc_STRVAR(QRatio_docstring,
 );
 
 static PyObject* QRatio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-    return fuzz_impl<ratio_func>(true, args, keywds);
+    return fuzz_call<ratio_func>(true, args, keywds);
 }
 
 
@@ -462,14 +497,14 @@ PyDoc_STRVAR(quick_lev_ratio_docstring,
 );
 
 struct quick_lev_ratio_func {
-    template <typename Sentence1, typename Sentence2>
-    static double call(const Sentence1& s1, const Sentence2& s2, const double score_cutoff = 0) {
-        return fuzz::quick_lev_ratio(s1, s2, score_cutoff);
+    template <typename... Args>
+    static double call(Args&&... args) {
+        return fuzz::quick_lev_ratio(std::forward<Args>(args)...);
     }
 };
 
 static PyObject* quick_lev_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-    return fuzz_impl<quick_lev_ratio_func>(true, args, keywds);
+    return fuzz_call<quick_lev_ratio_func>(true, args, keywds);
 }
 
 
