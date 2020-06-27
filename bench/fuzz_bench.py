@@ -17,7 +17,7 @@ class BenchmarkRunner:
     self._result = defaultdict(list)
 
     for func, setup, name in zip(self.functions, self.setups, self.names):
-        print(f"testing {func}...")
+        print("testing {}...".format(func))
         for value in self.lengths:
             test = timeit.Timer(func.format(value), setup=setup.format(value))
             result = test.timeit(number=100000)
@@ -62,39 +62,48 @@ mostly_similar_b = similar_a + "b"
 
   bench_runner = BenchmarkRunner(
     functions=[
-      f'fuzz.{name}(similar_a, similar_b)',
-      f'fuzz.{name}(similar_a, similar_b, score_cutoff=80)',
-      f'fuzz.{name}(similar_a, similar_b)'
+      'fuzz.{}(similar_a, similar_b)'.format(name),
+      'fuzz.{}(similar_a, similar_b, score_cutoff=80)'.format(name),
+      'fuzz.{}(similar_a, similar_b)'.format(name)
     ],
     setups=[
       setup.format("rapidfuzz", "{0}"),
       setup.format("rapidfuzz", "{0}"),
       setup.format("fuzzywuzzy", "{0}")],
     names=["rapidfuzz", "rapidfuzz with score_cutoff=80", "fuzzywuzzy"],
-    lengths=[int(1.4**x) for x in range(3,20)]
+    lengths=[int(1.2**x) for x in range(3,37)]
   )
   bench_runner.run()
-  bench_runner.store('string length (in characters)', f'fuzz.{name} with similar strings', f'bench_results/{name}_similar.svg')
+  bench_runner.store(
+    'string length (in characters)',
+    'fuzz.{} with similar strings'.format(name),
+    'bench_results/{}_similar.svg'.format(name))
   print()
 
   bench_runner.functions = [
-    f'fuzz.{name}(mostly_similar_a, mostly_similar_b)',
-    f'fuzz.{name}(mostly_similar_a, mostly_similar_b, score_cutoff=80)',
-    f'fuzz.{name}(mostly_similar_a, mostly_similar_b)'
+    'fuzz.{}(mostly_similar_a, mostly_similar_b)'.format(name),
+    'fuzz.{}(mostly_similar_a, mostly_similar_b, score_cutoff=80)'.format(name),
+    'fuzz.{}(mostly_similar_a, mostly_similar_b)'.format(name)
   ]
   bench_runner.run()
-  bench_runner.store('string length (in characters)', f'fuzz.{name} with mostly similar strings', f'bench_results/{name}_mostly_similar.svg')
+  bench_runner.store(
+    'string length (in characters)',
+    'fuzz.{} with mostly similar strings'.format(name),
+    'bench_results/{}_mostly_similar.svg'.format(name))
   print()
 
-  bench_runner.functions = [f'fuzz.{name}("a"*{"{0}"} , "b"*{"{0}"})']*2
+  bench_runner.functions = ['fuzz.{}("a"*{{0}} , "b"*{{0}})'.format(name)]*2
   bench_runner.functions = [
-    f'fuzz.{name}(different_a, different_b)',
-    f'fuzz.{name}(different_a, different_b, score_cutoff=80)',
-    f'fuzz.{name}(different_a, different_b)'
+    'fuzz.{}(different_a, different_b)'.format(name),
+    'fuzz.{}(different_a, different_b, score_cutoff=80)'.format(name),
+    'fuzz.{}(different_a, different_b)'.format(name)
   ]
-  bench_runner.lengths=[int(1.4**x) for x in range(3,15)]
+  bench_runner.lengths=[int(1.2**x) for x in range(3,28)]
   bench_runner.run()
-  bench_runner.store('string length (in characters)', f'fuzz.{name} with different strings', f'bench_results/{name}_different.svg')
+  bench_runner.store(
+    'string length (in characters)',
+    'fuzz.{} with different strings'.format(name),
+    'bench_results/{}_different.svg'.format(name))
   print()
 
 try:

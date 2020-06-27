@@ -3,11 +3,12 @@ include VERSION
 include LICENSE
 
 recursive-include src/rapidfuzz-cpp/src *.hpp *.txx
+exclude src/rapidfuzz-cpp/src/process.hpp
+exclude src/rapidfuzz-cpp/src/process.txx
+
 recursive-include src/rapidfuzz-cpp/extern/difflib *
 recursive-include src/rapidfuzz-cpp/extern/nonstd *
+
 recursive-include extern/variant *
 include src/py_utils.hpp
 include src/rapidfuzz-cpp/LICENSE
-
-exclude src/rapidfuzz-cpp/src/process.hpp
-exclude src/rapidfuzz-cpp/src/process.txx
