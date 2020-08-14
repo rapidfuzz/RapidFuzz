@@ -5,6 +5,7 @@
 from rapidfuzz import fuzz, utils
 from typing import Iterable, List, Tuple, Optional, Union, Callable, Generator
 import heapq
+import numbers
 
 def iterExtract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, processor: Callable = utils.default_process,
             score_cutoff: float = 0) -> Generator[Tuple[str, float], None, None]:
@@ -167,9 +168,14 @@ def extractOne(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, pr
             if score >= score_cutoff:
                 # very small increment for the score_cutoff, so when multiple
                 # elements have the same score the first one is used
-                score_cutoff = score + 0.00001
-                if score_cutoff > 100:
-                    return (match_choice, score, choice)
+                # only done when the score is a number
+                if isinstance(score, numbers.Number):
+                    score_cutoff = score + 0.00001
+                    if score_cutoff > 100:
+                        return (match_choice, score, choice)
+                else:
+                    score_cutoff = score
+
                 result_score = score
                 result_choice = match_choice
                 choice_key = choice
@@ -186,9 +192,13 @@ def extractOne(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, pr
             score_cutoff=score_cutoff)
 
         if score >= score_cutoff:
-            score_cutoff = score + 0.00001
-            if score_cutoff > 100:
-                return (choice, score)
+            if isinstance(score, numbers.Number):
+                score_cutoff = score + 0.00001
+                if score_cutoff > 100:
+                    return (choice, score)
+            else:
+                score_cutoff = score
+
             result_score = score
             result_choice = choice
 

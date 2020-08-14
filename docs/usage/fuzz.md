@@ -43,9 +43,7 @@ However the methods are sometimes using differing default values to make the beh
 
 Calculates a simple ratio between two strings.
 
-Parameters: Check [fuzz](#fuzz) for further details.
-
-Returns: Check [fuzz](#fuzz) for further details.
+Parameters/Returns: Check [fuzz](#fuzz) for further details
 
 === "Python"
     ```bash
@@ -68,9 +66,7 @@ Returns: Check [fuzz](#fuzz) for further details.
 
 Calculates the [ratio](#ratio) of the optimal string alignment
 
-Parameters: Check [fuzz](#fuzz) for further details.
-
-Returns: Check [fuzz](#fuzz) for further details.
+Parameters/Returns: Check [fuzz](#fuzz) for further details
 
 === "Python"
     ```bash
@@ -92,9 +88,7 @@ Returns: Check [fuzz](#fuzz) for further details.
 
 Sorts the words in the strings and calculates the [ratio](#ratio) between them.
 
-Parameters: Check [fuzz](#fuzz) for further details.
-
-Returns: Check [fuzz](#fuzz) for further details.
+Parameters/Returns: Check [fuzz](#fuzz) for further details
 
 === "Python"
     ```bash
@@ -116,18 +110,14 @@ Returns: Check [fuzz](#fuzz) for further details.
 
 Sorts the words in the strings and calculates the [partial_ratio](#partial_ratio) between them.
 
-Parameters: Check [fuzz](#fuzz) for further details.
-
-Returns: Check [fuzz](#fuzz) for further details.
+Parameters/Returns: Check [fuzz](#fuzz) for further details
 
 
 ## token_set_ratio
 
 Compares the words in the strings based on unique and common words between them using [ratio](#ratio).
 
-Parameters: Check [fuzz](#fuzz) for further details.
-
-Returns: Check [fuzz](#fuzz) for further details.
+Parameters/Returns: Check [fuzz](#fuzz) for further details
 
 === "Python"
     ```bash
@@ -153,9 +143,7 @@ Returns: Check [fuzz](#fuzz) for further details.
 
 Compares the words in the strings based on unique and common words between them using [partial_ratio](#partial_ratio).
 
-Parameters: Check [fuzz](#fuzz) for further details.
-
-Returns: Check [fuzz](#fuzz) for further details..
+Parameters/Returns: Check [fuzz](#fuzz) for further details
 
 
 ## token_ratio
@@ -163,9 +151,7 @@ Returns: Check [fuzz](#fuzz) for further details..
 Helper method that returns the maximum of [token_set_ratio](#token_set_ratio) and
 [token_sort_ratio](#token_sort_ratio) (faster than manually executing the two functions)
 
-Parameters: Check [fuzz](#fuzz) for further details.
-
-Returns: Check [fuzz](#fuzz) for further details.
+Parameters/Returns: Check [fuzz](#fuzz) for further details
 
 
 ## partial_token_ratio
@@ -173,22 +159,16 @@ Returns: Check [fuzz](#fuzz) for further details.
 Helper method that returns the maximum of [partial_token_set_ratio](#partial_token_set_ratio) and
 [partial_token_sort_ratio](#partial_token_sort_ratio) (faster than manually executing the two functions)
 
-Parameters: Check [fuzz](#fuzz) for further details.
-
-Returns: Check [fuzz](#fuzz) for further details.
+Parameters/Returns: Check [fuzz](#fuzz) for further details
 
 
 ## QRatio
 Similar algorithm to [ratio](#ratio), but preprocesses the strings by default, while it does not do this by default in
 [ratio](#ratio).
 
-Parameters: Check [fuzz](#fuzz) for further details.
-
-Returns: Check [fuzz](#fuzz) for further details.
+Parameters/Returns: Check [fuzz](#fuzz) for further details
 
 ## WRatio
 Calculates a weighted ratio based on the other ratio algorithms.
 
-Parameters: Check [fuzz](#fuzz) for further details.
-
-Returns: Check [fuzz](#fuzz) for further details.
+Parameters/Returns: Check [fuzz](#fuzz) for further details
