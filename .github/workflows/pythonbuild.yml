@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.5, 3.6, 3.7, 3.8]
+        python-version: [2.7, 3.5, 3.6, 3.7, 3.8]
 
     steps:
       - uses: actions/checkout@v2
@@ -34,9 +34,9 @@ jobs:
         run: |
           pip install flake8
           # stop the build if there are Python syntax errors or undefined names
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          flake8 src --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
       - name: Run Unit Tests
         run: |
@@ -53,7 +53,7 @@ jobs:
       matrix:
         os: [ubuntu-18.04, windows-latest, macos-latest]
     env:
-      CIBW_SKIP: cp27-* pp27-*
+      CIBW_SKIP: cp27-win* pp27-win*
 
     steps:
       - uses: actions/checkout@v1

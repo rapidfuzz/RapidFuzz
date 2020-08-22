@@ -1,12 +1,11 @@
 /* SPDX-License-Identifier: MIT */
 /* Copyright © 2020 Max Bachmann */
 
-#define PY_SSIZE_T_CLEAN
-#include <Python.h>
 #include <string>
 #include "utils.hpp"
+#include "py_utils.hpp"
 
-namespace utils = rapidfuzz::utils;
+namespace rutils = rapidfuzz::utils;
 
 constexpr const char * default_process_docstring = R"()";
 
@@ -14,14 +13,36 @@ static PyObject* default_process(PyObject* /*self*/, PyObject* args, PyObject* k
     PyObject *py_sentence;
     static const char *kwlist[] = {"sentence", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "U", const_cast<char **>(kwlist),
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "O", const_cast<char **>(kwlist),
                                      &py_sentence)) {
         return NULL;
     }
 
+#ifdef PYTHON_2
+    if (PyObject_TypeCheck(py_sentence, &PyString_Type)) {
+        Py_ssize_t len = PyString_GET_SIZE(py_sentence);
+        char* str = PyString_AS_STRING(py_sentence);
+
+        auto proc_str = rutils::default_process(nonstd::basic_string_view<char>(str, len));
+        return PyString_FromStringAndSize(proc_str.data(), proc_str.size());
+    } else if (PyObject_TypeCheck(py_sentence, &PyUnicode_Type)) {
+        Py_ssize_t len = PyUnicode_GET_SIZE(py_sentence);
+        Py_UNICODE* str = PyUnicode_AS_UNICODE(py_sentence);
+
+        auto proc_str = rutils::default_process(nonstd::basic_string_view<Py_UNICODE>(str, len));
+        return PyUnicode_FromUnicode(proc_str.data(), proc_str.size());
+    } else {
+        PyErr_Format(PyExc_TypeError, "expected String or Unicode");
+        return NULL;
+    }
+#else /* Python 3 */
+
+// PyUnicode_READY deprecated in Python 3.10 removed in Python 3.12
+#ifdef PY_BELOW_3_12
     if (PyUnicode_READY(py_sentence)) {
         return NULL;
     }
+#endif
 
     Py_ssize_t len = PyUnicode_GET_LENGTH(py_sentence);
     void* str = PyUnicode_DATA(py_sentence);
@@ -33,49 +54,26 @@ static PyObject* default_process(PyObject* /*self*/, PyObject* args, PyObject* k
     switch (str_kind) {
     case PyUnicode_1BYTE_KIND:
     {
-        auto proc_str = utils::default_process(nonstd::basic_string_view<uint8_t>(static_cast<uint8_t*>(str), len));
-        result = PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, proc_str.data(), proc_str.size());
-        break;
+        auto proc_str = rutils::default_process(nonstd::basic_string_view<uint8_t>(static_cast<uint8_t*>(str), len));
+        return PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, proc_str.data(), proc_str.size());
     }
     case PyUnicode_2BYTE_KIND:
     {
-        auto proc_str = utils::default_process(nonstd::basic_string_view<uint16_t>(static_cast<uint16_t*>(str), len));
-        result = PyUnicode_FromKindAndData(PyUnicode_2BYTE_KIND, proc_str.data(), proc_str.size());
-        break;
+        auto proc_str = rutils::default_process(nonstd::basic_string_view<uint16_t>(static_cast<uint16_t*>(str), len));
+        return PyUnicode_FromKindAndData(PyUnicode_2BYTE_KIND, proc_str.data(), proc_str.size());
     }
     default:
     {
-        auto proc_str = utils::default_process(nonstd::basic_string_view<uint32_t>(static_cast<uint32_t*>(str), len));
-        result = PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, proc_str.data(), proc_str.size());
-        break;
+        auto proc_str = rutils::default_process(nonstd::basic_string_view<uint32_t>(static_cast<uint32_t*>(str), len));
+        return PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, proc_str.data(), proc_str.size());
     }
     }
-
-    return result;
-
+#endif
 }
 
-/* The cast of the function is necessary since PyCFunction values
-* only take two PyObject* parameters, and these functions take three.
-*/
-#define PY_METHOD(x) { #x, (PyCFunction)(void(*)(void))x, METH_VARARGS | METH_KEYWORDS, x##_docstring }
 static PyMethodDef methods[] = {
     PY_METHOD(default_process),
     {NULL, NULL, 0, NULL}   /* sentinel */
 };
 
-static struct PyModuleDef moduledef = {
-    PyModuleDef_HEAD_INIT,
-    "rapidfuzz.utils",
-    NULL,
-    -1,
-    methods,
-    NULL,  /* m_slots */
-    NULL,  /* m_traverse */
-    0,     /* m_clear */
-    NULL   /* m_free */
-};
-
-PyMODINIT_FUNC PyInit_utils(void) {
-    return PyModule_Create(&moduledef);
-}
+PY_INIT_MOD(utils, NULL, methods)

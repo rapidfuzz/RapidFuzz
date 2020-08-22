@@ -2,15 +2,12 @@
 /* Copyright © 2020 Max Bachmann */
 /* Copyright © 2011 Adam Cohen */
 
-#define PY_SSIZE_T_CLEAN
-#include <Python.h>
 #include <string>
 #include "fuzz.hpp"
 #include "utils.hpp"
 #include "py_utils.hpp"
-#include <nonstd/string_view.hpp>
 
-namespace fuzz = rapidfuzz::fuzz;
+namespace rfuzz = rapidfuzz::fuzz;
 namespace utils = rapidfuzz::utils;
 
 bool use_preprocessing(PyObject* processor, bool processor_default) {
@@ -35,17 +32,7 @@ static PyObject* fuzz_call(bool processor_default, PyObject* args, PyObject* key
         return PyFloat_FromDouble(0);
     }
 
-    if (!PyUnicode_Check(py_s1)) {
-        PyErr_SetString(PyExc_TypeError, "s1 must be a string or None");
-        return NULL;
-    }
-
-    if (!PyUnicode_Check(py_s2)) {
-        PyErr_SetString(PyExc_TypeError, "s2 must be a string or None");
-        return NULL;
-    } 
-
-    if (PyUnicode_READY(py_s1) || PyUnicode_READY(py_s2)) {
+    if (!valid_str(py_s1, "s1") || !valid_str(py_s2, "s2")) {
         return NULL;
     }
 
@@ -112,85 +99,57 @@ static PyObject* fuzz_call_old(bool processor_default, PyObject* args, PyObject*
         return PyFloat_FromDouble(0);
     }
 
-    if (!PyUnicode_Check(py_s1)) {
-        PyErr_SetString(PyExc_TypeError, "s1 must be a string or None");
-        return NULL;
-    }
-
-    if (!PyUnicode_Check(py_s2)) {
-        PyErr_SetString(PyExc_TypeError, "s2 must be a string or None");
-        return NULL;
-    } 
-
-    if (PyUnicode_READY(py_s1) || PyUnicode_READY(py_s2)) {
+    if (!valid_str(py_s1, "s1") || !valid_str(py_s2, "s2")) {
         return NULL;
     }
 
     if (PyCallable_Check(processor)) {
-        PyObject *proc_s1 = PyObject_CallFunctionObjArgs(processor, py_s1, NULL);
-        if (proc_s1 == NULL) {
-            return NULL;
-        }
-        Py_ssize_t len_s1 = PyUnicode_GET_LENGTH(proc_s1);
-        wchar_t* buffer_s1 = PyUnicode_AsWideCharString(proc_s1, &len_s1);
-        Py_DecRef(proc_s1);
-        if (buffer_s1 == NULL) {
+        PyObject *py_proc_s1 = PyObject_CallFunctionObjArgs(processor, py_s1, NULL);
+        if (py_proc_s1 == NULL) {
             return NULL;
         }
 
-        PyObject *proc_s2 = PyObject_CallFunctionObjArgs(processor, py_s2, NULL);
-        if (proc_s2 == NULL) {
-            PyMem_Free(buffer_s1);
+        auto proc_s1_view = decode_python_string(py_proc_s1);
+        std::wstring proc_s1 = mpark::visit([](auto&& val) {
+            return std::wstring(val.begin(), val.end());
+        }, proc_s1_view);
+        Py_DecRef(py_proc_s1);
+
+
+        PyObject *py_proc_s2 = PyObject_CallFunctionObjArgs(processor, py_s2, NULL);
+        if (py_proc_s2 == NULL) {
             return NULL;
         }
-        Py_ssize_t len_s2 = PyUnicode_GET_LENGTH(proc_s2);
-        wchar_t* buffer_s2 = PyUnicode_AsWideCharString(proc_s2, &len_s2);
-        Py_DecRef(proc_s2);
-        if (buffer_s2 == NULL) {
-            PyMem_Free(buffer_s1);
-            return NULL;
-        }
 
-        auto result = MatchingFunc::call(
-            nonstd::wstring_view(buffer_s1, len_s1),
-            nonstd::wstring_view(buffer_s2, len_s2),
-            score_cutoff);
+        auto proc_s2_view = decode_python_string(py_proc_s2);
+        std::wstring proc_s2 = mpark::visit([](auto&& val) {
+            return std::wstring(val.begin(), val.end());
+        }, proc_s2_view);
+        Py_DecRef(py_proc_s2);
 
-        PyMem_Free(buffer_s1);
-        PyMem_Free(buffer_s2);
-
+        auto result = MatchingFunc::call(proc_s1, proc_s2, score_cutoff);
         return PyFloat_FromDouble(result);
     }
 
-    Py_ssize_t len_s1 = PyUnicode_GET_LENGTH(py_s1);
-    wchar_t* buffer_s1 = PyUnicode_AsWideCharString(py_s1, &len_s1);
-    if (buffer_s1 == NULL) {
-        return NULL;
-    }
+    auto s1_view = decode_python_string(py_s1);
+    std::wstring s1 = mpark::visit([](auto&& val) {
+        return std::wstring(val.begin(), val.end());
+    }, s1_view);
 
-    Py_ssize_t len_s2 = PyUnicode_GET_LENGTH(py_s2);
-    wchar_t* buffer_s2 = PyUnicode_AsWideCharString(py_s2, &len_s2);
-    if (buffer_s2 == NULL) {
-        PyMem_Free(buffer_s1);
-        return NULL;
-    }
+    auto s2_view = decode_python_string(py_s2);
+    std::wstring s2 = mpark::visit([](auto&& val) {
+        return std::wstring(val.begin(), val.end());
+    }, s2_view);
 
     double result;
-
     if (use_preprocessing(processor, processor_default)) {
         result = MatchingFunc::call(
-            utils::default_process(nonstd::wstring_view(buffer_s1, len_s1)),
-            utils::default_process(nonstd::wstring_view(buffer_s2, len_s2)),
+            utils::default_process(s1),
+            utils::default_process(s2),
             score_cutoff);
     } else {
-        result = MatchingFunc::call(
-            nonstd::wstring_view(buffer_s1, len_s1),
-            nonstd::wstring_view(buffer_s2, len_s2),
-            score_cutoff);
+        result = MatchingFunc::call(s1, s2, score_cutoff);
     }
-
-    PyMem_Free(buffer_s1);
-    PyMem_Free(buffer_s2);
 
     return PyFloat_FromDouble(result);
 }
@@ -217,7 +176,7 @@ PyDoc_STRVAR(ratio_docstring,
 struct ratio_func {
     template <typename... Args>
     static double call(Args&&... args) {
-        return fuzz::ratio(std::forward<Args>(args)...);
+        return rfuzz::ratio(std::forward<Args>(args)...);
     }
 };
 
@@ -247,7 +206,7 @@ PyDoc_STRVAR(partial_ratio_docstring,
 struct partial_ratio_func {
     template <typename... Args>
     static double call(Args&&... args) {
-        return fuzz::partial_ratio(std::forward<Args>(args)...);
+        return rfuzz::partial_ratio(std::forward<Args>(args)...);
     }
 };
 
@@ -277,7 +236,7 @@ PyDoc_STRVAR(token_sort_ratio_docstring,
 struct token_sort_ratio_func {
     template <typename... Args>
     static double call(Args&&... args) {
-        return fuzz::token_sort_ratio(std::forward<Args>(args)...);
+        return rfuzz::token_sort_ratio(std::forward<Args>(args)...);
     }
 };
 
@@ -304,7 +263,7 @@ PyDoc_STRVAR(partial_token_sort_ratio_docstring,
 struct partial_token_sort_ratio_func {
     template <typename... Args>
     static double call(Args&&... args) {
-        return fuzz::partial_token_sort_ratio(std::forward<Args>(args)...);
+        return rfuzz::partial_token_sort_ratio(std::forward<Args>(args)...);
     }
 };
 
@@ -336,7 +295,7 @@ PyDoc_STRVAR(token_set_ratio_docstring,
 struct token_set_ratio_func {
     template <typename... Args>
     static double call(Args&&... args) {
-        return fuzz::token_set_ratio(std::forward<Args>(args)...);
+        return rfuzz::token_set_ratio(std::forward<Args>(args)...);
     }
 };
 
@@ -363,7 +322,7 @@ PyDoc_STRVAR(partial_token_set_ratio_docstring,
 struct partial_token_set_ratio_func {
     template <typename... Args>
     static double call(Args&&... args) {
-        return fuzz::partial_token_set_ratio(std::forward<Args>(args)...);
+        return rfuzz::partial_token_set_ratio(std::forward<Args>(args)...);
     }
 };
 
@@ -391,7 +350,7 @@ PyDoc_STRVAR(token_ratio_docstring,
 struct token_ratio_func {
     template <typename... Args>
     static double call(Args&&... args) {
-        return fuzz::token_ratio(std::forward<Args>(args)...);
+        return rfuzz::token_ratio(std::forward<Args>(args)...);
     }
 };
 
@@ -419,7 +378,7 @@ PyDoc_STRVAR(partial_token_ratio_docstring,
 struct partial_token_ratio_func {
     template <typename... Args>
     static double call(Args&&... args) {
-        return fuzz::partial_token_ratio(std::forward<Args>(args)...);
+        return rfuzz::partial_token_ratio(std::forward<Args>(args)...);
     }
 };
 
@@ -446,7 +405,7 @@ PyDoc_STRVAR(WRatio_docstring,
 struct WRatio_func {
     template <typename... Args>
     static double call(Args&&... args) {
-        return fuzz::WRatio(std::forward<Args>(args)...);
+        return rfuzz::WRatio(std::forward<Args>(args)...);
     }
 };
 
@@ -499,7 +458,7 @@ PyDoc_STRVAR(quick_lev_ratio_docstring,
 struct quick_lev_ratio_func {
     template <typename... Args>
     static double call(Args&&... args) {
-        return fuzz::quick_lev_ratio(std::forward<Args>(args)...);
+        return rfuzz::quick_lev_ratio(std::forward<Args>(args)...);
     }
 };
 
@@ -508,10 +467,6 @@ static PyObject* quick_lev_ratio(PyObject* /*self*/, PyObject* args, PyObject* k
 }
 
 
-/* The cast of the function is necessary since PyCFunction values
-* only take two PyObject* parameters, and these functions take three.
-*/
-#define PY_METHOD(x) { #x, (PyCFunction)(void(*)(void))x, METH_VARARGS | METH_KEYWORDS, x##_docstring }
 static PyMethodDef methods[] = {
     PY_METHOD(ratio),
     PY_METHOD(partial_ratio),
@@ -527,18 +482,4 @@ static PyMethodDef methods[] = {
     {NULL, NULL, 0, NULL}   /* sentinel */
 };
 
-static struct PyModuleDef moduledef = {
-    PyModuleDef_HEAD_INIT,
-    "rapidfuzz.fuzz",
-    NULL,
-    -1,
-    methods,
-    NULL,  /* m_slots */
-    NULL,  /* m_traverse */
-    NULL,     /* m_clear */
-    NULL   /* m_free */
-};
-
-PyMODINIT_FUNC PyInit_fuzz(void) {
-    return PyModule_Create(&moduledef);
-}
+PY_INIT_MOD(fuzz, NULL, methods)

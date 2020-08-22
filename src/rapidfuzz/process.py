@@ -3,12 +3,10 @@
 # Copyright © 2011 Adam Cohen
 
 from rapidfuzz import fuzz, utils
-from typing import Iterable, List, Tuple, Optional, Union, Callable, Generator
 import heapq
 import numbers
 
-def iterExtract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, processor: Callable = utils.default_process,
-            score_cutoff: float = 0) -> Generator[Tuple[str, float], None, None]:
+def iterExtract(query, choices, scorer = fuzz.WRatio, processor = utils.default_process, score_cutoff = 0):
     if query is None:
         return
     
@@ -41,8 +39,7 @@ def iterExtract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, p
             if score >= score_cutoff:
                 yield (choice, score)
 
-def iterExtractIndices(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, processor: Callable = utils.default_process,
-            score_cutoff: float = 0) -> Generator[Tuple[int, float], None, None]:
+def iterExtractIndices(query, choices, scorer = fuzz.WRatio, processor = utils.default_process, score_cutoff = 0):
     if query is None:
         return
 
@@ -61,8 +58,7 @@ def iterExtractIndices(query: str, choices: Iterable, scorer: Callable = fuzz.WR
             yield (i, score)
 
 
-def extract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, processor: Callable = utils.default_process,
-            limit: Optional[int] = 5, score_cutoff: float = 0) -> List[Tuple[str, float]]:
+def extract(query, choices, scorer = fuzz.WRatio, processor = utils.default_process, limit = 5, score_cutoff = 0):
     """ 
     Find the best matches in a list of choices
 
@@ -92,8 +88,7 @@ def extract(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, proce
     return heapq.nlargest(limit, results, key=lambda x: x[1])
 
 
-def extractIndices(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, processor: Callable = utils.default_process,
-            limit: Optional[int] = 5, score_cutoff: float = 0) -> List[Tuple[int, float]]:
+def extractIndices(query, choices, scorer = fuzz.WRatio, processor = utils.default_process, limit = 5, score_cutoff = 0):
     """ 
     Find the best matches in a list of choices
 
@@ -120,13 +115,11 @@ def extractIndices(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio
     return heapq.nlargest(limit, results, key=lambda x: x[1])
 
 
-def extractBests(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, processor: Callable = utils.default_process,
-            limit: Optional[int] = 5, score_cutoff: float = 0) -> List[Tuple[str, float]]:
+def extractBests(query, choices, scorer = fuzz.WRatio, processor = utils.default_process, limit = 5, score_cutoff = 0):
     return extract(query, choices, scorer, processor, limit, score_cutoff)
 
 
-def extractOne(query: str, choices: Iterable, scorer: Callable = fuzz.WRatio, processor: Callable = utils.default_process,
-               score_cutoff: float = 0) -> Optional[Tuple[str, float]]:
+def extractOne(query, choices, scorer = fuzz.WRatio, processor = utils.default_process, score_cutoff = 0):
     """
     Find the best match in a list of choices
 

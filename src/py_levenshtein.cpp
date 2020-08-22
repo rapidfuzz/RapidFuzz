@@ -1,12 +1,10 @@
 /* SPDX-License-Identifier: MIT */
 /* Copyright © 2020 Max Bachmann */
 
-#define PY_SSIZE_T_CLEAN
-#include <Python.h>
 #include "levenshtein.hpp"
 #include "py_utils.hpp"
 
-namespace levenshtein = rapidfuzz::levenshtein;
+namespace rlevenshtein = rapidfuzz::levenshtein;
 
 constexpr const char * distance_docstring = R"(
 Calculates the minimum number of insertions, deletions, and substitutions
@@ -25,19 +23,19 @@ PyObject* distance(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
     PyObject *py_s2;
     static const char *kwlist[] = {"s1", "s2", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU", const_cast<char **>(kwlist),
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO", const_cast<char **>(kwlist),
                                      &py_s1, &py_s2)) {
         return NULL;
     }
 
-    if (PyUnicode_READY(py_s1) || PyUnicode_READY(py_s2)) {
+    if (!valid_str(py_s1, "s1") || !valid_str(py_s2, "s2")) {
         return NULL;
     }
 
     auto s1_view = decode_python_string(py_s1);
     auto s2_view = decode_python_string(py_s2);
     std::size_t result = mpark::visit([](auto&& val1, auto&& val2) {
-        return levenshtein::distance(val1, val2);
+        return rlevenshtein::distance(val1, val2);
     }, s1_view, s2_view);
     
     return PyLong_FromSize_t(result);
@@ -63,19 +61,19 @@ PyObject* normalized_distance(PyObject* /*self*/, PyObject* args, PyObject* keyw
     double score_cutoff = 0;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU|d", const_cast<char **>(kwlist),
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|d", const_cast<char **>(kwlist),
                                      &py_s1, &py_s2, &score_cutoff)) {
         return NULL;
     }
 
-    if (PyUnicode_READY(py_s1) || PyUnicode_READY(py_s2)) {
+    if (!valid_str(py_s1, "s1") || !valid_str(py_s2, "s2")) {
         return NULL;
     }
 
     auto s1_view = decode_python_string(py_s1);
     auto s2_view = decode_python_string(py_s2);
     double result = mpark::visit([score_cutoff](auto&& val1, auto&& val2) {
-        return levenshtein::normalized_distance(val1, val2, score_cutoff/100);
+        return rlevenshtein::normalized_distance(val1, val2, score_cutoff/100);
     }, s1_view, s2_view);
 
     return PyFloat_FromDouble(result*100);
@@ -106,15 +104,14 @@ PyObject* weighted_distance(PyObject* /*self*/, PyObject* args, PyObject* keywds
     std::size_t replace_cost = 1;
     static const char *kwlist[] = {"s1", "s2", "insert_cost", "delete_cost", "replace_cost", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU|nnn", const_cast<char **>(kwlist),
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|nnn", const_cast<char **>(kwlist),
                                      &py_s1, &py_s2, &insert_cost, &delete_cost, &replace_cost)) {
         return NULL;
     }
 
-    if (PyUnicode_READY(py_s1) || PyUnicode_READY(py_s2)) {
+    if (!valid_str(py_s1, "s1") || !valid_str(py_s2, "s2")) {
         return NULL;
     }
-
     auto s1_view = decode_python_string(py_s1);
     auto s2_view = decode_python_string(py_s2);
 
@@ -122,20 +119,20 @@ PyObject* weighted_distance(PyObject* /*self*/, PyObject* args, PyObject* keywds
     if (insert_cost == 1 && delete_cost == 1) {
         if (replace_cost == 1) {
             result = mpark::visit([](auto&& val1, auto&& val2) {
-                return levenshtein::distance(val1, val2);
+                return rlevenshtein::distance(val1, val2);
             }, s1_view, s2_view);
         } else if (replace_cost == 2) {
             result = mpark::visit([](auto&& val1, auto&& val2) {
-                return levenshtein::weighted_distance(val1, val2);
+                return rlevenshtein::weighted_distance(val1, val2);
             }, s1_view, s2_view);
         } else {
             result = mpark::visit([insert_cost, delete_cost, replace_cost](auto&& val1, auto&& val2) {
-                return levenshtein::generic_distance(val1, val2, {insert_cost, delete_cost, replace_cost});
+                return rlevenshtein::generic_distance(val1, val2, {insert_cost, delete_cost, replace_cost});
             }, s1_view, s2_view);
         }
     } else {
         result = mpark::visit([insert_cost, delete_cost, replace_cost](auto&& val1, auto&& val2) {
-            return levenshtein::generic_distance(val1, val2, {insert_cost, delete_cost, replace_cost});
+            return rlevenshtein::generic_distance(val1, val2, {insert_cost, delete_cost, replace_cost});
         }, s1_view, s2_view);
     }
 
@@ -168,29 +165,25 @@ PyObject* normalized_weighted_distance(PyObject* /*self*/, PyObject* args, PyObj
     double score_cutoff = 0;
     static const char *kwlist[] = {"s1", "s2", "score_cutoff", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "UU|d", const_cast<char **>(kwlist),
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|d", const_cast<char **>(kwlist),
                                      &py_s1, &py_s2, &score_cutoff)) {
         return NULL;
     }
 
-    if (PyUnicode_READY(py_s1) || PyUnicode_READY(py_s2)) {
+    if (!valid_str(py_s1, "s1") || !valid_str(py_s2, "s2")) {
         return NULL;
     }
-
     auto s1_view = decode_python_string(py_s1);
     auto s2_view = decode_python_string(py_s2);
+
     double result = mpark::visit([score_cutoff](auto&& val1, auto&& val2) {
-        return levenshtein::normalized_weighted_distance(val1, val2, score_cutoff/100);
+        return rlevenshtein::normalized_weighted_distance(val1, val2, score_cutoff/100);
     }, s1_view, s2_view);
     
     return PyFloat_FromDouble(result*100);
 }
 
 
-/* The cast of the function is necessary since PyCFunction values
-* only take two PyObject* parameters, and these functions take three.
-*/
-#define PY_METHOD(x) { #x, (PyCFunction)(void(*)(void))x, METH_VARARGS | METH_KEYWORDS, x##_docstring }
 static PyMethodDef methods[] = {
     PY_METHOD(distance),
     PY_METHOD(normalized_distance),
@@ -199,18 +192,4 @@ static PyMethodDef methods[] = {
     {NULL, NULL, 0, NULL}   /* sentinel */
 };
 
-static struct PyModuleDef moduledef = {
-    PyModuleDef_HEAD_INIT,
-    "rapidfuzz.levenshtein",
-    NULL,
-    -1,
-    methods,
-    NULL,  /* m_slots */
-    NULL,  /* m_traverse */
-    0,     /* m_clear */
-    NULL   /* m_free */
-};
-
-PyMODINIT_FUNC PyInit_levenshtein(void) {
-    return PyModule_Create(&moduledef);
-}
+PY_INIT_MOD(levenshtein, NULL, methods)

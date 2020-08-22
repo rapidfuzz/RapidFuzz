@@ -3,6 +3,8 @@ from setuptools.command.build_ext import build_ext
 import sys
 
 from os import path
+from io import open
+
 this_dir = path.abspath(path.dirname(__file__))
 with open(path.join(this_dir, "VERSION"), encoding='utf-8') as version_file:
     version = version_file.read().strip()
@@ -76,6 +78,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     classifiers=[
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
@@ -84,5 +88,5 @@ setup(
         "Programming Language :: Python :: 3.9",
         "License :: OSI Approved :: MIT License",
     ],
-    python_requires=">=3.5",
+    python_requires=">=2.7",
 )

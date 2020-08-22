@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import unittest
 
 from rapidfuzz import process, fuzz, utils
@@ -73,13 +76,13 @@ class RatioTest(unittest.TestCase):
         self.assertEqual(fuzz.partial_ratio("", None), 0)
 
     def testWRatioUnicodeString(self):
-        s1 = "Á"
+        s1 = u"Á"
         s2 = "ABCD"
         score = fuzz.WRatio(s1, s2)
         self.assertEqual(0, score)
 
     def testQRatioUnicodeString(self):
-        s1 = "Á"
+        s1 = u"Á"
         s2 = "ABCD"
         score = fuzz.QRatio(s1, s2)
         self.assertEqual(0, score)

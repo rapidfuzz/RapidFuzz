@@ -11,4 +11,6 @@ recursive-include src/rapidfuzz-cpp/extern/nonstd *
 
 recursive-include extern/variant *
 include src/py_utils.hpp
+include src/py2_utils.hpp
+include src/py3_utils.hpp
 include src/rapidfuzz-cpp/LICENSE
