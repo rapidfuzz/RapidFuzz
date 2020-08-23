@@ -5,9 +5,12 @@
 #include <Python.h>
 
 /* The cast of the function is necessary since PyCFunction values
-* only take two PyObject* parameters, and these functions take three.
-*/
-#define PY_METHOD(x) { #x, (PyCFunction)(void(*)(void))x, METH_VARARGS | METH_KEYWORDS, x##_docstring }
+ * only take two PyObject* parameters, and these functions take three.
+ */
+#define PY_METHOD(x)                                                                               \
+  {                                                                                                \
+#x, (PyCFunction)(void (*)(void))x, METH_VARARGS | METH_KEYWORDS, x##_docstring                \
+  }
 
 #if PY_MAJOR_VERSION == 2
 #define PYTHON_2
