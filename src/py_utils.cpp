@@ -27,14 +27,14 @@ static PyObject* default_process(PyObject* /*self*/, PyObject* args, PyObject* k
     Py_ssize_t len = PyString_GET_SIZE(py_sentence);
     char* str = PyString_AS_STRING(py_sentence);
 
-    auto proc_str = rutils::default_process(nonstd::basic_string_view<char>(str, len));
+    auto proc_str = rutils::default_process(rapidfuzz::basic_string_view<char>(str, len));
     return PyString_FromStringAndSize(proc_str.data(), proc_str.size());
   }
   else {
     Py_ssize_t len = PyUnicode_GET_SIZE(py_sentence);
     const Py_UNICODE* str = PyUnicode_AS_UNICODE(py_sentence);
 
-    auto proc_str = rutils::default_process(nonstd::basic_string_view<Py_UNICODE>(str, len));
+    auto proc_str = rutils::default_process(rapidfuzz::basic_string_view<Py_UNICODE>(str, len));
     return PyUnicode_FromUnicode(proc_str.data(), proc_str.size());
   }
 #else /* Python 3 */
@@ -46,19 +46,19 @@ static PyObject* default_process(PyObject* /*self*/, PyObject* args, PyObject* k
   case PyUnicode_1BYTE_KIND:
   {
     auto proc_str = rutils::default_process(
-        nonstd::basic_string_view<uint8_t>(static_cast<uint8_t*>(str), len));
+        rapidfuzz::basic_string_view<uint8_t>(static_cast<uint8_t*>(str), len));
     return PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, proc_str.data(), proc_str.size());
   }
   case PyUnicode_2BYTE_KIND:
   {
     auto proc_str = rutils::default_process(
-        nonstd::basic_string_view<uint16_t>(static_cast<uint16_t*>(str), len));
+        rapidfuzz::basic_string_view<uint16_t>(static_cast<uint16_t*>(str), len));
     return PyUnicode_FromKindAndData(PyUnicode_2BYTE_KIND, proc_str.data(), proc_str.size());
   }
   default:
   {
     auto proc_str = rutils::default_process(
-        nonstd::basic_string_view<uint32_t>(static_cast<uint32_t*>(str), len));
+        rapidfuzz::basic_string_view<uint32_t>(static_cast<uint32_t*>(str), len));
     return PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, proc_str.data(), proc_str.size());
   }
   }

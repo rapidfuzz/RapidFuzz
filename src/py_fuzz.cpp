@@ -15,7 +15,6 @@ bool use_preprocessing(PyObject* processor, bool processor_default)
   return processor ? PyObject_IsTrue(processor) : processor_default;
 }
 
-// TODO: make this the default when partial_ratio accepts strings of different char types
 template <typename MatchingFunc>
 static PyObject* fuzz_call(bool processor_default, PyObject* args, PyObject* keywds)
 {
@@ -89,74 +88,6 @@ static PyObject* fuzz_call(bool processor_default, PyObject* args, PyObject* key
   return PyFloat_FromDouble(result);
 }
 
-template <typename MatchingFunc>
-static PyObject* fuzz_call_old(bool processor_default, PyObject* args, PyObject* keywds)
-{
-  PyObject* py_s1;
-  PyObject* py_s2;
-  PyObject* processor = NULL;
-  double score_cutoff = 0;
-  static const char* kwlist[] = {"s1", "s2", "processor", "score_cutoff", NULL};
-
-  if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|Od", const_cast<char**>(kwlist), &py_s1,
-                                   &py_s2, &processor, &score_cutoff))
-  {
-    return NULL;
-  }
-
-  if (py_s1 == Py_None || py_s2 == Py_None) {
-    return PyFloat_FromDouble(0);
-  }
-
-  if (!valid_str(py_s1, "s1") || !valid_str(py_s2, "s2")) {
-    return NULL;
-  }
-
-  if (PyCallable_Check(processor)) {
-    PyObject* py_proc_s1 = PyObject_CallFunctionObjArgs(processor, py_s1, NULL);
-    if (py_proc_s1 == NULL) {
-      return NULL;
-    }
-
-    auto proc_s1_view = decode_python_string(py_proc_s1);
-    std::wstring proc_s1 =
-        mpark::visit([](auto&& val) { return std::wstring(val.begin(), val.end()); }, proc_s1_view);
-    Py_DecRef(py_proc_s1);
-
-    PyObject* py_proc_s2 = PyObject_CallFunctionObjArgs(processor, py_s2, NULL);
-    if (py_proc_s2 == NULL) {
-      return NULL;
-    }
-
-    auto proc_s2_view = decode_python_string(py_proc_s2);
-    std::wstring proc_s2 =
-        mpark::visit([](auto&& val) { return std::wstring(val.begin(), val.end()); }, proc_s2_view);
-    Py_DecRef(py_proc_s2);
-
-    auto result = MatchingFunc::call(proc_s1, proc_s2, score_cutoff);
-    return PyFloat_FromDouble(result);
-  }
-
-  auto s1_view = decode_python_string(py_s1);
-  std::wstring s1 =
-      mpark::visit([](auto&& val) { return std::wstring(val.begin(), val.end()); }, s1_view);
-
-  auto s2_view = decode_python_string(py_s2);
-  std::wstring s2 =
-      mpark::visit([](auto&& val) { return std::wstring(val.begin(), val.end()); }, s2_view);
-
-  double result;
-  if (use_preprocessing(processor, processor_default)) {
-    result =
-        MatchingFunc::call(utils::default_process(s1), utils::default_process(s2), score_cutoff);
-  }
-  else {
-    result = MatchingFunc::call(s1, s2, score_cutoff);
-  }
-
-  return PyFloat_FromDouble(result);
-}
-
 PyDoc_STRVAR(
     ratio_docstring,
     "ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
@@ -218,7 +149,7 @@ struct partial_ratio_func {
 
 static PyObject* partial_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 {
-  return fuzz_call_old<partial_ratio_func>(false, args, keywds);
+  return fuzz_call<partial_ratio_func>(false, args, keywds);
 }
 
 PyDoc_STRVAR(
@@ -280,7 +211,7 @@ struct partial_token_sort_ratio_func {
 
 static PyObject* partial_token_sort_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 {
-  return fuzz_call_old<partial_token_sort_ratio_func>(true, args, keywds);
+  return fuzz_call<partial_token_sort_ratio_func>(true, args, keywds);
 }
 
 PyDoc_STRVAR(token_set_ratio_docstring,
@@ -345,7 +276,7 @@ struct partial_token_set_ratio_func {
 
 static PyObject* partial_token_set_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 {
-  return fuzz_call_old<partial_token_set_ratio_func>(true, args, keywds);
+  return fuzz_call<partial_token_set_ratio_func>(true, args, keywds);
 }
 
 PyDoc_STRVAR(
@@ -407,7 +338,7 @@ struct partial_token_ratio_func {
 
 static PyObject* partial_token_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 {
-  return fuzz_call_old<partial_token_ratio_func>(true, args, keywds);
+  return fuzz_call<partial_token_ratio_func>(true, args, keywds);
 }
 
 PyDoc_STRVAR(WRatio_docstring,
@@ -436,7 +367,7 @@ struct WRatio_func {
 
 static PyObject* WRatio(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 {
-  return fuzz_call_old<WRatio_func>(true, args, keywds);
+  return fuzz_call<WRatio_func>(true, args, keywds);
 }
 
 PyDoc_STRVAR(QRatio_docstring,

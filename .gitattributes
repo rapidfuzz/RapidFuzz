@@ -1,2 +1,3 @@
-cpp/variant/* linguist-vendored
+extern/boost/* linguist-vendored
+extern/variant/* linguist-vendored
 docs/theme/* linguist-vendored

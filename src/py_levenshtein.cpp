@@ -120,36 +120,20 @@ PyObject* weighted_distance(PyObject* /*self*/, PyObject* args, PyObject* keywds
   auto s1_view = decode_python_string(py_s1);
   auto s2_view = decode_python_string(py_s2);
 
-  std::size_t result = 0;
-  if (insert_cost == 1 && delete_cost == 1) {
-    if (replace_cost == 1) {
-      result =
-          mpark::visit([](auto&& val1, auto&& val2) { return rlevenshtein::distance(val1, val2); },
-                       s1_view, s2_view);
-    }
-    else if (replace_cost == 2) {
-      result = mpark::visit(
-          [](auto&& val1, auto&& val2) { return rlevenshtein::weighted_distance(val1, val2); },
-          s1_view, s2_view);
-    }
-    else {
-      result = mpark::visit(
-          [insert_cost, delete_cost, replace_cost](auto&& val1, auto&& val2) {
-            return rlevenshtein::generic_distance(val1, val2,
-                                                  {insert_cost, delete_cost, replace_cost});
-          },
-          s1_view, s2_view);
-    }
-  }
-  else {
-    result = mpark::visit(
-        [insert_cost, delete_cost, replace_cost](auto&& val1, auto&& val2) {
-          return rlevenshtein::generic_distance(val1, val2,
-                                                {insert_cost, delete_cost, replace_cost});
-        },
-        s1_view, s2_view);
-  }
+  std::size_t result = mpark::visit(
+      [insert_cost, delete_cost, replace_cost](auto&& s1, auto&& s2) {
+        if (insert_cost == 1 && delete_cost == 1) {
+          if (replace_cost == 1) {
+            return rlevenshtein::distance(s1, s2);
+          }
+          else if (replace_cost == 2) {
+            return rlevenshtein::weighted_distance(s1, s2);
+          }
+        }
 
+        return rlevenshtein::generic_distance(s1, s2, {insert_cost, delete_cost, replace_cost});
+      },
+      s1_view, s2_view);
   return PyLong_FromSize_t(result);
 }
 
