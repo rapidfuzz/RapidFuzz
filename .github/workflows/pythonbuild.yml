@@ -53,7 +53,7 @@ jobs:
       matrix:
         os: [ubuntu-18.04, windows-latest, macos-latest]
     env:
-      CIBW_SKIP: cp27-win* pp27-win*
+      CIBW_SKIP: cp27-win* pp27-win* pp36-win*
 
     steps:
       - uses: actions/checkout@v1

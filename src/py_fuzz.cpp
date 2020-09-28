@@ -12,7 +12,7 @@ namespace utils = rapidfuzz::utils;
 
 bool use_preprocessing(PyObject* processor, bool processor_default)
 {
-  return processor ? PyObject_IsTrue(processor) : processor_default;
+  return processor ? PyObject_IsTrue(processor) != 0 : processor_default;
 }
 
 template <typename MatchingFunc>
