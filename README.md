@@ -48,17 +48,48 @@ RapidFuzz is a fast string matching library for Python and C++, which is using t
 1) It is MIT licensed so it can be used whichever License you might want to choose for your project, while you're forced to adopt the GPL license when using FuzzyWuzzy
 2) It is mostly written in C++ and on top of this comes with a lot of Algorithmic improvements to make string matching even faster, while still providing the same results. More details on these performance improvements in form of benchmarks can be found [here](https://github.com/maxbachmann/rapidfuzz/blob/master/Benchmarks.md)
 
+## Requirements
+
+- Python 2.7 or later
+- On Windows the [Visual C++ 2019 redistributable](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) is required
 
 ## Installation
-RapidFuzz can be installed using [pip](https://pypi.org/project/rapidfuzz/)
+
+There are several ways to install RapidFuzz, the recommended methods
+are to either use `pip`(the Python package manager) or
+`conda` (an open-source, cross-platform, package manager)
+
+### with pip
+
+RapidFuzz can be installed with `pip` the following way:
+
 ```bash
-$ pip install rapidfuzz
+pip install rapidfuzz
 ```
 
-There are pre-built binaries (wheels) for `RapidFuzz` and its dependencies for MacOS (10.9 and later), Linux x86_64 and Windows.
+There are pre-built binaries (wheels) of RapidFuzz for MacOS (10.9 and later), Linux x86_64 and Windows. Wheels for armv6l (Raspberry Pi Zero) and armv7l (Raspberry Pi) are available on [piwheels](https://www.piwheels.org/project/rapidfuzz/).
 
-For any other architecture/os `RapidFuzz` can be installed from the source distribution. To do so, a C++14 capable compiler must be installed before running the `pip install rapidfuzz` command. While Linux and MacOs usually come with a compiler it is required to install [C++-Buildtools](https://visualstudio.microsoft.com/visual-cpp-build-tools) on Windows.
+> :heavy_multiplication_x: &nbsp;&nbsp;**failure "ImportError: DLL load failed"**
+>
+> If you run into this error on Windows the reason is most likely, that the [Visual C++ 2019 redistributable](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) is not installed, which is required to find C++ Libraries (The C++ 2019 version includes the 2015, 2017 and 2019 version).
 
+
+### with conda
+
+RapidFuzz can be installed with `conda`:
+
+```bash
+conda install -c conda-forge rapidfuzz
+```
+
+### from git
+RapidFuzz can be installed directly from the source distribution by cloning the repository. This requires a C++14 capable compiler.
+
+```bash
+git clone https://github.com/maxbachmann/rapidfuzz.git
+cd rapidfuzz
+pip install .
+```
 
 ## Usage
 ```console

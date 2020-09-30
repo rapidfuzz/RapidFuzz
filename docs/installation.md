@@ -5,7 +5,7 @@ template: overrides/main.html
 # Installation
 
 === "Python"
-    While there are several ways of install RapidFUzz, the recommended methods
+    While there are several ways of install RapidFuzz, the recommended methods
     are either by using `pip`(the Python package manager) or
     `conda` (an open-source, cross-platform, package manager)
 
@@ -33,7 +33,7 @@ template: overrides/main.html
 
     ## from git
 
-    RapidFuzz can be directly used from [GitHub][8] by cloning the
+    RapidFuzz can be directly used from GitHub by cloning the
     repository which might be useful when you want to work on it:
 
     ``` sh
