@@ -44,6 +44,7 @@ jobs:
           pip install pytest
           pytest
 
+
   build_wheels:
     needs: [test_python]
     name: Build wheel on ${{ matrix.os }}
@@ -74,6 +75,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           path: ./wheelhouse/*.whl
+
 
   build_wheels_python27_windows_64:
     needs: [test_python]
@@ -106,6 +108,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           path: ./wheelhouse/*.whl
+
 
   build_wheels_python27_windows_32:
     needs: [test_python]
@@ -140,6 +143,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           path: ./wheelhouse/*.whl
+
 
   build_sdist:
     needs: [test_python]
