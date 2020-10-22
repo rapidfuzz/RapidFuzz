@@ -44,16 +44,14 @@ jobs:
           pip install pytest
           pytest
 
-  build_wheels:
+  build_wheels_python27_windows:
     needs: [test_python]
-    name: Build wheel on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-18.04, windows-latest, macos-latest]
+    name: Build wheel on windows-latest
+    runs-on: windows-latest
     env:
-      CIBW_SKIP: cp27-win* pp27-win*
+      CIBW_BUILD: cp27-win_amd64
+      DISTUTILS_USE_SDK: 1
+      MSSdk: 1
 
     steps:
       - uses: actions/checkout@v1
@@ -72,20 +70,6 @@ jobs:
       - uses: ilammy/msvc-dev-cmd@v1
       - name: Build 64-bit wheel
         run: python -m cibuildwheel --output-dir wheelhouse
-        env:
-          CIBW_BUILD: cp27-win_amd64
-          DISTUTILS_USE_SDK: 1
-          MSSdk: 1
-
-      - uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x86
-      - name: Build 32-bit wheel
-        run: python -m cibuildwheel --output-dir wheelhouse
-        env:
-          CIBW_BUILD: cp27-win32
-          DISTUTILS_USE_SDK: 1
-          MSSdk: 1
 
       - uses: actions/upload-artifact@v2
         with:
@@ -119,7 +103,7 @@ jobs:
 
   deploy-wheels:
     if: github.event_name == 'release' && github.event.action == 'published'
-    needs: [build_wheels, build_sdist]
+    needs: [build_wheels_python27_windows, build_sdist]
     name: deploy wheels to pypi
     runs-on: ubuntu-18.04
 
