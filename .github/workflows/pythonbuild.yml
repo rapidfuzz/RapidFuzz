@@ -69,9 +69,23 @@ jobs:
         run: |
           python -m pip install git+https://github.com/joerick/cibuildwheel.git@f6eaa9f
 
-      - name: Build wheels
-        run: |
-          python -m cibuildwheel --output-dir wheelhouse
+      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Build 64-bit wheel
+        run: python -m cibuildwheel --output-dir wheelhouse
+        env:
+          CIBW_BUILD: cp27-win_amd64
+          DISTUTILS_USE_SDK: 1
+          MSSdk: 1
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86
+      - name: Build 32-bit wheel
+        run: python -m cibuildwheel --output-dir wheelhouse
+        env:
+          CIBW_BUILD: cp27-win32
+          DISTUTILS_USE_SDK: 1
+          MSSdk: 1
 
       - uses: actions/upload-artifact@v2
         with:
