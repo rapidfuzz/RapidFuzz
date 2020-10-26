@@ -77,8 +77,8 @@ def extract(query, choices, scorer = fuzz.WRatio, processor = utils.default_proc
     Returns: 
         Union[List[Tuple[str, float]], List[Tuple[str, float, str]]]: Returns a
         list of all matches that have a `score >= score_cutoff`. The list will
-        be of either `(, )` when `choices` is a list of strings or `(, , )` when
-        `choices` is a mapping.
+        be of either `(<choice>, <ratio>)` when `choices` is a list of strings
+        or `(<choice>, <ratio>, <key of choice>)` when `choices` is a mapping.
     """
     results = iterExtract(query, choices, scorer, processor, score_cutoff)
 
@@ -137,6 +137,10 @@ def extractOne(query, choices, scorer = fuzz.WRatio, processor = utils.default_p
     Returns: 
         Optional[Tuple[str, float]]: returns the best match in form of a tuple or None when there is
             no match with a score >= score_cutoff
+        Union[None, Tuple[str, float], Tuple[str, float, str]]: Returns the best match the best match
+            in form of a tuple or None when there is no match with a score >= score_cutoff. The Tuple will
+            be in the form`(<choice>, <ratio>)` when `choices` is a list of strings
+            or `(<choice>, <ratio>, <key of choice>)` when `choices` is a mapping.
     """
     if query is None:
         return None

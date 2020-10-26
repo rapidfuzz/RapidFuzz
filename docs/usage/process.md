@@ -46,8 +46,8 @@ Find the best matches in a list of choices.
     - **matches**: *List[Tuple[str, float]] or List[Tuple[str, float, str]])*
 
         Returns a list of all matches that have a `score >= score_cutoff`. The list will
-        be of either `(, )` when `choices` is a list of strings or `(, , )` when `choices` is a
-        mapping.
+        be of either `(<choice>, <ratio>)` when `choices` is a list of strings
+        or `(<choice>, <ratio>, <key of choice>)` when `choices` is a mapping.
 
 
     ```console
@@ -80,10 +80,9 @@ Finds the best match in a list of choices by comparing them using the provided s
 
     Returns:
 
-    - **matches**: *Optional[Tuple[str, float]]*
+    - **matches**: *Union[None, Tuple[str, float], Tuple[str, float, str]]*
 
-        Returns the best match in form of a tuple or None when there is
-        no match with a `score >= score_cutoff`.
+        Returns the best match the best match in form of a tuple or None when there is no match with a score >= score_cutoff. The Tuple will be in the form`(<choice>, <ratio>)` when `choices` is a list of strings or `(<choice>, <ratio>, <key of choice>)` when `choices` is a mapping.
 
 
     ```console
