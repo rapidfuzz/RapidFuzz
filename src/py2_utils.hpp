@@ -37,3 +37,13 @@ python_string_view decode_python_string(PyObject* py_str)
     return rapidfuzz::basic_string_view<Py_UNICODE>(str, len);
   }
 }
+
+PyObject* encode_python_string(std::basic_string<uint8_t> str)
+{
+  return PyString_FromStringAndSize(reinterpret_cast<const char*>(str.data()), str.size());
+}
+
+PyObject* encode_python_string(std::basic_string<Py_UNICODE> str)
+{
+  return PyUnicode_FromUnicode(str.data(), str.size());
+}

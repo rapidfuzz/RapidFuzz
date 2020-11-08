@@ -54,3 +54,18 @@ python_string_view decode_python_string(PyObject* py_str)
     return rapidfuzz::basic_string_view<uint32_t>(static_cast<uint32_t*>(str), len);
   }
 }
+
+PyObject* encode_python_string(std::basic_string<uint8_t> str)
+{
+  return PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, str.data(), str.size());
+}
+
+PyObject* encode_python_string(std::basic_string<uint16_t> str)
+{
+  return PyUnicode_FromKindAndData(PyUnicode_2BYTE_KIND, str.data(), str.size());
+}
+
+PyObject* encode_python_string(std::basic_string<uint32_t> str)
+{
+  return PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, str.data(), str.size());
+}
