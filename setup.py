@@ -59,14 +59,8 @@ setup(
             language='c++',
         ),
         Extension(
-            'rapidfuzz.fuzz',
-            ['src/py_fuzz.cpp'],
-            include_dirs=["src/rapidfuzz-cpp/rapidfuzz", "src/rapidfuzz-cpp/extern", "extern"],
-            language='c++',
-        ),
-        Extension(
-            'rapidfuzz.utils',
-            ['src/py_utils.cpp'],
+            'rapidfuzz.cpp_impl',
+            ['src/py_abstraction.cpp'],
             include_dirs=["src/rapidfuzz-cpp/rapidfuzz", "src/rapidfuzz-cpp/extern", "extern"],
             language='c++',
         ),

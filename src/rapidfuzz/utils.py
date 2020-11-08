@@ -1,0 +1,1 @@
+from rapidfuzz.cpp_impl import default_process
