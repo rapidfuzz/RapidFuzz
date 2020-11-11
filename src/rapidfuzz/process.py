@@ -3,6 +3,7 @@
 # Copyright © 2011 Adam Cohen
 
 from rapidfuzz import fuzz, utils
+from rapidfuzz.cpp_impl import extractOne as extractOne2
 import heapq
 import numbers
 

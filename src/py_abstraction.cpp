@@ -22,7 +22,7 @@ static inline bool non_default_process(PyObject* processor)
 {
   if (processor) {
     if (PyCFunction_Check(processor)) {
-        if (PyCFunction_GetFunction(processor) == (PyCFunction)(void (*)(void))default_process) {
+        if (PyCFunction_GetFunction(processor) == PY_FUNC_CAST(default_process)) {
           return false;
         }
     }
@@ -127,7 +127,24 @@ struct name##_func {                                                        \
 static PyObject* name(PyObject* /*self*/, PyObject* args, PyObject* keywds) \
 {                                                                           \
   return fuzz_call<name##_func>(process_default, args, keywds);             \
-}
+}                                                                           
+
+struct CachedFuzz {
+  virtual void str1_set(python_string str) {
+    m_str1 = std::move(str);
+  }
+
+  virtual void str2_set(python_string str) {
+    m_str2 = std::move(str);
+  }
+
+  virtual double call(double score_cutoff) = 0;
+
+protected:
+  python_string m_str1;
+  python_string m_str2;
+};
+
 
 FUZZ_FUNC(
   ratio, false,
@@ -149,6 +166,17 @@ FUZZ_FUNC(
   "    96.55171966552734"
 )
 
+struct CachedRatio : public CachedFuzz {
+  double call(double score_cutoff) override {
+    return mpark::visit(
+      [score_cutoff](auto&& val1, auto&& val2) {
+          return rfuzz::ratio(val1, val2, score_cutoff);
+        },
+        m_str1, m_str2);
+  }
+};
+
+
 FUZZ_FUNC(
   partial_ratio, false,
   "partial_ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
@@ -169,6 +197,15 @@ FUZZ_FUNC(
   "    100"
 )
 
+struct CachedPartialRatio : public CachedFuzz {
+  double call(double score_cutoff) override {
+    return mpark::visit(
+      [score_cutoff](auto&& val1, auto&& val2) {
+          return rfuzz::partial_ratio(val1, val2, score_cutoff);
+        },
+        m_str1, m_str2);
+  }
+};
 
 FUZZ_FUNC(
   token_sort_ratio, true,
@@ -191,6 +228,26 @@ FUZZ_FUNC(
   "    100.0"
 )
 
+struct CachedTokenSortRatio : public CachedFuzz {
+  void str1_set(python_string str) override {
+    m_str1 = mpark::visit(
+      [](auto&& val) -> python_string {return rutils::sorted_split(val).join();}, str);
+  }
+
+  virtual void str2_set(python_string str) override {
+    m_str2 = mpark::visit(
+      [](auto&& val) -> python_string {return rutils::sorted_split(val).join();}, str);
+  }
+
+  double call(double score_cutoff) override {
+    return mpark::visit(
+      [score_cutoff](auto&& val1, auto&& val2) {
+          return rfuzz::ratio(val1, val2, score_cutoff);
+        },
+        m_str1, m_str2);
+  }
+};
+
 FUZZ_FUNC(
   partial_token_sort_ratio, true,
   "partial_token_sort_ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
@@ -208,6 +265,26 @@ FUZZ_FUNC(
   "Returns:\n"
   "    float: ratio between s1 and s2 as a float between 0 and 100"
 )
+
+struct CachedPartialTokenSortRatio : public CachedFuzz {
+  void str1_set(python_string str) override {
+    m_str1 = mpark::visit(
+      [](auto&& val) -> python_string {return rutils::sorted_split(val).join();}, str);
+  }
+
+  virtual void str2_set(python_string str) override {
+    m_str2 = mpark::visit(
+      [](auto&& val) -> python_string {return rutils::sorted_split(val).join();}, str);
+  }
+
+  double call(double score_cutoff) override {
+    return mpark::visit(
+      [score_cutoff](auto&& val1, auto&& val2) {
+          return rfuzz::partial__ratio(val1, val2, score_cutoff);
+        },
+        m_str1, m_str2);
+  }
+};
 
 FUZZ_FUNC(
   token_set_ratio, true,
@@ -233,6 +310,16 @@ FUZZ_FUNC(
   "    100.0"
 )
 
+struct CachedTokenSetRatio : public CachedFuzz {
+  double call(double score_cutoff) override {
+    return mpark::visit(
+      [score_cutoff](auto&& val1, auto&& val2) {
+          return rfuzz::token_set_ratio(val1, val2, score_cutoff);
+        },
+        m_str1, m_str2);
+  }
+};
+
 FUZZ_FUNC(
   partial_token_set_ratio, true,
   "partial_token_set_ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
@@ -252,6 +339,16 @@ FUZZ_FUNC(
   "    float: ratio between s1 and s2 as a float between 0 and 100"
 )
 
+struct CachedPartialTokenSetRatio : public CachedFuzz {
+  double call(double score_cutoff) override {
+    return mpark::visit(
+      [score_cutoff](auto&& val1, auto&& val2) {
+          return rfuzz::partial_token_set_ratio(val1, val2, score_cutoff);
+        },
+        m_str1, m_str2);
+  }
+};
+
 FUZZ_FUNC(
   token_ratio, true,
   "token_ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
@@ -270,6 +367,16 @@ FUZZ_FUNC(
     "Returns:\n"
     "    float: ratio between s1 and s2 as a float between 0 and 100"
 )
+
+struct CachedTokenRatio : public CachedFuzz {
+  double call(double score_cutoff) override {
+    return mpark::visit(
+      [score_cutoff](auto&& val1, auto&& val2) {
+          return rfuzz::token_ratio(val1, val2, score_cutoff);
+        },
+        m_str1, m_str2);
+  }
+};
 
 FUZZ_FUNC(
   partial_token_ratio, true,
@@ -291,6 +398,16 @@ FUZZ_FUNC(
   "    float: ratio between s1 and s2 as a float between 0 and 100"
 )
 
+struct CachedPartialTokenRatio : public CachedFuzz {
+  double call(double score_cutoff) override {
+    return mpark::visit(
+      [score_cutoff](auto&& val1, auto&& val2) {
+          return rfuzz::partial_token_ratio(val1, val2, score_cutoff);
+        },
+        m_str1, m_str2);
+  }
+};
+
 FUZZ_FUNC(
   WRatio, true,
   "WRatio($module, s1, s2, processor = False, score_cutoff = 0)\n"
@@ -308,6 +425,16 @@ FUZZ_FUNC(
   "Returns:\n"
   "    float: ratio between s1 and s2 as a float between 0 and 100"
 )
+
+struct CachedWRatio : public CachedFuzz {
+  double call(double score_cutoff) override {
+    return mpark::visit(
+      [score_cutoff](auto&& val1, auto&& val2) {
+          return rfuzz::WRatio(val1, val2, score_cutoff);
+        },
+        m_str1, m_str2);
+  }
+};
 
 FUZZ_FUNC(
   QRatio, true,
@@ -329,6 +456,16 @@ FUZZ_FUNC(
   "    >>> fuzz.QRatio(\"this is a test\", \"this is a test!\")\n"
   "    96.55171966552734"
 )
+
+struct CachedQRatio : public CachedFuzz {
+  double call(double score_cutoff) override {
+    return mpark::visit(
+      [score_cutoff](auto&& val1, auto&& val2) {
+          return rfuzz::QRatio(val1, val2, score_cutoff);
+        },
+        m_str1, m_str2);
+  }
+};
 
 FUZZ_FUNC(
   quick_lev_ratio, true,
@@ -352,7 +489,39 @@ FUZZ_FUNC(
   "    float: ratio between s1 and s2 as a float between 0 and 100"
 )
 
+struct CachedQuickLevRatio : public CachedFuzz {
+  double call(double score_cutoff) override {
+    return mpark::visit(
+      [score_cutoff](auto&& val1, auto&& val2) {
+          return rfuzz::quick_lev_ratio(val1, val2, score_cutoff);
+        },
+        m_str1, m_str2);
+  }
+};
 
+struct CachedPyFunc : public CachedFuzz {
+  CachedPyFunc(PyObject* scorer)
+    : m_scorer(scorer) {}
+
+  void str1_set(python_string str) override {
+    m_str1 = std::move(str);
+  }
+
+  void str2_set(python_string str) override {
+    m_str2 = std::move(str);
+  }
+
+  double call(double score_cutoff) override {
+    m_scorer
+    return mpark::visit(
+      [score_cutoff](auto&& val1, auto&& val2) {
+          return rfuzz::token_ratio(val1, val2, score_cutoff);
+        },
+        m_str1, m_str2);
+  }
+private:
+  PyObject* m_scorer;
+};
 
 constexpr const char* default_process_docstring = R"()";
 
@@ -378,6 +547,215 @@ static PyObject* default_process(PyObject* /*self*/, PyObject* args, PyObject* k
   return processed;
 }
 
+
+std::unique_ptr<CachedFuzz> get_matching_instance(PyObject* scorer)
+{
+  if (scorer) {
+    if (PyCFunction_Check(scorer)) {
+        auto scorer_func = PyCFunction_GetFunction(scorer);
+        if (scorer_func == PY_FUNC_CAST(ratio))
+        {
+          return std::make_unique<CachedRatio>();
+        } else if (scorer_func == PY_FUNC_CAST(partial_ratio)) {
+          return std::make_unique<CachedPartialRatio>();
+        } else if (scorer_func == PY_FUNC_CAST(token_sort_ratio)) {
+          return std::make_unique<CachedTokenSortRatio>();
+        } else if (scorer_func == PY_FUNC_CAST(token_set_ratio)) {
+          return std::make_unique<CachedTokenSetRatio>();
+        } else if (scorer_func == PY_FUNC_CAST(partial_token_sort_ratio)) {
+          return std::make_unique<CachedPartialTokenSortRatio>();
+        } else if (scorer_func == PY_FUNC_CAST(partial_token_set_ratio)) {
+          return std::make_unique<CachedPartialTokenSetRatio>();
+        } else if (scorer_func == PY_FUNC_CAST(token_ratio)) {
+          return std::make_unique<CachedTokenRatio>();
+        } else if (scorer_func == PY_FUNC_CAST(partial_token_ratio)) {
+          return std::make_unique<CachedPartialTokenRatio>();
+        } else if (scorer_func == PY_FUNC_CAST(WRatio)) {
+          return std::make_unique<CachedWRatio>();
+        } else if (scorer_func == PY_FUNC_CAST(QRatio)) {
+          return std::make_unique<CachedQRatio>();
+        }
+    }
+    /* call python function */
+    return std::make_unique<CachedWRatio>();
+  /* default is fuzz.WRatio */
+  } else {
+    return std::make_unique<CachedWRatio>();
+  }
+}
+
+
+
+constexpr const char* extractOne_docstring = R"()";
+
+static PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds)
+{
+  bool match_found = false;
+  PyObject* result_choice = NULL;
+  PyObject* choice_key = NULL;
+  std::vector<PyObject*> outer_owner_list;
+  python_string query;
+
+  PyObject* py_query;
+  PyObject* py_choices;
+  PyObject* processor = NULL;
+  PyObject* py_scorer = NULL;
+  double score_cutoff = 0;
+  static const char* kwlist[] = {"query", "choices", "scorer", "processor", "score_cutoff", NULL};
+
+  if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|OOd", const_cast<char**>(kwlist), &py_query,
+                                   &py_choices, &py_scorer, &processor, &score_cutoff))
+  {
+    return NULL;
+  }
+
+  if (py_query == Py_None) {
+    return PyFloat_FromDouble(0);
+  }
+
+  if (!valid_str(py_query, "query")) {
+    return NULL;
+  }
+
+  if (!process_string(py_query, processor, true, query, outer_owner_list)) {
+    return NULL;
+  }
+
+  auto scorer = get_matching_instance(py_scorer);
+  scorer->str1_set(query);
+
+  /* dict like container */
+  if (PyObject_HasAttrString(py_choices, "items")) {
+    //PyObject* py_items = PyObject_CallMethodObjArgs(py_choices, "items", NULL);//todo python3.9
+    PyObject* py_items = PyObject_CallMethod(py_choices, "items", "");
+    if (!py_items) {
+      free_owner_list(outer_owner_list);
+      return NULL;
+    }
+    outer_owner_list.push_back(py_items);
+
+    PyObject* choices = PySequence_Fast(py_items, "Choices must be a sequence of strings");
+    if (!choices) {
+      free_owner_list(outer_owner_list);
+      return NULL;
+    }
+    outer_owner_list.push_back(choices);
+
+    std::size_t choice_count = PySequence_Fast_GET_SIZE(choices);
+
+    for (std::size_t i = 0; i < choice_count; ++i) {
+
+      PyObject* py_item = PySequence_Fast_GET_ITEM(choices, i);
+
+      PyObject* py_choice = NULL;
+      PyObject* py_match_choice = NULL;
+
+      if (!PyArg_ParseTuple(py_item, "OO", &py_choice, &py_match_choice))
+      {
+        free_owner_list(outer_owner_list);
+        return NULL;
+      }
+
+      if (py_match_choice == Py_None) {
+        continue;
+      }
+
+      if (!valid_str(py_match_choice, "choice")) {
+        free_owner_list(outer_owner_list);
+        return NULL;
+      }
+
+      std::vector<PyObject*> inner_owner_list;
+      python_string choice;
+
+      if (!process_string(py_match_choice, processor, true, choice, inner_owner_list)) {
+        free_owner_list(outer_owner_list);
+        return NULL;
+      }
+
+      scorer->str2_set(choice);
+      double score = scorer->call(score_cutoff);
+
+      if (score >= score_cutoff) {
+        // increase the value by a small step so it might be able to exit early
+        score_cutoff = score + (float)0.00001;
+        match_found = true;
+        result_choice = py_match_choice;
+        choice_key = py_choice;
+      } 
+      free_owner_list(inner_owner_list);
+    }
+
+    free_owner_list(outer_owner_list);
+        
+    if (!match_found) {
+      Py_RETURN_NONE;
+    }
+
+    if (score_cutoff > 100) {
+      score_cutoff = 100;
+    }
+    return Py_BuildValue("(OdO)", result_choice, score_cutoff, choice_key);
+  }
+  /* list like container */
+  else {
+    PyObject* choices = PySequence_Fast(py_choices, "Choices must be a sequence of strings");
+    if (!choices) {
+      free_owner_list(outer_owner_list);
+      return NULL;
+    }
+    outer_owner_list.push_back(choices);
+
+    std::size_t choice_count = PySequence_Fast_GET_SIZE(choices);
+
+    for (std::size_t i = 0; i < choice_count; ++i) {
+      PyObject* py_choice = PySequence_Fast_GET_ITEM(choices, i);
+
+      if (py_choice == Py_None) {
+        continue;
+      }
+
+      if (!valid_str(py_choice, "choice")) {
+        free_owner_list(outer_owner_list);
+        return NULL;
+      }
+
+      std::vector<PyObject*> inner_owner_list;
+      python_string choice;
+
+      if (!process_string(py_choice, processor, true, choice, inner_owner_list)) {
+        free_owner_list(outer_owner_list);
+        return NULL;
+      }
+
+      scorer->str2_set(choice);
+      double score = scorer->call(score_cutoff);
+
+      if (score >= score_cutoff) {
+        // increase the value by a small step so it might be able to exit early
+        score_cutoff = score + (float)0.00001;
+        match_found = true;
+        result_choice = py_choice;
+      }
+      free_owner_list(inner_owner_list);
+    }
+
+    free_owner_list(outer_owner_list);
+        
+    if (!match_found) {
+      Py_RETURN_NONE;
+    }
+
+    if (score_cutoff > 100) {
+      score_cutoff = 100;
+    }
+    return Py_BuildValue("(Od)", result_choice, score_cutoff);
+  }
+}
+
+
+
+
 static PyMethodDef methods[] = {
 /* utils */
     PY_METHOD(default_process),
@@ -395,6 +773,7 @@ static PyMethodDef methods[] = {
     PY_METHOD(QRatio),
     PY_METHOD(quick_lev_ratio),
 /* process */
+    PY_METHOD(extractOne),
 /* sentinel */
     {NULL, NULL, 0, NULL}
 };

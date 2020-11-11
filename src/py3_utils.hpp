@@ -56,17 +56,33 @@ python_string decode_python_string(PyObject* py_str)
   }
 }
 
-PyObject* encode_python_string(std::basic_string<uint8_t> str)
+
+/*PyObject* encode_python_string(std::basic_string<uint8_t> str)
+{
+  return PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, str.data(), str.size());
+}*/
+
+PyObject* encode_python_string(rapidfuzz::basic_string_view<uint8_t> str)
 {
   return PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, str.data(), str.size());
 }
-
+/*
 PyObject* encode_python_string(std::basic_string<uint16_t> str)
 {
   return PyUnicode_FromKindAndData(PyUnicode_2BYTE_KIND, str.data(), str.size());
-}
+}*/
 
+PyObject* encode_python_string(rapidfuzz::basic_string_view<uint16_t> str)
+{
+  return PyUnicode_FromKindAndData(PyUnicode_2BYTE_KIND, str.data(), str.size());
+}
+/*
 PyObject* encode_python_string(std::basic_string<uint32_t> str)
+{
+  return PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, str.data(), str.size());
+}*/
+
+PyObject* encode_python_string(rapidfuzz::basic_string_view<uint32_t> str)
 {
   return PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, str.data(), str.size());
 }

@@ -21,7 +21,6 @@ bool valid_str(PyObject* str, const char* name)
     Py_InitModule3(#name, methods, doc);                                                           \
   }
 
-
 using python_string =
     mpark::variant<std::basic_string<uint8_t>, std::basic_string<Py_UNICODE>,
     rapidfuzz::basic_string_view<uint8_t>, rapidfuzz::basic_string_view<Py_UNICODE>>;
@@ -39,6 +38,7 @@ python_string decode_python_string(PyObject* py_str)
     return rapidfuzz::basic_string_view<Py_UNICODE>(str, len);
   }
 }
+
 
 PyObject* encode_python_string(std::basic_string<uint8_t> str)
 {

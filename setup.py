@@ -52,18 +52,24 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     ext_modules = [
-        Extension(
-            'rapidfuzz.levenshtein',
-            ['src/py_levenshtein.cpp'],
-            include_dirs=["src/rapidfuzz-cpp/rapidfuzz", "src/rapidfuzz-cpp/extern", "extern"],
-            language='c++',
-        ),
+        #Extension(
+        #    'rapidfuzz.levenshtein',
+        #    ['src/py_levenshtein.cpp'],
+        #    include_dirs=["src/rapidfuzz-cpp/rapidfuzz", "src/rapidfuzz-cpp/extern", "extern"],
+        #    language='c++',
+        #),
         Extension(
             'rapidfuzz.cpp_impl',
             ['src/py_abstraction.cpp'],
             include_dirs=["src/rapidfuzz-cpp/rapidfuzz", "src/rapidfuzz-cpp/extern", "extern"],
             language='c++',
         ),
+        # Extension(
+        #    'rapidfuzz.test',
+        #    ['src/py_process.cpp'],
+        #    include_dirs=["src/rapidfuzz-cpp/rapidfuzz", "src/rapidfuzz-cpp/extern", "extern"],
+        #    language='c++',
+        #),
     ],
     cmdclass={'build_ext': BuildExt},
     package_data={'': ['LICENSE', 'VERSION']},
