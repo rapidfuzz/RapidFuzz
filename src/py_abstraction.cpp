@@ -31,9 +31,49 @@ static inline bool non_default_process(PyObject* processor)
   return PyCallable_Check(processor);
 }
 
+static inline void free_owner_list(const std::vector<PyObject*>& owner_list)
+{
+  for (const auto owned : owner_list) {
+    Py_DecRef(owned);
+  }
+}
+
+template<typename Sentence>
+static inline python_string default_process_string(Sentence&& str)
+{
+  return rutils::default_process(std::forward<Sentence>(str));
+}
+
+static inline bool process_string(
+  PyObject* py_str, PyObject* processor, bool processor_default,
+  python_string& proc_str, std::vector<PyObject*>& owner_list)
+{
+  if (non_default_process(processor)) {
+    PyObject* proc_py_str = PyObject_CallFunctionObjArgs(processor, py_str, NULL);
+    if (proc_py_str == NULL) {
+      return false;
+    }
+
+    owner_list.push_back(proc_py_str);
+    proc_str = decode_python_string(proc_py_str);
+  } else if (use_preprocessing(processor, processor_default)) {
+    proc_str = mpark::visit(
+        [](auto&& val1) { return default_process_string(val1);},
+        decode_python_string(py_str));
+  } else {
+    proc_str = decode_python_string(py_str);
+  }
+
+  return true;
+}
+
 template <typename MatchingFunc>
 static PyObject* fuzz_call(bool processor_default, PyObject* args, PyObject* keywds)
 {
+  std::vector<PyObject*> owner_list;
+  python_string proc_s1;
+  python_string proc_s2;
+
   PyObject* py_s1;
   PyObject* py_s2;
   PyObject* processor = NULL;
@@ -54,53 +94,22 @@ static PyObject* fuzz_call(bool processor_default, PyObject* args, PyObject* key
     return NULL;
   }
 
-  if (non_default_process(processor)) {
-    PyObject* proc_s1 = PyObject_CallFunctionObjArgs(processor, py_s2, NULL);
-    if (proc_s1 == NULL) {
-      return NULL;
-    }
+  if (!process_string(py_s1, processor, processor_default, proc_s1, owner_list)) {
+    return NULL;
+  }
 
-    PyObject* proc_s2 = PyObject_CallFunctionObjArgs(processor, py_s2, NULL);
-    if (proc_s2 == NULL) {
-      Py_DecRef(proc_s1);
-      return NULL;
-    }
+  if (!process_string(py_s2, processor, processor_default, proc_s2, owner_list)) {
+    free_owner_list(owner_list);
+    return NULL;
+  }
 
-    auto s1_view = decode_python_string(proc_s1);
-    auto s2_view = decode_python_string(proc_s2);
-
-    double result = mpark::visit(
+  double result = mpark::visit(
         [score_cutoff](auto&& val1, auto&& val2) {
           return MatchingFunc::call(val1, val2, score_cutoff);
         },
-        s1_view, s2_view);
+        proc_s1, proc_s2);
 
-    Py_DecRef(proc_s1);
-    Py_DecRef(proc_s2);
-
-    return PyFloat_FromDouble(result);
-  }
-
-  auto s1_view = decode_python_string(py_s1);
-  auto s2_view = decode_python_string(py_s2);
-
-  double result;
-  if (use_preprocessing(processor, processor_default)) {
-    result = mpark::visit(
-        [score_cutoff](auto&& val1, auto&& val2) {
-          return MatchingFunc::call(rutils::default_process(val1), rutils::default_process(val2),
-                                    score_cutoff);
-        },
-        s1_view, s2_view);
-  }
-  else {
-    result = mpark::visit(
-        [score_cutoff](auto&& val1, auto&& val2) {
-          return MatchingFunc::call(val1, val2, score_cutoff);
-        },
-        s1_view, s2_view);
-  }
-
+  free_owner_list(owner_list);
   return PyFloat_FromDouble(result);
 }
 

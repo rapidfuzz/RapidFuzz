@@ -36,11 +36,12 @@ bool valid_str(PyObject* str, const char* name)
     return PyModule_Create(&moduledef);                                                            \
   }
 
-using python_string_view =
-    mpark::variant<rapidfuzz::basic_string_view<uint8_t>, rapidfuzz::basic_string_view<uint16_t>,
+using python_string =
+    mpark::variant<std::basic_string<uint8_t>, std::basic_string<uint16_t>, std::basic_string<uint32_t>,
+    rapidfuzz::basic_string_view<uint8_t>, rapidfuzz::basic_string_view<uint16_t>,
                    rapidfuzz::basic_string_view<uint32_t>>;
 
-python_string_view decode_python_string(PyObject* py_str)
+python_string decode_python_string(PyObject* py_str)
 {
   Py_ssize_t len = PyUnicode_GET_LENGTH(py_str);
   void* str = PyUnicode_DATA(py_str);
