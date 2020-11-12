@@ -6,11 +6,8 @@
 #include "details/types.hpp"
 #include <variant/variant.hpp>
 
-// PEP 623 deprecates legacy strings and therefor
-// deprecates e.g. PyUnicode_READY in Python 3.10
-#if PY_VERSION_HEX < 0x030A0000
-#define PY_BELOW_3_10
-#endif
+
+
 
 bool valid_str(PyObject* str, const char* name)
 {
@@ -19,7 +16,9 @@ bool valid_str(PyObject* str, const char* name)
     return false;
   }
 
-#ifdef PY_BELOW_3_10
+  // PEP 623 deprecates legacy strings and therefor
+  // deprecates e.g. PyUnicode_READY in Python 3.10
+#if PY_VERSION_HEX < PYTHON_VERSION(3,10,0)
   if (PyUnicode_READY(str)) {
     return false;
   }
@@ -57,30 +56,15 @@ python_string decode_python_string(PyObject* py_str)
 }
 
 
-/*PyObject* encode_python_string(std::basic_string<uint8_t> str)
-{
-  return PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, str.data(), str.size());
-}*/
-
 PyObject* encode_python_string(rapidfuzz::basic_string_view<uint8_t> str)
 {
   return PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, str.data(), str.size());
 }
-/*
-PyObject* encode_python_string(std::basic_string<uint16_t> str)
-{
-  return PyUnicode_FromKindAndData(PyUnicode_2BYTE_KIND, str.data(), str.size());
-}*/
 
 PyObject* encode_python_string(rapidfuzz::basic_string_view<uint16_t> str)
 {
   return PyUnicode_FromKindAndData(PyUnicode_2BYTE_KIND, str.data(), str.size());
 }
-/*
-PyObject* encode_python_string(std::basic_string<uint32_t> str)
-{
-  return PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, str.data(), str.size());
-}*/
 
 PyObject* encode_python_string(rapidfuzz::basic_string_view<uint32_t> str)
 {

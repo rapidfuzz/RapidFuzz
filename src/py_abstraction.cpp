@@ -280,7 +280,7 @@ struct CachedPartialTokenSortRatio : public CachedFuzz {
   double call(double score_cutoff) override {
     return mpark::visit(
       [score_cutoff](auto&& val1, auto&& val2) {
-          return rfuzz::partial__ratio(val1, val2, score_cutoff);
+          return rfuzz::partial_ratio(val1, val2, score_cutoff);
         },
         m_str1, m_str2);
   }
@@ -499,30 +499,6 @@ struct CachedQuickLevRatio : public CachedFuzz {
   }
 };
 
-struct CachedPyFunc : public CachedFuzz {
-  CachedPyFunc(PyObject* scorer)
-    : m_scorer(scorer) {}
-
-  void str1_set(python_string str) override {
-    m_str1 = std::move(str);
-  }
-
-  void str2_set(python_string str) override {
-    m_str2 = std::move(str);
-  }
-
-  double call(double score_cutoff) override {
-    m_scorer
-    return mpark::visit(
-      [score_cutoff](auto&& val1, auto&& val2) {
-          return rfuzz::token_ratio(val1, val2, score_cutoff);
-        },
-        m_str1, m_str2);
-  }
-private:
-  PyObject* m_scorer;
-};
-
 constexpr const char* default_process_docstring = R"()";
 
 static PyObject* default_process(PyObject* /*self*/, PyObject* args, PyObject* keywds)
@@ -577,13 +553,158 @@ std::unique_ptr<CachedFuzz> get_matching_instance(PyObject* scorer)
         }
     }
     /* call python function */
-    return std::make_unique<CachedWRatio>();
+    return nullptr;
   /* default is fuzz.WRatio */
   } else {
     return std::make_unique<CachedWRatio>();
   }
 }
 
+
+static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices,
+    PyObject* scorer, PyObject* processor, double score_cutoff)
+{
+  bool match_found = false;
+  PyObject* result_choice = NULL;
+  PyObject* choice_key = NULL;
+  std::vector<PyObject*> outer_owner_list;
+  
+  bool is_dict = false;
+
+  PyObject* py_score_cutoff = PyFloat_FromDouble(score_cutoff);
+  if (!py_score_cutoff) {
+    return NULL;
+  }
+
+  python_string query;
+  if (!process_string(py_query, processor, true, query, outer_owner_list)) {
+    Py_DecRef(py_score_cutoff);
+    return NULL;
+  }
+
+  py_query = mpark::visit(
+        [](auto&& val) {return encode_python_string(val);},
+        query);
+
+  if (!py_query) {
+    Py_DecRef(py_score_cutoff);
+    free_owner_list(outer_owner_list);
+    return NULL;
+  }
+  outer_owner_list.push_back(py_query);
+
+  /* dict like container */
+  if (PyObject_HasAttrString(py_choices, "items")) {
+    is_dict = true;
+    py_choices = PyObject_CallMethod(py_choices, "items", NULL);
+    if (!py_choices) {
+      free_owner_list(outer_owner_list);
+      return NULL;
+    }
+    outer_owner_list.push_back(py_choices);
+  }
+
+  PyObject* choices = PySequence_Fast(py_choices, "Choices must be a sequence of strings");
+  if (!choices) {
+    Py_DecRef(py_score_cutoff);
+    free_owner_list(outer_owner_list);
+    return NULL;
+  }
+  outer_owner_list.push_back(choices);
+
+  std::size_t choice_count = PySequence_Fast_GET_SIZE(choices);
+
+
+  for (std::size_t i = 0; i < choice_count; ++i) {
+    PyObject* py_choice = NULL;
+    PyObject* py_match_choice = PySequence_Fast_GET_ITEM(choices, i);
+
+    if (is_dict) {
+      if (!PyArg_ParseTuple(py_match_choice, "OO", &py_choice, &py_match_choice))
+      {
+        Py_DecRef(py_score_cutoff);
+        free_owner_list(outer_owner_list);
+        return NULL;
+      }
+    }
+
+    if (py_match_choice == Py_None) {
+      continue;
+    }
+
+    if (!valid_str(py_match_choice, "choice")) {
+      Py_DecRef(py_score_cutoff);
+      free_owner_list(outer_owner_list);
+      return NULL;
+    }
+
+    std::vector<PyObject*> inner_owner_list;
+    python_string choice;
+
+    if (!process_string(py_match_choice, processor, true, choice, inner_owner_list)) {
+      Py_DecRef(py_score_cutoff);
+      free_owner_list(outer_owner_list);
+      return NULL;
+    }
+
+    PyObject* py_proc_choice = mpark::visit(
+        [](auto&& val) {return encode_python_string(val);},
+        choice);
+
+    if (!py_proc_choice) {
+      Py_DecRef(py_score_cutoff);
+      free_owner_list(outer_owner_list);
+      return NULL;
+    }
+    inner_owner_list.push_back(py_proc_choice);
+
+    PyObject* score = PyObject_CallFunction(scorer, "OOO",
+      py_query, py_proc_choice, py_score_cutoff);
+
+    if (!score) {
+      Py_DecRef(py_score_cutoff);
+      free_owner_list(outer_owner_list);
+      free_owner_list(inner_owner_list);
+      return NULL;
+    }
+
+    int comp = PyObject_RichCompareBool(score, py_score_cutoff, Py_GE);
+    if (comp == 1) {
+      Py_DecRef(py_score_cutoff);
+      py_score_cutoff = score;
+      match_found = true;
+      result_choice = py_match_choice;
+      choice_key = py_choice;
+    } else if (comp == 0) {
+      Py_DecRef(score);
+    } else if (comp == -1) {
+      Py_DecRef(py_score_cutoff);
+      Py_DecRef(score);
+      free_owner_list(outer_owner_list);
+      free_owner_list(inner_owner_list);
+      return NULL;
+    }
+    free_owner_list(inner_owner_list);
+  }
+
+  free_owner_list(outer_owner_list);
+        
+  if (!match_found) {
+    Py_DecRef(py_score_cutoff);
+    Py_RETURN_NONE;
+  }
+
+  if (score_cutoff > 100) {
+    score_cutoff = 100;
+  }
+  
+  PyObject* result = is_dict
+    ? Py_BuildValue("(OOO)", result_choice, py_score_cutoff, choice_key)
+    : Py_BuildValue("(OO)", result_choice, py_score_cutoff);
+
+  Py_DecRef(py_score_cutoff);
+  return result;
+}
 
 
 constexpr const char* extractOne_docstring = R"()";
@@ -595,6 +716,7 @@ static PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds
   PyObject* choice_key = NULL;
   std::vector<PyObject*> outer_owner_list;
   python_string query;
+  bool is_dict = false;
 
   PyObject* py_query;
   PyObject* py_choices;
@@ -617,144 +739,97 @@ static PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds
     return NULL;
   }
 
+  auto scorer = get_matching_instance(py_scorer);
+  if (!scorer) {
+    // todo this is mostly code duplication
+    return py_extractOne(py_query, py_choices, py_scorer, processor, score_cutoff);
+  }
+
   if (!process_string(py_query, processor, true, query, outer_owner_list)) {
     return NULL;
   }
 
-  auto scorer = get_matching_instance(py_scorer);
   scorer->str1_set(query);
+  PyObject* py_items;
 
   /* dict like container */
   if (PyObject_HasAttrString(py_choices, "items")) {
-    //PyObject* py_items = PyObject_CallMethodObjArgs(py_choices, "items", NULL);//todo python3.9
-    PyObject* py_items = PyObject_CallMethod(py_choices, "items", "");
-    if (!py_items) {
+    is_dict = true;
+    py_choices = PyObject_CallMethod(py_choices, "items", NULL);
+    if (!py_choices) {
       free_owner_list(outer_owner_list);
       return NULL;
     }
-    outer_owner_list.push_back(py_items);
+    outer_owner_list.push_back(py_choices);
+  }
 
-    PyObject* choices = PySequence_Fast(py_items, "Choices must be a sequence of strings");
-    if (!choices) {
-      free_owner_list(outer_owner_list);
-      return NULL;
-    }
-    outer_owner_list.push_back(choices);
+  PyObject* choices = PySequence_Fast(py_choices, "Choices must be a sequence of strings");
+  if (!choices) {
+    free_owner_list(outer_owner_list);
+    return NULL;
+  }
+  outer_owner_list.push_back(choices);
 
-    std::size_t choice_count = PySequence_Fast_GET_SIZE(choices);
+  std::size_t choice_count = PySequence_Fast_GET_SIZE(choices);
 
-    for (std::size_t i = 0; i < choice_count; ++i) {
+  for (std::size_t i = 0; i < choice_count; ++i) {
+    PyObject* py_choice = NULL;
+    PyObject* py_match_choice = PySequence_Fast_GET_ITEM(choices, i);
 
-      PyObject* py_item = PySequence_Fast_GET_ITEM(choices, i);
-
-      PyObject* py_choice = NULL;
-      PyObject* py_match_choice = NULL;
-
-      if (!PyArg_ParseTuple(py_item, "OO", &py_choice, &py_match_choice))
+    if (is_dict) {
+      if (!PyArg_ParseTuple(py_match_choice, "OO", &py_choice, &py_match_choice))
       {
         free_owner_list(outer_owner_list);
         return NULL;
       }
-
-      if (py_match_choice == Py_None) {
-        continue;
-      }
-
-      if (!valid_str(py_match_choice, "choice")) {
-        free_owner_list(outer_owner_list);
-        return NULL;
-      }
-
-      std::vector<PyObject*> inner_owner_list;
-      python_string choice;
-
-      if (!process_string(py_match_choice, processor, true, choice, inner_owner_list)) {
-        free_owner_list(outer_owner_list);
-        return NULL;
-      }
-
-      scorer->str2_set(choice);
-      double score = scorer->call(score_cutoff);
-
-      if (score >= score_cutoff) {
-        // increase the value by a small step so it might be able to exit early
-        score_cutoff = score + (float)0.00001;
-        match_found = true;
-        result_choice = py_match_choice;
-        choice_key = py_choice;
-      } 
-      free_owner_list(inner_owner_list);
     }
 
-    free_owner_list(outer_owner_list);
-        
-    if (!match_found) {
-      Py_RETURN_NONE;
+    if (py_match_choice == Py_None) {
+      continue;
     }
 
-    if (score_cutoff > 100) {
-      score_cutoff = 100;
-    }
-    return Py_BuildValue("(OdO)", result_choice, score_cutoff, choice_key);
-  }
-  /* list like container */
-  else {
-    PyObject* choices = PySequence_Fast(py_choices, "Choices must be a sequence of strings");
-    if (!choices) {
+    if (!valid_str(py_match_choice, "choice")) {
       free_owner_list(outer_owner_list);
       return NULL;
     }
-    outer_owner_list.push_back(choices);
 
-    std::size_t choice_count = PySequence_Fast_GET_SIZE(choices);
+    std::vector<PyObject*> inner_owner_list;
+    python_string choice;
 
-    for (std::size_t i = 0; i < choice_count; ++i) {
-      PyObject* py_choice = PySequence_Fast_GET_ITEM(choices, i);
-
-      if (py_choice == Py_None) {
-        continue;
-      }
-
-      if (!valid_str(py_choice, "choice")) {
-        free_owner_list(outer_owner_list);
-        return NULL;
-      }
-
-      std::vector<PyObject*> inner_owner_list;
-      python_string choice;
-
-      if (!process_string(py_choice, processor, true, choice, inner_owner_list)) {
-        free_owner_list(outer_owner_list);
-        return NULL;
-      }
-
-      scorer->str2_set(choice);
-      double score = scorer->call(score_cutoff);
-
-      if (score >= score_cutoff) {
-        // increase the value by a small step so it might be able to exit early
-        score_cutoff = score + (float)0.00001;
-        match_found = true;
-        result_choice = py_choice;
-      }
-      free_owner_list(inner_owner_list);
+    if (!process_string(py_match_choice, processor, true, choice, inner_owner_list)) {
+      free_owner_list(outer_owner_list);
+      return NULL;
     }
 
-    free_owner_list(outer_owner_list);
+    scorer->str2_set(choice);
+    double score = scorer->call(score_cutoff);
+
+    if (score >= score_cutoff) {
+      // increase the value by a small step so it might be able to exit early
+      score_cutoff = score + (float)0.00001;
+      match_found = true;
+      result_choice = py_match_choice;
+      choice_key = py_choice;
+    } 
+    free_owner_list(inner_owner_list);
+  }
+
+  free_owner_list(outer_owner_list);
         
-    if (!match_found) {
-      Py_RETURN_NONE;
-    }
+  if (!match_found) {
+    Py_RETURN_NONE;
+  }
 
-    if (score_cutoff > 100) {
-      score_cutoff = 100;
-    }
+  if (score_cutoff > 100) {
+    score_cutoff = 100;
+  }
+
+  if (is_dict) {
+    return Py_BuildValue("(OdO)", result_choice, score_cutoff, choice_key);
+  } else {
     return Py_BuildValue("(Od)", result_choice, score_cutoff);
   }
 }
-
-
-
 
 static PyMethodDef methods[] = {
 /* utils */
