@@ -45,18 +45,26 @@ static inline python_string default_process_string(Sentence&& str)
 }
 
 static inline bool process_string(
-  PyObject* py_str, PyObject* processor, bool processor_default,
+  PyObject* py_str, const char* name,
+  PyObject* processor, bool processor_default,
   python_string& proc_str, std::vector<PyObject*>& owner_list)
 {
   if (non_default_process(processor)) {
     PyObject* proc_py_str = PyObject_CallFunctionObjArgs(processor, py_str, NULL);
-    if (proc_py_str == NULL) {
+    if ((proc_py_str == NULL) || (!valid_str(proc_py_str, name))) {
       return false;
     }
 
     owner_list.push_back(proc_py_str);
     proc_str = decode_python_string(proc_py_str);
-  } else if (use_preprocessing(processor, processor_default)) {
+    return true;
+  }
+  
+  if (!valid_str(py_str, name)) {
+    return false;
+  }
+  
+  if (use_preprocessing(processor, processor_default)) {
     proc_str = mpark::visit(
         [](auto&& val1) { return default_process_string(val1);},
         decode_python_string(py_str));
@@ -90,15 +98,11 @@ static PyObject* fuzz_call(bool processor_default, PyObject* args, PyObject* key
     return PyFloat_FromDouble(0);
   }
 
-  if (!valid_str(py_s1, "s1") || !valid_str(py_s2, "s2")) {
+  if (!process_string(py_s1, "s1", processor, processor_default, proc_s1, owner_list)) {
     return NULL;
   }
 
-  if (!process_string(py_s1, processor, processor_default, proc_s1, owner_list)) {
-    return NULL;
-  }
-
-  if (!process_string(py_s2, processor, processor_default, proc_s2, owner_list)) {
+  if (!process_string(py_s2, "s2", processor, processor_default, proc_s2, owner_list)) {
     free_owner_list(owner_list);
     return NULL;
   }
@@ -577,7 +581,7 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices,
   }
 
   python_string query;
-  if (!process_string(py_query, processor, true, query, outer_owner_list)) {
+  if (!process_string(py_query, "query", processor, true, query, outer_owner_list)) {
     Py_DecRef(py_score_cutoff);
     return NULL;
   }
@@ -632,16 +636,10 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices,
       continue;
     }
 
-    if (!valid_str(py_match_choice, "choice")) {
-      Py_DecRef(py_score_cutoff);
-      free_owner_list(outer_owner_list);
-      return NULL;
-    }
-
     std::vector<PyObject*> inner_owner_list;
     python_string choice;
 
-    if (!process_string(py_match_choice, processor, true, choice, inner_owner_list)) {
+    if (!process_string(py_match_choice, "choice", processor, true, choice, inner_owner_list)) {
       Py_DecRef(py_score_cutoff);
       free_owner_list(outer_owner_list);
       return NULL;
@@ -707,13 +705,34 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices,
 }
 
 
-constexpr const char* extractOne_docstring = R"()";
+constexpr const char* extractOne_docstring = 
+  "extractOne($module, query, choices, scorer = 'fuzz.WRatio', processor = 'utils.default_process', score_cutoff = 0)\n"
+  "--\n\n"  
+  "Find the best match in a list of choices\n\n"
+  "Args:\n"
+  "    query (str): string we want to find\n"
+  "    choices (Iterable): list of all strings the query should be compared with or dict with a mapping\n"
+  "        {<result>: <string to compare>}\n"
+  "    scorer (Callable): optional callable that is used to calculate the matching score between\n"
+  "        the query and each choice. WRatio is used by default\n"
+  "    processor (Callable): optional callable that reformats the strings. utils.default_process\n"
+  "        is used by default, which lowercases the strings and trims whitespace\n"
+  "    score_cutoff (float): Optional argument for a score threshold. Matches with\n"
+  "        a lower score than this number will not be returned. Defaults to 0\n\n"
+  "Returns:\n"
+  "    Optional[Tuple[str, float]]: returns the best match in form of a tuple or None when there is\n"
+  "        no match with a score >= score_cutoff\n"
+  "    Union[None, Tuple[str, float], Tuple[str, float, str]]: Returns the best match the best match\n"
+  "        in form of a tuple or None when there is no match with a score >= score_cutoff. The Tuple will\n"
+  "        be in the form`(<choice>, <ratio>)` when `choices` is a list of strings\n"
+  "        or `(<choice>, <ratio>, <key of choice>)` when `choices` is a mapping.";
 
 static PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 {
   bool match_found = false;
   PyObject* result_choice = NULL;
   PyObject* choice_key = NULL;
+  double result_score;
   std::vector<PyObject*> outer_owner_list;
   python_string query;
   bool is_dict = false;
@@ -735,17 +754,13 @@ static PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds
     return PyFloat_FromDouble(0);
   }
 
-  if (!valid_str(py_query, "query")) {
-    return NULL;
-  }
-
   auto scorer = get_matching_instance(py_scorer);
   if (!scorer) {
     // todo this is mostly code duplication
     return py_extractOne(py_query, py_choices, py_scorer, processor, score_cutoff);
   }
 
-  if (!process_string(py_query, processor, true, query, outer_owner_list)) {
+  if (!process_string(py_query, "query", processor, true, query, outer_owner_list)) {
     return NULL;
   }
 
@@ -788,15 +803,10 @@ static PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds
       continue;
     }
 
-    if (!valid_str(py_match_choice, "choice")) {
-      free_owner_list(outer_owner_list);
-      return NULL;
-    }
-
     std::vector<PyObject*> inner_owner_list;
     python_string choice;
 
-    if (!process_string(py_match_choice, processor, true, choice, inner_owner_list)) {
+    if (!process_string(py_match_choice, "choice", processor, true, choice, inner_owner_list)) {
       free_owner_list(outer_owner_list);
       return NULL;
     }
@@ -807,6 +817,7 @@ static PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds
     if (score >= score_cutoff) {
       // increase the value by a small step so it might be able to exit early
       score_cutoff = score + (float)0.00001;
+      result_score = score;
       match_found = true;
       result_choice = py_match_choice;
       choice_key = py_choice;
@@ -820,14 +831,10 @@ static PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds
     Py_RETURN_NONE;
   }
 
-  if (score_cutoff > 100) {
-    score_cutoff = 100;
-  }
-
   if (is_dict) {
-    return Py_BuildValue("(OdO)", result_choice, score_cutoff, choice_key);
+    return Py_BuildValue("(OdO)", result_choice, result_score, choice_key);
   } else {
-    return Py_BuildValue("(Od)", result_choice, score_cutoff);
+    return Py_BuildValue("(Od)", result_choice, result_score);
   }
 }
 

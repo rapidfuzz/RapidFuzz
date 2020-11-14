@@ -6,9 +6,6 @@
 #include "details/types.hpp"
 #include <variant/variant.hpp>
 
-
-
-
 bool valid_str(PyObject* str, const char* name)
 {
   if (!PyUnicode_Check(str)) {

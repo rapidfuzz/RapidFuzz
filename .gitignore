@@ -15,3 +15,7 @@ site/
 
 # benchmark results
 bench_results/
+
+# Hypothesis results
+.hypothesis/
+

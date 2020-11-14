@@ -14,6 +14,20 @@ class ProcessTest(unittest.TestCase):
             "braves vs mets",
         ]
 
+    def testExtractOneExceptions(self):
+        self.assertRaises(TypeError, process.extractOne)
+        self.assertRaises(TypeError, process.extractOne, 1)
+        self.assertRaises(TypeError, process.extractOne, 1, [])
+        self.assertRaises(TypeError, process.extractOne, '', [1])
+        self.assertRaises(TypeError, process.extractOne, '', {1:1})
+
+    def testExtractExceptions(self):
+        self.assertRaises(TypeError, process.extract)
+        self.assertRaises(TypeError, process.extract, 1)
+        self.assertRaises(TypeError, process.extract, 1, [])
+        self.assertRaises(TypeError, process.extract, '', [1])
+        self.assertRaises(TypeError, process.extract, '', {1:1})
+
     def testGetBestChoice1(self):
         query = "new york mets at atlanta braves"
         best = process.extractOne(query, self.baseball_strings)
@@ -35,12 +49,16 @@ class ProcessTest(unittest.TestCase):
         self.assertEqual(best[0], self.baseball_strings[0])
 
     def testWithProcessor(self):
+        """
+        extractOne should accept any type as long as it is a string
+        after preprocessing
+        """
         events = [
             ["chicago cubs vs new york mets", "CitiField", "2011-05-11", "8pm"],
             ["new york yankees vs boston red sox", "Fenway Park", "2011-05-11", "8pm"],
             ["atlanta braves vs pittsburgh pirates", "PNC Park", "2011-05-11", "8pm"],
         ]
-        query = "new york mets vs chicago cubs"
+        query = events[0]
 
         best = process.extractOne(query, events, processor=lambda event: event[0])
         self.assertEqual(best[0], events[0])
