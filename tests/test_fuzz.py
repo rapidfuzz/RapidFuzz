@@ -5,6 +5,19 @@ import unittest
 
 from rapidfuzz import process, fuzz, utils
 
+scorers = [
+    fuzz.ratio,
+    fuzz.partial_ratio,
+    fuzz.token_sort_ratio,
+    fuzz.token_set_ratio,
+    fuzz.token_ratio,
+    fuzz.partial_token_sort_ratio,
+    fuzz.partial_token_set_ratio,
+    fuzz.partial_token_ratio,
+    fuzz.WRatio,
+    fuzz.QRatio
+]
+
 class RatioTest(unittest.TestCase):
     def setUp(self):
         self.s1 = "new york mets"
@@ -86,6 +99,28 @@ class RatioTest(unittest.TestCase):
         s2 = "ABCD"
         score = fuzz.QRatio(s1, s2)
         self.assertEqual(0, score)
+
+    def testWithProcessor(self):
+        """
+        Any scorer should accept any type as s1 and s2, as long as it is a string
+        after preprocessing.
+        """
+        s1 = ["chicago cubs vs new york mets", "CitiField", "2011-05-11", "8pm"]
+        s2 = ["chicago cubs vs new york mets", "CitiFields", "2012-05-11", "9pm"]
+
+        for scorer in scorers:
+            score = scorer(s1, s2, processor=lambda event: event[0])
+            self.assertEqual(score, 100)
+
+    def testHelp(self):
+        """
+        test that all help texts can be printed without throwing an exception,
+        since they are implemented in C++ aswell
+        """
+
+        for scorer in scorers:
+            help(scorer)
+
 
 if __name__ == '__main__':
     unittest.main()

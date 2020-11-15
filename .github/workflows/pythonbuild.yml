@@ -9,11 +9,11 @@ on:
 
 jobs:
   test_python:
-    name: run linting, tests and benchmarks for the python module
-    runs-on: ubuntu-latest
+    name: linting and tests on Python ${{ matrix.python-version }}
+    runs-on: ubuntu-18.04
     strategy:
       matrix:
-        python-version: [2.7, 3.5, 3.6, 3.7, 3.8]
+        python-version: [2.7, 3.5, 3.6, 3.7, 3.8, 3.9]
 
     steps:
       - uses: actions/checkout@v2
@@ -41,7 +41,7 @@ jobs:
       - name: Run Unit Tests
         run: |
           pip install .
-          pip install pytest
+          pip install pytest hypothesis
           pytest
 
 
