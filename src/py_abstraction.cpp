@@ -44,44 +44,9 @@ static inline python_string default_process_string(Sentence&& str)
   return rutils::default_process(std::forward<Sentence>(str));
 }
 
-static inline bool process_string(
-  PyObject* py_str, const char* name,
-  PyObject* processor, bool processor_default,
-  python_string& proc_str, std::vector<PyObject*>& owner_list)
-{
-  if (non_default_process(processor)) {
-    PyObject* proc_py_str = PyObject_CallFunctionObjArgs(processor, py_str, NULL);
-    if ((proc_py_str == NULL) || (!valid_str(proc_py_str, name))) {
-      return false;
-    }
-
-    owner_list.push_back(proc_py_str);
-    proc_str = decode_python_string(proc_py_str);
-    return true;
-  }
-  
-  if (!valid_str(py_str, name)) {
-    return false;
-  }
-  
-  if (use_preprocessing(processor, processor_default)) {
-    proc_str = mpark::visit(
-        [](auto&& val1) { return default_process_string(val1);},
-        decode_python_string(py_str));
-  } else {
-    proc_str = decode_python_string(py_str);
-  }
-
-  return true;
-}
-
 template <typename MatchingFunc>
-static PyObject* fuzz_call(bool processor_default, PyObject* args, PyObject* keywds)
+static inline PyObject* fuzz_call(bool processor_default, PyObject* args, PyObject* keywds)
 {
-  std::vector<PyObject*> owner_list;
-  python_string proc_s1;
-  python_string proc_s2;
-
   PyObject* py_s1;
   PyObject* py_s2;
   PyObject* processor = NULL;
@@ -98,22 +63,61 @@ static PyObject* fuzz_call(bool processor_default, PyObject* args, PyObject* key
     return PyFloat_FromDouble(0);
   }
 
-  if (!process_string(py_s1, "s1", processor, processor_default, proc_s1, owner_list)) {
-    return NULL;
-  }
+  if (non_default_process(processor)) {
+    PyObject* proc_s1 = PyObject_CallFunctionObjArgs(processor, py_s2, NULL);
+    if (proc_s1 == NULL) {
+      return NULL;
+    }
 
-  if (!process_string(py_s2, "s2", processor, processor_default, proc_s2, owner_list)) {
-    free_owner_list(owner_list);
-    return NULL;
-  }
+    PyObject* proc_s2 = PyObject_CallFunctionObjArgs(processor, py_s2, NULL);
+    if (proc_s2 == NULL) {
+      Py_DecRef(proc_s1);
+      return NULL;
+    }
 
-  double result = mpark::visit(
+    if (!valid_str(proc_s1, "s1") || !valid_str(proc_s2, "s2")) {
+      return NULL;
+    }
+
+    auto s1_view = decode_python_string_view(proc_s1);
+    auto s2_view = decode_python_string_view(proc_s2);
+
+    double result = mpark::visit(
         [score_cutoff](auto&& val1, auto&& val2) {
           return MatchingFunc::call(val1, val2, score_cutoff);
         },
-        proc_s1, proc_s2);
+        s1_view, s2_view);
 
-  free_owner_list(owner_list);
+    Py_DecRef(proc_s1);
+    Py_DecRef(proc_s2);
+
+    return PyFloat_FromDouble(result);
+  }
+
+  if (!valid_str(py_s1, "s1") || !valid_str(py_s2, "s2")) {
+    return NULL;
+  }
+
+  auto s1_view = decode_python_string_view(py_s1);
+  auto s2_view = decode_python_string_view(py_s2);
+
+  double result;
+  if (use_preprocessing(processor, processor_default)) {
+    result = mpark::visit(
+        [score_cutoff](auto&& val1, auto&& val2) {
+          return MatchingFunc::call(rutils::default_process(val1), rutils::default_process(val2),
+                                    score_cutoff);
+        },
+        s1_view, s2_view);
+  }
+  else {
+    result = mpark::visit(
+        [score_cutoff](auto&& val1, auto&& val2) {
+          return MatchingFunc::call(val1, val2, score_cutoff);
+        },
+        s1_view, s2_view);
+  }
+
   return PyFloat_FromDouble(result);
 }
 
@@ -518,14 +522,81 @@ static PyObject* default_process(PyObject* /*self*/, PyObject* args, PyObject* k
     return NULL;
   }
 
-  auto sentence_view = decode_python_string(py_sentence);
-  PyObject* processed = mpark::visit(
-        [](auto&& val1) {
-          return encode_python_string(rutils::default_process(val1));},
-        sentence_view);
-  
-  return processed;
+  /* this is pretty verbose. However it is faster than std::variant + std::visit */
+#ifdef PYTHON_2
+  if (PyObject_TypeCheck(py_sentence, &PyString_Type)) {
+    Py_ssize_t len = PyString_GET_SIZE(py_sentence);
+    char* str = PyString_AS_STRING(py_sentence);
+
+    auto proc_str = rutils::default_process(rapidfuzz::basic_string_view<char>(str, len));
+    return PyString_FromStringAndSize(proc_str.data(), proc_str.size());
+  }
+  else {
+    Py_ssize_t len = PyUnicode_GET_SIZE(py_sentence);
+    const Py_UNICODE* str = PyUnicode_AS_UNICODE(py_sentence);
+
+    auto proc_str = rutils::default_process(rapidfuzz::basic_string_view<Py_UNICODE>(str, len));
+    return PyUnicode_FromUnicode(proc_str.data(), proc_str.size());
+  }
+#else /* Python 3 */
+
+  Py_ssize_t len = PyUnicode_GET_LENGTH(py_sentence);
+  void* str = PyUnicode_DATA(py_sentence);
+
+  switch (PyUnicode_KIND(py_sentence)) {
+  case PyUnicode_1BYTE_KIND:
+  {
+    auto proc_str = rutils::default_process(
+        rapidfuzz::basic_string_view<uint8_t>(static_cast<uint8_t*>(str), len));
+    return PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, proc_str.data(), proc_str.size());
+  }
+  case PyUnicode_2BYTE_KIND:
+  {
+    auto proc_str = rutils::default_process(
+        rapidfuzz::basic_string_view<uint16_t>(static_cast<uint16_t*>(str), len));
+    return PyUnicode_FromKindAndData(PyUnicode_2BYTE_KIND, proc_str.data(), proc_str.size());
+  }
+  default:
+  {
+    auto proc_str = rutils::default_process(
+        rapidfuzz::basic_string_view<uint32_t>(static_cast<uint32_t*>(str), len));
+    return PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, proc_str.data(), proc_str.size());
+  }
+  }
+#endif
 }
+
+static inline bool process_string(
+  PyObject* py_str, const char* name,
+  PyObject* processor, bool processor_default,
+  python_string& proc_str, std::vector<PyObject*>& owner_list)
+{
+  if (non_default_process(processor)) {
+    PyObject* proc_py_str = PyObject_CallFunctionObjArgs(processor, py_str, NULL);
+    if ((proc_py_str == NULL) || (!valid_str(proc_py_str, name))) {
+      return false;
+    }
+
+    owner_list.push_back(proc_py_str);
+    proc_str = decode_python_string(proc_py_str);
+    return true;
+  }
+  
+  if (!valid_str(py_str, name)) {
+    return false;
+  }
+  
+  if (use_preprocessing(processor, processor_default)) {
+    proc_str = mpark::visit(
+        [](auto&& val1) { return default_process_string(val1);},
+        decode_python_string(py_str));
+  } else {
+    proc_str = decode_python_string(py_str);
+  }
+
+  return true;
+}
+
 
 
 std::unique_ptr<CachedFuzz> get_matching_instance(PyObject* scorer)

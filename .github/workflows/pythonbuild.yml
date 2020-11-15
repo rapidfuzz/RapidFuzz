@@ -9,12 +9,11 @@ on:
 
 jobs:
   test_python:
-    name: linting and tests on ${{ matrix.os }} Python ${{ matrix.python-version }}
-    runs-on: ${{ matrix.os }}
+    name: linting and tests on Python ${{ matrix.python-version }}
+    runs-on: ubuntu-18.04
     strategy:
       matrix:
         python-version: [2.7, 3.5, 3.6, 3.7, 3.8, 3.9]
-        os: [ubuntu-18.04, macos-latest]
 
     steps:
       - uses: actions/checkout@v2
