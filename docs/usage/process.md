@@ -43,17 +43,17 @@ Find the best matches in a list of choices.
 
     Returns:
 
-    - **matches**: *List[Tuple[str, float]] or List[Tuple[str, float, str]])*
+    - **matches**: *List[Tuple[str, float, Any]]*
 
         Returns a list of all matches that have a `score >= score_cutoff`. The list will
-        be of either `(<choice>, <ratio>)` when `choices` is a list of strings
+        be of either `(<choice>, <ratio>, <index of choice>)` when `choices` is a list of strings
         or `(<choice>, <ratio>, <key of choice>)` when `choices` is a mapping.
 
 
     ```console
     > choices = ["Atlanta Falcons", "New York Jets", "New York Giants", "Dallas Cowboys"]
     > process.extract("new york jets", choices, limit=2)
-    [('new york jets', 100), ('new york giants', 78.57142639160156)]
+    [('New York Jets', 100, 1), ('New York Giants', 78.57142639160156, 2)]
     ```
 
 === "C++"
@@ -62,7 +62,7 @@ Find the best matches in a list of choices.
     using rapidfuzz::process::extract;
 
     // matches is a vector of std::pairs
-    // [('new york jets', 100), ('new york giants', 78.57142639160156)]
+    // [('New York Jets', 100, 1), ('New York Giants', 78.57142639160156, 2)]
     auto matches = extract(
       "new york jets",
       std::vector<std::string>{"Atlanta Falcons", "New York Jets", "New York Giants", "Dallas Cowboys"},
@@ -80,15 +80,15 @@ Finds the best match in a list of choices by comparing them using the provided s
 
     Returns:
 
-    - **matches**: *Union[None, Tuple[str, float], Tuple[str, float, str]]*
+    - **matches**: *Union[None, Tuple[str, float, Any]]*
 
-        Returns the best match the best match in form of a tuple or None when there is no match with a score >= score_cutoff. The Tuple will be in the form`(<choice>, <ratio>)` when `choices` is a list of strings or `(<choice>, <ratio>, <key of choice>)` when `choices` is a mapping.
+        Returns the best match the best match in form of a tuple or None when there is no match with a score >= score_cutoff. The Tuple will be in the form`(<choice>, <ratio>, <index of choice>)` when `choices` is a list of strings or `(<choice>, <ratio>, <key of choice>)` when `choices` is a mapping.
 
 
     ```console
     > choices = ["Atlanta Falcons", "New York Jets", "New York Giants", "Dallas Cowboys"]
     > process.extractOne("cowboys", choices)
-    ("dallas cowboys", 90)
+    ("Dallas Cowboys", 90, 3)
     ```
 
 === "C++"
@@ -97,7 +97,7 @@ Finds the best match in a list of choices by comparing them using the provided s
     using rapidfuzz::process::extractOne;
 
     // matches is a boost::optional<std::pair>
-    // ("dallas cowboys", 90)
+    // ("Dallas Cowboys", 90, 3)
     auto matches = extractOne(
       "cowboys",
       std::vector<std::string>{"Atlanta Falcons", "New York Jets", "New York Giants", "Dallas Cowboys"});

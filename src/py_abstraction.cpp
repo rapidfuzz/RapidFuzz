@@ -1,6 +1,5 @@
 /* SPDX-License-Identifier: MIT */
 /* Copyright © 2020 Max Bachmann */
-/* Copyright © 2011 Adam Cohen */
 
 #include "fuzz.hpp"
 #include "py_utils.hpp"
@@ -639,9 +638,9 @@ std::unique_ptr<CachedFuzz> get_matching_instance(PyObject* scorer)
 static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices,
     PyObject* scorer, PyObject* processor, double score_cutoff)
 {
-  bool match_found = false;
   PyObject* result_choice = NULL;
   PyObject* choice_key = NULL;
+  Py_ssize_t result_index = -1;
   std::vector<PyObject*> outer_owner_list;
   
   bool is_dict = false;
@@ -687,10 +686,9 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices,
   }
   outer_owner_list.push_back(choices);
 
-  std::size_t choice_count = PySequence_Fast_GET_SIZE(choices);
+  Py_ssize_t choice_count = PySequence_Fast_GET_SIZE(choices);
 
-
-  for (std::size_t i = 0; i < choice_count; ++i) {
+  for (Py_ssize_t i = 0; i < choice_count; ++i) {
     PyObject* py_choice = NULL;
     PyObject* py_match_choice = PySequence_Fast_GET_ITEM(choices, i);
 
@@ -741,9 +739,9 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices,
     if (comp == 1) {
       Py_DecRef(py_score_cutoff);
       py_score_cutoff = score;
-      match_found = true;
       result_choice = py_match_choice;
       choice_key = py_choice;
+      result_index = i;
     } else if (comp == 0) {
       Py_DecRef(score);
     } else if (comp == -1) {
@@ -758,7 +756,7 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices,
 
   free_owner_list(outer_owner_list);
         
-  if (!match_found) {
+  if (result_index != -1) {
     Py_DecRef(py_score_cutoff);
     Py_RETURN_NONE;
   }
@@ -769,7 +767,7 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices,
   
   PyObject* result = is_dict
     ? Py_BuildValue("(OOO)", result_choice, py_score_cutoff, choice_key)
-    : Py_BuildValue("(OO)", result_choice, py_score_cutoff);
+    : Py_BuildValue("(OOn)", result_choice, py_score_cutoff, result_index);
 
   Py_DecRef(py_score_cutoff);
   return result;
@@ -793,17 +791,17 @@ constexpr const char* extractOne_docstring =
   "Returns:\n"
   "    Optional[Tuple[str, float]]: returns the best match in form of a tuple or None when there is\n"
   "        no match with a score >= score_cutoff\n"
-  "    Union[None, Tuple[str, float], Tuple[str, float, str]]: Returns the best match the best match\n"
+  "    Union[None, Tuple[str, float, Any]]: Returns the best match the best match\n"
   "        in form of a tuple or None when there is no match with a score >= score_cutoff. The Tuple will\n"
-  "        be in the form`(<choice>, <ratio>)` when `choices` is a list of strings\n"
+  "        be in the form`(<choice>, <ratio>, <index of choice>)` when `choices` is a list of strings\n"
   "        or `(<choice>, <ratio>, <key of choice>)` when `choices` is a mapping.";
 
 static PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 {
-  bool match_found = false;
   PyObject* result_choice = NULL;
   PyObject* choice_key = NULL;
   double result_score;
+  Py_ssize_t result_index = -1;
   std::vector<PyObject*> outer_owner_list;
   python_string query;
   bool is_dict = false;
@@ -856,9 +854,9 @@ static PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds
   }
   outer_owner_list.push_back(choices);
 
-  std::size_t choice_count = PySequence_Fast_GET_SIZE(choices);
+  Py_ssize_t choice_count = PySequence_Fast_GET_SIZE(choices);
 
-  for (std::size_t i = 0; i < choice_count; ++i) {
+  for (Py_ssize_t i = 0; i < choice_count; ++i) {
     PyObject* py_choice = NULL;
     PyObject* py_match_choice = PySequence_Fast_GET_ITEM(choices, i);
 
@@ -889,23 +887,23 @@ static PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds
       // increase the value by a small step so it might be able to exit early
       score_cutoff = score + (float)0.00001;
       result_score = score;
-      match_found = true;
       result_choice = py_match_choice;
       choice_key = py_choice;
+      result_index = i;
     } 
     free_owner_list(inner_owner_list);
   }
 
   free_owner_list(outer_owner_list);
         
-  if (!match_found) {
+  if (result_index == -1) {
     Py_RETURN_NONE;
   }
 
   if (is_dict) {
     return Py_BuildValue("(OdO)", result_choice, result_score, choice_key);
   } else {
-    return Py_BuildValue("(Od)", result_choice, result_score);
+    return Py_BuildValue("(Odn)", result_choice, result_score, result_index);
   }
 }
 

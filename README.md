@@ -129,9 +129,9 @@ pip install .
 ```console
 > choices = ["Atlanta Falcons", "New York Jets", "New York Giants", "Dallas Cowboys"]
 > process.extract("new york jets", choices, limit=2)
-[('new york jets', 100), ('new york giants', 78.57142639160156)]
+[('New York Jets', 100, 1), ('New York Giants', 78.57142639160156, 2)]
 > process.extractOne("cowboys", choices)
-("dallas cowboys", 90)
+("Dallas Cowboys", 90, 3)
 ```
 
 ## License
