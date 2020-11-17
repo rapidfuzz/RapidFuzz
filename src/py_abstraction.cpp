@@ -890,6 +890,11 @@ static PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds
       result_choice = py_match_choice;
       choice_key = py_choice;
       result_index = i;
+
+      if (score_cutoff > 100) {
+        free_owner_list(inner_owner_list);
+        break;
+      }
     } 
     free_owner_list(inner_owner_list);
   }
