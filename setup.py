@@ -30,7 +30,7 @@ def has_flag(compiler, flagname):
     return True
 
 
- def cpp_flag(compiler):
+def cpp_flag(compiler):
     """Return the c++14 compiler flag."""
 
     if has_flag(compiler, '-std=c++14'): return '-std=c++14'
