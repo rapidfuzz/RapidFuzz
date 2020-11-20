@@ -13,11 +13,37 @@ with open(path.join(this_dir, "VERSION"), encoding='utf-8') as version_file:
 with open(path.join(this_dir, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
+    
+# As of Python 3.6, CCompiler has a `has_flag` method.
+# cf http://bugs.python.org/issue26689
+def has_flag(compiler, flagname):
+    """Return a boolean indicating whether a flag name is supported on
+    the specified compiler.
+    """
+    import tempfile
+    with tempfile.NamedTemporaryFile('w', suffix='.cpp') as f:
+        f.write('int main (int argc, char **argv) { return 0; }')
+        try:
+            compiler.compile([f.name], extra_postargs=[flagname])
+        except setuptools.distutils.errors.CompileError:
+            return False
+    return True
+
+
+ def cpp_flag(compiler):
+    """Return the c++14 compiler flag."""
+
+    if has_flag(compiler, '-std=c++14'): return '-std=c++14'
+    if has_flag(compiler, '-std=c++1y'): return '-std=c++1y'
+
+    raise RuntimeError('Unsupported compiler -- C++14 support is required!')
+
+ 
 class BuildExt(build_ext):
     """A custom build extension for adding compiler-specific options."""
     c_opts = {
         'msvc': ['/EHsc', '/O2', '/std:c++14'],
-        'unix': ['-O3', '-std=c++14', '-Wextra', '-Wall'],
+        'unix': ['-O3', '-Wextra', '-Wall'],
     }
     l_opts = {
         'msvc': [],
@@ -35,6 +61,7 @@ class BuildExt(build_ext):
         link_opts = self.l_opts.get(ct, [])
         if ct == 'unix':
             opts.append('-DVERSION_INFO="%s"' % self.distribution.get_version())
+            opts.append(cpp_flag(self.compiler))
         elif ct == 'msvc':
             opts.append('/DVERSION_INFO=\\"%s\\"' % self.distribution.get_version())
         for ext in self.extensions:
