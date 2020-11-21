@@ -18,6 +18,15 @@ Returns:
     int: levenshtein distance between s1 and s2
 )";
 
+// C++11 does not support generic lambdas
+struct DistanceVisitor {
+  template <typename Sentence1, typename Sentence2>
+  std::size_t operator()(Sentence1&& s1, Sentence2&& s2) const
+  {
+    return rlevenshtein::distance(s1, s2);
+  }
+};
+
 PyObject* distance(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 {
   PyObject* py_s1;
@@ -35,9 +44,7 @@ PyObject* distance(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 
   auto s1_view = decode_python_string(py_s1);
   auto s2_view = decode_python_string(py_s2);
-  std::size_t result =
-      mpark::visit([](auto&& val1, auto&& val2) { return rlevenshtein::distance(val1, val2); },
-                   s1_view, s2_view);
+  std::size_t result = mpark::visit(DistanceVisitor(), s1_view, s2_view);
 
   return PyLong_FromSize_t(result);
 }
@@ -54,6 +61,21 @@ Args:
 Returns:
     float: normalized levenshtein distance between s1 and s2 as a float between 0 and 100
 )";
+
+// C++11 does not support generic lambdas
+struct NormalizedDistanceVisitor {
+  NormalizedDistanceVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
+  {}
+
+  template <typename Sentence1, typename Sentence2>
+  double operator()(Sentence1&& s1, Sentence2&& s2) const
+  {
+    return rlevenshtein::normalized_distance(s1, s2, m_score_cutoff / 100);
+  }
+
+private:
+  double m_score_cutoff;
+};
 
 PyObject* normalized_distance(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 {
@@ -74,11 +96,7 @@ PyObject* normalized_distance(PyObject* /*self*/, PyObject* args, PyObject* keyw
 
   auto s1_view = decode_python_string(py_s1);
   auto s2_view = decode_python_string(py_s2);
-  double result = mpark::visit(
-      [score_cutoff](auto&& val1, auto&& val2) {
-        return rlevenshtein::normalized_distance(val1, val2, score_cutoff / 100);
-      },
-      s1_view, s2_view);
+  double result = mpark::visit(NormalizedDistanceVisitor(score_cutoff), s1_view, s2_view);
 
   return PyFloat_FromDouble(result * 100);
 }
@@ -98,6 +116,34 @@ Args:
 Returns:
     int: weighted levenshtein distance between s1 and s2
 )";
+
+// C++11 does not support generic lambdas
+struct WeightedDistanceVisitor {
+  WeightedDistanceVisitor(std::size_t insert_cost, std::size_t delete_cost,
+                          std::size_t replace_cost)
+      : m_insert_cost(insert_cost), m_delete_cost(delete_cost), m_replace_cost(replace_cost)
+  {}
+
+  template <typename Sentence1, typename Sentence2>
+  std::size_t operator()(Sentence1&& s1, Sentence2&& s2) const
+  {
+    if (m_insert_cost == 1 && m_delete_cost == 1) {
+      if (m_replace_cost == 1) {
+        return rlevenshtein::distance(s1, s2);
+      }
+      else if (m_replace_cost == 2) {
+        return rlevenshtein::weighted_distance(s1, s2);
+      }
+    }
+
+    return rlevenshtein::generic_distance(s1, s2, {m_insert_cost, m_delete_cost, m_replace_cost});
+  }
+
+private:
+  std::size_t m_insert_cost;
+  std::size_t m_delete_cost;
+  std::size_t m_replace_cost;
+};
 
 PyObject* weighted_distance(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 {
@@ -120,20 +166,8 @@ PyObject* weighted_distance(PyObject* /*self*/, PyObject* args, PyObject* keywds
   auto s1_view = decode_python_string(py_s1);
   auto s2_view = decode_python_string(py_s2);
 
-  std::size_t result = mpark::visit(
-      [insert_cost, delete_cost, replace_cost](auto&& s1, auto&& s2) {
-        if (insert_cost == 1 && delete_cost == 1) {
-          if (replace_cost == 1) {
-            return rlevenshtein::distance(s1, s2);
-          }
-          else if (replace_cost == 2) {
-            return rlevenshtein::weighted_distance(s1, s2);
-          }
-        }
-
-        return rlevenshtein::generic_distance(s1, s2, {insert_cost, delete_cost, replace_cost});
-      },
-      s1_view, s2_view);
+  std::size_t result = mpark::visit(WeightedDistanceVisitor(insert_cost, delete_cost, replace_cost),
+                                    s1_view, s2_view);
   return PyLong_FromSize_t(result);
 }
 
@@ -157,6 +191,21 @@ Returns:
     float: normalized weighted levenshtein distance between s1 and s2 as a float between 0 and 100
 )";
 
+// C++11 does not support generic lambdas
+struct NormalizedWeightedDistanceVisitor {
+  NormalizedWeightedDistanceVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
+  {}
+
+  template <typename Sentence1, typename Sentence2>
+  double operator()(Sentence1&& s1, Sentence2&& s2) const
+  {
+    return rlevenshtein::normalized_weighted_distance(s1, s2, m_score_cutoff / 100);
+  }
+
+private:
+  double m_score_cutoff;
+};
+
 PyObject* normalized_weighted_distance(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 {
   PyObject* py_s1;
@@ -176,11 +225,7 @@ PyObject* normalized_weighted_distance(PyObject* /*self*/, PyObject* args, PyObj
   auto s1_view = decode_python_string(py_s1);
   auto s2_view = decode_python_string(py_s2);
 
-  double result = mpark::visit(
-      [score_cutoff](auto&& val1, auto&& val2) {
-        return rlevenshtein::normalized_weighted_distance(val1, val2, score_cutoff / 100);
-      },
-      s1_view, s2_view);
+  double result = mpark::visit(NormalizedWeightedDistanceVisitor(score_cutoff), s1_view, s2_view);
 
   return PyFloat_FromDouble(result * 100);
 }
