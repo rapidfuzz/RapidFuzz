@@ -76,6 +76,36 @@ jobs:
         with:
           path: ./wheelhouse/*.whl
 
+  build_wheels_manylinux1:
+    needs: [test_python]
+    name: Build wheel with manylinux1
+    runs-on: ubuntu-18.04
+    strategy:
+      fail-fast: false
+    env:
+      CIBW_BUILD: cp*
+      CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
+      CIBW_MANYLINUX_I686_IMAGE: manylinux1
+
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: 'true'
+
+      - uses: actions/setup-python@v1
+        name: Install Python
+        with:
+          python-version: '3.7'
+
+      - name: Install cibuildwheel
+        run: |
+          python -m pip install git+https://github.com/joerick/cibuildwheel.git@f6eaa9f
+      - name: Build wheels
+        run: |
+          python -m cibuildwheel --output-dir wheelhouse
+      - uses: actions/upload-artifact@v2
+        with:
+          path: ./wheelhouse/*.whl
 
   build_wheels_python27_windows_64:
     needs: [test_python]
@@ -173,7 +203,7 @@ jobs:
 
   deploy-wheels:
     if: github.event_name == 'release' && github.event.action == 'published'
-    needs: [build_wheels, build_wheels_python27_windows_64, build_wheels_python27_windows_32, build_sdist]
+    needs: [build_wheels, build_wheels_manylinux1, build_wheels_python27_windows_64, build_wheels_python27_windows_32, build_sdist]
     name: deploy wheels to pypi
     runs-on: ubuntu-18.04
 

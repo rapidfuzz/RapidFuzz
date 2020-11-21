@@ -2,8 +2,8 @@
 /* Copyright © 2020 Max Bachmann */
 
 #define PY_SSIZE_T_CLEAN
-#include <Python.h>
 #include "details/types.hpp"
+#include <Python.h>
 #include <variant/variant.hpp>
 
 bool valid_str(PyObject* str, const char* name)
@@ -15,7 +15,7 @@ bool valid_str(PyObject* str, const char* name)
 
   // PEP 623 deprecates legacy strings and therefor
   // deprecates e.g. PyUnicode_READY in Python 3.10
-#if PY_VERSION_HEX < PYTHON_VERSION(3,10,0)
+#if PY_VERSION_HEX < PYTHON_VERSION(3, 10, 0)
   if (PyUnicode_READY(str)) {
     return false;
   }
@@ -33,9 +33,9 @@ bool valid_str(PyObject* str, const char* name)
   }
 
 using python_string =
-    mpark::variant<std::basic_string<uint8_t>, std::basic_string<uint16_t>, std::basic_string<uint32_t>,
-    rapidfuzz::basic_string_view<uint8_t>, rapidfuzz::basic_string_view<uint16_t>,
-                   rapidfuzz::basic_string_view<uint32_t>>;
+    mpark::variant<std::basic_string<uint8_t>, std::basic_string<uint16_t>,
+                   std::basic_string<uint32_t>, rapidfuzz::basic_string_view<uint8_t>,
+                   rapidfuzz::basic_string_view<uint16_t>, rapidfuzz::basic_string_view<uint32_t>>;
 
 using python_string_view =
     mpark::variant<rapidfuzz::basic_string_view<uint8_t>, rapidfuzz::basic_string_view<uint16_t>,

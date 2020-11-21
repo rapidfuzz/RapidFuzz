@@ -2,8 +2,8 @@
 /* Copyright © 2020 Max Bachmann */
 
 #define PY_SSIZE_T_CLEAN
-#include <Python.h>
 #include "details/types.hpp"
+#include <Python.h>
 #include <variant/variant.hpp>
 
 bool valid_str(PyObject* str, const char* name)
@@ -23,7 +23,7 @@ bool valid_str(PyObject* str, const char* name)
 
 using python_string =
     mpark::variant<std::basic_string<uint8_t>, std::basic_string<Py_UNICODE>,
-    rapidfuzz::basic_string_view<uint8_t>, rapidfuzz::basic_string_view<Py_UNICODE>>;
+                   rapidfuzz::basic_string_view<uint8_t>, rapidfuzz::basic_string_view<Py_UNICODE>>;
 
 using python_string_view =
     mpark::variant<rapidfuzz::basic_string_view<uint8_t>, rapidfuzz::basic_string_view<Py_UNICODE>>;
@@ -55,7 +55,6 @@ python_string_view decode_python_string_view(PyObject* py_str)
     return rapidfuzz::basic_string_view<Py_UNICODE>(str, len);
   }
 }
-
 
 PyObject* encode_python_string(rapidfuzz::basic_string_view<uint8_t> str)
 {

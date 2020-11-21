@@ -11,7 +11,6 @@ namespace rutils = rapidfuzz::utils;
 
 static PyObject* default_process(PyObject*, PyObject*, PyObject*);
 
-
 static inline bool use_preprocessing(PyObject* processor, bool processor_default)
 {
   return processor ? PyObject_IsTrue(processor) != 0 : processor_default;
@@ -21,9 +20,9 @@ static inline bool non_default_process(PyObject* processor)
 {
   if (processor) {
     if (PyCFunction_Check(processor)) {
-        if (PyCFunction_GetFunction(processor) == PY_FUNC_CAST(default_process)) {
-          return false;
-        }
+      if (PyCFunction_GetFunction(processor) == PY_FUNC_CAST(default_process)) {
+        return false;
+      }
     }
   }
 
@@ -37,11 +36,44 @@ static inline void free_owner_list(const std::vector<PyObject*>& owner_list)
   }
 }
 
-template<typename Sentence>
+template <typename Sentence>
 static inline python_string default_process_string(Sentence&& str)
 {
   return rutils::default_process(std::forward<Sentence>(str));
 }
+
+// C++11 does not support generic lambdas
+template <typename MatchingFunc>
+struct GenericRatioVisitor {
+  GenericRatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
+  {}
+
+  template <typename Sentence1, typename Sentence2>
+  double operator()(Sentence1&& s1, Sentence2&& s2) const
+  {
+    return MatchingFunc::call(s1, s2, m_score_cutoff);
+  }
+
+private:
+  double m_score_cutoff;
+};
+
+// C++11 does not support generic lambdas
+template <typename MatchingFunc>
+struct GenericProcessedRatioVisitor {
+  GenericProcessedRatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
+  {}
+
+  template <typename Sentence1, typename Sentence2>
+  double operator()(Sentence1&& s1, Sentence2&& s2) const
+  {
+    return MatchingFunc::call(rutils::default_process(s1), rutils::default_process(s2),
+                              m_score_cutoff);
+  }
+
+private:
+  double m_score_cutoff;
+};
 
 template <typename MatchingFunc>
 static inline PyObject* fuzz_call(bool processor_default, PyObject* args, PyObject* keywds)
@@ -81,11 +113,7 @@ static inline PyObject* fuzz_call(bool processor_default, PyObject* args, PyObje
     auto s1_view = decode_python_string_view(proc_s1);
     auto s2_view = decode_python_string_view(proc_s2);
 
-    double result = mpark::visit(
-        [score_cutoff](auto&& val1, auto&& val2) {
-          return MatchingFunc::call(val1, val2, score_cutoff);
-        },
-        s1_view, s2_view);
+    double result = mpark::visit(GenericRatioVisitor<MatchingFunc>(score_cutoff), s1_view, s2_view);
 
     Py_DecRef(proc_s1);
     Py_DecRef(proc_s2);
@@ -102,46 +130,40 @@ static inline PyObject* fuzz_call(bool processor_default, PyObject* args, PyObje
 
   double result;
   if (use_preprocessing(processor, processor_default)) {
-    result = mpark::visit(
-        [score_cutoff](auto&& val1, auto&& val2) {
-          return MatchingFunc::call(rutils::default_process(val1), rutils::default_process(val2),
-                                    score_cutoff);
-        },
-        s1_view, s2_view);
+    result =
+        mpark::visit(GenericProcessedRatioVisitor<MatchingFunc>(score_cutoff), s1_view, s2_view);
   }
   else {
-    result = mpark::visit(
-        [score_cutoff](auto&& val1, auto&& val2) {
-          return MatchingFunc::call(val1, val2, score_cutoff);
-        },
-        s1_view, s2_view);
+    result = mpark::visit(GenericRatioVisitor<MatchingFunc>(score_cutoff), s1_view, s2_view);
   }
 
   return PyFloat_FromDouble(result);
 }
 
-#define FUZZ_FUNC(name, process_default, docstring)                         \
-PyDoc_STRVAR(name##_docstring, docstring);                                  \
-\
-struct name##_func {                                                        \
-  template <typename... Args>                                               \
-  static double call(Args&&... args)                                        \
-  {                                                                         \
-    return rfuzz::name(std::forward<Args>(args)...);                        \
-  }                                                                         \
-};                                                                          \
-\
-static PyObject* name(PyObject* /*self*/, PyObject* args, PyObject* keywds) \
-{                                                                           \
-  return fuzz_call<name##_func>(process_default, args, keywds);             \
-}
+#define FUZZ_FUNC(name, process_default, docstring)                                                \
+  PyDoc_STRVAR(name##_docstring, docstring);                                                       \
+                                                                                                   \
+  struct name##_func {                                                                             \
+    template <typename... Args>                                                                    \
+    static double call(Args&&... args)                                                             \
+    {                                                                                              \
+      return rfuzz::name(std::forward<Args>(args)...);                                             \
+    }                                                                                              \
+  };                                                                                               \
+                                                                                                   \
+  static PyObject* name(PyObject* /*self*/, PyObject* args, PyObject* keywds)                      \
+  {                                                                                                \
+    return fuzz_call<name##_func>(process_default, args, keywds);                                  \
+  }
 
 struct CachedFuzz {
-  virtual void str1_set(python_string str) {
+  virtual void str1_set(python_string str)
+  {
     m_str1 = std::move(str);
   }
 
-  virtual void str2_set(python_string str) {
+  virtual void str2_set(python_string str)
+  {
     m_str2 = std::move(str);
   }
 
@@ -152,213 +174,253 @@ protected:
   python_string m_str2;
 };
 
-
 FUZZ_FUNC(
-  ratio, false,
-  "ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
-  "--\n\n"
-  "calculates a simple ratio between two strings\n\n"
-  "Args:\n"
-  "    s1 (str): first string to compare\n"
-  "    s2 (str): second string to compare\n"
-  "    processor (Union[bool, Callable]): optional callable that reformats the strings. None\n"
-  "        is used by default.\n"
-  "    score_cutoff (float): Optional argument for a score threshold as a float between 0 and "
-  "100.\n"
-  "        For ratio < score_cutoff 0 is returned instead. Defaults to 0.\n\n"
-  "Returns:\n"
-  "    float: ratio between s1 and s2 as a float between 0 and 100\n\n"
-  "Example:\n"
-  "    >>> fuzz.ratio(\"this is a test\", \"this is a test!\")\n"
-  "    96.55171966552734"
-)
+    ratio, false,
+    "ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
+    "--\n\n"
+    "calculates a simple ratio between two strings\n\n"
+    "Args:\n"
+    "    s1 (str): first string to compare\n"
+    "    s2 (str): second string to compare\n"
+    "    processor (Union[bool, Callable]): optional callable that reformats the strings. None\n"
+    "        is used by default.\n"
+    "    score_cutoff (float): Optional argument for a score threshold as a float between 0 and "
+    "100.\n"
+    "        For ratio < score_cutoff 0 is returned instead. Defaults to 0.\n\n"
+    "Returns:\n"
+    "    float: ratio between s1 and s2 as a float between 0 and 100\n\n"
+    "Example:\n"
+    "    >>> fuzz.ratio(\"this is a test\", \"this is a test!\")\n"
+    "    96.55171966552734")
+
+// C++11 does not support generic lambdas
+struct RatioVisitor {
+  RatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
+  {}
+
+  template <typename Sentence1, typename Sentence2>
+  double operator()(Sentence1&& s1, Sentence2&& s2) const
+  {
+    return rfuzz::ratio(s1, s2, m_score_cutoff);
+  }
+
+private:
+  double m_score_cutoff;
+};
 
 struct CachedRatio : public CachedFuzz {
-  double call(double score_cutoff) override {
-    return mpark::visit(
-      [score_cutoff](auto&& val1, auto&& val2) {
-          return rfuzz::ratio(val1, val2, score_cutoff);
-        },
-        m_str1, m_str2);
+  double call(double score_cutoff) override
+  {
+    return mpark::visit(RatioVisitor(score_cutoff), m_str1, m_str2);
   }
 };
 
-
 FUZZ_FUNC(
-  partial_ratio, false,
-  "partial_ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
-  "--\n\n"
-  "calculates the fuzz.ratio of the optimal string alignment\n\n"
-  "Args:\n"
-  "    s1 (str): first string to compare\n"
-  "    s2 (str): second string to compare\n"
-  "    processor (Union[bool, Callable]): optional callable that reformats the strings. None\n"
-  "        is used by default.\n"
-  "    score_cutoff (float): Optional argument for a score threshold as a float between 0 and "
-  "100.\n"
-  "        For ratio < score_cutoff 0 is returned instead. Defaults to 0.\n\n"
-  "Returns:\n"
-  "    float: ratio between s1 and s2 as a float between 0 and 100\n\n"
-  "Example:\n"
-  "    >>> fuzz.partial_ratio(\"this is a test\", \"this is a test!\")\n"
-  "    100"
-)
+    partial_ratio, false,
+    "partial_ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
+    "--\n\n"
+    "calculates the fuzz.ratio of the optimal string alignment\n\n"
+    "Args:\n"
+    "    s1 (str): first string to compare\n"
+    "    s2 (str): second string to compare\n"
+    "    processor (Union[bool, Callable]): optional callable that reformats the strings. None\n"
+    "        is used by default.\n"
+    "    score_cutoff (float): Optional argument for a score threshold as a float between 0 and "
+    "100.\n"
+    "        For ratio < score_cutoff 0 is returned instead. Defaults to 0.\n\n"
+    "Returns:\n"
+    "    float: ratio between s1 and s2 as a float between 0 and 100\n\n"
+    "Example:\n"
+    "    >>> fuzz.partial_ratio(\"this is a test\", \"this is a test!\")\n"
+    "    100")
+
+// C++11 does not support generic lambdas
+struct PartialRatioVisitor {
+  PartialRatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
+  {}
+
+  template <typename Sentence1, typename Sentence2>
+  double operator()(Sentence1&& s1, Sentence2&& s2) const
+  {
+    return rfuzz::partial_ratio(s1, s2, m_score_cutoff);
+  }
+
+private:
+  double m_score_cutoff;
+};
 
 struct CachedPartialRatio : public CachedFuzz {
-  double call(double score_cutoff) override {
-    return mpark::visit(
-      [score_cutoff](auto&& val1, auto&& val2) {
-          return rfuzz::partial_ratio(val1, val2, score_cutoff);
-        },
-        m_str1, m_str2);
+  double call(double score_cutoff) override
+  {
+    return mpark::visit(PartialRatioVisitor(score_cutoff), m_str1, m_str2);
   }
 };
 
 FUZZ_FUNC(
-  token_sort_ratio, true,
-  "token_sort_ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
-  "--\n\n"
-  "sorts the words in the strings and calculates the fuzz.ratio between them\n\n"
-  "Args:\n"
-  "    s1 (str): first string to compare\n"
-  "    s2 (str): second string to compare\n"
-  "    processor (Union[bool, Callable]): optional callable that reformats the strings. "
-  "utils.default_process\n"
-  "        is used by default, which lowercases the strings and trims whitespace\n"
-  "    score_cutoff (float): Optional argument for a score threshold as a float between 0 and "
-  "100.\n"
-  "        For ratio < score_cutoff 0 is returned instead. Defaults to 0.\n\n"
-  "Returns:\n"
-  "    float: ratio between s1 and s2 as a float between 0 and 100\n\n"
-  "Example:\n"
-  "    >>> fuzz.token_sort_ratio(\"fuzzy wuzzy was a bear\", \"wuzzy fuzzy was a bear\")\n"
-  "    100.0"
-)
+    token_sort_ratio, true,
+    "token_sort_ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
+    "--\n\n"
+    "sorts the words in the strings and calculates the fuzz.ratio between them\n\n"
+    "Args:\n"
+    "    s1 (str): first string to compare\n"
+    "    s2 (str): second string to compare\n"
+    "    processor (Union[bool, Callable]): optional callable that reformats the strings. "
+    "utils.default_process\n"
+    "        is used by default, which lowercases the strings and trims whitespace\n"
+    "    score_cutoff (float): Optional argument for a score threshold as a float between 0 and "
+    "100.\n"
+    "        For ratio < score_cutoff 0 is returned instead. Defaults to 0.\n\n"
+    "Returns:\n"
+    "    float: ratio between s1 and s2 as a float between 0 and 100\n\n"
+    "Example:\n"
+    "    >>> fuzz.token_sort_ratio(\"fuzzy wuzzy was a bear\", \"wuzzy fuzzy was a bear\")\n"
+    "    100.0")
+
+// C++11 does not support generic lambdas
+struct SortedSplitVisitor {
+  template <typename Sentence>
+  python_string operator()(Sentence&& s) const
+  {
+    return rutils::sorted_split(s).join();
+  }
+};
 
 struct CachedTokenSortRatio : public CachedFuzz {
-  void str1_set(python_string str) override {
-    m_str1 = mpark::visit(
-      [](auto&& val) -> python_string {return rutils::sorted_split(val).join();}, str);
+  void str1_set(python_string str) override
+  {
+    m_str1 = mpark::visit(SortedSplitVisitor(), str);
   }
 
-  virtual void str2_set(python_string str) override {
-    m_str2 = mpark::visit(
-      [](auto&& val) -> python_string {return rutils::sorted_split(val).join();}, str);
+  virtual void str2_set(python_string str) override
+  {
+    m_str2 = mpark::visit(SortedSplitVisitor(), str);
   }
 
-  double call(double score_cutoff) override {
-    return mpark::visit(
-      [score_cutoff](auto&& val1, auto&& val2) {
-          return rfuzz::ratio(val1, val2, score_cutoff);
-        },
-        m_str1, m_str2);
+  double call(double score_cutoff) override
+  {
+    return mpark::visit(RatioVisitor(score_cutoff), m_str1, m_str2);
   }
 };
 
-FUZZ_FUNC(
-  partial_token_sort_ratio, true,
-  "partial_token_sort_ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
-  "--\n\n"
-  "sorts the words in the strings and calculates the fuzz.partial_ratio between them\n\n"
-  "Args:\n"
-  "    s1 (str): first string to compare\n"
-  "    s2 (str): second string to compare\n"
-  "    processor (Union[bool, Callable]): optional callable that reformats the strings. "
-  "utils.default_process\n"
-  "        is used by default, which lowercases the strings and trims whitespace\n"
-  "    score_cutoff (float): Optional argument for a score threshold as a float between "
-  "0 and 100.\n"
-  "        For ratio < score_cutoff 0 is returned instead. Defaults to 0.\n\n"
-  "Returns:\n"
-  "    float: ratio between s1 and s2 as a float between 0 and 100"
-)
+FUZZ_FUNC(partial_token_sort_ratio, true,
+          "partial_token_sort_ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
+          "--\n\n"
+          "sorts the words in the strings and calculates the fuzz.partial_ratio between them\n\n"
+          "Args:\n"
+          "    s1 (str): first string to compare\n"
+          "    s2 (str): second string to compare\n"
+          "    processor (Union[bool, Callable]): optional callable that reformats the strings. "
+          "utils.default_process\n"
+          "        is used by default, which lowercases the strings and trims whitespace\n"
+          "    score_cutoff (float): Optional argument for a score threshold as a float between "
+          "0 and 100.\n"
+          "        For ratio < score_cutoff 0 is returned instead. Defaults to 0.\n\n"
+          "Returns:\n"
+          "    float: ratio between s1 and s2 as a float between 0 and 100")
 
 struct CachedPartialTokenSortRatio : public CachedFuzz {
-  void str1_set(python_string str) override {
-    m_str1 = mpark::visit(
-      [](auto&& val) -> python_string {return rutils::sorted_split(val).join();}, str);
+  void str1_set(python_string str) override
+  {
+    m_str1 = mpark::visit(SortedSplitVisitor(), str);
   }
 
-  virtual void str2_set(python_string str) override {
-    m_str2 = mpark::visit(
-      [](auto&& val) -> python_string {return rutils::sorted_split(val).join();}, str);
+  virtual void str2_set(python_string str) override
+  {
+    m_str2 = mpark::visit(SortedSplitVisitor(), str);
   }
 
-  double call(double score_cutoff) override {
-    return mpark::visit(
-      [score_cutoff](auto&& val1, auto&& val2) {
-          return rfuzz::partial_ratio(val1, val2, score_cutoff);
-        },
-        m_str1, m_str2);
+  double call(double score_cutoff) override
+  {
+    return mpark::visit(PartialRatioVisitor(score_cutoff), m_str1, m_str2);
   }
 };
 
-FUZZ_FUNC(
-  token_set_ratio, true,
-  "token_set_ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
-  "--\n\n"
-  "Compares the words in the strings based on unique and common words between them "
-  "using fuzz.ratio\n\n"
-  "Args:\n"
-  "    s1 (str): first string to compare\n"
-  "    s2 (str): second string to compare\n"
-  "    processor (Union[bool, Callable]): optional callable that reformats the strings. "
-  "utils.default_process\n"
-  "        is used by default, which lowercases the strings and trims whitespace\n"
-  "    score_cutoff (float): Optional argument for a score threshold as a float between "
-  "0 and 100.\n"
-  "        For ratio < score_cutoff 0 is returned instead. Defaults to 0.\n\n"
-  "Returns:\n"
-  "    float: ratio between s1 and s2 as a float between 0 and 100\n\n"
-  "Example:\n"
-  "    >>> fuzz.token_sort_ratio(\"fuzzy was a bear\", \"fuzzy fuzzy was a bear\")\n"
-  "    83.8709716796875\n"
-  "    >>> fuzz.token_set_ratio(\"fuzzy was a bear\", \"fuzzy fuzzy was a bear\")\n"
-  "    100.0"
-)
+FUZZ_FUNC(token_set_ratio, true,
+          "token_set_ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
+          "--\n\n"
+          "Compares the words in the strings based on unique and common words between them "
+          "using fuzz.ratio\n\n"
+          "Args:\n"
+          "    s1 (str): first string to compare\n"
+          "    s2 (str): second string to compare\n"
+          "    processor (Union[bool, Callable]): optional callable that reformats the strings. "
+          "utils.default_process\n"
+          "        is used by default, which lowercases the strings and trims whitespace\n"
+          "    score_cutoff (float): Optional argument for a score threshold as a float between "
+          "0 and 100.\n"
+          "        For ratio < score_cutoff 0 is returned instead. Defaults to 0.\n\n"
+          "Returns:\n"
+          "    float: ratio between s1 and s2 as a float between 0 and 100\n\n"
+          "Example:\n"
+          "    >>> fuzz.token_sort_ratio(\"fuzzy was a bear\", \"fuzzy fuzzy was a bear\")\n"
+          "    83.8709716796875\n"
+          "    >>> fuzz.token_set_ratio(\"fuzzy was a bear\", \"fuzzy fuzzy was a bear\")\n"
+          "    100.0")
+
+// C++11 does not support generic lambdas
+struct TokenSetRatioVisitor {
+  TokenSetRatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
+  {}
+
+  template <typename Sentence1, typename Sentence2>
+  double operator()(Sentence1&& s1, Sentence2&& s2) const
+  {
+    return rfuzz::token_set_ratio(s1, s2, m_score_cutoff);
+  }
+
+private:
+  double m_score_cutoff;
+};
 
 struct CachedTokenSetRatio : public CachedFuzz {
-  double call(double score_cutoff) override {
-    return mpark::visit(
-      [score_cutoff](auto&& val1, auto&& val2) {
-          return rfuzz::token_set_ratio(val1, val2, score_cutoff);
-        },
-        m_str1, m_str2);
+  double call(double score_cutoff) override
+  {
+    return mpark::visit(TokenSetRatioVisitor(score_cutoff), m_str1, m_str2);
   }
 };
 
-FUZZ_FUNC(
-  partial_token_set_ratio, true,
-  "partial_token_set_ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
-  "--\n\n"
-  "Compares the words in the strings based on unique and common words between them "
-  "using fuzz.partial_ratio\n\n"
-  "Args:\n"
-  "    s1 (str): first string to compare\n"
-  "    s2 (str): second string to compare\n"
-  "    processor (Union[bool, Callable]): optional callable that reformats the strings. "
-  "utils.default_process\n"
-  "        is used by default, which lowercases the strings and trims whitespace\n"
-  "    score_cutoff (float): Optional argument for a score threshold as a float between "
-  "0 and 100.\n"
-  "        For ratio < score_cutoff 0 is returned instead. Defaults to 0.\n\n"
-  "Returns:\n"
-  "    float: ratio between s1 and s2 as a float between 0 and 100"
-)
+FUZZ_FUNC(partial_token_set_ratio, true,
+          "partial_token_set_ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
+          "--\n\n"
+          "Compares the words in the strings based on unique and common words between them "
+          "using fuzz.partial_ratio\n\n"
+          "Args:\n"
+          "    s1 (str): first string to compare\n"
+          "    s2 (str): second string to compare\n"
+          "    processor (Union[bool, Callable]): optional callable that reformats the strings. "
+          "utils.default_process\n"
+          "        is used by default, which lowercases the strings and trims whitespace\n"
+          "    score_cutoff (float): Optional argument for a score threshold as a float between "
+          "0 and 100.\n"
+          "        For ratio < score_cutoff 0 is returned instead. Defaults to 0.\n\n"
+          "Returns:\n"
+          "    float: ratio between s1 and s2 as a float between 0 and 100")
+
+// C++11 does not support generic lambdas
+struct PartialTokenSetRatioVisitor {
+  PartialTokenSetRatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
+  {}
+
+  template <typename Sentence1, typename Sentence2>
+  double operator()(Sentence1&& s1, Sentence2&& s2) const
+  {
+    return rfuzz::partial_token_set_ratio(s1, s2, m_score_cutoff);
+  }
+
+private:
+  double m_score_cutoff;
+};
 
 struct CachedPartialTokenSetRatio : public CachedFuzz {
-  double call(double score_cutoff) override {
-    return mpark::visit(
-      [score_cutoff](auto&& val1, auto&& val2) {
-          return rfuzz::partial_token_set_ratio(val1, val2, score_cutoff);
-        },
-        m_str1, m_str2);
+  double call(double score_cutoff) override
+  {
+    return mpark::visit(PartialTokenSetRatioVisitor(score_cutoff), m_str1, m_str2);
   }
 };
 
 FUZZ_FUNC(
-  token_ratio, true,
-  "token_ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
+    token_ratio, true,
+    "token_ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
     "--\n\n"
     "Helper method that returns the maximum of fuzz.token_set_ratio and fuzz.token_sort_ratio\n"
     "    (faster than manually executing the two functions)\n\n"
@@ -372,137 +434,188 @@ FUZZ_FUNC(
     "100.\n"
     "        For ratio < score_cutoff 0 is returned instead. Defaults to 0.\n\n"
     "Returns:\n"
-    "    float: ratio between s1 and s2 as a float between 0 and 100"
-)
+    "    float: ratio between s1 and s2 as a float between 0 and 100")
+
+// C++11 does not support generic lambdas
+struct TokenRatioVisitor {
+  TokenRatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
+  {}
+
+  template <typename Sentence1, typename Sentence2>
+  double operator()(Sentence1&& s1, Sentence2&& s2) const
+  {
+    return rfuzz::token_ratio(s1, s2, m_score_cutoff);
+  }
+
+private:
+  double m_score_cutoff;
+};
 
 struct CachedTokenRatio : public CachedFuzz {
-  double call(double score_cutoff) override {
-    return mpark::visit(
-      [score_cutoff](auto&& val1, auto&& val2) {
-          return rfuzz::token_ratio(val1, val2, score_cutoff);
-        },
-        m_str1, m_str2);
+  double call(double score_cutoff) override
+  {
+    return mpark::visit(TokenRatioVisitor(score_cutoff), m_str1, m_str2);
   }
 };
 
-FUZZ_FUNC(
-  partial_token_ratio, true,
-  "partial_token_ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
-  "--\n\n"
-  "Helper method that returns the maximum of fuzz.partial_token_set_ratio and "
-  "fuzz.partial_token_sort_ratio\n"
-  "    (faster than manually executing the two functions)\n\n"
-  "Args:\n"
-  "    s1 (str): first string to compare\n"
-  "    s2 (str): second string to compare\n"
-  "    processor (Union[bool, Callable]): optional callable that reformats the strings. "
-  "utils.default_process\n"
-  "        is used by default, which lowercases the strings and trims whitespace\n"
-  "    score_cutoff (float): Optional argument for a score threshold as a float between "
-  "0 and 100.\n"
-  "        For ratio < score_cutoff 0 is returned instead. Defaults to 0.\n\n"
-  "Returns:\n"
-  "    float: ratio between s1 and s2 as a float between 0 and 100"
-)
+FUZZ_FUNC(partial_token_ratio, true,
+          "partial_token_ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
+          "--\n\n"
+          "Helper method that returns the maximum of fuzz.partial_token_set_ratio and "
+          "fuzz.partial_token_sort_ratio\n"
+          "    (faster than manually executing the two functions)\n\n"
+          "Args:\n"
+          "    s1 (str): first string to compare\n"
+          "    s2 (str): second string to compare\n"
+          "    processor (Union[bool, Callable]): optional callable that reformats the strings. "
+          "utils.default_process\n"
+          "        is used by default, which lowercases the strings and trims whitespace\n"
+          "    score_cutoff (float): Optional argument for a score threshold as a float between "
+          "0 and 100.\n"
+          "        For ratio < score_cutoff 0 is returned instead. Defaults to 0.\n\n"
+          "Returns:\n"
+          "    float: ratio between s1 and s2 as a float between 0 and 100")
+
+// C++11 does not support generic lambdas
+struct PartialTokenRatioVisitor {
+  PartialTokenRatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
+  {}
+
+  template <typename Sentence1, typename Sentence2>
+  double operator()(Sentence1&& s1, Sentence2&& s2) const
+  {
+    return rfuzz::partial_token_ratio(s1, s2, m_score_cutoff);
+  }
+
+private:
+  double m_score_cutoff;
+};
 
 struct CachedPartialTokenRatio : public CachedFuzz {
-  double call(double score_cutoff) override {
-    return mpark::visit(
-      [score_cutoff](auto&& val1, auto&& val2) {
-          return rfuzz::partial_token_ratio(val1, val2, score_cutoff);
-        },
-        m_str1, m_str2);
+  double call(double score_cutoff) override
+  {
+    return mpark::visit(PartialTokenRatioVisitor(score_cutoff), m_str1, m_str2);
   }
 };
 
-FUZZ_FUNC(
-  WRatio, true,
-  "WRatio($module, s1, s2, processor = False, score_cutoff = 0)\n"
-  "--\n\n"
-  "Calculates a weighted ratio based on the other ratio algorithms\n\n"
-  "Args:\n"
-  "    s1 (str): first string to compare\n"
-  "    s2 (str): second string to compare\n"
-  "    processor (Union[bool, Callable]): optional callable that reformats the strings. "
-  "utils.default_process\n"
-  "        is used by default, which lowercases the strings and trims whitespace\n"
-  "    score_cutoff (float): Optional argument for a score threshold as a float between "
-  "0 and 100.\n"
-  "        For ratio < score_cutoff 0 is returned instead. Defaults to 0.\n\n"
-  "Returns:\n"
-  "    float: ratio between s1 and s2 as a float between 0 and 100"
-)
+FUZZ_FUNC(WRatio, true,
+          "WRatio($module, s1, s2, processor = False, score_cutoff = 0)\n"
+          "--\n\n"
+          "Calculates a weighted ratio based on the other ratio algorithms\n\n"
+          "Args:\n"
+          "    s1 (str): first string to compare\n"
+          "    s2 (str): second string to compare\n"
+          "    processor (Union[bool, Callable]): optional callable that reformats the strings. "
+          "utils.default_process\n"
+          "        is used by default, which lowercases the strings and trims whitespace\n"
+          "    score_cutoff (float): Optional argument for a score threshold as a float between "
+          "0 and 100.\n"
+          "        For ratio < score_cutoff 0 is returned instead. Defaults to 0.\n\n"
+          "Returns:\n"
+          "    float: ratio between s1 and s2 as a float between 0 and 100")
+
+// C++11 does not support generic lambdas
+struct WRatioVisitor {
+  WRatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
+  {}
+
+  template <typename Sentence1, typename Sentence2>
+  double operator()(Sentence1&& s1, Sentence2&& s2) const
+  {
+    return rfuzz::WRatio(s1, s2, m_score_cutoff);
+  }
+
+private:
+  double m_score_cutoff;
+};
 
 struct CachedWRatio : public CachedFuzz {
-  double call(double score_cutoff) override {
-    return mpark::visit(
-      [score_cutoff](auto&& val1, auto&& val2) {
-          return rfuzz::WRatio(val1, val2, score_cutoff);
-        },
-        m_str1, m_str2);
+  double call(double score_cutoff) override
+  {
+    return mpark::visit(WRatioVisitor(score_cutoff), m_str1, m_str2);
   }
 };
 
-FUZZ_FUNC(
-  QRatio, true,
-  "QRatio($module, s1, s2, processor = False, score_cutoff = 0)\n"
-  "--\n\n"
-  "Calculates a quick ratio between two strings using fuzz.ratio\n\n"
-  "Args:\n"
-  "    s1 (str): first string to compare\n"
-  "    s2 (str): second string to compare\n"
-  "    processor (Union[bool, Callable]): optional callable that reformats the strings. "
-  "utils.default_process\n"
-  "        is used by default, which lowercases the strings and trims whitespace\n"
-  "    score_cutoff (float): Optional argument for a score threshold as a float between "
-  "0 and 100.\n"
-  "        For ratio < score_cutoff 0 is returned instead. Defaults to 0.\n\n"
-  "Returns:\n"
-  "    float: ratio between s1 and s2 as a float between 0 and 100\n\n"
-  "Example:\n"
-  "    >>> fuzz.QRatio(\"this is a test\", \"this is a test!\")\n"
-  "    96.55171966552734"
-)
+FUZZ_FUNC(QRatio, true,
+          "QRatio($module, s1, s2, processor = False, score_cutoff = 0)\n"
+          "--\n\n"
+          "Calculates a quick ratio between two strings using fuzz.ratio\n\n"
+          "Args:\n"
+          "    s1 (str): first string to compare\n"
+          "    s2 (str): second string to compare\n"
+          "    processor (Union[bool, Callable]): optional callable that reformats the strings. "
+          "utils.default_process\n"
+          "        is used by default, which lowercases the strings and trims whitespace\n"
+          "    score_cutoff (float): Optional argument for a score threshold as a float between "
+          "0 and 100.\n"
+          "        For ratio < score_cutoff 0 is returned instead. Defaults to 0.\n\n"
+          "Returns:\n"
+          "    float: ratio between s1 and s2 as a float between 0 and 100\n\n"
+          "Example:\n"
+          "    >>> fuzz.QRatio(\"this is a test\", \"this is a test!\")\n"
+          "    96.55171966552734")
+
+// C++11 does not support generic lambdas
+struct QRatioVisitor {
+  QRatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
+  {}
+
+  template <typename Sentence1, typename Sentence2>
+  double operator()(Sentence1&& s1, Sentence2&& s2) const
+  {
+    return rfuzz::QRatio(s1, s2, m_score_cutoff);
+  }
+
+private:
+  double m_score_cutoff;
+};
 
 struct CachedQRatio : public CachedFuzz {
-  double call(double score_cutoff) override {
-    return mpark::visit(
-      [score_cutoff](auto&& val1, auto&& val2) {
-          return rfuzz::QRatio(val1, val2, score_cutoff);
-        },
-        m_str1, m_str2);
+  double call(double score_cutoff) override
+  {
+    return mpark::visit(QRatioVisitor(score_cutoff), m_str1, m_str2);
   }
 };
 
-FUZZ_FUNC(
-  quick_lev_ratio, true,
-  "quick_lev_ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
-  "--\n\n"
-  "Calculates a quick estimation of fuzz.ratio by counting uncommon letters between the "
-  "two sentences.\n"
-  "Guaranteed to be equal or higher than fuzz.ratio.\n"
-  "(internally used by fuzz.ratio when providing it with a score_cutoff to speed up the "
-  "matching)\n\n"
-  "Args:\n"
-  "    s1 (str): first string to compare\n"
-  "    s2 (str): second string to compare\n"
-  "    processor (Union[bool, Callable]): optional callable that reformats the strings. "
-  "utils.default_process\n"
-  "        is used by default, which lowercases the strings and trims whitespace\n"
-  "    score_cutoff (float): Optional argument for a score threshold as a float between "
-  "0 and 100.\n"
-  "        For ratio < score_cutoff 0 is returned instead. Defaults to 0.\n\n"
-  "Returns:\n"
-  "    float: ratio between s1 and s2 as a float between 0 and 100"
-)
+FUZZ_FUNC(quick_lev_ratio, true,
+          "quick_lev_ratio($module, s1, s2, processor = False, score_cutoff = 0)\n"
+          "--\n\n"
+          "Calculates a quick estimation of fuzz.ratio by counting uncommon letters between the "
+          "two sentences.\n"
+          "Guaranteed to be equal or higher than fuzz.ratio.\n"
+          "(internally used by fuzz.ratio when providing it with a score_cutoff to speed up the "
+          "matching)\n\n"
+          "Args:\n"
+          "    s1 (str): first string to compare\n"
+          "    s2 (str): second string to compare\n"
+          "    processor (Union[bool, Callable]): optional callable that reformats the strings. "
+          "utils.default_process\n"
+          "        is used by default, which lowercases the strings and trims whitespace\n"
+          "    score_cutoff (float): Optional argument for a score threshold as a float between "
+          "0 and 100.\n"
+          "        For ratio < score_cutoff 0 is returned instead. Defaults to 0.\n\n"
+          "Returns:\n"
+          "    float: ratio between s1 and s2 as a float between 0 and 100")
+
+// C++11 does not support generic lambdas
+struct QuickLevRatioVisitor {
+  QuickLevRatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
+  {}
+
+  template <typename Sentence1, typename Sentence2>
+  double operator()(Sentence1&& s1, Sentence2&& s2) const
+  {
+    return rfuzz::quick_lev_ratio(s1, s2, m_score_cutoff);
+  }
+
+private:
+  double m_score_cutoff;
+};
 
 struct CachedQuickLevRatio : public CachedFuzz {
-  double call(double score_cutoff) override {
-    return mpark::visit(
-      [score_cutoff](auto&& val1, auto&& val2) {
-          return rfuzz::quick_lev_ratio(val1, val2, score_cutoff);
-        },
-        m_str1, m_str2);
+  double call(double score_cutoff) override
+  {
+    return mpark::visit(QuickLevRatioVisitor(score_cutoff), m_str1, m_str2);
   }
 };
 
@@ -565,10 +678,18 @@ static PyObject* default_process(PyObject* /*self*/, PyObject* args, PyObject* k
 #endif
 }
 
-static inline bool process_string(
-  PyObject* py_str, const char* name,
-  PyObject* processor, bool processor_default,
-  python_string& proc_str, std::vector<PyObject*>& owner_list)
+// C++11 does not support generic lambdas
+struct DefaultProcessVisitor {
+  template <typename Sentence>
+  python_string operator()(Sentence&& s) const
+  {
+    return default_process_string(s);
+  }
+};
+
+static inline bool process_string(PyObject* py_str, const char* name, PyObject* processor,
+                                  bool processor_default, python_string& proc_str,
+                                  std::vector<PyObject*>& owner_list)
 {
   if (non_default_process(processor)) {
     PyObject* proc_py_str = PyObject_CallFunctionObjArgs(processor, py_str, NULL);
@@ -586,57 +707,74 @@ static inline bool process_string(
   }
 
   if (use_preprocessing(processor, processor_default)) {
-    proc_str = mpark::visit(
-        [](auto&& val1) { return default_process_string(val1);},
-        decode_python_string(py_str));
-  } else {
+    proc_str = mpark::visit(DefaultProcessVisitor(), decode_python_string(py_str));
+  }
+  else {
     proc_str = decode_python_string(py_str);
   }
 
   return true;
 }
 
-
-
 std::unique_ptr<CachedFuzz> get_matching_instance(PyObject* scorer)
 {
   if (scorer) {
     if (PyCFunction_Check(scorer)) {
-        auto scorer_func = PyCFunction_GetFunction(scorer);
-        if (scorer_func == PY_FUNC_CAST(ratio))
-        {
-          return std::make_unique<CachedRatio>();
-        } else if (scorer_func == PY_FUNC_CAST(partial_ratio)) {
-          return std::make_unique<CachedPartialRatio>();
-        } else if (scorer_func == PY_FUNC_CAST(token_sort_ratio)) {
-          return std::make_unique<CachedTokenSortRatio>();
-        } else if (scorer_func == PY_FUNC_CAST(token_set_ratio)) {
-          return std::make_unique<CachedTokenSetRatio>();
-        } else if (scorer_func == PY_FUNC_CAST(partial_token_sort_ratio)) {
-          return std::make_unique<CachedPartialTokenSortRatio>();
-        } else if (scorer_func == PY_FUNC_CAST(partial_token_set_ratio)) {
-          return std::make_unique<CachedPartialTokenSetRatio>();
-        } else if (scorer_func == PY_FUNC_CAST(token_ratio)) {
-          return std::make_unique<CachedTokenRatio>();
-        } else if (scorer_func == PY_FUNC_CAST(partial_token_ratio)) {
-          return std::make_unique<CachedPartialTokenRatio>();
-        } else if (scorer_func == PY_FUNC_CAST(WRatio)) {
-          return std::make_unique<CachedWRatio>();
-        } else if (scorer_func == PY_FUNC_CAST(QRatio)) {
-          return std::make_unique<CachedQRatio>();
-        }
+      auto scorer_func = PyCFunction_GetFunction(scorer);
+      if (scorer_func == PY_FUNC_CAST(ratio)) {
+        return std::unique_ptr<CachedRatio>(new CachedRatio());
+      }
+      else if (scorer_func == PY_FUNC_CAST(partial_ratio)) {
+        return std::unique_ptr<CachedPartialRatio>(new CachedPartialRatio());
+      }
+      else if (scorer_func == PY_FUNC_CAST(token_sort_ratio)) {
+        return std::unique_ptr<CachedTokenSortRatio>(new CachedTokenSortRatio());
+      }
+      else if (scorer_func == PY_FUNC_CAST(token_set_ratio)) {
+        return std::unique_ptr<CachedTokenSetRatio>(new CachedTokenSetRatio());
+      }
+      else if (scorer_func == PY_FUNC_CAST(partial_token_sort_ratio)) {
+        return std::unique_ptr<CachedPartialTokenSortRatio>(new CachedPartialTokenSortRatio());
+      }
+      else if (scorer_func == PY_FUNC_CAST(partial_token_set_ratio)) {
+        return std::unique_ptr<CachedPartialTokenSetRatio>(new CachedPartialTokenSetRatio());
+      }
+      else if (scorer_func == PY_FUNC_CAST(token_ratio)) {
+        return std::unique_ptr<CachedTokenRatio>(new CachedTokenRatio());
+      }
+      else if (scorer_func == PY_FUNC_CAST(partial_token_ratio)) {
+        return std::unique_ptr<CachedPartialTokenRatio>(new CachedPartialTokenRatio());
+      }
+      else if (scorer_func == PY_FUNC_CAST(WRatio)) {
+        return std::unique_ptr<CachedWRatio>(new CachedWRatio());
+      }
+      else if (scorer_func == PY_FUNC_CAST(QRatio)) {
+        return std::unique_ptr<CachedQRatio>(new CachedQRatio());
+      }
+      else if (scorer_func == PY_FUNC_CAST(quick_lev_ratio)) {
+        return std::unique_ptr<CachedQuickLevRatio>(new CachedQuickLevRatio());
+      }
     }
     /* call python function */
     return nullptr;
-  /* default is fuzz.WRatio */
-  } else {
-    return std::make_unique<CachedWRatio>();
+    /* default is fuzz.WRatio */
+  }
+  else {
+    return std::unique_ptr<CachedWRatio>(new CachedWRatio());
   }
 }
 
+// C++11 does not support generic lambdas
+struct EncodePythonStringVisitor {
+  template <typename Sentence>
+  PyObject* operator()(Sentence&& s) const
+  {
+    return encode_python_string(s);
+  }
+};
 
-static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices,
-    PyObject* scorer, PyObject* processor, double score_cutoff)
+static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices, PyObject* scorer,
+                               PyObject* processor, double score_cutoff)
 {
   PyObject* result_choice = NULL;
   PyObject* choice_key = NULL;
@@ -656,9 +794,7 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices,
     return NULL;
   }
 
-  py_query = mpark::visit(
-        [](auto&& val) {return encode_python_string(val);},
-        query);
+  py_query = mpark::visit(EncodePythonStringVisitor(), query);
 
   if (!py_query) {
     Py_DecRef(py_score_cutoff);
@@ -693,8 +829,7 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices,
     PyObject* py_match_choice = PySequence_Fast_GET_ITEM(choices, i);
 
     if (is_dict) {
-      if (!PyArg_ParseTuple(py_match_choice, "OO", &py_choice, &py_match_choice))
-      {
+      if (!PyArg_ParseTuple(py_match_choice, "OO", &py_choice, &py_match_choice)) {
         Py_DecRef(py_score_cutoff);
         free_owner_list(outer_owner_list);
         return NULL;
@@ -714,9 +849,7 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices,
       return NULL;
     }
 
-    PyObject* py_proc_choice = mpark::visit(
-        [](auto&& val) {return encode_python_string(val);},
-        choice);
+    PyObject* py_proc_choice = mpark::visit(EncodePythonStringVisitor(), choice);
 
     if (!py_proc_choice) {
       Py_DecRef(py_score_cutoff);
@@ -725,8 +858,8 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices,
     }
     inner_owner_list.push_back(py_proc_choice);
 
-    PyObject* score = PyObject_CallFunction(scorer, "OOO",
-      py_query, py_proc_choice, py_score_cutoff);
+    PyObject* score =
+        PyObject_CallFunction(scorer, "OOO", py_query, py_proc_choice, py_score_cutoff);
 
     if (!score) {
       Py_DecRef(py_score_cutoff);
@@ -742,9 +875,11 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices,
       result_choice = py_match_choice;
       choice_key = py_choice;
       result_index = i;
-    } else if (comp == 0) {
+    }
+    else if (comp == 0) {
       Py_DecRef(score);
-    } else if (comp == -1) {
+    }
+    else if (comp == -1) {
       Py_DecRef(py_score_cutoff);
       Py_DecRef(score);
       free_owner_list(outer_owner_list);
@@ -764,9 +899,8 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices,
     score_cutoff = 100;
   }
 
-  PyObject* result = is_dict
-    ? Py_BuildValue("(OOO)", result_choice, py_score_cutoff, choice_key)
-    : Py_BuildValue("(OOn)", result_choice, py_score_cutoff, result_index);
+  PyObject* result = is_dict ? Py_BuildValue("(OOO)", result_choice, py_score_cutoff, choice_key)
+                             : Py_BuildValue("(OOn)", result_choice, py_score_cutoff, result_index);
 
   free_owner_list(outer_owner_list);
 
@@ -774,28 +908,34 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices,
   return result;
 }
 
-
 constexpr const char* extractOne_docstring =
-  "extractOne($module, query, choices, scorer = 'fuzz.WRatio', processor = 'utils.default_process', score_cutoff = 0)\n"
-  "--\n\n"
-  "Find the best match in a list of choices\n\n"
-  "Args:\n"
-  "    query (str): string we want to find\n"
-  "    choices (Iterable): list of all strings the query should be compared with or dict with a mapping\n"
-  "        {<result>: <string to compare>}\n"
-  "    scorer (Callable): optional callable that is used to calculate the matching score between\n"
-  "        the query and each choice. WRatio is used by default\n"
-  "    processor (Callable): optional callable that reformats the strings. utils.default_process\n"
-  "        is used by default, which lowercases the strings and trims whitespace\n"
-  "    score_cutoff (float): Optional argument for a score threshold. Matches with\n"
-  "        a lower score than this number will not be returned. Defaults to 0\n\n"
-  "Returns:\n"
-  "    Optional[Tuple[str, float]]: returns the best match in form of a tuple or None when there is\n"
-  "        no match with a score >= score_cutoff\n"
-  "    Union[None, Tuple[str, float, Any]]: Returns the best match the best match\n"
-  "        in form of a tuple or None when there is no match with a score >= score_cutoff. The Tuple will\n"
-  "        be in the form`(<choice>, <ratio>, <index of choice>)` when `choices` is a list of strings\n"
-  "        or `(<choice>, <ratio>, <key of choice>)` when `choices` is a mapping.";
+    "extractOne($module, query, choices, scorer = 'fuzz.WRatio', processor = "
+    "'utils.default_process', score_cutoff = 0)\n"
+    "--\n\n"
+    "Find the best match in a list of choices\n\n"
+    "Args:\n"
+    "    query (str): string we want to find\n"
+    "    choices (Iterable): list of all strings the query should be compared with or dict with a "
+    "mapping\n"
+    "        {<result>: <string to compare>}\n"
+    "    scorer (Callable): optional callable that is used to calculate the matching score "
+    "between\n"
+    "        the query and each choice. WRatio is used by default\n"
+    "    processor (Callable): optional callable that reformats the strings. "
+    "utils.default_process\n"
+    "        is used by default, which lowercases the strings and trims whitespace\n"
+    "    score_cutoff (float): Optional argument for a score threshold. Matches with\n"
+    "        a lower score than this number will not be returned. Defaults to 0\n\n"
+    "Returns:\n"
+    "    Optional[Tuple[str, float]]: returns the best match in form of a tuple or None when there "
+    "is\n"
+    "        no match with a score >= score_cutoff\n"
+    "    Union[None, Tuple[str, float, Any]]: Returns the best match the best match\n"
+    "        in form of a tuple or None when there is no match with a score >= score_cutoff. The "
+    "Tuple will\n"
+    "        be in the form`(<choice>, <ratio>, <index of choice>)` when `choices` is a list of "
+    "strings\n"
+    "        or `(<choice>, <ratio>, <key of choice>)` when `choices` is a mapping.";
 
 static PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 {
@@ -862,8 +1002,7 @@ static PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds
     PyObject* py_match_choice = PySequence_Fast_GET_ITEM(choices, i);
 
     if (is_dict) {
-      if (!PyArg_ParseTuple(py_match_choice, "OO", &py_choice, &py_match_choice))
-      {
+      if (!PyArg_ParseTuple(py_match_choice, "OO", &py_choice, &py_match_choice)) {
         free_owner_list(outer_owner_list);
         return NULL;
       }
@@ -905,19 +1044,18 @@ static PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds
     Py_RETURN_NONE;
   }
 
-  PyObject* result = is_dict
-    ? Py_BuildValue("(OdO)", result_choice, result_score, choice_key)
-    : Py_BuildValue("(Odn)", result_choice, result_score, result_index);
+  PyObject* result = is_dict ? Py_BuildValue("(OdO)", result_choice, result_score, choice_key)
+                             : Py_BuildValue("(Odn)", result_choice, result_score, result_index);
 
   free_owner_list(outer_owner_list);
   return result;
 }
 
 static PyMethodDef methods[] = {
-/* utils */
+    /* utils */
     PY_METHOD(default_process),
 
-/* fuzz */
+    /* fuzz */
     PY_METHOD(ratio),
     PY_METHOD(partial_ratio),
     PY_METHOD(token_sort_ratio),
@@ -929,10 +1067,9 @@ static PyMethodDef methods[] = {
     PY_METHOD(WRatio),
     PY_METHOD(QRatio),
     PY_METHOD(quick_lev_ratio),
-/* process */
+    /* process */
     PY_METHOD(extractOne),
-/* sentinel */
-    {NULL, NULL, 0, NULL}
-};
+    /* sentinel */
+    {NULL, NULL, 0, NULL}};
 
 PY_INIT_MOD(cpp_impl, NULL, methods)
