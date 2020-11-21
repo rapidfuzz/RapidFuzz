@@ -134,7 +134,7 @@ struct name##_func {                                                        \
 static PyObject* name(PyObject* /*self*/, PyObject* args, PyObject* keywds) \
 {                                                                           \
   return fuzz_call<name##_func>(process_default, args, keywds);             \
-}                                                                           
+}
 
 struct CachedFuzz {
   virtual void str1_set(python_string str) {
@@ -580,11 +580,11 @@ static inline bool process_string(
     proc_str = decode_python_string(proc_py_str);
     return true;
   }
-  
+
   if (!valid_str(py_str, name)) {
     return false;
   }
-  
+
   if (use_preprocessing(processor, processor_default)) {
     proc_str = mpark::visit(
         [](auto&& val1) { return default_process_string(val1);},
@@ -642,7 +642,7 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices,
   PyObject* choice_key = NULL;
   Py_ssize_t result_index = -1;
   std::vector<PyObject*> outer_owner_list;
-  
+
   bool is_dict = false;
 
   PyObject* py_score_cutoff = PyFloat_FromDouble(score_cutoff);
@@ -754,9 +754,8 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices,
     free_owner_list(inner_owner_list);
   }
 
-  free_owner_list(outer_owner_list);
-        
   if (result_index != -1) {
+    free_owner_list(outer_owner_list);
     Py_DecRef(py_score_cutoff);
     Py_RETURN_NONE;
   }
@@ -764,19 +763,21 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices,
   if (score_cutoff > 100) {
     score_cutoff = 100;
   }
-  
+
   PyObject* result = is_dict
     ? Py_BuildValue("(OOO)", result_choice, py_score_cutoff, choice_key)
     : Py_BuildValue("(OOn)", result_choice, py_score_cutoff, result_index);
+
+  free_owner_list(outer_owner_list);
 
   Py_DecRef(py_score_cutoff);
   return result;
 }
 
 
-constexpr const char* extractOne_docstring = 
+constexpr const char* extractOne_docstring =
   "extractOne($module, query, choices, scorer = 'fuzz.WRatio', processor = 'utils.default_process', score_cutoff = 0)\n"
-  "--\n\n"  
+  "--\n\n"
   "Find the best match in a list of choices\n\n"
   "Args:\n"
   "    query (str): string we want to find\n"
@@ -895,21 +896,21 @@ static PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds
         free_owner_list(inner_owner_list);
         break;
       }
-    } 
+    }
     free_owner_list(inner_owner_list);
   }
 
-  free_owner_list(outer_owner_list);
-        
   if (result_index == -1) {
+    free_owner_list(outer_owner_list);
     Py_RETURN_NONE;
   }
 
-  if (is_dict) {
-    return Py_BuildValue("(OdO)", result_choice, result_score, choice_key);
-  } else {
-    return Py_BuildValue("(Odn)", result_choice, result_score, result_index);
-  }
+  PyObject* result = is_dict
+    ? Py_BuildValue("(OdO)", result_choice, result_score, choice_key)
+    : Py_BuildValue("(Odn)", result_choice, result_score, result_index);
+
+  free_owner_list(outer_owner_list);
+  return result;
 }
 
 static PyMethodDef methods[] = {
