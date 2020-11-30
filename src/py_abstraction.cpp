@@ -157,6 +157,9 @@ static inline PyObject* fuzz_call(bool processor_default, PyObject* args, PyObje
   }
 
 struct CachedFuzz {
+  /* deleting polymorphic object without virtual destructur results in undefined behaviour */
+  virtual ~CachedFuzz() = default;
+
   virtual void str1_set(python_string str)
   {
     m_str1 = std::move(str);
