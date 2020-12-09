@@ -230,11 +230,60 @@ PyObject* normalized_weighted_distance(PyObject* /*self*/, PyObject* args, PyObj
   return PyFloat_FromDouble(result * 100);
 }
 
+constexpr const char* hamming_docstring = R"(
+Calculates the Hamming distance between two strings.
+
+Args:
+    s1 (str):  first string to compare
+    s2 (str):  second string to compare
+
+Returns:
+    int: Hamming distance between s1 and s2
+)";
+
+// C++11 does not support generic lambdas
+struct HammingDistanceVisitor {
+  template <typename Sentence1, typename Sentence2>
+  std::size_t operator()(Sentence1&& s1, Sentence2&& s2) const
+  {
+    return rlevenshtein::hamming(s1, s2);
+  }
+};
+
+PyObject* hamming(PyObject* /*self*/, PyObject* args, PyObject* keywds)
+{
+  PyObject* py_s1;
+  PyObject* py_s2;
+  static const char* kwlist[] = {"s1", "s2", NULL};
+
+  if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO", const_cast<char**>(kwlist), &py_s1, &py_s2))
+  {
+    return NULL;
+  }
+
+  if (!valid_str(py_s1, "s1") || !valid_str(py_s2, "s2")) {
+    return NULL;
+  }
+
+  auto s1_view = decode_python_string(py_s1);
+  auto s2_view = decode_python_string(py_s2);
+  std::size_t result;
+  try {
+    result = mpark::visit(HammingDistanceVisitor(), s1_view, s2_view);
+  } catch(std::invalid_argument& e) {
+    PyErr_Format(PyExc_ValueError, e.what());
+    return NULL;
+  }
+
+  return PyLong_FromSize_t(result);
+}
+
 static PyMethodDef methods[] = {
     PY_METHOD(distance),
     PY_METHOD(normalized_distance),
     PY_METHOD(weighted_distance),
     PY_METHOD(normalized_weighted_distance),
+    PY_METHOD(hamming),
     {NULL, NULL, 0, NULL} /* sentinel */
 };
 
