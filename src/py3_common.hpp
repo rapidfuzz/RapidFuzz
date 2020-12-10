@@ -1,12 +1,13 @@
 /* SPDX-License-Identifier: MIT */
 /* Copyright © 2020 Max Bachmann */
 
+#pragma once
 #define PY_SSIZE_T_CLEAN
 #include "details/types.hpp"
 #include <Python.h>
 #include <variant/variant.hpp>
 
-bool valid_str(PyObject* str, const char* name)
+static inline bool valid_str(PyObject* str, const char* name)
 {
   if (!PyUnicode_Check(str)) {
     PyErr_Format(PyExc_TypeError, "%s must be a String or None", name);
@@ -41,7 +42,7 @@ using python_string_view =
     mpark::variant<rapidfuzz::basic_string_view<uint8_t>, rapidfuzz::basic_string_view<uint16_t>,
                    rapidfuzz::basic_string_view<uint32_t>>;
 
-python_string decode_python_string(PyObject* py_str)
+static inline python_string decode_python_string(PyObject* py_str)
 {
   Py_ssize_t len = PyUnicode_GET_LENGTH(py_str);
   void* str = PyUnicode_DATA(py_str);
@@ -56,7 +57,7 @@ python_string decode_python_string(PyObject* py_str)
   }
 }
 
-python_string_view decode_python_string_view(PyObject* py_str)
+static inline python_string_view decode_python_string_view(PyObject* py_str)
 {
   Py_ssize_t len = PyUnicode_GET_LENGTH(py_str);
   void* str = PyUnicode_DATA(py_str);
@@ -71,17 +72,17 @@ python_string_view decode_python_string_view(PyObject* py_str)
   }
 }
 
-PyObject* encode_python_string(rapidfuzz::basic_string_view<uint8_t> str)
+static inline PyObject* encode_python_string(rapidfuzz::basic_string_view<uint8_t> str)
 {
   return PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, str.data(), str.size());
 }
 
-PyObject* encode_python_string(rapidfuzz::basic_string_view<uint16_t> str)
+static inline PyObject* encode_python_string(rapidfuzz::basic_string_view<uint16_t> str)
 {
   return PyUnicode_FromKindAndData(PyUnicode_2BYTE_KIND, str.data(), str.size());
 }
 
-PyObject* encode_python_string(rapidfuzz::basic_string_view<uint32_t> str)
+static inline PyObject* encode_python_string(rapidfuzz::basic_string_view<uint32_t> str)
 {
   return PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, str.data(), str.size());
 }

@@ -5,4 +5,4 @@ __author__ = "Max Bachmann"
 __license__ = "MIT"
 __version__ = "0.14.1"
 
-from rapidfuzz import process, fuzz, utils, levenshtein
+from rapidfuzz import process, fuzz, utils, levenshtein, string_metric

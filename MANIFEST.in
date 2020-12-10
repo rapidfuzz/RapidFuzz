@@ -7,8 +7,6 @@ exclude src/rapidfuzz-cpp/rapidfuzz/process.hpp
 exclude src/rapidfuzz-cpp/rapidfuzz/process.txx
 
 recursive-include extern/variant *
-recursive-include extern/boost *
-include src/py_utils.hpp
-include src/py2_utils.hpp
-include src/py3_utils.hpp
+include src/*.hpp
+include src/*.cpp
 include src/rapidfuzz-cpp/LICENSE
