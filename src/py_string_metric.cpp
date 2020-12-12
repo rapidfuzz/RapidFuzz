@@ -226,9 +226,38 @@ PyObject* hamming(PyObject* /*self*/, PyObject* args, PyObject* keywds)
   return PyLong_FromSize_t(result);
 }
 
+struct normalized_hamming_func {
+  template <typename... Args>
+  static double call(Args&&... args) {
+    return rlevenshtein::normalized_hamming(std::forward<Args>(args)...);
+  }
+};
+
+PyObject* normalized_hamming(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
+  return fuzz_call<normalized_hamming_func>(false, args, keywds);
+}
+
+// C++11 does not support generic lambdas
+struct NormalizedHammingVisitor {
+  NormalizedHammingVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
+  {}
+
+  template <typename Sentence1, typename Sentence2>
+  double operator()(Sentence1&& s1, Sentence2&& s2) const {
+    return rlevenshtein::normalized_hamming(s1, s2, m_score_cutoff);
+  }
+
+private:
+  double m_score_cutoff;
+};
+
+double CachedNormalizedHamming::call(double score_cutoff) {
+  return mpark::visit(NormalizedHammingVisitor(score_cutoff), m_str1, m_str2);
+}
+
 
 /**********************************************
- *         normalized_letter_frequency
+ *              letter_frequency
  *********************************************/
 
 struct normalized_letter_frequency_func {

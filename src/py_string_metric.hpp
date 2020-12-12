@@ -26,7 +26,7 @@ PyObject* levenshtein(PyObject* /*self*/, PyObject* args, PyObject* keywds);
 
 
 PyDoc_STRVAR(normalized_levenshtein_docstring,
-R"(normalized_levenshtein($module, s1, s2, insert_cost = 1, delete_cost = 1, replace_cost = 1, processor = False, score_cutoff = 1)
+R"(normalized_levenshtein($module, s1, s2, insert_cost = 1, delete_cost = 1, replace_cost = 1, processor = False, score_cutoff = 0)
 --
 
 Calculates a normalized levenshtein distance using custom
@@ -68,6 +68,29 @@ Returns:
     int: Hamming distance between s1 and s2
 )");
 PyObject* hamming(PyObject* /*self*/, PyObject* args, PyObject* keywds);
+
+PyDoc_STRVAR(normalized_hamming_docstring,
+R"(normalized_hamming($module, s1, s2, processor = False, score_cutoff = 0)
+--
+
+Calculates a normalized hamming distance
+
+Args:
+    s1 (str):  first string to compare
+    s2 (str):  second string to compare
+    processor (Union[bool, Callable]): optional callable that reformats the strings.
+        None is used by default.
+    score_cutoff (float): Optional argument for a score threshold as a float between 0 and 100.
+        For ratio < score_cutoff 0 is returned instead. Defaults to 0.
+
+Returns:
+    float: normalized hamming distance between s1 and s2 as a float between 0 and 100
+)");
+PyObject* normalized_hamming(PyObject* /*self*/, PyObject* args, PyObject* keywds);
+
+struct CachedNormalizedHamming : public CachedScorer {
+  double call(double score_cutoff) override;
+};
 
 
 PyDoc_STRVAR(normalized_letter_frequency_docstring,
