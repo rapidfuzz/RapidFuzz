@@ -7,40 +7,30 @@ from rapidfuzz.cpp_impl import extractOne
 import heapq
 import numbers
 
-def iterExtract(query, choices, scorer = fuzz.WRatio, processor = utils.default_process, score_cutoff = 0):
+def iterExtract(query, choices, scorer = fuzz.WRatio, processor = utils.default_process, score_cutoff = 0, **kwargs):
     if query is None:
         return
     
     a = processor(query) if processor else query
 
-    if hasattr(choices, "items"):
-        for choice, match_choice in choices.items():
-            if match_choice is None:
-                continue
-            b = processor(match_choice) if processor else match_choice
+    items = choices.items() if hasattr(choices, "items") else enumerate(choices)
 
-            score = scorer(
-                a, b,
-                processor=None,
-                score_cutoff=score_cutoff)
+    for choice, match_choice in items:
+        if match_choice is None:
+            continue
+        b = processor(match_choice) if processor else match_choice
 
-            if score >= score_cutoff:
-                yield (match_choice, score, choice)
-    else:
-        for i, choice in enumerate(choices):
-            if choice is None:
-                continue
-            b = processor(choice) if processor else choice
+        score = scorer(
+            a, b,
+            processor=None,
+            score_cutoff=score_cutoff,
+            **kwargs)
 
-            score = scorer(
-                a, b,
-                processor=None,
-                score_cutoff=score_cutoff)
+        if score >= score_cutoff:
+            yield (match_choice, score, choice)
 
-            if score >= score_cutoff:
-                yield (choice, score, i)
 
-def extract(query, choices, scorer = fuzz.WRatio, processor = utils.default_process, limit = 5, score_cutoff = 0):
+def extract(query, choices, scorer = fuzz.WRatio, processor = utils.default_process, limit = 5, score_cutoff = 0, **kwargs):
     """ 
     Find the best matches in a list of choices
 
@@ -62,7 +52,7 @@ def extract(query, choices, scorer = fuzz.WRatio, processor = utils.default_proc
         be of either `(<choice>, <ratio>, <index of choice>)` when `choices` is a list of strings
         or `(<choice>, <ratio>, <key of choice>)` when `choices` is a mapping.
     """
-    results = iterExtract(query, choices, scorer, processor, score_cutoff)
+    results = iterExtract(query, choices, scorer, processor, score_cutoff, **kwargs)
 
     if limit is None:
         return sorted(results, key=lambda x: x[1], reverse=True)
