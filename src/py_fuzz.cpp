@@ -8,39 +8,8 @@
 #include "py_utils.hpp"
 #include <string>
 
-namespace rfuzz = rapidfuzz::fuzz;
-namespace rutils = rapidfuzz::utils;
-
-static inline bool use_preprocessing(PyObject* processor, bool processor_default)
-{
-  return processor ? PyObject_IsTrue(processor) != 0 : processor_default;
-}
-
-static inline bool non_default_process(PyObject* processor)
-{
-  if (processor) {
-    if (PyCFunction_Check(processor)) {
-      if (PyCFunction_GetFunction(processor) == PY_FUNC_CAST(default_process)) {
-        return false;
-      }
-    }
-  }
-
-  return PyCallable_Check(processor);
-}
-
-static inline void free_owner_list(const std::vector<PyObject*>& owner_list)
-{
-  for (const auto owned : owner_list) {
-    Py_DecRef(owned);
-  }
-}
-
-template <typename Sentence>
-static inline python_string default_process_string(Sentence&& str)
-{
-  return rutils::default_process(std::forward<Sentence>(str));
-}
+namespace fuzz = rapidfuzz::fuzz;
+namespace utils = rapidfuzz::utils;
 
 // C++11 does not support generic lambdas
 template <typename MatchingFunc>
@@ -49,26 +18,8 @@ struct GenericRatioVisitor {
   {}
 
   template <typename Sentence1, typename Sentence2>
-  double operator()(Sentence1&& s1, Sentence2&& s2) const
-  {
+  double operator()(Sentence1&& s1, Sentence2&& s2) const {
     return MatchingFunc::call(s1, s2, m_score_cutoff);
-  }
-
-private:
-  double m_score_cutoff;
-};
-
-// C++11 does not support generic lambdas
-template <typename MatchingFunc>
-struct GenericProcessedRatioVisitor {
-  GenericProcessedRatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
-  {}
-
-  template <typename Sentence1, typename Sentence2>
-  double operator()(Sentence1&& s1, Sentence2&& s2) const
-  {
-    return MatchingFunc::call(rutils::default_process(s1), rutils::default_process(s2),
-                              m_score_cutoff);
   }
 
 private:
@@ -80,12 +31,12 @@ static inline PyObject* fuzz_call(bool processor_default, PyObject* args, PyObje
 {
   PyObject* py_s1;
   PyObject* py_s2;
-  PyObject* processor = NULL;
+  PyObject* py_processor = NULL;
   double score_cutoff = 0;
   static const char* kwlist[] = {"s1", "s2", "processor", "score_cutoff", NULL};
 
   if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|Od", const_cast<char**>(kwlist), &py_s1,
-                                   &py_s2, &processor, &score_cutoff))
+                                   &py_s2, &py_processor, &score_cutoff))
   {
     return NULL;
   }
@@ -94,50 +45,16 @@ static inline PyObject* fuzz_call(bool processor_default, PyObject* args, PyObje
     return PyFloat_FromDouble(0);
   }
 
-  if (non_default_process(processor)) {
-    PyObject* proc_s1 = PyObject_CallFunctionObjArgs(processor, py_s2, NULL);
-    if (proc_s1 == NULL) {
-      return NULL;
-    }
+  auto processor = get_processor(py_processor, processor_default);
 
-    PyObject* proc_s2 = PyObject_CallFunctionObjArgs(processor, py_s2, NULL);
-    if (proc_s2 == NULL) {
-      Py_DecRef(proc_s1);
-      return NULL;
-    }
-
-    if (!valid_str(proc_s1, "s1") || !valid_str(proc_s2, "s2")) {
-      return NULL;
-    }
-
-    auto s1_view = decode_python_string_view(proc_s1);
-    auto s2_view = decode_python_string_view(proc_s2);
-
-    double result = mpark::visit(GenericRatioVisitor<MatchingFunc>(score_cutoff), s1_view, s2_view);
-
-    Py_DecRef(proc_s1);
-    Py_DecRef(proc_s2);
-
+  try {
+    auto s1 = processor->call(py_s1, "s1");
+    auto s2 = processor->call(py_s2, "s2");
+    double result = mpark::visit(GenericRatioVisitor<MatchingFunc>(score_cutoff), s1.value, s2.value);
     return PyFloat_FromDouble(result);
-  }
-
-  if (!valid_str(py_s1, "s1") || !valid_str(py_s2, "s2")) {
+  } catch(std::invalid_argument& e) {
     return NULL;
   }
-
-  auto s1_view = decode_python_string_view(py_s1);
-  auto s2_view = decode_python_string_view(py_s2);
-
-  double result;
-  if (use_preprocessing(processor, processor_default)) {
-    result =
-        mpark::visit(GenericProcessedRatioVisitor<MatchingFunc>(score_cutoff), s1_view, s2_view);
-  }
-  else {
-    result = mpark::visit(GenericRatioVisitor<MatchingFunc>(score_cutoff), s1_view, s2_view);
-  }
-
-  return PyFloat_FromDouble(result);
 }
 
 /**********************************************
@@ -145,11 +62,11 @@ static inline PyObject* fuzz_call(bool processor_default, PyObject* args, PyObje
  *********************************************/
 
 struct ratio_func {
-  template <typename... Args>                                              
-  static double call(Args&&... args) {                                                                                
-    return rfuzz::ratio(std::forward<Args>(args)...);                              
-  }                           
-};       
+  template <typename... Args>
+  static double call(Args&&... args) {
+    return fuzz::ratio(std::forward<Args>(args)...);
+  }
+};
 
 PyObject* ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {                                                                                                \
   return fuzz_call<ratio_func>(false, args, keywds);
@@ -162,7 +79,7 @@ struct RatioVisitor {
 
   template <typename Sentence1, typename Sentence2>
   double operator()(Sentence1&& s1, Sentence2&& s2) const {
-    return rfuzz::ratio(s1, s2, m_score_cutoff);
+    return fuzz::ratio(s1, s2, m_score_cutoff);
   }
 
 private:
@@ -179,11 +96,11 @@ double CachedRatio::call(double score_cutoff) {
  *********************************************/
 
 struct partial_ratio_func {
-  template <typename... Args>                                              
-  static double call(Args&&... args) {                                                                                
-    return rfuzz::partial_ratio(std::forward<Args>(args)...);                              
-  }                           
-};       
+  template <typename... Args>
+  static double call(Args&&... args) {
+    return fuzz::partial_ratio(std::forward<Args>(args)...);
+  }
+};
 
 PyObject* partial_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {                                                                                                \
   return fuzz_call<partial_ratio_func>(false, args, keywds);
@@ -196,7 +113,7 @@ struct PartialRatioVisitor {
 
   template <typename Sentence1, typename Sentence2>
   double operator()(Sentence1&& s1, Sentence2&& s2) const {
-    return rfuzz::partial_ratio(s1, s2, m_score_cutoff);
+    return fuzz::partial_ratio(s1, s2, m_score_cutoff);
   }
 
 private:
@@ -213,11 +130,11 @@ double CachedPartialRatio::call(double score_cutoff) {
  *********************************************/
 
 struct token_sort_ratio_func {
-  template <typename... Args>                                              
-  static double call(Args&&... args) {                                                                                
-    return rfuzz::token_sort_ratio(std::forward<Args>(args)...);                              
-  }                           
-};       
+  template <typename... Args>
+  static double call(Args&&... args) {
+    return fuzz::token_sort_ratio(std::forward<Args>(args)...);
+  }
+};
 
 PyObject* token_sort_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {                                                                                                \
   return fuzz_call<token_sort_ratio_func>(true, args, keywds);
@@ -227,7 +144,7 @@ PyObject* token_sort_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 struct SortedSplitVisitor {
   template <typename Sentence>
   python_string operator()(Sentence&& s) const {
-    return rutils::sorted_split(s).join();
+    return utils::sorted_split(s).join();
   }
 };
 
@@ -249,11 +166,11 @@ double CachedTokenSortRatio::call(double score_cutoff) {
  *********************************************/
 
 struct partial_token_sort_ratio_func {
-  template <typename... Args>                                              
-  static double call(Args&&... args) {                                                                                
-    return rfuzz::partial_token_sort_ratio(std::forward<Args>(args)...);                              
-  }                           
-};       
+  template <typename... Args>
+  static double call(Args&&... args) {
+    return fuzz::partial_token_sort_ratio(std::forward<Args>(args)...);
+  }
+};
 
 PyObject* partial_token_sort_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {                                                                                                \
   return fuzz_call<partial_token_sort_ratio_func>(true, args, keywds);
@@ -277,11 +194,11 @@ double CachedPartialTokenSortRatio::call(double score_cutoff) {
  *********************************************/
 
 struct token_set_ratio_func {
-  template <typename... Args>                                              
-  static double call(Args&&... args) {                                                                                
-    return rfuzz::token_set_ratio(std::forward<Args>(args)...);                              
-  }                           
-};       
+  template <typename... Args>
+  static double call(Args&&... args) {
+    return fuzz::token_set_ratio(std::forward<Args>(args)...);
+  }
+};
 
 PyObject* token_set_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {                                                                                                \
   return fuzz_call<token_set_ratio_func>(true, args, keywds);
@@ -294,7 +211,7 @@ struct TokenSetRatioVisitor {
 
   template <typename Sentence1, typename Sentence2>
   double operator()(Sentence1&& s1, Sentence2&& s2) const {
-    return rfuzz::token_set_ratio(s1, s2, m_score_cutoff);
+    return fuzz::token_set_ratio(s1, s2, m_score_cutoff);
   }
 
 private:
@@ -311,11 +228,11 @@ double CachedTokenSetRatio::call(double score_cutoff) {
  *********************************************/
 
 struct partial_token_set_ratio_func {
-  template <typename... Args>                                              
-  static double call(Args&&... args) {                                                                                
-    return rfuzz::partial_token_set_ratio(std::forward<Args>(args)...);                              
-  }                           
-};       
+  template <typename... Args>
+  static double call(Args&&... args) {
+    return fuzz::partial_token_set_ratio(std::forward<Args>(args)...);
+  }
+};
 
 PyObject* partial_token_set_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {                                                                                                \
   return fuzz_call<partial_token_set_ratio_func>(true, args, keywds);
@@ -328,7 +245,7 @@ struct PartialTokenSetRatioVisitor {
 
   template <typename Sentence1, typename Sentence2>
   double operator()(Sentence1&& s1, Sentence2&& s2) const {
-    return rfuzz::partial_token_set_ratio(s1, s2, m_score_cutoff);
+    return fuzz::partial_token_set_ratio(s1, s2, m_score_cutoff);
   }
 
 private:
@@ -345,11 +262,11 @@ double CachedPartialTokenSetRatio::call(double score_cutoff) {
  *********************************************/
 
 struct token_ratio_func {
-  template <typename... Args>                                              
-  static double call(Args&&... args) {                                                                                
-    return rfuzz::token_ratio(std::forward<Args>(args)...);                              
-  }                           
-};       
+  template <typename... Args>
+  static double call(Args&&... args) {
+    return fuzz::token_ratio(std::forward<Args>(args)...);
+  }
+};
 
 PyObject* token_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {                                                                                                \
   return fuzz_call<token_ratio_func>(true, args, keywds);
@@ -362,7 +279,7 @@ struct TokenRatioVisitor {
 
   template <typename Sentence1, typename Sentence2>
   double operator()(Sentence1&& s1, Sentence2&& s2) const {
-    return rfuzz::token_ratio(s1, s2, m_score_cutoff);
+    return fuzz::token_ratio(s1, s2, m_score_cutoff);
   }
 
 private:
@@ -379,11 +296,11 @@ double CachedTokenRatio::call(double score_cutoff) {
  *********************************************/
 
 struct partial_token_ratio_func {
-  template <typename... Args>                                              
-  static double call(Args&&... args) {                                                                                
-    return rfuzz::partial_token_ratio(std::forward<Args>(args)...);                              
-  }                           
-};       
+  template <typename... Args>
+  static double call(Args&&... args) {
+    return fuzz::partial_token_ratio(std::forward<Args>(args)...);
+  }
+};
 
 PyObject* partial_token_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {                                                                                                \
   return fuzz_call<partial_token_ratio_func>(true, args, keywds);
@@ -397,7 +314,7 @@ struct PartialTokenRatioVisitor {
   template <typename Sentence1, typename Sentence2>
   double operator()(Sentence1&& s1, Sentence2&& s2) const
   {
-    return rfuzz::partial_token_ratio(s1, s2, m_score_cutoff);
+    return fuzz::partial_token_ratio(s1, s2, m_score_cutoff);
   }
 
 private:
@@ -414,11 +331,11 @@ double CachedPartialTokenRatio::call(double score_cutoff) {
  *********************************************/
 
 struct WRatio_func {
-  template <typename... Args>                                              
-  static double call(Args&&... args) {                                                                                
-    return rfuzz::WRatio(std::forward<Args>(args)...);                              
-  }                           
-};       
+  template <typename... Args>
+  static double call(Args&&... args) {
+    return fuzz::WRatio(std::forward<Args>(args)...);
+  }
+};
 
 PyObject* WRatio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {                                                                                                \
   return fuzz_call<WRatio_func>(true, args, keywds);
@@ -431,7 +348,7 @@ struct WRatioVisitor {
 
   template <typename Sentence1, typename Sentence2>
   double operator()(Sentence1&& s1, Sentence2&& s2) const {
-    return rfuzz::WRatio(s1, s2, m_score_cutoff);
+    return fuzz::WRatio(s1, s2, m_score_cutoff);
   }
 
 private:
@@ -448,11 +365,11 @@ double CachedWRatio::call(double score_cutoff) {
  *********************************************/
 
 struct QRatio_func {
-  template <typename... Args>                                              
-  static double call(Args&&... args) {                                                                                
-    return rfuzz::QRatio(std::forward<Args>(args)...);                              
-  }                           
-};       
+  template <typename... Args>
+  static double call(Args&&... args) {
+    return fuzz::QRatio(std::forward<Args>(args)...);
+  }
+};
 
 PyObject* QRatio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {                                                                                                \
   return fuzz_call<QRatio_func>(true, args, keywds);
@@ -465,7 +382,7 @@ struct QRatioVisitor {
 
   template <typename Sentence1, typename Sentence2>
   double operator()(Sentence1&& s1, Sentence2&& s2) const {
-    return rfuzz::QRatio(s1, s2, m_score_cutoff);
+    return fuzz::QRatio(s1, s2, m_score_cutoff);
   }
 
 private:

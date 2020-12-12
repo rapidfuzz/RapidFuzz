@@ -44,6 +44,7 @@ static inline python_string default_process_string(Sentence&& str)
   return rutils::default_process(std::forward<Sentence>(str));
 }
 
+#if false
 // C++11 does not support generic lambdas
 struct DefaultProcessVisitor {
   template <typename Sentence>
@@ -52,7 +53,7 @@ struct DefaultProcessVisitor {
     return default_process_string(s);
   }
 };
-
+#endif
 static inline bool process_string(PyObject* py_str, const char* name, PyObject* processor,
                                   bool processor_default, python_string& proc_str,
                                   std::vector<PyObject*>& owner_list)
@@ -117,8 +118,8 @@ std::unique_ptr<CachedScorer> get_matching_instance(PyObject* scorer)
       else if (scorer_func == PY_FUNC_CAST(QRatio)) {
         return std::unique_ptr<CachedQRatio>(new CachedQRatio());
       }
-      else if (scorer_func == PY_FUNC_CAST(quick_lev_ratio)) {
-        return std::unique_ptr<CachedQuickLevRatio>(new CachedQuickLevRatio());
+      else if (scorer_func == PY_FUNC_CAST(normalized_letter_frequency)) {
+        return std::unique_ptr<CachedNormalizedLetterFrequency>(new CachedNormalizedLetterFrequency());
       }
     }
     /* call python function */
@@ -276,6 +277,8 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices, PyObjec
 
 PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 {
+
+  if (args == NULL) { return NULL; }
   PyObject* result_choice = NULL;
   PyObject* choice_key = NULL;
   double result_score;

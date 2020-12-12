@@ -5,9 +5,58 @@
 #include "fuzz.hpp"
 #include "py_common.hpp"
 #include "py_string_metric.hpp"
+#include "py_utils.hpp"
 
 namespace rlevenshtein = rapidfuzz::levenshtein;
 namespace fuzz = rapidfuzz::fuzz;
+
+// C++11 does not support generic lambdas
+template <typename MatchingFunc>
+struct GenericRatioVisitor {
+  GenericRatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
+  {}
+
+  template <typename Sentence1, typename Sentence2>
+  double operator()(Sentence1&& s1, Sentence2&& s2) const {
+    return MatchingFunc::call(s1, s2, m_score_cutoff);
+  }
+
+private:
+  double m_score_cutoff;
+};
+
+template <typename MatchingFunc>
+static inline PyObject* fuzz_call(bool processor_default, PyObject* args, PyObject* keywds)
+{
+  PyObject* py_s1;
+  PyObject* py_s2;
+  PyObject* py_processor = NULL;
+  double score_cutoff = 0;
+  static const char* kwlist[] = {"s1", "s2", "processor", "score_cutoff", NULL};
+
+  if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|Od", const_cast<char**>(kwlist), &py_s1,
+                                   &py_s2, &py_processor, &score_cutoff))
+  {
+    return NULL;
+  }
+
+  if (py_s1 == Py_None || py_s2 == Py_None) {
+    return PyFloat_FromDouble(0);
+  }
+
+  auto processor = get_processor(py_processor, processor_default);
+
+  try {
+    auto s1 = processor->call(py_s1, "s1");
+    auto s2 = processor->call(py_s2, "s2");
+    double result = mpark::visit(GenericRatioVisitor<MatchingFunc>(score_cutoff), s1.value, s2.value);
+    return PyFloat_FromDouble(result);
+  } catch(std::invalid_argument& e) {
+    return NULL;
+  }
+}
+
+
 
 /**********************************************
  *              Levenshtein
@@ -103,32 +152,38 @@ PyObject* normalized_levenshtein(PyObject* /*self*/, PyObject* args, PyObject* k
   std::size_t insert_cost = 1;
   std::size_t delete_cost = 1;
   std::size_t replace_cost = 1;
+  PyObject* py_processor = NULL;
   double score_cutoff = 0;
-  static const char* kwlist[] = {"s1", "s2", "insert_cost", "delete_cost", "replace_cost", "score_cutoff", NULL};
+  static const char* kwlist[] = {"s1", "s2", "insert_cost", "delete_cost", "replace_cost", "processor", "score_cutoff", NULL};
 
-  if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|nnnd", const_cast<char**>(kwlist), &py_s1,
-                                   &py_s2, &insert_cost, &delete_cost, &replace_cost, &score_cutoff))
+  if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|nnnOd", const_cast<char**>(kwlist), &py_s1,
+                                   &py_s2, &insert_cost, &delete_cost, &replace_cost, &py_processor, &score_cutoff))
   {
     return NULL;
   }
 
-  if (!valid_str(py_s1, "s1") || !valid_str(py_s2, "s2")) {
-    return NULL;
+  if (py_s1 == Py_None || py_s2 == Py_None) {
+    return PyFloat_FromDouble(0);
   }
-  
+
   if (insert_cost != 1 || delete_cost != 1 || replace_cost > 2) {
     PyErr_SetString(PyExc_ValueError, "normalisation for these weightes not supported yet");
     return NULL;
   }
 
-  auto s1_view = decode_python_string(py_s1);
-  auto s2_view = decode_python_string(py_s2);
+  auto processor = get_processor(py_processor, false);
 
-  double result = mpark::visit(
-    NormalizedLevenshteinVisitor(insert_cost, delete_cost, replace_cost, score_cutoff),
-    s1_view, s2_view);
+  try {
+    auto s1 = processor->call(py_s1, "s1");
+    auto s2 = processor->call(py_s2, "s2");
+    double result = mpark::visit(
+      NormalizedLevenshteinVisitor(insert_cost, delete_cost, replace_cost, score_cutoff),
+      s1.value, s2.value);
 
-  return PyFloat_FromDouble(result * 100);
+    return PyFloat_FromDouble(result * 100);
+  } catch(std::invalid_argument& e) {
+    return NULL;
+  }
 }
 
 /**********************************************
@@ -173,16 +228,23 @@ PyObject* hamming(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 
 
 /**********************************************
- *              quick_lev_ratio
+ *         normalized_letter_frequency
  *********************************************/
-// todo
-PyObject* quick_lev_ratio(PyObject* /*self*/, PyObject* /*args*/, PyObject* /*keywds*/) {
-  return NULL;
+
+struct normalized_letter_frequency_func {
+  template <typename... Args>
+  static double call(Args&&... args) {
+    return fuzz::quick_lev_ratio(std::forward<Args>(args)...);
+  }
+};
+
+PyObject* normalized_letter_frequency(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
+  return fuzz_call<normalized_letter_frequency_func>(false, args, keywds);
 }
 
 // C++11 does not support generic lambdas
-struct QuickLevRatioVisitor {
-  QuickLevRatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
+struct NormalizedLetterFrequencyVisitor {
+  NormalizedLetterFrequencyVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
   {}
 
   template <typename Sentence1, typename Sentence2>
@@ -194,6 +256,6 @@ private:
   double m_score_cutoff;
 };
 
-double CachedQuickLevRatio::call(double score_cutoff) {
-  return mpark::visit(QuickLevRatioVisitor(score_cutoff), m_str1, m_str2);
+double CachedNormalizedLetterFrequency::call(double score_cutoff) {
+  return mpark::visit(NormalizedLetterFrequencyVisitor(score_cutoff), m_str1, m_str2);
 }

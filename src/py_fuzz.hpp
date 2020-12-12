@@ -27,6 +27,9 @@ Example:
 )");
 PyObject* ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds);
 
+PyDoc_STRVAR(ratio2_docstring, "");
+PyObject* ratio2(PyObject* /*self*/, PyObject* args, PyObject* keywds);
+
 struct CachedRatio : public CachedScorer {
   double call(double score_cutoff) override;
 };

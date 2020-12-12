@@ -39,8 +39,76 @@ struct CachedScorer {
   }
 
   virtual double call(double score_cutoff) = 0;
+  // allow different scorers to require different keyword
+  /*virtual bool parse_args(PyObject* keywds) {
+    // if keywds not empty
+  }*/
 
 protected:
   python_string m_str1;
   python_string m_str2;
+};
+
+
+struct PythonStringWrapper {
+  PythonStringWrapper(python_string value, PyObject* ref = NULL)
+    : value(std::move(value)), m_ref(ref) {}
+
+  PythonStringWrapper(const PythonStringWrapper& other) = delete;
+
+  PythonStringWrapper(PythonStringWrapper&& other) {
+    value = std::move(other.value);
+    m_ref = std::move(other.m_ref);
+    other.m_ref = NULL;
+  }
+
+  PythonStringWrapper& operator=(const PythonStringWrapper& other) = delete;
+  PythonStringWrapper& operator=(PythonStringWrapper&& other) {
+    value = std::move(other.value);
+    m_ref = std::move(other.m_ref);
+    other.m_ref = NULL;
+    return *this;
+  }
+
+  ~PythonStringWrapper() {
+    Py_XDECREF(m_ref);
+  }
+
+  python_string value;
+private:
+  PyObject* m_ref;
+};
+
+
+
+struct Processor {
+  virtual ~Processor() = default;
+  virtual PythonStringWrapper call(PyObject* str, const char* name) = 0;
+};
+
+struct NoProcessor : public Processor  {
+  NoProcessor() {}
+  PythonStringWrapper call(PyObject* str, const char* name) override {
+    if (!valid_str(str, name)) throw std::invalid_argument("");
+    return PythonStringWrapper(decode_python_string(str));
+  }
+};
+
+struct PythonProcessor : public Processor {
+  PythonProcessor(PyObject* processor)
+    : m_processor(processor) {}
+
+  PythonStringWrapper call(PyObject* str, const char* name) override {
+#if PY_VERSION_HEX >= PYTHON_VERSION(3, 9, 0)
+    PyObject* proc_str = PyObject_CallOneArg(m_processor, str);
+#else
+    PyObject* proc_str = PyObject_CallFunctionObjArgs(m_processor, str, NULL);
+#endif
+    if ((proc_str == NULL) || (!valid_str(proc_str, name))) {
+       throw std::invalid_argument("");
+    }
+    return PythonStringWrapper(decode_python_string(proc_str), proc_str);
+  }
+private:
+  PyObject* m_processor;
 };

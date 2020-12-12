@@ -3,7 +3,6 @@
 
 #include "py_utils.hpp"
 
-namespace utils = rapidfuzz::utils;
 
 PyObject* default_process(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 {

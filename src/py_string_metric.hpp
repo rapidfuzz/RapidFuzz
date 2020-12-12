@@ -26,7 +26,7 @@ PyObject* levenshtein(PyObject* /*self*/, PyObject* args, PyObject* keywds);
 
 
 PyDoc_STRVAR(normalized_levenshtein_docstring,
-R"(normalized_levenshtein($module, s1, s2, insert_cost = 1, delete_cost = 1, replace_cost = 1, score_cutoff = 1)
+R"(normalized_levenshtein($module, s1, s2, insert_cost = 1, delete_cost = 1, replace_cost = 1, processor = False, score_cutoff = 1)
 --
 
 Calculates a normalized levenshtein distance using custom
@@ -43,8 +43,10 @@ Args:
     insert_cost (int): cost for insertions
     delete_cost (int): cost for deletions
     replace_cost (int): cost for substitutions
+    processor (Union[bool, Callable]): optional callable that reformats the strings.
+        None is used by default.
     score_cutoff (float): Optional argument for a score threshold as a float between 0 and 100.
-        For ratio < score_cutoff 0 is returned instead of the ratio. Defaults to 0.
+        For ratio < score_cutoff 0 is returned instead. Defaults to 0.
 
 Returns:
     float: normalized weighted levenshtein distance between s1 and s2 as a float between 0 and 100
@@ -68,8 +70,8 @@ Returns:
 PyObject* hamming(PyObject* /*self*/, PyObject* args, PyObject* keywds);
 
 
-PyDoc_STRVAR(quick_lev_ratio_docstring,
-R"(quick_lev_ratio($module, s1, s2, processor = False, score_cutoff = 0)
+PyDoc_STRVAR(normalized_letter_frequency_docstring,
+R"(normalized_letter_frequency($module, s1, s2, processor = False, score_cutoff = 0)
 --
 
 Calculates a quick estimation of fuzz.ratio by counting uncommon letters between the two sentences.
@@ -80,16 +82,15 @@ Args:
     s1 (str): first string to compare
     s2 (str): second string to compare
     processor (Union[bool, Callable]): optional callable that reformats the strings.
-        utils.default_process is used by default, which lowercases the strings and trims whitespace
+        None is used by default.
     score_cutoff (float): Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Defaults to 0.
 
 Returns:
     float: ratio between s1 and s2 as a float between 0 and 100
 )");
-//todo rename
-PyObject* quick_lev_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds);
+PyObject* normalized_letter_frequency(PyObject* /*self*/, PyObject* args, PyObject* keywds);
 
-struct CachedQuickLevRatio : public CachedScorer {
+struct CachedNormalizedLetterFrequency : public CachedScorer {
   double call(double score_cutoff) override;
 };
