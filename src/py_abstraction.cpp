@@ -95,7 +95,7 @@ static inline PyObject* fuzz_call(bool processor_default, PyObject* args, PyObje
   }
 
   if (non_default_process(processor)) {
-    PyObject* proc_s1 = PyObject_CallFunctionObjArgs(processor, py_s2, NULL);
+    PyObject* proc_s1 = PyObject_CallFunctionObjArgs(processor, py_s1, NULL);
     if (proc_s1 == NULL) {
       return NULL;
     }
