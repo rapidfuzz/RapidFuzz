@@ -91,29 +91,3 @@ PyObject* normalized_hamming(PyObject* /*self*/, PyObject* args, PyObject* keywd
 struct CachedNormalizedHamming : public CachedScorer {
   double call(double score_cutoff) override;
 };
-
-
-PyDoc_STRVAR(normalized_letter_frequency_docstring,
-R"(normalized_letter_frequency($module, s1, s2, processor = False, score_cutoff = 0)
---
-
-Calculates a quick estimation of fuzz.ratio by counting uncommon letters between the two sentences.
-Guaranteed to be equal or higher than fuzz.ratio.
-(internally used by fuzz.ratio when providing it with a score_cutoff to speed up the matching)
-
-Args:
-    s1 (str): first string to compare
-    s2 (str): second string to compare
-    processor (Union[bool, Callable]): optional callable that reformats the strings.
-        None is used by default.
-    score_cutoff (float): Optional argument for a score threshold as a float between 0 and 100.
-        For ratio < score_cutoff 0 is returned instead. Defaults to 0.
-
-Returns:
-    float: ratio between s1 and s2 as a float between 0 and 100
-)");
-PyObject* normalized_letter_frequency(PyObject* /*self*/, PyObject* args, PyObject* keywds);
-
-struct CachedNormalizedLetterFrequency : public CachedScorer {
-  double call(double score_cutoff) override;
-};

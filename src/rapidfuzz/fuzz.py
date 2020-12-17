@@ -1,5 +1,7 @@
 from rapidfuzz.cpp_impl import (
     ratio,
+    quick_ratio,
+    real_quick_ratio,
     partial_ratio,
     token_sort_ratio,
     partial_token_sort_ratio,

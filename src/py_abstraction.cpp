@@ -15,9 +15,10 @@ static PyMethodDef methods[] = {
     PY_METHOD(normalized_levenshtein),
     PY_METHOD(hamming),
     PY_METHOD(normalized_hamming),
-    PY_METHOD(normalized_letter_frequency),
     /* fuzz */
     PY_METHOD(ratio),
+    PY_METHOD(quick_ratio),
+    PY_METHOD(real_quick_ratio),
     PY_METHOD(partial_ratio),
     PY_METHOD(token_sort_ratio),
     PY_METHOD(partial_token_sort_ratio),

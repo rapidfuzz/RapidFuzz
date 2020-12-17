@@ -254,37 +254,3 @@ private:
 double CachedNormalizedHamming::call(double score_cutoff) {
   return mpark::visit(NormalizedHammingVisitor(score_cutoff), m_str1, m_str2);
 }
-
-
-/**********************************************
- *              letter_frequency
- *********************************************/
-
-struct normalized_letter_frequency_func {
-  template <typename... Args>
-  static double call(Args&&... args) {
-    return fuzz::quick_lev_ratio(std::forward<Args>(args)...);
-  }
-};
-
-PyObject* normalized_letter_frequency(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-  return fuzz_call<normalized_letter_frequency_func>(false, args, keywds);
-}
-
-// C++11 does not support generic lambdas
-struct NormalizedLetterFrequencyVisitor {
-  NormalizedLetterFrequencyVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
-  {}
-
-  template <typename Sentence1, typename Sentence2>
-  double operator()(Sentence1&& s1, Sentence2&& s2) const {
-    return fuzz::quick_lev_ratio(s1, s2, m_score_cutoff);
-  }
-
-private:
-  double m_score_cutoff;
-};
-
-double CachedNormalizedLetterFrequency::call(double score_cutoff) {
-  return mpark::visit(NormalizedLetterFrequencyVisitor(score_cutoff), m_str1, m_str2);
-}
