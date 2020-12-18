@@ -51,32 +51,34 @@ protected:
 
 
 struct PythonStringWrapper {
-  PythonStringWrapper(python_string value, PyObject* ref = NULL)
-    : value(std::move(value)), m_ref(ref) {}
+  PythonStringWrapper(python_string value, PyObject* object = NULL, bool owned = false)
+    : value(std::move(value)), object(object), owned(owned) {}
 
   PythonStringWrapper(const PythonStringWrapper& other) = delete;
 
   PythonStringWrapper(PythonStringWrapper&& other) {
     value = std::move(other.value);
-    m_ref = std::move(other.m_ref);
-    other.m_ref = NULL;
+    object = other.object;
+    owned = other.owned;
+    other.owned = false;
   }
 
   PythonStringWrapper& operator=(const PythonStringWrapper& other) = delete;
   PythonStringWrapper& operator=(PythonStringWrapper&& other) {
     value = std::move(other.value);
-    m_ref = std::move(other.m_ref);
-    other.m_ref = NULL;
+    object = other.object;
+    owned = other.owned;
+    other.owned = false;
     return *this;
   }
 
   ~PythonStringWrapper() {
-    Py_XDECREF(m_ref);
+    if (owned) Py_XDECREF(object);
   }
 
   python_string value;
-private:
-  PyObject* m_ref;
+  PyObject* object;
+  bool owned;
 };
 
 
@@ -90,7 +92,7 @@ struct NoProcessor : public Processor  {
   NoProcessor() {}
   PythonStringWrapper call(PyObject* str, const char* name) override {
     if (!valid_str(str, name)) throw std::invalid_argument("");
-    return PythonStringWrapper(decode_python_string(str));
+    return PythonStringWrapper(decode_python_string(str), str);
   }
 };
 
@@ -107,7 +109,7 @@ struct PythonProcessor : public Processor {
     if ((proc_str == NULL) || (!valid_str(proc_str, name))) {
        throw std::invalid_argument("");
     }
-    return PythonStringWrapper(decode_python_string(proc_str), proc_str);
+    return PythonStringWrapper(decode_python_string(proc_str), proc_str, true);
   }
 private:
   PyObject* m_processor;

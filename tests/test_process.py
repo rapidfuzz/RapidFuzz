@@ -169,6 +169,9 @@ def custom_scorer(s1, s2, processor=None, score_cutoff=0):
 def test_extractOne_case_sensitive(processor, scorer):
     assert process.extractOne("new york mets", ["new", "new YORK mets"], processor=processor, scorer=scorer)[1] != 100
 
+@pytest.mark.parametrize("scorer", [fuzz.ratio, custom_scorer])
+def test_extractOne_use_first_match(scorer):
+    assert process.extractOne("new york mets", ["new york mets", "new york mets"], scorer=scorer)[2] == 0
 
 if __name__ == '__main__':
     unittest.main()

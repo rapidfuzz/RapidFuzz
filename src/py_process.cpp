@@ -29,10 +29,10 @@ std::unique_ptr<CachedScorer> get_matching_instance(PyObject* scorer)
         return std::unique_ptr<CachedRatio>(new CachedRatio());
       }
       else if (scorer_func == PY_FUNC_CAST(quick_ratio)) {
-        return std::unique_ptr<CachedRatio>(new CachedQuickRatio());
+        return std::unique_ptr<CachedQuickRatio>(new CachedQuickRatio());
       }
       else if (scorer_func == PY_FUNC_CAST(real_quick_ratio)) {
-        return std::unique_ptr<CachedRatio>(new CachedRealQuickRatio());
+        return std::unique_ptr<CachedRealQuickRatio>(new CachedRealQuickRatio());
       }
       else if (scorer_func == PY_FUNC_CAST(partial_ratio)) {
         return std::unique_ptr<CachedPartialRatio>(new CachedPartialRatio());
@@ -155,6 +155,7 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices, PyObjec
       }
 
       auto choice = processor->call(py_match_choice, "choice");
+
       PyObject* py_proc_choice = mpark::visit(EncodePythonStringVisitor(), choice.value);
 
       if (!py_proc_choice) {
@@ -169,7 +170,7 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices, PyObjec
         throw std::invalid_argument("");
       }
 
-      int comp = PyObject_RichCompareBool(score, py_score_cutoff, Py_GE);
+      int comp = PyObject_RichCompareBool(score, py_score_cutoff, Py_GT);
       if (comp == 1) {
         py_score_cutoff = score;
         PyDict_SetItemString(kwargs, "score_cutoff", score);
