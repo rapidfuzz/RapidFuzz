@@ -28,6 +28,12 @@ std::unique_ptr<CachedScorer> get_matching_instance(PyObject* scorer)
       if (scorer_func == PY_FUNC_CAST(ratio)) {
         return std::unique_ptr<CachedRatio>(new CachedRatio());
       }
+      else if (scorer_func == PY_FUNC_CAST(quick_ratio)) {
+        return std::unique_ptr<CachedRatio>(new CachedQuickRatio());
+      }
+      else if (scorer_func == PY_FUNC_CAST(real_quick_ratio)) {
+        return std::unique_ptr<CachedRatio>(new CachedRealQuickRatio());
+      }
       else if (scorer_func == PY_FUNC_CAST(partial_ratio)) {
         return std::unique_ptr<CachedPartialRatio>(new CachedPartialRatio());
       }
@@ -54,9 +60,6 @@ std::unique_ptr<CachedScorer> get_matching_instance(PyObject* scorer)
       }
       else if (scorer_func == PY_FUNC_CAST(QRatio)) {
         return std::unique_ptr<CachedQRatio>(new CachedQRatio());
-      }
-      else if (scorer_func == PY_FUNC_CAST(normalized_letter_frequency)) {
-        return std::unique_ptr<CachedNormalizedLetterFrequency>(new CachedNormalizedLetterFrequency());
       }
     }
     /* call python function */
@@ -92,14 +95,32 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices, PyObjec
     return NULL;
   }
 
+  PyObject* kwargs =  PyDict_New();
+  if (!kwargs) {
+    Py_DecRef(py_score_cutoff);
+    return NULL;
+  }
+  outer_owner_list.push_back(kwargs);
+
+  PyDict_SetItemString(kwargs, "processor", Py_None);
+  PyDict_SetItemString(kwargs, "score_cutoff", py_score_cutoff);
+  Py_DecRef(py_score_cutoff);
+
+  PyObject* args = PyTuple_New(2);
+  if (!args) {
+    free_owner_list(outer_owner_list);
+    return NULL;
+  }
+  outer_owner_list.push_back(args);
+
   try {
     auto query = processor->call(py_query, "query");
     py_query = mpark::visit(EncodePythonStringVisitor(), query.value);
     if (!py_query) {
       throw std::invalid_argument("");
     }
-  
-    outer_owner_list.push_back(py_query);
+
+    PyTuple_SET_ITEM(args, 0, py_query);
 
     /* dict like container */
     if (PyObject_HasAttrString(py_choices, "items")) {
@@ -140,10 +161,9 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices, PyObjec
         throw std::invalid_argument("");
       }
 
-      PyObject* score =
-          PyObject_CallFunction(scorer, "OOO", py_query, py_proc_choice, py_score_cutoff);
+      PyTuple_SetItem(args, 1, py_proc_choice);
 
-      Py_DecRef(py_proc_choice);
+      PyObject* score = PyObject_Call(scorer, args, kwargs);
 
       if (!score) {
         throw std::invalid_argument("");
@@ -151,31 +171,27 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices, PyObjec
 
       int comp = PyObject_RichCompareBool(score, py_score_cutoff, Py_GE);
       if (comp == 1) {
-        Py_DecRef(py_score_cutoff);
         py_score_cutoff = score;
+        PyDict_SetItemString(kwargs, "score_cutoff", score);
         result_choice = py_match_choice;
         choice_key = py_choice;
         result_index = i;
-      }
-      else if (comp == 0) {
-        Py_DecRef(score);
       }
       else if (comp == -1) {
         Py_DecRef(score);
         throw std::invalid_argument("");
       }
+      Py_DecRef(score);
     }
 
   } catch(std::invalid_argument& e) {
     // todo replace
     free_owner_list(outer_owner_list);
-    Py_DecRef(py_score_cutoff);
     return NULL;
   }  
 
   if (result_index == -1) {
     free_owner_list(outer_owner_list);
-    Py_DecRef(py_score_cutoff);
     Py_RETURN_NONE;
   }
 
@@ -183,7 +199,6 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices, PyObjec
                              : Py_BuildValue("(OOn)", result_choice, py_score_cutoff, result_index);
 
   free_owner_list(outer_owner_list);
-  Py_DecRef(py_score_cutoff);
   return result;
 }
 

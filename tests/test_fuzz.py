@@ -99,15 +99,15 @@ class RatioTest(unittest.TestCase):
 
 
 @pytest.mark.parametrize("processor", [True, utils.default_process, lambda s: utils.default_process(s)])
-def testRatioCaseInsensitive(processor):
+def test_ratio_case_insensitive(processor):
     assert fuzz.ratio(RatioTest.s1, RatioTest.s2, processor=processor) == 100
 
 @pytest.mark.parametrize("processor", [False, None, lambda s: s])
-def testRatioNotCaseInsensitive(processor):
+def test_ratio_case_censitive(processor):
     assert fuzz.ratio(RatioTest.s1, RatioTest.s2, processor=processor) != 100
 
 @pytest.mark.parametrize("scorer", scorers)
-def testCustomProcessor(scorer):
+def test_custom_processor(scorer):
     """
     Any scorer should accept any type as s1 and s2, as long as it is a string
     after preprocessing.
@@ -119,7 +119,7 @@ def testCustomProcessor(scorer):
     assert scorer(s2, s3, processor=lambda event: event[0]) != 100
 
 @pytest.mark.parametrize("scorer", scorers)
-def testHelp(scorer):
+def test_help(scorer):
     """
     test that all help texts can be printed without throwing an exception,
     since they are implemented in C++ aswell
