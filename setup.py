@@ -61,7 +61,7 @@ setup(
                 'src/py_process.cpp',
                 'src/py_abstraction.cpp'
             ],
-            include_dirs=["src/rapidfuzz-cpp/rapidfuzz", "src/rapidfuzz-cpp/extern", "extern"],
+            include_dirs=["src/rapidfuzz-cpp/rapidfuzz", "src/rapidfuzz-cpp/", "extern"],
             language='c++',
         ),
     ],

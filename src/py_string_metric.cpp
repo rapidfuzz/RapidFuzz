@@ -1,13 +1,13 @@
 /* SPDX-License-Identifier: MIT */
 /* Copyright © 2020 Max Bachmann */
 
-#include "levenshtein.hpp"
+#include "string_metric.hpp"
 #include "fuzz.hpp"
 #include "py_common.hpp"
 #include "py_string_metric.hpp"
 #include "py_utils.hpp"
 
-namespace rlevenshtein = rapidfuzz::levenshtein;
+namespace string_metric = rapidfuzz::string_metric;
 namespace fuzz = rapidfuzz::fuzz;
 
 // C++11 does not support generic lambdas
@@ -71,16 +71,7 @@ struct LevenshteinVisitor {
   template <typename Sentence1, typename Sentence2>
   std::size_t operator()(Sentence1&& s1, Sentence2&& s2) const
   {
-    if (m_insert_cost == 1 && m_delete_cost == 1) {
-      if (m_replace_cost == 1) {
-        return rlevenshtein::distance(s1, s2);
-      }
-      else if (m_replace_cost == 2) {
-        return rlevenshtein::weighted_distance(s1, s2);
-      }
-    }
-
-    return rlevenshtein::generic_distance(s1, s2, {m_insert_cost, m_delete_cost, m_replace_cost});
+    return string_metric::levenshtein(s1, s2, {m_insert_cost, m_delete_cost, m_replace_cost});
   }
 
 private:
@@ -97,12 +88,12 @@ PyObject* levenshtein(PyObject* /*self*/, PyObject* args, PyObject* keywds)
   std::size_t delete_cost = 1;
   std::size_t replace_cost = 1;
   static const char* kwlist[] = {"s1", "s2", "insert_cost", "delete_cost", "replace_cost", NULL};
-
   if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|nnn", const_cast<char**>(kwlist), &py_s1,
                                    &py_s2, &insert_cost, &delete_cost, &replace_cost))
   {
     return NULL;
   }
+
 
   if (!valid_str(py_s1, "s1") || !valid_str(py_s2, "s2")) {
     return NULL;
@@ -125,16 +116,10 @@ struct NormalizedLevenshteinVisitor {
   template <typename Sentence1, typename Sentence2>
   double operator()(Sentence1&& s1, Sentence2&& s2) const
   {
-    if (m_insert_cost == 1 && m_delete_cost == 1) {
-      if (m_replace_cost == 1) {
-        return rlevenshtein::normalized_distance(s1, s2, m_score_cutoff);
-      }
-      else if (m_replace_cost == 2) {
-        return rlevenshtein::normalized_weighted_distance(s1, s2, m_score_cutoff);
-      }
-    }
-    /* todo there is no normalized version of this yet */
-    return 0.0;
+    return string_metric::normalized_levenshtein(
+      s1, s2, {m_insert_cost, m_delete_cost, m_replace_cost}, m_score_cutoff);
+
+    // todo catch potential exception somewhere
   }
 
 private:
@@ -194,7 +179,7 @@ struct HammingDistanceVisitor {
   template <typename Sentence1, typename Sentence2>
   std::size_t operator()(Sentence1&& s1, Sentence2&& s2) const
   {
-    return rlevenshtein::hamming(s1, s2);
+    return string_metric::hamming(s1, s2);
   }
 };
 
@@ -229,7 +214,7 @@ PyObject* hamming(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 struct normalized_hamming_func {
   template <typename... Args>
   static double call(Args&&... args) {
-    return rlevenshtein::normalized_hamming(std::forward<Args>(args)...);
+    return string_metric::normalized_hamming(std::forward<Args>(args)...);
   }
 };
 
@@ -244,7 +229,7 @@ struct NormalizedHammingVisitor {
 
   template <typename Sentence1, typename Sentence2>
   double operator()(Sentence1&& s1, Sentence2&& s2) const {
-    return rlevenshtein::normalized_hamming(s1, s2, m_score_cutoff);
+    return string_metric::normalized_hamming(s1, s2, m_score_cutoff);
   }
 
 private:
