@@ -47,20 +47,25 @@ Insertion = 1, Deletion = 1, Substitution = 1:
   +==================+           +----------------------------+
         | No
         V
+  +=======================+
+  || remove common affix ||
+  +=======================+
+        |
+        V
   +==================+    Yes    +--------------------------+
-  ||     k ≤ 3      ||---------->| mbleven algorithm (O(N)) |
+  ||    max ≤ 3     ||---------->| mbleven algorithm (O(N)) |
   +==================+           +--------------------------+
         | No
         V
   +==================+    Yes    +--------------------------+
   || extended Ascii ||---------->| Hyyrös' algorithm (O(N)) |
-  || len(ss) ≤ 64   ||           | described by [5]_        |
+  || len(ss) ≤ 64   ||           | described by [1]_        |
   +==================+           +--------------------------+
         | No
         V
   +-------------------------------------------------------------+
   | Wagner-Fischer using Ukkonens optimisation                  |
-  | described by [0]_ and [3]_                                  |
+  | described by [2]_ and [3]_                                  |
   | TODO: replace with Myers algorithm (with blocks)            |
   +-------------------------------------------------------------+
 
@@ -70,9 +75,19 @@ Insertion = 1, Deletion = 1, Substitution = 2:
   +==================+           +----------------------------+
         | No
         V
+  +=======================+
+  || remove common affix ||
+  +=======================+
+        |
+        V
+  +==================+    Yes    +--------------------------+
+  ||    max ≤ 4     ||---------->| mbleven algorithm (O(N)) |
+  +==================+           +--------------------------+
+        | No
+        V
   +==================+    Yes    +--------------------------+
   || extended Ascii ||---------->| BitPAl algorithm (O(N))  |
-  || len(ss) ≤ 64   ||           | described by [6]_        |
+  || len(ss) ≤ 64   ||           | described by [4]_        |
   +==================+           +--------------------------+
         | No
         V
@@ -86,29 +101,30 @@ Insertion = 1, Deletion = 1, Substitution = 2:
 Other weights:
   The implementation for other weights is based on Wagner-Fischer.
   It has a performance of ``O(m * n)`` and has a memory usage of ``O(n)``.
-  Further details can be found in [0]_ and [1]_.
+  Further details can be found in [1]_ and [6]_.
 
 
 References
 ----------
-.. [1] Wagner, Robert & Fischer, Michael
-       "The String-to-String Correction Problem."
-       J. ACM. 21. (1974): 168-173
-.. [2] Hirschberg, D. "A Linear space algorithm for Computing
-       Maximal Common Subsequences."
-       Commun. ACM 18 (1975): 341-343
-.. [3] Ukkonen, Esko. "Algorithms for Approximate String Matching."
-       Information and Control. 64. (1985): 100-118
-.. [4] Myers, Gene. "A fast bit-vector algorithm for approximate
-       string matching based on dynamic programming."
-       Journal of the ACM (JACM) 46.3 (1999): 395-415.
-.. [5] Hyyrö, Heikki. "A Bit-Vector Algorithm for Computing
+.. [1] Hyyrö, Heikki. "A Bit-Vector Algorithm for Computing
        Levenshtein and Damerau Edit Distances."
        Nordic Journal of Computing, Volume 10 (2003): 29-39.
-.. [6] Loving, Joshua & Hernández, Yözen & Benson, Gary.
+.. [2] Wagner, Robert & Fischer, Michael
+       "The String-to-String Correction Problem."
+       J. ACM. 21. (1974): 168-173
+.. [3] Ukkonen, Esko. "Algorithms for Approximate String Matching."
+       Information and Control. 64. (1985): 100-118
+.. [4] Loving, Joshua & Hernández, Yözen & Benson, Gary.
        "BitPAl: A Bit-Parallel, General Integer-Scoring Sequence
        Alignment Algorithm. Bioinformatics"
        Bioinformatics, Volume 30 (2014): 3166–3173
+.. [5] Myers, Gene. "A fast bit-vector algorithm for approximate
+       string matching based on dynamic programming."
+       Journal of the ACM (JACM) 46.3 (1999): 395-415.
+.. [6] Hirschberg, D. "A Linear space algorithm for Computing
+       Maximal Common Subsequences."
+       Commun. ACM 18 (1975): 341-343
+
 
 Examples
 --------
