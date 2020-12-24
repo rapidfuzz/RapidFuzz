@@ -47,9 +47,9 @@ Insertion = 1, Deletion = 1, Substitution = 1:
   +==================+           +----------------------------+
         | No
         V
-  +=======================+
-  || remove common affix ||
-  +=======================+
+  +---------------------+
+  | remove common affix |
+  +---------------------+
         |
         V
   +==================+    Yes    +--------------------------+
@@ -65,43 +65,50 @@ Insertion = 1, Deletion = 1, Substitution = 1:
         V
   +-------------------------------------------------------------+
   | Wagner-Fischer using Ukkonens optimisation                  |
-  | described by [2]_ and [3]_                                  |
+  | described by [2]_                                           |
   | TODO: replace with Myers algorithm (with blocks)            |
   +-------------------------------------------------------------+
 
 Insertion = 1, Deletion = 1, Substitution = 2:
+  +==================+   Yes    +----------------------------+
+  ||    max = 0     ||--------->| direct comparision (O(N))  |
+  +==================+          +----------------------------+
+        | No
+        V
+  +---------------------+
+  | remove common affix |
+  +---------------------+
+        |
+        V
+  +==================+   Yes    +--------------------------+
+  ||    max ≤ 4     ||--------->| mbleven algorithm (O(N)) |
+  +==================+          +--------------------------+
+        | No
+        V
+  +==================+    Yes    +-------------------------------+
+  ||  len(ss) ≤ 64  ||---------->| BitPAl algorithm (O(N))       |
+  ||                ||           | described by [4]_             |
+  ||                ||           | with additional UTF32 support |
+  +==================+           +-------------------------------+
+        | No
+        V
   +==================+    Yes    +----------------------------+
-  ||    max = 0     ||---------->| direct comparision (O(N))  |
+  || extended Ascii ||---------->| BitPAl algorithm blockwise |
+  ||                ||           | (O(N*M/64))                |
   +==================+           +----------------------------+
         | No
         V
-  +=======================+
-  || remove common affix ||
-  +=======================+
-        |
-        V
-  +==================+    Yes    +--------------------------+
-  ||    max ≤ 4     ||---------->| mbleven algorithm (O(N)) |
-  +==================+           +--------------------------+
-        | No
-        V
-  +==================+    Yes    +--------------------------+
-  || extended Ascii ||---------->| BitPAl algorithm (O(N))  |
-  || len(ss) ≤ 64   ||           | described by [4]_        |
-  +==================+           +--------------------------+
-        | No
-        V
-  +-------------------------------------------------------------+
-  | Wagner-Fischer using Ukkonens optimisation                  |
-  | described by [0]_ and [3]_                                  |
-  | TODO: replace with Myers algorithm (with blocks)            |
-  +-------------------------------------------------------------+
+  +--------------------------------------------------------------+
+  | Wagner-Fischer using Ukkonens optimisation (O(N*M))          |
+  | described by [2]_                                            |
+  | TODO: add unicode support to blockwise BitPAL as replacement |
+  +--------------------------------------------------------------+
 
 
 Other weights:
   The implementation for other weights is based on Wagner-Fischer.
   It has a performance of ``O(m * n)`` and has a memory usage of ``O(n)``.
-  Further details can be found in [1]_ and [6]_.
+  Further details can be found in [2]_.
 
 
 References
@@ -121,9 +128,6 @@ References
 .. [5] Myers, Gene. "A fast bit-vector algorithm for approximate
        string matching based on dynamic programming."
        Journal of the ACM (JACM) 46.3 (1999): 395-415.
-.. [6] Hirschberg, D. "A Linear space algorithm for Computing
-       Maximal Common Subsequences."
-       Commun. ACM 18 (1975): 341-343
 
 
 Examples

@@ -240,7 +240,7 @@ PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 
   try {
     auto query = processor->call(py_query, "query");
-    scorer->str1_set(query.value);
+    scorer->set_seq1(query.value);
 
     /* dict like container */
     if (PyObject_HasAttrString(py_choices, "items")) {
@@ -275,7 +275,7 @@ PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds)
       }
 
       auto choice = processor->call(py_match_choice, "choice");
-      scorer->str2_set(choice.value);
+      scorer->set_seq2(choice.value);
 
       double score = scorer->call(score_cutoff);
 

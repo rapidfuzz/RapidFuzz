@@ -28,12 +28,12 @@
 struct CachedScorer {
   virtual ~CachedScorer() = default;
 
-  virtual void str1_set(python_string str)
+  virtual void set_seq1(python_string str)
   {
     m_str1 = std::move(str);
   }
 
-  virtual void str2_set(python_string str)
+  virtual void set_seq2(python_string str)
   {
     m_str2 = std::move(str);
   }

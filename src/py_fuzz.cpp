@@ -210,15 +210,15 @@ PyObject* token_sort_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 struct SortedSplitVisitor {
   template <typename Sentence>
   python_string operator()(Sentence&& s) const {
-    return utils::sorted_split(s).join();
+    return rapidfuzz::common::sorted_split(s).join();
   }
 };
 
-void CachedTokenSortRatio::str1_set(python_string str) {
+void CachedTokenSortRatio::set_seq1(python_string str) {
   m_str1 = mpark::visit(SortedSplitVisitor(), str);
 }
 
-void CachedTokenSortRatio::str2_set(python_string str) {
+void CachedTokenSortRatio::set_seq2(python_string str) {
   m_str2 = mpark::visit(SortedSplitVisitor(), str);
 }
 
@@ -242,11 +242,11 @@ PyObject* partial_token_sort_ratio(PyObject* /*self*/, PyObject* args, PyObject*
   return fuzz_call<partial_token_sort_ratio_func>(true, args, keywds);
 }
 
-void CachedPartialTokenSortRatio::str1_set(python_string str) {
+void CachedPartialTokenSortRatio::set_seq1(python_string str) {
   m_str1 = mpark::visit(SortedSplitVisitor(), str);
 }
 
-void CachedPartialTokenSortRatio::str2_set(python_string str) {
+void CachedPartialTokenSortRatio::set_seq2(python_string str) {
   m_str2 = mpark::visit(SortedSplitVisitor(), str);
 }
 

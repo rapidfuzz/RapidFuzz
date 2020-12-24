@@ -139,8 +139,8 @@ Example:
 PyObject* token_sort_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds);
 
 struct CachedTokenSortRatio : public CachedScorer {
-  void str1_set(python_string str) override;
-  void str2_set(python_string str) override;
+  void set_seq1(python_string str) override;
+  void set_seq2(python_string str) override;
   double call(double score_cutoff) override;
 };
 
@@ -165,8 +165,8 @@ Returns:
 PyObject* partial_token_sort_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds);
 
 struct CachedPartialTokenSortRatio : public CachedScorer {
-  void str1_set(python_string str) override;
-  void str2_set(python_string str) override;
+  void set_seq1(python_string str) override;
+  void set_seq2(python_string str) override;
   double call(double score_cutoff) override;
 };
 
