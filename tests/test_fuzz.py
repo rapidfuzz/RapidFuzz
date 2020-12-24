@@ -77,34 +77,48 @@ class RatioTest(unittest.TestCase):
     def testQRatioUnicode(self):
         self.assertEqual(fuzz.WRatio(self.s1, self.s1a), 100)
 
-    def testEmptyStrings(self):
-        self.assertEqual(fuzz.ratio("", ""), 100)
-        self.assertEqual(fuzz.partial_ratio("", ""), 100)
 
-    def testNoneString(self):
-        self.assertEqual(fuzz.ratio("", None), 0)
-        self.assertEqual(fuzz.partial_ratio("", None), 0)
+@pytest.mark.parametrize("scorer", scorers)
+def test_empty_string(scorer):
+    """
+    when both strings are empty this is a perfect match
+    """
+    assert scorer("", "") == 100
 
-    def testWRatioUnicodeString(self):
-        s1 = u"Á"
-        s2 = "ABCD"
-        score = fuzz.WRatio(s1, s2)
-        self.assertEqual(0, score)
 
-    def testQRatioUnicodeString(self):
-        s1 = u"Á"
-        s2 = "ABCD"
-        score = fuzz.QRatio(s1, s2)
-        self.assertEqual(0, score)
+@pytest.mark.parametrize("scorer", scorers)
+def test_none_string(scorer):
+    """
+    when None is passed to a scorer the result should always be 0
+    """
+    assert scorer("test", None) == 0
+    assert scorer(None, "test") == 0
+
+@pytest.mark.parametrize("scorer", scorers)
+def test_simple_unicode_tests(scorer):
+    """
+    some very simple tests using unicode with scorers
+    to catch relatively obvious implementation errors
+    """
+    s1 = u"ÁÄ"
+    s2 = "ABCD"
+    assert scorer(s1, s2) == 0
+    assert scorer(s1, s1) == 100
 
 
 @pytest.mark.parametrize("processor", [True, utils.default_process, lambda s: utils.default_process(s)])
-def test_ratio_case_insensitive(processor):
-    assert fuzz.ratio(RatioTest.s1, RatioTest.s2, processor=processor) == 100
+@pytest.mark.parametrize("scorer", scorers)
+def test_scorer_case_insensitive(processor, scorer):
+    """
+    each scorer should be able to preprocess strings properly
+    """
+    assert scorer(RatioTest.s1, RatioTest.s2, processor=processor) == 100
+
 
 @pytest.mark.parametrize("processor", [False, None, lambda s: s])
 def test_ratio_case_censitive(processor):
     assert fuzz.ratio(RatioTest.s1, RatioTest.s2, processor=processor) != 100
+
 
 @pytest.mark.parametrize("scorer", scorers)
 def test_custom_processor(scorer):
@@ -117,6 +131,7 @@ def test_custom_processor(scorer):
     s3 = ["different string", "CitiFields", "2012-05-11", "9pm"]
     assert scorer(s1, s2, processor=lambda event: event[0]) == 100
     assert scorer(s2, s3, processor=lambda event: event[0]) != 100
+
 
 @pytest.mark.parametrize("scorer", scorers)
 def test_help(scorer):
