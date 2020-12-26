@@ -74,11 +74,19 @@ PyObject* ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {         
 
 // C++11 does not support generic lambdas
 struct RatioVisitor {
-  RatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
+  RatioVisitor(double score_cutoff)
+    : m_score_cutoff(score_cutoff)
   {}
 
-  template <typename Sentence1, typename Sentence2>
-  double operator()(Sentence1&& s1, Sentence2&& s2) const {
+  template <typename Sentence1, typename BlockMap, typename Sentence2>
+  double operator()(Sentence1&& s1, BlockMap&& block, Sentence2&& s2) const {
+    if (s1.size() < 64) {
+      auto sentence1 = rapidfuzz::common::to_string_view(s1);
+      auto sentence2 = rapidfuzz::common::to_string_view(s2);
+      // block is created using s1
+      return rapidfuzz::string_metric::detail::normalized_weighted_levenshtein(
+        sentence2, block, sentence1, m_score_cutoff);
+    }
     return fuzz::ratio(s1, s2, m_score_cutoff);
   }
 
@@ -86,8 +94,28 @@ private:
   double m_score_cutoff;
 };
 
+struct BlockmapVisitor {
+  template <typename Sentence, typename CharT = rapidfuzz::char_type<Sentence>>
+  python_blockmap operator()(Sentence s) {
+    rapidfuzz::common::blockmap_entry<sizeof(CharT)> block;
+
+    if (s.size() < 64) {
+      for (std::size_t i = 0; i < s.size(); i++){
+        block.insert(s[i], i);
+      }
+    }
+
+    return block;
+  }
+};
+
+void CachedRatio::set_seq1(python_string str){
+  m_str1 = std::move(str);
+  m_block = mpark::visit(BlockmapVisitor(), m_str1);
+}
+
 double CachedRatio::call(double score_cutoff) {
-  return mpark::visit(RatioVisitor(score_cutoff), m_str1, m_str2);
+  return mpark::visit(RatioVisitor(score_cutoff), m_str1, m_block, m_str2);
 }
 
 /**********************************************
@@ -168,7 +196,7 @@ struct partial_ratio_func {
   }
 };
 
-PyObject* partial_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {                                                                                                \
+PyObject* partial_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
   return fuzz_call<partial_ratio_func>(false, args, keywds);
 }
 
@@ -202,7 +230,7 @@ struct token_sort_ratio_func {
   }
 };
 
-PyObject* token_sort_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {                                                                                                \
+PyObject* token_sort_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
   return fuzz_call<token_sort_ratio_func>(true, args, keywds);
 }
 
@@ -216,6 +244,7 @@ struct SortedSplitVisitor {
 
 void CachedTokenSortRatio::set_seq1(python_string str) {
   m_str1 = mpark::visit(SortedSplitVisitor(), str);
+  m_block = mpark::visit(BlockmapVisitor(), m_str1);
 }
 
 void CachedTokenSortRatio::set_seq2(python_string str) {
@@ -223,7 +252,7 @@ void CachedTokenSortRatio::set_seq2(python_string str) {
 }
 
 double CachedTokenSortRatio::call(double score_cutoff) {
-  return mpark::visit(RatioVisitor(score_cutoff), m_str1, m_str2);
+  return mpark::visit(RatioVisitor(score_cutoff), m_str1, m_block, m_str2);
 }
 
 
@@ -446,8 +475,15 @@ struct QRatioVisitor {
   QRatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
   {}
 
-  template <typename Sentence1, typename Sentence2>
-  double operator()(Sentence1&& s1, Sentence2&& s2) const {
+  template <typename Sentence1, typename BlockMap, typename Sentence2>
+  double operator()(Sentence1&& s1, BlockMap&& block, Sentence2&& s2) const {
+    if (s1.size() < 64) {
+      auto sentence1 = rapidfuzz::common::to_string_view(s1);
+      auto sentence2 = rapidfuzz::common::to_string_view(s2);
+      // block is created using s1
+      return rapidfuzz::string_metric::detail::normalized_weighted_levenshtein(
+        sentence2, block, sentence1, m_score_cutoff);
+    }
     return fuzz::QRatio(s1, s2, m_score_cutoff);
   }
 
@@ -455,6 +491,11 @@ private:
   double m_score_cutoff;
 };
 
+void CachedQRatio::set_seq1(python_string str){
+  m_str1 = std::move(str);
+  m_block = mpark::visit(BlockmapVisitor(), m_str1);
+}
+
 double CachedQRatio::call(double score_cutoff) {
-  return mpark::visit(QRatioVisitor(score_cutoff), m_str1, m_str2);
+  return mpark::visit(RatioVisitor(score_cutoff), m_str1, m_block, m_str2);
 }

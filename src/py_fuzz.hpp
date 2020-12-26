@@ -3,6 +3,7 @@
 
 #pragma once
 #include "py_common.hpp"
+#include "rapidfuzz/details/common.hpp"
 
 PyDoc_STRVAR(ratio_docstring,
 R"(ratio($module, s1, s2, processor = False, score_cutoff = 0)
@@ -27,8 +28,15 @@ Example:
 )");
 PyObject* ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds);
 
+using python_blockmap =
+    mpark::variant<rapidfuzz::common::blockmap_entry<1>, rapidfuzz::common::blockmap_entry<2>, rapidfuzz::common::blockmap_entry<4>>;
+
+
 struct CachedRatio : public CachedScorer {
+  void set_seq1(python_string str) override;
   double call(double score_cutoff) override;
+private:
+  python_blockmap m_block;
 };
 
 
@@ -142,6 +150,8 @@ struct CachedTokenSortRatio : public CachedScorer {
   void set_seq1(python_string str) override;
   void set_seq2(python_string str) override;
   double call(double score_cutoff) override;
+private:
+  python_blockmap m_block;
 };
 
 
@@ -325,5 +335,8 @@ Example:
 PyObject* QRatio(PyObject* /*self*/, PyObject* args, PyObject* keywds);
 
 struct CachedQRatio : public CachedScorer {
+  void set_seq1(python_string str) override;
   double call(double score_cutoff) override;
+private:
+  python_blockmap m_block;
 };
