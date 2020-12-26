@@ -19,11 +19,11 @@ class UtilsTest(unittest.TestCase):
         mixed_strings_proc = [
             "lorem ipsum is simply dummy text of the printing and typesetting industry",
             "c est la vie",
-            u"Ça va",
+            u"ça va",
             u"cães danados",
-            u"¬camarões assados",
-            u"a¬ሴ€耀",
-            u"Á"
+            u"camarões assados",
+            u"a ሴ€耀",
+            u"á"
         ]
 
         for string, proc_string in zip(mixed_strings, mixed_strings_proc):
