@@ -3,7 +3,7 @@
 
 #pragma once
 #include "py_common.hpp"
-#include "rapidfuzz/details/common.hpp"
+
 
 PyDoc_STRVAR(ratio_docstring,
 R"(ratio($module, s1, s2, processor = False, score_cutoff = 0)
@@ -28,17 +28,6 @@ Example:
 )");
 PyObject* ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds);
 
-using python_blockmap =
-    mpark::variant<rapidfuzz::common::blockmap_entry<1>, rapidfuzz::common::blockmap_entry<2>, rapidfuzz::common::blockmap_entry<4>>;
-
-
-struct CachedRatio : public CachedScorer {
-  void set_seq1(python_string str) override;
-  double call(double score_cutoff) override;
-private:
-  python_blockmap m_block;
-};
-
 
 PyDoc_STRVAR(quick_ratio_docstring,
 R"(quick_ratio($module, s1, s2, processor = False, score_cutoff = 0)
@@ -62,11 +51,6 @@ Returns:
 )");
 PyObject* quick_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds);
 
-// todo precalculate array for s2
-struct CachedQuickRatio : public CachedScorer {
-  double call(double score_cutoff) override;
-};
-
 
 PyDoc_STRVAR(real_quick_ratio_docstring,
 R"(real_quick_ratio($module, s1, s2, processor = False, score_cutoff = 0)
@@ -89,10 +73,6 @@ Returns:
     float: ratio between s1 and s2 as a float between 0 and 100
 )");
 PyObject* real_quick_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds);
-
-struct CachedRealQuickRatio : public CachedScorer {
-  double call(double score_cutoff) override;
-};
 
 
 PyDoc_STRVAR(partial_ratio_docstring,
@@ -118,10 +98,6 @@ Example:
 )");
 PyObject* partial_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds);
 
-struct CachedPartialRatio : public CachedScorer {
-  double call(double score_cutoff) override;
-};
-
 
 PyDoc_STRVAR(token_sort_ratio_docstring,
 R"(token_sort_ratio($module, s1, s2, processor = False, score_cutoff = 0)
@@ -146,14 +122,6 @@ Example:
 )");
 PyObject* token_sort_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds);
 
-struct CachedTokenSortRatio : public CachedScorer {
-  void set_seq1(python_string str) override;
-  void set_seq2(python_string str) override;
-  double call(double score_cutoff) override;
-private:
-  python_blockmap m_block;
-};
-
 
 PyDoc_STRVAR(partial_token_sort_ratio_docstring,
 R"(partial_token_sort_ratio($module, s1, s2, processor = False, score_cutoff = 0)
@@ -173,12 +141,6 @@ Returns:
     float: ratio between s1 and s2 as a float between 0 and 100
 )");
 PyObject* partial_token_sort_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds);
-
-struct CachedPartialTokenSortRatio : public CachedScorer {
-  void set_seq1(python_string str) override;
-  void set_seq2(python_string str) override;
-  double call(double score_cutoff) override;
-};
 
 
 PyDoc_STRVAR(token_set_ratio_docstring,
@@ -207,10 +169,6 @@ Example:
 )");
 PyObject* token_set_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds);
 
-struct CachedTokenSetRatio : public CachedScorer {
-  double call(double score_cutoff) override;
-};
-
 
 PyDoc_STRVAR(partial_token_set_ratio_docstring,
 R"(partial_token_set_ratio($module, s1, s2, processor = False, score_cutoff = 0)
@@ -231,10 +189,6 @@ Returns:
     float: ratio between s1 and s2 as a float between 0 and 100
 )");
 PyObject* partial_token_set_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds);
-
-struct CachedPartialTokenSetRatio : public CachedScorer {
-  double call(double score_cutoff) override;
-};
 
 
 PyDoc_STRVAR(token_ratio_docstring,
@@ -257,10 +211,6 @@ Returns:
 )");
 PyObject* token_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds);
 
-struct CachedTokenRatio : public CachedScorer {
-  double call(double score_cutoff) override;
-};
-
 
 PyDoc_STRVAR(partial_token_ratio_docstring,
 R"(partial_token_ratio($module, s1, s2, processor = False, score_cutoff = 0)
@@ -282,10 +232,6 @@ Returns:
 )");
 PyObject* partial_token_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds);
 
-struct CachedPartialTokenRatio : public CachedScorer {
-  double call(double score_cutoff) override;
-};
-
 
 PyDoc_STRVAR(WRatio_docstring,
 R"(WRatio($module, s1, s2, processor = False, score_cutoff = 0)
@@ -305,10 +251,6 @@ Returns:
     float: ratio between s1 and s2 as a float between 0 and 100
 )");
 PyObject* WRatio(PyObject* /*self*/, PyObject* args, PyObject* keywds);
-
-struct CachedWRatio : public CachedScorer {
-  double call(double score_cutoff) override;
-};
 
 
 PyDoc_STRVAR(QRatio_docstring,
@@ -333,10 +275,3 @@ Example:
     96.55171966552734
 )");
 PyObject* QRatio(PyObject* /*self*/, PyObject* args, PyObject* keywds);
-
-struct CachedQRatio : public CachedScorer {
-  void set_seq1(python_string str) override;
-  double call(double score_cutoff) override;
-private:
-  python_blockmap m_block;
-};

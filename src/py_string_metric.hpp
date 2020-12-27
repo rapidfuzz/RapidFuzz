@@ -283,7 +283,3 @@ ratio : float
     as a float between 0 and 100
 )");
 PyObject* normalized_hamming(PyObject* /*self*/, PyObject* args, PyObject* keywds);
-
-struct CachedNormalizedHamming : public CachedScorer {
-  double call(double score_cutoff) override;
-};

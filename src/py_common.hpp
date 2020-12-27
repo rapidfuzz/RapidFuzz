@@ -28,25 +28,39 @@
 struct CachedScorer {
   virtual ~CachedScorer() = default;
 
-  virtual void set_seq1(python_string str)
-  {
-    m_str1 = std::move(str);
+  virtual double ratio(const python_string& s2, double score_cutoff) const = 0;
+};
+
+/*
+ * this is a generic cached scorer implementation
+ * that can be used by all scorers, that do not accept any
+ * additional arguments
+ */
+template <typename Scorer>
+struct GenericScorerVisitor {
+  GenericScorerVisitor(const Scorer* cached_ratio, double score_cutoff)
+    : m_cached_ratio(cached_ratio), m_score_cutoff(score_cutoff) {}
+
+  template <typename Sentence2>
+  double operator()(Sentence2&& s2) const {
+    return m_cached_ratio->ratio(s2, m_score_cutoff);
   }
 
-  virtual void set_seq2(python_string str)
-  {
-    m_str2 = std::move(str);
+private:
+  const Scorer* m_cached_ratio;
+  double m_score_cutoff;
+};
+
+template <template<typename> class Scorer, typename Sentence1>
+struct GenericCachedScorer : public CachedScorer {
+  GenericCachedScorer(const Sentence1& s1)
+    : cached_ratio(s1) {}
+
+  double ratio(const python_string& s2, double score_cutoff) const override {
+    return mpark::visit(GenericScorerVisitor<decltype(cached_ratio)>(&cached_ratio, score_cutoff), s2);
   }
-
-  virtual double call(double score_cutoff) = 0;
-  // allow different scorers to require different keyword
-  /*virtual bool parse_args(PyObject* keywds) {
-    // if keywds not empty
-  }*/
-
-protected:
-  python_string m_str1;
-  python_string m_str2;
+private:
+  Scorer<Sentence1> cached_ratio;
 };
 
 

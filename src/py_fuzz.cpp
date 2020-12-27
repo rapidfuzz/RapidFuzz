@@ -2,14 +2,11 @@
 /* Copyright © 2020 Max Bachmann */
 
 #include "fuzz.hpp"
-#include "py_common.hpp"
 #include "py_fuzz.hpp"
 #include "utils.hpp"
-#include "py_utils.hpp"
 #include <string>
 
 namespace fuzz = rapidfuzz::fuzz;
-namespace utils = rapidfuzz::utils;
 
 // C++11 does not support generic lambdas
 template <typename MatchingFunc>
@@ -72,51 +69,6 @@ PyObject* ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {         
   return fuzz_call<ratio_func>(false, args, keywds);
 }
 
-// C++11 does not support generic lambdas
-struct RatioVisitor {
-  RatioVisitor(double score_cutoff)
-    : m_score_cutoff(score_cutoff)
-  {}
-
-  template <typename Sentence1, typename BlockMap, typename Sentence2>
-  double operator()(Sentence1&& s1, BlockMap&& block, Sentence2&& s2) const {
-    if (s1.size() < 64) {
-      auto sentence1 = rapidfuzz::common::to_string_view(s1);
-      auto sentence2 = rapidfuzz::common::to_string_view(s2);
-      // block is created using s1
-      return rapidfuzz::string_metric::detail::normalized_weighted_levenshtein(
-        sentence2, block, sentence1, m_score_cutoff);
-    }
-    return fuzz::ratio(s1, s2, m_score_cutoff);
-  }
-
-private:
-  double m_score_cutoff;
-};
-
-struct BlockmapVisitor {
-  template <typename Sentence, typename CharT = rapidfuzz::char_type<Sentence>>
-  python_blockmap operator()(Sentence s) {
-    rapidfuzz::common::blockmap_entry<sizeof(CharT)> block;
-
-    if (s.size() < 64) {
-      for (std::size_t i = 0; i < s.size(); i++){
-        block.insert(s[i], i);
-      }
-    }
-
-    return block;
-  }
-};
-
-void CachedRatio::set_seq1(python_string str){
-  m_str1 = std::move(str);
-  m_block = mpark::visit(BlockmapVisitor(), m_str1);
-}
-
-double CachedRatio::call(double score_cutoff) {
-  return mpark::visit(RatioVisitor(score_cutoff), m_str1, m_block, m_str2);
-}
 
 /**********************************************
  *              quick_ratio
@@ -131,24 +83,6 @@ struct quick_ratio_func {
 
 PyObject* quick_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
   return fuzz_call<quick_ratio_func>(false, args, keywds);
-}
-
-// C++11 does not support generic lambdas
-struct QuickRatioVisitor {
-  QuickRatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
-  {}
-
-  template <typename Sentence1, typename Sentence2>
-  double operator()(Sentence1&& s1, Sentence2&& s2) const {
-    return fuzz::quick_ratio(s1, s2, m_score_cutoff);
-  }
-
-private:
-  double m_score_cutoff;
-};
-
-double CachedQuickRatio::call(double score_cutoff) {
-  return mpark::visit(QuickRatioVisitor(score_cutoff), m_str1, m_str2);
 }
 
 
@@ -167,23 +101,6 @@ PyObject* real_quick_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds)
   return fuzz_call<real_quick_ratio_func>(false, args, keywds);
 }
 
-// C++11 does not support generic lambdas
-struct RealQuickRatioVisitor {
-  RealQuickRatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
-  {}
-
-  template <typename Sentence1, typename Sentence2>
-  double operator()(Sentence1&& s1, Sentence2&& s2) const {
-    return fuzz::real_quick_ratio(s1, s2, m_score_cutoff);
-  }
-
-private:
-  double m_score_cutoff;
-};
-
-double CachedRealQuickRatio::call(double score_cutoff) {
-  return mpark::visit(RealQuickRatioVisitor(score_cutoff), m_str1, m_str2);
-}
 
 /**********************************************
  *             partial_ratio
@@ -198,24 +115,6 @@ struct partial_ratio_func {
 
 PyObject* partial_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
   return fuzz_call<partial_ratio_func>(false, args, keywds);
-}
-
-// C++11 does not support generic lambdas
-struct PartialRatioVisitor {
-  PartialRatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
-  {}
-
-  template <typename Sentence1, typename Sentence2>
-  double operator()(Sentence1&& s1, Sentence2&& s2) const {
-    return fuzz::partial_ratio(s1, s2, m_score_cutoff);
-  }
-
-private:
-  double m_score_cutoff;
-};
-
-double CachedPartialRatio::call(double score_cutoff) {
-  return mpark::visit(PartialRatioVisitor(score_cutoff), m_str1, m_str2);
 }
 
 
@@ -234,27 +133,6 @@ PyObject* token_sort_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds)
   return fuzz_call<token_sort_ratio_func>(true, args, keywds);
 }
 
-// C++11 does not support generic lambdas
-struct SortedSplitVisitor {
-  template <typename Sentence>
-  python_string operator()(Sentence&& s) const {
-    return rapidfuzz::common::sorted_split(s).join();
-  }
-};
-
-void CachedTokenSortRatio::set_seq1(python_string str) {
-  m_str1 = mpark::visit(SortedSplitVisitor(), str);
-  m_block = mpark::visit(BlockmapVisitor(), m_str1);
-}
-
-void CachedTokenSortRatio::set_seq2(python_string str) {
-  m_str2 = mpark::visit(SortedSplitVisitor(), str);
-}
-
-double CachedTokenSortRatio::call(double score_cutoff) {
-  return mpark::visit(RatioVisitor(score_cutoff), m_str1, m_block, m_str2);
-}
-
 
 /**********************************************
  *          partial_token_sort_ratio
@@ -269,18 +147,6 @@ struct partial_token_sort_ratio_func {
 
 PyObject* partial_token_sort_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {                                                                                                \
   return fuzz_call<partial_token_sort_ratio_func>(true, args, keywds);
-}
-
-void CachedPartialTokenSortRatio::set_seq1(python_string str) {
-  m_str1 = mpark::visit(SortedSplitVisitor(), str);
-}
-
-void CachedPartialTokenSortRatio::set_seq2(python_string str) {
-  m_str2 = mpark::visit(SortedSplitVisitor(), str);
-}
-
-double CachedPartialTokenSortRatio::call(double score_cutoff) {
-  return mpark::visit(PartialRatioVisitor(score_cutoff), m_str1, m_str2);
 }
 
 
@@ -299,24 +165,6 @@ PyObject* token_set_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) 
   return fuzz_call<token_set_ratio_func>(true, args, keywds);
 }
 
-// C++11 does not support generic lambdas
-struct TokenSetRatioVisitor {
-  TokenSetRatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
-  {}
-
-  template <typename Sentence1, typename Sentence2>
-  double operator()(Sentence1&& s1, Sentence2&& s2) const {
-    return fuzz::token_set_ratio(s1, s2, m_score_cutoff);
-  }
-
-private:
-  double m_score_cutoff;
-};
-
-double CachedTokenSetRatio::call(double score_cutoff) {
-  return mpark::visit(TokenSetRatioVisitor(score_cutoff), m_str1, m_str2);
-}
-
 
 /**********************************************
  *          partial_token_set_ratio
@@ -331,24 +179,6 @@ struct partial_token_set_ratio_func {
 
 PyObject* partial_token_set_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {                                                                                                \
   return fuzz_call<partial_token_set_ratio_func>(true, args, keywds);
-}
-
-// C++11 does not support generic lambdas
-struct PartialTokenSetRatioVisitor {
-  PartialTokenSetRatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
-  {}
-
-  template <typename Sentence1, typename Sentence2>
-  double operator()(Sentence1&& s1, Sentence2&& s2) const {
-    return fuzz::partial_token_set_ratio(s1, s2, m_score_cutoff);
-  }
-
-private:
-  double m_score_cutoff;
-};
-
-double CachedPartialTokenSetRatio::call(double score_cutoff) {
-  return mpark::visit(PartialTokenSetRatioVisitor(score_cutoff), m_str1, m_str2);
 }
 
 
@@ -367,24 +197,6 @@ PyObject* token_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {   
   return fuzz_call<token_ratio_func>(true, args, keywds);
 }
 
-// C++11 does not support generic lambdas
-struct TokenRatioVisitor {
-  TokenRatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
-  {}
-
-  template <typename Sentence1, typename Sentence2>
-  double operator()(Sentence1&& s1, Sentence2&& s2) const {
-    return fuzz::token_ratio(s1, s2, m_score_cutoff);
-  }
-
-private:
-  double m_score_cutoff;
-};
-
-double CachedTokenRatio::call(double score_cutoff) {
-  return mpark::visit(TokenRatioVisitor(score_cutoff), m_str1, m_str2);
-}
-
 
 /**********************************************
  *             partial_token_ratio
@@ -399,25 +211,6 @@ struct partial_token_ratio_func {
 
 PyObject* partial_token_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {                                                                                                \
   return fuzz_call<partial_token_ratio_func>(true, args, keywds);
-}
-
-// C++11 does not support generic lambdas
-struct PartialTokenRatioVisitor {
-  PartialTokenRatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
-  {}
-
-  template <typename Sentence1, typename Sentence2>
-  double operator()(Sentence1&& s1, Sentence2&& s2) const
-  {
-    return fuzz::partial_token_ratio(s1, s2, m_score_cutoff);
-  }
-
-private:
-  double m_score_cutoff;
-};
-
-double CachedPartialTokenRatio::call(double score_cutoff) {
-  return mpark::visit(PartialTokenRatioVisitor(score_cutoff), m_str1, m_str2);
 }
 
 
@@ -436,24 +229,6 @@ PyObject* WRatio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {        
   return fuzz_call<WRatio_func>(true, args, keywds);
 }
 
-// C++11 does not support generic lambdas
-struct WRatioVisitor {
-  WRatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
-  {}
-
-  template <typename Sentence1, typename Sentence2>
-  double operator()(Sentence1&& s1, Sentence2&& s2) const {
-    return fuzz::WRatio(s1, s2, m_score_cutoff);
-  }
-
-private:
-  double m_score_cutoff;
-};
-
-double CachedWRatio::call(double score_cutoff) {
-  return mpark::visit(WRatioVisitor(score_cutoff), m_str1, m_str2);
-}
-
 
 /**********************************************
  *                    QRatio
@@ -468,34 +243,4 @@ struct QRatio_func {
 
 PyObject* QRatio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {                                                                                                \
   return fuzz_call<QRatio_func>(true, args, keywds);
-}
-
-// C++11 does not support generic lambdas
-struct QRatioVisitor {
-  QRatioVisitor(double score_cutoff) : m_score_cutoff(score_cutoff)
-  {}
-
-  template <typename Sentence1, typename BlockMap, typename Sentence2>
-  double operator()(Sentence1&& s1, BlockMap&& block, Sentence2&& s2) const {
-    if (s1.size() < 64) {
-      auto sentence1 = rapidfuzz::common::to_string_view(s1);
-      auto sentence2 = rapidfuzz::common::to_string_view(s2);
-      // block is created using s1
-      return rapidfuzz::string_metric::detail::normalized_weighted_levenshtein(
-        sentence2, block, sentence1, m_score_cutoff);
-    }
-    return fuzz::QRatio(s1, s2, m_score_cutoff);
-  }
-
-private:
-  double m_score_cutoff;
-};
-
-void CachedQRatio::set_seq1(python_string str){
-  m_str1 = std::move(str);
-  m_block = mpark::visit(BlockmapVisitor(), m_str1);
-}
-
-double CachedQRatio::call(double score_cutoff) {
-  return mpark::visit(RatioVisitor(score_cutoff), m_str1, m_block, m_str2);
 }

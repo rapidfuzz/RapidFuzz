@@ -20,46 +20,57 @@ static inline void free_owner_list(const std::vector<PyObject*>& owner_list)
   }
 }
 
-std::unique_ptr<CachedScorer> get_matching_instance(PyObject* scorer)
+//template <typename Scorer>
+template <template<typename> class Scorer>
+struct GenericScorerAllocVisitor {
+  template <typename Sentence>
+  std::unique_ptr<CachedScorer> operator()(Sentence&& query) {
+    return std::unique_ptr<CachedScorer>(
+      new GenericCachedScorer<Scorer, Sentence>(std::forward<Sentence>(query))
+    );
+  }
+};
+
+std::unique_ptr<CachedScorer> get_matching_instance(PyObject* scorer, const python_string& query)
 {
   if (scorer) {
     if (PyCFunction_Check(scorer)) {
       auto scorer_func = PyCFunction_GetFunction(scorer);
       if (scorer_func == PY_FUNC_CAST(ratio)) {
-        return std::unique_ptr<CachedRatio>(new CachedRatio());
+        return mpark::visit(GenericScorerAllocVisitor<rfuzz::CachedRatio>(), query);
       }
       else if (scorer_func == PY_FUNC_CAST(quick_ratio)) {
-        return std::unique_ptr<CachedQuickRatio>(new CachedQuickRatio());
+        return mpark::visit(GenericScorerAllocVisitor<rfuzz::CachedQuickRatio>(), query);
       }
       else if (scorer_func == PY_FUNC_CAST(real_quick_ratio)) {
-        return std::unique_ptr<CachedRealQuickRatio>(new CachedRealQuickRatio());
+        return mpark::visit(GenericScorerAllocVisitor<rfuzz::CachedRealQuickRatio>(), query);
       }
       else if (scorer_func == PY_FUNC_CAST(partial_ratio)) {
-        return std::unique_ptr<CachedPartialRatio>(new CachedPartialRatio());
+        return mpark::visit(GenericScorerAllocVisitor<rfuzz::CachedPartialRatio>(), query);
       }
       else if (scorer_func == PY_FUNC_CAST(token_sort_ratio)) {
-        return std::unique_ptr<CachedTokenSortRatio>(new CachedTokenSortRatio());
+        return mpark::visit(GenericScorerAllocVisitor<rfuzz::CachedTokenSortRatio>(), query);
       }
       else if (scorer_func == PY_FUNC_CAST(token_set_ratio)) {
-        return std::unique_ptr<CachedTokenSetRatio>(new CachedTokenSetRatio());
+        return mpark::visit(GenericScorerAllocVisitor<rfuzz::CachedTokenSetRatio>(), query);
       }
       else if (scorer_func == PY_FUNC_CAST(partial_token_sort_ratio)) {
-        return std::unique_ptr<CachedPartialTokenSortRatio>(new CachedPartialTokenSortRatio());
+        return mpark::visit(GenericScorerAllocVisitor<rfuzz::CachedPartialTokenSortRatio>(), query);
       }
       else if (scorer_func == PY_FUNC_CAST(partial_token_set_ratio)) {
-        return std::unique_ptr<CachedPartialTokenSetRatio>(new CachedPartialTokenSetRatio());
+        return mpark::visit(GenericScorerAllocVisitor<rfuzz::CachedPartialTokenSetRatio>(), query);
       }
       else if (scorer_func == PY_FUNC_CAST(token_ratio)) {
-        return std::unique_ptr<CachedTokenRatio>(new CachedTokenRatio());
+        return mpark::visit(GenericScorerAllocVisitor<rfuzz::CachedTokenRatio>(), query);
       }
       else if (scorer_func == PY_FUNC_CAST(partial_token_ratio)) {
-        return std::unique_ptr<CachedPartialTokenRatio>(new CachedPartialTokenRatio());
+        return mpark::visit(GenericScorerAllocVisitor<rfuzz::CachedPartialTokenRatio>(), query);
       }
       else if (scorer_func == PY_FUNC_CAST(WRatio)) {
-        return std::unique_ptr<CachedWRatio>(new CachedWRatio());
+        return mpark::visit(GenericScorerAllocVisitor<rfuzz::CachedWRatio>(), query);
       }
       else if (scorer_func == PY_FUNC_CAST(QRatio)) {
-        return std::unique_ptr<CachedQRatio>(new CachedQRatio());
+        return mpark::visit(GenericScorerAllocVisitor<rfuzz::CachedQRatio>(), query);
       }
     }
     /* call python function */
@@ -67,7 +78,7 @@ std::unique_ptr<CachedScorer> get_matching_instance(PyObject* scorer)
     /* default is fuzz.WRatio */
   }
   else {
-    return std::unique_ptr<CachedWRatio>(new CachedWRatio());
+    return mpark::visit(GenericScorerAllocVisitor<rfuzz::CachedWRatio>(), query);
   }
 }
 
@@ -230,17 +241,17 @@ PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds)
     return PyFloat_FromDouble(0);
   }
 
-  auto scorer = get_matching_instance(py_scorer);
-  auto processor = get_processor(py_processor, true);
-
-  if (!scorer) {
-    // todo this is mostly code duplication
-    return py_extractOne(py_query, py_choices, py_scorer, std::move(processor), score_cutoff);
-  }
-
   try {
+    auto processor = get_processor(py_processor, true);
+    //todo do not run twice
     auto query = processor->call(py_query, "query");
-    scorer->set_seq1(query.value);
+
+    auto scorer = get_matching_instance(py_scorer, query.value);
+
+    if (!scorer) {
+      // todo this is mostly code duplication
+      return py_extractOne(py_query, py_choices, py_scorer, std::move(processor), score_cutoff);
+    }
 
     /* dict like container */
     if (PyObject_HasAttrString(py_choices, "items")) {
@@ -275,9 +286,9 @@ PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds)
       }
 
       auto choice = processor->call(py_match_choice, "choice");
-      scorer->set_seq2(choice.value);
 
-      double score = scorer->call(score_cutoff);
+      //todo changed back
+      double score = scorer->ratio(choice.value, 0/*score_cutoff*/);
 
       if (score >= score_cutoff) {
         // increase the value by a small step so it might be able to exit early
@@ -287,9 +298,9 @@ PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds)
         choice_key = py_choice;
         result_index = i;
 
-        if (score_cutoff > 100) {
+        /*if (score_cutoff > 100) {
           break;
-        }
+        }*/
       }
     }
   } catch(std::invalid_argument& e) {

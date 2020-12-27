@@ -235,7 +235,3 @@ struct NormalizedHammingVisitor {
 private:
   double m_score_cutoff;
 };
-
-double CachedNormalizedHamming::call(double score_cutoff) {
-  return mpark::visit(NormalizedHammingVisitor(score_cutoff), m_str1, m_str2);
-}
