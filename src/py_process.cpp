@@ -39,12 +39,6 @@ std::unique_ptr<CachedScorer> get_matching_instance(PyObject* scorer, const pyth
       if (scorer_func == PY_FUNC_CAST(ratio)) {
         return mpark::visit(GenericScorerAllocVisitor<rfuzz::CachedRatio>(), query);
       }
-      else if (scorer_func == PY_FUNC_CAST(quick_ratio)) {
-        return mpark::visit(GenericScorerAllocVisitor<rfuzz::CachedQuickRatio>(), query);
-      }
-      else if (scorer_func == PY_FUNC_CAST(real_quick_ratio)) {
-        return mpark::visit(GenericScorerAllocVisitor<rfuzz::CachedRealQuickRatio>(), query);
-      }
       else if (scorer_func == PY_FUNC_CAST(partial_ratio)) {
         return mpark::visit(GenericScorerAllocVisitor<rfuzz::CachedPartialRatio>(), query);
       }

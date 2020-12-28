@@ -256,7 +256,7 @@ PyObject* hamming(PyObject* /*self*/, PyObject* args, PyObject* keywds);
 
 
 PyDoc_STRVAR(normalized_hamming_docstring,
-R"(normalized_hamming($module, s1, s2, processor = False, score_cutoff = 0)
+R"(normalized_hamming($module, s1, s2, processor = None, score_cutoff = 0)
 --
 
 Calculates a normalized hamming distance
