@@ -28,53 +28,6 @@ Example:
 )");
 PyObject* ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds);
 
-
-PyDoc_STRVAR(quick_ratio_docstring,
-R"(quick_ratio($module, s1, s2, processor = False, score_cutoff = 0)
---
-Calculates an upper bound on ratio relatively quickly.
-
-This isn't defined beyond that it is an upper bound on ratio(), and
-is faster to compute (linear runtime O(N)). 
-
-
-Args:
-    s1 (str): first string to compare
-    s2 (str): second string to compare
-    processor (Union[bool, Callable]): optional callable that reformats the strings.
-        None is used by default.
-    score_cutoff (float): Optional argument for a score threshold as a float between 0 and 100.
-        For ratio < score_cutoff 0 is returned instead. Defaults to 0.
-
-Returns:
-    float: ratio between s1 and s2 as a float between 0 and 100
-)");
-PyObject* quick_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds);
-
-
-PyDoc_STRVAR(real_quick_ratio_docstring,
-R"(real_quick_ratio($module, s1, s2, processor = False, score_cutoff = 0)
---
-Calculates an upper bound on ratio very quickly.
-
-This isn't defined beyond that it is an upper bound on ratio(), and
-is faster to compute than either ratio() or quick_ratio() (constant runtime O(1)). 
-
-
-Args:
-    s1 (str): first string to compare
-    s2 (str): second string to compare
-    processor (Union[bool, Callable]): optional callable that reformats the strings.
-        None is used by default.
-    score_cutoff (float): Optional argument for a score threshold as a float between 0 and 100.
-        For ratio < score_cutoff 0 is returned instead. Defaults to 0.
-
-Returns:
-    float: ratio between s1 and s2 as a float between 0 and 100
-)");
-PyObject* real_quick_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds);
-
-
 PyDoc_STRVAR(partial_ratio_docstring,
 R"(partial_ratio($module, s1, s2, processor = False, score_cutoff = 0)
 --

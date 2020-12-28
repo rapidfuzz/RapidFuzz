@@ -2,6 +2,7 @@
 /* Copyright © 2020 Max Bachmann */
 
 #include "fuzz.hpp"
+#include "py_utils.hpp"
 #include "py_fuzz.hpp"
 #include "utils.hpp"
 #include <string>
@@ -54,6 +55,7 @@ static inline PyObject* fuzz_call(bool processor_default, PyObject* args, PyObje
   }
 }
 
+
 /**********************************************
  *                   ratio
  *********************************************/
@@ -67,38 +69,6 @@ struct ratio_func {
 
 PyObject* ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {                                                                                                \
   return fuzz_call<ratio_func>(false, args, keywds);
-}
-
-
-/**********************************************
- *              quick_ratio
- *********************************************/
-
-struct quick_ratio_func {
-  template <typename... Args>
-  static double call(Args&&... args) {
-    return fuzz::quick_ratio(std::forward<Args>(args)...);
-  }
-};
-
-PyObject* quick_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-  return fuzz_call<quick_ratio_func>(false, args, keywds);
-}
-
-
-/**********************************************
- *              real_quick_ratio
- *********************************************/
-
-struct real_quick_ratio_func {
-  template <typename... Args>
-  static double call(Args&&... args) {
-    return fuzz::real_quick_ratio(std::forward<Args>(args)...);
-  }
-};
-
-PyObject* real_quick_ratio(PyObject* /*self*/, PyObject* args, PyObject* keywds) {
-  return fuzz_call<real_quick_ratio_func>(false, args, keywds);
 }
 
 
