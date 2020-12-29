@@ -71,7 +71,7 @@ struct PythonStringWrapper {
   PythonStringWrapper(const PythonStringWrapper& other) = delete;
 
   PythonStringWrapper(PythonStringWrapper&& other) {
-    value = std::move(other.value);
+    std::swap(value, other.value);
     object = other.object;
     owned = other.owned;
     other.owned = false;
@@ -79,7 +79,7 @@ struct PythonStringWrapper {
 
   PythonStringWrapper& operator=(const PythonStringWrapper& other) = delete;
   PythonStringWrapper& operator=(PythonStringWrapper&& other) {
-    value = std::move(other.value);
+    std::swap(value, other.value);
     object = other.object;
     owned = other.owned;
     other.owned = false;
