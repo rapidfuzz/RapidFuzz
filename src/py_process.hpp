@@ -31,3 +31,34 @@ Returns:
         when `choices` is a mapping.
 )");
 PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds);
+
+
+typedef struct {
+    PyObject_HEAD
+    Py_ssize_t choice_index;
+    Py_ssize_t choice_count;
+    PyObject* choicesObj;
+    PyObject* choices;
+    bool is_dict;
+
+
+    PythonStringWrapper query;
+    PyObject* queryObj;
+
+    std::unique_ptr<Processor> processor;
+    PyObject* processorObj;
+    std::unique_ptr<CachedScorer> scorer;
+    PyObject* scorerObj;
+    // used when scorer is a python function
+    PyObject* argsObj;
+    PyObject* kwargsObj;
+
+    double score_cutoff;
+} ExtractIterState;
+
+
+
+
+PyObject* extract_iter_new(PyTypeObject *type, PyObject *args, PyObject *kwargs);
+void extract_iter_dealloc(ExtractIterState *state);
+PyObject* extract_iter_next(ExtractIterState *state);

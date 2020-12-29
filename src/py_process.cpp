@@ -177,6 +177,7 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices, PyObjec
 
       int comp = PyObject_RichCompareBool(score, py_score_cutoff, Py_GT);
       if (comp == 1) {
+        // todo validate reference count
         py_score_cutoff = score;
         PyDict_SetItemString(kwargs, "score_cutoff", score);
         result_choice = py_match_choice;
@@ -232,6 +233,7 @@ PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds)
   }
 
   if (py_query == Py_None) {
+    // todo this is completely wrong
     return PyFloat_FromDouble(0);
   }
 
@@ -312,4 +314,201 @@ PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 
   free_owner_list(outer_owner_list);
   return result;
+}
+
+
+
+
+
+
+PyObject* extract_iter_new(PyTypeObject *type, PyObject *args, PyObject *keywds)
+{
+  PyObject* py_query;
+  PyObject* py_choices;
+  PyObject* py_processor = NULL;
+  PyObject* py_scorer = NULL;
+  double score_cutoff = 0;
+  static const char* kwlist[] = {"query", "choices", "scorer", "processor", "score_cutoff", NULL};
+
+  if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|OOd", const_cast<char**>(kwlist), &py_query,
+                                   &py_choices, &py_scorer, &py_processor, &score_cutoff))
+  {
+    return NULL;
+  }
+
+
+  /* Create a new ExtractIterState and initialize its state */
+  ExtractIterState *state = (ExtractIterState *)type->tp_alloc(type, 0);
+  if (!state) {
+    return NULL;
+  }
+
+  // store choices
+  if (PyObject_HasAttrString(py_choices, "items")) {
+    state->is_dict = true;
+    state->choicesObj = PyObject_CallMethod(py_choices, "items", NULL);
+    if (!state->choicesObj) {
+      goto Error;
+    }
+  } else {
+    state->is_dict = false;
+    Py_INCREF(py_choices);
+    state->choicesObj = py_choices;
+  }
+  state->choices = PySequence_Fast(state->choicesObj, "Choices must be a sequence of strings");
+  if (!state->choices) {
+    goto Error;
+  }
+
+  state->choice_count = PySequence_Fast_GET_SIZE(state->choices);
+  state->choice_index = 0;
+
+  // store processor
+  Py_XINCREF(py_processor);
+  state->processorObj = py_processor;
+  state->processor = get_processor(py_processor, true);
+
+  // store query
+  Py_INCREF(py_query);
+  state->queryObj = py_query;
+  try {
+    state->query = state->processor->call(py_query, "query");
+  } catch(std::invalid_argument& e) {
+    goto Error;
+  }
+
+  // store and init scorer
+  Py_XINCREF(py_scorer);
+  state->scorerObj = py_scorer;
+  state->scorer = get_matching_instance(py_scorer, state->query.value);
+
+  // scorer is a python function
+  if (!state->scorer) {
+    PyObject* py_score_cutoff = PyFloat_FromDouble(score_cutoff);
+    PyObject* py_proc_query = NULL;
+
+    if (!py_score_cutoff) {
+      goto Error;
+    }
+
+    state->kwargsObj =  PyDict_New();
+    if (!state->kwargsObj) {
+      Py_DecRef(py_score_cutoff);
+      goto Error;
+    }
+
+    PyDict_SetItemString(state->kwargsObj, "processor", Py_None);
+    PyDict_SetItemString(state->kwargsObj, "score_cutoff", py_score_cutoff);
+    Py_DecRef(py_score_cutoff);
+
+    state->argsObj = PyTuple_New(2);
+    if (!state->argsObj) {
+      goto Error;
+    }
+
+    py_proc_query = mpark::visit(EncodePythonStringVisitor(), state->query.value);
+    if (!py_proc_query) {
+      goto Error;
+    }
+
+    PyTuple_SET_ITEM(state->argsObj, 0, py_proc_query);
+  }
+
+  state->score_cutoff = score_cutoff;
+
+  return (PyObject *)state;
+
+Error:
+  Py_XDECREF(state->choicesObj);
+  Py_XDECREF(state->choices);
+  Py_XDECREF(state->processorObj);
+  Py_XDECREF(state->queryObj);
+  Py_XDECREF(state->scorerObj);
+  Py_XDECREF(state->argsObj);
+  Py_XDECREF(state->kwargsObj);
+
+  Py_TYPE(state)->tp_free(state);
+  return NULL;
+}
+
+
+void extract_iter_dealloc(ExtractIterState *state)
+{
+    /* We need XDECREF here because when the generator is exhausted,
+     * rgstate->sequence is cleared with Py_CLEAR which sets it to NULL.
+    */
+
+  Py_XDECREF(state->choicesObj);
+  Py_XDECREF(state->choices);
+  Py_XDECREF(state->processorObj);
+  Py_XDECREF(state->queryObj);
+  Py_XDECREF(state->scorerObj);
+  Py_XDECREF(state->argsObj);
+  Py_XDECREF(state->kwargsObj);
+
+  Py_TYPE(state)->tp_free(state);
+}
+
+
+PyObject* extract_iter_next(ExtractIterState *state)
+{
+  /* seq_index < 0 means that the generator is exhausted.
+   * Returning NULL in this case is enough. The next() builtin will raise the
+   * StopIteration error for us.
+  */
+  if (state->choice_index < state->choice_count) {
+    PyObject* py_choice = NULL;
+    PyObject* py_match_choice = PySequence_Fast_GET_ITEM(state->choices, state->choice_index);
+
+    if (state->is_dict) {
+      if (!PyArg_ParseTuple(py_match_choice, "OO", &py_choice, &py_match_choice)) {
+        return NULL;
+      }
+    }
+
+    PyObject* result;
+    if (py_match_choice != Py_None) {
+      try {
+        auto choice = state->processor->call(py_match_choice, "choice");
+      } catch(std::invalid_argument& e) {
+        return NULL;
+      }
+
+      // built in scorer of rapidfuzz
+      if (state->scorer) {
+        double score = state->scorer->ratio(choice.value, state->score_cutoff);
+        result = state->is_dict ? Py_BuildValue("(OdO)", py_match_choice, score, py_choice)
+                                : Py_BuildValue("(Odn)", py_match_choice, score, state->choice_index);
+      // custom scorer that has to be called through Python
+      } else {
+        PyObject* py_proc_choice = mpark::visit(EncodePythonStringVisitor(), choice.value);
+        if (!py_proc_choice) {
+          return NULL;
+        }
+        PyTuple_SetItem(state->argsObj, 1, py_proc_choice);
+        PyObject* score = PyObject_Call(state->scorerObj, state->argsObj, state->kwargsObj);
+        if (!score) {
+          return NULL;
+        }
+  
+        result = state->is_dict ? Py_BuildValue("(OOO)", py_match_choice, score, py_choice)
+                                : Py_BuildValue("(OOn)", py_match_choice, score, state->choice_index);
+        Py_DecRef(score);
+      }
+    } else {
+      result = state->is_dict ? Py_BuildValue("(OdO)", py_match_choice, 0.0, py_choice)
+                              : Py_BuildValue("(Odn)", py_match_choice, 0.0, state->choice_index);
+    }
+
+    state->choice_index += 1;
+    return result;
+  }
+
+  /* The reference to the sequence is cleared in the first generator call
+   * after its exhaustion (after the call that returned the last element).
+   * Py_CLEAR will be harmless for subsequent calls since it's idempotent
+   * on NULL.
+  */
+  Py_CLEAR(state->choices);
+  return NULL;
 }

@@ -17,7 +17,7 @@ PyObject* default_process(PyObject* /*self*/, PyObject* args, PyObject* keywds)
     return NULL;
   }
 
-  /* this is pretty verbose. However it is faster than std::variant + std::visit */
+  /* this is pretty verbose. However it is faster than mpark::variant + mpark::visit */
 #ifdef PYTHON_2
   if (PyObject_TypeCheck(py_sentence, &PyString_Type)) {
     Py_ssize_t len = PyString_GET_SIZE(py_sentence);
