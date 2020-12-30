@@ -177,7 +177,6 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices, PyObjec
 
       int comp = PyObject_RichCompareBool(score, py_score_cutoff, Py_GT);
       if (comp == 1) {
-        // todo validate reference count
         py_score_cutoff = score;
         PyDict_SetItemString(kwargs, "score_cutoff", score);
         result_choice = py_match_choice;
@@ -283,8 +282,7 @@ PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 
       auto choice = processor->call(py_match_choice, "choice");
 
-      //todo changed back
-      double score = scorer->ratio(choice.value, 0/*score_cutoff*/);
+      double score = scorer->ratio(choice.value, score_cutoff);
 
       if (score >= score_cutoff) {
         // increase the value by a small step so it might be able to exit early
@@ -294,9 +292,9 @@ PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds)
         choice_key = py_choice;
         result_index = i;
 
-        /*if (score_cutoff > 100) {
+        if (score_cutoff > 100) {
           break;
-        }*/
+        }
       }
     }
   } catch(std::invalid_argument& e) {
@@ -327,15 +325,14 @@ PyObject* extract_iter_new(PyTypeObject *type, PyObject *args, PyObject *keywds)
   PyObject* py_choices;
   PyObject* py_processor = NULL;
   PyObject* py_scorer = NULL;
-  double score_cutoff = 0;
+  PyObject* py_score_cutoff = NULL;
   static const char* kwlist[] = {"query", "choices", "scorer", "processor", "score_cutoff", NULL};
 
-  if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|OOd", const_cast<char**>(kwlist), &py_query,
-                                   &py_choices, &py_scorer, &py_processor, &score_cutoff))
+  if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|OOO", const_cast<char**>(kwlist), &py_query,
+                                   &py_choices, &py_scorer, &py_processor, &py_score_cutoff))
   {
     return NULL;
   }
-
 
   /* Create a new ExtractIterState and initialize its state */
   ExtractIterState *state = (ExtractIterState *)type->tp_alloc(type, 0);
@@ -384,7 +381,6 @@ PyObject* extract_iter_new(PyTypeObject *type, PyObject *args, PyObject *keywds)
 
   // scorer is a python function
   if (!state->scorer) {
-    PyObject* py_score_cutoff = PyFloat_FromDouble(score_cutoff);
     PyObject* py_proc_query = NULL;
 
     if (!py_score_cutoff) {
@@ -393,13 +389,11 @@ PyObject* extract_iter_new(PyTypeObject *type, PyObject *args, PyObject *keywds)
 
     state->kwargsObj =  PyDict_New();
     if (!state->kwargsObj) {
-      Py_DecRef(py_score_cutoff);
       goto Error;
     }
 
     PyDict_SetItemString(state->kwargsObj, "processor", Py_None);
     PyDict_SetItemString(state->kwargsObj, "score_cutoff", py_score_cutoff);
-    Py_DecRef(py_score_cutoff);
 
     state->argsObj = PyTuple_New(2);
     if (!state->argsObj) {
@@ -414,7 +408,20 @@ PyObject* extract_iter_new(PyTypeObject *type, PyObject *args, PyObject *keywds)
     PyTuple_SET_ITEM(state->argsObj, 0, py_proc_query);
   }
 
-  state->score_cutoff = score_cutoff;
+  if(py_score_cutoff) {
+    if (state->scorer) {
+      state->score_cutoff = PyFloat_AsDouble(py_score_cutoff);
+    } else {
+      Py_INCREF(py_scorer);
+      state->scoreCutoffObj = py_score_cutoff;
+    }
+  } else {
+    if (state->scorer) {
+      state->score_cutoff = 0;
+    } else {
+      state->scoreCutoffObj = PyFloat_FromDouble(0);
+    }
+  }
 
   return (PyObject *)state;
 
@@ -426,6 +433,7 @@ Error:
   Py_XDECREF(state->scorerObj);
   Py_XDECREF(state->argsObj);
   Py_XDECREF(state->kwargsObj);
+  Py_XDECREF(state->scoreCutoffObj);
 
   Py_TYPE(state)->tp_free(state);
   return NULL;
@@ -445,6 +453,7 @@ void extract_iter_dealloc(ExtractIterState *state)
   Py_XDECREF(state->scorerObj);
   Py_XDECREF(state->argsObj);
   Py_XDECREF(state->kwargsObj);
+  Py_XDECREF(state->scoreCutoffObj);
 
   Py_TYPE(state)->tp_free(state);
 }
@@ -470,30 +479,45 @@ PyObject* extract_iter_next(ExtractIterState *state)
     if (py_match_choice != Py_None) {
       try {
         auto choice = state->processor->call(py_match_choice, "choice");
+
+        // built in scorer of rapidfuzz
+        if (state->scorer) {
+          double score = state->scorer->ratio(choice.value, state->score_cutoff);
+          if (score < state->score_cutoff) {
+            state->choice_index += 1;
+            return extract_iter_next(state);
+          }
+          result = state->is_dict ? Py_BuildValue("(OdO)", py_match_choice, score, py_choice)
+                                  : Py_BuildValue("(Odn)", py_match_choice, score, state->choice_index);
+        // custom scorer that has to be called through Python
+        } else {
+          PyObject* py_proc_choice = mpark::visit(EncodePythonStringVisitor(), choice.value);
+          if (!py_proc_choice) {
+            return NULL;
+          }
+          PyTuple_SetItem(state->argsObj, 1, py_proc_choice);
+          PyObject* score = PyObject_Call(state->scorerObj, state->argsObj, state->kwargsObj);
+          if (!score) {
+            return NULL;
+          }
+
+          int comp = PyObject_RichCompareBool(score, state->scoreCutoffObj, Py_LT);
+          // lower than
+          if (comp == 1) {
+            state->choice_index += 1;
+            return extract_iter_next(state);
+          // error in comparision
+          } else if (comp == -1) {
+            Py_DecRef(score);
+            return NULL;
+          }
+    
+          result = state->is_dict ? Py_BuildValue("(OOO)", py_match_choice, score, py_choice)
+                                  : Py_BuildValue("(OOn)", py_match_choice, score, state->choice_index);
+          Py_DecRef(score);
+        }
       } catch(std::invalid_argument& e) {
         return NULL;
-      }
-
-      // built in scorer of rapidfuzz
-      if (state->scorer) {
-        double score = state->scorer->ratio(choice.value, state->score_cutoff);
-        result = state->is_dict ? Py_BuildValue("(OdO)", py_match_choice, score, py_choice)
-                                : Py_BuildValue("(Odn)", py_match_choice, score, state->choice_index);
-      // custom scorer that has to be called through Python
-      } else {
-        PyObject* py_proc_choice = mpark::visit(EncodePythonStringVisitor(), choice.value);
-        if (!py_proc_choice) {
-          return NULL;
-        }
-        PyTuple_SetItem(state->argsObj, 1, py_proc_choice);
-        PyObject* score = PyObject_Call(state->scorerObj, state->argsObj, state->kwargsObj);
-        if (!score) {
-          return NULL;
-        }
-  
-        result = state->is_dict ? Py_BuildValue("(OOO)", py_match_choice, score, py_choice)
-                                : Py_BuildValue("(OOn)", py_match_choice, score, state->choice_index);
-        Py_DecRef(score);
       }
     } else {
       result = state->is_dict ? Py_BuildValue("(OdO)", py_match_choice, 0.0, py_choice)

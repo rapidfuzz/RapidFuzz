@@ -3,32 +3,8 @@
 # Copyright © 2011 Adam Cohen
 
 from rapidfuzz import fuzz, utils
-from rapidfuzz.cpp_impl import extractOne
+from rapidfuzz.cpp_impl import extractOne, extract_iter
 import heapq
-import numbers
-
-def iterExtract(query, choices, scorer = fuzz.WRatio, processor = utils.default_process, score_cutoff = 0, **kwargs):
-    if query is None:
-        return
-    
-    a = processor(query) if processor else query
-
-    items = choices.items() if hasattr(choices, "items") else enumerate(choices)
-
-    for choice, match_choice in items:
-        if match_choice is None:
-            continue
-        b = processor(match_choice) if processor else match_choice
-
-        score = scorer(
-            a, b,
-            processor=None,
-            score_cutoff=score_cutoff,
-            **kwargs)
-
-        if score >= score_cutoff:
-            yield (match_choice, score, choice)
-
 
 def extract(query, choices, scorer = fuzz.WRatio, processor = utils.default_process, limit = 5, score_cutoff = 0, **kwargs):
     """ 
@@ -52,7 +28,7 @@ def extract(query, choices, scorer = fuzz.WRatio, processor = utils.default_proc
         be of either `(<choice>, <ratio>, <index of choice>)` when `choices` is a list of strings
         or `(<choice>, <ratio>, <key of choice>)` when `choices` is a mapping.
     """
-    results = iterExtract(query, choices, scorer, processor, score_cutoff, **kwargs)
+    results = extract_iter(query, choices, scorer, processor, score_cutoff, **kwargs)
 
     if limit is None:
         return sorted(results, key=lambda x: x[1], reverse=True)

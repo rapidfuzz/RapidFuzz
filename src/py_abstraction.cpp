@@ -8,20 +8,46 @@
 #include "py_utils.hpp"
 
 
-PyTypeObject PyExtractIter_Type = {
+PyTypeObject PyExtractIter_Type {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
-    .tp_name = "extract_iter",
-    .tp_doc = "",
-    .tp_basicsize = sizeof(ExtractIterState),
-    .tp_itemsize = 0,
-    .tp_dealloc = (destructor)extract_iter_dealloc,
-    .tp_flags = Py_TPFLAGS_DEFAULT,
-    .tp_iter = PyObject_SelfIter,
-    .tp_iternext = (iternextfunc)extract_iter_next,
-    .tp_alloc = PyType_GenericAlloc,
-    .tp_new = extract_iter_new
+    "extract_iter",                   /* tp_name */
+    sizeof(ExtractIterState),         /* tp_basicsize */
+    0,                                /* tp_itemsize */
+    (destructor)extract_iter_dealloc, /* tp_dealloc */
+    0,                                /* tp_print */
+    0,                                /* tp_getattr */
+    0,                                /* tp_setattr */
+    0,                                /* tp_reserved */
+    0,                                /* tp_repr */
+    0,                                /* tp_as_number */
+    0,                                /* tp_as_sequence */
+    0,                                /* tp_as_mapping */
+    0,                                /* tp_hash */
+    0,                                /* tp_call */
+    0,                                /* tp_str */
+    0,                                /* tp_getattro */
+    0,                                /* tp_setattro */
+    0,                                /* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT,               /* tp_flags */
+    extract_iter_docstring,           /* tp_doc */
+    0,                                /* tp_traverse */
+    0,                                /* tp_clear */
+    0,                                /* tp_richcompare */
+    0,                                /* tp_weaklistoffset */
+    PyObject_SelfIter,                /* tp_iter */
+    (iternextfunc)extract_iter_next,  /* tp_iternext */
+    0,                                /* tp_methods */
+    0,                                /* tp_members */
+    0,                                /* tp_getset */
+    0,                                /* tp_base */
+    0,                                /* tp_dict */
+    0,                                /* tp_descr_get */
+    0,                                /* tp_descr_set */
+    0,                                /* tp_dictoffset */
+    0,                                /* tp_init */
+    PyType_GenericAlloc,              /* tp_alloc */
+    extract_iter_new,                 /* tp_new */
 };
-
 
 static PyMethodDef methods[] = {
     /* utils */
@@ -56,7 +82,7 @@ PyMODINIT_FUNC initcpp_impl(void)
     return;
   }
 
-  PyObject* module = Py_InitModule3(cpp_impl, methods, NULL);
+  PyObject* module = Py_InitModule3("cpp_impl", methods, NULL);
 
   if (!module) {
     return;
@@ -95,7 +121,7 @@ PyMODINIT_FUNC PyInit_cpp_impl(void)
   Py_INCREF((PyObject *)&PyExtractIter_Type);
   if (PyModule_AddObject(module, "extract_iter", (PyObject *)&PyExtractIter_Type) < 0) {
     Py_DECREF(module);
-    Py_DECREF(PyExtractIter_Type);
+    Py_DECREF((PyObject *)&PyExtractIter_Type);
     return NULL;
   }
 
