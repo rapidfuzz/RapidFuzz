@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
-# Copyright © 2020 Max Bachmann
-# Copyright © 2011 Adam Cohen
+# Copyright 2020 Max Bachmann
+# Copyright 2011 Adam Cohen
 
 from rapidfuzz import fuzz, utils
 from rapidfuzz.cpp_impl import extractOne
