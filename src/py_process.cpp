@@ -12,6 +12,7 @@
 
 namespace rfuzz = rapidfuzz::fuzz;
 namespace rutils = rapidfuzz::utils;
+namespace string_metric = rapidfuzz::string_metric;
 
 static inline void free_owner_list(const std::vector<PyObject*>& owner_list)
 {
@@ -65,6 +66,9 @@ std::unique_ptr<CachedScorer> get_matching_instance(PyObject* scorer, const pyth
       }
       else if (scorer_func == PY_FUNC_CAST(QRatio)) {
         return mpark::visit(GenericScorerAllocVisitor<rfuzz::CachedQRatio>(), query);
+      }
+      else if (scorer_func == PY_FUNC_CAST(normalized_hamming)) {
+        return mpark::visit(GenericScorerAllocVisitor<string_metric::CachedNormalizedHamming>(), query);
       }
     }
     /* call python function */
@@ -328,6 +332,7 @@ PyObject* extract_iter_new(PyTypeObject *type, PyObject *args, PyObject *keywds)
   PyObject* py_score_cutoff = NULL;
   static const char* kwlist[] = {"query", "choices", "scorer", "processor", "score_cutoff", NULL};
 
+
   if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|OOO", const_cast<char**>(kwlist), &py_query,
                                    &py_choices, &py_scorer, &py_processor, &py_score_cutoff))
   {
@@ -379,35 +384,6 @@ PyObject* extract_iter_new(PyTypeObject *type, PyObject *args, PyObject *keywds)
   state->scorerObj = py_scorer;
   state->scorer = get_matching_instance(py_scorer, state->query.value);
 
-  // scorer is a python function
-  if (!state->scorer) {
-    PyObject* py_proc_query = NULL;
-
-    if (!py_score_cutoff) {
-      goto Error;
-    }
-
-    state->kwargsObj =  PyDict_New();
-    if (!state->kwargsObj) {
-      goto Error;
-    }
-
-    PyDict_SetItemString(state->kwargsObj, "processor", Py_None);
-    PyDict_SetItemString(state->kwargsObj, "score_cutoff", py_score_cutoff);
-
-    state->argsObj = PyTuple_New(2);
-    if (!state->argsObj) {
-      goto Error;
-    }
-
-    py_proc_query = mpark::visit(EncodePythonStringVisitor(), state->query.value);
-    if (!py_proc_query) {
-      goto Error;
-    }
-
-    PyTuple_SET_ITEM(state->argsObj, 0, py_proc_query);
-  }
-
   if(py_score_cutoff) {
     if (state->scorer) {
       state->score_cutoff = PyFloat_AsDouble(py_score_cutoff);
@@ -422,6 +398,33 @@ PyObject* extract_iter_new(PyTypeObject *type, PyObject *args, PyObject *keywds)
       state->scoreCutoffObj = PyFloat_FromDouble(0);
     }
   }
+
+
+  // scorer is a python function
+  if (!state->scorer) {
+    PyObject* py_proc_query = NULL;
+
+    state->kwargsObj = PyDict_New();
+    if (!state->kwargsObj) {
+      goto Error;
+    }
+
+    PyDict_SetItemString(state->kwargsObj, "processor", Py_None);
+    PyDict_SetItemString(state->kwargsObj, "score_cutoff", state->scoreCutoffObj);
+
+    state->argsObj = PyTuple_New(2);
+    if (!state->argsObj) {
+      goto Error;
+    }
+
+    py_proc_query = mpark::visit(EncodePythonStringVisitor(), state->query.value);
+    if (!py_proc_query) {
+      goto Error;
+    }
+
+    PyTuple_SET_ITEM(state->argsObj, 0, py_proc_query);
+  }
+
 
   return (PyObject *)state;
 
@@ -517,6 +520,9 @@ PyObject* extract_iter_next(ExtractIterState *state)
           Py_DecRef(score);
         }
       } catch(std::invalid_argument& e) {
+        if (e.what() != "") {
+          PyErr_SetString(PyExc_ValueError, e.what());
+        }
         return NULL;
       }
     } else {
