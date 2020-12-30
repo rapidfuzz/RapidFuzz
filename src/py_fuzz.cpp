@@ -51,8 +51,9 @@ static inline PyObject* fuzz_call(bool processor_default, PyObject* args, PyObje
     double result = mpark::visit(GenericRatioVisitor<MatchingFunc>(score_cutoff), s1.value, s2.value);
     return PyFloat_FromDouble(result);
   } catch(std::invalid_argument& e) {
-    if (e.what() != "") {
-      PyErr_SetString(PyExc_ValueError, e.what());
+    const char* msg = e.what();
+    if (msg[0]) {
+      PyErr_SetString(PyExc_ValueError, msg);
     }
     return NULL;
   }

@@ -9,6 +9,8 @@
 #include "py_process.hpp"
 #include "py_utils.hpp"
 #include <string>
+#include <iostream>
+
 
 namespace rfuzz = rapidfuzz::fuzz;
 namespace rutils = rapidfuzz::utils;
@@ -520,8 +522,9 @@ PyObject* extract_iter_next(ExtractIterState *state)
           Py_DecRef(score);
         }
       } catch(std::invalid_argument& e) {
-        if (e.what() != "") {
-          PyErr_SetString(PyExc_ValueError, e.what());
+        const char* msg = e.what();
+        if (msg[0]) {
+          PyErr_SetString(PyExc_ValueError, msg);
         }
         return NULL;
       }
