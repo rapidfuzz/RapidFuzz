@@ -68,45 +68,83 @@ static inline PyObject* fuzz_call(bool processor_default, PyObject* args, PyObje
 
 struct LevenshteinVisitor {
   LevenshteinVisitor(std::size_t insert_cost, std::size_t delete_cost,
-                          std::size_t replace_cost)
-      : m_insert_cost(insert_cost), m_delete_cost(delete_cost), m_replace_cost(replace_cost)
+                          std::size_t replace_cost, std::size_t max)
+      : m_insert_cost(insert_cost), m_delete_cost(delete_cost), m_replace_cost(replace_cost), m_max(max)
   {}
 
   template <typename Sentence1, typename Sentence2>
   std::size_t operator()(Sentence1&& s1, Sentence2&& s2) const
   {
-    return string_metric::levenshtein(s1, s2, {m_insert_cost, m_delete_cost, m_replace_cost});
+    return string_metric::levenshtein(s1, s2, {m_insert_cost, m_delete_cost, m_replace_cost}, m_max);
   }
 
 private:
   std::size_t m_insert_cost;
   std::size_t m_delete_cost;
   std::size_t m_replace_cost;
+  std::size_t m_max;
 };
 
 PyObject* levenshtein(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 {
   PyObject* py_s1;
   PyObject* py_s2;
+  PyObject* py_weights = NULL;
+  PyObject* py_max = NULL;
+  Py_ssize_t  max = -1;
   std::size_t insert_cost = 1;
   std::size_t delete_cost = 1;
   std::size_t replace_cost = 1;
-  static const char* kwlist[] = {"s1", "s2", "insert_cost", "delete_cost", "replace_cost", NULL};
-  if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|nnn", const_cast<char**>(kwlist), &py_s1,
-                                   &py_s2, &insert_cost, &delete_cost, &replace_cost))
+  static const char* kwlist[] = {"s1", "s2", "weights", "max", NULL};
+  if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|OO", const_cast<char**>(kwlist), &py_s1,
+                                   &py_s2, &py_weights, &py_max))
   {
     return NULL;
   }
 
+  if (py_max) {
+    if (py_max == Py_None) {
+      max = -1;
+    } else if (!PyLong_Check(py_max)) {
+      PyErr_SetString(PyExc_TypeError, "Max must be a integer or None");
+      return NULL;
+    } else {
+      max = PyLong_AsSsize_t(py_max);
+      if (PyErr_Occurred()) {
+        return NULL;
+      }
+      if (max < 0) {
+        PyErr_SetString(PyExc_TypeError, "Max has to be at least 0");
+        return NULL;
+      }
+    }
+  }
+
+
+  if (py_weights) {
+    if (!PyTuple_Check(py_weights)) {
+      PyErr_SetString(PyExc_TypeError, "Weights must be a Tuple");
+      return NULL;
+    }
+
+    if (!PyArg_ParseTuple(py_weights, "nnn", &insert_cost, &delete_cost, &replace_cost)) {
+      return NULL;
+    }
+  }
 
   if (!valid_str(py_s1, "s1") || !valid_str(py_s2, "s2")) {
     return NULL;
   }
+
   auto s1_view = decode_python_string(py_s1);
   auto s2_view = decode_python_string(py_s2);
 
-  std::size_t result = mpark::visit(LevenshteinVisitor(insert_cost, delete_cost, replace_cost),
+  std::size_t result = mpark::visit(LevenshteinVisitor(insert_cost, delete_cost, replace_cost, (std::size_t)max),
                                     s1_view, s2_view);
+                                  
+  if (result == (std::size_t)-1) {
+    return PyLong_FromLong(-1);
+  }
   return PyLong_FromSize_t(result);
 }
 
@@ -138,17 +176,30 @@ PyObject* normalized_levenshtein(PyObject* /*self*/, PyObject* args, PyObject* k
 {
   PyObject* py_s1;
   PyObject* py_s2;
+  PyObject* py_weights;
   std::size_t insert_cost = 1;
   std::size_t delete_cost = 1;
   std::size_t replace_cost = 1;
   PyObject* py_processor = NULL;
   double score_cutoff = 0;
-  static const char* kwlist[] = {"s1", "s2", "insert_cost", "delete_cost", "replace_cost", "processor", "score_cutoff", NULL};
+  static const char* kwlist[] = {"s1", "s2", "weights", "processor", "score_cutoff", NULL};
 
-  if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|nnnOd", const_cast<char**>(kwlist), &py_s1,
-                                   &py_s2, &insert_cost, &delete_cost, &replace_cost, &py_processor, &score_cutoff))
+  if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|OOd", const_cast<char**>(kwlist), &py_s1,
+                                   &py_s2, &py_weights, &py_processor, &score_cutoff))
   {
     return NULL;
+  }
+
+  if (py_weights) {
+    if (!PyTuple_Check(py_weights)) {
+      PyErr_SetString(PyExc_TypeError, "Weights must be a Tuple");
+      return NULL;
+    }
+
+    // todo use better error message
+    if (!PyArg_ParseTuple(py_weights, "nnn", &insert_cost, &delete_cost, &replace_cost)) {
+      return NULL;
+    }
   }
 
   if (py_s1 == Py_None || py_s2 == Py_None) {

@@ -5,7 +5,7 @@
 #include <Python.h>
 
 PyDoc_STRVAR(levenshtein_docstring,
-R"(levenshtein($module, s1, s2, weights = None, max = None)
+R"(levenshtein($module, s1, s2, weights = (1, 1, 1), max = None)
 --
 
 Calculates the minimum number of insertions, deletions, and substitutions
@@ -20,7 +20,7 @@ s2 : str
     Second string to compare
 weights : Tuple[int, int, int] or None, optional
     The weights for the three operations in the form
-    (insertion, deletion, substitution). Default is None,
+    (insertion, deletion, substitution). Default is (1, 1, 1),
     which gives all three operations a weight of 1.
 max : int or None, optional
     Maximum Levenshtein distance between s1 and s2, that is
@@ -151,7 +151,7 @@ PyObject* levenshtein(PyObject* /*self*/, PyObject* args, PyObject* keywds);
 
 
 PyDoc_STRVAR(normalized_levenshtein_docstring,
-R"(normalized_levenshtein($module, s1, s2, weights = None, processor = None, score_cutoff = 0)
+R"(normalized_levenshtein($module, s1, s2, weights = (1, 1, 1), processor = None, score_cutoff = 0)
 --
 
 Calculates a normalized levenshtein distance using custom
@@ -170,7 +170,7 @@ s2 : str
     Second string to compare.
 weights : Tuple[int, int, int] or None, optional
     The weights for the three operations in the form
-    (insertion, deletion, substitution). Default is None,
+    (insertion, deletion, substitution). Default is (1, 1, 1),
     which gives all three operations a weight of 1.
 processor: bool or callable, optional
   Optional callable that is used to preprocess the strings before
