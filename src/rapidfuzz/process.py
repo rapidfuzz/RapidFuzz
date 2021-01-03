@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2020 Max Bachmann
+# Copyright (C) 2021 Max Bachmann
 # Copyright (C) 2011 Adam Cohen
 
 from rapidfuzz import fuzz, utils
@@ -10,23 +10,34 @@ def extract(query, choices, scorer = fuzz.WRatio, processor = utils.default_proc
     """ 
     Find the best matches in a list of choices
 
-    Args: 
-        query (str): string we want to find
-        choices (Iterable): list of all strings the query should be compared with or dict with a mapping
-            {<result>: <string to compare> }
-        scorer (Callable): optional callable that is used to calculate the matching score between
-            the query and each choice. WRatio is used by default
-        processor (Callable): optional callable that reformats the strings. utils.default_process
-            is used by default, which lowercases the strings and trims whitespace
-        limit (int): maximum amount of results to return
-        score_cutoff (float): Optional argument for a score threshold. Matches with
-            a lower score than this number will not be returned. Defaults to 0
+    Parameters
+    ----------
+    query : str
+        string we want to find
+    choices : Iterable
+        list of all strings the query should be compared with or dict with a mapping
+        {<result>: <string to compare>}
+    scorer : Callable, optional
+        Optional callable that is used to calculate the matching score between
+        the query and each choice. fuzz.WRatio is used by default
+    processor : Callable, optional
+        Optional callable that reformats the strings.
+        utils.default_process is used by default, which lowercases the strings and trims whitespace
+    limit : int
+        maximum amount of results to return
+    score_cutoff : float, optional
+        Optional argument for a score threshold as a float between 0 and 100.
+        Matches with a lower score than this number will be ignored. Default is 0,
+        which deactivates this behaviour.
 
-    Returns: 
-        Union[List[Tuple[str, float, Any]]]: Returns a
-        list of all matches that have a `score >= score_cutoff`. The list will
-        be of either `(<choice>, <ratio>, <index of choice>)` when `choices` is a list of strings
-        or `(<choice>, <ratio>, <key of choice>)` when `choices` is a mapping.
+    Returns
+    -------
+    List[Tuple[str, float, Any]]
+        Returns a list of all matches that have a `score >= score_cutoff`.
+        The list will be of either `(<choice>, <ratio>, <index of choice>)`
+        when `choices` is a list of strings or `(<choice>, <ratio>, <key of choice>)`
+        when `choices` is a mapping
+
     """
     results = extract_iter(query, choices, scorer, processor, score_cutoff, **kwargs)
 

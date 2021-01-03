@@ -42,72 +42,71 @@ the diagrams ``ls`` refers to the longer string and ``ss`` refers to the
 shorter string.
 
 Insertion = 1, Deletion = 1, Substitution = 1:
-  +==================+    Yes    +----------------------------+
-  ||    max = 0     ||---------->| direct comparision (O(N))  |
-  +==================+           +----------------------------+
-        | No
-        V
-  +---------------------+
-  | remove common affix |
-  +---------------------+
-        |
-        V
-  +==================+    Yes    +--------------------------+
-  ||    max ≤ 3     ||---------->| mbleven algorithm (O(N)) |
-  +==================+           +--------------------------+
-        | No
-        V
-  +==================+    Yes    +--------------------------+
-  || extended Ascii ||---------->| Hyyrös' algorithm (O(N)) |
-  || len(ss) ≤ 64   ||           | described by [1]_        |
-  +==================+           +--------------------------+
-        | No
-        V
-  +-------------------------------------------------------------+
-  | Wagner-Fischer using Ukkonens optimisation                  |
-  | described by [2]_                                           |
-  | TODO: replace with Myers algorithm (with blocks)            |
-  +-------------------------------------------------------------+
+  - if max is 0 the similarity can be calculated using a direct comparision,
+    since no difference between the strings is allowed.  The time complexity of
+    this algorithm is ``O(N)``.
+
+  - A common prefix/suffix of the two compared strings does not affect
+    the Levenshtein distance, so the affix is removed before calculating the
+    similarity.
+
+  - If max is ≤ 3 the mbleven algorithm is used. This algorithm
+    checks all possible edit operations that are possible under
+    the threshold `max`. The time complexity of this algorithm is ``O(N)``.
+
+  - If the length of the shorter string is ≤ 64 after removing the common affix
+    Hyyrös' algorithm is used, which calculates the Levenshtein distance in
+    parallel. The algorithm is described by [1]_. The time complexity of this
+    algorithm is ``O(N)``.
+
+  - In all other cases the Levenshtein distance is calculated using
+    Wagner-Fischer with Ukkonens optimisation as described by [2]_.  The time
+    complexity of this algorithm is ``O(N * M)``.
+    In the future this should be replaced by Myers algorithm (with blocks),
+    which performs the calculation in parallel aswell (64 characters at a time).
+    Myers algorithm is described in [3]_
+
 
 Insertion = 1, Deletion = 1, Substitution = 2:
-  +==================+   Yes    +----------------------------+
-  ||    max = 0     ||--------->| direct comparision (O(N))  |
-  +==================+          +----------------------------+
-        | No
-        V
-  +---------------------+
-  | remove common affix |
-  +---------------------+
-        |
-        V
-  +==================+   Yes    +--------------------------+
-  ||    max ≤ 4     ||--------->| mbleven algorithm (O(N)) |
-  +==================+          +--------------------------+
-        | No
-        V
-  +==================+    Yes    +-------------------------------+
-  ||  len(ss) ≤ 64  ||---------->| BitPAl algorithm (O(N))       |
-  ||                ||           | described by [4]_             |
-  ||                ||           | with additional UTF32 support |
-  +==================+           +-------------------------------+
-        | No
-        V
-  +==================+    Yes    +----------------------------+
-  || extended Ascii ||---------->| BitPAl algorithm blockwise |
-  ||                ||           | (O(N*M/64))                |
-  +==================+           +----------------------------+
-        | No
-        V
-  +--------------------------------------------------------------+
-  | Wagner-Fischer using Ukkonens optimisation (O(N*M))          |
-  | described by [2]_                                            |
-  | TODO: add unicode support to blockwise BitPAL as replacement |
-  +--------------------------------------------------------------+
+  - if max is 0 the similarity can be calculated using a direct comparision,
+    since no difference between the strings is allowed.  The time complexity of
+    this algorithm is ``O(N)``.
 
+  - if max is 1 and the two strings have a similar length, the similarity can be
+    calculated using a direct comparision aswell, since a substitution would cause
+    a edit distance higher than max. The time complexity of this algorithm
+    is ``O(N)``.
+
+  - A common prefix/suffix of the two compared strings does not affect
+    the Levenshtein distance, so the affix is removed before calculating the
+    similarity.
+
+  - If max is ≤ 4 the mbleven algorithm is used. This algorithm
+    checks all possible edit operations that are possible under
+    the threshold `max`. As a difference to the normal Levenshtein distance this
+    algorithm can even be used up to a threshold of 4 here, since the higher weight
+    of substitutions decreases the amount of possible edit operations.
+    The time complexity of this algorithm is ``O(N)``.
+
+  - If the length of the shorter string is ≤ 64 after removing the common affix
+    the BitPAl algorithm is used, which calculates the Levenshtein distance in
+    parallel. The algorithm is described by [4]_ and is extended with support
+    for UTF32 in this implementation. The time complexity of this
+    algorithm is ``O(N)``.
+
+  - If both strings only use extended Ascii a blockwise BitPAl algorithm is used.
+    It calculated the Levenshtein distance in blocks of 64 characters and
+    therefor has a time complexity of ``O(N*M/64)``
+
+  - In all other cases the Levenshtein distance is calculated using
+    Wagner-Fischer with Ukkonens optimisation as described by [2]_. The time
+    complexity of this algorithm is ``O(N * M)``.
+    This will be removed once UTF32 support is added to the blockwise BitPAl
+    algorithm.
 
 Other weights:
   The implementation for other weights is based on Wagner-Fischer.
-  It has a performance of ``O(m * n)`` and has a memory usage of ``O(n)``.
+  It has a performance of ``O(N * M)`` and has a memory usage of ``O(N)``.
   Further details can be found in [2]_.
 
 
@@ -119,32 +118,35 @@ References
 .. [2] Wagner, Robert & Fischer, Michael
        "The String-to-String Correction Problem."
        J. ACM. 21. (1974): 168-173
-.. [3] Ukkonen, Esko. "Algorithms for Approximate String Matching."
-       Information and Control. 64. (1985): 100-118
+.. [3] Myers, Gene. "A fast bit-vector algorithm for approximate
+       string matching based on dynamic programming."
+       Journal of the ACM (JACM) 46.3 (1999): 395-415.
 .. [4] Loving, Joshua & Hernández, Yözen & Benson, Gary.
        "BitPAl: A Bit-Parallel, General Integer-Scoring Sequence
        Alignment Algorithm. Bioinformatics"
        Bioinformatics, Volume 30 (2014): 3166–3173
-.. [5] Myers, Gene. "A fast bit-vector algorithm for approximate
-       string matching based on dynamic programming."
-       Journal of the ACM (JACM) 46.3 (1999): 395-415.
-
 
 Examples
 --------
 Find the Levenshtein distance between two strings:
+
 >>> from rapidfuzz.string_metric import levenshtein
 >>> levenshtein("lewenstein", "levenshtein")
 2
+
 Setting a maximum distance allows the implementation to select
 a more efficient implementation:
+
 >>> levenshtein("lewenstein", "levenshtein", max=1)
 -1
+
 It is possible to select different weights by passing a `weight`
 tuple. Internally s1 and s2 might be swapped, so insertion and deletion
 cost should usually have the same value.
+
 >>> levenshtein("lewenstein", "levenshtein", weights=(1,1,2))
 3
+
 )");
 
 PyObject* levenshtein(PyObject* /*self*/, PyObject* args, PyObject* keywds);
@@ -213,20 +215,27 @@ for normalization yet.
 Examples
 --------
 Find the normalized Levenshtein distance between two strings:
+
 >>> from rapidfuzz.string_metric import normalized_levenshtein
 >>> normalized_levenshtein("lewenstein", "levenshtein")
 81.81818181818181
+
 Setting a score_cutoff allows the implementation to select
 a more efficient implementation:
+
 >>> levenshtein("lewenstein", "levenshtein", score_cutoff=85)
 0.0
+
 It is possible to select different weights by passing a `weight`
 tuple. Internally s1 and s2 might be swapped, so insertion and deletion
 cost should usually have the same value.
+
 >>> levenshtein("lewenstein", "levenshtein", weights=(1,1,2))
 85.71428571428571
+
 When a different processor is used s1 and s2 do not have to be strings
->> levenshtein(["lewenstein"], ["levenshtein"], processor=lambda s: s[0])
+
+>>> levenshtein(["lewenstein"], ["levenshtein"], processor=lambda s: s[0])
 81.81818181818181
 
 )");
@@ -281,5 +290,6 @@ Returns
 ratio : float
     Normalized hamming distance between s1 and s2
     as a float between 0 and 100
+
 )");
 PyObject* normalized_hamming(PyObject* /*self*/, PyObject* args, PyObject* keywds);
