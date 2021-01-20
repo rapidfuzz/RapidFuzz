@@ -7,14 +7,43 @@
 #include "py_string_metric.hpp"
 #include "utils.hpp"
 #include "py_process.hpp"
-#include "py_utils.hpp"
 #include <string>
-#include <iostream>
-
 
 namespace rfuzz = rapidfuzz::fuzz;
 namespace rutils = rapidfuzz::utils;
 namespace string_metric = rapidfuzz::string_metric;
+
+
+static inline double calc_similarity(
+  PyObject* py_choice, PyObject* py_processor, processor_func processor,
+  CachedScorer* scorer, double score_cutoff)
+{
+  double score = 0;
+
+  switch(processor.index()) {
+  case 0: /* No Processor */
+  {
+    if (!valid_str(py_choice, "choice")) throw std::invalid_argument("");
+    auto choice = decode_python_string(py_choice);
+    score = scorer->ratio(choice, score_cutoff);
+    break;
+  }
+  case 1: /* Python processor */
+  {
+    auto choice = mpark::get<1>(processor)(py_processor, py_choice, "choice");
+    score = scorer->ratio(choice.value, score_cutoff);
+    break;
+  }
+  case 2: /* C++ processor */
+  {
+    auto choice = mpark::get<2>(processor)(py_choice, "choice");
+    score = scorer->ratio(choice, score_cutoff);
+    break;
+  }
+  }
+
+  return score;
+}
 
 static inline void free_owner_list(const std::vector<PyObject*>& owner_list)
 {
@@ -34,7 +63,7 @@ struct GenericScorerAllocVisitor {
   }
 };
 
-std::unique_ptr<CachedScorer> get_matching_instance(PyObject* scorer, const python_string& query)
+static std::unique_ptr<CachedScorer> get_matching_instance(PyObject* scorer, const python_string& query)
 {
   if (scorer) {
     if (PyCFunction_Check(scorer)) {
@@ -75,9 +104,9 @@ std::unique_ptr<CachedScorer> get_matching_instance(PyObject* scorer, const pyth
     }
     /* call python function */
     return nullptr;
-    /* default is fuzz.WRatio */
   }
   else {
+    /* default is fuzz.WRatio */
     return mpark::visit(GenericScorerAllocVisitor<rfuzz::CachedWRatio>(), query);
   }
 }
@@ -92,7 +121,7 @@ struct EncodePythonStringVisitor {
 };
 
 static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices, PyObject* scorer,
-                               std::unique_ptr<Processor> processor, double score_cutoff)
+                               PyObject* py_processor, processor_func processor, double score_cutoff)
 {
   PyObject* result_choice = NULL;
   PyObject* choice_key = NULL;
@@ -125,7 +154,7 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices, PyObjec
   outer_owner_list.push_back(args);
 
   try {
-    auto query = processor->call(py_query, "query");
+    auto query = preprocess(py_query, py_processor, processor, "query");
     py_query = mpark::visit(EncodePythonStringVisitor(), query.value);
     if (!py_query) {
       throw std::invalid_argument("");
@@ -165,7 +194,7 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices, PyObjec
         continue;
       }
 
-      auto choice = processor->call(py_match_choice, "choice");
+      auto choice = preprocess(py_match_choice, py_processor, processor, "choice");
 
       PyObject* py_proc_choice = mpark::visit(EncodePythonStringVisitor(), choice.value);
 
@@ -200,7 +229,7 @@ static PyObject* py_extractOne(PyObject* py_query, PyObject* py_choices, PyObjec
     // todo replace
     free_owner_list(outer_owner_list);
     return NULL;
-  }  
+  }
 
   if (result_index == -1) {
     free_owner_list(outer_owner_list);
@@ -238,20 +267,19 @@ PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds)
   }
 
   if (py_query == Py_None) {
-    // todo this is completely wrong
-    return PyFloat_FromDouble(0);
+    Py_RETURN_NONE;
   }
 
   try {
     auto processor = get_processor(py_processor, true);
-    //todo do not run twice
-    auto query = processor->call(py_query, "query");
+    //todo do not run twice for python scorer
+    auto query = preprocess(py_query, py_processor, processor, "query");
 
     auto scorer = get_matching_instance(py_scorer, query.value);
 
     if (!scorer) {
       // todo this is mostly code duplication
-      return py_extractOne(py_query, py_choices, py_scorer, std::move(processor), score_cutoff);
+      return py_extractOne(py_query, py_choices, py_scorer, py_processor, processor, score_cutoff);
     }
 
     /* dict like container */
@@ -286,9 +314,7 @@ PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds)
         continue;
       }
 
-      auto choice = processor->call(py_match_choice, "choice");
-
-      double score = scorer->ratio(choice.value, score_cutoff);
+      double score = calc_similarity(py_match_choice, py_processor, processor, scorer.get(), score_cutoff);
 
       if (score >= score_cutoff) {
         // increase the value by a small step so it might be able to exit early
@@ -302,6 +328,7 @@ PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds)
           break;
         }
       }
+
     }
   } catch(std::invalid_argument& e) {
     free_owner_list(outer_owner_list);
@@ -376,7 +403,7 @@ PyObject* extract_iter_new(PyTypeObject *type, PyObject *args, PyObject *keywds)
   Py_INCREF(py_query);
   state->queryObj = py_query;
   try {
-    state->query = state->processor->call(py_query, "query");
+    state->query = preprocess(py_query, state->processorObj, state->processor, "query");
   } catch(std::invalid_argument& e) {
     goto Error;
   }
@@ -483,7 +510,7 @@ PyObject* extract_iter_next(ExtractIterState *state)
     PyObject* result;
     if (py_match_choice != Py_None) {
       try {
-        auto choice = state->processor->call(py_match_choice, "choice");
+        auto choice = preprocess(py_match_choice, state->processorObj, state->processor, "choice");
 
         // built in scorer of rapidfuzz
         if (state->scorer) {
@@ -516,7 +543,7 @@ PyObject* extract_iter_next(ExtractIterState *state)
             Py_DecRef(score);
             return NULL;
           }
-    
+
           result = state->is_dict ? Py_BuildValue("(OOO)", py_match_choice, score, py_choice)
                                   : Py_BuildValue("(OOn)", py_match_choice, score, state->choice_index);
           Py_DecRef(score);

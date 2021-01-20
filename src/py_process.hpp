@@ -3,6 +3,7 @@
 
 #pragma once
 #include "py_common.hpp"
+#include "py_utils.hpp"
 
 PyDoc_STRVAR(extractOne_docstring,
 R"(extractOne($module, query, choices, scorer = 'fuzz.WRatio', processor = 'utils.default_process', score_cutoff = 0)
@@ -85,7 +86,7 @@ typedef struct {
     PythonStringWrapper query;
     PyObject* queryObj;
 
-    std::unique_ptr<Processor> processor;
+    processor_func processor;
     PyObject* processorObj;
     std::unique_ptr<CachedScorer> scorer;
     PyObject* scorerObj;

@@ -95,36 +95,16 @@ struct PythonStringWrapper {
   bool owned;
 };
 
-
-
-struct Processor {
-  virtual ~Processor() = default;
-  virtual PythonStringWrapper call(PyObject* str, const char* name) = 0;
-};
-
-struct NoProcessor : public Processor  {
-  NoProcessor() {}
-  PythonStringWrapper call(PyObject* str, const char* name) override {
-    if (!valid_str(str, name)) throw std::invalid_argument("");
-    return PythonStringWrapper(decode_python_string(str), str);
-  }
-};
-
-struct PythonProcessor : public Processor {
-  PythonProcessor(PyObject* processor)
-    : m_processor(processor) {}
-
-  PythonStringWrapper call(PyObject* str, const char* name) override {
+struct PythonProcessor {
+  static PythonStringWrapper call(PyObject* processor, PyObject* str, const char* name) {
 #if PY_VERSION_HEX >= PYTHON_VERSION(3, 9, 0)
-    PyObject* proc_str = PyObject_CallOneArg(m_processor, str);
+    PyObject* proc_str = PyObject_CallOneArg(processor, str);
 #else
-    PyObject* proc_str = PyObject_CallFunctionObjArgs(m_processor, str, NULL);
+    PyObject* proc_str = PyObject_CallFunctionObjArgs(processor, str, NULL);
 #endif
     if ((proc_str == NULL) || (!valid_str(proc_str, name))) {
        throw std::invalid_argument("");
     }
     return PythonStringWrapper(decode_python_string(proc_str), proc_str, true);
   }
-private:
-  PyObject* m_processor;
 };

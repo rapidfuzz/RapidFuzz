@@ -42,38 +42,61 @@ struct DefaultProcessVisitor {
   }
 };
 
-struct DefaultProcessor : public Processor  {
-  DefaultProcessor() {}
-  PythonStringWrapper call(PyObject* str, const char* name) override {
+struct DefaultProcessor {
+  static python_string call(PyObject* str, const char* name) {
     if (!valid_str(str, name)) throw std::invalid_argument("");
-    return PythonStringWrapper(mpark::visit(DefaultProcessVisitor(), decode_python_string(str)));
+    return mpark::visit(DefaultProcessVisitor(), decode_python_string(str));
   }
 };
 
+using processor_func = mpark::variant<
+  mpark::monostate,                                            /* No processor */
+  PythonStringWrapper (*) (PyObject*, PyObject*, const char*), /* Python processor */
+  python_string (*) (PyObject*, const char*)                   /* C++ processor */
+>;
 
-static inline std::unique_ptr<Processor> get_processor(PyObject* processor, bool processor_default)
+static inline processor_func get_processor(PyObject* processor, bool processor_default)
 {
   if (processor == NULL) {
     if (processor_default) {
-      return std::unique_ptr<Processor>(new DefaultProcessor());
+      return DefaultProcessor::call;
     }
-    return std::unique_ptr<Processor>(new NoProcessor());
+    return mpark::monostate();
   }
-  
+
   if (PyCFunction_Check(processor)) {
     if (PyCFunction_GetFunction(processor) == PY_FUNC_CAST(default_process)) {
-      return std::unique_ptr<Processor>(new DefaultProcessor());
+      return DefaultProcessor::call;
     }
     // add new processors here
   }
 
   if (PyCallable_Check(processor)) {
-    return std::unique_ptr<Processor>(new PythonProcessor(processor));
+    return PythonProcessor::call;
   }
 
   if (PyObject_IsTrue(processor)) {
-    return std::unique_ptr<Processor>(new DefaultProcessor());
+    return DefaultProcessor::call;
   }
 
-  return std::unique_ptr<Processor>(new NoProcessor());
+  return mpark::monostate();
+}
+
+static inline PythonStringWrapper preprocess(PyObject* py_str, PyObject* py_processor, processor_func processor, const char* name)
+{
+  switch(processor.index()) {
+  case 0: /* No Processor */
+  {
+    if (!valid_str(py_str, name)) throw std::invalid_argument("");
+    return PythonStringWrapper(decode_python_string(py_str), py_str);
+  }
+  case 1: /* Python processor */
+  {
+    return mpark::get<1>(processor)(py_processor, py_str, name);
+  }
+  case 2: /* C++ processor */
+  {
+    return PythonStringWrapper(mpark::get<2>(processor)(py_str, name));
+  }
+  }
 }

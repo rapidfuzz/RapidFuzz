@@ -46,8 +46,8 @@ static inline PyObject* fuzz_call(bool processor_default, PyObject* args, PyObje
   auto processor = get_processor(py_processor, processor_default);
 
   try {
-    auto s1 = processor->call(py_s1, "s1");
-    auto s2 = processor->call(py_s2, "s2");
+    auto s1 = preprocess(py_s1, py_processor, processor, "s1");
+    auto s2 = preprocess(py_s2, py_processor, processor, "s2");
     double result = mpark::visit(GenericRatioVisitor<MatchingFunc>(score_cutoff), s1.value, s2.value);
     return PyFloat_FromDouble(result);
   } catch(std::invalid_argument& e) {
