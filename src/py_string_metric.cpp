@@ -176,7 +176,7 @@ PyObject* normalized_levenshtein(PyObject* /*self*/, PyObject* args, PyObject* k
 {
   PyObject* py_s1;
   PyObject* py_s2;
-  PyObject* py_weights;
+  PyObject* py_weights = NULL;
   std::size_t insert_cost = 1;
   std::size_t delete_cost = 1;
   std::size_t replace_cost = 1;
