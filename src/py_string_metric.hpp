@@ -35,11 +35,8 @@ distance : int
 
 Notes
 -----
-Depending on the input parameters different optimised implementation are used
+Depending on the input parameters different optimized implementation are used
 to improve the performance. Worst-case performance is ``O(m * n)``.
-In the following, these are visualized in the form of simple diagrams. Inside
-the diagrams ``ls`` refers to the longer string and ``ss`` refers to the
-shorter string.
 
 Insertion = 1, Deletion = 1, Substitution = 1:
   - if max is 0 the similarity can be calculated using a direct comparision,
@@ -60,7 +57,7 @@ Insertion = 1, Deletion = 1, Substitution = 1:
     algorithm is ``O(N)``.
 
   - In all other cases the Levenshtein distance is calculated using
-    Wagner-Fischer with Ukkonens optimisation as described by [2]_.  The time
+    Wagner-Fischer with Ukkonens optimization as described by [2]_.  The time
     complexity of this algorithm is ``O(N * M)``.
     In the future this should be replaced by Myers algorithm (with blocks),
     which performs the calculation in parallel aswell (64 characters at a time).
@@ -99,7 +96,7 @@ Insertion = 1, Deletion = 1, Substitution = 2:
     therefor has a time complexity of ``O(N*M/64)``
 
   - In all other cases the Levenshtein distance is calculated using
-    Wagner-Fischer with Ukkonens optimisation as described by [2]_. The time
+    Wagner-Fischer with Ukkonens optimization as described by [2]_. The time
     complexity of this algorithm is ``O(N * M)``.
     This will be removed once UTF32 support is added to the blockwise BitPAl
     algorithm.
@@ -223,19 +220,19 @@ Find the normalized Levenshtein distance between two strings:
 Setting a score_cutoff allows the implementation to select
 a more efficient implementation:
 
->>> levenshtein("lewenstein", "levenshtein", score_cutoff=85)
+>>> normalized_levenshtein("lewenstein", "levenshtein", score_cutoff=85)
 0.0
 
 It is possible to select different weights by passing a `weight`
 tuple. Internally s1 and s2 might be swapped, so insertion and deletion
 cost should usually have the same value.
 
->>> levenshtein("lewenstein", "levenshtein", weights=(1,1,2))
+>>> normalized_levenshtein("lewenstein", "levenshtein", weights=(1,1,2))
 85.71428571428571
 
 When a different processor is used s1 and s2 do not have to be strings
 
->>> levenshtein(["lewenstein"], ["levenshtein"], processor=lambda s: s[0])
+>>> normalized_levenshtein(["lewenstein"], ["levenshtein"], processor=lambda s: s[0])
 81.81818181818181
 
 )");
