@@ -464,8 +464,18 @@ PyObject* extract(PyObject* /*self*/, PyObject* args, PyObject* keywds)
         if (limit == -1 && PyErr_Occurred()) {
           return NULL;
         }
-      } else {
+      }
+#if PY_VERSION_HEX < PYTHON_VERSION(3, 0, 0)
+      else if (PyInt_Check(py_limit)) {
+        limit = PyInt_AsSsize_t(py_limit);
+        if (limit == -1 && PyErr_Occurred()) {
+          return NULL;
+        }
+      }
+#endif
+      else {
         // todo exception
+        PyErr_SetString(PyExc_TypeError, "limit has to be a Integer or None");
         return NULL;
       }
     }
@@ -528,7 +538,7 @@ PyObject* extract(PyObject* /*self*/, PyObject* args, PyObject* keywds)
     return NULL;
   }
 
-  if (limit == -1 || limit >= results.size()) {
+  if (limit < 0 || limit >= results.size()) {
     limit = results.size();
   }
 
