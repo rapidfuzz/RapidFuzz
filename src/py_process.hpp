@@ -40,6 +40,9 @@ Union[None, Tuple[str, float, Any]]
 )");
 PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds);
 
+PyDoc_STRVAR(extract_docstring, "");
+PyObject* extract(PyObject* /*self*/, PyObject* args, PyObject* keywds);
+
 
 PyDoc_STRVAR(extract_iter_docstring,
 R"(extract_iter($module, query, choices, scorer = 'fuzz.WRatio', processor = 'utils.default_process', score_cutoff = 0)

@@ -70,6 +70,7 @@ static PyMethodDef methods[] = {
     PY_METHOD(QRatio),
     /* process */
     PY_METHOD(extractOne),
+    PY_METHOD(extract),
     /* sentinel */
     {NULL, NULL, 0, NULL}};
 

@@ -347,8 +347,202 @@ PyObject* extractOne(PyObject* /*self*/, PyObject* args, PyObject* keywds)
   return result;
 }
 
+struct ExtractComp
+{
+    template<class T>
+    bool operator()(T const &a, T const &b) const {
+        if (a.first > b.first) {
+            return true;
+        } else if (a.first < b.first) {
+            return false;
+        } else {
+            return a.second < b.second;
+        }
+    }
+};
 
+static inline PyObject* extract_resultsToList(
+  const std::vector<std::pair<double, Py_ssize_t>>& results,
+  Py_ssize_t limit,
+  bool is_dict,
+  PyObject* choices)
+{
+  PyObject* result_list = PyList_New(limit);
+  if (result_list == NULL) {
+    goto Error;
+  }
 
+  for (Py_ssize_t i = 0; i < limit; ++i) {
+    double score = results[i].first;
+    Py_ssize_t index = results[i].second;
+    PyObject* result_tuple = NULL;
+
+    if (is_dict) {
+      PyObject* py_choice = NULL;
+      PyObject* py_match_choice = PySequence_Fast_GET_ITEM(choices, index);
+      PyObject* py_score = NULL;
+
+      if (!PyArg_ParseTuple(py_match_choice, "OO", &py_choice, &py_match_choice)) {
+        goto Error;
+      }
+
+      py_score = PyFloat_FromDouble(score);
+      if (py_score == NULL) {
+        goto Error;
+      }
+
+      result_tuple = PyTuple_Pack(3, py_match_choice, py_score, py_choice);
+      Py_DecRef(py_score);
+    } else {
+      PyObject* py_match_choice = PySequence_Fast_GET_ITEM(choices, index);
+      PyObject* py_score = NULL;
+      PyObject* py_choice = NULL;
+
+      py_score = PyFloat_FromDouble(score);
+      if (py_score == NULL) {
+        goto Error;
+      }
+
+      py_choice = PyLong_FromSsize_t(index);
+      if (py_choice == NULL) {
+        Py_DecRef(py_score);
+        goto Error;
+      }
+
+      result_tuple = PyTuple_Pack(3, py_match_choice, py_score, py_choice);
+      Py_DecRef(py_score);
+      Py_DecRef(py_choice);
+    }
+
+    if (result_tuple == NULL) {
+      goto Error;
+    }
+
+    PyList_SET_ITEM(result_list, i, result_tuple);
+  }
+
+  return result_list;
+Error:
+  Py_DecRef(result_list);
+  return NULL;
+}
+
+PyObject* extract(PyObject* /*self*/, PyObject* args, PyObject* keywds)
+{
+  std::vector<PyObject*> outer_owner_list;
+  std::vector<std::pair<double, Py_ssize_t>> results;
+  python_string query;
+  bool is_dict = false;
+
+  PyObject* py_query;
+  PyObject* py_choices;
+  PyObject* choices;
+  PyObject* py_processor = NULL;
+  PyObject* py_scorer = NULL;
+  PyObject* py_limit = NULL;
+  Py_ssize_t limit = 5;
+  double score_cutoff = 0;
+  static const char* kwlist[] = {"query", "choices", "scorer", "processor", "limit", "score_cutoff", NULL};
+
+  if (!PyArg_ParseTupleAndKeywords(args, keywds, "OO|OOOd", const_cast<char**>(kwlist), &py_query,
+                                   &py_choices, &py_scorer, &py_processor, &py_limit, &score_cutoff))
+  {
+    return NULL;
+  }
+
+  if (py_query == Py_None) {
+    // todo
+    Py_RETURN_NONE;
+  }
+
+  if (py_limit != NULL) {
+    if (py_limit == Py_None) {
+      limit = -1;
+    } else {
+      if (PyLong_Check(py_limit)) {
+        limit = PyLong_AsSsize_t(py_limit);
+        if (limit == -1 && PyErr_Occurred()) {
+          return NULL;
+        }
+      } else {
+        // todo exception
+        return NULL;
+      }
+    }
+  }
+
+  try {
+    auto processor = get_processor(py_processor, true);
+    auto query = preprocess(py_query, py_processor, processor, "query");
+
+    auto scorer = get_matching_instance(py_scorer, query.value);
+
+    if (!scorer) {
+      // use Python implementation, since we would have to call the scorer through python anyways
+      PyErr_SetString(PyExc_TypeError, "The C++ implementation only supports scorers implemented in C++");
+      return NULL;
+    }
+
+    /* dict like container */
+    if (PyObject_HasAttrString(py_choices, "items")) {
+      is_dict = true;
+      py_choices = PyObject_CallMethod(py_choices, "items", NULL);
+      if (!py_choices) {
+        throw std::invalid_argument("");
+      }
+      outer_owner_list.push_back(py_choices);
+    }
+
+    choices = PySequence_Fast(py_choices, "Choices must be a sequence of strings");
+    if (!choices) {
+      throw std::invalid_argument("");
+    }
+    outer_owner_list.push_back(choices);
+
+    Py_ssize_t choice_count = PySequence_Fast_GET_SIZE(choices);
+    results.reserve(choice_count);
+
+    for (Py_ssize_t i = 0; i < choice_count; ++i) {
+      PyObject* py_choice = NULL;
+      PyObject* py_match_choice = PySequence_Fast_GET_ITEM(choices, i);
+
+      if (is_dict) {
+        if (!PyArg_ParseTuple(py_match_choice, "OO", &py_choice, &py_match_choice)) {
+          throw std::invalid_argument("");
+        }
+      }
+
+      if (py_match_choice == Py_None) {
+        continue;
+      }
+
+      double score = calc_similarity(py_match_choice, py_processor, processor, scorer.get(), score_cutoff);
+
+      if (score >= score_cutoff) {
+        results.emplace_back(score, i);
+      }
+
+    }
+  } catch(std::invalid_argument& e) {
+    free_owner_list(outer_owner_list);
+    return NULL;
+  }
+
+  if (limit == -1 || limit >= results.size()) {
+    limit = results.size();
+  }
+
+  if (limit == results.size()) {
+    std::sort(results.begin(), results.end(), ExtractComp());
+  } else {
+    std::partial_sort(results.begin(), results.begin() + limit, results.end(), ExtractComp());
+  }
+
+  PyObject* result_list = extract_resultsToList(results, limit, is_dict, choices);
+
+  free_owner_list(outer_owner_list);
+  return result_list;
+}
 
 
 
