@@ -24,7 +24,7 @@
     <img src="https://badges.gitter.im/rapidfuzz/community.svg"
          alt="Gitter chat">
   </a>
-  <a href="https://github.com/maxbachmann/RapidFuzz/blob/master/docs/index.md">
+  <a href="https://maxbachmann.github.io/RapidFuzz">
     <img src="https://img.shields.io/badge/-documentation-blue"
          alt="Documentation">
   </a>
