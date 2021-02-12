@@ -33,9 +33,9 @@ def get_platform():
     return 'Python %s on %s (%s)' % (pyver, uname.system, uname.machine)
 
 def benchmark():
-    words = [''.join(random.choice(string.ascii_letters + string.digits) for _ in range(10)) for s in range(10000)]
+    words = [''.join(random.choice(string.ascii_letters + string.digits) for _ in range(10)) for _ in range(10000)]
     sample_rate = len(words) // 100
-    sample = [word for word in words[::sample_rate]]
+    sample = words[::sample_rate]
 
     total = len(words) * len(sample)
 
