@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: MIT
+# Copyright (C) 2021 Max Bachmann
+
 from rapidfuzz.cpp_impl import (
     ratio,
     partial_ratio,
@@ -8,6 +11,5 @@ from rapidfuzz.cpp_impl import (
     token_ratio,
     partial_token_ratio,
     WRatio,
-    QRatio,
-    quick_lev_ratio
+    QRatio
 )

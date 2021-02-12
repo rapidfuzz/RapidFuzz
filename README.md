@@ -1,11 +1,11 @@
 <h1 align="center">
-<img src="https://raw.githubusercontent.com/maxbachmann/rapidfuzz/master/docs/img/RapidFuzz.svg?sanitize=true" alt="RapidFuzz" width="400">
+<img src="https://raw.githubusercontent.com/maxbachmann/RapidFuzz/master/docs/img/RapidFuzz.svg?sanitize=true" alt="RapidFuzz" width="400">
 </h1>
 <h4 align="center">Rapid fuzzy string matching in Python and C++ using the Levenshtein Distance</h4>
 
 <p align="center">
-  <a href="https://github.com/maxbachmann/rapidfuzz/actions">
-    <img src="https://github.com/maxbachmann/rapidfuzz/workflows/Build/badge.svg"
+  <a href="https://github.com/maxbachmann/RapidFuzz/actions">
+    <img src="https://github.com/maxbachmann/RapidFuzz/workflows/Build/badge.svg"
          alt="Continous Integration">
   </a>
   <a href="https://pypi.org/project/rapidfuzz/">
@@ -48,6 +48,8 @@ RapidFuzz is a fast string matching library for Python and C++, which is using t
 1) It is MIT licensed so it can be used whichever License you might want to choose for your project, while you're forced to adopt the GPL license when using FuzzyWuzzy
 2) It is mostly written in C++ and on top of this comes with a lot of Algorithmic improvements to make string matching even faster, while still providing the same results. More details on these performance improvements in form of benchmarks can be found [here](https://github.com/maxbachmann/rapidfuzz/blob/master/Benchmarks.md)
 
+
+
 ## Requirements
 
 - Python 2.7 or later
@@ -73,7 +75,6 @@ There are pre-built binaries (wheels) of RapidFuzz for MacOS (10.9 and later), L
 >
 > If you run into this error on Windows the reason is most likely, that the [Visual C++ 2019 redistributable](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) is not installed, which is required to find C++ Libraries (The C++ 2019 version includes the 2015, 2017 and 2019 version).
 
-
 ### with conda
 
 RapidFuzz can be installed with `conda`:
@@ -92,24 +93,24 @@ pip install .
 ```
 
 ## Usage
-```console
-> from rapidfuzz import fuzz
-> from rapidfuzz import process
-```
+Some simple functions are shown below. A complete documentation of all functions can be found [here](https://maxbachmann.github.io/RapidFuzz/index.html).
 
-### Simple Ratio
+### Scorers
+Scorers in RapidFuzz can be found in the modules `fuzz` and `string_metric`.
+
+#### Simple Ratio
 ```console
 > fuzz.ratio("this is a test", "this is a test!")
 96.55171966552734
 ```
 
-### Partial Ratio
+#### Partial Ratio
 ```console
 > fuzz.partial_ratio("this is a test", "this is a test!")
 100.0
 ```
 
-### Token Sort Ratio
+#### Token Sort Ratio
 ```console
 > fuzz.ratio("fuzzy wuzzy was a bear", "wuzzy fuzzy was a bear")
 90.90908813476562
@@ -117,7 +118,7 @@ pip install .
 100.0
 ```
 
-### Token Set Ratio
+#### Token Set Ratio
 ```console
 > fuzz.token_sort_ratio("fuzzy was a bear", "fuzzy fuzzy was a bear")
 83.8709716796875
@@ -126,13 +127,57 @@ pip install .
 ```
 
 ### Process
+The process module makes it compare strings to lists of strings. This is generally more
+performant than using the scorers directly from Python. 
+Here are some examples on the usage of processors in RapidFuzz:
+
 ```console
+> from rapidfuzz import process, fuzz
 > choices = ["Atlanta Falcons", "New York Jets", "New York Giants", "Dallas Cowboys"]
-> process.extract("new york jets", choices, limit=2)
+> process.extract("new york jets", choices, scorer=fuzz.WRatio, limit=2)
 [('New York Jets', 100, 1), ('New York Giants', 78.57142639160156, 2)]
-> process.extractOne("cowboys", choices)
+> process.extractOne("cowboys", choices, scorer=fuzz.WRatio)
 ("Dallas Cowboys", 90, 3)
 ```
+
+The full documentation of processors can be found [here](https://maxbachmann.github.io/RapidFuzz/process.html)
+
+
+## Benchmark
+
+I generated a list of 10000 strings with length 10, that is compared to a sample of 100 elements from this list:
+```python
+words = [
+  ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(10))
+  for _ in range(10_000)
+]
+samples = words[::len(words) // 100]
+```
+
+The first benchmark compares the performance of the scorers in FuzzyWuzzy and RapidFuzz when they are used directly
+from Python in the following way:
+```python3
+for sample in samples:
+  for word in words:
+    scorer(sample, word)
+```
+The following graph shows how many elements are processed per second with each of the scorers. There are big performance differences between the different scorers. However each of the scorers is faster in RapidFuzz
+
+
+![scorer Benchmark](docs/img/scorer.png)
+
+
+The second benchmark compares the performance when the scorers are used in combination with extractOne in the following
+way:
+```python3
+for sample in samples:
+  extractOne(sample, word, scorer=scorer)
+```
+The following graph shows how many elements are processed per second with each of the scorers. In RapidFuzz the usage of scorers through processors like `extractOne` is a lot faster than directly using it. Thats why they should be used whenever possible.
+
+![extractOne Benchmark](docs/img/extractOne.png)
+
+
 
 ## License
 RapidFuzz is licensed under the MIT license since I believe that everyone should be able to use it without being forced to adopt the GPL license. Thats why the library is based on an older version of fuzzywuzzy that was MIT licensed as well.

@@ -1,10 +1,7 @@
-name: Deploy docs
+name: Build docs
 
 on:
   push:
-    paths: 
-    - 'docs/**'
-    - 'mkdocs.yml'
     branches:
     - master
 
@@ -12,19 +9,25 @@ jobs:
   build:
     runs-on: [ubuntu-latest]
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.7
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip setuptools
-        python -m pip install -r docs/requirements.txt
-    - name: Build Site
-      run: mkdocs build
-    - name: Deploy Site
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./site
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install dependencies
+        run: |
+          python -m pip install Sphinx sphinx_rtd_theme
+          python -m pip install .
+
+      - name: Build Site
+        run: make html
+
+      - name: Deploy Site
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/html

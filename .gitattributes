@@ -1,3 +1,4 @@
 extern/boost/* linguist-vendored
 extern/variant/* linguist-vendored
 docs/theme/* linguist-vendored
+bench/data/* linguist-vendored
