@@ -1,55 +1,35 @@
-##### LIST OF LIBRARIES IN THIS SCIPRT ####################
-#
-# edlib        https://github.com/Martinsos/edlib
-# distance     https://github.com/doukremt/distance
-# jellyfish    https://github.com/jamesturk/jellyfish
-# editdistance https://github.com/aflc/editdistance
-# Levenshtein  https://github.com/ztane/python-Levenshtein
-# polyleven    https://github.com/fujimotos/polyleven
-#
-###########################################################
-
 import importlib
-import os.path
-import sys
 import random
 from timeit import timeit
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 
+import string
+
+random.seed(18)
+
 PROCESSOR = {
-    "fuzz.ratio":False,
-    "string_metric.normalized_hamming": False,
-    "fuzz.quick_ratio":False,
-    "fuzz.partial_ratio":False,
-    "fuzz.token_sort_ratio":True,
-    "fuzz.token_set_ratio":True,
-    "fuzz.partial_token_sort_ratio":True,
-    "fuzz.partial_token_set_ratio":True,
-    "fuzz.QRatio":True,
-    "fuzz.WRatio":True
+    "ratio":False,
+    "partial_ratio":False,
+    "token_sort_ratio":True,
+    "token_set_ratio":True,
+    "partial_token_sort_ratio":True,
+    "partial_token_set_ratio":True,
+    "QRatio":True,
+    "WRatio":True
 }
 
 LIBRARIES = (
-    "fuzz.ratio",
-    "fuzz.partial_ratio",
-    "fuzz.token_sort_ratio",
-    "fuzz.token_set_ratio",
-    "fuzz.partial_token_sort_ratio",
-    "fuzz.partial_token_set_ratio",
-    "fuzz.QRatio",
-    "fuzz.WRatio"
+    "ratio",
+    "partial_ratio",
+    "token_sort_ratio",
+    "token_set_ratio",
+    "partial_token_sort_ratio",
+    "partial_token_set_ratio",
+    "QRatio",
+    "WRatio",
 )
-
-WORD_TXT = 'data/words.txt'
-
-def load_word():
-    basedir = os.path.dirname(sys.argv[0])
-    path = os.path.join(basedir, WORD_TXT)
-
-    with open(path, encoding="utf-8") as fp:
-        return [x.strip() for x in fp]*10
 
 def load_func(target):
     modname, funcname = target.rsplit('.', maxsplit=1)
@@ -64,8 +44,8 @@ def get_platform():
     return 'Python %s on %s (%s)' % (pyver, uname.system, uname.machine)
 
 def benchmark():
-    words = load_word()
-    sample_rate = len(words) // 10
+    words = [''.join(random.choice(string.ascii_letters + string.digits) for _ in range(10)) for s in range(10000)]
+    sample_rate = len(words) // 100
     sample = [word for word in words[::sample_rate]]
     total = len(words) * len(sample)
 
@@ -74,33 +54,33 @@ def benchmark():
     print('Sample:', len(sample))
     print('Total : %s calls\n' % total)
 
-    print('%-30s %s' % ('#', 'speed difference'))
-
-    def wrap(f, scorer, processor, score_cutoff=0):
+    def wrap(f, scorer, processor):
         def func():
             if not processor:
-                return len([f(x, words, scorer=scorer, processor=None, score_cutoff=score_cutoff) for x in sample])
-            return len([f(x, words, scorer=scorer, score_cutoff=score_cutoff) for x in sample])
+                return len([f(x, words, scorer=scorer, processor=None) for x in sample])
+            return len([f(x, words, scorer=scorer) for x in sample])
         return func
-
 
     fuzz = []
     rfuzz = []
+
+    header_list = ['Function', 'RapidFuzz', 'FuzzyWuzzy', 'SpeedImprovement']
+    row_format ="{:>25}" * len(header_list)
+    print(row_format.format(*header_list))
     for target in LIBRARIES:
- 
         func = load_func("fuzzywuzzy.process.extractOne")
-        scorer = load_func("fuzzywuzzy." + target)
-        sec = timeit('func()', globals={'func': wrap(func, scorer, PROCESSOR[target], 0)}, number=1)
+        scorer = load_func("fuzzywuzzy.fuzz." + target)
+        sec = timeit('func()', globals={'func': wrap(func, scorer, PROCESSOR[target])}, number=1)
         calls = total / sec
         fuzz.append(calls)
 
         rfunc = load_func("rapidfuzz.process.extractOne")
-        rscorer = load_func("rapidfuzz." + target)
-        rsec = timeit('func()', globals={'func': wrap(rfunc, rscorer, PROCESSOR[target], 0)}, number=1)
+        rscorer = load_func("rapidfuzz.fuzz." + target)
+        rsec = timeit('func()', globals={'func': wrap(rfunc, rscorer, PROCESSOR[target])}, number=1)
         rcalls = total / rsec
         rfuzz.append(rcalls)
 
-        print('%-30s  %i %%' % (target, 100 * sec/rsec))
+        print(row_format.format(target, f"{rcalls//1000}k", f"{calls//1000}k", f"{int(100 * sec/rsec)}%"))
 
 
     labels = LIBRARIES
@@ -118,7 +98,7 @@ def benchmark():
     ax.set_title('The number of word pairs evaluated per second\n(the larger the better)')
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
-    #ax.ticklabel_format(style='plain', axis='y')
+
     ax.get_yaxis().set_major_formatter(
         matplotlib.ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
     ax.legend()
@@ -127,18 +107,15 @@ def benchmark():
         """Attach a text label above each bar in *rects*, displaying its height."""
         for rect in rects:
             height = rect.get_height()
-            ax.annotate('{:,}'.format(round(height)),
+            ax.annotate('{:,}'.format(int(height)),
                         xy=(rect.get_x() + rect.get_width() / 2, height),
                         xytext=(0, 3),  # 3 points vertical offset
                         textcoords="offset points",
                         ha='center', va='bottom')
 
-
     autolabel(rects1)
     autolabel(rects2)
-
     fig.tight_layout()
-
     plt.show()
 
 

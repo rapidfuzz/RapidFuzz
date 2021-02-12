@@ -1,23 +1,13 @@
-##### LIST OF LIBRARIES IN THIS SCIPRT ####################
-#
-# edlib        https://github.com/Martinsos/edlib
-# distance     https://github.com/doukremt/distance
-# jellyfish    https://github.com/jamesturk/jellyfish
-# editdistance https://github.com/aflc/editdistance
-# Levenshtein  https://github.com/ztane/python-Levenshtein
-# polyleven    https://github.com/fujimotos/polyleven
-#
-###########################################################
-
 import importlib
-import os.path
-import sys
 import random
 from timeit import timeit
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 
+import string
+
+random.seed(18)
 
 LIBRARIES = (
     "ratio",
@@ -29,15 +19,6 @@ LIBRARIES = (
     "QRatio",
     "WRatio"
 )
-
-WORD_TXT = 'data/words.txt'
-
-def load_word():
-    basedir = os.path.dirname(sys.argv[0])
-    path = os.path.join(basedir, WORD_TXT)
-
-    with open(path, encoding="utf-8") as fp:
-        return [x.strip() for x in fp]
 
 def load_func(target):
     modname, funcname = target.rsplit('.', maxsplit=1)
@@ -52,9 +33,10 @@ def get_platform():
     return 'Python %s on %s (%s)' % (pyver, uname.system, uname.machine)
 
 def benchmark():
-    words = load_word()
-    sample_rate = len(words) // 10
+    words = [''.join(random.choice(string.ascii_letters + string.digits) for _ in range(10)) for s in range(10000)]
+    sample_rate = len(words) // 100
     sample = [word for word in words[::sample_rate]]
+
     total = len(words) * len(sample)
 
     print('System:', get_platform())
@@ -62,15 +44,18 @@ def benchmark():
     print('Sample:', len(sample))
     print('Total : %s calls\n' % total)
 
-    print('%-30s %s' % ('#', 'speed difference'))
-
-    def wrap(f, *args):
+    def wrap(f):
         def func():
-            return len([f(x, y, *args) for x in sample for y in words])
+            return len([f(x, y) for x in sample for y in words])
         return func
 
     fuzz = []
     rfuzz = []
+
+    header_list = ['Function', 'RapidFuzz', 'FuzzyWuzzy', 'SpeedImprovement']
+    row_format ="{:>25}" * len(header_list)
+    print(row_format.format(*header_list))
+
     for target in LIBRARIES:
         func = load_func("fuzzywuzzy.fuzz." + target)
         sec = timeit('func()', globals={'func': wrap(func)}, number=1)
@@ -82,8 +67,7 @@ def benchmark():
         rcalls = total / rsec
         rfuzz.append(rcalls)
 
-        print('%-30s %i %%' % (target, 100 * sec/rsec))
-
+        print(row_format.format(target, f"{rcalls//1000}k", f"{calls//1000}k", f"{int(100 * sec/rsec)}%"))
 
     labels = LIBRARIES
 
@@ -100,7 +84,6 @@ def benchmark():
     ax.set_title('The number of word pairs evaluated per second\n(the larger the better)')
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
-    #ax.ticklabel_format(style='plain', axis='y')
     ax.get_yaxis().set_major_formatter(
         matplotlib.ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
     ax.legend()
@@ -109,7 +92,7 @@ def benchmark():
         """Attach a text label above each bar in *rects*, displaying its height."""
         for rect in rects:
             height = rect.get_height()
-            ax.annotate('{:,}'.format(round(height)),
+            ax.annotate('{:,}'.format(int(height)),
                         xy=(rect.get_x() + rect.get_width() / 2, height),
                         xytext=(0, 3),  # 3 points vertical offset
                         textcoords="offset points",
@@ -118,9 +101,7 @@ def benchmark():
 
     autolabel(rects1)
     autolabel(rects2)
-
     fig.tight_layout()
-
     plt.show()
 
 
