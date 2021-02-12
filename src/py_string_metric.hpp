@@ -91,15 +91,11 @@ Insertion = 1, Deletion = 1, Substitution = 2:
     for UTF32 in this implementation. The time complexity of this
     algorithm is ``O(N)``.
 
-  - If both strings only use extended Ascii a blockwise BitPAl algorithm is used.
-    It calculated the Levenshtein distance in blocks of 64 characters and
-    therefor has a time complexity of ``O(N*M/64)``
-
   - In all other cases the Levenshtein distance is calculated using
     Wagner-Fischer with Ukkonens optimization as described by [2]_. The time
     complexity of this algorithm is ``O(N * M)``.
-    This will be removed once UTF32 support is added to the blockwise BitPAl
-    algorithm.
+    This can be replaced with a blockwise implementation of the BitPal algorithm
+    in the future.
 
 Other weights:
   The implementation for other weights is based on Wagner-Fischer.
