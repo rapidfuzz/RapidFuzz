@@ -9,6 +9,13 @@ import string
 
 random.seed(18)
 
+plt.rc('font', size=13)          # controls default text sizes
+plt.rc('axes', titlesize=18)     # fontsize of the axes title
+plt.rc('axes', labelsize=15)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=15)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=15)    # fontsize of the tick labels
+plt.rc('legend', fontsize=15)    # legend fontsize
+
 PROCESSOR = {
     "ratio":False,
     "partial_ratio":False,
@@ -97,7 +104,8 @@ def benchmark():
     ax.set_xlabel('Scorer')
     ax.set_title('The number of word pairs evaluated per second\n(the larger the better)')
     ax.set_xticks(x)
-    ax.set_xticklabels(labels)
+    #ax.set_xticklabels(labels)
+    ax.set_xticklabels(labels, rotation=30 )
 
     ax.get_yaxis().set_major_formatter(
         matplotlib.ticker.FuncFormatter(lambda x, p: format(int(x), ',')))

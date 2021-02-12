@@ -9,6 +9,13 @@ import string
 
 random.seed(18)
 
+plt.rc('font', size=13)          # controls default text sizes
+plt.rc('axes', titlesize=18)     # fontsize of the axes title
+plt.rc('axes', labelsize=15)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=15)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=15)    # fontsize of the tick labels
+plt.rc('legend', fontsize=15)    # legend fontsize
+
 LIBRARIES = (
     "ratio",
     "partial_ratio",
