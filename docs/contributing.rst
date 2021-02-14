@@ -36,7 +36,7 @@ Please consider what kind of change it is:
 
 * **Small features and bugs** can be crafted and directly submitted as a Pull
   Request. However, there is no guarantee that your feature will make it into
-  the `master`, as it's always a matter of opinion whether if benefits the
+  the `main`, as it's always a matter of opinion whether if benefits the
   overall functionality of the project.
 
 .. _submission-guidelines:
