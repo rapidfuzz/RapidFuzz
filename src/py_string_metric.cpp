@@ -132,6 +132,7 @@ PyObject* levenshtein(PyObject* /*self*/, PyObject* args, PyObject* keywds)
     }
   }
 
+  // todo improve error message for None
   if (!valid_str(py_s1, "s1") || !valid_str(py_s2, "s2")) {
     return NULL;
   }
@@ -141,7 +142,7 @@ PyObject* levenshtein(PyObject* /*self*/, PyObject* args, PyObject* keywds)
 
   std::size_t result = mpark::visit(LevenshteinVisitor(insert_cost, delete_cost, replace_cost, (std::size_t)max),
                                     s1_view, s2_view);
-                                  
+
   if (result == (std::size_t)-1) {
     return PyLong_FromLong(-1);
   }
@@ -249,6 +250,7 @@ PyObject* hamming(PyObject* /*self*/, PyObject* args, PyObject* keywds)
     return NULL;
   }
 
+  // todo improve error message for None
   if (!valid_str(py_s1, "s1") || !valid_str(py_s2, "s2")) {
     return NULL;
   }

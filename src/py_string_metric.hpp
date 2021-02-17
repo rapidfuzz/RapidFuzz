@@ -64,7 +64,12 @@ Insertion = 1, Deletion = 1, Substitution = 1:
     Myers algorithm is described in [3]_
 
 
-Insertion = 1, Deletion = 1, Substitution = 2:
+Insertion = 1, Deletion = 1, Substitution >= Insertion + Deletion:
+  when ``Substitution >= Insertion + Deletion`` set
+  ``Substitution = Insertion + Deletion``
+  since every Substitution can be performed as Insertion + Deletion
+  so in this case treat Substitution as 2
+
   - if max is 0 the similarity can be calculated using a direct comparision,
     since no difference between the strings is allowed.  The time complexity of
     this algorithm is ``O(N)``.
@@ -151,9 +156,8 @@ R"(normalized_levenshtein($module, s1, s2, weights = (1, 1, 1), processor = None
 
 Calculates a normalized levenshtein distance using custom
 costs for insertion, deletion and substitution. So far only the following
-combinations are supported:
-- weights = (1, 1, 1)
-- weights = (1, 1, 2)
+weights are supported:
+- weights = (1, 1, N) with N >= 1
 
 further combinations might be supported in the future
 
