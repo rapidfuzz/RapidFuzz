@@ -23,11 +23,12 @@ def test_simple_unicode_tests():
     """
     s1 = u"ÁÄ"
     s2 = "ABCD"
-    assert string_metric.levenshtein(s1, s2) == 4
-    assert string_metric.levenshtein(s1, s2, (1,1,0)) == 2
-    assert string_metric.levenshtein(s1, s2, (1,1,2)) == 6
-    assert string_metric.levenshtein(s1, s2, (1,1,5)) == 6
-    assert string_metric.levenshtein(s1, s2, (3,7,5)) == 24
+    assert string_metric.levenshtein(s1, s2) == 4           # 2 sub + 2 ins
+    assert string_metric.levenshtein(s1, s2, (1,1,0)) == 2  # 2 sub + 2 ins
+    assert string_metric.levenshtein(s1, s2, (1,1,2)) == 6  # 2 del + 4 ins / 2 sub + 2 ins
+    assert string_metric.levenshtein(s1, s2, (1,1,5)) == 6  # 2 del + 4 ins
+    assert string_metric.levenshtein(s1, s2, (1,7,5)) == 12 # 2 sub + 2 ins
+    assert string_metric.levenshtein(s2, s1, (1,7,5)) == 24 # 2 sub + 2 del
 
     assert string_metric.levenshtein(s1, s1) == 0
     assert string_metric.levenshtein(s1, s1, (1,1,0)) == 0

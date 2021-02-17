@@ -139,8 +139,7 @@ a more efficient implementation:
 -1
 
 It is possible to select different weights by passing a `weight`
-tuple. Internally s1 and s2 might be swapped, so insertion and deletion
-cost should usually have the same value.
+tuple.
 
 >>> levenshtein("lewenstein", "levenshtein", weights=(1,1,2))
 3
@@ -155,11 +154,7 @@ R"(normalized_levenshtein($module, s1, s2, weights = (1, 1, 1), processor = None
 --
 
 Calculates a normalized levenshtein distance using custom
-costs for insertion, deletion and substitution. So far only the following
-weights are supported:
-- weights = (1, 1, N) with N >= 1
-
-further combinations might be supported in the future
+costs for insertion, deletion and substitution.
 
 Parameters
 ----------
@@ -197,17 +192,25 @@ levenshtein : Levenshtein distance
 
 Notes
 -----
-Depending on the provided weights the normalisation is performed in different
-ways:
+The normalization of the Levenshtein distance is performed in the following way:
 
-Insertion = 1, Deletion = 1, Substitution = 1:
-  .. math:: ratio = 100 \cdot \frac{distance(s1, s2)}{max(len(s1), len(s2))}
+.. math::
+  :nowrap:
 
-Insertion = 1, Deletion = 1, Substitution = 2:
-  .. math:: ratio = 100 \cdot \frac{distance(s1, s2)}{len(s1) + len(s2)}
+  \begin{align*}
+    dist_{max} &= \begin{cases}
+      min(len(s1), len(s2)) \cdot sub,       & \text{if } sub \leq ins + del \\
+      len(s1) \cdot del + len(s2) \cdot ins, & \text{otherwise}
+    \end{cases}\\[10pt]
 
-Different weights are currently not supported, since the library has no algorithm
-for normalization yet.
+    dist_{max} &= \begin{cases}
+      dist_{max} + (len(s1) - len(s2)) \cdot del, & \text{if } len(s1) > len(s2) \\
+      dist_{max} + (len(s2) - len(s1)) \cdot ins, & \text{if } len(s1) < len(s2) \\
+      dist_{max},                                 & \text{if } len(s1) = len(s2)
+    \end{cases}\\[10pt]
+
+    ratio &= 100 \cdot \frac{distance(s1, s2)}{dist_{max}}
+  \end{align*}
 
 Examples
 --------
@@ -224,8 +227,7 @@ a more efficient implementation:
 0.0
 
 It is possible to select different weights by passing a `weight`
-tuple. Internally s1 and s2 might be swapped, so insertion and deletion
-cost should usually have the same value.
+tuple.
 
 >>> normalized_levenshtein("lewenstein", "levenshtein", weights=(1,1,2))
 85.71428571428571
