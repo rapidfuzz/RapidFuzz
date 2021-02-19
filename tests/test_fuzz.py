@@ -77,6 +77,10 @@ class RatioTest(unittest.TestCase):
     def testQRatioUnicode(self):
         self.assertEqual(fuzz.WRatio(self.s1, self.s1a), 100)
 
+    def testIssue76(self):
+        self.assertAlmostEqual(fuzz.partial_ratio("physics 2 vid", "study physics physics 2"), 81.81818, places=4)
+        self.assertEqual(fuzz.partial_ratio("physics 2 vid", "study physics physics 2 video"), 100)
+
 
 @pytest.mark.parametrize("scorer", scorers)
 def test_empty_string(scorer):
