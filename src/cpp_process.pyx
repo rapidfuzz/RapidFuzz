@@ -340,11 +340,6 @@ cdef inline extract_dict(scorer_context context, choices, processor, size_t limi
     results.reserve(<size_t>len(choices))
     cdef list result_list
 
-    if limit is None or limit >= len(choices):
-        c_limit = len(choices)
-    else:
-        c_limit = <size_t>limit
-
     if processor is not None:
         for choice_key, choice in choices.items():
             if choice is None:
@@ -370,7 +365,7 @@ cdef inline extract_dict(scorer_context context, choices, processor, size_t limi
     if limit > results.size():
         limit = results.size()
 
-    if c_limit >= results.size():
+    if limit >= results.size():
         algorithm.sort(results.begin(), results.end(), ExtractComp())
     else:
         algorithm.partial_sort(results.begin(), results.begin() + limit, results.end(), ExtractComp())

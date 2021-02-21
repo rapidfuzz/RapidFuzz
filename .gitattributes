@@ -1,4 +1,3 @@
-extern/boost/* linguist-vendored
 extern/variant/* linguist-vendored
-docs/theme/* linguist-vendored
-bench/data/* linguist-vendored
+src/cpp_process.cpp linguist-vendored
+src/cpp_fuzz.cpp linguist-vendored

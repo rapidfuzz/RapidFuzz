@@ -53,6 +53,14 @@ setup(
     long_description_content_type='text/markdown',
     ext_modules = [
         Extension(
+            'rapidfuzz.cpp_fuzz',
+            [
+                'src/cpp_fuzz.cpp'
+            ],
+            include_dirs=["src/rapidfuzz-cpp/rapidfuzz", "src/rapidfuzz-cpp/", "extern"],
+            language='c++',
+        ),
+        Extension(
             'rapidfuzz.cpp_process',
             [
                 'src/cpp_process.cpp'
@@ -65,7 +73,6 @@ setup(
             [
                 'src/py_utils.cpp',
                 'src/py_string_metric.cpp',
-                'src/py_fuzz.cpp',
                 'src/py_abstraction.cpp'
             ],
             include_dirs=["src/rapidfuzz-cpp/rapidfuzz", "src/rapidfuzz-cpp/", "extern"],

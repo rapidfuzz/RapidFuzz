@@ -2,7 +2,6 @@
 /* Copyright © 2020 Max Bachmann */
 
 #include "py_common.hpp"
-#include "py_fuzz.hpp"
 #include "py_string_metric.hpp"
 #include "py_utils.hpp"
 
@@ -15,17 +14,6 @@ static PyMethodDef methods[] = {
     PY_METHOD(normalized_levenshtein),
     PY_METHOD(hamming),
     PY_METHOD(normalized_hamming),
-    /* fuzz */
-    PY_METHOD(ratio),
-    PY_METHOD(partial_ratio),
-    PY_METHOD(token_sort_ratio),
-    PY_METHOD(partial_token_sort_ratio),
-    PY_METHOD(token_set_ratio),
-    PY_METHOD(partial_token_set_ratio),
-    PY_METHOD(token_ratio),
-    PY_METHOD(partial_token_ratio),
-    PY_METHOD(WRatio),
-    PY_METHOD(QRatio),
     /* sentinel */
     {NULL, NULL, 0, NULL}};
 

@@ -34,6 +34,10 @@ struct DictMatchElem {
     PyObject* key;
 };
 
+void dummy() {
+    
+}
+
 struct ExtractComp
 {
     template<class T>
@@ -61,9 +65,9 @@ struct proc_string {
     size_t length;
 };
 
-static proc_string process_string(PyObject* py_str)
+static proc_string convert_string(PyObject* py_str)
 {
-    proc_string str;
+    proc_string str = {0, NULL, 0};
 
 #if PY_VERSION_HEX >= PYTHON_VERSION(3, 0, 0)
     if (!PyUnicode_Check(py_str)) {
@@ -74,7 +78,7 @@ static proc_string process_string(PyObject* py_str)
     // deprecates e.g. PyUnicode_READY in Python 3.10
 #if PY_VERSION_HEX < PYTHON_VERSION(3, 10, 0)
     if (PyUnicode_READY(py_str)) {
-      return str; // unitialized, but cython directly raises an exception anyways
+      return str;
     }
 #endif
 
@@ -116,7 +120,7 @@ struct scorer_context {
 template <typename CharT>                                                         \
 static void cached_##RATIO##_deinit(void* context)                                \
 {                                                                                 \
-    delete (CACHED_SCORER<rapidfuzz::basic_string_view<CharT>>*)context; \
+    delete (CACHED_SCORER<rapidfuzz::basic_string_view<CharT>>*)context;          \
 }
 
 #if PY_VERSION_HEX >= PYTHON_VERSION(3, 0, 0)
@@ -125,7 +129,9 @@ template<typename CharT>                                                        
 static double cached_##RATIO##_func_default_process(                              \
     void* context, PyObject* py_str, double score_cutoff)                         \
 {                                                                                 \
-    proc_string str = process_string(py_str);                                     \
+    proc_string str = convert_string(py_str);                                     \
+    if (str.data == NULL) return 0.0;                                             \
+                                                                                  \
     auto* ratio = (CACHED_SCORER<rapidfuzz::basic_string_view<CharT>>*)context;   \
                                                                                   \
     switch(str.kind){                                                             \
@@ -152,7 +158,9 @@ template<typename CharT>                                                        
 static double cached_##RATIO##_func_default_process(                              \
     void* context, PyObject* py_str, double score_cutoff)                         \
 {                                                                                 \
-    proc_string str = process_string(py_str);                                     \
+    proc_string str = convert_string(py_str);                                     \
+    if (str.data == NULL) return 0.0;                                             \
+                                                                                  \
     auto* ratio = (CACHED_SCORER<rapidfuzz::basic_string_view<CharT>>*)context;   \
                                                                                   \
     switch(str.kind){                                                             \
@@ -176,7 +184,9 @@ template<typename CharT>                                                        
 static double cached_##RATIO##_func(                                                 \
     void* context, PyObject* py_str, double score_cutoff)                            \
 {                                                                                    \
-    proc_string str = process_string(py_str);                                        \
+    proc_string str = convert_string(py_str);                                        \
+    if (str.data == NULL) return 0.0;                                                \
+                                                                                     \
     auto* ratio = (CACHED_SCORER<rapidfuzz::basic_string_view<CharT>>*)context;      \
                                                                                      \
     switch(str.kind){                                                                \
@@ -203,7 +213,9 @@ template<typename CharT>                                                        
 static double cached_##RATIO##_func(                                                     \
     void* context, PyObject* py_str, double score_cutoff)                                \
 {                                                                                        \
-    proc_string str = process_string(py_str);                                            \
+    proc_string str = convert_string(py_str);                                            \
+    if (str.data == NULL) return 0.0;                                                    \
+                                                                                         \
     auto* ratio = (CACHED_SCORER<rapidfuzz::basic_string_view<CharT>>*)context;          \
                                                                                          \
     switch(str.kind){                                                                    \
@@ -227,8 +239,8 @@ static double cached_##RATIO##_func(                                            
 static scorer_context cached_##RATIO##_init(PyObject* py_str, int def_process)               \
 {                                                                                            \
     scorer_context context;                                                                  \
-    proc_string str = process_string(py_str);                                                \
-                                                                                             \
+    proc_string str = convert_string(py_str);                                                \
+    if (str.data == NULL) return context;                                                    \
                                                                                              \
     switch(str.kind){                                                                        \
     case PyUnicode_1BYTE_KIND:                                                               \
@@ -276,7 +288,8 @@ static scorer_context cached_##RATIO##_init(PyObject* py_str, int def_process)  
 static scorer_context cached_##RATIO##_init(PyObject* py_str, int def_process)                 \
 {                                                                                              \
     scorer_context context;                                                                    \
-    proc_string str = process_string(py_str);                                                  \
+    proc_string str = convert_string(py_str);                                                  \
+    if (str.data == NULL) return context;                                                      \
                                                                                                \
                                                                                                \
     switch(str.kind){                                                                          \
