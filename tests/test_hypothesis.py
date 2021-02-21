@@ -6,8 +6,44 @@ from hypothesis import given, assume, settings
 import hypothesis.strategies as st
 import pytest
 
-from rapidfuzz import fuzz, process, utils
+from rapidfuzz import fuzz, process, utils, string_metric
 import random
+
+
+def levenshtein(s1, s2, weights=(1, 1, 1)):
+    """
+    python implementation of a generic Levenshtein distance
+    this is much less error prone, than the bitparallel C implementations
+    and is therefor used to test the C implementation
+    """
+
+    rows = len(s1)+1
+    cols = len(s2)+1
+    insert, delete, substitute = weights
+
+    dist = [[0 for x in range(cols)] for x in range(rows)]
+
+    for row in range(1, rows):
+        dist[row][0] = row * delete
+
+    for col in range(1, cols):
+        dist[0][col] = col * insert
+
+    for col in range(1, cols):
+        for row in range(1, rows):
+            if s1[row-1] == s2[col-1]:
+                cost = 0
+            else:
+                cost = substitute
+
+            dist[row][col] = min(
+                dist[row-1][col] + delete,  # deletion
+                dist[row][col-1] + insert,  # insertion
+                dist[row-1][col-1] + cost    # substitution
+            )
+
+    return dist[-1][-1]
+
 
 
 HYPOTHESIS_ALPHABET = ascii_letters + digits + punctuation
@@ -36,6 +72,37 @@ PROCESSORS = [
     utils.default_process
 ]
 
+
+@given(s1=st.text(min_size=0, max_size=64), s2=st.text(min_size=0, max_size=64))
+@settings(max_examples=500, deadline=None)
+def test_levenshtein_word(s1, s2):
+    """
+    Test short Levenshtein implementation against simple implementation
+    """
+    assert string_metric.levenshtein(s1, s2) == levenshtein(s1, s2)
+    assert string_metric.levenshtein(s1, s2, (1,1,2)) == levenshtein(s1, s2, (1,1,2))
+
+
+@given(s1=st.text(min_size=65), s2=st.text(min_size=65))
+@settings(max_examples=500, deadline=None)
+def test_levenshtein_block(s1, s2):
+    """
+    Test blockwise Levenshtein implementation against simple implementation
+    """
+    assert string_metric.levenshtein(s1, s2) == levenshtein(s1, s2)
+    assert string_metric.levenshtein(s1, s2, (1,1,2)) == levenshtein(s1, s2, (1,1,2))
+
+
+@given(s1=st.text(), s2=st.text())
+@settings(max_examples=500, deadline=None)
+def test_levenshtein_random(s1, s2):
+    """
+    Test mixed strings to test through all implementations of Levenshtein
+    """
+    assert string_metric.levenshtein(s1, s2) == levenshtein(s1, s2)
+    assert string_metric.levenshtein(s1, s2, (1,1,2)) == levenshtein(s1, s2, (1,1,2))
+
+
 @given(sentence=st.text())
 @settings(max_examples=200)
 def test_multiple_processor_runs(sentence):
@@ -46,71 +113,6 @@ def test_multiple_processor_runs(sentence):
     assert utils.default_process(sentence) \
         == utils.default_process(utils.default_process(sentence))
 
-'''
-
-def full_scorers_processors():
-    """
-    Generate a list of (scorer, processor) pairs for testing for scorers that use the full string only
-    :return: [(scorer, processor), ...]
-    """
-    scorers = [fuzz.ratio]
-    processors = [lambda x: x,
-                  partial(utils.full_process, force_ascii=False),
-                  partial(utils.full_process, force_ascii=True)]
-    splist = list(product(scorers, processors))
-    splist.extend(
-        [(fuzz.WRatio, partial(utils.full_process, force_ascii=True)),
-         (fuzz.QRatio, partial(utils.full_process, force_ascii=True)),
-         (fuzz.UWRatio, partial(utils.full_process, force_ascii=False)),
-         (fuzz.UQRatio, partial(utils.full_process, force_ascii=False))]
-    )
-
-    return splist
-
-
-@pytest.mark.parametrize('scorer,processor',
-                         scorers_processors())
-@given(data=st.data())
-@settings(max_examples=20, deadline=5000)
-def test_identical_strings_extracted(scorer, processor, data):
-    """
-    Test that identical strings will always return a perfect match.
-    :param scorer:
-    :param processor:
-    :param data:
-    :return:
-    """
-    # Draw a list of random strings
-    strings = data.draw(
-        st.lists(
-            st.text(min_size=10, max_size=100, alphabet=HYPOTHESIS_ALPHABET),
-            min_size=1,
-            max_size=10
-        )
-    )
-    # Draw a random integer for the index in that list
-    choiceidx = data.draw(st.integers(min_value=0, max_value=(len(strings) - 1)))
-
-    # Extract our choice from the list
-    choice = strings[choiceidx]
-
-    # Check process doesn't make our choice the empty string
-    assume(processor(choice) != '')
-
-    # Extract all perfect matches
-    result = process.extractBests(choice,
-                                  strings,
-                                  scorer=scorer,
-                                  processor=processor,
-                                  score_cutoff=100,
-                                  limit=None)
-
-    # Check we get a result
-    assert result != []
-
-    # Check the original is in the list
-    assert (choice, 100) in result
-'''
 
 @pytest.mark.parametrize('scorer,processor', list(product(FULL_SCORERS, PROCESSORS)))
 @given(choices=st.lists(st.text(), min_size=1))

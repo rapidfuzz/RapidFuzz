@@ -29,6 +29,22 @@ class ProcessTest(unittest.TestCase):
         self.assertRaises(TypeError, process.extract, '', [1])
         self.assertRaises(TypeError, process.extract, '', {1:1})
 
+    def testExtractIterExceptions(self):
+        self.assertRaises(TypeError, process.extract_iter)
+        self.assertRaises(TypeError, process.extract_iter, 1)
+        self.assertRaises(TypeError,
+            lambda *args, **kwargs: next(process.extract_iter(*args, **kwargs)),
+            1, []
+        )
+        self.assertRaises(TypeError,
+            lambda *args, **kwargs: next(process.extract_iter(*args, **kwargs)),
+            '', [1]
+        )
+        self.assertRaises(TypeError,
+            lambda *args, **kwargs: next(process.extract_iter(*args, **kwargs)),
+            '', {1:1}
+        )
+
     def testGetBestChoice1(self):
         query = "new york mets at atlanta braves"
         best = process.extractOne(query, self.baseball_strings)

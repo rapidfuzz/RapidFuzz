@@ -24,46 +24,6 @@
 #  include "py3_common.hpp"
 #endif
 
-
-struct CachedScorer {
-  virtual ~CachedScorer() = default;
-
-  virtual double ratio(const python_string& s2, double score_cutoff) const = 0;
-};
-
-/*
- * this is a generic cached scorer implementation
- * that can be used by all scorers, that do not accept any
- * additional arguments
- */
-template <typename Scorer>
-struct GenericScorerVisitor {
-  GenericScorerVisitor(const Scorer* cached_ratio, double score_cutoff)
-    : m_cached_ratio(cached_ratio), m_score_cutoff(score_cutoff) {}
-
-  template <typename Sentence2>
-  double operator()(Sentence2&& s2) const {
-    return m_cached_ratio->ratio(s2, m_score_cutoff);
-  }
-
-private:
-  const Scorer* m_cached_ratio;
-  double m_score_cutoff;
-};
-
-template <template<typename> class Scorer, typename Sentence1>
-struct GenericCachedScorer : public CachedScorer {
-  GenericCachedScorer(const Sentence1& s1)
-    : cached_ratio(s1) {}
-
-  double ratio(const python_string& s2, double score_cutoff) const override {
-    return mpark::visit(GenericScorerVisitor<decltype(cached_ratio)>(&cached_ratio, score_cutoff), s2);
-  }
-private:
-  Scorer<Sentence1> cached_ratio;
-};
-
-
 struct PythonStringWrapper {
   PythonStringWrapper(python_string value, PyObject* object = NULL, bool owned = false)
     : value(std::move(value)), object(object), owned(owned) {}
@@ -71,7 +31,7 @@ struct PythonStringWrapper {
   PythonStringWrapper(const PythonStringWrapper& other) = delete;
 
   PythonStringWrapper(PythonStringWrapper&& other) {
-    std::swap(value, other.value);
+    value = other.value;
     object = other.object;
     owned = other.owned;
     other.owned = false;
@@ -79,7 +39,7 @@ struct PythonStringWrapper {
 
   PythonStringWrapper& operator=(const PythonStringWrapper& other) = delete;
   PythonStringWrapper& operator=(PythonStringWrapper&& other) {
-    std::swap(value, other.value);
+    value = other.value;
     object = other.object;
     owned = other.owned;
     other.owned = false;
