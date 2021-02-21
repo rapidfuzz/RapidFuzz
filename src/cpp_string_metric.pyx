@@ -218,19 +218,19 @@ def normalized_levenshtein(s1, s2, weights=(1,1,1), processor=None, double score
     .. math::
       :nowrap:
 
-      \begin{align*}
-        dist_{max} &= \begin{cases}
-          min(len(s1), len(s2)) \cdot sub,       & \text{if } sub \leq ins + del \\
-          len(s1) \cdot del + len(s2) \cdot ins, & \text{otherwise}
-        \end{cases}\\[10pt]
+      \\begin{align*}
+        dist_{max} &= \\begin{cases}
+          min(len(s1), len(s2)) \cdot sub,       & \\text{if } sub \leq ins + del \\\\
+          len(s1) \cdot del + len(s2) \cdot ins, & \\text{otherwise}
+        \end{cases}\\\\[10pt]
 
-        dist_{max} &= \begin{cases}
-          dist_{max} + (len(s1) - len(s2)) \cdot del, & \text{if } len(s1) > len(s2) \\
-          dist_{max} + (len(s2) - len(s1)) \cdot ins, & \text{if } len(s1) < len(s2) \\
-          dist_{max},                                 & \text{if } len(s1) = len(s2)
-        \end{cases}\\[10pt]
+        dist_{max} &= \\begin{cases}
+          dist_{max} + (len(s1) - len(s2)) \cdot del, & \\text{if } len(s1) > len(s2) \\\\
+          dist_{max} + (len(s2) - len(s1)) \cdot ins, & \\text{if } len(s1) < len(s2) \\\\
+          dist_{max},                                 & \\text{if } len(s1) = len(s2)
+        \end{cases}\\\\[10pt]
 
-        ratio &= 100 \cdot \frac{distance(s1, s2)}{dist_{max}}
+        ratio &= 100 \cdot \\frac{distance(s1, s2)}{dist_{max}}
       \end{align*}
 
     Examples
