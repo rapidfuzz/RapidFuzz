@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2021 Max Bachmann
 
-from rapidfuzz.cpp_impl import (
+from rapidfuzz.cpp_fuzz import (
     ratio,
     partial_ratio,
     token_sort_ratio,

@@ -22,7 +22,7 @@ class UtilsTest(unittest.TestCase):
             u"ça va",
             u"cães danados",
             u"camarões assados",
-            u"a ሴ€耀",
+            u"a ሴ 耀",
             u"á"
         ]
 

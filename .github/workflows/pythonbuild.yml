@@ -133,7 +133,7 @@ jobs:
           python -m pip install git+https://github.com/joerick/cibuildwheel.git@f6eaa9f
 
       - uses: ilammy/msvc-dev-cmd@v1
-      
+
       - name: Build 64-bit wheel
         run: python -m cibuildwheel --output-dir wheelhouse
 
@@ -168,7 +168,7 @@ jobs:
       - uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x86
-      
+
       - name: Build 64-bit wheel
         run: python -m cibuildwheel --output-dir wheelhouse
 
