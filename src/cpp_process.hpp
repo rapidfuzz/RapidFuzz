@@ -1,7 +1,7 @@
 #include "Python.h"
-#include "fuzz.hpp"
-#include "utils.hpp"
-#include "string_metric.hpp"
+#include <rapidfuzz/fuzz.hpp>
+#include <rapidfuzz/utils.hpp>
+#include <rapidfuzz/string_metric.hpp>
 #include <exception>
 
 #define PYTHON_VERSION(major, minor, micro) ((major << 24) | (minor << 16) | (micro << 8))

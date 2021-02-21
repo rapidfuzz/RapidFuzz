@@ -1,5 +1,5 @@
 #include "Python.h"
-#include "utils.hpp"
+#include <rapidfuzz/utils.hpp>
 #include <exception>
 
 #define PYTHON_VERSION(major, minor, micro) ((major << 24) | (minor << 16) | (micro << 8))

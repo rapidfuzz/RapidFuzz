@@ -2,7 +2,7 @@ include README.md
 include VERSION
 include LICENSE
 
-recursive-include src/rapidfuzz-cpp/rapidfuzz *.hpp *.txx
+recursive-include src/rapidfuzz-cpp/rapidfuzz *.hpp *.h *.txx *cpp
 exclude src/rapidfuzz-cpp/rapidfuzz/process.hpp
 exclude src/rapidfuzz-cpp/rapidfuzz/process.txx
 

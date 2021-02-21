@@ -53,23 +53,31 @@ setup(
     long_description_content_type='text/markdown',
     ext_modules = [
         Extension(
-            'rapidfuzz.cpp_process', ['src/cpp_process.cpp'],
-            include_dirs=["src/rapidfuzz-cpp/rapidfuzz", "src/rapidfuzz-cpp/"],
+            'rapidfuzz.cpp_process', [
+                'src/cpp_process.cpp',
+                'src/rapidfuzz-cpp/rapidfuzz/details/unicode.cpp'],
+            include_dirs=["src/rapidfuzz-cpp/"],
             language='c++',
         ),
         Extension(
-            'rapidfuzz.cpp_fuzz', ['src/cpp_fuzz.cpp'],
-            include_dirs=["src/rapidfuzz-cpp/rapidfuzz", "src/rapidfuzz-cpp/"],
+            'rapidfuzz.cpp_fuzz', [
+                'src/cpp_fuzz.cpp',
+                'src/rapidfuzz-cpp/rapidfuzz/details/unicode.cpp'],
+            include_dirs=["src/rapidfuzz-cpp/"],
             language='c++',
         ),
         Extension(
-            'rapidfuzz.cpp_string_metric', ['src/cpp_string_metric.cpp'],
-            include_dirs=["src/rapidfuzz-cpp/rapidfuzz", "src/rapidfuzz-cpp/"],
+            'rapidfuzz.cpp_string_metric', [
+                'src/cpp_string_metric.cpp',
+                'src/rapidfuzz-cpp/rapidfuzz/details/unicode.cpp'],
+            include_dirs=["src/rapidfuzz-cpp/"],
             language='c++',
         ),
         Extension(
-            'rapidfuzz.cpp_utils', ['src/cpp_utils.cpp'],
-            include_dirs=["src/rapidfuzz-cpp/rapidfuzz", "src/rapidfuzz-cpp/"],
+            'rapidfuzz.cpp_utils', [
+                'src/cpp_utils.cpp',
+                'src/rapidfuzz-cpp/rapidfuzz/details/unicode.cpp'],
+            include_dirs=["src/rapidfuzz-cpp/"],
             language='c++',
         ),
     ],
