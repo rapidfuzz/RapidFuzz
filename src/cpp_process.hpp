@@ -1,9 +1,13 @@
 #include "Python.h"
 #include "fuzz.hpp"
 #include "utils.hpp"
+#include "string_metric.hpp"
 #include <exception>
 
 #define PYTHON_VERSION(major, minor, micro) ((major << 24) | (minor << 16) | (micro << 8))
+
+namespace string_metric = rapidfuzz::string_metric;
+namespace fuzz = rapidfuzz::fuzz;
 
 class PythonTypeError: public std::bad_typeid {
 public:
@@ -108,35 +112,22 @@ struct scorer_context {
 };
 
 
-#define CACHED_RATIO_DEINIT(RATIO, CLASS)                                         \
+#define CACHED_RATIO_DEINIT(RATIO, CACHED_SCORER)                                 \
 template <typename CharT>                                                         \
 static void cached_##RATIO##_deinit(void* context)                                \
 {                                                                                 \
-    delete (rapidfuzz::fuzz::CLASS<rapidfuzz::basic_string_view<CharT>>*)context; \
+    delete (CACHED_SCORER<rapidfuzz::basic_string_view<CharT>>*)context; \
 }
 
-CACHED_RATIO_DEINIT(ratio,                    CachedRatio)
-CACHED_RATIO_DEINIT(partial_ratio,            CachedPartialRatio)
-CACHED_RATIO_DEINIT(token_sort_ratio,         CachedTokenSortRatio)
-CACHED_RATIO_DEINIT(token_set_ratio,          CachedTokenSetRatio)
-CACHED_RATIO_DEINIT(token_ratio,              CachedTokenRatio)
-CACHED_RATIO_DEINIT(partial_token_sort_ratio, CachedPartialTokenSortRatio)
-CACHED_RATIO_DEINIT(partial_token_set_ratio,  CachedPartialTokenSetRatio)
-CACHED_RATIO_DEINIT(partial_token_ratio,      CachedPartialTokenRatio)
-CACHED_RATIO_DEINIT(WRatio,                   CachedWRatio)
-CACHED_RATIO_DEINIT(QRatio,                   CachedQRatio)
-
-
 #if PY_VERSION_HEX >= PYTHON_VERSION(3, 0, 0)
-#define CACHED_RATIO_FUNC_DEFAULT_PROCESS(RATIO, CLASS)                           \
+#define CACHED_RATIO_FUNC_DEFAULT_PROCESS(RATIO, CACHED_SCORER)                   \
 template<typename CharT>                                                          \
 static double cached_##RATIO##_func_default_process(                              \
     void* context, PyObject* py_str, double score_cutoff)                         \
 {                                                                                 \
     proc_string str = process_string(py_str);                                     \
-    auto* ratio =                                                                 \
-      (rapidfuzz::fuzz::CLASS<rapidfuzz::basic_string_view<CharT>>*)context;      \
-\
+    auto* ratio = (CACHED_SCORER<rapidfuzz::basic_string_view<CharT>>*)context;   \
+                                                                                  \
     switch(str.kind){                                                             \
     case PyUnicode_1BYTE_KIND:                                                    \
         return ratio->ratio(                                                      \
@@ -156,14 +147,13 @@ static double cached_##RATIO##_func_default_process(                            
     }                                                                             \
 }
 #else
-#define CACHED_RATIO_FUNC_DEFAULT_PROCESS(RATIO, CLASS)                           \
+#define CACHED_RATIO_FUNC_DEFAULT_PROCESS(RATIO, CACHED_SCORER)                   \
 template<typename CharT>                                                          \
 static double cached_##RATIO##_func_default_process(                              \
     void* context, PyObject* py_str, double score_cutoff)                         \
 {                                                                                 \
     proc_string str = process_string(py_str);                                     \
-    auto* ratio =                                                                 \
-      (rapidfuzz::fuzz::CLASS<rapidfuzz::basic_string_view<CharT>>*)context;      \
+    auto* ratio = (CACHED_SCORER<rapidfuzz::basic_string_view<CharT>>*)context;   \
                                                                                   \
     switch(str.kind){                                                             \
     case CHAR_STRING:                                                             \
@@ -180,27 +170,14 @@ static double cached_##RATIO##_func_default_process(                            
 }
 #endif
 
-CACHED_RATIO_FUNC_DEFAULT_PROCESS(ratio,                    CachedRatio)
-CACHED_RATIO_FUNC_DEFAULT_PROCESS(partial_ratio,            CachedPartialRatio)
-CACHED_RATIO_FUNC_DEFAULT_PROCESS(token_sort_ratio,         CachedTokenSortRatio)
-CACHED_RATIO_FUNC_DEFAULT_PROCESS(token_set_ratio,          CachedTokenSetRatio)
-CACHED_RATIO_FUNC_DEFAULT_PROCESS(token_ratio,              CachedTokenRatio)
-CACHED_RATIO_FUNC_DEFAULT_PROCESS(partial_token_sort_ratio, CachedPartialTokenSortRatio)
-CACHED_RATIO_FUNC_DEFAULT_PROCESS(partial_token_set_ratio,  CachedPartialTokenSetRatio)
-CACHED_RATIO_FUNC_DEFAULT_PROCESS(partial_token_ratio,      CachedPartialTokenRatio)
-CACHED_RATIO_FUNC_DEFAULT_PROCESS(WRatio,                   CachedWRatio)
-CACHED_RATIO_FUNC_DEFAULT_PROCESS(QRatio,                   CachedQRatio)
-
-
 #if PY_VERSION_HEX >= PYTHON_VERSION(3, 0, 0)
-#define CACHED_RATIO_FUNC(RATIO, CLASS)                                              \
+#define CACHED_RATIO_FUNC(RATIO, CACHED_SCORER)                                      \
 template<typename CharT>                                                             \
 static double cached_##RATIO##_func(                                                 \
     void* context, PyObject* py_str, double score_cutoff)                            \
 {                                                                                    \
     proc_string str = process_string(py_str);                                        \
-    auto* ratio =                                                                    \
-        (rapidfuzz::fuzz::CLASS<rapidfuzz::basic_string_view<CharT>>*)context;       \
+    auto* ratio = (CACHED_SCORER<rapidfuzz::basic_string_view<CharT>>*)context;      \
                                                                                      \
     switch(str.kind){                                                                \
     case PyUnicode_1BYTE_KIND:                                                       \
@@ -221,14 +198,13 @@ static double cached_##RATIO##_func(                                            
     }                                                                                \
 }
 #else
-#define CACHED_RATIO_FUNC(RATIO, CLASS)                                                  \
+#define CACHED_RATIO_FUNC(RATIO, CACHED_SCORER)                                          \
 template<typename CharT>                                                                 \
 static double cached_##RATIO##_func(                                                     \
     void* context, PyObject* py_str, double score_cutoff)                                \
 {                                                                                        \
     proc_string str = process_string(py_str);                                            \
-    auto* ratio =                                                                        \
-        (rapidfuzz::fuzz::CLASS<rapidfuzz::basic_string_view<CharT>>*)context;           \
+    auto* ratio = (CACHED_SCORER<rapidfuzz::basic_string_view<CharT>>*)context;          \
                                                                                          \
     switch(str.kind){                                                                    \
     case CHAR_STRING:                                                                    \
@@ -245,115 +221,112 @@ static double cached_##RATIO##_func(                                            
 }
 #endif
 
-CACHED_RATIO_FUNC(ratio,                    CachedRatio)
-CACHED_RATIO_FUNC(partial_ratio,            CachedPartialRatio)
-CACHED_RATIO_FUNC(token_sort_ratio,         CachedTokenSortRatio)
-CACHED_RATIO_FUNC(token_set_ratio,          CachedTokenSetRatio)
-CACHED_RATIO_FUNC(token_ratio,              CachedTokenRatio)
-CACHED_RATIO_FUNC(partial_token_sort_ratio, CachedPartialTokenSortRatio)
-CACHED_RATIO_FUNC(partial_token_set_ratio,  CachedPartialTokenSetRatio)
-CACHED_RATIO_FUNC(partial_token_ratio,      CachedPartialTokenRatio)
-CACHED_RATIO_FUNC(WRatio,                   CachedWRatio)
-CACHED_RATIO_FUNC(QRatio,                   CachedQRatio)
-
 
 #if PY_VERSION_HEX >= PYTHON_VERSION(3, 0, 0)
-#define CACHED_RATIO_INIT(RATIO, CLASS)                                                               \
-static scorer_context cached_##RATIO##_init(PyObject* py_str, int def_process)                        \
-{                                                                                                     \
-    scorer_context context;                                                                           \
-    proc_string str = process_string(py_str);                                                         \
-                                                                                                      \
-                                                                                                      \
-    switch(str.kind){                                                                                 \
-    case PyUnicode_1BYTE_KIND:                                                                        \
-        context.context = (void*) new rapidfuzz::fuzz::CLASS<rapidfuzz::basic_string_view<uint8_t>>(  \
-            rapidfuzz::basic_string_view<uint8_t>((uint8_t*)str.data, str.length)                     \
-        );                                                                                            \
-                                                                                                      \
-        if (def_process) {                                                                            \
-            context.scorer = cached_##RATIO##_func_default_process<uint8_t>;                          \
-        } else {                                                                                      \
-            context.scorer = cached_##RATIO##_func<uint8_t>;                                          \
-        }                                                                                             \
-        context.deinit = cached_##RATIO##_deinit<uint8_t>;                                            \
-        break;                                                                                        \
-    case PyUnicode_2BYTE_KIND:                                                                        \
-        context.context = (void*) new rapidfuzz::fuzz::CLASS<rapidfuzz::basic_string_view<uint16_t>>( \
-            rapidfuzz::basic_string_view<uint16_t>((uint16_t*)str.data, str.length)                   \
-        );                                                                                            \
-                                                                                                      \
-        if (def_process) {                                                                            \
-            context.scorer = cached_##RATIO##_func_default_process<uint16_t>;                         \
-        } else {                                                                                      \
-            context.scorer = cached_##RATIO##_func<uint16_t>;                                         \
-        }                                                                                             \
-        context.deinit = cached_##RATIO##_deinit<uint16_t>;                                           \
-        break;                                                                                        \
-    default:                                                                                          \
-        context.context = (void*) new rapidfuzz::fuzz::CLASS<rapidfuzz::basic_string_view<uint32_t>>( \
-            rapidfuzz::basic_string_view<uint32_t>((uint32_t*)str.data, str.length)                   \
-        );                                                                                            \
-                                                                                                      \
-        if (def_process) {                                                                            \
-            context.scorer = cached_##RATIO##_func_default_process<uint32_t>;                         \
-        } else {                                                                                      \
-            context.scorer = cached_##RATIO##_func<uint32_t>;                                         \
-        }                                                                                             \
-        context.deinit = cached_##RATIO##_deinit<uint32_t>;                                           \
-        break;                                                                                        \
-    }                                                                                                 \
-                                                                                                      \
-    return context;                                                                                   \
+#define CACHED_RATIO_INIT(RATIO, CACHED_SCORER)                                              \
+static scorer_context cached_##RATIO##_init(PyObject* py_str, int def_process)               \
+{                                                                                            \
+    scorer_context context;                                                                  \
+    proc_string str = process_string(py_str);                                                \
+                                                                                             \
+                                                                                             \
+    switch(str.kind){                                                                        \
+    case PyUnicode_1BYTE_KIND:                                                               \
+        context.context = (void*) new CACHED_SCORER<rapidfuzz::basic_string_view<uint8_t>>(  \
+            rapidfuzz::basic_string_view<uint8_t>((uint8_t*)str.data, str.length)            \
+        );                                                                                   \
+                                                                                             \
+        if (def_process) {                                                                   \
+            context.scorer = cached_##RATIO##_func_default_process<uint8_t>;                 \
+        } else {                                                                             \
+            context.scorer = cached_##RATIO##_func<uint8_t>;                                 \
+        }                                                                                    \
+        context.deinit = cached_##RATIO##_deinit<uint8_t>;                                   \
+        break;                                                                               \
+    case PyUnicode_2BYTE_KIND:                                                               \
+        context.context = (void*) new CACHED_SCORER<rapidfuzz::basic_string_view<uint16_t>>( \
+            rapidfuzz::basic_string_view<uint16_t>((uint16_t*)str.data, str.length)          \
+        );                                                                                   \
+                                                                                             \
+        if (def_process) {                                                                   \
+            context.scorer = cached_##RATIO##_func_default_process<uint16_t>;                \
+        } else {                                                                             \
+            context.scorer = cached_##RATIO##_func<uint16_t>;                                \
+        }                                                                                    \
+        context.deinit = cached_##RATIO##_deinit<uint16_t>;                                  \
+        break;                                                                               \
+    default:                                                                                 \
+        context.context = (void*) new CACHED_SCORER<rapidfuzz::basic_string_view<uint32_t>>( \
+            rapidfuzz::basic_string_view<uint32_t>((uint32_t*)str.data, str.length)          \
+        );                                                                                   \
+                                                                                             \
+        if (def_process) {                                                                   \
+            context.scorer = cached_##RATIO##_func_default_process<uint32_t>;                \
+        } else {                                                                             \
+            context.scorer = cached_##RATIO##_func<uint32_t>;                                \
+        }                                                                                    \
+        context.deinit = cached_##RATIO##_deinit<uint32_t>;                                  \
+        break;                                                                               \
+    }                                                                                        \
+                                                                                             \
+    return context;                                                                          \
 }
 #else
-#define CACHED_RATIO_INIT(RATIO, CLASS)                                                               \
-static scorer_context cached_##RATIO##_init(PyObject* py_str, int def_process)                        \
-{                                                                                                     \
-    scorer_context context;                                                                           \
-    proc_string str = process_string(py_str);                                                         \
-                                                                                                      \
-                                                                                                      \
-    switch(str.kind){                                                                                 \
-    case CHAR_STRING:                                                                                 \
-        context.context = (void*) new rapidfuzz::fuzz::CLASS<rapidfuzz::basic_string_view<uint8_t>>(  \
-            rapidfuzz::basic_string_view<uint8_t>((uint8_t*)str.data, str.length)                     \
-        );                                                                                            \
-                                                                                                      \
-        if (def_process) {                                                                            \
-            context.scorer = cached_##RATIO##_func_default_process<uint8_t>;                          \
-        } else {                                                                                      \
-            context.scorer = cached_##RATIO##_func<uint8_t>;                                          \
-        }                                                                                             \
-        context.deinit = cached_##RATIO##_deinit<uint8_t>;                                            \
-        break;                                                                                        \
-    default:                                                                                          \
-        context.context = (void*) new rapidfuzz::fuzz::CLASS<rapidfuzz::basic_string_view<Py_UNICODE>>( \
-            rapidfuzz::basic_string_view<Py_UNICODE>((Py_UNICODE*)str.data, str.length)               \
-        );                                                                                            \
-                                                                                                      \
-        if (def_process) {                                                                            \
-            context.scorer = cached_##RATIO##_func_default_process<Py_UNICODE>;                       \
-        } else {                                                                                      \
-            context.scorer = cached_##RATIO##_func<Py_UNICODE>;                                       \
-        }                                                                                             \
-        context.deinit = cached_##RATIO##_deinit<Py_UNICODE>;                                         \
-        break;                                                                                        \
-    }                                                                                                 \
-                                                                                                      \
-    return context;                                                                                   \
+#define CACHED_RATIO_INIT(RATIO, CACHED_SCORER)                                                \
+static scorer_context cached_##RATIO##_init(PyObject* py_str, int def_process)                 \
+{                                                                                              \
+    scorer_context context;                                                                    \
+    proc_string str = process_string(py_str);                                                  \
+                                                                                               \
+                                                                                               \
+    switch(str.kind){                                                                          \
+    case CHAR_STRING:                                                                          \
+        context.context = (void*) new CACHED_SCORER<rapidfuzz::basic_string_view<uint8_t>>(    \
+            rapidfuzz::basic_string_view<uint8_t>((uint8_t*)str.data, str.length)              \
+        );                                                                                     \
+                                                                                               \
+        if (def_process) {                                                                     \
+            context.scorer = cached_##RATIO##_func_default_process<uint8_t>;                   \
+        } else {                                                                               \
+            context.scorer = cached_##RATIO##_func<uint8_t>;                                   \
+        }                                                                                      \
+        context.deinit = cached_##RATIO##_deinit<uint8_t>;                                     \
+        break;                                                                                 \
+    default:                                                                                   \
+        context.context = (void*) new CACHED_SCORER<rapidfuzz::basic_string_view<Py_UNICODE>>( \
+            rapidfuzz::basic_string_view<Py_UNICODE>((Py_UNICODE*)str.data, str.length)        \
+        );                                                                                     \
+                                                                                               \
+        if (def_process) {                                                                     \
+            context.scorer = cached_##RATIO##_func_default_process<Py_UNICODE>;                \
+        } else {                                                                               \
+            context.scorer = cached_##RATIO##_func<Py_UNICODE>;                                \
+        }                                                                                      \
+        context.deinit = cached_##RATIO##_deinit<Py_UNICODE>;                                  \
+        break;                                                                                 \
+    }                                                                                          \
+                                                                                               \
+    return context;                                                                            \
 }
 
 #endif
 
+#define CACHED_RATIO(RATIO, CACHED_SCORER)              \
+CACHED_RATIO_DEINIT(RATIO, CACHED_SCORER)               \
+CACHED_RATIO_FUNC_DEFAULT_PROCESS(RATIO, CACHED_SCORER) \
+CACHED_RATIO_FUNC(RATIO, CACHED_SCORER)                 \
+CACHED_RATIO_INIT(RATIO, CACHED_SCORER)
 
-CACHED_RATIO_INIT(ratio,                    CachedRatio)
-CACHED_RATIO_INIT(partial_ratio,            CachedPartialRatio)
-CACHED_RATIO_INIT(token_sort_ratio,         CachedTokenSortRatio)
-CACHED_RATIO_INIT(token_set_ratio,          CachedTokenSetRatio)
-CACHED_RATIO_INIT(token_ratio,              CachedTokenRatio)
-CACHED_RATIO_INIT(partial_token_sort_ratio, CachedPartialTokenSortRatio)
-CACHED_RATIO_INIT(partial_token_set_ratio,  CachedPartialTokenSetRatio)
-CACHED_RATIO_INIT(partial_token_ratio,      CachedPartialTokenRatio)
-CACHED_RATIO_INIT(WRatio,                   CachedWRatio)
-CACHED_RATIO_INIT(QRatio,                   CachedQRatio)
+/* fuzz */
+CACHED_RATIO(ratio,                    fuzz::CachedRatio)
+CACHED_RATIO(partial_ratio,            fuzz::CachedPartialRatio)
+CACHED_RATIO(token_sort_ratio,         fuzz::CachedTokenSortRatio)
+CACHED_RATIO(token_set_ratio,          fuzz::CachedTokenSetRatio)
+CACHED_RATIO(token_ratio,              fuzz::CachedTokenRatio)
+CACHED_RATIO(partial_token_sort_ratio, fuzz::CachedPartialTokenSortRatio)
+CACHED_RATIO(partial_token_set_ratio,  fuzz::CachedPartialTokenSetRatio)
+CACHED_RATIO(partial_token_ratio,      fuzz::CachedPartialTokenRatio)
+CACHED_RATIO(WRatio,                   fuzz::CachedWRatio)
+CACHED_RATIO(QRatio,                   fuzz::CachedQRatio)
+/* string_metric */
+CACHED_RATIO(normalized_hamming,       string_metric::CachedNormalizedHamming)
