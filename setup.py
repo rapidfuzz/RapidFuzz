@@ -53,29 +53,23 @@ setup(
     long_description_content_type='text/markdown',
     ext_modules = [
         Extension(
-            'rapidfuzz.cpp_fuzz',
-            [
-                'src/cpp_fuzz.cpp'
-            ],
-            include_dirs=["src/rapidfuzz-cpp/rapidfuzz", "src/rapidfuzz-cpp/", "extern"],
+            'rapidfuzz.cpp_process', ['src/cpp_process.cpp'],
+            include_dirs=["src/rapidfuzz-cpp/rapidfuzz", "src/rapidfuzz-cpp/"],
             language='c++',
         ),
         Extension(
-            'rapidfuzz.cpp_process',
-            [
-                'src/cpp_process.cpp'
-            ],
-            include_dirs=["src/rapidfuzz-cpp/rapidfuzz", "src/rapidfuzz-cpp/", "extern"],
+            'rapidfuzz.cpp_fuzz', ['src/cpp_fuzz.cpp'],
+            include_dirs=["src/rapidfuzz-cpp/rapidfuzz", "src/rapidfuzz-cpp/"],
             language='c++',
         ),
         Extension(
-            'rapidfuzz.cpp_impl',
-            [
-                'src/py_utils.cpp',
-                'src/py_string_metric.cpp',
-                'src/py_abstraction.cpp'
-            ],
-            include_dirs=["src/rapidfuzz-cpp/rapidfuzz", "src/rapidfuzz-cpp/", "extern"],
+            'rapidfuzz.cpp_string_metric', ['src/cpp_string_metric.cpp'],
+            include_dirs=["src/rapidfuzz-cpp/rapidfuzz", "src/rapidfuzz-cpp/"],
+            language='c++',
+        ),
+        Extension(
+            'rapidfuzz.cpp_utils', ['src/cpp_utils.cpp'],
+            include_dirs=["src/rapidfuzz-cpp/rapidfuzz", "src/rapidfuzz-cpp/"],
             language='c++',
         ),
     ],

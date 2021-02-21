@@ -1,3 +1,5 @@
 extern/variant/* linguist-vendored
 src/cpp_process.cpp linguist-vendored
 src/cpp_fuzz.cpp linguist-vendored
+src/cpp_string_metric.cpp linguist-vendored
+src/cpp_utils.cpp linguist-vendored

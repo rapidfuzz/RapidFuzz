@@ -75,7 +75,7 @@ cdef inline extractOne_dict(scorer_context context, choices, processor, double s
                 score_cutoff = score
                 result_choice = choice
                 result_key = choice_key
-    
+
                 if score_cutoff == 100:
                     break
     else:
@@ -84,15 +84,15 @@ cdef inline extractOne_dict(scorer_context context, choices, processor, double s
                 continue
 
             score = context.scorer(context.context, choice, score_cutoff)
-    
+
             if score >= score_cutoff:
                 score_cutoff = score
                 result_choice = choice
                 result_key = choice_key
-    
+
                 if score_cutoff == 100:
                     break
-    
+
     return (result_choice, score_cutoff, result_key) if result_choice is not None else None
 
 
@@ -154,7 +154,7 @@ cdef inline py_extractOne_dict(query, choices, scorer, processor, double score_c
                 result_score = score
                 result_choice = choice
                 result_key = choice_key
-    
+
                 if score_cutoff == 100:
                     break
     else:
@@ -170,7 +170,7 @@ cdef inline py_extractOne_dict(query, choices, scorer, processor, double score_c
                 result_score = score
                 result_choice = choice
                 result_key = choice_key
-    
+
                 if score_cutoff == 100:
                     break
 
@@ -196,7 +196,7 @@ cdef inline py_extractOne_list(query, choices, scorer, processor, double score_c
                 result_score = score
                 result_choice = choice
                 result_index = index
-    
+
                 if score_cutoff == 100:
                     break
             index += 1
@@ -207,13 +207,13 @@ cdef inline py_extractOne_list(query, choices, scorer, processor, double score_c
 
             score = scorer(query, choice,
                 processor=None, score_cutoff=score_cutoff, **kwargs)
-    
+
             if score > result_score:
                 score_cutoff = score
                 result_score = score
                 result_choice = choice
                 result_index = index
-    
+
                 if score_cutoff == 100:
                     break
             index += 1
@@ -310,7 +310,7 @@ def extractOne(query, choices, scorer=fuzz.WRatio, processor=utils.default_proce
     # query might be e.g. False
     else:
         processor = None
-    
+
     # directly use the C++ implementation if possible
     context = CachedScorerInit(scorer, query, def_process)
     if context.context != NULL:
@@ -460,7 +460,7 @@ cdef inline py_extract_dict(query, choices, scorer, processor, size_t limit, dou
 
             if score >= score_cutoff:
                 result_list.append((choice, score, choice_key))
-    
+
     return heapq.nlargest(limit, result_list, key=lambda i: i[1])
 
 
@@ -492,12 +492,12 @@ cdef inline py_extract_list(query, choices, scorer, processor, size_t limit, dou
             if score >= score_cutoff:
                 result_list.append((choice, score, index))
             index += 1
-    
+
     return heapq.nlargest(limit, result_list, key=lambda i: i[1])
 
 
 def extract(query, choices, scorer=fuzz.WRatio, processor=utils.default_process, limit=5, double score_cutoff=0.0, **kwargs):
-    """ 
+    """
     Find the best matches in a list of choices
 
     Parameters
@@ -559,7 +559,7 @@ def extract(query, choices, scorer=fuzz.WRatio, processor=utils.default_process,
     # query might be e.g. False
     else:
         processor = None
-    
+
     # directly use the C++ implementation if possible
     context = CachedScorerInit(scorer, query, def_process)
     if context.context != NULL:
@@ -568,7 +568,7 @@ def extract(query, choices, scorer=fuzz.WRatio, processor=utils.default_process,
                 return extract_dict(context, choices, processor, limit, score_cutoff)
             else:
                 return extract_list(context, choices, processor, limit, score_cutoff)
-    
+
         finally:
             # part of the context is dynamically allocated, so it has to be freed in any case
             context.deinit(context.context)
@@ -581,7 +581,7 @@ def extract(query, choices, scorer=fuzz.WRatio, processor=utils.default_process,
 
 
 def extract_iter(query, choices, scorer=fuzz.WRatio, processor=utils.default_process, double score_cutoff=0.0, **kwargs):
-    """ 
+    """
     Find the best match in a list of choices
 
     Parameters
@@ -619,7 +619,7 @@ def extract_iter(query, choices, scorer=fuzz.WRatio, processor=utils.default_pro
     cdef double score = 0.0
     cdef object py_score
     cdef size_t index
-    
+
     if query is None:
         return None
 
@@ -641,7 +641,7 @@ def extract_iter(query, choices, scorer=fuzz.WRatio, processor=utils.default_pro
     # query might be e.g. False
     else:
         processor = None
-    
+
     # directly use the C++ implementation if possible
     context = CachedScorerInit(scorer, query, def_process)
     if context.context != NULL:
@@ -652,7 +652,7 @@ def extract_iter(query, choices, scorer=fuzz.WRatio, processor=utils.default_pro
                     for choice_key, choice in choices.items():
                         if choice is None:
                             continue
-                
+
                         score = context.scorer(context.context, processor(choice), score_cutoff)
 
                         if score >= score_cutoff:
@@ -662,9 +662,9 @@ def extract_iter(query, choices, scorer=fuzz.WRatio, processor=utils.default_pro
                     for choice_key, choice in choices.items():
                         if choice is None:
                             continue
-                        
+
                         score = context.scorer(context.context, choice, score_cutoff)
-            
+
                         if score >= score_cutoff:
                             yield (choice, score, choice_key)
             else:
@@ -687,7 +687,7 @@ def extract_iter(query, choices, scorer=fuzz.WRatio, processor=utils.default_pro
                             continue
 
                         score = context.scorer(context.context, choice, score_cutoff)
-                
+
                         if score >= score_cutoff:
                             yield (choice, score, index)
                         index += 1
@@ -705,7 +705,7 @@ def extract_iter(query, choices, scorer=fuzz.WRatio, processor=utils.default_pro
 
                     py_score = scorer(query, processor(choice),
                         processor=None, score_cutoff=score_cutoff, **kwargs)
- 
+
                     if py_score >= score_cutoff:
                         yield (choice, py_score, choice_key)
             else:
@@ -716,7 +716,7 @@ def extract_iter(query, choices, scorer=fuzz.WRatio, processor=utils.default_pro
 
                     py_score = scorer(query, choice,
                         processor=None, score_cutoff=score_cutoff, **kwargs)
-        
+
                     if py_score >= score_cutoff:
                         yield (choice, py_score, choice_key)
         else:
@@ -741,7 +741,7 @@ def extract_iter(query, choices, scorer=fuzz.WRatio, processor=utils.default_pro
 
                     py_score = scorer(query, choice,
                         processor=None, score_cutoff=score_cutoff, **kwargs)
-    
+
                     if py_score >= score_cutoff:
                         yield(choice, py_score, index)
                     index += 1

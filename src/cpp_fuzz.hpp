@@ -74,50 +74,50 @@ static proc_string convert_string(PyObject* py_str)
 }
 
 #if PY_VERSION_HEX >= PYTHON_VERSION(3, 0, 0)
+#define RATIO_SINGLE(RATIO, RATIO_FUNC)                                            \
+template<typename CharT>                                                           \
+inline double RATIO##_single(proc_string s1, proc_string s2, double score_cutoff)  \
+{                                                                                  \
+    switch(s2.kind){                                                               \
+    case PyUnicode_1BYTE_KIND:                                                     \
+        return RATIO_FUNC(                                                         \
+            rapidfuzz::basic_string_view<CharT>((CharT*)s1.data, s1.length),       \
+            rapidfuzz::basic_string_view<uint8_t>((uint8_t*)s2.data, s2.length),   \
+            score_cutoff                                                           \
+        );                                                                         \
+    case PyUnicode_2BYTE_KIND:                                                     \
+        return RATIO_FUNC(                                                         \
+            rapidfuzz::basic_string_view<CharT>((CharT*)s1.data, s1.length),       \
+            rapidfuzz::basic_string_view<uint16_t>((uint16_t*)s2.data, s2.length), \
+            score_cutoff                                                           \
+        );                                                                         \
+    default:                                                                       \
+        return RATIO_FUNC(                                                         \
+            rapidfuzz::basic_string_view<CharT>((CharT*)s1.data, s1.length),       \
+            rapidfuzz::basic_string_view<uint32_t>((uint32_t*)s2.data, s2.length), \
+            score_cutoff                                                           \
+        );                                                                         \
+    }                                                                              \
+}
+#else
 #define RATIO_SINGLE(RATIO, RATIO_FUNC)                                                \
 template<typename CharT>                                                               \
 inline double RATIO##_single(proc_string s1, proc_string s2, double score_cutoff)      \
 {                                                                                      \
     switch(s2.kind){                                                                   \
-        case PyUnicode_1BYTE_KIND:                                                     \
-            return RATIO_FUNC(                                                         \
-                rapidfuzz::basic_string_view<CharT>((CharT*)s1.data, s1.length),       \
-                rapidfuzz::basic_string_view<uint8_t>((uint8_t*)s2.data, s2.length),   \
-                score_cutoff                                                           \
-            );                                                                         \
-        case PyUnicode_2BYTE_KIND:                                                     \
-            return RATIO_FUNC(                                                         \
-                rapidfuzz::basic_string_view<CharT>((CharT*)s1.data, s1.length),       \
-                rapidfuzz::basic_string_view<uint16_t>((uint16_t*)s2.data, s2.length), \
-                score_cutoff                                                           \
-            );                                                                         \
-        default:                                                                       \
-            return RATIO_FUNC(                                                         \
-                rapidfuzz::basic_string_view<CharT>((CharT*)s1.data, s1.length),       \
-                rapidfuzz::basic_string_view<uint32_t>((uint32_t*)s2.data, s2.length), \
-                score_cutoff                                                           \
-            );                                                                         \
-        }                                                                              \
-}
-#else
-#define RATIO_SINGLE(RATIO, RATIO_FUNC)                                                    \
-template<typename CharT>                                                                   \
-inline double RATIO##_single(proc_string s1, proc_string s2, double score_cutoff)          \
-{                                                                                          \
-    switch(s2.kind){                                                                       \
-        case CHAR_STRING:                                                                  \
-            return RATIO_FUNC(                                                             \
-                rapidfuzz::basic_string_view<CharT>((CharT*)s1.data, s1.length),           \
-                rapidfuzz::basic_string_view<uint8_t>((uint8_t*)s2.data, s2.length),       \
-                score_cutoff                                                               \
-            );                                                                             \
-        default:                                                                           \
-            return RATIO_FUNC(                                                             \
-                rapidfuzz::basic_string_view<CharT>((CharT*)s1.data, s1.length),           \
-                rapidfuzz::basic_string_view<Py_UNICODE>((Py_UNICODE*)s2.data, s2.length), \
-                score_cutoff                                                               \
-            );                                                                             \
-        }                                                                                  \
+    case CHAR_STRING:                                                                  \
+        return RATIO_FUNC(                                                             \
+            rapidfuzz::basic_string_view<CharT>((CharT*)s1.data, s1.length),           \
+            rapidfuzz::basic_string_view<uint8_t>((uint8_t*)s2.data, s2.length),       \
+            score_cutoff                                                               \
+        );                                                                             \
+    default:                                                                           \
+        return RATIO_FUNC(                                                             \
+            rapidfuzz::basic_string_view<CharT>((CharT*)s1.data, s1.length),           \
+            rapidfuzz::basic_string_view<Py_UNICODE>((Py_UNICODE*)s2.data, s2.length), \
+            score_cutoff                                                               \
+        );                                                                             \
+    }                                                                                  \
 }
 #endif
 

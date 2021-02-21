@@ -128,7 +128,7 @@ Scorers in RapidFuzz can be found in the modules `fuzz` and `string_metric`.
 
 ### Process
 The process module makes it compare strings to lists of strings. This is generally more
-performant than using the scorers directly from Python. 
+performant than using the scorers directly from Python.
 Here are some examples on the usage of processors in RapidFuzz:
 
 ```console

@@ -35,7 +35,7 @@ struct DictMatchElem {
 };
 
 void dummy() {
-    
+
 }
 
 struct ExtractComp
