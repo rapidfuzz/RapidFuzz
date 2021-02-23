@@ -101,14 +101,25 @@ class ProcessTest(unittest.TestCase):
         # first, as an example, the normal way would select the "more 'complete' match of choices[1]"
         best = process.extractOne(query, choices)
         self.assertEqual(best[0], choices[1])
+        best = process.extract(query, choices)[0]
+        self.assertEqual(best[0], choices[1])
+        # dict
         best = process.extractOne(query, choices_mapping)
+        self.assertEqual(best[0], choices_mapping[2])
+        best = process.extract(query, choices_mapping)[0]
         self.assertEqual(best[0], choices_mapping[2])
 
         # now, use the custom scorer
         best = process.extractOne(query, choices, scorer=fuzz.QRatio)
         self.assertEqual(best[0], choices[0])
+        best = process.extract(query, choices, scorer=fuzz.QRatio)[0]
+        self.assertEqual(best[0], choices[0])
+        # dict
         best = process.extractOne(query, choices_mapping, scorer=fuzz.QRatio)
         self.assertEqual(best[0], choices_mapping[1])
+        best = process.extract(query, choices_mapping, scorer=fuzz.QRatio)[0]
+        self.assertEqual(best[0], choices_mapping[1])
+
 
     def testWithCutoff(self):
         choices = [

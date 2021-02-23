@@ -377,7 +377,11 @@ cdef inline extract_dict(scorer_context context, choices, processor, size_t limi
         # the casting is necessary to ensure that Cython doesn't
         # decref the result of Py_BuildValue
         # https://stackoverflow.com/questions/43553763/cythonize-list-of-all-splits-of-a-string/43557675#43557675
-        PyList_SET_ITEM(result_list, i, <object>Py_BuildValue("OdO", <PyObject*>choice, results[i].score, results[i].index))
+        PyList_SET_ITEM(result_list, i,
+            <object>Py_BuildValue("OdO",
+                <PyObject*>choices[<object>results[i].key],
+                results[i].score,
+                <PyObject*>results[i].key))
 
     return result_list
 
@@ -424,13 +428,15 @@ cdef inline extract_list(scorer_context context, choices, processor, size_t limi
     # copy elements into Python List
     result_list = PyList_New(limit)
     for i in range(limit):
-        choice = choices[results[i].index]
-
         # PyList_SET_ITEM steals a reference
         # the casting is necessary to ensure that Cython doesn't
         # decref the result of Py_BuildValue
         # https://stackoverflow.com/questions/43553763/cythonize-list-of-all-splits-of-a-string/43557675#43557675
-        PyList_SET_ITEM(result_list, i, <object>Py_BuildValue("Odn", <PyObject*>choice, results[i].score, results[i].index))
+        PyList_SET_ITEM(result_list, i,
+            <object>Py_BuildValue("Odn",
+                <PyObject*>choices[results[i].index],
+                results[i].score,
+                results[i].index))
 
     return result_list
 
