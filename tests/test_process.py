@@ -5,6 +5,7 @@ import unittest
 import pytest
 
 from rapidfuzz import process, fuzz, utils
+import pandas as pd
 
 class ProcessTest(unittest.TestCase):
     def setUp(self):
@@ -186,6 +187,12 @@ class ProcessTest(unittest.TestCase):
 
         best = process.extractOne(query, choices)
         self.assertEqual(best[0], choices[1])
+
+    def testIssue81(self):
+        # this mostly tests whether this segfaults due to incorrect ref counting
+        choices = pd.Series(['test color brightness', 'test lemon', 'test lavender'], index=[67478, 67479, 67480])
+        matches = process.extract("test", choices)
+        assert matches == [('test color brightness', 90.0, 67478), ('test lemon', 90.0, 67479), ('test lavender', 90.0, 67480)]
 
 
 def custom_scorer(s1, s2, processor=None, score_cutoff=0):

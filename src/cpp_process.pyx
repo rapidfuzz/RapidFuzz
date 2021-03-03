@@ -11,6 +11,7 @@ from cpython.list cimport PyList_New
 from cpython.list cimport PyList_SET_ITEM
 from cpython.object cimport PyObject
 from cpython.ref cimport Py_INCREF
+from cpython.ref cimport Py_DECREF
 
 import heapq
 
@@ -358,6 +359,10 @@ cdef inline extract_dict(scorer_context context, choices, processor, size_t limi
             score = context.scorer(context.context, choice, score_cutoff)
 
             if score >= score_cutoff:
+                # especially the key object might be created on the fly by e.g. pandas.Dataframe
+                # so we need to ensure Python does not deallocate it
+                Py_INCREF(choice)
+                Py_INCREF(choice_key)
                 results.push_back(DictMatchElem(score, i, <PyObject*>choice, <PyObject*>choice_key))
             index += 1
 
@@ -379,9 +384,14 @@ cdef inline extract_dict(scorer_context context, choices, processor, size_t limi
         # https://stackoverflow.com/questions/43553763/cythonize-list-of-all-splits-of-a-string/43557675#43557675
         PyList_SET_ITEM(result_list, i,
             <object>Py_BuildValue("OdO",
-                <PyObject*>choices[<object>results[i].key],
+                <PyObject*>results[i].choice,
                 results[i].score,
                 <PyObject*>results[i].key))
+
+    # decref all reference counts
+    for i in range(results.size()):
+        Py_DECREF(<object>results[i].choice)
+        Py_DECREF(<object>results[i].key)
 
     return result_list
 
@@ -393,7 +403,7 @@ cdef inline extract_list(scorer_context context, choices, processor, size_t limi
     # todo possibly a smaller vector would be good to reduce memory usage
     cdef vector[ListMatchElem] results
     results.reserve(<size_t>len(choices))
-    cdef object result_list
+    cdef list result_list
 
     if processor is not None:
         for choice in choices:
@@ -751,4 +761,3 @@ def extract_iter(query, choices, scorer=fuzz.WRatio, processor=utils.default_pro
                     if py_score >= score_cutoff:
                         yield(choice, py_score, index)
                     index += 1
-        
