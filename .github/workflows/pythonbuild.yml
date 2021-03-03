@@ -43,7 +43,7 @@ jobs:
       - name: Run Unit Tests
         run: |
           pip install .
-          pip install pytest hypothesis
+          pip install pytest hypothesis pandas
           pytest
 
 
