@@ -208,12 +208,12 @@ static inline double cached_func(void* context, PyObject* py_str, double score_c
     }
 }
 
-template<template <typename> class CachedScorer, typename CharT>
-static inline scorer_context get_scorer_context(const proc_string& str, int def_process)
+template<template <typename> class CachedScorer, typename CharT, typename ...Args>
+static inline scorer_context get_scorer_context(const proc_string& str, int def_process, Args... args)
 {
     using Sentence = rapidfuzz::basic_string_view<CharT>;
     scorer_context context;
-    context.context = (void*) new CachedScorer<Sentence>(Sentence((CharT*)str.data, str.length));
+    context.context = (void*) new CachedScorer<Sentence>(Sentence((CharT*)str.data, str.length), args...);
 
     if (def_process) {
         context.scorer = cached_func_default_process<CachedScorer<Sentence>>;
@@ -224,8 +224,8 @@ static inline scorer_context get_scorer_context(const proc_string& str, int def_
     return context;
 }
 
-template<template <typename> class CachedScorer>
-static inline scorer_context cached_init(PyObject* py_str, int def_process)
+template<template <typename> class CachedScorer, typename ...Args>
+static inline scorer_context cached_init(PyObject* py_str, int def_process, Args... args)
 {
     proc_string str = convert_string(py_str);
     if (str.data == NULL) return {NULL, NULL, NULL};
@@ -233,16 +233,16 @@ static inline scorer_context cached_init(PyObject* py_str, int def_process)
     switch(str.kind){
 #if PY_VERSION_HEX >= PYTHON_VERSION(3, 0, 0)
     case PyUnicode_1BYTE_KIND:
-        return get_scorer_context<CachedScorer, uint8_t>(str, def_process);
+        return get_scorer_context<CachedScorer, uint8_t>(str, def_process, args...);
     case PyUnicode_2BYTE_KIND:
-        return get_scorer_context<CachedScorer, uint16_t>(str, def_process);
+        return get_scorer_context<CachedScorer, uint16_t>(str, def_process, args...);
     case PyUnicode_4BYTE_KIND:
-        return get_scorer_context<CachedScorer, uint32_t>(str, def_process);
+        return get_scorer_context<CachedScorer, uint32_t>(str, def_process, args...);
 #else
     case CHAR_STRING:
-        return get_scorer_context<CachedScorer, uint8_t>(str, def_process);
+        return get_scorer_context<CachedScorer, uint8_t>(str, def_process, args...);
     case UNICODE_STRING:
-        return get_scorer_context<CachedScorer, Py_UNICODE>(str, def_process);
+        return get_scorer_context<CachedScorer, Py_UNICODE>(str, def_process, args...);
 #endif
     default:
        throw std::logic_error("Reached end of control flow in cached_init");
@@ -301,6 +301,15 @@ static scorer_context cached_QRatio_init(PyObject* py_str, int def_process)
 }
 
 /* string_metric */
+
+static scorer_context cached_normalized_levenshtein_init(PyObject* py_str, int def_process,
+  size_t insertion, size_t deletion, size_t substitution)
+{
+    rapidfuzz::LevenshteinWeightTable weights = {insertion, deletion, substitution};
+    return cached_init<string_metric::CachedNormalizedLevenshtein>(
+        py_str, def_process, weights);
+}
+
 static scorer_context cached_normalized_hamming_init(PyObject* py_str, int def_process)
 {
     return cached_init<string_metric::CachedNormalizedHamming>(py_str, def_process);
