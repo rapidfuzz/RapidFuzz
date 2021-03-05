@@ -42,6 +42,7 @@ cdef extern from "cpp_process.hpp":
     scorer_context cached_WRatio_init(                  object, int) except +*
     scorer_context cached_QRatio_init(                  object, int) except +*
     # string_metric
+    scorer_context cached_normalized_levenshtein_init(object, int, size_t, size_t, size_t) except +*
     scorer_context cached_normalized_hamming_init(      object, int) except +*
 
 
@@ -222,7 +223,13 @@ cdef inline py_extractOne_list(query, choices, scorer, processor, double score_c
     return (result_choice, result_score, result_index) if result_choice is not None else None
 
 
-cdef inline scorer_context CachedScorerInit(object scorer, object query, int def_process):
+cdef inline scorer_context CachedNormalizedLevenshteinInit(object query, int def_process, dict kwargs):
+    cdef size_t insertion, deletion, substitution
+    insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
+    return cached_normalized_levenshtein_init(query, def_process, insertion, deletion, substitution)
+
+
+cdef inline scorer_context CachedScorerInit(object scorer, object query, int def_process, dict kwargs):
     cdef scorer_context context
 
     if scorer == fuzz.ratio:
@@ -245,6 +252,8 @@ cdef inline scorer_context CachedScorerInit(object scorer, object query, int def
         context = cached_WRatio_init(query, def_process)
     elif scorer == fuzz.QRatio:
         context = cached_QRatio_init(query, def_process)
+    elif scorer == string_metric.normalized_levenshtein:
+        context = CachedNormalizedLevenshteinInit(query, def_process, kwargs)
     elif scorer == string_metric.normalized_hamming:
         context = cached_normalized_hamming_init(query, def_process)
     else:
@@ -313,7 +322,7 @@ def extractOne(query, choices, scorer=fuzz.WRatio, processor=utils.default_proce
         processor = None
 
     # directly use the C++ implementation if possible
-    context = CachedScorerInit(scorer, query, def_process)
+    context = CachedScorerInit(scorer, query, def_process, kwargs)
     if context.context != NULL:
         try:
             if hasattr(choices, "items"):
@@ -442,6 +451,7 @@ cdef inline extract_list(scorer_context context, choices, processor, size_t limi
         # the casting is necessary to ensure that Cython doesn't
         # decref the result of Py_BuildValue
         # https://stackoverflow.com/questions/43553763/cythonize-list-of-all-splits-of-a-string/43557675#43557675
+
         PyList_SET_ITEM(result_list, i,
             <object>Py_BuildValue("Odn",
                 <PyObject*>choices[results[i].index],
@@ -577,7 +587,7 @@ def extract(query, choices, scorer=fuzz.WRatio, processor=utils.default_process,
         processor = None
 
     # directly use the C++ implementation if possible
-    context = CachedScorerInit(scorer, query, def_process)
+    context = CachedScorerInit(scorer, query, def_process, kwargs)
     if context.context != NULL:
         try:
             if hasattr(choices, "items"):
@@ -659,7 +669,7 @@ def extract_iter(query, choices, scorer=fuzz.WRatio, processor=utils.default_pro
         processor = None
 
     # directly use the C++ implementation if possible
-    context = CachedScorerInit(scorer, query, def_process)
+    context = CachedScorerInit(scorer, query, def_process, kwargs)
     if context.context != NULL:
         try:
             if hasattr(choices, "items"):
