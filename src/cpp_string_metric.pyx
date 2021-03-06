@@ -81,6 +81,15 @@ def levenshtein(s1, s2, weights=(1,1,1), max=None):
         The algorithm is described by [3]_. The time complexity of this
         algorithm is ``O([N/64]M)``.
 
+    The following image shows a benchmark of the Levenshtein distance in multiple
+    Python libraries. All of them are implemented either in C/C++ or Cython.
+    The graph shows, that python-Levenshtein is the only library with a time
+    complexity of ``O(NM)``, while all other libraries have a time complexity of
+    ``O([N/64]M)``. Especially for long strings RapidFuzz is a lot faster than
+    all the other tested libraries.
+
+    .. image:: img/uniform_levenshtein.svg
+
 
     Insertion = Deletion, Substitution >= Insertion + Deletion:
       Since every Substitution can be performed as Insertion + Deletion, this variant
@@ -119,6 +128,14 @@ def levenshtein(s1, s2, weights=(1,1,1), max=None):
         the Levenshtein distance in parallel (64 characters at a time).
         The algorithm is described by [4]_. The time complexity of this
         algorithm is ``O([N/64]M)``.
+
+    The following image shows a benchmark of the InDel distance in RapidFuzz
+    and python-Levenshtein. Similar to the normal Levenshtein distance
+    python-Levenshtein uses a implementation with a time complexity of ``O(NM)``,
+    while RapidFuzz has a time complexity of ``O([N/64]M)``.
+
+    .. image:: img/indel_levenshtein.svg
+
 
     Other weights:
       The implementation for other weights is based on Wagner-Fischer.
@@ -285,6 +302,9 @@ def normalized_levenshtein(s1, s2, weights=(1,1,1), processor=None, double score
 def hamming(s1, s2, max=None):
     """
     Calculates the Hamming distance between two strings.
+    The hamming distance is defined as the number of positions 
+    where the two strings differ. It describes the minimum
+    amount of substitutions required to transform s1 into s2.
 
     Parameters
     ----------
@@ -302,6 +322,11 @@ def hamming(s1, s2, max=None):
     -------
     distance : int
         Hamming distance between s1 and s2
+
+    Raises
+    ------
+    ValueError
+        If s1 and s2 have a different length
     """
     cdef size_t max_ = -1
 
@@ -335,6 +360,15 @@ def normalized_hamming(s1, s2, processor=None, double score_cutoff=0.0):
     ratio : float
         Normalized hamming distance between s1 and s2
         as a float between 0 and 100
+
+    Raises
+    ------
+    ValueError
+        If s1 and s2 have a different length
+
+    See Also
+    --------
+    hamming : Hamming distance
     """
     if s1 is None or s2 is None:
         return 0
