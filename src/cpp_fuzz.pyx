@@ -61,6 +61,11 @@ def ratio(s1, s2, processor=False, double score_cutoff=0.0):
     ratio : float
         ratio distance between s1 and s2 as a float between 0 and 100
 
+    Notes
+    -----
+
+    .. image:: img/ratio.svg
+
     Examples
     --------
     >>> fuzz.ratio("this is a test", "this is a test!")
@@ -101,6 +106,11 @@ def partial_ratio(s1, s2, processor=False, double score_cutoff=0.0):
     -------
     ratio : float
         ratio distance between s1 and s2 as a float between 0 and 100
+
+    Notes
+    -----
+
+    .. image:: img/partial_ratio.svg
 
     Examples
     --------
@@ -143,6 +153,11 @@ def token_sort_ratio(s1, s2, processor=True, double score_cutoff=0.0):
     ratio : float
         ratio distance between s1 and s2 as a float between 0 and 100
 
+    Notes
+    -----
+
+    .. image:: img/token_sort_ratio.svg
+
     Examples
     --------
     >>> fuzz.token_sort_ratio("fuzzy wuzzy was a bear", "wuzzy fuzzy was a bear")
@@ -184,6 +199,11 @@ def token_set_ratio(s1, s2, processor=True, double score_cutoff=0.0):
     -------
     ratio : float
         ratio distance between s1 and s2 as a float between 0 and 100
+
+    Notes
+    -----
+
+    .. image:: img/token_set_ratio.svg
 
     Examples
     --------
@@ -228,6 +248,11 @@ def token_ratio(s1, s2, processor=True, double score_cutoff=0.0):
     -------
     ratio : float
         ratio distance between s1 and s2 as a float between 0 and 100
+
+    Notes
+    -----
+
+    .. image:: img/token_ratio.svg
     """
     if s1 is None or s2 is None:
         return 0
@@ -264,6 +289,11 @@ def partial_token_sort_ratio(s1, s2, processor=True, double score_cutoff=0.0):
     -------
     ratio : float
         ratio distance between s1 and s2 as a float between 0 and 100
+
+    Notes
+    -----
+
+    .. image:: img/partial_token_sort_ratio.svg
     """
     if s1 is None or s2 is None:
         return 0
@@ -301,6 +331,11 @@ def partial_token_set_ratio(s1, s2, processor=True, double score_cutoff=0.0):
     -------
     ratio : float
         ratio distance between s1 and s2 as a float between 0 and 100
+
+    Notes
+    -----
+
+    .. image:: img/partial_token_set_ratio.svg
     """
     if s1 is None or s2 is None:
         return 0
@@ -338,6 +373,11 @@ def partial_token_ratio(s1, s2, processor=True, double score_cutoff=0.0):
     -------
     ratio : float
         ratio distance between s1 and s2 as a float between 0 and 100
+
+    Notes
+    -----
+
+    .. image:: img/partial_token_ratio.svg
     """
     if s1 is None or s2 is None:
         return 0
@@ -374,6 +414,11 @@ def WRatio(s1, s2, processor=True, double score_cutoff=0.0):
     -------
     ratio : float
         ratio distance between s1 and s2 as a float between 0 and 100
+
+    Notes
+    -----
+
+    .. image:: img/WRatio.svg
     """
     if s1 is None or s2 is None:
         return 0
