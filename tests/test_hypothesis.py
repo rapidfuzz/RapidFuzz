@@ -9,12 +9,12 @@ import pytest
 from rapidfuzz import fuzz, process, utils, string_metric
 import random
 
-
 def levenshtein(s1, s2, weights=(1, 1, 1)):
     """
     python implementation of a generic Levenshtein distance
     this is much less error prone, than the bitparallel C implementations
     and is therefor used to test the C implementation
+    However this makes this very slow even for testing purposes
     """
 
     rows = len(s1)+1
@@ -71,6 +71,22 @@ PROCESSORS = [
     lambda x: x,
     utils.default_process
 ]
+
+@given(s1=st.text(), s2=st.text())
+@settings(max_examples=500, deadline=None)
+def test_token_ratio(s1, s2):
+    """
+    token_ratio should be max(token_sort_ratio, token_set_ratio)
+    """
+    assert fuzz.token_ratio(s1, s2) == max(fuzz.token_sort_ratio(s1, s2), fuzz.token_set_ratio(s1, s2))
+
+@given(s1=st.text(), s2=st.text())
+@settings(max_examples=500, deadline=None)
+def test_partial_token_ratio(s1, s2):
+    """
+    partial_token_ratio should be max(partial_token_sort_ratio, partial_token_set_ratio)
+    """
+    assert fuzz.partial_token_ratio(s1, s2) == max(fuzz.partial_token_sort_ratio(s1, s2), fuzz.partial_token_set_ratio(s1, s2))
 
 
 @given(s1=st.text(min_size=0, max_size=64), s2=st.text(min_size=0, max_size=64))

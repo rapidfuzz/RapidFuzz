@@ -145,7 +145,8 @@ The full documentation of processors can be found [here](https://maxbachmann.git
 
 ## Benchmark
 
-I generated a list of 10000 strings with length 10, that is compared to a sample of 100 elements from this list:
+The following benchmark gives a quick performance comparision between RapidFuzz and FuzzyWuzzy.
+More detailed benchmarks for the string metrics can be found in the [documentation](https://maxbachmann.github.io/RapidFuzz/fuzz.html). For this simple comparision I generated a list of 10.000 strings with length 10, that is compared to a sample of 100 elements from this list:
 ```python
 words = [
   ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(10))
