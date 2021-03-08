@@ -53,13 +53,6 @@ struct ExtractComp
     }
 };
 
-#if PY_VERSION_HEX < PYTHON_VERSION(3, 0, 0)
-enum StringKind{
-    CHAR_STRING,
-    UNICODE_STRING
-};
-#endif
-
 struct proc_string {
     int kind;
     void* data;
@@ -70,7 +63,6 @@ static proc_string convert_string(PyObject* py_str)
 {
     proc_string str = {0, NULL, 0};
 
-#if PY_VERSION_HEX >= PYTHON_VERSION(3, 0, 0)
     if (!PyUnicode_Check(py_str)) {
         throw PythonTypeError("choice must be a String or None");
     }
@@ -86,21 +78,6 @@ static proc_string convert_string(PyObject* py_str)
     str.kind = PyUnicode_KIND(py_str);
     str.data = PyUnicode_DATA(py_str);
     str.length = PyUnicode_GET_LENGTH(py_str);
-#else /* Python 2 */
-    if (PyObject_TypeCheck(py_str, &PyString_Type)) {
-        str.kind = CHAR_STRING;
-        str.length = PyString_GET_SIZE(py_str);
-        str.data = (void*)PyString_AS_STRING(py_str);
-    }
-    else if (PyObject_TypeCheck(py_str, &PyUnicode_Type)) {
-        str.kind = UNICODE_STRING;
-        str.length = PyUnicode_GET_SIZE(py_str);
-        str.data = (void*)PyUnicode_AS_UNICODE(py_str);
-    }
-    else {
-        throw PythonTypeError("choice must be a String, Unicode or None");
-    }
-#endif
 
     return str;
 }
@@ -130,7 +107,6 @@ static inline double cached_func_default_process(
     CachedScorer* ratio = (CachedScorer*)context;
 
     switch(str.kind){
-#if PY_VERSION_HEX >= PYTHON_VERSION(3, 0, 0)
     case PyUnicode_1BYTE_KIND:
         return ratio->ratio(
             utils::default_process(
@@ -149,20 +125,6 @@ static inline double cached_func_default_process(
                 rapidfuzz::basic_string_view<uint32_t>((uint32_t*)str.data, str.length)),
             score_cutoff
         );
-#else
-    case CHAR_STRING:
-        return ratio->ratio(
-            utils::default_process(
-                rapidfuzz::basic_string_view<uint8_t>((uint8_t*)str.data, str.length)),
-            score_cutoff
-        );
-    case UNICODE_STRING:
-        return ratio->ratio(
-            utils::default_process(
-                rapidfuzz::basic_string_view<Py_UNICODE>((Py_UNICODE*)str.data, str.length)),
-            score_cutoff
-        );
-#endif
     default:
        throw std::logic_error("Reached end of control flow in cached_func_default_process");
     }
@@ -175,7 +137,6 @@ static inline double cached_func(void* context, PyObject* py_str, double score_c
     CachedScorer* ratio = (CachedScorer*)context;
 
     switch(str.kind){
-#if PY_VERSION_HEX >= PYTHON_VERSION(3, 0, 0)
     case PyUnicode_1BYTE_KIND:
         return ratio->ratio(
             rapidfuzz::basic_string_view<uint8_t>((uint8_t*)str.data, str.length),
@@ -191,18 +152,6 @@ static inline double cached_func(void* context, PyObject* py_str, double score_c
             rapidfuzz::basic_string_view<uint32_t>((uint32_t*)str.data, str.length),
             score_cutoff
         );
-#else
-    case CHAR_STRING:
-        return ratio->ratio(
-            rapidfuzz::basic_string_view<uint8_t>((uint8_t*)str.data, str.length),
-            score_cutoff
-        );
-    case UNICODE_STRING:
-        return ratio->ratio(
-            rapidfuzz::basic_string_view<Py_UNICODE>((Py_UNICODE*)str.data, str.length),
-            score_cutoff
-        );
-#endif
     default:
        throw std::logic_error("Reached end of control flow in cached_func");
     }
@@ -231,19 +180,12 @@ static inline scorer_context cached_init(PyObject* py_str, int def_process, Args
     if (str.data == NULL) return {NULL, NULL, NULL};
 
     switch(str.kind){
-#if PY_VERSION_HEX >= PYTHON_VERSION(3, 0, 0)
     case PyUnicode_1BYTE_KIND:
         return get_scorer_context<CachedScorer, uint8_t>(str, def_process, args...);
     case PyUnicode_2BYTE_KIND:
         return get_scorer_context<CachedScorer, uint16_t>(str, def_process, args...);
     case PyUnicode_4BYTE_KIND:
         return get_scorer_context<CachedScorer, uint32_t>(str, def_process, args...);
-#else
-    case CHAR_STRING:
-        return get_scorer_context<CachedScorer, uint8_t>(str, def_process, args...);
-    case UNICODE_STRING:
-        return get_scorer_context<CachedScorer, Py_UNICODE>(str, def_process, args...);
-#endif
     default:
        throw std::logic_error("Reached end of control flow in cached_init");
     }

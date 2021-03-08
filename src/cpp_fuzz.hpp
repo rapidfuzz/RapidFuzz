@@ -21,13 +21,6 @@ private:
     char const* m_error;
 };
 
-#if PY_VERSION_HEX < PYTHON_VERSION(3, 0, 0)
-enum StringKind{
-    CHAR_STRING,
-    UNICODE_STRING
-};
-#endif
-
 struct proc_string {
     int kind;
     void* data;
@@ -38,7 +31,6 @@ static proc_string convert_string(PyObject* py_str)
 {
     proc_string str = {0, NULL, 0};
 
-#if PY_VERSION_HEX >= PYTHON_VERSION(3, 0, 0)
     if (!PyUnicode_Check(py_str)) {
         throw PythonTypeError("choice must be a String or None");
     }
@@ -54,26 +46,10 @@ static proc_string convert_string(PyObject* py_str)
     str.kind = PyUnicode_KIND(py_str);
     str.data = PyUnicode_DATA(py_str);
     str.length = PyUnicode_GET_LENGTH(py_str);
-#else /* Python 2 */
-    if (PyObject_TypeCheck(py_str, &PyString_Type)) {
-        str.kind = CHAR_STRING;
-        str.length = PyString_GET_SIZE(py_str);
-        str.data = (void*)PyString_AS_STRING(py_str);
-    }
-    else if (PyObject_TypeCheck(py_str, &PyUnicode_Type)) {
-        str.kind = UNICODE_STRING;
-        str.length = PyUnicode_GET_SIZE(py_str);
-        str.data = (void*)PyUnicode_AS_UNICODE(py_str);
-    }
-    else {
-        throw PythonTypeError("choice must be a String, Unicode or None");
-    }
-#endif
 
     return str;
 }
 
-#if PY_VERSION_HEX >= PYTHON_VERSION(3, 0, 0)
 #define RATIO_SINGLE(RATIO, RATIO_FUNC)                                            \
 template<typename CharT>                                                           \
 inline double RATIO##_single(proc_string s1, proc_string s2, double score_cutoff)  \
@@ -99,30 +75,7 @@ inline double RATIO##_single(proc_string s1, proc_string s2, double score_cutoff
         );                                                                         \
     }                                                                              \
 }
-#else
-#define RATIO_SINGLE(RATIO, RATIO_FUNC)                                                \
-template<typename CharT>                                                               \
-inline double RATIO##_single(proc_string s1, proc_string s2, double score_cutoff)      \
-{                                                                                      \
-    switch(s2.kind){                                                                   \
-    case CHAR_STRING:                                                                  \
-        return RATIO_FUNC(                                                             \
-            rapidfuzz::basic_string_view<CharT>((CharT*)s1.data, s1.length),           \
-            rapidfuzz::basic_string_view<uint8_t>((uint8_t*)s2.data, s2.length),       \
-            score_cutoff                                                               \
-        );                                                                             \
-    default:                                                                           \
-        return RATIO_FUNC(                                                             \
-            rapidfuzz::basic_string_view<CharT>((CharT*)s1.data, s1.length),           \
-            rapidfuzz::basic_string_view<Py_UNICODE>((Py_UNICODE*)s2.data, s2.length), \
-            score_cutoff                                                               \
-        );                                                                             \
-    }                                                                                  \
-}
-#endif
 
-
-#if PY_VERSION_HEX >= PYTHON_VERSION(3, 0, 0)
 #define RATIO_IMPL(RATIO, RATIO_FUNC)                                \
 double RATIO##_impl(PyObject* s1, PyObject* s2, double score_cutoff) \
 {                                                                    \
@@ -141,27 +94,7 @@ double RATIO##_impl(PyObject* s1, PyObject* s2, double score_cutoff) \
         return RATIO##_single<uint32_t>(c_s1, c_s2, score_cutoff);   \
     }                                                                \
 }
-#else
-#define RATIO_IMPL(RATIO, RATIO_FUNC)                                \
-double RATIO##_impl(PyObject* s1, PyObject* s2, double score_cutoff) \
-{                                                                    \
-    proc_string c_s1 = convert_string(s1);                           \
-    if (c_s1.data == NULL) return 0.0;                               \
-                                                                     \
-    proc_string c_s2 = convert_string(s2);                           \
-    if (c_s2.data == NULL) return 0.0;                               \
-                                                                     \
-    switch(c_s1.kind){                                               \
-    case CHAR_STRING:                                                \
-        return RATIO##_single<uint8_t>(c_s1, c_s2, score_cutoff);    \
-    default:                                                         \
-        return RATIO##_single<Py_UNICODE>(c_s1, c_s2, score_cutoff); \
-    }                                                                \
-}
-#endif
 
-
-#if PY_VERSION_HEX >= PYTHON_VERSION(3, 0, 0)
 #define RATIO_SINGLE_DEFAULT_PROCESS(RATIO, RATIO_FUNC)                               \
 template<typename CharT>                                                              \
 inline double RATIO##_single_default_process(                                         \
@@ -200,39 +133,7 @@ inline double RATIO##_single_default_process(                                   
         );                                                                            \
     }                                                                                 \
 }
-#else
-#define RATIO_SINGLE_DEFAULT_PROCESS(RATIO, RATIO_FUNC)                                   \
-template<typename CharT>                                                                  \
-inline double RATIO##_single_default_process(                                             \
-    proc_string s1, proc_string s2, double score_cutoff)                                  \
-{                                                                                         \
-    switch(s2.kind){                                                                      \
-    case CHAR_STRING:                                                                     \
-        return RATIO_FUNC(                                                                \
-            utils::default_process(                                                       \
-                rapidfuzz::basic_string_view<CharT>((CharT*)s1.data, s1.length)           \
-            ),                                                                            \
-            utils::default_process(                                                       \
-                rapidfuzz::basic_string_view<uint8_t>((uint8_t*)s2.data, s2.length)       \
-            ),                                                                            \
-            score_cutoff                                                                  \
-        );                                                                                \
-    default:                                                                              \
-        return RATIO_FUNC(                                                                \
-            utils::default_process(                                                       \
-                rapidfuzz::basic_string_view<CharT>((CharT*)s1.data, s1.length)           \
-            ),                                                                            \
-            utils::default_process(                                                       \
-                rapidfuzz::basic_string_view<Py_UNICODE>((Py_UNICODE*)s2.data, s2.length) \
-            ),                                                                            \
-            score_cutoff                                                                  \
-        );                                                                                \
-    }                                                                                     \
-}
-#endif
 
-
-#if PY_VERSION_HEX >= PYTHON_VERSION(3, 0, 0)
 #define RATIO_IMPL_DEFAULT_PROCESS(RATIO, RATIO_FUNC)                                   \
 double RATIO##_impl_default_process(PyObject* s1, PyObject* s2, double score_cutoff) {  \
     proc_string c_s1 = convert_string(s1);                                              \
@@ -250,23 +151,6 @@ double RATIO##_impl_default_process(PyObject* s1, PyObject* s2, double score_cut
         return RATIO##_single_default_process<uint32_t>(c_s1, c_s2, score_cutoff);      \
     }                                                                                   \
 }
-#else
-#define RATIO_IMPL_DEFAULT_PROCESS(RATIO, RATIO_FUNC)                                   \
-double RATIO##_impl_default_process(PyObject* s1, PyObject* s2, double score_cutoff) {  \
-    proc_string c_s1 = convert_string(s1);                                              \
-    if (c_s1.data == NULL) return 0.0;                                                  \
-                                                                                        \
-    proc_string c_s2 = convert_string(s2);                                              \
-    if (c_s2.data == NULL) return 0.0;                                                  \
-                                                                                        \
-    switch(c_s1.kind){                                                                  \
-    case CHAR_STRING:                                                                   \
-        return RATIO##_single_default_process<uint8_t>(c_s1, c_s2, score_cutoff);       \
-    default:                                                                            \
-        return RATIO##_single_default_process<Py_UNICODE>(c_s1, c_s2, score_cutoff);    \
-    }                                                                                   \
-}
-#endif
 
 #define RATIO_DEF(RATIO, RATIO_FUNC)            \
 RATIO_SINGLE_DEFAULT_PROCESS(RATIO, RATIO_FUNC) \
