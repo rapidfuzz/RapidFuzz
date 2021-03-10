@@ -29,19 +29,20 @@ struct proc_string {
     size_t length;
 };
 
-static proc_string convert_string(PyObject* py_str)
+static inline proc_string convert_string(PyObject* py_str, char* err)
 {
     proc_string str = {0, NULL, 0};
 
     if (!PyUnicode_Check(py_str)) {
-        throw PythonTypeError("choice must be a String or None");
+        throw PythonTypeError(err);
     }
 
     // PEP 623 deprecates legacy strings and therefor
     // deprecates e.g. PyUnicode_READY in Python 3.10
 #if PY_VERSION_HEX < PYTHON_VERSION(3, 10, 0)
     if (PyUnicode_READY(py_str)) {
-      return str;
+      // cython will use the exception set by PyUnicode_READY
+      throw std::runtime_error("");
     }
 #endif
 

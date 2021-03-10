@@ -29,11 +29,8 @@ inline double RATIO##_single(proc_string s1, proc_string s2, double score_cutoff
 #define RATIO_IMPL(RATIO, RATIO_FUNC)                                \
 double RATIO##_impl(PyObject* s1, PyObject* s2, double score_cutoff) \
 {                                                                    \
-    proc_string c_s1 = convert_string(s1);                           \
-    if (c_s1.data == NULL) return 0.0;                               \
-                                                                     \
-    proc_string c_s2 = convert_string(s2);                           \
-    if (c_s2.data == NULL) return 0.0;                               \
+    proc_string c_s1 = convert_string(s1, "s1 must be a String");    \
+    proc_string c_s2 = convert_string(s2, "s2 must be a String");    \
                                                                      \
     switch(c_s1.kind){                                               \
     case PyUnicode_1BYTE_KIND:                                       \
@@ -86,11 +83,8 @@ inline double RATIO##_single_default_process(                                   
 
 #define RATIO_IMPL_DEFAULT_PROCESS(RATIO, RATIO_FUNC)                                   \
 double RATIO##_impl_default_process(PyObject* s1, PyObject* s2, double score_cutoff) {  \
-    proc_string c_s1 = convert_string(s1);                                              \
-    if (c_s1.data == NULL) return 0.0;                                                  \
-                                                                                        \
-    proc_string c_s2 = convert_string(s2);                                              \
-    if (c_s2.data == NULL) return 0.0;                                                  \
+    proc_string c_s1 = convert_string(s1, "s1 must be a String");                       \
+    proc_string c_s2 = convert_string(s2, "s2 must be a String");                       \
                                                                                         \
     switch(c_s1.kind){                                                                  \
     case PyUnicode_1BYTE_KIND:                                                          \
