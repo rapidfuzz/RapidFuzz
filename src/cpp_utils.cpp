@@ -1131,7 +1131,6 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
 
 /* Module declarations from 'cpp_utils' */
-static PyObject *__pyx_f_9cpp_utils_dummy(void); /*proto*/
 #define __Pyx_MODULE_NAME "cpp_utils"
 extern int __pyx_module_is_main_cpp_utils;
 int __pyx_module_is_main_cpp_utils = 0;
@@ -1158,63 +1157,8 @@ static PyObject *__pyx_tuple_;
 static PyObject *__pyx_codeobj__2;
 /* Late includes */
 
-/* "cpp_utils.pyx":9
- * 
- * 
- * cdef dummy() except +:             # <<<<<<<<<<<<<<
- *     # trick cython into generating
- *     # exception handling, since except +* does not work properly
- */
-
-static PyObject *__pyx_f_9cpp_utils_dummy(void) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("dummy", 0);
-
-  /* "cpp_utils.pyx":13
- *     # exception handling, since except +* does not work properly
- *     # https://github.com/cython/cython/issues/3065
- *     dummy()             # <<<<<<<<<<<<<<
- * 
- * 
- */
-  try {
-    __pyx_t_1 = __pyx_f_9cpp_utils_dummy();
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 13, __pyx_L1_error)
-  } catch(...) {
-    __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 13, __pyx_L1_error)
-  }
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-  /* "cpp_utils.pyx":9
- * 
- * 
- * cdef dummy() except +:             # <<<<<<<<<<<<<<
- *     # trick cython into generating
- *     # exception handling, since except +* does not work properly
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("cpp_utils.dummy", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = 0;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "cpp_utils.pyx":16
- * 
+/* "cpp_utils.pyx":8
+ *     object default_process_impl(object) except +
  * 
  * def default_process(sentence):             # <<<<<<<<<<<<<<
  *     """
@@ -1245,7 +1189,7 @@ static PyObject *__pyx_pf_9cpp_utils_default_process(CYTHON_UNUSED PyObject *__p
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("default_process", 0);
 
-  /* "cpp_utils.pyx":38
+  /* "cpp_utils.pyx":30
  *         processed string
  *     """
  *     return default_process_impl(sentence)             # <<<<<<<<<<<<<<
@@ -1253,19 +1197,18 @@ static PyObject *__pyx_pf_9cpp_utils_default_process(CYTHON_UNUSED PyObject *__p
   __Pyx_XDECREF(__pyx_r);
   try {
     __pyx_t_1 = default_process_impl(__pyx_v_sentence);
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 38, __pyx_L1_error)
-    if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 38, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 30, __pyx_L1_error)
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 38, __pyx_L1_error)
+    __PYX_ERR(0, 30, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "cpp_utils.pyx":16
- * 
+  /* "cpp_utils.pyx":8
+ *     object default_process_impl(object) except +
  * 
  * def default_process(sentence):             # <<<<<<<<<<<<<<
  *     """
@@ -1347,17 +1290,17 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "cpp_utils.pyx":16
- * 
+  /* "cpp_utils.pyx":8
+ *     object default_process_impl(object) except +
  * 
  * def default_process(sentence):             # <<<<<<<<<<<<<<
  *     """
  *     This function preprocesses a string by:
  */
-  __pyx_tuple_ = PyTuple_Pack(1, __pyx_n_s_sentence); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_tuple_ = PyTuple_Pack(1, __pyx_n_s_sentence); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 8, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
-  __pyx_codeobj__2 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_cpp_utils_pyx, __pyx_n_s_default_process, 16, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__2)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_codeobj__2 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_cpp_utils_pyx, __pyx_n_s_default_process, 8, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__2)) __PYX_ERR(0, 8, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -1638,16 +1581,16 @@ if (!__Pyx_RefNanny) {
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
-  /* "cpp_utils.pyx":16
- * 
+  /* "cpp_utils.pyx":8
+ *     object default_process_impl(object) except +
  * 
  * def default_process(sentence):             # <<<<<<<<<<<<<<
  *     """
  *     This function preprocesses a string by:
  */
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_9cpp_utils_1default_process, 0, __pyx_n_s_default_process, NULL, __pyx_n_s_cpp_utils, __pyx_d, ((PyObject *)__pyx_codeobj__2)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_9cpp_utils_1default_process, 0, __pyx_n_s_default_process, NULL, __pyx_n_s_cpp_utils, __pyx_d, ((PyObject *)__pyx_codeobj__2)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 8, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_default_process, __pyx_t_1) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_default_process, __pyx_t_1) < 0) __PYX_ERR(0, 8, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "cpp_utils.pyx":1

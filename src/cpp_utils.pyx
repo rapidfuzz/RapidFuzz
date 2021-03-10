@@ -3,15 +3,7 @@
 # cython: binding=True
 
 cdef extern from "cpp_utils.hpp":
-    object default_process_impl(object) except +*
-
-
-cdef dummy() except +:
-    # trick cython into generating
-    # exception handling, since except +* does not work properly
-    # https://github.com/cython/cython/issues/3065
-    dummy()
-
+    object default_process_impl(object) except +
 
 def default_process(sentence):
     """

@@ -40,7 +40,7 @@ cdef extern from "Python.h":
 
 
 cdef extern from "cpp_process.hpp":
-    ctypedef double (*scorer_func) (void* context, object py_str, double score_cutoff) except +*
+    ctypedef double (*scorer_func) (void* context, object py_str, double score_cutoff) except +
     ctypedef void (*scorer_context_deinit) (void* context) except +
 
     ctypedef struct scorer_context:
@@ -49,19 +49,19 @@ cdef extern from "cpp_process.hpp":
         scorer_context_deinit deinit
 
     # fuzz
-    scorer_context cached_ratio_init(                   object, int) except +*
-    scorer_context cached_partial_ratio_init(           object, int) except +*
-    scorer_context cached_token_sort_ratio_init(        object, int) except +*
-    scorer_context cached_token_set_ratio_init(         object, int) except +*
-    scorer_context cached_token_ratio_init(             object, int) except +*
-    scorer_context cached_partial_token_sort_ratio_init(object, int) except +*
-    scorer_context cached_partial_token_set_ratio_init( object, int) except +*
-    scorer_context cached_partial_token_ratio_init(     object, int) except +*
-    scorer_context cached_WRatio_init(                  object, int) except +*
-    scorer_context cached_QRatio_init(                  object, int) except +*
+    scorer_context cached_ratio_init(                   object, int) except +
+    scorer_context cached_partial_ratio_init(           object, int) except +
+    scorer_context cached_token_sort_ratio_init(        object, int) except +
+    scorer_context cached_token_set_ratio_init(         object, int) except +
+    scorer_context cached_token_ratio_init(             object, int) except +
+    scorer_context cached_partial_token_sort_ratio_init(object, int) except +
+    scorer_context cached_partial_token_set_ratio_init( object, int) except +
+    scorer_context cached_partial_token_ratio_init(     object, int) except +
+    scorer_context cached_WRatio_init(                  object, int) except +
+    scorer_context cached_QRatio_init(                  object, int) except +
     # string_metric
-    scorer_context cached_normalized_levenshtein_init(object, int, size_t, size_t, size_t) except +*
-    scorer_context cached_normalized_hamming_init(      object, int) except +*
+    scorer_context cached_normalized_levenshtein_init(object, int, size_t, size_t, size_t) except +
+    scorer_context cached_normalized_hamming_init(      object, int) except +
 
 
 
