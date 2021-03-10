@@ -1,23 +1,4 @@
-#include "Python.h"
-#include <rapidfuzz/utils.hpp>
-#include <exception>
-
-#define PYTHON_VERSION(major, minor, micro) ((major << 24) | (minor << 16) | (micro << 8))
-
-namespace utils = rapidfuzz::utils;
-
-class PythonTypeError: public std::bad_typeid {
-public:
-
-    PythonTypeError(char const* error)
-      : m_error(error) {}
-
-    virtual char const* what() const noexcept {
-        return m_error;
-    }
-private:
-    char const* m_error;
-};
+#include "cpp_common.hpp"
 
 PyObject* default_process_impl(PyObject* sentence) {
     if (!PyUnicode_Check(sentence)) {

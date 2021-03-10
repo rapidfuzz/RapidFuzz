@@ -2,7 +2,25 @@
 # cython: language_level=3
 # cython: binding=True
 
-from rapidfuzz import fuzz, utils, string_metric
+from rapidfuzz.utils import default_process
+
+from rapidfuzz.string_metric import (
+    normalized_levenshtein,
+    normalized_hamming
+)
+
+from rapidfuzz.fuzz import (
+    ratio,
+    partial_ratio,
+    token_sort_ratio,
+    token_set_ratio,
+    token_ratio,
+    partial_token_sort_ratio,
+    partial_token_set_ratio,
+    partial_token_ratio,
+    QRatio,
+    WRatio
+)
 
 from libcpp.vector cimport vector
 from libcpp cimport algorithm
@@ -232,36 +250,36 @@ cdef inline scorer_context CachedNormalizedLevenshteinInit(object query, int def
 cdef inline scorer_context CachedScorerInit(object scorer, object query, int def_process, dict kwargs):
     cdef scorer_context context
 
-    if scorer == fuzz.ratio:
+    if scorer is ratio:
         context = cached_ratio_init(query, def_process)
-    elif scorer == fuzz.partial_ratio:
+    elif scorer is partial_ratio:
         context = cached_partial_ratio_init(query, def_process)
-    elif scorer == fuzz.token_sort_ratio:
+    elif scorer is token_sort_ratio:
         context = cached_token_sort_ratio_init(query, def_process)
-    elif scorer == fuzz.token_set_ratio:
+    elif scorer is token_set_ratio:
         context = cached_token_set_ratio_init(query, def_process)
-    elif scorer == fuzz.token_ratio:
+    elif scorer is token_ratio:
         context = cached_token_ratio_init(query, def_process)
-    elif scorer == fuzz.partial_token_sort_ratio:
+    elif scorer is partial_token_sort_ratio:
         context = cached_partial_token_sort_ratio_init(query, def_process)
-    elif scorer == fuzz.partial_token_set_ratio:
+    elif scorer is partial_token_set_ratio:
         context = cached_partial_token_set_ratio_init(query, def_process)
-    elif scorer == fuzz.partial_token_ratio:
+    elif scorer is partial_token_ratio:
         context = cached_partial_token_ratio_init(query, def_process)
-    elif scorer == fuzz.WRatio:
+    elif scorer is WRatio:
         context = cached_WRatio_init(query, def_process)
-    elif scorer == fuzz.QRatio:
+    elif scorer is QRatio:
         context = cached_QRatio_init(query, def_process)
-    elif scorer == string_metric.normalized_levenshtein:
+    elif scorer is normalized_levenshtein:
         context = CachedNormalizedLevenshteinInit(query, def_process, kwargs)
-    elif scorer == string_metric.normalized_hamming:
+    elif scorer is normalized_hamming:
         context = cached_normalized_hamming_init(query, def_process)
     else:
         context.context = NULL
     return context
 
 
-def extractOne(query, choices, scorer=fuzz.WRatio, processor=utils.default_process, double score_cutoff=0.0, **kwargs):
+def extractOne(query, choices, scorer=WRatio, processor=default_process, double score_cutoff=0.0, **kwargs):
     """
     Find the best match in a list of choices
 
@@ -303,7 +321,7 @@ def extractOne(query, choices, scorer=fuzz.WRatio, processor=utils.default_proce
         return None
 
     # preprocess the query
-    if processor == utils.default_process:
+    if processor is default_process:
         def_process = 1
         # since this call is only performed once it is not very expensive to
         # make it in Python
@@ -315,7 +333,7 @@ def extractOne(query, choices, scorer=fuzz.WRatio, processor=utils.default_proce
         def_process = 1
         # since this call is only performed once it is not very expensive to
         # make it in Python
-        query = utils.default_process(query)
+        query = default_process(query)
         processor = None
     # query might be e.g. False
     else:
@@ -358,6 +376,10 @@ cdef inline extract_dict(scorer_context context, choices, processor, size_t limi
             score = context.scorer(context.context, processor(choice), score_cutoff)
 
             if score >= score_cutoff:
+                # especially the key object might be created on the fly by e.g. pandas.Dataframe
+                # so we need to ensure Python does not deallocate it
+                Py_INCREF(choice)
+                Py_INCREF(choice_key)
                 results.push_back(DictMatchElem(score, i, <PyObject*>choice, <PyObject*>choice_key))
             index += 1
     else:
@@ -522,7 +544,7 @@ cdef inline py_extract_list(query, choices, scorer, processor, size_t limit, dou
     return heapq.nlargest(limit, result_list, key=lambda i: i[1])
 
 
-def extract(query, choices, scorer=fuzz.WRatio, processor=utils.default_process, limit=5, double score_cutoff=0.0, **kwargs):
+def extract(query, choices, scorer=WRatio, processor=default_process, limit=5, double score_cutoff=0.0, **kwargs):
     """
     Find the best matches in a list of choices
 
@@ -568,7 +590,7 @@ def extract(query, choices, scorer=fuzz.WRatio, processor=utils.default_process,
         limit = len(choices)
 
     # preprocess the query
-    if processor == utils.default_process:
+    if processor is default_process:
         def_process = 1
         # since this call is only performed once it is not very expensive to
         # make it in Python
@@ -580,7 +602,7 @@ def extract(query, choices, scorer=fuzz.WRatio, processor=utils.default_process,
         def_process = 1
         # since this call is only performed once it is not very expensive to
         # make it in Python
-        query = utils.default_process(query)
+        query = default_process(query)
         processor = None
     # query might be e.g. False
     else:
@@ -606,7 +628,7 @@ def extract(query, choices, scorer=fuzz.WRatio, processor=utils.default_process,
             return py_extract_list(query, choices, scorer, processor, limit, score_cutoff, kwargs)
 
 
-def extract_iter(query, choices, scorer=fuzz.WRatio, processor=utils.default_process, double score_cutoff=0.0, **kwargs):
+def extract_iter(query, choices, scorer=WRatio, processor=default_process, double score_cutoff=0.0, **kwargs):
     """
     Find the best match in a list of choices
 
@@ -650,7 +672,7 @@ def extract_iter(query, choices, scorer=fuzz.WRatio, processor=utils.default_pro
         return None
 
     # preprocess the query
-    if processor == utils.default_process:
+    if processor is default_process:
         def_process = 1
         # since this call is only performed once it is not very expensive to
         # make it in Python
@@ -662,7 +684,7 @@ def extract_iter(query, choices, scorer=fuzz.WRatio, processor=utils.default_pro
         def_process = 1
         # since this call is only performed once it is not very expensive to
         # make it in Python
-        query = utils.default_process(query)
+        query = default_process(query)
         processor = None
     # query might be e.g. False
     else:
