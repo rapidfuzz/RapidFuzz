@@ -5,34 +5,27 @@
 from rapidfuzz.utils import default_process
 
 cdef extern from "cpp_fuzz.hpp":
-    double ratio_impl(                   object, object, double) except +*
-    double partial_ratio_impl(           object, object, double) except +*
-    double token_sort_ratio_impl(        object, object, double) except +*
-    double token_set_ratio_impl(         object, object, double) except +*
-    double token_ratio_impl(             object, object, double) except +*
-    double partial_token_sort_ratio_impl(object, object, double) except +*
-    double partial_token_set_ratio_impl( object, object, double) except +*
-    double partial_token_ratio_impl(     object, object, double) except +*
-    double WRatio_impl(                  object, object, double) except +*
-    double QRatio_impl(                  object, object, double) except +*
+    double ratio_impl(                   object, object, double) except +
+    double partial_ratio_impl(           object, object, double) except +
+    double token_sort_ratio_impl(        object, object, double) except +
+    double token_set_ratio_impl(         object, object, double) except +
+    double token_ratio_impl(             object, object, double) except +
+    double partial_token_sort_ratio_impl(object, object, double) except +
+    double partial_token_set_ratio_impl( object, object, double) except +
+    double partial_token_ratio_impl(     object, object, double) except +
+    double WRatio_impl(                  object, object, double) except +
+    double QRatio_impl(                  object, object, double) except +
 
-    double ratio_impl_default_process(                   object, object, double) except +*
-    double partial_ratio_impl_default_process(           object, object, double) except +*
-    double token_sort_ratio_impl_default_process(        object, object, double) except +*
-    double token_set_ratio_impl_default_process(         object, object, double) except +*
-    double token_ratio_impl_default_process(             object, object, double) except +*
-    double partial_token_sort_ratio_impl_default_process(object, object, double) except +*
-    double partial_token_set_ratio_impl_default_process( object, object, double) except +*
-    double partial_token_ratio_impl_default_process(     object, object, double) except +*
-    double WRatio_impl_default_process(                  object, object, double) except +*
-    double QRatio_impl_default_process(                  object, object, double) except +*
-
-
-cdef dummy() except +:
-    # trick cython into generating
-    # exception handling, since except +* does not work properly
-    # https://github.com/cython/cython/issues/3065
-    dummy()
+    double ratio_impl_default_process(                   object, object, double) except +
+    double partial_ratio_impl_default_process(           object, object, double) except +
+    double token_sort_ratio_impl_default_process(        object, object, double) except +
+    double token_set_ratio_impl_default_process(         object, object, double) except +
+    double token_ratio_impl_default_process(             object, object, double) except +
+    double partial_token_sort_ratio_impl_default_process(object, object, double) except +
+    double partial_token_set_ratio_impl_default_process( object, object, double) except +
+    double partial_token_ratio_impl_default_process(     object, object, double) except +
+    double WRatio_impl_default_process(                  object, object, double) except +
+    double QRatio_impl_default_process(                  object, object, double) except +
 
 
 def ratio(s1, s2, processor=False, double score_cutoff=0.0):

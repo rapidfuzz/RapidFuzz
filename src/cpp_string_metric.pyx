@@ -5,20 +5,13 @@
 from rapidfuzz.utils import default_process
 
 cdef extern from "cpp_string_metric.hpp":
-    object levenshtein_impl(object, object, size_t, size_t, size_t, size_t) except +*
-    double normalized_levenshtein_impl(object, object, size_t, size_t, size_t, double) except +*
-    double normalized_levenshtein_impl_default_process(object, object, size_t, size_t, size_t, double) except +*
+    object levenshtein_impl(object, object, size_t, size_t, size_t, size_t) except +
+    double normalized_levenshtein_impl(object, object, size_t, size_t, size_t, double) except +
+    double normalized_levenshtein_impl_default_process(object, object, size_t, size_t, size_t, double) except +
 
-    object hamming_impl(object, object, size_t) except +*
-    double normalized_hamming_impl(object, object, double) except +*
-    double normalized_hamming_impl_default_process(object, object, double) except +*
-
-
-cdef dummy() except +:
-    # trick cython into generating
-    # exception handling, since except +* does not work properly
-    # https://github.com/cython/cython/issues/3065
-    dummy()
+    object hamming_impl(object, object, size_t) except +
+    double normalized_hamming_impl(object, object, double) except +
+    double normalized_hamming_impl_default_process(object, object, double) except +
 
 
 def levenshtein(s1, s2, weights=(1,1,1), max=None):

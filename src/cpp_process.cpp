@@ -1393,9 +1393,6 @@ static void __pyx_insert_code_object(int code_line, PyCodeObject* code_object);
 static void __Pyx_AddTraceback(const char *funcname, int c_line,
                                int py_line, const char *filename);
 
-/* CIntToPy.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value);
-
 /* CppExceptionConversion.proto */
 #ifndef __Pyx_CppExn2PyErr
 #include <new>
@@ -1437,6 +1434,9 @@ static void __Pyx_CppExn2PyErr() {
   }
 }
 #endif
+
+/* CIntToPy.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value);
 
 /* CIntToPy.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value);
@@ -1866,7 +1866,6 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       try {
         __pyx_t_11 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_t_8, __pyx_v_score_cutoff);
-        if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 92, __pyx_L1_error)
       } catch(...) {
         __Pyx_CppExn2PyErr();
         __PYX_ERR(0, 92, __pyx_L1_error)
@@ -2031,7 +2030,6 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
  */
       try {
         __pyx_t_11 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_v_choice, __pyx_v_score_cutoff);
-        if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 106, __pyx_L1_error)
       } catch(...) {
         __Pyx_CppExn2PyErr();
         __PYX_ERR(0, 106, __pyx_L1_error)
@@ -2360,7 +2358,6 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       try {
         __pyx_t_9 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_t_6, __pyx_v_score_cutoff);
-        if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 130, __pyx_L1_error)
       } catch(...) {
         __Pyx_CppExn2PyErr();
         __PYX_ERR(0, 130, __pyx_L1_error)
@@ -2562,7 +2559,6 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
  */
       try {
         __pyx_t_9 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_v_choice, __pyx_v_score_cutoff);
-        if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 145, __pyx_L1_error)
       } catch(...) {
         __Pyx_CppExn2PyErr();
         __PYX_ERR(0, 145, __pyx_L1_error)
@@ -4056,7 +4052,6 @@ static CYTHON_INLINE scorer_context __pyx_f_11cpp_process_CachedNormalizedLevens
  */
   try {
     __pyx_t_10 = cached_normalized_levenshtein_init(__pyx_v_query, __pyx_v_def_process, __pyx_v_insertion, __pyx_v_deletion, __pyx_v_substitution);
-    if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 247, __pyx_L1_error)
   } catch(...) {
     __Pyx_CppExn2PyErr();
     __PYX_ERR(0, 247, __pyx_L1_error)
@@ -4130,7 +4125,6 @@ static CYTHON_INLINE scorer_context __pyx_f_11cpp_process_CachedScorerInit(PyObj
  */
     try {
       __pyx_t_4 = cached_ratio_init(__pyx_v_query, __pyx_v_def_process);
-      if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 254, __pyx_L1_error)
     } catch(...) {
       __Pyx_CppExn2PyErr();
       __PYX_ERR(0, 254, __pyx_L1_error)
@@ -4170,7 +4164,6 @@ static CYTHON_INLINE scorer_context __pyx_f_11cpp_process_CachedScorerInit(PyObj
  */
     try {
       __pyx_t_4 = cached_partial_ratio_init(__pyx_v_query, __pyx_v_def_process);
-      if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 256, __pyx_L1_error)
     } catch(...) {
       __Pyx_CppExn2PyErr();
       __PYX_ERR(0, 256, __pyx_L1_error)
@@ -4210,7 +4203,6 @@ static CYTHON_INLINE scorer_context __pyx_f_11cpp_process_CachedScorerInit(PyObj
  */
     try {
       __pyx_t_4 = cached_token_sort_ratio_init(__pyx_v_query, __pyx_v_def_process);
-      if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 258, __pyx_L1_error)
     } catch(...) {
       __Pyx_CppExn2PyErr();
       __PYX_ERR(0, 258, __pyx_L1_error)
@@ -4250,7 +4242,6 @@ static CYTHON_INLINE scorer_context __pyx_f_11cpp_process_CachedScorerInit(PyObj
  */
     try {
       __pyx_t_4 = cached_token_set_ratio_init(__pyx_v_query, __pyx_v_def_process);
-      if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 260, __pyx_L1_error)
     } catch(...) {
       __Pyx_CppExn2PyErr();
       __PYX_ERR(0, 260, __pyx_L1_error)
@@ -4290,7 +4281,6 @@ static CYTHON_INLINE scorer_context __pyx_f_11cpp_process_CachedScorerInit(PyObj
  */
     try {
       __pyx_t_4 = cached_token_ratio_init(__pyx_v_query, __pyx_v_def_process);
-      if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 262, __pyx_L1_error)
     } catch(...) {
       __Pyx_CppExn2PyErr();
       __PYX_ERR(0, 262, __pyx_L1_error)
@@ -4330,7 +4320,6 @@ static CYTHON_INLINE scorer_context __pyx_f_11cpp_process_CachedScorerInit(PyObj
  */
     try {
       __pyx_t_4 = cached_partial_token_sort_ratio_init(__pyx_v_query, __pyx_v_def_process);
-      if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 264, __pyx_L1_error)
     } catch(...) {
       __Pyx_CppExn2PyErr();
       __PYX_ERR(0, 264, __pyx_L1_error)
@@ -4370,7 +4359,6 @@ static CYTHON_INLINE scorer_context __pyx_f_11cpp_process_CachedScorerInit(PyObj
  */
     try {
       __pyx_t_4 = cached_partial_token_set_ratio_init(__pyx_v_query, __pyx_v_def_process);
-      if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 266, __pyx_L1_error)
     } catch(...) {
       __Pyx_CppExn2PyErr();
       __PYX_ERR(0, 266, __pyx_L1_error)
@@ -4410,7 +4398,6 @@ static CYTHON_INLINE scorer_context __pyx_f_11cpp_process_CachedScorerInit(PyObj
  */
     try {
       __pyx_t_4 = cached_partial_token_ratio_init(__pyx_v_query, __pyx_v_def_process);
-      if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 268, __pyx_L1_error)
     } catch(...) {
       __Pyx_CppExn2PyErr();
       __PYX_ERR(0, 268, __pyx_L1_error)
@@ -4450,7 +4437,6 @@ static CYTHON_INLINE scorer_context __pyx_f_11cpp_process_CachedScorerInit(PyObj
  */
     try {
       __pyx_t_4 = cached_WRatio_init(__pyx_v_query, __pyx_v_def_process);
-      if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 270, __pyx_L1_error)
     } catch(...) {
       __Pyx_CppExn2PyErr();
       __PYX_ERR(0, 270, __pyx_L1_error)
@@ -4490,7 +4476,6 @@ static CYTHON_INLINE scorer_context __pyx_f_11cpp_process_CachedScorerInit(PyObj
  */
     try {
       __pyx_t_4 = cached_QRatio_init(__pyx_v_query, __pyx_v_def_process);
-      if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 272, __pyx_L1_error)
     } catch(...) {
       __Pyx_CppExn2PyErr();
       __PYX_ERR(0, 272, __pyx_L1_error)
@@ -4563,7 +4548,6 @@ static CYTHON_INLINE scorer_context __pyx_f_11cpp_process_CachedScorerInit(PyObj
  */
     try {
       __pyx_t_4 = cached_normalized_hamming_init(__pyx_v_query, __pyx_v_def_process);
-      if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 276, __pyx_L1_error)
     } catch(...) {
       __Pyx_CppExn2PyErr();
       __PYX_ERR(0, 276, __pyx_L1_error)
@@ -5461,7 +5445,6 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       try {
         __pyx_t_11 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_t_8, __pyx_v_score_cutoff);
-        if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 376, __pyx_L1_error)
       } catch(...) {
         __Pyx_CppExn2PyErr();
         __PYX_ERR(0, 376, __pyx_L1_error)
@@ -5613,7 +5596,6 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
  */
       try {
         __pyx_t_11 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_v_choice, __pyx_v_score_cutoff);
-        if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 390, __pyx_L1_error)
       } catch(...) {
         __Pyx_CppExn2PyErr();
         __PYX_ERR(0, 390, __pyx_L1_error)
@@ -6060,7 +6042,6 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       try {
         __pyx_t_9 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_t_6, __pyx_v_score_cutoff);
-        if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 444, __pyx_L1_error)
       } catch(...) {
         __Pyx_CppExn2PyErr();
         __PYX_ERR(0, 444, __pyx_L1_error)
@@ -6221,7 +6202,6 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
  */
       try {
         __pyx_t_9 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_v_choice, __pyx_v_score_cutoff);
-        if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 454, __pyx_L1_error)
       } catch(...) {
         __Pyx_CppExn2PyErr();
         __PYX_ERR(0, 454, __pyx_L1_error)
@@ -8913,7 +8893,6 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
             __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
             try {
               __pyx_t_11 = __pyx_cur_scope->__pyx_v_context.scorer(__pyx_cur_scope->__pyx_v_context.context, __pyx_t_5, __pyx_cur_scope->__pyx_v_score_cutoff);
-              if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 704, __pyx_L8_error)
             } catch(...) {
               __Pyx_CppExn2PyErr();
               __PYX_ERR(0, 704, __pyx_L8_error)
@@ -9066,7 +9045,6 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  */
             try {
               __pyx_t_11 = __pyx_cur_scope->__pyx_v_context.scorer(__pyx_cur_scope->__pyx_v_context.context, __pyx_cur_scope->__pyx_v_choice, __pyx_cur_scope->__pyx_v_score_cutoff);
-              if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 714, __pyx_L8_error)
             } catch(...) {
               __Pyx_CppExn2PyErr();
               __PYX_ERR(0, 714, __pyx_L8_error)
@@ -9275,7 +9253,6 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
             __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
             try {
               __pyx_t_11 = __pyx_cur_scope->__pyx_v_context.scorer(__pyx_cur_scope->__pyx_v_context.context, __pyx_t_4, __pyx_cur_scope->__pyx_v_score_cutoff);
-              if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 726, __pyx_L8_error)
             } catch(...) {
               __Pyx_CppExn2PyErr();
               __PYX_ERR(0, 726, __pyx_L8_error)
@@ -9464,7 +9441,6 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  */
             try {
               __pyx_t_11 = __pyx_cur_scope->__pyx_v_context.scorer(__pyx_cur_scope->__pyx_v_context.context, __pyx_cur_scope->__pyx_v_choice, __pyx_cur_scope->__pyx_v_score_cutoff);
-              if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 737, __pyx_L8_error)
             } catch(...) {
               __Pyx_CppExn2PyErr();
               __PYX_ERR(0, 737, __pyx_L8_error)
