@@ -45,7 +45,7 @@ template<typename CachedScorer>
 static inline double cached_func_default_process(
     void* context, PyObject* py_str, double score_cutoff)
 {
-    proc_string str = convert_string(py_str);
+    proc_string str = convert_string(py_str, "choice must be a String or None");
     CachedScorer* ratio = (CachedScorer*)context;
 
     switch(str.kind){
@@ -75,7 +75,7 @@ static inline double cached_func_default_process(
 template<typename CachedScorer>
 static inline double cached_func(void* context, PyObject* py_str, double score_cutoff)
 {
-    proc_string str = convert_string(py_str);
+    proc_string str = convert_string(py_str, "choice must be a String or None");
     CachedScorer* ratio = (CachedScorer*)context;
 
     switch(str.kind){
@@ -118,8 +118,7 @@ static inline scorer_context get_scorer_context(const proc_string& str, int def_
 template<template <typename> class CachedScorer, typename ...Args>
 static inline scorer_context cached_init(PyObject* py_str, int def_process, Args... args)
 {
-    proc_string str = convert_string(py_str);
-    if (str.data == NULL) return {NULL, NULL, NULL};
+    proc_string str = convert_string(py_str, "query must be a String");
 
     switch(str.kind){
     case PyUnicode_1BYTE_KIND:

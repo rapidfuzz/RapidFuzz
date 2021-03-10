@@ -1,38 +1,25 @@
 #include "cpp_common.hpp"
 
 PyObject* default_process_impl(PyObject* sentence) {
-    if (!PyUnicode_Check(sentence)) {
-        throw PythonTypeError("sentence must be a String");
-    }
+    proc_string c_sentence = convert_string(sentence, "sentence must be a String");
 
-    // PEP 623 deprecates legacy strings and therefor
-    // deprecates e.g. PyUnicode_READY in Python 3.10
-#if PY_VERSION_HEX < PYTHON_VERSION(3, 10, 0)
-    if (PyUnicode_READY(sentence)) {
-        Py_RETURN_NONE; // unitialized, but cython directly raises an exception anyways
-    }
-#endif
-
-    Py_ssize_t len = PyUnicode_GET_LENGTH(sentence);
-    void* str = PyUnicode_DATA(sentence);
-
-    switch (PyUnicode_KIND(sentence)) {
+    switch (c_sentence.kind) {
     case PyUnicode_1BYTE_KIND:
     {
         auto proc_str = utils::default_process(
-            rapidfuzz::basic_string_view<uint8_t>(static_cast<uint8_t*>(str), len));
+            rapidfuzz::basic_string_view<uint8_t>(static_cast<uint8_t*>(c_sentence.data), c_sentence.length));
         return PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, proc_str.data(), proc_str.size());
     }
     case PyUnicode_2BYTE_KIND:
     {
         auto proc_str = utils::default_process(
-            rapidfuzz::basic_string_view<uint16_t>(static_cast<uint16_t*>(str), len));
+            rapidfuzz::basic_string_view<uint16_t>(static_cast<uint16_t*>(c_sentence.data), c_sentence.length));
         return PyUnicode_FromKindAndData(PyUnicode_2BYTE_KIND, proc_str.data(), proc_str.size());
     }
     default:
     {
         auto proc_str = utils::default_process(
-            rapidfuzz::basic_string_view<uint32_t>(static_cast<uint32_t*>(str), len));
+            rapidfuzz::basic_string_view<uint32_t>(static_cast<uint32_t*>(c_sentence.data), c_sentence.length));
         return PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, proc_str.data(), proc_str.size());
     }
     }
