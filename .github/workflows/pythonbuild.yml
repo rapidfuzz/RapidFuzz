@@ -9,7 +9,7 @@ on:
 
 jobs:
   build_wheels:
-    name: Build wheel on ${{ matrix.os }} for ${{matrix.python_tag}}
+    name: Build wheel on ${{ matrix.os }}/auto/${{matrix.python_tag}}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -20,10 +20,9 @@ jobs:
       CIBW_BUILD: ${{matrix.python_tag}}
       CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_COMMAND: pytest {package}/tests
-      CIBW_TEST_SKIP: pp*
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
         with:
           submodules: 'true'
 
@@ -32,13 +31,36 @@ jobs:
         with:
           output-dir: wheelhouse
 
-      - uses: actions/upload-artifact@v2
+      - name: Upload wheels
+        uses: actions/upload-artifact@v2
+        with:
+          path: ./wheelhouse/*.whl
+
+  build_wheels_apple_silicon:
+    name: Build wheel on macos-latest/universal2+arm64/cp39-*
+    runs-on: macos-latest
+    env:
+      CIBW_BUILD: "cp39-*"
+      CIBW_ARCHS_MACOS: "universal2 arm64"
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+
+      - name: Build wheels
+        uses: joerick/cibuildwheel@v1.10.0
+        with:
+          output-dir: wheelhouse
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v2
         with:
           path: ./wheelhouse/*.whl
 
   build_wheels_manylinux:
-    name: Build wheels on ${{matrix.arch}} for ${{matrix.python_tag}}
-    runs-on: ubuntu-18.04
+    name: Build wheels on ubuntu-latest/${{matrix.arch}}/${{matrix.python_tag}}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -64,7 +86,38 @@ jobs:
         with:
           output-dir: wheelhouse
 
-      - uses: actions/upload-artifact@v2
+      - name: Upload wheels
+        uses: actions/upload-artifact@v2
+        with:
+          path: ./wheelhouse/*.whl
+
+  build_wheels_pypy:
+    name: Build wheel on ${{ matrix.os }}/auto/${{matrix.python_tag}}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python_tag: [ "pp36-*", "pp37-*"]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    env:
+      CIBW_BUILD: ${{matrix.python_tag}}
+      # activate tests when the fix for
+      # https://foss.heptapod.net/pypy/pypy/-/issues/3413 is released
+      # CIBW_TEST_REQUIRES: pytest hypothesis pandas
+      # CIBW_TEST_COMMAND: pytest {package}/tests
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+
+      - name: Build wheels
+        uses: joerick/cibuildwheel@v1.10.0
+        with:
+          output-dir: wheelhouse
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v2
         with:
           path: ./wheelhouse/*.whl
 
@@ -92,10 +145,9 @@ jobs:
         with:
           path: dist/*.tar.gz
 
-
   deploy-wheels:
     if: github.event_name == 'release' && github.event.action == 'published'
-    needs: [build_wheels, build_wheels_manylinux, build_sdist]
+    needs: [build_wheels, build_wheels_apple_silicon, build_wheels_manylinux, build_wheels_pypy, build_sdist]
     name: deploy wheels to pypi
     runs-on: ubuntu-18.04
 
