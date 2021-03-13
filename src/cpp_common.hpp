@@ -29,7 +29,7 @@ struct proc_string {
     size_t length;
 };
 
-static inline proc_string convert_string(PyObject* py_str, char* err)
+static inline proc_string convert_string(PyObject* py_str, const char* err)
 {
     proc_string str = {0, NULL, 0};
 
