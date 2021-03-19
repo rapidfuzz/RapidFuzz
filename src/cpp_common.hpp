@@ -48,7 +48,7 @@ static inline proc_string convert_string(PyObject* py_str, const char* err)
 
     str.kind = PyUnicode_KIND(py_str);
     str.data = PyUnicode_DATA(py_str);
-    str.length = PyUnicode_GET_LENGTH(py_str);
+    str.length = static_cast<std::size_t>(PyUnicode_GET_LENGTH(py_str));
 
     return str;
 }

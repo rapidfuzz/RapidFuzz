@@ -404,16 +404,16 @@ cdef inline extract_dict(scorer_context context, choices, processor, size_t limi
     if limit >= results.size():
         algorithm.sort(results.begin(), results.end(), ExtractComp())
     else:
-        algorithm.partial_sort(results.begin(), results.begin() + limit, results.end(), ExtractComp())
+        algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractComp())
 
     # copy elements into Python List
-    result_list = PyList_New(limit)
+    result_list = PyList_New(<Py_ssize_t>limit)
     for i in range(limit):
         # PyList_SET_ITEM steals a reference
         # the casting is necessary to ensure that Cython doesn't
         # decref the result of Py_BuildValue
         # https://stackoverflow.com/questions/43553763/cythonize-list-of-all-splits-of-a-string/43557675#43557675
-        PyList_SET_ITEM(result_list, i,
+        PyList_SET_ITEM(result_list, <Py_ssize_t>i,
             <object>Py_BuildValue("OdO",
                 <PyObject*>results[i].choice,
                 results[i].score,
@@ -464,17 +464,17 @@ cdef inline extract_list(scorer_context context, choices, processor, size_t limi
     if limit >= results.size():
         algorithm.sort(results.begin(), results.end(), ExtractComp())
     else:
-        algorithm.partial_sort(results.begin(), results.begin() + limit, results.end(), ExtractComp())
+        algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractComp())
 
     # copy elements into Python List
-    result_list = PyList_New(limit)
+    result_list = PyList_New(<Py_ssize_t>limit)
     for i in range(limit):
         # PyList_SET_ITEM steals a reference
         # the casting is necessary to ensure that Cython doesn't
         # decref the result of Py_BuildValue
         # https://stackoverflow.com/questions/43553763/cythonize-list-of-all-splits-of-a-string/43557675#43557675
 
-        PyList_SET_ITEM(result_list, i,
+        PyList_SET_ITEM(result_list, <Py_ssize_t>i,
             <object>Py_BuildValue("Odn",
                 <PyObject*>choices[results[i].index],
                 results[i].score,
