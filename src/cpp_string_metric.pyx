@@ -175,7 +175,7 @@ def levenshtein(s1, s2, weights=(1,1,1), max=None):
     cdef size_t insertion = 1
     cdef size_t deletion = 1
     cdef size_t substitution = 1
-    cdef size_t max_ = -1
+    cdef size_t max_ = <size_t>-1
 
     if weights:
         insertion, deletion, substitution = weights
@@ -321,7 +321,7 @@ def hamming(s1, s2, max=None):
     ValueError
         If s1 and s2 have a different length
     """
-    cdef size_t max_ = -1
+    cdef size_t max_ = <size_t>-1
 
     if max is not None:
         max_ = max

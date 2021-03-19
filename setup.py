@@ -5,8 +5,21 @@ import sys
 class BuildExt(build_ext):
     """A custom build extension for adding compiler-specific options."""
     c_opts = {
-        'msvc': ['/EHsc', '/O2', '/std:c++11'],
-        'unix': ['-O3', '-std=c++11', '-Wextra', '-Wall', '-g0'],
+        'msvc': ['/EHsc', '/O2', '/std:c++11', '/W4', '/WX', 
+        # disable some warnings from the Cython code
+            '/wd4127', # conditional expression is constant
+            '/wd4100', # '__pyx_self': unreferenced formal parameter
+            '/wd4505', # unreferenced local function has been removed
+            '/wd4125', # decimal digit terminates octal escape sequence
+            '/wd4310', # cast truncates constant value
+        ],
+        'unix': ['-O3', '-std=c++11',
+            '-Wextra', '-Wall', '-Werror', '-Wconversion', '-g0',
+            '-Wno-deprecated-declarations',
+            # the xcode implementation used in the CI has a bug, which causes
+            # this to be thrown even when it is ignored using brackets around the statement
+            '-Wno-unreachable-code'
+            ],
     }
     l_opts = {
         'msvc': [],

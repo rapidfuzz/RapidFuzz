@@ -115,7 +115,7 @@ inline double normalized_levenshtein_impl_inner_default_process(proc_string s1, 
 {
     switch(s2.kind){
     case PyUnicode_1BYTE_KIND:
-        return string_metric::levenshtein(
+        return string_metric::normalized_levenshtein(
             utils::default_process(
                 rapidfuzz::basic_string_view<CharT>((CharT*)s1.data, s1.length)
             ),
@@ -123,7 +123,7 @@ inline double normalized_levenshtein_impl_inner_default_process(proc_string s1, 
             {insertion, deletion, substitution}, score_cutoff
         );
     case PyUnicode_2BYTE_KIND:
-        return string_metric::levenshtein(
+        return string_metric::normalized_levenshtein(
             utils::default_process(
                 rapidfuzz::basic_string_view<CharT>((CharT*)s1.data, s1.length)
             ),
@@ -133,7 +133,7 @@ inline double normalized_levenshtein_impl_inner_default_process(proc_string s1, 
             {insertion, deletion, substitution}, score_cutoff
         );
     default:
-        return string_metric::levenshtein(
+        return string_metric::normalized_levenshtein(
             utils::default_process(
                 rapidfuzz::basic_string_view<CharT>((CharT*)s1.data, s1.length)
             ),
@@ -268,7 +268,7 @@ inline double normalized_hamming_impl_inner_default_process(
 {
     switch(s2.kind){
     case PyUnicode_1BYTE_KIND:
-        return string_metric::hamming(
+        return string_metric::normalized_hamming(
             utils::default_process(
                 rapidfuzz::basic_string_view<CharT>((CharT*)s1.data, s1.length)
             ),
@@ -276,7 +276,7 @@ inline double normalized_hamming_impl_inner_default_process(
             score_cutoff
         );
     case PyUnicode_2BYTE_KIND:
-        return string_metric::hamming(
+        return string_metric::normalized_hamming(
             utils::default_process(
                 rapidfuzz::basic_string_view<CharT>((CharT*)s1.data, s1.length)
             ),
@@ -286,7 +286,7 @@ inline double normalized_hamming_impl_inner_default_process(
             score_cutoff
         );
     default:
-        return string_metric::hamming(
+        return string_metric::normalized_hamming(
             utils::default_process(
                 rapidfuzz::basic_string_view<CharT>((CharT*)s1.data, s1.length)
             ),
