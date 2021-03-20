@@ -15952,10 +15952,9 @@ bad:
         func_type value = func_value;\
         if (sizeof(target_type) < sizeof(func_type)) {\
             if (unlikely(value != (func_type) (target_type) value)) {\
-                func_type zero = 0;\
                 if (exc && unlikely(value == (func_type)-1 && PyErr_Occurred()))\
                     return (target_type) -1;\
-                if (is_unsigned && unlikely(value < zero))\
+                if (is_unsigned && unlikely(value < (func_type)0))\
                     goto raise_neg_overflow;\
                 else\
                     goto raise_overflow;\
