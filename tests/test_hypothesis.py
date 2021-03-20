@@ -8,6 +8,7 @@ import pytest
 
 from rapidfuzz import fuzz, process, utils, string_metric
 import random
+from math import isclose
 
 def levenshtein(s1, s2, weights=(1, 1, 1)):
     """
@@ -44,7 +45,30 @@ def levenshtein(s1, s2, weights=(1, 1, 1)):
 
     return dist[-1][-1]
 
+def normalize_distance(dist, s1, s2, weights=(1, 1, 1)):
+    insert, delete, substitute = weights
+    if len(s1) > len(s2):
+        max_dist = min([
+            # delete all characters from s1 and insert all characters from s2
+            len(s1) * delete + len(s2) * insert,
+            # replace all characters and delete the remaining characters from s1
+            len(s2) * substitute + (len(s1) - len(s2)) * delete
+        ])
+    else:
+        max_dist = min([
+            # delete all characters from s1 and insert all characters from s2
+            len(s1) * delete + len(s2) * insert,
+            # replace all characters and insert the remaining characters into s1
+            len(s1) * substitute + (len(s2) - len(s1)) * insert
+        ])
 
+    return 100 - 100 * dist / max_dist if max_dist else 100
+
+def extractOne_scorer(s1, s2, scorer, processor=None, **kwargs):
+    return process.extractOne(s1, [s2], processor=processor, scorer=scorer, **kwargs)[1]
+
+def extract_scorer(s1, s2, scorer, processor=None, **kwargs):
+    return process.extract(s1, [s2], processor=processor, scorer=scorer, **kwargs)[0][1]
 
 HYPOTHESIS_ALPHABET = ascii_letters + digits + punctuation
 
@@ -74,6 +98,17 @@ PROCESSORS = [
 
 @given(s1=st.text(), s2=st.text())
 @settings(max_examples=500, deadline=None)
+def test_partial_ratio(s1, s2):
+    """
+    test partial_ratio. Currently this only tests, so there are no exceptions
+    In the future this should validate the implementation. However this requires
+    a correct implementation to be found.
+    """
+    fuzz.partial_ratio(s1, s2)
+
+
+@given(s1=st.text(), s2=st.text())
+@settings(max_examples=500, deadline=None)
 def test_token_ratio(s1, s2):
     """
     token_ratio should be max(token_sort_ratio, token_set_ratio)
@@ -95,8 +130,19 @@ def test_levenshtein_word(s1, s2):
     """
     Test short Levenshtein implementation against simple implementation
     """
-    assert string_metric.levenshtein(s1, s2) == levenshtein(s1, s2)
-    assert string_metric.levenshtein(s1, s2, (1,1,2)) == levenshtein(s1, s2, (1,1,2))
+    reference_dist = levenshtein(s1, s2)
+    reference_sim = normalize_distance(reference_dist, s1, s2)
+    assert string_metric.levenshtein(s1, s2) == reference_dist
+    assert isclose(string_metric.normalized_levenshtein(s1, s2), reference_sim)
+    assert isclose(extractOne_scorer(s1, s2, string_metric.normalized_levenshtein), reference_sim)
+    assert isclose(extract_scorer(s1, s2, string_metric.normalized_levenshtein), reference_sim)
+
+    reference_dist = levenshtein(s1, s2, (1,1,2))
+    reference_sim = normalize_distance(reference_dist, s1, s2, (1,1,2))
+    assert string_metric.levenshtein(s1, s2, (1,1,2)) == reference_dist
+    assert isclose(string_metric.normalized_levenshtein(s1, s2, (1,1,2)), reference_sim)
+    assert isclose(extractOne_scorer(s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
+    assert isclose(extract_scorer(s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
 
 
 @given(s1=st.text(min_size=65), s2=st.text(min_size=65))
@@ -105,8 +151,19 @@ def test_levenshtein_block(s1, s2):
     """
     Test blockwise Levenshtein implementation against simple implementation
     """
-    assert string_metric.levenshtein(s1, s2) == levenshtein(s1, s2)
-    assert string_metric.levenshtein(s1, s2, (1,1,2)) == levenshtein(s1, s2, (1,1,2))
+    reference_dist = levenshtein(s1, s2)
+    reference_sim = normalize_distance(reference_dist, s1, s2)
+    assert string_metric.levenshtein(s1, s2) == reference_dist
+    assert isclose(string_metric.normalized_levenshtein(s1, s2), reference_sim)
+    assert isclose(extractOne_scorer(s1, s2, string_metric.normalized_levenshtein), reference_sim)
+    assert isclose(extract_scorer(s1, s2, string_metric.normalized_levenshtein), reference_sim)
+
+    reference_dist = levenshtein(s1, s2, (1,1,2))
+    reference_sim = normalize_distance(reference_dist, s1, s2, (1,1,2))
+    assert string_metric.levenshtein(s1, s2, (1,1,2)) == reference_dist
+    assert isclose(string_metric.normalized_levenshtein(s1, s2, (1,1,2)), reference_sim)
+    assert isclose(extractOne_scorer(s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
+    assert isclose(extract_scorer(s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
 
 
 @given(s1=st.text(), s2=st.text())
@@ -115,8 +172,19 @@ def test_levenshtein_random(s1, s2):
     """
     Test mixed strings to test through all implementations of Levenshtein
     """
-    assert string_metric.levenshtein(s1, s2) == levenshtein(s1, s2)
-    assert string_metric.levenshtein(s1, s2, (1,1,2)) == levenshtein(s1, s2, (1,1,2))
+    reference_dist = levenshtein(s1, s2)
+    reference_sim = normalize_distance(reference_dist, s1, s2)
+    assert string_metric.levenshtein(s1, s2) == reference_dist
+    assert isclose(string_metric.normalized_levenshtein(s1, s2), reference_sim)
+    assert isclose(extractOne_scorer(s1, s2, string_metric.normalized_levenshtein), reference_sim)
+    assert isclose(extract_scorer(s1, s2, string_metric.normalized_levenshtein), reference_sim)
+
+    reference_dist = levenshtein(s1, s2, (1,1,2))
+    reference_sim = normalize_distance(reference_dist, s1, s2, (1,1,2))
+    assert string_metric.levenshtein(s1, s2, (1,1,2)) == reference_dist
+    assert isclose(string_metric.normalized_levenshtein(s1, s2, (1,1,2)), reference_sim)
+    assert isclose(extractOne_scorer(s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
+    assert isclose(extract_scorer(s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
 
 
 @given(sentence=st.text())
