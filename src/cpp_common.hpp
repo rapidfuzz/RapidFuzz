@@ -1,4 +1,5 @@
 #include "Python.h"
+#define RAPIDFUZZ_PYTHON
 #include <rapidfuzz/fuzz.hpp>
 #include <rapidfuzz/utils.hpp>
 #include <rapidfuzz/string_metric.hpp>

@@ -164,9 +164,7 @@ for sample in samples:
 ```
 The following graph shows how many elements are processed per second with each of the scorers. There are big performance differences between the different scorers. However each of the scorers is faster in RapidFuzz
 
-
-![scorer Benchmark](docs/img/scorer.png)
-
+<img src="https://raw.githubusercontent.com/maxbachmann/RapidFuzz/main/docs/img/scorer.svg?sanitize=true" alt="Benchmark Scorer">
 
 The second benchmark compares the performance when the scorers are used in combination with extractOne in the following
 way:
@@ -176,8 +174,7 @@ for sample in samples:
 ```
 The following graph shows how many elements are processed per second with each of the scorers. In RapidFuzz the usage of scorers through processors like `extractOne` is a lot faster than directly using it. Thats why they should be used whenever possible.
 
-![extractOne Benchmark](docs/img/extractOne.png)
-
+<img src="https://raw.githubusercontent.com/maxbachmann/RapidFuzz/main/docs/img/extractOne.svg?sanitize=true" alt="Benchmark extractOne">
 
 
 ## License
