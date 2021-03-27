@@ -160,6 +160,26 @@ class ProcessTest(unittest.TestCase):
         self.assertIsNotNone(best)
         self.assertEqual(best[1], 0)
 
+    def testNoneElements(self):
+        """
+        when a None element is used, it is skipped and the index is still correct
+        """
+        best = process.extractOne("test", [None, "tes"])
+        self.assertEqual(best[2], 1)
+
+        best = process.extract("test", [None, "tes"], limit=1)
+        self.assertEqual(best[0][2], 1)
+
+    def testResultOrder(self):
+        """
+        when multiple elements have the same score, the first one should be returned
+        """
+        best = process.extractOne("test", ["tes", "tes"])
+        self.assertEqual(best[2], 0)
+
+        best = process.extract("test", ["tes", "tes"], limit=1)
+        self.assertEqual(best[0][2], 0)
+
     def testEmptyStrings(self):
         choices = [
             "",
