@@ -12,11 +12,6 @@ def default_process(sentence):
     - trimming whitespaces
     - converting all characters to lower case
     
-    Right now this only affects characters lower than 256
-    (extended Ascii), while all other characters are not modified.
-    This should be enough for most western languages. Full Unicode
-    support will be added in a later release.
-    
     Parameters
     ----------
     sentence : str

@@ -306,6 +306,8 @@
 #   endif
 # elif defined(__ICC) || (defined(__INTEL_COMPILER) && !defined(_MSC_VER))
 #   define CYTHON_UNUSED __attribute__ ((__unused__))
+# elif defined(_MSC_VER)
+#   define CYTHON_UNUSED __pragma(warning(suppress:4100))
 # else
 #   define CYTHON_UNUSED
 # endif
@@ -479,7 +481,7 @@ class __Pyx_FakeReference {
   typedef PyObject *(*__pyx_vectorcallfunc)(PyObject *callable, PyObject *const *args,
                                             size_t nargsf, PyObject *kwnames);
   #define __Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET  ((size_t)1 << (8 * sizeof(size_t) - 1))
-  #define __Pyx_PyVectorcall_NARGS(n)  ((Py_ssize_t)((n) & ~__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET))
+  #define __Pyx_PyVectorcall_NARGS(n)  ((Py_ssize_t)(((size_t)(n)) & ~__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET))
 #else
   #define __Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET  0
   #define __Pyx_PyVectorcall_NARGS(n)  ((Py_ssize_t)(n))
@@ -1194,7 +1196,7 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_GetAttrStr(PyObject* obj, PyObject
 
 /* PyVectorcallFastCallDict.proto */
 #if CYTHON_METH_FASTCALL
-static CYTHON_INLINE PyObject *__Pyx_PyVectorcall_FastCallDict(PyObject *func, __pyx_vectorcallfunc vc, PyObject *const *args, Py_ssize_t nargs, PyObject *kw);
+static CYTHON_INLINE PyObject *__Pyx_PyVectorcall_FastCallDict(PyObject *func, __pyx_vectorcallfunc vc, PyObject *const *args, size_t nargs, PyObject *kw);
 #endif
 
 /* CythonFunctionShared.proto */
@@ -1676,7 +1678,7 @@ PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_9cpp_utils_default_process, "\n    This function preprocesses a string by:\n    - removing all non alphanumeric characters\n    - trimming whitespaces\n    - converting all characters to lower case\n    \n    Right now this only affects characters lower than 256\n    (extended Ascii), while all other characters are not modified.\n    This should be enough for most western languages. Full Unicode\n    support will be added in a later release.\n    \n    Parameters\n    ----------\n    sentence : str\n        String to preprocess\n    \n    Returns\n    -------\n    processed_string : str\n        processed string\n    ");
+PyDoc_STRVAR(__pyx_doc_9cpp_utils_default_process, "\n    This function preprocesses a string by:\n    - removing all non alphanumeric characters\n    - trimming whitespaces\n    - converting all characters to lower case\n    \n    Parameters\n    ----------\n    sentence : str\n        String to preprocess\n    \n    Returns\n    -------\n    processed_string : str\n        processed string\n    ");
 static PyMethodDef __pyx_mdef_9cpp_utils_1default_process = {"default_process", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_9cpp_utils_1default_process, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_9cpp_utils_default_process};
 static PyObject *__pyx_pw_9cpp_utils_1default_process(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
@@ -1753,7 +1755,7 @@ static PyObject *__pyx_pf_9cpp_utils_default_process(CYTHON_UNUSED PyObject *__p
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("default_process", 0);
 
-  /* "cpp_utils.pyx":30
+  /* "cpp_utils.pyx":25
  *         processed string
  *     """
  *     return default_process_impl(sentence)             # <<<<<<<<<<<<<<
@@ -1761,10 +1763,10 @@ static PyObject *__pyx_pf_9cpp_utils_default_process(CYTHON_UNUSED PyObject *__p
   __Pyx_XDECREF(__pyx_r);
   try {
     __pyx_t_1 = default_process_impl(__pyx_v_sentence);
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 30, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 25, __pyx_L1_error)
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 30, __pyx_L1_error)
+    __PYX_ERR(0, 25, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
@@ -2759,22 +2761,23 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_GetAttrStr(PyObject* obj, PyObject
 
 /* PyVectorcallFastCallDict */
 #if CYTHON_METH_FASTCALL
-static PyObject *__Pyx_PyVectorcall_FastCallDict_kw(PyObject *func, __pyx_vectorcallfunc vc, PyObject *const *args, Py_ssize_t nargs, PyObject *kw)
+static PyObject *__Pyx_PyVectorcall_FastCallDict_kw(PyObject *func, __pyx_vectorcallfunc vc, PyObject *const *args, size_t nargs, PyObject *kw)
 {
     PyObject *res = NULL;
     PyObject *kwnames;
     PyObject **newargs;
     PyObject **kwvalues;
     Py_ssize_t i, pos;
+    size_t j;
     PyObject *key, *value;
     unsigned long keys_are_strings;
     Py_ssize_t nkw = PyDict_GET_SIZE(kw);
-    newargs = (PyObject **)PyMem_Malloc((size_t)(nargs + nkw) * sizeof(args[0]));
+    newargs = (PyObject **)PyMem_Malloc((nargs + (size_t)nkw) * sizeof(args[0]));
     if (unlikely(newargs == NULL)) {
         PyErr_NoMemory();
         return NULL;
     }
-    for (i = 0; i < nargs; i++) newargs[i] = args[i];
+    for (j = 0; j < nargs; j++) newargs[j] = args[j];
     kwnames = PyTuple_New(nkw);
     if (unlikely(kwnames == NULL)) {
         PyMem_Free(newargs);
@@ -2795,7 +2798,7 @@ static PyObject *__Pyx_PyVectorcall_FastCallDict_kw(PyObject *func, __pyx_vector
         PyErr_SetString(PyExc_TypeError, "keywords must be strings");
         goto cleanup;
     }
-    res = vc(func, newargs, (size_t)nargs, kwnames);
+    res = vc(func, newargs, nargs, kwnames);
 cleanup:
     Py_DECREF(kwnames);
     for (i = 0; i < nkw; i++)
@@ -2803,10 +2806,10 @@ cleanup:
     PyMem_Free(newargs);
     return res;
 }
-static CYTHON_INLINE PyObject *__Pyx_PyVectorcall_FastCallDict(PyObject *func, __pyx_vectorcallfunc vc, PyObject *const *args, Py_ssize_t nargs, PyObject *kw)
+static CYTHON_INLINE PyObject *__Pyx_PyVectorcall_FastCallDict(PyObject *func, __pyx_vectorcallfunc vc, PyObject *const *args, size_t nargs, PyObject *kw)
 {
     if (likely(kw == NULL) || PyDict_GET_SIZE(kw) == 0) {
-        return vc(func, args, (size_t)nargs, NULL);
+        return vc(func, args, nargs, NULL);
     }
     return __Pyx_PyVectorcall_FastCallDict_kw(func, vc, args, nargs, kw);
 }
@@ -3320,7 +3323,7 @@ static PyObject *__Pyx_CyFunction_CallAsMethod(PyObject *func, PyObject *args, P
      __pyx_vectorcallfunc vc = __Pyx_CyFunction_func_vectorcall(cyfunc);
     if (vc) {
 #if CYTHON_ASSUME_SAFE_MACROS
-        return __Pyx_PyVectorcall_FastCallDict(func, vc, &PyTuple_GET_ITEM(args, 0), PyTuple_GET_SIZE(args), kw);
+        return __Pyx_PyVectorcall_FastCallDict(func, vc, &PyTuple_GET_ITEM(args, 0), (size_t)PyTuple_GET_SIZE(args), kw);
 #else
         (void) &__Pyx_PyVectorcall_FastCallDict;
         return PyVectorcall_Call(func, args, kw);
