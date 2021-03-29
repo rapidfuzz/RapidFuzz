@@ -288,8 +288,8 @@ cdef inline extractOne_distance_list(distance_context context, choices, processo
     return (result_choice, result_distance, result_index) if result_choice is not None else None
 
 
-cdef inline py_extractOne_dict(query, choices, scorer, processor, double score_cutoff, kwargs):
-    result_score = 0
+cdef inline py_extractOne_dict(query, choices, scorer, processor, score_cutoff, kwargs):
+    result_score = -1
     result_choice = None
     result_key = None
 
@@ -301,7 +301,7 @@ cdef inline py_extractOne_dict(query, choices, scorer, processor, double score_c
             score = scorer(query, processor(choice),
                 processor=None, score_cutoff=score_cutoff, **kwargs)
 
-            if score > result_score:
+            if score >= score_cutoff and score > result_score:
                 score_cutoff = score
                 result_score = score
                 result_choice = choice
@@ -317,7 +317,7 @@ cdef inline py_extractOne_dict(query, choices, scorer, processor, double score_c
             score = scorer(query, choice,
                 processor=None, score_cutoff=score_cutoff, **kwargs)
 
-            if score > result_score:
+            if score >= score_cutoff and score > result_score:
                 score_cutoff = score
                 result_score = score
                 result_choice = choice
@@ -332,7 +332,7 @@ cdef inline py_extractOne_dict(query, choices, scorer, processor, double score_c
 cdef inline py_extractOne_list(query, choices, scorer, processor, double score_cutoff, kwargs):
     cdef size_t result_index = 0
     cdef size_t i = 0
-    result_score = 0
+    result_score = -1
     result_choice = None
 
     if processor is not None:
@@ -344,7 +344,7 @@ cdef inline py_extractOne_list(query, choices, scorer, processor, double score_c
             score = scorer(query, processor(choice),
                 processor=None, score_cutoff=score_cutoff, **kwargs)
 
-            if score > result_score:
+            if score >= score_cutoff and score > result_score:
                 score_cutoff = score
                 result_score = score
                 result_choice = choice
@@ -362,7 +362,7 @@ cdef inline py_extractOne_list(query, choices, scorer, processor, double score_c
             score = scorer(query, choice,
                 processor=None, score_cutoff=score_cutoff, **kwargs)
 
-            if score > result_score:
+            if score >= score_cutoff and score > result_score:
                 score_cutoff = score
                 result_score = score
                 result_choice = choice
@@ -430,7 +430,7 @@ cdef inline distance_context CachedDistanceInit(object scorer, object query, int
     return context
 
 
-def extractOne(query, choices, scorer=WRatio, processor=default_process, double score_cutoff=0.0, **kwargs):
+def extractOne(query, choices, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):
     """
     Find the best match in a list of choices. When multiple elements have the same similarity,
     the first element is returned.
@@ -444,14 +444,19 @@ def extractOne(query, choices, scorer=WRatio, processor=default_process, double 
         {<result>: <string to compare>}
     scorer : Callable, optional
         Optional callable that is used to calculate the matching score between
-        the query and each choice. fuzz.WRatio is used by default
+        the query and each choice. This can be any of the scorers included in RapidFuzz
+        (both scorers that calculate the edit distance or the normalized edit distance), or
+        a custom function, which returns a normalized edit distance.
+        fuzz.WRatio is used by default.
     processor : Callable, optional
         Optional callable that reformats the strings.
         utils.default_process is used by default, which lowercases the strings and trims whitespace
-    score_cutoff : float, optional
-        Optional argument for a score threshold as a float between 0 and 100.
-        Matches with a lower score than this number will be ignored. Default is 0,
-        which deactivates this behaviour.
+    score_cutoff : Any, optional
+        Optional argument for a score threshold. When an edit distance is used this represents the maximum
+        edit distance and matches with a `distance <= score_cutoff` are ignored. When a
+        normalized edit distance is used this represents the minimal similarity
+        and matches with a `similarity >= score_cutoff` are ignored. For edit distances this defaults to
+        -1, while for normalized edit distances this defaults to 0.0, which deactivates this behaviour.
     **kwargs : Any, optional
         any other named parameters are passed to the scorer. This can be used to pass
         e.g. weights to string_metric.levenshtein
@@ -467,7 +472,7 @@ def extractOne(query, choices, scorer=WRatio, processor=default_process, double 
         * The second value represents the similarity calculated by the scorer. This can be:
 
           * An edit distance (distance is 0 for a perfect match and > 0 for non perfect matches).
-            In this case only choices which have a `distance <= max` are returned.
+            In this case only choices which have a `distance <= score_cutoff` are returned.
             An example of a scorer with this behavior is `string_metric.levenshtein`.
           * A normalized edit distance (similarity is a score between 0 and 100, with 100 being a perfect match).
             In this case only choices which have a `similarity >= score_cutoff` are returned.
@@ -481,14 +486,74 @@ def extractOne(query, choices, scorer=WRatio, processor=default_process, double 
           * The `key of choice` when choices is a mapping like a dict, or a pandas Series
 
     None
-        When no choice has a `similarity >= score_cutoff`/`distance <= max` None is returned
+        When no choice has a `similarity >= score_cutoff`/`distance <= score_cutoff` None is returned
+
+    Examples
+    --------
+
+    >>> from rapidfuzz.process import extractOne
+    >>> from rapidfuzz.string_metric import levenshtein, normalized_levenshtein
+    >>> from rapidfuzz.fuzz import ratio
+
+    extractOne can be used with normalized edit distances.
+
+    >>> extractOne("abcd", ["abce"], scorer=ratio)
+    ("abcd", 75.0, 1)
+    >>> extractOne("abcd", ["abce"], scorer=normalized_levenshtein)
+    ("abcd", 75.0, 1)
+
+    extractOne can be used with edit distances as well.
+
+    >>> extractOne("abcd", ["abce"], scorer=levenshtein)
+    ("abce", 1, 0)
+
+    additional settings of the scorer can be passed as keyword arguments to extractOne
+
+    >>> extractOne("abcd", ["abce"], scorer=levenshtein, weights=(1,1,2))
+    ("abcde", 2, 1)
+
+    when a mapping is used for the choices the key of the choice is returned instead of the List index
+
+    >>> extractOne("abcd", {"key": "abce"}, scorer=ratio)
+    ("abcd", 75.0, "key")
+
+    By default each string is preprocessed using `utils.default_process`, which lowercases the strings,
+    replaces non alphanumeric characters with whitespaces and trims whitespaces from start and end of them.
+    This behavior can be changed by passing a custom function, or None/False to disable the behavior. Preprocessing
+    can take a significant part of the runtime, so it makes sense to disable it, when it is not required.
+
+
+    >>> extractOne("abcd", ["abdD"], scorer=ratio)
+    ("abcD", 100.0, 0)
+    >>> extractOne("abcd", ["abdD"], scorer=ratio, processor=None)
+    ("abcD", 75.0, 0)
+    >>> extractOne("abcd", ["abdD"], scorer=ratio, processor=lambda s: s.upper())
+    ("abcD", 100.0, 0)
+
+    When only results with a similarity above a certain threshold are relevant, the parameter score_cutoff can be
+    used to filter out results with a lower similarity. This threshold is used by some of the scorers to exit early,
+    when they are sure, that the similarity is below the threshold.
+    For normalized edit distances all results with a similarity below score_cutoff are filtered out
+
+    >>> extractOne("abcd", ["abce"], scorer=ratio)
+    ("abce", 75.0, 0)
+    >>> extractOne("abcd", ["abce"], scorer=ratio, score_cutoff=80)
+    None
+
+    For edit distances all results with a edit distance above the score_cutoff are filtered out
+
+    >>> extractOne("abcd", ["abce"], scorer=levenshtein, weights=(1,1,2))
+    ("abce", 2, 0)
+    >>> extractOne("abcd", ["abce"], scorer=levenshtein, weights=(1,1,2), score_cutoff=1)
+    None
 
     """
 
     cdef int def_process = 0
     cdef scorer_context ScorerContext
     cdef distance_context DistanceContext
-    cdef size_t max_ = <size_t>-1
+    cdef double c_score_cutoff = 0.0
+    cdef size_t c_max = <size_t>-1
 
     if query is None:
         return None
@@ -517,10 +582,15 @@ def extractOne(query, choices, scorer=WRatio, processor=default_process, double 
     ScorerContext = CachedScorerInit(scorer, query, def_process, kwargs)
     if ScorerContext.context != NULL:
         try:
+            if score_cutoff is not None:
+                c_score_cutoff = score_cutoff
+            if c_score_cutoff < 0 or c_score_cutoff > 100:
+                raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
+
             if hasattr(choices, "items"):
-                return extractOne_dict(ScorerContext, choices, processor, score_cutoff)
+                return extractOne_dict(ScorerContext, choices, processor, c_score_cutoff)
             else:
-                return extractOne_list(ScorerContext, choices, processor, score_cutoff)
+                return extractOne_list(ScorerContext, choices, processor, c_score_cutoff)
         finally:
             # part of the context is dynamically allocated, so it has to be freed in any case
             ScorerContext.deinit(ScorerContext.context)
@@ -528,19 +598,25 @@ def extractOne(query, choices, scorer=WRatio, processor=default_process, double 
     DistanceContext = CachedDistanceInit(scorer, query, def_process, kwargs)
     if DistanceContext.context != NULL:
         try:
+            if score_cutoff is not None and score_cutoff != -1:
+                c_max = score_cutoff
+
             if hasattr(choices, "items"):
-                return extractOne_distance_dict(DistanceContext, choices, processor, max_)
+                return extractOne_distance_dict(DistanceContext, choices, processor, c_max)
             else:
-                return extractOne_distance_list(DistanceContext, choices, processor, max_)
+                return extractOne_distance_list(DistanceContext, choices, processor, c_max)
         finally:
             # part of the context is dynamically allocated, so it has to be freed in any case
             DistanceContext.deinit(DistanceContext.context)
 
     # the scorer has to be called through Python
+    if score_cutoff is not None:
+        c_score_cutoff = score_cutoff
+
     if hasattr(choices, "items"):
-        return py_extractOne_dict(query, choices, scorer, processor, score_cutoff, kwargs)
+        return py_extractOne_dict(query, choices, scorer, processor, c_score_cutoff, kwargs)
     else:
-        return py_extractOne_list(query, choices, scorer, processor, score_cutoff, kwargs)
+        return py_extractOne_list(query, choices, scorer, processor, c_score_cutoff, kwargs)
 
 
 cdef inline extract_dict(scorer_context context, choices, processor, size_t limit, double score_cutoff):
@@ -1008,12 +1084,28 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, doubl
 
     Yields
     -------
-    Tuple[str, float, Any]
-        Yields similarity between the query and each choice in form of a tuple.
-        The Tuple will be in the form `(<choice>, <ratio>, <index of choice>)`
-        when `choices` is a list of strings or `(<choice>, <ratio>, <key of choice>)`
-        when `choices` is a mapping.
-        Matches with a similarity, that is smaller than score_cutoff are skipped.
+    Tuple[str, Any, Any]
+        Yields similarity between the query and each choice in form of a Tuple with 3 elements.
+        The values stored in the tuple depend on the types of the input arguments.
+
+        * The first element is always the current `choice`, which is the value thats compared to the query.
+
+        * The second value represents the similarity calculated by the scorer. This can be:
+
+          * An edit distance (distance is 0 for a perfect match and > 0 for non perfect matches).
+            In this case only choices which have a `distance <= max` are yielded.
+            An example of a scorer with this behavior is `string_metric.levenshtein`.
+          * A normalized edit distance (similarity is a score between 0 and 100, with 100 being a perfect match).
+            In this case only choices which have a `similarity >= score_cutoff` are yielded.
+            An example of a scorer with this behavior is `string_metric.normalized_levenshtein`.
+
+          Note, that for all scorers, which are not provided by RapidFuzz, only normalized edit distances are supported.
+
+        * The third parameter depends on the type of the `choices` argument it is:
+
+          * The `index of choice` when choices is a simple iterable like a list
+          * The `key of choice` when choices is a mapping like a dict, or a pandas Series
+
     """
     cdef int def_process = 0
     cdef scorer_context ScorerContext

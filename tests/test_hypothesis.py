@@ -70,6 +70,10 @@ def extractOne_scorer(s1, s2, scorer, processor=None, **kwargs):
 def extract_scorer(s1, s2, scorer, processor=None, **kwargs):
     return process.extract(s1, [s2], processor=processor, scorer=scorer, **kwargs)[0][1]
 
+def extract_iter_scorer(s1, s2, scorer, processor=None, **kwargs):
+    return list(process.extract_iter(s1, [s2], processor=processor, scorer=scorer, **kwargs))[0][1]
+
+
 HYPOTHESIS_ALPHABET = ascii_letters + digits + punctuation
 
 SCORERS = [
@@ -101,8 +105,8 @@ PROCESSORS = [
 def test_partial_ratio(s1, s2):
     """
     test partial_ratio. Currently this only tests, so there are no exceptions
-    In the future this should validate the implementation. However this requires
-    a correct implementation to be found.
+    In the future this should validate the implementation. However te current implementation
+    is not completely optimal in some edge cases
     """
     fuzz.partial_ratio(s1, s2)
 
@@ -134,23 +138,29 @@ def test_levenshtein_word(s1, s2):
     # distance
     reference_dist = levenshtein(s1, s2)
     assert string_metric.levenshtein(s1, s2) == reference_dist
-    assert extractOne_scorer(s1, s2, string_metric.levenshtein) == reference_dist
+    assert extractOne_scorer(  s1, s2, string_metric.levenshtein) == reference_dist
+    assert extract_scorer(     s1, s2, string_metric.levenshtein) == reference_dist
+    assert extract_iter_scorer(s1, s2, string_metric.levenshtein) == reference_dist
     # normalized distance
     reference_sim = normalize_distance(reference_dist, s1, s2)
     assert isclose(string_metric.normalized_levenshtein(s1, s2), reference_sim)
-    assert isclose(extractOne_scorer(s1, s2, string_metric.normalized_levenshtein), reference_sim)
-    assert isclose(extract_scorer(s1, s2, string_metric.normalized_levenshtein), reference_sim)
+    assert isclose(extractOne_scorer(  s1, s2, string_metric.normalized_levenshtein), reference_sim)
+    assert isclose(extract_scorer(     s1, s2, string_metric.normalized_levenshtein), reference_sim)
+    assert isclose(extract_iter_scorer(s1, s2, string_metric.normalized_levenshtein), reference_sim)
 
     # InDel-Distance
     # distance
     reference_dist = levenshtein(s1, s2, (1,1,2))
     assert string_metric.levenshtein(s1, s2, (1,1,2)) == reference_dist
-    assert extractOne_scorer(s1, s2, string_metric.levenshtein, weights=(1,1,2)) == reference_dist
+    assert extractOne_scorer(  s1, s2, string_metric.levenshtein, weights=(1,1,2)) == reference_dist
+    assert extract_scorer(     s1, s2, string_metric.levenshtein, weights=(1,1,2)) == reference_dist
+    assert extract_iter_scorer(s1, s2, string_metric.levenshtein, weights=(1,1,2)) == reference_dist
     # normalized distance
     reference_sim = normalize_distance(reference_dist, s1, s2, (1,1,2))
     assert isclose(string_metric.normalized_levenshtein(s1, s2, (1,1,2)), reference_sim)
-    assert isclose(extractOne_scorer(s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
-    assert isclose(extract_scorer(s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
+    assert isclose(extractOne_scorer(  s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
+    assert isclose(extract_scorer(     s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
+    assert isclose(extract_iter_scorer(s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
 
 
 @given(s1=st.text(min_size=65), s2=st.text(min_size=65))
@@ -163,23 +173,29 @@ def test_levenshtein_block(s1, s2):
     # distance
     reference_dist = levenshtein(s1, s2)
     assert string_metric.levenshtein(s1, s2) == reference_dist
-    assert extractOne_scorer(s1, s2, string_metric.levenshtein) == reference_dist
+    assert extractOne_scorer(  s1, s2, string_metric.levenshtein) == reference_dist
+    assert extract_scorer(     s1, s2, string_metric.levenshtein) == reference_dist
+    assert extract_iter_scorer(s1, s2, string_metric.levenshtein) == reference_dist
     # normalized distance
     reference_sim = normalize_distance(reference_dist, s1, s2)
     assert isclose(string_metric.normalized_levenshtein(s1, s2), reference_sim)
-    assert isclose(extractOne_scorer(s1, s2, string_metric.normalized_levenshtein), reference_sim)
-    assert isclose(extract_scorer(s1, s2, string_metric.normalized_levenshtein), reference_sim)
+    assert isclose(extractOne_scorer(  s1, s2, string_metric.normalized_levenshtein), reference_sim)
+    assert isclose(extract_scorer(     s1, s2, string_metric.normalized_levenshtein), reference_sim)
+    assert isclose(extract_iter_scorer(s1, s2, string_metric.normalized_levenshtein), reference_sim)
 
     # InDel-Distance
     # distance
     reference_dist = levenshtein(s1, s2, (1,1,2))
     assert string_metric.levenshtein(s1, s2, (1,1,2)) == reference_dist
-    assert extractOne_scorer(s1, s2, string_metric.levenshtein, weights=(1,1,2)) == reference_dist
+    assert extractOne_scorer(  s1, s2, string_metric.levenshtein, weights=(1,1,2)) == reference_dist
+    assert extract_scorer(     s1, s2, string_metric.levenshtein, weights=(1,1,2)) == reference_dist
+    assert extract_iter_scorer(s1, s2, string_metric.levenshtein, weights=(1,1,2)) == reference_dist
     # normalized distance
     reference_sim = normalize_distance(reference_dist, s1, s2, (1,1,2))
-    assert isclose(string_metric.normalized_levenshtein(s1, s2, (1,1,2)), reference_sim)
-    assert isclose(extractOne_scorer(s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
-    assert isclose(extract_scorer(s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
+    assert isclose(string_metric.normalized_levenshtein(s1, s2, weights=(1,1,2)), reference_sim)
+    assert isclose(extractOne_scorer(  s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
+    assert isclose(extract_scorer(     s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
+    assert isclose(extract_iter_scorer(s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
 
 @given(s1=st.text(), s2=st.text())
 @settings(max_examples=500, deadline=None)
@@ -191,23 +207,29 @@ def test_levenshtein_random(s1, s2):
     # distance
     reference_dist = levenshtein(s1, s2)
     assert string_metric.levenshtein(s1, s2) == reference_dist
-    assert extractOne_scorer(s1, s2, string_metric.levenshtein) == reference_dist
+    assert extractOne_scorer(  s1, s2, string_metric.levenshtein) == reference_dist
+    assert extract_scorer(     s1, s2, string_metric.levenshtein) == reference_dist
+    assert extract_iter_scorer(s1, s2, string_metric.levenshtein) == reference_dist
     # normalized distance
     reference_sim = normalize_distance(reference_dist, s1, s2)
     assert isclose(string_metric.normalized_levenshtein(s1, s2), reference_sim)
-    assert isclose(extractOne_scorer(s1, s2, string_metric.normalized_levenshtein), reference_sim)
-    assert isclose(extract_scorer(s1, s2, string_metric.normalized_levenshtein), reference_sim)
+    assert isclose(extractOne_scorer(  s1, s2, string_metric.normalized_levenshtein), reference_sim)
+    assert isclose(extract_scorer(     s1, s2, string_metric.normalized_levenshtein), reference_sim)
+    assert isclose(extract_iter_scorer(s1, s2, string_metric.normalized_levenshtein), reference_sim)
 
     # InDel-Distance
     # distance
     reference_dist = levenshtein(s1, s2, (1,1,2))
     assert string_metric.levenshtein(s1, s2, (1,1,2)) == reference_dist
-    assert extractOne_scorer(s1, s2, string_metric.levenshtein, weights=(1,1,2)) == reference_dist
+    assert extractOne_scorer(  s1, s2, string_metric.levenshtein, weights=(1,1,2)) == reference_dist
+    assert extract_scorer(     s1, s2, string_metric.levenshtein, weights=(1,1,2)) == reference_dist
+    assert extract_iter_scorer(s1, s2, string_metric.levenshtein, weights=(1,1,2)) == reference_dist
     # normalized distance
     reference_sim = normalize_distance(reference_dist, s1, s2, (1,1,2))
     assert isclose(string_metric.normalized_levenshtein(s1, s2, (1,1,2)), reference_sim)
-    assert isclose(extractOne_scorer(s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
-    assert isclose(extract_scorer(s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
+    assert isclose(extractOne_scorer(  s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
+    assert isclose(extract_scorer(     s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
+    assert isclose(extract_iter_scorer(s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
 
 @given(sentence=st.text())
 @settings(max_examples=200)
