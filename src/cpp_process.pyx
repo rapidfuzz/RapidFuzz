@@ -35,12 +35,6 @@ from cpython.ref cimport Py_DECREF
 
 import heapq
 
-cdef extern from "Python.h":
-    # This isn't included in the cpython definitions
-    # using PyObject* rather than object lets us control refcounting
-    PyObject* Py_BuildValue(const char*,...) except NULL
-
-
 cdef extern from "cpp_process.hpp":
     ctypedef double (*scorer_func) (void* context, object py_str, double score_cutoff) except +
     ctypedef size_t (*distance_func) (void* context, object py_str, size_t max) except +
@@ -628,64 +622,59 @@ cdef inline extract_dict(scorer_context context, choices, processor, size_t limi
     results.reserve(<size_t>len(choices))
     cdef list result_list
 
-    if processor is not None:
-        for choice_key, choice in choices.items():
-            if choice is None:
+    try:
+        if processor is not None:
+            for choice_key, choice in choices.items():
+                if choice is None:
+                    i += 1
+                    continue
+
+                score = context.scorer(context.context, processor(choice), score_cutoff)
+
+                if score >= score_cutoff:
+                    # especially the key object might be created on the fly by e.g. pandas.Dataframe
+                    # so we need to ensure Python does not deallocate it
+                    Py_INCREF(choice)
+                    Py_INCREF(choice_key)
+                    results.push_back(DictMatchScorerElem(score, i, <PyObject*>choice, <PyObject*>choice_key))
                 i += 1
-                continue
+        else:
+            for choice_key, choice in choices.items():
+                if choice is None:
+                    i += 1
+                    continue
 
-            score = context.scorer(context.context, processor(choice), score_cutoff)
+                score = context.scorer(context.context, choice, score_cutoff)
 
-            if score >= score_cutoff:
-                # especially the key object might be created on the fly by e.g. pandas.Dataframe
-                # so we need to ensure Python does not deallocate it
-                Py_INCREF(choice)
-                Py_INCREF(choice_key)
-                results.push_back(DictMatchScorerElem(score, i, <PyObject*>choice, <PyObject*>choice_key))
-            i += 1
-    else:
-        for choice_key, choice in choices.items():
-            if choice is None:
+                if score >= score_cutoff:
+                    # especially the key object might be created on the fly by e.g. pandas.Dataframe
+                    # so we need to ensure Python does not deallocate it
+                    Py_INCREF(choice)
+                    Py_INCREF(choice_key)
+                    results.push_back(DictMatchScorerElem(score, i, <PyObject*>choice, <PyObject*>choice_key))
                 i += 1
-                continue
 
-            score = context.scorer(context.context, choice, score_cutoff)
+        # due to score_cutoff not always completely filled
+        if limit > results.size():
+            limit = results.size()
 
-            if score >= score_cutoff:
-                # especially the key object might be created on the fly by e.g. pandas.Dataframe
-                # so we need to ensure Python does not deallocate it
-                Py_INCREF(choice)
-                Py_INCREF(choice_key)
-                results.push_back(DictMatchScorerElem(score, i, <PyObject*>choice, <PyObject*>choice_key))
-            i += 1
+        if limit >= results.size():
+            algorithm.sort(results.begin(), results.end(), ExtractScorerComp())
+        else:
+            algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractScorerComp())
 
-    # due to score_cutoff not always completely filled
-    if limit > results.size():
-        limit = results.size()
+        # copy elements into Python List
+        result_list = PyList_New(<Py_ssize_t>limit)
+        for i in range(limit):
+            result_item = (<object>results[i].choice, results[i].score, <object>results[i].key)
+            Py_INCREF(result_item)
+            PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
 
-    if limit >= results.size():
-        algorithm.sort(results.begin(), results.end(), ExtractScorerComp())
-    else:
-        algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractScorerComp())
-
-    # copy elements into Python List
-    result_list = PyList_New(<Py_ssize_t>limit)
-    for i in range(limit):
-        # PyList_SET_ITEM steals a reference
-        # the casting is necessary to ensure that Cython doesn't
-        # decref the result of Py_BuildValue
-        # https://stackoverflow.com/questions/43553763/cythonize-list-of-all-splits-of-a-string/43557675#43557675
-        # todo probably faster to create the tuple by hand
-        PyList_SET_ITEM(result_list, <Py_ssize_t>i,
-            <object>Py_BuildValue("OdO",
-                <PyObject*>results[i].choice,
-                results[i].score,
-                <PyObject*>results[i].key))
-
-    # decref all reference counts
-    for i in range(results.size()):
-        Py_DECREF(<object>results[i].choice)
-        Py_DECREF(<object>results[i].key)
+    finally:
+        # decref all reference counts
+        for i in range(results.size()):
+            Py_DECREF(<object>results[i].choice)
+            Py_DECREF(<object>results[i].key)
 
     return result_list
 
@@ -699,64 +688,59 @@ cdef inline extract_distance_dict(distance_context context, choices, processor, 
     results.reserve(<size_t>len(choices))
     cdef list result_list
 
-    if processor is not None:
-        for choice_key, choice in choices.items():
-            if choice is None:
+    try:
+        if processor is not None:
+            for choice_key, choice in choices.items():
+                if choice is None:
+                    i += 1
+                    continue
+
+                distance = context.scorer(context.context, processor(choice), max_)
+
+                if distance <= max_:
+                    # especially the key object might be created on the fly by e.g. pandas.Dataframe
+                    # so we need to ensure Python does not deallocate it
+                    Py_INCREF(choice)
+                    Py_INCREF(choice_key)
+                    results.push_back(DictMatchDistanceElem(distance, i, <PyObject*>choice, <PyObject*>choice_key))
                 i += 1
-                continue
+        else:
+            for choice_key, choice in choices.items():
+                if choice is None:
+                    i += 1
+                    continue
 
-            distance = context.scorer(context.context, processor(choice), max_)
+                distance = context.scorer(context.context, choice, max_)
 
-            if distance <= max_:
-                # especially the key object might be created on the fly by e.g. pandas.Dataframe
-                # so we need to ensure Python does not deallocate it
-                Py_INCREF(choice)
-                Py_INCREF(choice_key)
-                results.push_back(DictMatchDistanceElem(distance, i, <PyObject*>choice, <PyObject*>choice_key))
-            i += 1
-    else:
-        for choice_key, choice in choices.items():
-            if choice is None:
+                if distance <= max_:
+                    # especially the key object might be created on the fly by e.g. pandas.Dataframe
+                    # so we need to ensure Python does not deallocate it
+                    Py_INCREF(choice)
+                    Py_INCREF(choice_key)
+                    results.push_back(DictMatchDistanceElem(distance, i, <PyObject*>choice, <PyObject*>choice_key))
                 i += 1
-                continue
 
-            distance = context.scorer(context.context, choice, max_)
+        # due to max_ not always completely filled
+        if limit > results.size():
+            limit = results.size()
 
-            if distance <= max_:
-                # especially the key object might be created on the fly by e.g. pandas.Dataframe
-                # so we need to ensure Python does not deallocate it
-                Py_INCREF(choice)
-                Py_INCREF(choice_key)
-                results.push_back(DictMatchDistanceElem(distance, i, <PyObject*>choice, <PyObject*>choice_key))
-            i += 1
+        if limit >= results.size():
+            algorithm.sort(results.begin(), results.end(), ExtractDistanceComp())
+        else:
+            algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractDistanceComp())
 
-    # due to max_ not always completely filled
-    if limit > results.size():
-        limit = results.size()
+        # copy elements into Python List
+        result_list = PyList_New(<Py_ssize_t>limit)
+        for i in range(limit):
+            result_item = (<object>results[i].choice, results[i].distance, <object>results[i].key)
+            Py_INCREF(result_item)
+            PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
 
-    if limit >= results.size():
-        algorithm.sort(results.begin(), results.end(), ExtractDistanceComp())
-    else:
-        algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractDistanceComp())
-
-    # copy elements into Python List
-    result_list = PyList_New(<Py_ssize_t>limit)
-    for i in range(limit):
-        # PyList_SET_ITEM steals a reference
-        # the casting is necessary to ensure that Cython doesn't
-        # decref the result of Py_BuildValue
-        # https://stackoverflow.com/questions/43553763/cythonize-list-of-all-splits-of-a-string/43557675#43557675
-        # todo probably faster to create the tuple by hand
-        PyList_SET_ITEM(result_list, <Py_ssize_t>i,
-            <object>Py_BuildValue("OnO",
-                <PyObject*>results[i].choice,
-                results[i].distance,
-                <PyObject*>results[i].key))
-
-    # decref all reference counts
-    for i in range(results.size()):
-        Py_DECREF(<object>results[i].choice)
-        Py_DECREF(<object>results[i].key)
+    finally:
+        # decref all reference counts
+        for i in range(results.size()):
+            Py_DECREF(<object>results[i].choice)
+            Py_DECREF(<object>results[i].key)
 
     return result_list
 
@@ -804,17 +788,9 @@ cdef inline extract_list(scorer_context context, choices, processor, size_t limi
     # copy elements into Python List
     result_list = PyList_New(<Py_ssize_t>limit)
     for i in range(limit):
-        # PyList_SET_ITEM steals a reference
-        # the casting is necessary to ensure that Cython doesn't
-        # decref the result of Py_BuildValue
-        # https://stackoverflow.com/questions/43553763/cythonize-list-of-all-splits-of-a-string/43557675#43557675
-        # todo probably faster to create the tuple by hand
-
-        PyList_SET_ITEM(result_list, <Py_ssize_t>i,
-            <object>Py_BuildValue("Odn",
-                <PyObject*>choices[results[i].index],
-                results[i].score,
-                results[i].index))
+        result_item = (choices[results[i].index], results[i].score, results[i].index)
+        Py_INCREF(result_item)
+        PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
 
     return result_list
 
@@ -862,17 +838,9 @@ cdef inline extract_distance_list(distance_context context, choices, processor, 
     # copy elements into Python List
     result_list = PyList_New(<Py_ssize_t>limit)
     for i in range(limit):
-        # PyList_SET_ITEM steals a reference
-        # the casting is necessary to ensure that Cython doesn't
-        # decref the result of Py_BuildValue
-        # https://stackoverflow.com/questions/43553763/cythonize-list-of-all-splits-of-a-string/43557675#43557675
-        # todo probably faster to create the tuple by hand
-
-        PyList_SET_ITEM(result_list, <Py_ssize_t>i,
-            <object>Py_BuildValue("Onn",
-                <PyObject*>choices[results[i].index],
-                results[i].distance,
-                results[i].index))
+        result_item = (choices[results[i].index], results[i].distance, results[i].index)
+        Py_INCREF(result_item)
+        PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
 
     return result_list
 
@@ -995,7 +963,7 @@ def extract(query, choices, scorer=WRatio, processor=default_process, limit=5, s
 
           * The `index of choice` when choices is a simple iterable like a list
           * The `key of choice` when choices is a mapping like a dict, or a pandas Series
-        
+
         The list is sorted by `score_cutoff` or `max` depending on the scorer used. The first element in the list
         has the `highest similarity`/`smallest distance`.
 
@@ -1142,7 +1110,7 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
           - scorer = normalized scorer implemented in C++
         """
         cdef double score
-    
+
         if processor is not None:
             for choice_key, choice in choices.items():
                 if choice is None:
@@ -1170,7 +1138,7 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
         """
         cdef size_t i = 0
         cdef double score
-    
+
         if processor is not None:
             for choice in choices:
                 if choice is None:
@@ -1201,23 +1169,23 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
           - scorer = distance implemented in C++
         """
         cdef size_t distance
-    
+
         if processor is not None:
             for choice_key, choice in choices.items():
                 if choice is None:
                     continue
-    
+
                 distance = DistanceContext.scorer(DistanceContext.context, processor(choice), c_max)
-    
+
                 if distance <= c_max:
                     yield (choice, distance, choice_key)
         else:
             for choice_key, choice in choices.items():
                 if choice is None:
                     continue
-    
+
                 distance = DistanceContext.scorer(DistanceContext.context, choice, c_max)
-    
+
                 if distance <= c_max:
                     yield (choice, distance, choice_key)
 
@@ -1229,15 +1197,15 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
         """
         cdef size_t i = 0
         cdef size_t distance
-    
+
         if processor is not None:
             for choice in choices:
                 if choice is None:
                     i += 1
                     continue
-    
+
                 distance = DistanceContext.scorer(DistanceContext.context, processor(choice), c_max)
-    
+
                 if distance <= c_max:
                     yield (choice, distance, i)
                 i += 1
@@ -1246,9 +1214,9 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
                 if choice is None:
                     i += 1
                     continue
-    
+
                 distance = DistanceContext.scorer(DistanceContext.context, choice, c_max)
-    
+
                 if distance <= c_max:
                     yield (choice, distance, i)
                 i += 1
@@ -1259,25 +1227,25 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
           - type of choices = dict
           - scorer = python function
         """
-    
+
         if processor is not None:
             for choice_key, choice in choices.items():
                 if choice is None:
                     continue
-    
+
                 score = scorer(query, processor(choice),
                     processor=None, score_cutoff=c_score_cutoff, **kwargs)
-    
+
                 if score >= c_score_cutoff:
                     yield (choice, score, choice_key)
         else:
             for choice_key, choice in choices.items():
                 if choice is None:
                     continue
-    
+
                 score = scorer(query, choice,
                     processor=None, score_cutoff=c_score_cutoff, **kwargs)
-        
+
                 if score >= c_score_cutoff:
                     yield (choice, score, choice_key)
 
@@ -1288,16 +1256,16 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
           - scorer = python function
         """
         cdef size_t i = 0
-    
+
         if processor is not None:
             for choice in choices:
                 if choice is None:
                     i += 1
                     continue
-        
+
                 score = scorer(query, processor(choice),
                     processor=None, score_cutoff=c_score_cutoff, **kwargs)
-        
+
                 if score >= c_score_cutoff:
                     yield(choice, score, i)
                 i += 1
@@ -1306,10 +1274,10 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
                 if choice is None:
                     i += 1
                     continue
-        
+
                 score = scorer(query, choice,
                     processor=None, score_cutoff=c_score_cutoff, **kwargs)
-        
+
                 if score >= c_score_cutoff:
                     yield(choice, score, i)
                 i += 1
@@ -1356,7 +1324,7 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
             ScorerContext.deinit(ScorerContext.context)
         # finish generator
         return
-    
+
     # distance implemented in C++
     DistanceContext = CachedDistanceInit(scorer, query, def_process, kwargs)
     if DistanceContext.context != NULL:
@@ -1374,7 +1342,7 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
             DistanceContext.deinit(DistanceContext.context)
         # finish generator
         return
-         
+
 
     # the scorer has to be called through Python
     if score_cutoff is not None:
