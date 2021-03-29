@@ -105,7 +105,7 @@ PROCESSORS = [
 def test_partial_ratio(s1, s2):
     """
     test partial_ratio. Currently this only tests, so there are no exceptions
-    In the future this should validate the implementation. However te current implementation
+    In the future this should validate the implementation. However the current implementation
     is not completely optimal in some edge cases
     """
     fuzz.partial_ratio(s1, s2)

@@ -540,7 +540,7 @@ def extractOne(query, choices, scorer=WRatio, processor=default_process, score_c
     >>> extractOne("abcd", ["abce"], scorer=ratio, score_cutoff=80)
     None
 
-    For edit distances all results with a edit distance above the score_cutoff are filtered out
+    For edit distances all results with an edit distance above the score_cutoff are filtered out
 
     >>> extractOne("abcd", ["abce"], scorer=levenshtein, weights=(1,1,2))
     ("abce", 2, 0)
@@ -939,7 +939,7 @@ cdef inline py_extract_list(query, choices, scorer, processor, size_t limit, dou
     return heapq.nlargest(limit, result_list, key=lambda i: i[1])
 
 
-def extract(query, choices, scorer=WRatio, processor=default_process, limit=5, double score_cutoff=0.0, **kwargs):
+def extract(query, choices, scorer=WRatio, processor=default_process, limit=5, score_cutoff=None, **kwargs):
     """
     Find the best matches in a list of choices. The list is sorted by the similarity.
     When multiple choices have the same similarity, they are sorted by their index
@@ -953,16 +953,21 @@ def extract(query, choices, scorer=WRatio, processor=default_process, limit=5, d
         {<result>: <string to compare>}
     scorer : Callable, optional
         Optional callable that is used to calculate the matching score between
-        the query and each choice. fuzz.WRatio is used by default
+        the query and each choice. This can be any of the scorers included in RapidFuzz
+        (both scorers that calculate the edit distance or the normalized edit distance), or
+        a custom function, which returns a normalized edit distance.
+        fuzz.WRatio is used by default.
     processor : Callable, optional
         Optional callable that reformats the strings.
         utils.default_process is used by default, which lowercases the strings and trims whitespace
     limit : int
         maximum amount of results to return
-    score_cutoff : float, optional
-        Optional argument for a score threshold as a float between 0 and 100.
-        Matches with a lower score than this number will be ignored. Default is 0,
-        which deactivates this behaviour.
+    score_cutoff : Any, optional
+        Optional argument for a score threshold. When an edit distance is used this represents the maximum
+        edit distance and matches with a `distance <= score_cutoff` are ignored. When a
+        normalized edit distance is used this represents the minimal similarity
+        and matches with a `similarity >= score_cutoff` are ignored. For edit distances this defaults to
+        -1, while for normalized edit distances this defaults to 0.0, which deactivates this behaviour.
     **kwargs : Any, optional
         any other named parameters are passed to the scorer. This can be used to pass
         e.g. weights to string_metric.levenshtein
@@ -998,7 +1003,8 @@ def extract(query, choices, scorer=WRatio, processor=default_process, limit=5, d
     cdef int def_process = 0
     cdef scorer_context ScorerContext
     cdef distance_context DistanceContext
-    cdef size_t max_ = <size_t>-1
+    cdef double c_score_cutoff = 0.0
+    cdef size_t c_max = <size_t>-1
 
     if query is None:
         return None
@@ -1029,10 +1035,15 @@ def extract(query, choices, scorer=WRatio, processor=default_process, limit=5, d
     ScorerContext = CachedScorerInit(scorer, query, def_process, kwargs)
     if ScorerContext.context != NULL:
         try:
+            if score_cutoff is not None:
+                c_score_cutoff = score_cutoff
+            if c_score_cutoff < 0 or c_score_cutoff > 100:
+                raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
+
             if hasattr(choices, "items"):
-                return extract_dict(ScorerContext, choices, processor, limit, score_cutoff)
+                return extract_dict(ScorerContext, choices, processor, limit, c_score_cutoff)
             else:
-                return extract_list(ScorerContext, choices, processor, limit, score_cutoff)
+                return extract_list(ScorerContext, choices, processor, limit, c_score_cutoff)
 
         finally:
             # part of the context is dynamically allocated, so it has to be freed in any case
@@ -1042,22 +1053,28 @@ def extract(query, choices, scorer=WRatio, processor=default_process, limit=5, d
     DistanceContext = CachedDistanceInit(scorer, query, def_process, kwargs)
     if DistanceContext.context != NULL:
         try:
+            if score_cutoff is not None and score_cutoff != -1:
+                c_max = score_cutoff
+
             if hasattr(choices, "items"):
-                return extract_distance_dict(DistanceContext, choices, processor, limit, max_)
+                return extract_distance_dict(DistanceContext, choices, processor, limit, c_max)
             else:
-                return extract_distance_list(DistanceContext, choices, processor, limit, max_)
+                return extract_distance_list(DistanceContext, choices, processor, limit, c_max)
         finally:
             # part of the context is dynamically allocated, so it has to be freed in any case
             DistanceContext.deinit(DistanceContext.context)
 
     # the scorer has to be called through Python
+    if score_cutoff is not None:
+        c_score_cutoff = score_cutoff
+
     if hasattr(choices, "items"):
-        return py_extract_dict(query, choices, scorer, processor, limit, score_cutoff, kwargs)
+        return py_extract_dict(query, choices, scorer, processor, limit, c_score_cutoff, kwargs)
     else:
-        return py_extract_list(query, choices, scorer, processor, limit, score_cutoff, kwargs)
+        return py_extract_list(query, choices, scorer, processor, limit, c_score_cutoff, kwargs)
 
 
-def extract_iter(query, choices, scorer=WRatio, processor=default_process, double score_cutoff=0.0, **kwargs):
+def extract_iter(query, choices, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):
     """
     Find the best match in a list of choices
 
@@ -1070,14 +1087,19 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, doubl
         {<result>: <string to compare>}
     scorer : Callable, optional
         Optional callable that is used to calculate the matching score between
-        the query and each choice. fuzz.WRatio is used by default
+        the query and each choice. This can be any of the scorers included in RapidFuzz
+        (both scorers that calculate the edit distance or the normalized edit distance), or
+        a custom function, which returns a normalized edit distance.
+        fuzz.WRatio is used by default.
     processor : Callable, optional
         Optional callable that reformats the strings.
         utils.default_process is used by default, which lowercases the strings and trims whitespace
-    score_cutoff : float, optional
-        Optional argument for a score threshold as a float between 0 and 100.
-        Matches with a lower score than this number will be ignored. Default is 0,
-        which deactivates this behaviour.
+    score_cutoff : Any, optional
+        Optional argument for a score threshold. When an edit distance is used this represents the maximum
+        edit distance and matches with a `distance <= score_cutoff` are ignored. When a
+        normalized edit distance is used this represents the minimal similarity
+        and matches with a `similarity >= score_cutoff` are ignored. For edit distances this defaults to
+        -1, while for normalized edit distances this defaults to 0.0, which deactivates this behaviour.
     **kwargs : Any, optional
         any other named parameters are passed to the scorer. This can be used to pass
         e.g. weights to string_metric.levenshtein
@@ -1110,7 +1132,8 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, doubl
     cdef int def_process = 0
     cdef scorer_context ScorerContext
     cdef distance_context DistanceContext
-    cdef size_t max_ = <size_t>-1
+    cdef double c_score_cutoff = 0.0
+    cdef size_t c_max = <size_t>-1
 
     def extract_iter_dict():
         """
@@ -1125,7 +1148,7 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, doubl
                 if choice is None:
                     continue
 
-                score = ScorerContext.scorer(ScorerContext.context, processor(choice), score_cutoff)
+                score = ScorerContext.scorer(ScorerContext.context, processor(choice), c_score_cutoff)
 
                 if score >= score_cutoff:
                     yield (choice, score, choice_key)
@@ -1134,7 +1157,7 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, doubl
                 if choice is None:
                     continue
 
-                score = ScorerContext.scorer(ScorerContext.context, choice, score_cutoff)
+                score = ScorerContext.scorer(ScorerContext.context, choice, c_score_cutoff)
 
                 if score >= score_cutoff:
                     yield (choice, score, choice_key)
@@ -1154,9 +1177,9 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, doubl
                     i += 1
                     continue
 
-                score = ScorerContext.scorer(ScorerContext.context, processor(choice), score_cutoff)
+                score = ScorerContext.scorer(ScorerContext.context, processor(choice), c_score_cutoff)
 
-                if score >= score_cutoff:
+                if score >= c_score_cutoff:
                     yield (choice, score, i)
                 i += 1
         else:
@@ -1165,9 +1188,9 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, doubl
                     i += 1
                     continue
 
-                score = ScorerContext.scorer(ScorerContext.context, choice, score_cutoff)
+                score = ScorerContext.scorer(ScorerContext.context, choice, c_score_cutoff)
 
-                if score >= score_cutoff:
+                if score >= c_score_cutoff:
                     yield (choice, score, i)
                 i += 1
 
@@ -1184,18 +1207,18 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, doubl
                 if choice is None:
                     continue
     
-                distance = DistanceContext.scorer(DistanceContext.context, processor(choice), max_)
+                distance = DistanceContext.scorer(DistanceContext.context, processor(choice), c_max)
     
-                if distance <= max_:
+                if distance <= c_max:
                     yield (choice, distance, choice_key)
         else:
             for choice_key, choice in choices.items():
                 if choice is None:
                     continue
     
-                distance = DistanceContext.scorer(DistanceContext.context, choice, max_)
+                distance = DistanceContext.scorer(DistanceContext.context, choice, c_max)
     
-                if distance <= max_:
+                if distance <= c_max:
                     yield (choice, distance, choice_key)
 
     def extract_iter_distance_list():
@@ -1213,9 +1236,9 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, doubl
                     i += 1
                     continue
     
-                distance = DistanceContext.scorer(DistanceContext.context, processor(choice), max_)
+                distance = DistanceContext.scorer(DistanceContext.context, processor(choice), c_max)
     
-                if distance <= max_:
+                if distance <= c_max:
                     yield (choice, distance, i)
                 i += 1
         else:
@@ -1224,9 +1247,9 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, doubl
                     i += 1
                     continue
     
-                distance = DistanceContext.scorer(DistanceContext.context, choice, max_)
+                distance = DistanceContext.scorer(DistanceContext.context, choice, c_max)
     
-                if distance <= max_:
+                if distance <= c_max:
                     yield (choice, distance, i)
                 i += 1
 
@@ -1243,9 +1266,9 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, doubl
                     continue
     
                 score = scorer(query, processor(choice),
-                    processor=None, score_cutoff=score_cutoff, **kwargs)
+                    processor=None, score_cutoff=c_score_cutoff, **kwargs)
     
-                if score >= score_cutoff:
+                if score >= c_score_cutoff:
                     yield (choice, score, choice_key)
         else:
             for choice_key, choice in choices.items():
@@ -1253,9 +1276,9 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, doubl
                     continue
     
                 score = scorer(query, choice,
-                    processor=None, score_cutoff=score_cutoff, **kwargs)
+                    processor=None, score_cutoff=c_score_cutoff, **kwargs)
         
-                if score >= score_cutoff:
+                if score >= c_score_cutoff:
                     yield (choice, score, choice_key)
 
     def py_extract_iter_list():
@@ -1273,9 +1296,9 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, doubl
                     continue
         
                 score = scorer(query, processor(choice),
-                    processor=None, score_cutoff=score_cutoff, **kwargs)
+                    processor=None, score_cutoff=c_score_cutoff, **kwargs)
         
-                if score >= score_cutoff:
+                if score >= c_score_cutoff:
                     yield(choice, score, i)
                 i += 1
         else:
@@ -1285,9 +1308,9 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, doubl
                     continue
         
                 score = scorer(query, choice,
-                    processor=None, score_cutoff=score_cutoff, **kwargs)
+                    processor=None, score_cutoff=c_score_cutoff, **kwargs)
         
-                if score >= score_cutoff:
+                if score >= c_score_cutoff:
                     yield(choice, score, i)
                 i += 1
 
@@ -1318,6 +1341,11 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, doubl
     ScorerContext = CachedScorerInit(scorer, query, def_process, kwargs)
     if ScorerContext.context != NULL:
         try:
+            if score_cutoff is not None:
+                c_score_cutoff = score_cutoff
+            if c_score_cutoff < 0 or c_score_cutoff > 100:
+                raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
+
             if hasattr(choices, "items"):
                 yield from extract_iter_dict()
             else:
@@ -1333,6 +1361,9 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, doubl
     DistanceContext = CachedDistanceInit(scorer, query, def_process, kwargs)
     if DistanceContext.context != NULL:
         try:
+            if score_cutoff is not None and score_cutoff != -1:
+                c_max = score_cutoff
+
             if hasattr(choices, "items"):
                 yield from extract_iter_distance_dict()
             else:
@@ -1346,6 +1377,9 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, doubl
          
 
     # the scorer has to be called through Python
+    if score_cutoff is not None:
+        c_score_cutoff = score_cutoff
+
     if hasattr(choices, "items"):
         yield from py_extract_iter_dict()
     else:
