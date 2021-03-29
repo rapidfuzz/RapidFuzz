@@ -3,6 +3,6 @@ rapid string matching library
 """
 __author__ = "Max Bachmann"
 __license__ = "MIT"
-__version__ = "1.3.3"
+__version__ = "1.4.0"
 
 from rapidfuzz import process, fuzz, utils, levenshtein, string_metric

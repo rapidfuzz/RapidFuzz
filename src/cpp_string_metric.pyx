@@ -6,15 +6,17 @@ from rapidfuzz.utils import default_process
 
 cdef extern from "cpp_string_metric.hpp":
     object levenshtein_impl(object, object, size_t, size_t, size_t, size_t) except +
+    object levenshtein_impl_default_process(object, object, size_t, size_t, size_t, size_t) except +
     double normalized_levenshtein_impl(object, object, size_t, size_t, size_t, double) except +
     double normalized_levenshtein_impl_default_process(object, object, size_t, size_t, size_t, double) except +
 
     object hamming_impl(object, object, size_t) except +
+    object hamming_impl_default_process(object, object, size_t) except +
     double normalized_hamming_impl(object, object, double) except +
     double normalized_hamming_impl_default_process(object, object, double) except +
 
 
-def levenshtein(s1, s2, weights=(1,1,1), max=None):
+def levenshtein(s1, s2, weights=(1,1,1), processor=None, max=None):
     """
     Calculates the minimum number of insertions, deletions, and substitutions
     required to change one sequence into the other according to Levenshtein with custom
@@ -30,6 +32,10 @@ def levenshtein(s1, s2, weights=(1,1,1), max=None):
         The weights for the three operations in the form
         (insertion, deletion, substitution). Default is (1, 1, 1),
         which gives all three operations a weight of 1.
+    processor: bool or callable, optional
+      Optional callable that is used to preprocess the strings before
+      comparing them. When processor is True ``utils.default_process``
+      is used. Default is None, which deactivates this behaviour.
     max : int or None, optional
         Maximum Levenshtein distance between s1 and s2, that is
         considered as a result. If the distance is bigger than max,
@@ -183,6 +189,12 @@ def levenshtein(s1, s2, weights=(1,1,1), max=None):
     if max is not None:
         max_ = max
 
+    if processor is True or processor == default_process:
+        return levenshtein_impl_default_process(s1, s2, insertion, deletion, substitution, max_)
+    elif callable(processor):
+        s1 = processor(s1)
+        s2 = processor(s2)
+
     return levenshtein_impl(s1, s2, insertion, deletion, substitution, max_)
 
 
@@ -292,7 +304,7 @@ def normalized_levenshtein(s1, s2, weights=(1,1,1), processor=None, double score
     return normalized_levenshtein_impl(s1, s2, insertion, deletion, substitution, score_cutoff)
 
 
-def hamming(s1, s2, max=None):
+def hamming(s1, s2, processor=None, max=None):
     """
     Calculates the Hamming distance between two strings.
     The hamming distance is defined as the number of positions 
@@ -305,6 +317,10 @@ def hamming(s1, s2, max=None):
         First string to compare.
     s2 : str
         Second string to compare.
+    processor: bool or callable, optional
+      Optional callable that is used to preprocess the strings before
+      comparing them. When processor is True ``utils.default_process``
+      is used. Default is None, which deactivates this behaviour.
     max : int or None, optional
         Maximum Hamming distance between s1 and s2, that is
         considered as a result. If the distance is bigger than max,
@@ -325,6 +341,12 @@ def hamming(s1, s2, max=None):
 
     if max is not None:
         max_ = max
+
+    if processor is True or processor == default_process:
+        return hamming_impl_default_process(s1, s2, max_)
+    elif callable(processor):
+        s1 = processor(s1)
+        s2 = processor(s2)
 
     return hamming_impl(s1, s2, max_)
 
