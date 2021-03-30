@@ -822,6 +822,7 @@ static CYTHON_INLINE float __PYX_NAN() {
 #include <algorithm>
 #include <string.h>
 #include <stdio.h>
+#include "cpp_common.hpp"
 #include "cpp_process.hpp"
 #ifdef _OPENMP
 #include <omp.h>
@@ -1079,7 +1080,7 @@ struct __pyx_defaults2 {
   PyObject *__pyx_arg_processor;
 };
 
-/* "cpp_process.pyx":1045
+/* "cpp_process.pyx":1110
  * 
  * 
  * def extract_iter(query, choices, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):             # <<<<<<<<<<<<<<
@@ -1108,7 +1109,7 @@ struct __pyx_obj_11cpp_process___pyx_scope_struct__extract_iter {
 };
 
 
-/* "cpp_process.pyx":1106
+/* "cpp_process.pyx":1171
  *     cdef size_t c_max = <size_t>-1
  * 
  *     def extract_iter_dict():             # <<<<<<<<<<<<<<
@@ -1120,6 +1121,7 @@ struct __pyx_obj_11cpp_process___pyx_scope_struct_1_extract_iter_dict {
   struct __pyx_obj_11cpp_process___pyx_scope_struct__extract_iter *__pyx_outer_scope;
   PyObject *__pyx_v_choice;
   PyObject *__pyx_v_choice_key;
+  PyObject *__pyx_v_proc_choice;
   double __pyx_v_score;
   PyObject *__pyx_t_0;
   Py_ssize_t __pyx_t_1;
@@ -1128,7 +1130,7 @@ struct __pyx_obj_11cpp_process___pyx_scope_struct_1_extract_iter_dict {
 };
 
 
-/* "cpp_process.pyx":1133
+/* "cpp_process.pyx":1205
  *                     yield (choice, score, choice_key)
  * 
  *     def extract_iter_list():             # <<<<<<<<<<<<<<
@@ -1140,6 +1142,7 @@ struct __pyx_obj_11cpp_process___pyx_scope_struct_2_extract_iter_list {
   struct __pyx_obj_11cpp_process___pyx_scope_struct__extract_iter *__pyx_outer_scope;
   PyObject *__pyx_v_choice;
   size_t __pyx_v_i;
+  PyObject *__pyx_v_proc_choice;
   double __pyx_v_score;
   PyObject *__pyx_t_0;
   Py_ssize_t __pyx_t_1;
@@ -1147,7 +1150,7 @@ struct __pyx_obj_11cpp_process___pyx_scope_struct_2_extract_iter_list {
 };
 
 
-/* "cpp_process.pyx":1165
+/* "cpp_process.pyx":1245
  *                 i += 1
  * 
  *     def extract_iter_distance_dict():             # <<<<<<<<<<<<<<
@@ -1160,6 +1163,7 @@ struct __pyx_obj_11cpp_process___pyx_scope_struct_3_extract_iter_distance_dict {
   PyObject *__pyx_v_choice;
   PyObject *__pyx_v_choice_key;
   size_t __pyx_v_distance;
+  PyObject *__pyx_v_proc_choice;
   PyObject *__pyx_t_0;
   Py_ssize_t __pyx_t_1;
   Py_ssize_t __pyx_t_2;
@@ -1167,7 +1171,7 @@ struct __pyx_obj_11cpp_process___pyx_scope_struct_3_extract_iter_distance_dict {
 };
 
 
-/* "cpp_process.pyx":1192
+/* "cpp_process.pyx":1279
  *                     yield (choice, distance, choice_key)
  * 
  *     def extract_iter_distance_list():             # <<<<<<<<<<<<<<
@@ -1180,13 +1184,14 @@ struct __pyx_obj_11cpp_process___pyx_scope_struct_4_extract_iter_distance_list {
   PyObject *__pyx_v_choice;
   size_t __pyx_v_distance;
   size_t __pyx_v_i;
+  PyObject *__pyx_v_proc_choice;
   PyObject *__pyx_t_0;
   Py_ssize_t __pyx_t_1;
   PyObject *(*__pyx_t_2)(PyObject *);
 };
 
 
-/* "cpp_process.pyx":1224
+/* "cpp_process.pyx":1319
  *                 i += 1
  * 
  *     def py_extract_iter_dict():             # <<<<<<<<<<<<<<
@@ -1206,7 +1211,7 @@ struct __pyx_obj_11cpp_process___pyx_scope_struct_5_py_extract_iter_dict {
 };
 
 
-/* "cpp_process.pyx":1252
+/* "cpp_process.pyx":1347
  *                     yield (choice, score, choice_key)
  * 
  *     def py_extract_iter_list():             # <<<<<<<<<<<<<<
@@ -1358,29 +1363,8 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_GetAttrStrNoError(PyObject* obj, P
 /* GetBuiltinName.proto */
 static PyObject *__Pyx_GetBuiltinName(PyObject *name);
 
-/* IterFinish.proto */
-static CYTHON_INLINE int __Pyx_IterFinish(void);
-
-/* PyFunctionFastCall.proto */
-#if CYTHON_FAST_PYCALL
-#if !CYTHON_VECTORCALL
-#define __Pyx_PyFunction_FastCall(func, args, nargs)\
-    __Pyx_PyFunction_FastCallDict((func), (args), (nargs), NULL)
-static PyObject *__Pyx_PyFunction_FastCallDict(PyObject *func, PyObject **args, Py_ssize_t nargs, PyObject *kwargs);
-#endif
-#define __Pyx_BUILD_ASSERT_EXPR(cond)\
-    (sizeof(char [1 - 2*!(cond)]) - 1)
-#ifndef Py_MEMBER_SIZE
-#define Py_MEMBER_SIZE(type, member) sizeof(((type *)0)->member)
-#endif
-  static size_t __pyx_pyframe_localsplus_offset = 0;
-  #include "frameobject.h"
-  #define __Pxy_PyFrame_Initialize_Offsets()\
-    ((void)__Pyx_BUILD_ASSERT_EXPR(sizeof(PyFrameObject) == offsetof(PyFrameObject, f_localsplus) + Py_MEMBER_SIZE(PyFrameObject, f_localsplus)),\
-     (void)(__pyx_pyframe_localsplus_offset = ((size_t)PyFrame_Type.tp_basicsize) - Py_MEMBER_SIZE(PyFrameObject, f_localsplus)))
-  #define __Pyx_PyFrame_GetLocalsplus(frame)\
-    (assert(__pyx_pyframe_localsplus_offset), (PyObject **)(((char *)(frame)) + __pyx_pyframe_localsplus_offset))
-#endif
+/* dict_getitem_default.proto */
+static PyObject* __Pyx_PyDict_GetItemDefault(PyObject* d, PyObject* key, PyObject* default_value);
 
 /* PyObjectCall.proto */
 #if CYTHON_COMPILING_IN_CPYTHON
@@ -1388,72 +1372,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg
 #else
 #define __Pyx_PyObject_Call(func, arg, kw) PyObject_Call(func, arg, kw)
 #endif
-
-/* PyObjectCallMethO.proto */
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg);
-#endif
-
-/* PyObjectFastCall.proto */
-#define __Pyx_PyObject_FastCall(func, args, nargs)  __Pyx_PyObject_FastCallDict(func, args, nargs, NULL)
-static CYTHON_INLINE PyObject* __Pyx_PyObject_FastCallDict(PyObject *func, PyObject **args, Py_ssize_t nargs, PyObject *kwargs);
-
-/* PyObjectCallNoArg.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func);
-
-/* PyObjectCallOneArg.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg);
-
-/* PyObjectGetMethod.proto */
-static int __Pyx_PyObject_GetMethod(PyObject *obj, PyObject *name, PyObject **method);
-
-/* PyObjectCallMethod0.proto */
-static PyObject* __Pyx_PyObject_CallMethod0(PyObject* obj, PyObject* method_name);
-
-/* RaiseNeedMoreValuesToUnpack.proto */
-static CYTHON_INLINE void __Pyx_RaiseNeedMoreValuesError(Py_ssize_t index);
-
-/* RaiseTooManyValuesToUnpack.proto */
-static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected);
-
-/* UnpackItemEndCheck.proto */
-static int __Pyx_IternextUnpackEndCheck(PyObject *retval, Py_ssize_t expected);
-
-/* RaiseNoneIterError.proto */
-static CYTHON_INLINE void __Pyx_RaiseNoneNotIterableError(void);
-
-/* UnpackTupleError.proto */
-static void __Pyx_UnpackTupleError(PyObject *, Py_ssize_t index);
-
-/* UnpackTuple2.proto */
-#define __Pyx_unpack_tuple2(tuple, value1, value2, is_tuple, has_known_size, decref_tuple)\
-    (likely(is_tuple || PyTuple_Check(tuple)) ?\
-        (likely(has_known_size || PyTuple_GET_SIZE(tuple) == 2) ?\
-            __Pyx_unpack_tuple2_exact(tuple, value1, value2, decref_tuple) :\
-            (__Pyx_UnpackTupleError(tuple, 2), -1)) :\
-        __Pyx_unpack_tuple2_generic(tuple, value1, value2, has_known_size, decref_tuple))
-static CYTHON_INLINE int __Pyx_unpack_tuple2_exact(
-    PyObject* tuple, PyObject** value1, PyObject** value2, int decref_tuple);
-static int __Pyx_unpack_tuple2_generic(
-    PyObject* tuple, PyObject** value1, PyObject** value2, int has_known_size, int decref_tuple);
-
-/* dict_iter.proto */
-static CYTHON_INLINE PyObject* __Pyx_dict_iterator(PyObject* dict, int is_dict, PyObject* method_name,
-                                                   Py_ssize_t* p_orig_length, int* p_is_dict);
-static CYTHON_INLINE int __Pyx_dict_iter_next(PyObject* dict_or_iter, Py_ssize_t orig_length, Py_ssize_t* ppos,
-                                              PyObject** pkey, PyObject** pvalue, PyObject** pitem, int is_dict);
-
-/* RaiseDoubleKeywords.proto */
-static void __Pyx_RaiseDoubleKeywordsError(const char* func_name, PyObject* kw_name);
-
-/* MergeKeywords.proto */
-static int __Pyx_MergeKeywords(PyObject *kwdict, PyObject *source_mapping);
-
-/* PyIntCompare.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyInt_EqObjC(PyObject *op1, PyObject *op2, long intval, long inplace);
-
-/* dict_getitem_default.proto */
-static PyObject* __Pyx_PyDict_GetItemDefault(PyObject* d, PyObject* key, PyObject* default_value);
 
 /* UnpackUnboundCMethod.proto */
 typedef struct {
@@ -1479,6 +1397,18 @@ static CYTHON_INLINE PyObject *__Pyx_CallUnboundCMethod2(__Pyx_CachedCFunction *
 #else
 #define __Pyx_CallUnboundCMethod2(cfunc, self, arg1, arg2)  __Pyx__CallUnboundCMethod2(cfunc, self, arg1, arg2)
 #endif
+
+/* RaiseTooManyValuesToUnpack.proto */
+static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected);
+
+/* RaiseNeedMoreValuesToUnpack.proto */
+static CYTHON_INLINE void __Pyx_RaiseNeedMoreValuesError(Py_ssize_t index);
+
+/* IterFinish.proto */
+static CYTHON_INLINE int __Pyx_IterFinish(void);
+
+/* UnpackItemEndCheck.proto */
+static int __Pyx_IternextUnpackEndCheck(PyObject *retval, Py_ssize_t expected);
 
 /* WriteUnraisableException.proto */
 static void __Pyx_WriteUnraisable(const char *name, int clineno,
@@ -1531,6 +1461,81 @@ static PyObject *__Pyx__GetModuleGlobalName(PyObject *name, PY_UINT64_T *dict_ve
 #define __Pyx_GetModuleGlobalNameUncached(var, name)  (var) = __Pyx__GetModuleGlobalName(name)
 static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name);
 #endif
+
+/* PyFunctionFastCall.proto */
+#if CYTHON_FAST_PYCALL
+#if !CYTHON_VECTORCALL
+#define __Pyx_PyFunction_FastCall(func, args, nargs)\
+    __Pyx_PyFunction_FastCallDict((func), (args), (nargs), NULL)
+static PyObject *__Pyx_PyFunction_FastCallDict(PyObject *func, PyObject **args, Py_ssize_t nargs, PyObject *kwargs);
+#endif
+#define __Pyx_BUILD_ASSERT_EXPR(cond)\
+    (sizeof(char [1 - 2*!(cond)]) - 1)
+#ifndef Py_MEMBER_SIZE
+#define Py_MEMBER_SIZE(type, member) sizeof(((type *)0)->member)
+#endif
+  static size_t __pyx_pyframe_localsplus_offset = 0;
+  #include "frameobject.h"
+  #define __Pxy_PyFrame_Initialize_Offsets()\
+    ((void)__Pyx_BUILD_ASSERT_EXPR(sizeof(PyFrameObject) == offsetof(PyFrameObject, f_localsplus) + Py_MEMBER_SIZE(PyFrameObject, f_localsplus)),\
+     (void)(__pyx_pyframe_localsplus_offset = ((size_t)PyFrame_Type.tp_basicsize) - Py_MEMBER_SIZE(PyFrameObject, f_localsplus)))
+  #define __Pyx_PyFrame_GetLocalsplus(frame)\
+    (assert(__pyx_pyframe_localsplus_offset), (PyObject **)(((char *)(frame)) + __pyx_pyframe_localsplus_offset))
+#endif
+
+/* PyObjectCallMethO.proto */
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg);
+#endif
+
+/* PyObjectFastCall.proto */
+#define __Pyx_PyObject_FastCall(func, args, nargs)  __Pyx_PyObject_FastCallDict(func, args, nargs, NULL)
+static CYTHON_INLINE PyObject* __Pyx_PyObject_FastCallDict(PyObject *func, PyObject **args, Py_ssize_t nargs, PyObject *kwargs);
+
+/* PyObjectCallNoArg.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func);
+
+/* PyObjectCallOneArg.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg);
+
+/* PyObjectGetMethod.proto */
+static int __Pyx_PyObject_GetMethod(PyObject *obj, PyObject *name, PyObject **method);
+
+/* PyObjectCallMethod0.proto */
+static PyObject* __Pyx_PyObject_CallMethod0(PyObject* obj, PyObject* method_name);
+
+/* RaiseNoneIterError.proto */
+static CYTHON_INLINE void __Pyx_RaiseNoneNotIterableError(void);
+
+/* UnpackTupleError.proto */
+static void __Pyx_UnpackTupleError(PyObject *, Py_ssize_t index);
+
+/* UnpackTuple2.proto */
+#define __Pyx_unpack_tuple2(tuple, value1, value2, is_tuple, has_known_size, decref_tuple)\
+    (likely(is_tuple || PyTuple_Check(tuple)) ?\
+        (likely(has_known_size || PyTuple_GET_SIZE(tuple) == 2) ?\
+            __Pyx_unpack_tuple2_exact(tuple, value1, value2, decref_tuple) :\
+            (__Pyx_UnpackTupleError(tuple, 2), -1)) :\
+        __Pyx_unpack_tuple2_generic(tuple, value1, value2, has_known_size, decref_tuple))
+static CYTHON_INLINE int __Pyx_unpack_tuple2_exact(
+    PyObject* tuple, PyObject** value1, PyObject** value2, int decref_tuple);
+static int __Pyx_unpack_tuple2_generic(
+    PyObject* tuple, PyObject** value1, PyObject** value2, int has_known_size, int decref_tuple);
+
+/* dict_iter.proto */
+static CYTHON_INLINE PyObject* __Pyx_dict_iterator(PyObject* dict, int is_dict, PyObject* method_name,
+                                                   Py_ssize_t* p_orig_length, int* p_is_dict);
+static CYTHON_INLINE int __Pyx_dict_iter_next(PyObject* dict_or_iter, Py_ssize_t orig_length, Py_ssize_t* ppos,
+                                              PyObject** pkey, PyObject** pvalue, PyObject** pitem, int is_dict);
+
+/* RaiseDoubleKeywords.proto */
+static void __Pyx_RaiseDoubleKeywordsError(const char* func_name, PyObject* kw_name);
+
+/* MergeKeywords.proto */
+static int __Pyx_MergeKeywords(PyObject *kwdict, PyObject *source_mapping);
+
+/* PyIntCompare.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyInt_EqObjC(PyObject *op1, PyObject *op2, long intval, long inplace);
 
 /* TupleAndListFromArray.proto */
 #if CYTHON_COMPILING_IN_CPYTHON
@@ -1922,6 +1927,11 @@ static void __pyx_insert_code_object(int code_line, PyCodeObject* code_object);
 static void __Pyx_AddTraceback(const char *funcname, int c_line,
                                int py_line, const char *filename);
 
+/* GCCDiagnostics.proto */
+#if defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
+#define __Pyx_HAS_GCC_DIAGNOSTIC
+#endif
+
 /* CppExceptionConversion.proto */
 #ifndef __Pyx_CppExn2PyErr
 #include <new>
@@ -1962,11 +1972,6 @@ static void __Pyx_CppExn2PyErr() {
     PyErr_SetString(PyExc_RuntimeError, "Unknown exception");
   }
 }
-#endif
-
-/* GCCDiagnostics.proto */
-#if defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
-#define __Pyx_HAS_GCC_DIAGNOSTIC
 #endif
 
 /* None.proto */
@@ -2085,16 +2090,16 @@ static PyTypeObject *__pyx_ptype_11cpp_process___pyx_scope_struct_4_extract_iter
 static PyTypeObject *__pyx_ptype_11cpp_process___pyx_scope_struct_5_py_extract_iter_dict = 0;
 static PyTypeObject *__pyx_ptype_11cpp_process___pyx_scope_struct_6_py_extract_iter_list = 0;
 #endif
+static CYTHON_INLINE scorer_context __pyx_f_11cpp_process_CachedNormalizedLevenshteinInit(PyObject *, int, PyObject *); /*proto*/
+static CYTHON_INLINE distance_context __pyx_f_11cpp_process_CachedLevenshteinInit(PyObject *, int, PyObject *); /*proto*/
+static CYTHON_INLINE scorer_context __pyx_f_11cpp_process_CachedScorerInit(PyObject *, PyObject *, int, PyObject *); /*proto*/
+static CYTHON_INLINE distance_context __pyx_f_11cpp_process_CachedDistanceInit(PyObject *, PyObject *, int, PyObject *); /*proto*/
 static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_context, PyObject *, PyObject *, double); /*proto*/
 static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(distance_context, PyObject *, PyObject *, size_t); /*proto*/
 static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_context, PyObject *, PyObject *, double); /*proto*/
 static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(distance_context, PyObject *, PyObject *, size_t); /*proto*/
 static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject *, PyObject *, PyObject *, PyObject *, PyObject *, PyObject *); /*proto*/
 static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject *, PyObject *, PyObject *, PyObject *, double, PyObject *); /*proto*/
-static CYTHON_INLINE scorer_context __pyx_f_11cpp_process_CachedNormalizedLevenshteinInit(PyObject *, int, PyObject *); /*proto*/
-static CYTHON_INLINE distance_context __pyx_f_11cpp_process_CachedLevenshteinInit(PyObject *, int, PyObject *); /*proto*/
-static CYTHON_INLINE scorer_context __pyx_f_11cpp_process_CachedScorerInit(PyObject *, PyObject *, int, PyObject *); /*proto*/
-static CYTHON_INLINE distance_context __pyx_f_11cpp_process_CachedDistanceInit(PyObject *, PyObject *, int, PyObject *); /*proto*/
 static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context, PyObject *, PyObject *, size_t, double); /*proto*/
 static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(distance_context, PyObject *, PyObject *, size_t, size_t); /*proto*/
 static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context, PyObject *, PyObject *, size_t, double); /*proto*/
@@ -2153,6 +2158,7 @@ static const char __pyx_k_extractOne[] = "extractOne";
 static const char __pyx_k_cpp_process[] = "cpp_process";
 static const char __pyx_k_def_process[] = "def_process";
 static const char __pyx_k_levenshtein[] = "levenshtein";
+static const char __pyx_k_proc_choice[] = "proc_choice";
 static const char __pyx_k_token_ratio[] = "token_ratio";
 static const char __pyx_k_extract_iter[] = "extract_iter";
 static const char __pyx_k_initializing[] = "_initializing";
@@ -2172,7 +2178,7 @@ static const char __pyx_k_extract_iter_list[] = "extract_iter_list";
 static const char __pyx_k_asyncio_coroutines[] = "asyncio.coroutines";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_normalized_hamming[] = "normalized_hamming";
-static const char __pyx_k_extractOne_line_427[] = "extractOne (line 427)";
+static const char __pyx_k_extractOne_line_460[] = "extractOne (line 460)";
 static const char __pyx_k_partial_token_ratio[] = "partial_token_ratio";
 static const char __pyx_k_src_cpp_process_pyx[] = "src/cpp_process.pyx";
 static const char __pyx_k_py_extract_iter_dict[] = "py_extract_iter_dict";
@@ -2217,7 +2223,7 @@ static PyObject *__pyx_n_s_default_process;
 static PyObject *__pyx_n_s_distance;
 static PyObject *__pyx_n_s_extract;
 static PyObject *__pyx_n_s_extractOne;
-static PyObject *__pyx_kp_u_extractOne_line_427;
+static PyObject *__pyx_kp_u_extractOne_line_460;
 static PyObject *__pyx_n_s_extract_iter;
 static PyObject *__pyx_n_s_extract_iter_dict;
 static PyObject *__pyx_n_s_extract_iter_distance_dict;
@@ -2252,6 +2258,7 @@ static PyObject *__pyx_n_s_partial_ratio;
 static PyObject *__pyx_n_s_partial_token_ratio;
 static PyObject *__pyx_n_s_partial_token_set_ratio;
 static PyObject *__pyx_n_s_partial_token_sort_ratio;
+static PyObject *__pyx_n_s_proc_choice;
 static PyObject *__pyx_n_s_processor;
 static PyObject *__pyx_n_s_py_extract_dict_locals_lambda;
 static PyObject *__pyx_n_s_py_extract_iter_dict;
@@ -2382,7 +2389,7 @@ typedef struct {
   PyObject *__pyx_n_s_distance;
   PyObject *__pyx_n_s_extract;
   PyObject *__pyx_n_s_extractOne;
-  PyObject *__pyx_kp_u_extractOne_line_427;
+  PyObject *__pyx_kp_u_extractOne_line_460;
   PyObject *__pyx_n_s_extract_iter;
   PyObject *__pyx_n_s_extract_iter_dict;
   PyObject *__pyx_n_s_extract_iter_distance_dict;
@@ -2417,6 +2424,7 @@ typedef struct {
   PyObject *__pyx_n_s_partial_token_ratio;
   PyObject *__pyx_n_s_partial_token_set_ratio;
   PyObject *__pyx_n_s_partial_token_sort_ratio;
+  PyObject *__pyx_n_s_proc_choice;
   PyObject *__pyx_n_s_processor;
   PyObject *__pyx_n_s_py_extract_dict_locals_lambda;
   PyObject *__pyx_n_s_py_extract_iter_dict;
@@ -2536,7 +2544,7 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_distance);
   Py_CLEAR(clear_module_state->__pyx_n_s_extract);
   Py_CLEAR(clear_module_state->__pyx_n_s_extractOne);
-  Py_CLEAR(clear_module_state->__pyx_kp_u_extractOne_line_427);
+  Py_CLEAR(clear_module_state->__pyx_kp_u_extractOne_line_460);
   Py_CLEAR(clear_module_state->__pyx_n_s_extract_iter);
   Py_CLEAR(clear_module_state->__pyx_n_s_extract_iter_dict);
   Py_CLEAR(clear_module_state->__pyx_n_s_extract_iter_distance_dict);
@@ -2571,6 +2579,7 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_partial_token_ratio);
   Py_CLEAR(clear_module_state->__pyx_n_s_partial_token_set_ratio);
   Py_CLEAR(clear_module_state->__pyx_n_s_partial_token_sort_ratio);
+  Py_CLEAR(clear_module_state->__pyx_n_s_proc_choice);
   Py_CLEAR(clear_module_state->__pyx_n_s_processor);
   Py_CLEAR(clear_module_state->__pyx_n_s_py_extract_dict_locals_lambda);
   Py_CLEAR(clear_module_state->__pyx_n_s_py_extract_iter_dict);
@@ -2677,7 +2686,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_distance);
   Py_VISIT(traverse_module_state->__pyx_n_s_extract);
   Py_VISIT(traverse_module_state->__pyx_n_s_extractOne);
-  Py_VISIT(traverse_module_state->__pyx_kp_u_extractOne_line_427);
+  Py_VISIT(traverse_module_state->__pyx_kp_u_extractOne_line_460);
   Py_VISIT(traverse_module_state->__pyx_n_s_extract_iter);
   Py_VISIT(traverse_module_state->__pyx_n_s_extract_iter_dict);
   Py_VISIT(traverse_module_state->__pyx_n_s_extract_iter_distance_dict);
@@ -2712,6 +2721,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_partial_token_ratio);
   Py_VISIT(traverse_module_state->__pyx_n_s_partial_token_set_ratio);
   Py_VISIT(traverse_module_state->__pyx_n_s_partial_token_sort_ratio);
+  Py_VISIT(traverse_module_state->__pyx_n_s_proc_choice);
   Py_VISIT(traverse_module_state->__pyx_n_s_processor);
   Py_VISIT(traverse_module_state->__pyx_n_s_py_extract_dict_locals_lambda);
   Py_VISIT(traverse_module_state->__pyx_n_s_py_extract_iter_dict);
@@ -2815,7 +2825,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_distance __pyx_mstate_global->__pyx_n_s_distance
 #define __pyx_n_s_extract __pyx_mstate_global->__pyx_n_s_extract
 #define __pyx_n_s_extractOne __pyx_mstate_global->__pyx_n_s_extractOne
-#define __pyx_kp_u_extractOne_line_427 __pyx_mstate_global->__pyx_kp_u_extractOne_line_427
+#define __pyx_kp_u_extractOne_line_460 __pyx_mstate_global->__pyx_kp_u_extractOne_line_460
 #define __pyx_n_s_extract_iter __pyx_mstate_global->__pyx_n_s_extract_iter
 #define __pyx_n_s_extract_iter_dict __pyx_mstate_global->__pyx_n_s_extract_iter_dict
 #define __pyx_n_s_extract_iter_distance_dict __pyx_mstate_global->__pyx_n_s_extract_iter_distance_dict
@@ -2850,6 +2860,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_partial_token_ratio __pyx_mstate_global->__pyx_n_s_partial_token_ratio
 #define __pyx_n_s_partial_token_set_ratio __pyx_mstate_global->__pyx_n_s_partial_token_set_ratio
 #define __pyx_n_s_partial_token_sort_ratio __pyx_mstate_global->__pyx_n_s_partial_token_sort_ratio
+#define __pyx_n_s_proc_choice __pyx_mstate_global->__pyx_n_s_proc_choice
 #define __pyx_n_s_processor __pyx_mstate_global->__pyx_n_s_processor
 #define __pyx_n_s_py_extract_dict_locals_lambda __pyx_mstate_global->__pyx_n_s_py_extract_dict_locals_lambda
 #define __pyx_n_s_py_extract_iter_dict __pyx_mstate_global->__pyx_n_s_py_extract_iter_dict
@@ -2901,7 +2912,949 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #endif
 /* #### Code section: module_code ### */
 
-/* "cpp_process.pyx":101
+/* "cpp_process.pyx":104
+ * 
+ * 
+ * cdef inline scorer_context CachedNormalizedLevenshteinInit(object query, int def_process, dict kwargs):             # <<<<<<<<<<<<<<
+ *     cdef size_t insertion, deletion, substitution
+ *     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
+ */
+
+static CYTHON_INLINE scorer_context __pyx_f_11cpp_process_CachedNormalizedLevenshteinInit(PyObject *__pyx_v_query, int __pyx_v_def_process, PyObject *__pyx_v_kwargs) {
+  size_t __pyx_v_insertion;
+  size_t __pyx_v_deletion;
+  size_t __pyx_v_substitution;
+  scorer_context __pyx_r;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  PyObject *__pyx_t_5 = NULL;
+  PyObject *(*__pyx_t_6)(PyObject *);
+  size_t __pyx_t_7;
+  size_t __pyx_t_8;
+  size_t __pyx_t_9;
+  scorer_context __pyx_t_10;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("CachedNormalizedLevenshteinInit", 0);
+
+  /* "cpp_process.pyx":106
+ * cdef inline scorer_context CachedNormalizedLevenshteinInit(object query, int def_process, dict kwargs):
+ *     cdef size_t insertion, deletion, substitution
+ *     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))             # <<<<<<<<<<<<<<
+ *     return cached_normalized_levenshtein_init(query, def_process, insertion, deletion, substitution)
+ * 
+ */
+  if (unlikely(__pyx_v_kwargs == Py_None)) {
+    PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "get");
+    __PYX_ERR(0, 106, __pyx_L1_error)
+  }
+  __pyx_t_1 = __Pyx_PyDict_GetItemDefault(__pyx_v_kwargs, __pyx_n_u_weights, __pyx_tuple_); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 106, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if ((likely(PyTuple_CheckExact(__pyx_t_1))) || (PyList_CheckExact(__pyx_t_1))) {
+    PyObject* sequence = __pyx_t_1;
+    Py_ssize_t size = __Pyx_PySequence_SIZE(sequence);
+    if (unlikely(size != 3)) {
+      if (size > 3) __Pyx_RaiseTooManyValuesError(3);
+      else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
+      __PYX_ERR(0, 106, __pyx_L1_error)
+    }
+    #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+    if (likely(PyTuple_CheckExact(sequence))) {
+      __pyx_t_2 = PyTuple_GET_ITEM(sequence, 0); 
+      __pyx_t_3 = PyTuple_GET_ITEM(sequence, 1); 
+      __pyx_t_4 = PyTuple_GET_ITEM(sequence, 2); 
+    } else {
+      __pyx_t_2 = PyList_GET_ITEM(sequence, 0); 
+      __pyx_t_3 = PyList_GET_ITEM(sequence, 1); 
+      __pyx_t_4 = PyList_GET_ITEM(sequence, 2); 
+    }
+    __Pyx_INCREF(__pyx_t_2);
+    __Pyx_INCREF(__pyx_t_3);
+    __Pyx_INCREF(__pyx_t_4);
+    #else
+    __pyx_t_2 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 106, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_3 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 106, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __pyx_t_4 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 106, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    #endif
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  } else {
+    Py_ssize_t index = -1;
+    __pyx_t_5 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 106, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __pyx_t_6 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_5);
+    index = 0; __pyx_t_2 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_2)) goto __pyx_L3_unpacking_failed;
+    __Pyx_GOTREF(__pyx_t_2);
+    index = 1; __pyx_t_3 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_3)) goto __pyx_L3_unpacking_failed;
+    __Pyx_GOTREF(__pyx_t_3);
+    index = 2; __pyx_t_4 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_4)) goto __pyx_L3_unpacking_failed;
+    __Pyx_GOTREF(__pyx_t_4);
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 3) < 0) __PYX_ERR(0, 106, __pyx_L1_error)
+    __pyx_t_6 = NULL;
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    goto __pyx_L4_unpacking_done;
+    __pyx_L3_unpacking_failed:;
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __pyx_t_6 = NULL;
+    if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
+    __PYX_ERR(0, 106, __pyx_L1_error)
+    __pyx_L4_unpacking_done:;
+  }
+  __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_7 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 106, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_8 = __Pyx_PyInt_As_size_t(__pyx_t_3); if (unlikely((__pyx_t_8 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 106, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_9 = __Pyx_PyInt_As_size_t(__pyx_t_4); if (unlikely((__pyx_t_9 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 106, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_v_insertion = __pyx_t_7;
+  __pyx_v_deletion = __pyx_t_8;
+  __pyx_v_substitution = __pyx_t_9;
+
+  /* "cpp_process.pyx":107
+ *     cdef size_t insertion, deletion, substitution
+ *     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
+ *     return cached_normalized_levenshtein_init(query, def_process, insertion, deletion, substitution)             # <<<<<<<<<<<<<<
+ * 
+ * cdef inline distance_context CachedLevenshteinInit(object query, int def_process, dict kwargs):
+ */
+  try {
+    __pyx_t_10 = cached_normalized_levenshtein_init(__pyx_v_query, __pyx_v_def_process, __pyx_v_insertion, __pyx_v_deletion, __pyx_v_substitution);
+  } catch(...) {
+    __Pyx_CppExn2PyErr();
+    __PYX_ERR(0, 107, __pyx_L1_error)
+  }
+  __pyx_r = __pyx_t_10;
+  goto __pyx_L0;
+
+  /* "cpp_process.pyx":104
+ * 
+ * 
+ * cdef inline scorer_context CachedNormalizedLevenshteinInit(object query, int def_process, dict kwargs):             # <<<<<<<<<<<<<<
+ *     cdef size_t insertion, deletion, substitution
+ *     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_WriteUnraisable("cpp_process.CachedNormalizedLevenshteinInit", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __Pyx_pretend_to_initialize(&__pyx_r);
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "cpp_process.pyx":109
+ *     return cached_normalized_levenshtein_init(query, def_process, insertion, deletion, substitution)
+ * 
+ * cdef inline distance_context CachedLevenshteinInit(object query, int def_process, dict kwargs):             # <<<<<<<<<<<<<<
+ *     cdef size_t insertion, deletion, substitution
+ *     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
+ */
+
+static CYTHON_INLINE distance_context __pyx_f_11cpp_process_CachedLevenshteinInit(PyObject *__pyx_v_query, int __pyx_v_def_process, PyObject *__pyx_v_kwargs) {
+  size_t __pyx_v_insertion;
+  size_t __pyx_v_deletion;
+  size_t __pyx_v_substitution;
+  distance_context __pyx_r;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  PyObject *__pyx_t_5 = NULL;
+  PyObject *(*__pyx_t_6)(PyObject *);
+  size_t __pyx_t_7;
+  size_t __pyx_t_8;
+  size_t __pyx_t_9;
+  distance_context __pyx_t_10;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("CachedLevenshteinInit", 0);
+
+  /* "cpp_process.pyx":111
+ * cdef inline distance_context CachedLevenshteinInit(object query, int def_process, dict kwargs):
+ *     cdef size_t insertion, deletion, substitution
+ *     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))             # <<<<<<<<<<<<<<
+ *     return cached_levenshtein_init(query, def_process, insertion, deletion, substitution)
+ * 
+ */
+  if (unlikely(__pyx_v_kwargs == Py_None)) {
+    PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "get");
+    __PYX_ERR(0, 111, __pyx_L1_error)
+  }
+  __pyx_t_1 = __Pyx_PyDict_GetItemDefault(__pyx_v_kwargs, __pyx_n_u_weights, __pyx_tuple_); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 111, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if ((likely(PyTuple_CheckExact(__pyx_t_1))) || (PyList_CheckExact(__pyx_t_1))) {
+    PyObject* sequence = __pyx_t_1;
+    Py_ssize_t size = __Pyx_PySequence_SIZE(sequence);
+    if (unlikely(size != 3)) {
+      if (size > 3) __Pyx_RaiseTooManyValuesError(3);
+      else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
+      __PYX_ERR(0, 111, __pyx_L1_error)
+    }
+    #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+    if (likely(PyTuple_CheckExact(sequence))) {
+      __pyx_t_2 = PyTuple_GET_ITEM(sequence, 0); 
+      __pyx_t_3 = PyTuple_GET_ITEM(sequence, 1); 
+      __pyx_t_4 = PyTuple_GET_ITEM(sequence, 2); 
+    } else {
+      __pyx_t_2 = PyList_GET_ITEM(sequence, 0); 
+      __pyx_t_3 = PyList_GET_ITEM(sequence, 1); 
+      __pyx_t_4 = PyList_GET_ITEM(sequence, 2); 
+    }
+    __Pyx_INCREF(__pyx_t_2);
+    __Pyx_INCREF(__pyx_t_3);
+    __Pyx_INCREF(__pyx_t_4);
+    #else
+    __pyx_t_2 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 111, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_3 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 111, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __pyx_t_4 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 111, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    #endif
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  } else {
+    Py_ssize_t index = -1;
+    __pyx_t_5 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 111, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __pyx_t_6 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_5);
+    index = 0; __pyx_t_2 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_2)) goto __pyx_L3_unpacking_failed;
+    __Pyx_GOTREF(__pyx_t_2);
+    index = 1; __pyx_t_3 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_3)) goto __pyx_L3_unpacking_failed;
+    __Pyx_GOTREF(__pyx_t_3);
+    index = 2; __pyx_t_4 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_4)) goto __pyx_L3_unpacking_failed;
+    __Pyx_GOTREF(__pyx_t_4);
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 3) < 0) __PYX_ERR(0, 111, __pyx_L1_error)
+    __pyx_t_6 = NULL;
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    goto __pyx_L4_unpacking_done;
+    __pyx_L3_unpacking_failed:;
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __pyx_t_6 = NULL;
+    if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
+    __PYX_ERR(0, 111, __pyx_L1_error)
+    __pyx_L4_unpacking_done:;
+  }
+  __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_7 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 111, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_8 = __Pyx_PyInt_As_size_t(__pyx_t_3); if (unlikely((__pyx_t_8 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 111, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_9 = __Pyx_PyInt_As_size_t(__pyx_t_4); if (unlikely((__pyx_t_9 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 111, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_v_insertion = __pyx_t_7;
+  __pyx_v_deletion = __pyx_t_8;
+  __pyx_v_substitution = __pyx_t_9;
+
+  /* "cpp_process.pyx":112
+ *     cdef size_t insertion, deletion, substitution
+ *     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
+ *     return cached_levenshtein_init(query, def_process, insertion, deletion, substitution)             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  try {
+    __pyx_t_10 = cached_levenshtein_init(__pyx_v_query, __pyx_v_def_process, __pyx_v_insertion, __pyx_v_deletion, __pyx_v_substitution);
+  } catch(...) {
+    __Pyx_CppExn2PyErr();
+    __PYX_ERR(0, 112, __pyx_L1_error)
+  }
+  __pyx_r = __pyx_t_10;
+  goto __pyx_L0;
+
+  /* "cpp_process.pyx":109
+ *     return cached_normalized_levenshtein_init(query, def_process, insertion, deletion, substitution)
+ * 
+ * cdef inline distance_context CachedLevenshteinInit(object query, int def_process, dict kwargs):             # <<<<<<<<<<<<<<
+ *     cdef size_t insertion, deletion, substitution
+ *     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_WriteUnraisable("cpp_process.CachedLevenshteinInit", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __Pyx_pretend_to_initialize(&__pyx_r);
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "cpp_process.pyx":115
+ * 
+ * 
+ * cdef inline scorer_context CachedScorerInit(object scorer, object query, int def_process, dict kwargs):             # <<<<<<<<<<<<<<
+ *     cdef scorer_context context
+ * 
+ */
+
+static CYTHON_INLINE scorer_context __pyx_f_11cpp_process_CachedScorerInit(PyObject *__pyx_v_scorer, PyObject *__pyx_v_query, int __pyx_v_def_process, PyObject *__pyx_v_kwargs) {
+  scorer_context __pyx_v_context;
+  scorer_context __pyx_r;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  int __pyx_t_2;
+  int __pyx_t_3;
+  scorer_context __pyx_t_4;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("CachedScorerInit", 0);
+
+  /* "cpp_process.pyx":118
+ *     cdef scorer_context context
+ * 
+ *     if scorer is ratio:             # <<<<<<<<<<<<<<
+ *         context = cached_ratio_init(query, def_process)
+ *     elif scorer is partial_ratio:
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 118, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = (__pyx_v_scorer == __pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_3 = (__pyx_t_2 != 0);
+  if (__pyx_t_3) {
+
+    /* "cpp_process.pyx":119
+ * 
+ *     if scorer is ratio:
+ *         context = cached_ratio_init(query, def_process)             # <<<<<<<<<<<<<<
+ *     elif scorer is partial_ratio:
+ *         context = cached_partial_ratio_init(query, def_process)
+ */
+    try {
+      __pyx_t_4 = cached_ratio_init(__pyx_v_query, __pyx_v_def_process);
+    } catch(...) {
+      __Pyx_CppExn2PyErr();
+      __PYX_ERR(0, 119, __pyx_L1_error)
+    }
+    __pyx_v_context = __pyx_t_4;
+
+    /* "cpp_process.pyx":118
+ *     cdef scorer_context context
+ * 
+ *     if scorer is ratio:             # <<<<<<<<<<<<<<
+ *         context = cached_ratio_init(query, def_process)
+ *     elif scorer is partial_ratio:
+ */
+    goto __pyx_L3;
+  }
+
+  /* "cpp_process.pyx":120
+ *     if scorer is ratio:
+ *         context = cached_ratio_init(query, def_process)
+ *     elif scorer is partial_ratio:             # <<<<<<<<<<<<<<
+ *         context = cached_partial_ratio_init(query, def_process)
+ *     elif scorer is token_sort_ratio:
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_partial_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 120, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_3 = (__pyx_v_scorer == __pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = (__pyx_t_3 != 0);
+  if (__pyx_t_2) {
+
+    /* "cpp_process.pyx":121
+ *         context = cached_ratio_init(query, def_process)
+ *     elif scorer is partial_ratio:
+ *         context = cached_partial_ratio_init(query, def_process)             # <<<<<<<<<<<<<<
+ *     elif scorer is token_sort_ratio:
+ *         context = cached_token_sort_ratio_init(query, def_process)
+ */
+    try {
+      __pyx_t_4 = cached_partial_ratio_init(__pyx_v_query, __pyx_v_def_process);
+    } catch(...) {
+      __Pyx_CppExn2PyErr();
+      __PYX_ERR(0, 121, __pyx_L1_error)
+    }
+    __pyx_v_context = __pyx_t_4;
+
+    /* "cpp_process.pyx":120
+ *     if scorer is ratio:
+ *         context = cached_ratio_init(query, def_process)
+ *     elif scorer is partial_ratio:             # <<<<<<<<<<<<<<
+ *         context = cached_partial_ratio_init(query, def_process)
+ *     elif scorer is token_sort_ratio:
+ */
+    goto __pyx_L3;
+  }
+
+  /* "cpp_process.pyx":122
+ *     elif scorer is partial_ratio:
+ *         context = cached_partial_ratio_init(query, def_process)
+ *     elif scorer is token_sort_ratio:             # <<<<<<<<<<<<<<
+ *         context = cached_token_sort_ratio_init(query, def_process)
+ *     elif scorer is token_set_ratio:
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_token_sort_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 122, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = (__pyx_v_scorer == __pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_3 = (__pyx_t_2 != 0);
+  if (__pyx_t_3) {
+
+    /* "cpp_process.pyx":123
+ *         context = cached_partial_ratio_init(query, def_process)
+ *     elif scorer is token_sort_ratio:
+ *         context = cached_token_sort_ratio_init(query, def_process)             # <<<<<<<<<<<<<<
+ *     elif scorer is token_set_ratio:
+ *         context = cached_token_set_ratio_init(query, def_process)
+ */
+    try {
+      __pyx_t_4 = cached_token_sort_ratio_init(__pyx_v_query, __pyx_v_def_process);
+    } catch(...) {
+      __Pyx_CppExn2PyErr();
+      __PYX_ERR(0, 123, __pyx_L1_error)
+    }
+    __pyx_v_context = __pyx_t_4;
+
+    /* "cpp_process.pyx":122
+ *     elif scorer is partial_ratio:
+ *         context = cached_partial_ratio_init(query, def_process)
+ *     elif scorer is token_sort_ratio:             # <<<<<<<<<<<<<<
+ *         context = cached_token_sort_ratio_init(query, def_process)
+ *     elif scorer is token_set_ratio:
+ */
+    goto __pyx_L3;
+  }
+
+  /* "cpp_process.pyx":124
+ *     elif scorer is token_sort_ratio:
+ *         context = cached_token_sort_ratio_init(query, def_process)
+ *     elif scorer is token_set_ratio:             # <<<<<<<<<<<<<<
+ *         context = cached_token_set_ratio_init(query, def_process)
+ *     elif scorer is token_ratio:
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_token_set_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 124, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_3 = (__pyx_v_scorer == __pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = (__pyx_t_3 != 0);
+  if (__pyx_t_2) {
+
+    /* "cpp_process.pyx":125
+ *         context = cached_token_sort_ratio_init(query, def_process)
+ *     elif scorer is token_set_ratio:
+ *         context = cached_token_set_ratio_init(query, def_process)             # <<<<<<<<<<<<<<
+ *     elif scorer is token_ratio:
+ *         context = cached_token_ratio_init(query, def_process)
+ */
+    try {
+      __pyx_t_4 = cached_token_set_ratio_init(__pyx_v_query, __pyx_v_def_process);
+    } catch(...) {
+      __Pyx_CppExn2PyErr();
+      __PYX_ERR(0, 125, __pyx_L1_error)
+    }
+    __pyx_v_context = __pyx_t_4;
+
+    /* "cpp_process.pyx":124
+ *     elif scorer is token_sort_ratio:
+ *         context = cached_token_sort_ratio_init(query, def_process)
+ *     elif scorer is token_set_ratio:             # <<<<<<<<<<<<<<
+ *         context = cached_token_set_ratio_init(query, def_process)
+ *     elif scorer is token_ratio:
+ */
+    goto __pyx_L3;
+  }
+
+  /* "cpp_process.pyx":126
+ *     elif scorer is token_set_ratio:
+ *         context = cached_token_set_ratio_init(query, def_process)
+ *     elif scorer is token_ratio:             # <<<<<<<<<<<<<<
+ *         context = cached_token_ratio_init(query, def_process)
+ *     elif scorer is partial_token_sort_ratio:
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_token_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 126, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = (__pyx_v_scorer == __pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_3 = (__pyx_t_2 != 0);
+  if (__pyx_t_3) {
+
+    /* "cpp_process.pyx":127
+ *         context = cached_token_set_ratio_init(query, def_process)
+ *     elif scorer is token_ratio:
+ *         context = cached_token_ratio_init(query, def_process)             # <<<<<<<<<<<<<<
+ *     elif scorer is partial_token_sort_ratio:
+ *         context = cached_partial_token_sort_ratio_init(query, def_process)
+ */
+    try {
+      __pyx_t_4 = cached_token_ratio_init(__pyx_v_query, __pyx_v_def_process);
+    } catch(...) {
+      __Pyx_CppExn2PyErr();
+      __PYX_ERR(0, 127, __pyx_L1_error)
+    }
+    __pyx_v_context = __pyx_t_4;
+
+    /* "cpp_process.pyx":126
+ *     elif scorer is token_set_ratio:
+ *         context = cached_token_set_ratio_init(query, def_process)
+ *     elif scorer is token_ratio:             # <<<<<<<<<<<<<<
+ *         context = cached_token_ratio_init(query, def_process)
+ *     elif scorer is partial_token_sort_ratio:
+ */
+    goto __pyx_L3;
+  }
+
+  /* "cpp_process.pyx":128
+ *     elif scorer is token_ratio:
+ *         context = cached_token_ratio_init(query, def_process)
+ *     elif scorer is partial_token_sort_ratio:             # <<<<<<<<<<<<<<
+ *         context = cached_partial_token_sort_ratio_init(query, def_process)
+ *     elif scorer is partial_token_set_ratio:
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_partial_token_sort_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 128, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_3 = (__pyx_v_scorer == __pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = (__pyx_t_3 != 0);
+  if (__pyx_t_2) {
+
+    /* "cpp_process.pyx":129
+ *         context = cached_token_ratio_init(query, def_process)
+ *     elif scorer is partial_token_sort_ratio:
+ *         context = cached_partial_token_sort_ratio_init(query, def_process)             # <<<<<<<<<<<<<<
+ *     elif scorer is partial_token_set_ratio:
+ *         context = cached_partial_token_set_ratio_init(query, def_process)
+ */
+    try {
+      __pyx_t_4 = cached_partial_token_sort_ratio_init(__pyx_v_query, __pyx_v_def_process);
+    } catch(...) {
+      __Pyx_CppExn2PyErr();
+      __PYX_ERR(0, 129, __pyx_L1_error)
+    }
+    __pyx_v_context = __pyx_t_4;
+
+    /* "cpp_process.pyx":128
+ *     elif scorer is token_ratio:
+ *         context = cached_token_ratio_init(query, def_process)
+ *     elif scorer is partial_token_sort_ratio:             # <<<<<<<<<<<<<<
+ *         context = cached_partial_token_sort_ratio_init(query, def_process)
+ *     elif scorer is partial_token_set_ratio:
+ */
+    goto __pyx_L3;
+  }
+
+  /* "cpp_process.pyx":130
+ *     elif scorer is partial_token_sort_ratio:
+ *         context = cached_partial_token_sort_ratio_init(query, def_process)
+ *     elif scorer is partial_token_set_ratio:             # <<<<<<<<<<<<<<
+ *         context = cached_partial_token_set_ratio_init(query, def_process)
+ *     elif scorer is partial_token_ratio:
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_partial_token_set_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 130, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = (__pyx_v_scorer == __pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_3 = (__pyx_t_2 != 0);
+  if (__pyx_t_3) {
+
+    /* "cpp_process.pyx":131
+ *         context = cached_partial_token_sort_ratio_init(query, def_process)
+ *     elif scorer is partial_token_set_ratio:
+ *         context = cached_partial_token_set_ratio_init(query, def_process)             # <<<<<<<<<<<<<<
+ *     elif scorer is partial_token_ratio:
+ *         context = cached_partial_token_ratio_init(query, def_process)
+ */
+    try {
+      __pyx_t_4 = cached_partial_token_set_ratio_init(__pyx_v_query, __pyx_v_def_process);
+    } catch(...) {
+      __Pyx_CppExn2PyErr();
+      __PYX_ERR(0, 131, __pyx_L1_error)
+    }
+    __pyx_v_context = __pyx_t_4;
+
+    /* "cpp_process.pyx":130
+ *     elif scorer is partial_token_sort_ratio:
+ *         context = cached_partial_token_sort_ratio_init(query, def_process)
+ *     elif scorer is partial_token_set_ratio:             # <<<<<<<<<<<<<<
+ *         context = cached_partial_token_set_ratio_init(query, def_process)
+ *     elif scorer is partial_token_ratio:
+ */
+    goto __pyx_L3;
+  }
+
+  /* "cpp_process.pyx":132
+ *     elif scorer is partial_token_set_ratio:
+ *         context = cached_partial_token_set_ratio_init(query, def_process)
+ *     elif scorer is partial_token_ratio:             # <<<<<<<<<<<<<<
+ *         context = cached_partial_token_ratio_init(query, def_process)
+ *     elif scorer is WRatio:
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_partial_token_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 132, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_3 = (__pyx_v_scorer == __pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = (__pyx_t_3 != 0);
+  if (__pyx_t_2) {
+
+    /* "cpp_process.pyx":133
+ *         context = cached_partial_token_set_ratio_init(query, def_process)
+ *     elif scorer is partial_token_ratio:
+ *         context = cached_partial_token_ratio_init(query, def_process)             # <<<<<<<<<<<<<<
+ *     elif scorer is WRatio:
+ *         context = cached_WRatio_init(query, def_process)
+ */
+    try {
+      __pyx_t_4 = cached_partial_token_ratio_init(__pyx_v_query, __pyx_v_def_process);
+    } catch(...) {
+      __Pyx_CppExn2PyErr();
+      __PYX_ERR(0, 133, __pyx_L1_error)
+    }
+    __pyx_v_context = __pyx_t_4;
+
+    /* "cpp_process.pyx":132
+ *     elif scorer is partial_token_set_ratio:
+ *         context = cached_partial_token_set_ratio_init(query, def_process)
+ *     elif scorer is partial_token_ratio:             # <<<<<<<<<<<<<<
+ *         context = cached_partial_token_ratio_init(query, def_process)
+ *     elif scorer is WRatio:
+ */
+    goto __pyx_L3;
+  }
+
+  /* "cpp_process.pyx":134
+ *     elif scorer is partial_token_ratio:
+ *         context = cached_partial_token_ratio_init(query, def_process)
+ *     elif scorer is WRatio:             # <<<<<<<<<<<<<<
+ *         context = cached_WRatio_init(query, def_process)
+ *     elif scorer is QRatio:
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_WRatio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 134, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = (__pyx_v_scorer == __pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_3 = (__pyx_t_2 != 0);
+  if (__pyx_t_3) {
+
+    /* "cpp_process.pyx":135
+ *         context = cached_partial_token_ratio_init(query, def_process)
+ *     elif scorer is WRatio:
+ *         context = cached_WRatio_init(query, def_process)             # <<<<<<<<<<<<<<
+ *     elif scorer is QRatio:
+ *         context = cached_QRatio_init(query, def_process)
+ */
+    try {
+      __pyx_t_4 = cached_WRatio_init(__pyx_v_query, __pyx_v_def_process);
+    } catch(...) {
+      __Pyx_CppExn2PyErr();
+      __PYX_ERR(0, 135, __pyx_L1_error)
+    }
+    __pyx_v_context = __pyx_t_4;
+
+    /* "cpp_process.pyx":134
+ *     elif scorer is partial_token_ratio:
+ *         context = cached_partial_token_ratio_init(query, def_process)
+ *     elif scorer is WRatio:             # <<<<<<<<<<<<<<
+ *         context = cached_WRatio_init(query, def_process)
+ *     elif scorer is QRatio:
+ */
+    goto __pyx_L3;
+  }
+
+  /* "cpp_process.pyx":136
+ *     elif scorer is WRatio:
+ *         context = cached_WRatio_init(query, def_process)
+ *     elif scorer is QRatio:             # <<<<<<<<<<<<<<
+ *         context = cached_QRatio_init(query, def_process)
+ *     elif scorer is normalized_levenshtein:
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_QRatio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 136, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_3 = (__pyx_v_scorer == __pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = (__pyx_t_3 != 0);
+  if (__pyx_t_2) {
+
+    /* "cpp_process.pyx":137
+ *         context = cached_WRatio_init(query, def_process)
+ *     elif scorer is QRatio:
+ *         context = cached_QRatio_init(query, def_process)             # <<<<<<<<<<<<<<
+ *     elif scorer is normalized_levenshtein:
+ *         context = CachedNormalizedLevenshteinInit(query, def_process, kwargs)
+ */
+    try {
+      __pyx_t_4 = cached_QRatio_init(__pyx_v_query, __pyx_v_def_process);
+    } catch(...) {
+      __Pyx_CppExn2PyErr();
+      __PYX_ERR(0, 137, __pyx_L1_error)
+    }
+    __pyx_v_context = __pyx_t_4;
+
+    /* "cpp_process.pyx":136
+ *     elif scorer is WRatio:
+ *         context = cached_WRatio_init(query, def_process)
+ *     elif scorer is QRatio:             # <<<<<<<<<<<<<<
+ *         context = cached_QRatio_init(query, def_process)
+ *     elif scorer is normalized_levenshtein:
+ */
+    goto __pyx_L3;
+  }
+
+  /* "cpp_process.pyx":138
+ *     elif scorer is QRatio:
+ *         context = cached_QRatio_init(query, def_process)
+ *     elif scorer is normalized_levenshtein:             # <<<<<<<<<<<<<<
+ *         context = CachedNormalizedLevenshteinInit(query, def_process, kwargs)
+ *     elif scorer is normalized_hamming:
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_normalized_levenshtein); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 138, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = (__pyx_v_scorer == __pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_3 = (__pyx_t_2 != 0);
+  if (__pyx_t_3) {
+
+    /* "cpp_process.pyx":139
+ *         context = cached_QRatio_init(query, def_process)
+ *     elif scorer is normalized_levenshtein:
+ *         context = CachedNormalizedLevenshteinInit(query, def_process, kwargs)             # <<<<<<<<<<<<<<
+ *     elif scorer is normalized_hamming:
+ *         context = cached_normalized_hamming_init(query, def_process)
+ */
+    __pyx_v_context = __pyx_f_11cpp_process_CachedNormalizedLevenshteinInit(__pyx_v_query, __pyx_v_def_process, __pyx_v_kwargs);
+
+    /* "cpp_process.pyx":138
+ *     elif scorer is QRatio:
+ *         context = cached_QRatio_init(query, def_process)
+ *     elif scorer is normalized_levenshtein:             # <<<<<<<<<<<<<<
+ *         context = CachedNormalizedLevenshteinInit(query, def_process, kwargs)
+ *     elif scorer is normalized_hamming:
+ */
+    goto __pyx_L3;
+  }
+
+  /* "cpp_process.pyx":140
+ *     elif scorer is normalized_levenshtein:
+ *         context = CachedNormalizedLevenshteinInit(query, def_process, kwargs)
+ *     elif scorer is normalized_hamming:             # <<<<<<<<<<<<<<
+ *         context = cached_normalized_hamming_init(query, def_process)
+ *     else:
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_normalized_hamming); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 140, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_3 = (__pyx_v_scorer == __pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = (__pyx_t_3 != 0);
+  if (__pyx_t_2) {
+
+    /* "cpp_process.pyx":141
+ *         context = CachedNormalizedLevenshteinInit(query, def_process, kwargs)
+ *     elif scorer is normalized_hamming:
+ *         context = cached_normalized_hamming_init(query, def_process)             # <<<<<<<<<<<<<<
+ *     else:
+ *         context.context = NULL
+ */
+    try {
+      __pyx_t_4 = cached_normalized_hamming_init(__pyx_v_query, __pyx_v_def_process);
+    } catch(...) {
+      __Pyx_CppExn2PyErr();
+      __PYX_ERR(0, 141, __pyx_L1_error)
+    }
+    __pyx_v_context = __pyx_t_4;
+
+    /* "cpp_process.pyx":140
+ *     elif scorer is normalized_levenshtein:
+ *         context = CachedNormalizedLevenshteinInit(query, def_process, kwargs)
+ *     elif scorer is normalized_hamming:             # <<<<<<<<<<<<<<
+ *         context = cached_normalized_hamming_init(query, def_process)
+ *     else:
+ */
+    goto __pyx_L3;
+  }
+
+  /* "cpp_process.pyx":143
+ *         context = cached_normalized_hamming_init(query, def_process)
+ *     else:
+ *         context.context = NULL             # <<<<<<<<<<<<<<
+ *     return context
+ * 
+ */
+  /*else*/ {
+    __pyx_v_context.context = NULL;
+  }
+  __pyx_L3:;
+
+  /* "cpp_process.pyx":144
+ *     else:
+ *         context.context = NULL
+ *     return context             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __pyx_r = __pyx_v_context;
+  goto __pyx_L0;
+
+  /* "cpp_process.pyx":115
+ * 
+ * 
+ * cdef inline scorer_context CachedScorerInit(object scorer, object query, int def_process, dict kwargs):             # <<<<<<<<<<<<<<
+ *     cdef scorer_context context
+ * 
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_WriteUnraisable("cpp_process.CachedScorerInit", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __Pyx_pretend_to_initialize(&__pyx_r);
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "cpp_process.pyx":147
+ * 
+ * 
+ * cdef inline distance_context CachedDistanceInit(object scorer, object query, int def_process, dict kwargs):             # <<<<<<<<<<<<<<
+ *     cdef distance_context context
+ * 
+ */
+
+static CYTHON_INLINE distance_context __pyx_f_11cpp_process_CachedDistanceInit(PyObject *__pyx_v_scorer, PyObject *__pyx_v_query, int __pyx_v_def_process, PyObject *__pyx_v_kwargs) {
+  distance_context __pyx_v_context;
+  distance_context __pyx_r;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  int __pyx_t_2;
+  int __pyx_t_3;
+  distance_context __pyx_t_4;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("CachedDistanceInit", 0);
+
+  /* "cpp_process.pyx":150
+ *     cdef distance_context context
+ * 
+ *     if scorer is levenshtein:             # <<<<<<<<<<<<<<
+ *         context = CachedLevenshteinInit(query, def_process, kwargs)
+ *     elif scorer is hamming:
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_levenshtein); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 150, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = (__pyx_v_scorer == __pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_3 = (__pyx_t_2 != 0);
+  if (__pyx_t_3) {
+
+    /* "cpp_process.pyx":151
+ * 
+ *     if scorer is levenshtein:
+ *         context = CachedLevenshteinInit(query, def_process, kwargs)             # <<<<<<<<<<<<<<
+ *     elif scorer is hamming:
+ *         context = cached_hamming_init(query, def_process)
+ */
+    __pyx_v_context = __pyx_f_11cpp_process_CachedLevenshteinInit(__pyx_v_query, __pyx_v_def_process, __pyx_v_kwargs);
+
+    /* "cpp_process.pyx":150
+ *     cdef distance_context context
+ * 
+ *     if scorer is levenshtein:             # <<<<<<<<<<<<<<
+ *         context = CachedLevenshteinInit(query, def_process, kwargs)
+ *     elif scorer is hamming:
+ */
+    goto __pyx_L3;
+  }
+
+  /* "cpp_process.pyx":152
+ *     if scorer is levenshtein:
+ *         context = CachedLevenshteinInit(query, def_process, kwargs)
+ *     elif scorer is hamming:             # <<<<<<<<<<<<<<
+ *         context = cached_hamming_init(query, def_process)
+ *     else:
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_hamming); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 152, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_3 = (__pyx_v_scorer == __pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = (__pyx_t_3 != 0);
+  if (__pyx_t_2) {
+
+    /* "cpp_process.pyx":153
+ *         context = CachedLevenshteinInit(query, def_process, kwargs)
+ *     elif scorer is hamming:
+ *         context = cached_hamming_init(query, def_process)             # <<<<<<<<<<<<<<
+ *     else:
+ *         context.context = NULL
+ */
+    try {
+      __pyx_t_4 = cached_hamming_init(__pyx_v_query, __pyx_v_def_process);
+    } catch(...) {
+      __Pyx_CppExn2PyErr();
+      __PYX_ERR(0, 153, __pyx_L1_error)
+    }
+    __pyx_v_context = __pyx_t_4;
+
+    /* "cpp_process.pyx":152
+ *     if scorer is levenshtein:
+ *         context = CachedLevenshteinInit(query, def_process, kwargs)
+ *     elif scorer is hamming:             # <<<<<<<<<<<<<<
+ *         context = cached_hamming_init(query, def_process)
+ *     else:
+ */
+    goto __pyx_L3;
+  }
+
+  /* "cpp_process.pyx":155
+ *         context = cached_hamming_init(query, def_process)
+ *     else:
+ *         context.context = NULL             # <<<<<<<<<<<<<<
+ *     return context
+ * 
+ */
+  /*else*/ {
+    __pyx_v_context.context = NULL;
+  }
+  __pyx_L3:;
+
+  /* "cpp_process.pyx":156
+ *     else:
+ *         context.context = NULL
+ *     return context             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __pyx_r = __pyx_v_context;
+  goto __pyx_L0;
+
+  /* "cpp_process.pyx":147
+ * 
+ * 
+ * cdef inline distance_context CachedDistanceInit(object scorer, object query, int def_process, dict kwargs):             # <<<<<<<<<<<<<<
+ *     cdef distance_context context
+ * 
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_WriteUnraisable("cpp_process.CachedDistanceInit", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __Pyx_pretend_to_initialize(&__pyx_r);
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "cpp_process.pyx":159
  * 
  * 
  * cdef inline extractOne_dict(scorer_context context, choices, processor, double score_cutoff):             # <<<<<<<<<<<<<<
@@ -2916,6 +3869,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
   PyObject *__pyx_v_result_key = NULL;
   PyObject *__pyx_v_choice_key = NULL;
   PyObject *__pyx_v_choice = NULL;
+  PyObject *__pyx_v_proc_choice = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
@@ -2934,7 +3888,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("extractOne_dict", 0);
 
-  /* "cpp_process.pyx":109
+  /* "cpp_process.pyx":167
  *     cdef double score
  *     # use -1 as score, so even a score of 0 in the first iteration is higher
  *     cdef double result_score = -1             # <<<<<<<<<<<<<<
@@ -2943,7 +3897,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
  */
   __pyx_v_result_score = -1.0;
 
-  /* "cpp_process.pyx":110
+  /* "cpp_process.pyx":168
  *     # use -1 as score, so even a score of 0 in the first iteration is higher
  *     cdef double result_score = -1
  *     result_choice = None             # <<<<<<<<<<<<<<
@@ -2953,7 +3907,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
   __Pyx_INCREF(Py_None);
   __pyx_v_result_choice = Py_None;
 
-  /* "cpp_process.pyx":111
+  /* "cpp_process.pyx":169
  *     cdef double result_score = -1
  *     result_choice = None
  *     result_key = None             # <<<<<<<<<<<<<<
@@ -2963,7 +3917,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
   __Pyx_INCREF(Py_None);
   __pyx_v_result_key = Py_None;
 
-  /* "cpp_process.pyx":113
+  /* "cpp_process.pyx":171
  *     result_key = None
  * 
  *     if processor is not None:             # <<<<<<<<<<<<<<
@@ -2974,7 +3928,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":114
+    /* "cpp_process.pyx":172
  * 
  *     if processor is not None:
  *         for choice_key, choice in choices.items():             # <<<<<<<<<<<<<<
@@ -2984,9 +3938,9 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
     __pyx_t_4 = 0;
     if (unlikely(__pyx_v_choices == Py_None)) {
       PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "items");
-      __PYX_ERR(0, 114, __pyx_L1_error)
+      __PYX_ERR(0, 172, __pyx_L1_error)
     }
-    __pyx_t_7 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_5), (&__pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 114, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_5), (&__pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 172, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_XDECREF(__pyx_t_3);
     __pyx_t_3 = __pyx_t_7;
@@ -2994,7 +3948,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
     while (1) {
       __pyx_t_9 = __Pyx_dict_iter_next(__pyx_t_3, __pyx_t_5, &__pyx_t_4, &__pyx_t_7, &__pyx_t_8, NULL, __pyx_t_6);
       if (unlikely(__pyx_t_9 == 0)) break;
-      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 114, __pyx_L1_error)
+      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 172, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_XDECREF_SET(__pyx_v_choice_key, __pyx_t_7);
@@ -3002,7 +3956,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
       __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_8);
       __pyx_t_8 = 0;
 
-      /* "cpp_process.pyx":115
+      /* "cpp_process.pyx":173
  *     if processor is not None:
  *         for choice_key, choice in choices.items():
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -3013,16 +3967,16 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
       __pyx_t_1 = (__pyx_t_2 != 0);
       if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":116
+        /* "cpp_process.pyx":174
  *         for choice_key, choice in choices.items():
  *             if choice is None:
  *                 continue             # <<<<<<<<<<<<<<
  * 
- *             score = context.scorer(context.context, processor(choice), score_cutoff)
+ *             proc_choice = processor(choice)
  */
         goto __pyx_L4_continue;
 
-        /* "cpp_process.pyx":115
+        /* "cpp_process.pyx":173
  *     if processor is not None:
  *         for choice_key, choice in choices.items():
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -3031,12 +3985,12 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
  */
       }
 
-      /* "cpp_process.pyx":118
+      /* "cpp_process.pyx":176
  *                 continue
  * 
- *             score = context.scorer(context.context, processor(choice), score_cutoff)             # <<<<<<<<<<<<<<
- * 
- *             if score >= score_cutoff and score > result_score:
+ *             proc_choice = processor(choice)             # <<<<<<<<<<<<<<
+ *             if proc_choice is None:
+ *                 continue
  */
       __Pyx_INCREF(__pyx_v_processor);
       __pyx_t_7 = __pyx_v_processor; __pyx_t_10 = NULL;
@@ -3055,38 +4009,90 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
         PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_choice};
         __pyx_t_8 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
         __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-        if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 118, __pyx_L1_error)
+        if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 176, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       }
+      __Pyx_XDECREF_SET(__pyx_v_proc_choice, __pyx_t_8);
+      __pyx_t_8 = 0;
+
+      /* "cpp_process.pyx":177
+ * 
+ *             proc_choice = processor(choice)
+ *             if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                 continue
+ * 
+ */
+      __pyx_t_1 = (__pyx_v_proc_choice == Py_None);
+      __pyx_t_2 = (__pyx_t_1 != 0);
+      if (__pyx_t_2) {
+
+        /* "cpp_process.pyx":178
+ *             proc_choice = processor(choice)
+ *             if proc_choice is None:
+ *                 continue             # <<<<<<<<<<<<<<
+ * 
+ *             validate_string(proc_choice, "choice must be a String or None")
+ */
+        goto __pyx_L4_continue;
+
+        /* "cpp_process.pyx":177
+ * 
+ *             proc_choice = processor(choice)
+ *             if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                 continue
+ * 
+ */
+      }
+
+      /* "cpp_process.pyx":180
+ *                 continue
+ * 
+ *             validate_string(proc_choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ * 
+ *             score = context.scorer(context.context, proc_choice, score_cutoff)
+ */
       try {
-        __pyx_t_11 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_t_8, __pyx_v_score_cutoff);
+        validate_string(__pyx_v_proc_choice, ((char const *)"choice must be a String or None"));
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 118, __pyx_L1_error)
+        __PYX_ERR(0, 180, __pyx_L1_error)
       }
-      __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+
+      /* "cpp_process.pyx":182
+ *             validate_string(proc_choice, "choice must be a String or None")
+ * 
+ *             score = context.scorer(context.context, proc_choice, score_cutoff)             # <<<<<<<<<<<<<<
+ * 
+ *             if score >= score_cutoff and score > result_score:
+ */
+      try {
+        __pyx_t_11 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_v_proc_choice, __pyx_v_score_cutoff);
+      } catch(...) {
+        __Pyx_CppExn2PyErr();
+        __PYX_ERR(0, 182, __pyx_L1_error)
+      }
       __pyx_v_score = __pyx_t_11;
 
-      /* "cpp_process.pyx":120
- *             score = context.scorer(context.context, processor(choice), score_cutoff)
+      /* "cpp_process.pyx":184
+ *             score = context.scorer(context.context, proc_choice, score_cutoff)
  * 
  *             if score >= score_cutoff and score > result_score:             # <<<<<<<<<<<<<<
  *                 result_score = score_cutoff = score
  *                 result_choice = choice
  */
-      __pyx_t_2 = ((__pyx_v_score >= __pyx_v_score_cutoff) != 0);
-      if (__pyx_t_2) {
-      } else {
-        __pyx_t_1 = __pyx_t_2;
-        goto __pyx_L8_bool_binop_done;
-      }
-      __pyx_t_2 = ((__pyx_v_score > __pyx_v_result_score) != 0);
-      __pyx_t_1 = __pyx_t_2;
-      __pyx_L8_bool_binop_done:;
+      __pyx_t_1 = ((__pyx_v_score >= __pyx_v_score_cutoff) != 0);
       if (__pyx_t_1) {
+      } else {
+        __pyx_t_2 = __pyx_t_1;
+        goto __pyx_L9_bool_binop_done;
+      }
+      __pyx_t_1 = ((__pyx_v_score > __pyx_v_result_score) != 0);
+      __pyx_t_2 = __pyx_t_1;
+      __pyx_L9_bool_binop_done:;
+      if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":121
+        /* "cpp_process.pyx":185
  * 
  *             if score >= score_cutoff and score > result_score:
  *                 result_score = score_cutoff = score             # <<<<<<<<<<<<<<
@@ -3096,7 +4102,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
         __pyx_v_result_score = __pyx_v_score;
         __pyx_v_score_cutoff = __pyx_v_score;
 
-        /* "cpp_process.pyx":122
+        /* "cpp_process.pyx":186
  *             if score >= score_cutoff and score > result_score:
  *                 result_score = score_cutoff = score
  *                 result_choice = choice             # <<<<<<<<<<<<<<
@@ -3106,7 +4112,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
         __Pyx_INCREF(__pyx_v_choice);
         __Pyx_DECREF_SET(__pyx_v_result_choice, __pyx_v_choice);
 
-        /* "cpp_process.pyx":123
+        /* "cpp_process.pyx":187
  *                 result_score = score_cutoff = score
  *                 result_choice = choice
  *                 result_key = choice_key             # <<<<<<<<<<<<<<
@@ -3116,17 +4122,17 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
         __Pyx_INCREF(__pyx_v_choice_key);
         __Pyx_DECREF_SET(__pyx_v_result_key, __pyx_v_choice_key);
 
-        /* "cpp_process.pyx":125
+        /* "cpp_process.pyx":189
  *                 result_key = choice_key
  * 
  *                 if result_score == 100:             # <<<<<<<<<<<<<<
  *                     break
  *     else:
  */
-        __pyx_t_1 = ((__pyx_v_result_score == 100.0) != 0);
-        if (__pyx_t_1) {
+        __pyx_t_2 = ((__pyx_v_result_score == 100.0) != 0);
+        if (__pyx_t_2) {
 
-          /* "cpp_process.pyx":126
+          /* "cpp_process.pyx":190
  * 
  *                 if result_score == 100:
  *                     break             # <<<<<<<<<<<<<<
@@ -3135,7 +4141,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
  */
           goto __pyx_L5_break;
 
-          /* "cpp_process.pyx":125
+          /* "cpp_process.pyx":189
  *                 result_key = choice_key
  * 
  *                 if result_score == 100:             # <<<<<<<<<<<<<<
@@ -3144,8 +4150,8 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
  */
         }
 
-        /* "cpp_process.pyx":120
- *             score = context.scorer(context.context, processor(choice), score_cutoff)
+        /* "cpp_process.pyx":184
+ *             score = context.scorer(context.context, proc_choice, score_cutoff)
  * 
  *             if score >= score_cutoff and score > result_score:             # <<<<<<<<<<<<<<
  *                 result_score = score_cutoff = score
@@ -3157,7 +4163,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
     __pyx_L5_break:;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "cpp_process.pyx":113
+    /* "cpp_process.pyx":171
  *     result_key = None
  * 
  *     if processor is not None:             # <<<<<<<<<<<<<<
@@ -3167,7 +4173,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
     goto __pyx_L3;
   }
 
-  /* "cpp_process.pyx":128
+  /* "cpp_process.pyx":192
  *                     break
  *     else:
  *         for choice_key, choice in choices.items():             # <<<<<<<<<<<<<<
@@ -3178,9 +4184,9 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
     __pyx_t_5 = 0;
     if (unlikely(__pyx_v_choices == Py_None)) {
       PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "items");
-      __PYX_ERR(0, 128, __pyx_L1_error)
+      __PYX_ERR(0, 192, __pyx_L1_error)
     }
-    __pyx_t_8 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_4), (&__pyx_t_6)); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 128, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_4), (&__pyx_t_6)); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 192, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_XDECREF(__pyx_t_3);
     __pyx_t_3 = __pyx_t_8;
@@ -3188,7 +4194,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
     while (1) {
       __pyx_t_9 = __Pyx_dict_iter_next(__pyx_t_3, __pyx_t_4, &__pyx_t_5, &__pyx_t_8, &__pyx_t_7, NULL, __pyx_t_6);
       if (unlikely(__pyx_t_9 == 0)) break;
-      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 128, __pyx_L1_error)
+      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 192, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_XDECREF_SET(__pyx_v_choice_key, __pyx_t_8);
@@ -3196,27 +4202,27 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
       __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_7);
       __pyx_t_7 = 0;
 
-      /* "cpp_process.pyx":129
+      /* "cpp_process.pyx":193
  *     else:
  *         for choice_key, choice in choices.items():
  *             if choice is None:             # <<<<<<<<<<<<<<
  *                 continue
  * 
  */
-      __pyx_t_1 = (__pyx_v_choice == Py_None);
-      __pyx_t_2 = (__pyx_t_1 != 0);
-      if (__pyx_t_2) {
+      __pyx_t_2 = (__pyx_v_choice == Py_None);
+      __pyx_t_1 = (__pyx_t_2 != 0);
+      if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":130
+        /* "cpp_process.pyx":194
  *         for choice_key, choice in choices.items():
  *             if choice is None:
  *                 continue             # <<<<<<<<<<<<<<
  * 
- *             score = context.scorer(context.context, choice, score_cutoff)
+ *             validate_string(choice, "choice must be a String or None")
  */
-        goto __pyx_L11_continue;
+        goto __pyx_L12_continue;
 
-        /* "cpp_process.pyx":129
+        /* "cpp_process.pyx":193
  *     else:
  *         for choice_key, choice in choices.items():
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -3225,9 +4231,23 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
  */
       }
 
-      /* "cpp_process.pyx":132
+      /* "cpp_process.pyx":196
  *                 continue
  * 
+ *             validate_string(choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ *             score = context.scorer(context.context, choice, score_cutoff)
+ * 
+ */
+      try {
+        validate_string(__pyx_v_choice, ((char const *)"choice must be a String or None"));
+      } catch(...) {
+        __Pyx_CppExn2PyErr();
+        __PYX_ERR(0, 196, __pyx_L1_error)
+      }
+
+      /* "cpp_process.pyx":197
+ * 
+ *             validate_string(choice, "choice must be a String or None")
  *             score = context.scorer(context.context, choice, score_cutoff)             # <<<<<<<<<<<<<<
  * 
  *             if score >= score_cutoff and score > result_score:
@@ -3236,29 +4256,29 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
         __pyx_t_11 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_v_choice, __pyx_v_score_cutoff);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 132, __pyx_L1_error)
+        __PYX_ERR(0, 197, __pyx_L1_error)
       }
       __pyx_v_score = __pyx_t_11;
 
-      /* "cpp_process.pyx":134
+      /* "cpp_process.pyx":199
  *             score = context.scorer(context.context, choice, score_cutoff)
  * 
  *             if score >= score_cutoff and score > result_score:             # <<<<<<<<<<<<<<
  *                 result_score = score_cutoff = score
  *                 result_choice = choice
  */
-      __pyx_t_1 = ((__pyx_v_score >= __pyx_v_score_cutoff) != 0);
-      if (__pyx_t_1) {
-      } else {
-        __pyx_t_2 = __pyx_t_1;
-        goto __pyx_L15_bool_binop_done;
-      }
-      __pyx_t_1 = ((__pyx_v_score > __pyx_v_result_score) != 0);
-      __pyx_t_2 = __pyx_t_1;
-      __pyx_L15_bool_binop_done:;
+      __pyx_t_2 = ((__pyx_v_score >= __pyx_v_score_cutoff) != 0);
       if (__pyx_t_2) {
+      } else {
+        __pyx_t_1 = __pyx_t_2;
+        goto __pyx_L16_bool_binop_done;
+      }
+      __pyx_t_2 = ((__pyx_v_score > __pyx_v_result_score) != 0);
+      __pyx_t_1 = __pyx_t_2;
+      __pyx_L16_bool_binop_done:;
+      if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":135
+        /* "cpp_process.pyx":200
  * 
  *             if score >= score_cutoff and score > result_score:
  *                 result_score = score_cutoff = score             # <<<<<<<<<<<<<<
@@ -3268,7 +4288,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
         __pyx_v_result_score = __pyx_v_score;
         __pyx_v_score_cutoff = __pyx_v_score;
 
-        /* "cpp_process.pyx":136
+        /* "cpp_process.pyx":201
  *             if score >= score_cutoff and score > result_score:
  *                 result_score = score_cutoff = score
  *                 result_choice = choice             # <<<<<<<<<<<<<<
@@ -3278,7 +4298,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
         __Pyx_INCREF(__pyx_v_choice);
         __Pyx_DECREF_SET(__pyx_v_result_choice, __pyx_v_choice);
 
-        /* "cpp_process.pyx":137
+        /* "cpp_process.pyx":202
  *                 result_score = score_cutoff = score
  *                 result_choice = choice
  *                 result_key = choice_key             # <<<<<<<<<<<<<<
@@ -3288,26 +4308,26 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
         __Pyx_INCREF(__pyx_v_choice_key);
         __Pyx_DECREF_SET(__pyx_v_result_key, __pyx_v_choice_key);
 
-        /* "cpp_process.pyx":139
+        /* "cpp_process.pyx":204
  *                 result_key = choice_key
  * 
  *                 if result_score == 100:             # <<<<<<<<<<<<<<
  *                     break
  * 
  */
-        __pyx_t_2 = ((__pyx_v_result_score == 100.0) != 0);
-        if (__pyx_t_2) {
+        __pyx_t_1 = ((__pyx_v_result_score == 100.0) != 0);
+        if (__pyx_t_1) {
 
-          /* "cpp_process.pyx":140
+          /* "cpp_process.pyx":205
  * 
  *                 if result_score == 100:
  *                     break             # <<<<<<<<<<<<<<
  * 
  *     return (result_choice, result_score, result_key) if result_choice is not None else None
  */
-          goto __pyx_L12_break;
+          goto __pyx_L13_break;
 
-          /* "cpp_process.pyx":139
+          /* "cpp_process.pyx":204
  *                 result_key = choice_key
  * 
  *                 if result_score == 100:             # <<<<<<<<<<<<<<
@@ -3316,7 +4336,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
  */
         }
 
-        /* "cpp_process.pyx":134
+        /* "cpp_process.pyx":199
  *             score = context.scorer(context.context, choice, score_cutoff)
  * 
  *             if score >= score_cutoff and score > result_score:             # <<<<<<<<<<<<<<
@@ -3324,14 +4344,14 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
  *                 result_choice = choice
  */
       }
-      __pyx_L11_continue:;
+      __pyx_L12_continue:;
     }
-    __pyx_L12_break:;
+    __pyx_L13_break:;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   }
   __pyx_L3:;
 
-  /* "cpp_process.pyx":142
+  /* "cpp_process.pyx":207
  *                     break
  * 
  *     return (result_choice, result_score, result_key) if result_choice is not None else None             # <<<<<<<<<<<<<<
@@ -3339,11 +4359,11 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = (__pyx_v_result_choice != Py_None);
-  if ((__pyx_t_2 != 0)) {
-    __pyx_t_7 = PyFloat_FromDouble(__pyx_v_result_score); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 142, __pyx_L1_error)
+  __pyx_t_1 = (__pyx_v_result_choice != Py_None);
+  if ((__pyx_t_1 != 0)) {
+    __pyx_t_7 = PyFloat_FromDouble(__pyx_v_result_score); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 207, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 142, __pyx_L1_error)
+    __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 207, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_INCREF(__pyx_v_result_choice);
     __Pyx_GIVEREF(__pyx_v_result_choice);
@@ -3364,7 +4384,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "cpp_process.pyx":101
+  /* "cpp_process.pyx":159
  * 
  * 
  * cdef inline extractOne_dict(scorer_context context, choices, processor, double score_cutoff):             # <<<<<<<<<<<<<<
@@ -3385,12 +4405,13 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_dict(scorer_cont
   __Pyx_XDECREF(__pyx_v_result_key);
   __Pyx_XDECREF(__pyx_v_choice_key);
   __Pyx_XDECREF(__pyx_v_choice);
+  __Pyx_XDECREF(__pyx_v_proc_choice);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "cpp_process.pyx":145
+/* "cpp_process.pyx":210
  * 
  * 
  * cdef inline extractOne_distance_dict(distance_context context, choices, processor, size_t max_):             # <<<<<<<<<<<<<<
@@ -3405,6 +4426,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
   PyObject *__pyx_v_result_key = NULL;
   PyObject *__pyx_v_choice_key = NULL;
   PyObject *__pyx_v_choice = NULL;
+  PyObject *__pyx_v_proc_choice = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
@@ -3423,7 +4445,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("extractOne_distance_dict", 0);
 
-  /* "cpp_process.pyx":152
+  /* "cpp_process.pyx":217
  *     """
  *     cdef size_t distance
  *     cdef size_t result_distance = <size_t>-1             # <<<<<<<<<<<<<<
@@ -3432,7 +4454,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
  */
   __pyx_v_result_distance = ((size_t)-1L);
 
-  /* "cpp_process.pyx":153
+  /* "cpp_process.pyx":218
  *     cdef size_t distance
  *     cdef size_t result_distance = <size_t>-1
  *     result_choice = None             # <<<<<<<<<<<<<<
@@ -3442,7 +4464,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
   __Pyx_INCREF(Py_None);
   __pyx_v_result_choice = Py_None;
 
-  /* "cpp_process.pyx":154
+  /* "cpp_process.pyx":219
  *     cdef size_t result_distance = <size_t>-1
  *     result_choice = None
  *     result_key = None             # <<<<<<<<<<<<<<
@@ -3452,7 +4474,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
   __Pyx_INCREF(Py_None);
   __pyx_v_result_key = Py_None;
 
-  /* "cpp_process.pyx":156
+  /* "cpp_process.pyx":221
  *     result_key = None
  * 
  *     if processor is not None:             # <<<<<<<<<<<<<<
@@ -3463,7 +4485,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":157
+    /* "cpp_process.pyx":222
  * 
  *     if processor is not None:
  *         for choice_key, choice in choices.items():             # <<<<<<<<<<<<<<
@@ -3473,9 +4495,9 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
     __pyx_t_4 = 0;
     if (unlikely(__pyx_v_choices == Py_None)) {
       PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "items");
-      __PYX_ERR(0, 157, __pyx_L1_error)
+      __PYX_ERR(0, 222, __pyx_L1_error)
     }
-    __pyx_t_7 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_5), (&__pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 157, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_5), (&__pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 222, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_XDECREF(__pyx_t_3);
     __pyx_t_3 = __pyx_t_7;
@@ -3483,7 +4505,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
     while (1) {
       __pyx_t_9 = __Pyx_dict_iter_next(__pyx_t_3, __pyx_t_5, &__pyx_t_4, &__pyx_t_7, &__pyx_t_8, NULL, __pyx_t_6);
       if (unlikely(__pyx_t_9 == 0)) break;
-      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 157, __pyx_L1_error)
+      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 222, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_XDECREF_SET(__pyx_v_choice_key, __pyx_t_7);
@@ -3491,7 +4513,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
       __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_8);
       __pyx_t_8 = 0;
 
-      /* "cpp_process.pyx":158
+      /* "cpp_process.pyx":223
  *     if processor is not None:
  *         for choice_key, choice in choices.items():
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -3502,16 +4524,16 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
       __pyx_t_1 = (__pyx_t_2 != 0);
       if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":159
+        /* "cpp_process.pyx":224
  *         for choice_key, choice in choices.items():
  *             if choice is None:
  *                 continue             # <<<<<<<<<<<<<<
  * 
- *             distance = context.scorer(context.context, processor(choice), max_)
+ *             proc_choice = processor(choice)
  */
         goto __pyx_L4_continue;
 
-        /* "cpp_process.pyx":158
+        /* "cpp_process.pyx":223
  *     if processor is not None:
  *         for choice_key, choice in choices.items():
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -3520,12 +4542,12 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
  */
       }
 
-      /* "cpp_process.pyx":161
+      /* "cpp_process.pyx":226
  *                 continue
  * 
- *             distance = context.scorer(context.context, processor(choice), max_)             # <<<<<<<<<<<<<<
- * 
- *             if distance <= max_ and distance < result_distance:
+ *             proc_choice = processor(choice)             # <<<<<<<<<<<<<<
+ *             if proc_choice is None:
+ *                 continue
  */
       __Pyx_INCREF(__pyx_v_processor);
       __pyx_t_7 = __pyx_v_processor; __pyx_t_10 = NULL;
@@ -3544,38 +4566,90 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
         PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_choice};
         __pyx_t_8 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
         __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-        if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 161, __pyx_L1_error)
+        if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 226, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       }
+      __Pyx_XDECREF_SET(__pyx_v_proc_choice, __pyx_t_8);
+      __pyx_t_8 = 0;
+
+      /* "cpp_process.pyx":227
+ * 
+ *             proc_choice = processor(choice)
+ *             if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                 continue
+ * 
+ */
+      __pyx_t_1 = (__pyx_v_proc_choice == Py_None);
+      __pyx_t_2 = (__pyx_t_1 != 0);
+      if (__pyx_t_2) {
+
+        /* "cpp_process.pyx":228
+ *             proc_choice = processor(choice)
+ *             if proc_choice is None:
+ *                 continue             # <<<<<<<<<<<<<<
+ * 
+ *             validate_string(proc_choice, "choice must be a String or None")
+ */
+        goto __pyx_L4_continue;
+
+        /* "cpp_process.pyx":227
+ * 
+ *             proc_choice = processor(choice)
+ *             if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                 continue
+ * 
+ */
+      }
+
+      /* "cpp_process.pyx":230
+ *                 continue
+ * 
+ *             validate_string(proc_choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ * 
+ *             distance = context.scorer(context.context, proc_choice, max_)
+ */
       try {
-        __pyx_t_11 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_t_8, __pyx_v_max_);
+        validate_string(__pyx_v_proc_choice, ((char const *)"choice must be a String or None"));
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 161, __pyx_L1_error)
+        __PYX_ERR(0, 230, __pyx_L1_error)
       }
-      __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+
+      /* "cpp_process.pyx":232
+ *             validate_string(proc_choice, "choice must be a String or None")
+ * 
+ *             distance = context.scorer(context.context, proc_choice, max_)             # <<<<<<<<<<<<<<
+ * 
+ *             if distance <= max_ and distance < result_distance:
+ */
+      try {
+        __pyx_t_11 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_v_proc_choice, __pyx_v_max_);
+      } catch(...) {
+        __Pyx_CppExn2PyErr();
+        __PYX_ERR(0, 232, __pyx_L1_error)
+      }
       __pyx_v_distance = __pyx_t_11;
 
-      /* "cpp_process.pyx":163
- *             distance = context.scorer(context.context, processor(choice), max_)
+      /* "cpp_process.pyx":234
+ *             distance = context.scorer(context.context, proc_choice, max_)
  * 
  *             if distance <= max_ and distance < result_distance:             # <<<<<<<<<<<<<<
  *                 result_distance = max_ = distance
  *                 result_choice = choice
  */
-      __pyx_t_2 = ((__pyx_v_distance <= __pyx_v_max_) != 0);
-      if (__pyx_t_2) {
-      } else {
-        __pyx_t_1 = __pyx_t_2;
-        goto __pyx_L8_bool_binop_done;
-      }
-      __pyx_t_2 = ((__pyx_v_distance < __pyx_v_result_distance) != 0);
-      __pyx_t_1 = __pyx_t_2;
-      __pyx_L8_bool_binop_done:;
+      __pyx_t_1 = ((__pyx_v_distance <= __pyx_v_max_) != 0);
       if (__pyx_t_1) {
+      } else {
+        __pyx_t_2 = __pyx_t_1;
+        goto __pyx_L9_bool_binop_done;
+      }
+      __pyx_t_1 = ((__pyx_v_distance < __pyx_v_result_distance) != 0);
+      __pyx_t_2 = __pyx_t_1;
+      __pyx_L9_bool_binop_done:;
+      if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":164
+        /* "cpp_process.pyx":235
  * 
  *             if distance <= max_ and distance < result_distance:
  *                 result_distance = max_ = distance             # <<<<<<<<<<<<<<
@@ -3585,7 +4659,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
         __pyx_v_result_distance = __pyx_v_distance;
         __pyx_v_max_ = __pyx_v_distance;
 
-        /* "cpp_process.pyx":165
+        /* "cpp_process.pyx":236
  *             if distance <= max_ and distance < result_distance:
  *                 result_distance = max_ = distance
  *                 result_choice = choice             # <<<<<<<<<<<<<<
@@ -3595,7 +4669,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
         __Pyx_INCREF(__pyx_v_choice);
         __Pyx_DECREF_SET(__pyx_v_result_choice, __pyx_v_choice);
 
-        /* "cpp_process.pyx":166
+        /* "cpp_process.pyx":237
  *                 result_distance = max_ = distance
  *                 result_choice = choice
  *                 result_key = choice_key             # <<<<<<<<<<<<<<
@@ -3605,17 +4679,17 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
         __Pyx_INCREF(__pyx_v_choice_key);
         __Pyx_DECREF_SET(__pyx_v_result_key, __pyx_v_choice_key);
 
-        /* "cpp_process.pyx":168
+        /* "cpp_process.pyx":239
  *                 result_key = choice_key
  * 
  *                 if result_distance == 0:             # <<<<<<<<<<<<<<
  *                     break
  *     else:
  */
-        __pyx_t_1 = ((__pyx_v_result_distance == 0) != 0);
-        if (__pyx_t_1) {
+        __pyx_t_2 = ((__pyx_v_result_distance == 0) != 0);
+        if (__pyx_t_2) {
 
-          /* "cpp_process.pyx":169
+          /* "cpp_process.pyx":240
  * 
  *                 if result_distance == 0:
  *                     break             # <<<<<<<<<<<<<<
@@ -3624,7 +4698,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
  */
           goto __pyx_L5_break;
 
-          /* "cpp_process.pyx":168
+          /* "cpp_process.pyx":239
  *                 result_key = choice_key
  * 
  *                 if result_distance == 0:             # <<<<<<<<<<<<<<
@@ -3633,8 +4707,8 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
  */
         }
 
-        /* "cpp_process.pyx":163
- *             distance = context.scorer(context.context, processor(choice), max_)
+        /* "cpp_process.pyx":234
+ *             distance = context.scorer(context.context, proc_choice, max_)
  * 
  *             if distance <= max_ and distance < result_distance:             # <<<<<<<<<<<<<<
  *                 result_distance = max_ = distance
@@ -3646,7 +4720,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
     __pyx_L5_break:;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "cpp_process.pyx":156
+    /* "cpp_process.pyx":221
  *     result_key = None
  * 
  *     if processor is not None:             # <<<<<<<<<<<<<<
@@ -3656,7 +4730,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
     goto __pyx_L3;
   }
 
-  /* "cpp_process.pyx":171
+  /* "cpp_process.pyx":242
  *                     break
  *     else:
  *         for choice_key, choice in choices.items():             # <<<<<<<<<<<<<<
@@ -3667,9 +4741,9 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
     __pyx_t_5 = 0;
     if (unlikely(__pyx_v_choices == Py_None)) {
       PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "items");
-      __PYX_ERR(0, 171, __pyx_L1_error)
+      __PYX_ERR(0, 242, __pyx_L1_error)
     }
-    __pyx_t_8 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_4), (&__pyx_t_6)); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 171, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_4), (&__pyx_t_6)); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 242, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_XDECREF(__pyx_t_3);
     __pyx_t_3 = __pyx_t_8;
@@ -3677,7 +4751,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
     while (1) {
       __pyx_t_9 = __Pyx_dict_iter_next(__pyx_t_3, __pyx_t_4, &__pyx_t_5, &__pyx_t_8, &__pyx_t_7, NULL, __pyx_t_6);
       if (unlikely(__pyx_t_9 == 0)) break;
-      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 171, __pyx_L1_error)
+      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 242, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_XDECREF_SET(__pyx_v_choice_key, __pyx_t_8);
@@ -3685,27 +4759,27 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
       __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_7);
       __pyx_t_7 = 0;
 
-      /* "cpp_process.pyx":172
+      /* "cpp_process.pyx":243
  *     else:
  *         for choice_key, choice in choices.items():
  *             if choice is None:             # <<<<<<<<<<<<<<
  *                 continue
  * 
  */
-      __pyx_t_1 = (__pyx_v_choice == Py_None);
-      __pyx_t_2 = (__pyx_t_1 != 0);
-      if (__pyx_t_2) {
+      __pyx_t_2 = (__pyx_v_choice == Py_None);
+      __pyx_t_1 = (__pyx_t_2 != 0);
+      if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":173
+        /* "cpp_process.pyx":244
  *         for choice_key, choice in choices.items():
  *             if choice is None:
  *                 continue             # <<<<<<<<<<<<<<
  * 
- *             distance = context.scorer(context.context, choice, max_)
+ *             validate_string(choice, "choice must be a String or None")
  */
-        goto __pyx_L11_continue;
+        goto __pyx_L12_continue;
 
-        /* "cpp_process.pyx":172
+        /* "cpp_process.pyx":243
  *     else:
  *         for choice_key, choice in choices.items():
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -3714,9 +4788,23 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
  */
       }
 
-      /* "cpp_process.pyx":175
+      /* "cpp_process.pyx":246
  *                 continue
  * 
+ *             validate_string(choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ *             distance = context.scorer(context.context, choice, max_)
+ * 
+ */
+      try {
+        validate_string(__pyx_v_choice, ((char const *)"choice must be a String or None"));
+      } catch(...) {
+        __Pyx_CppExn2PyErr();
+        __PYX_ERR(0, 246, __pyx_L1_error)
+      }
+
+      /* "cpp_process.pyx":247
+ * 
+ *             validate_string(choice, "choice must be a String or None")
  *             distance = context.scorer(context.context, choice, max_)             # <<<<<<<<<<<<<<
  * 
  *             if distance <= max_ and distance < result_distance:
@@ -3725,29 +4813,29 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
         __pyx_t_11 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_v_choice, __pyx_v_max_);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 175, __pyx_L1_error)
+        __PYX_ERR(0, 247, __pyx_L1_error)
       }
       __pyx_v_distance = __pyx_t_11;
 
-      /* "cpp_process.pyx":177
+      /* "cpp_process.pyx":249
  *             distance = context.scorer(context.context, choice, max_)
  * 
  *             if distance <= max_ and distance < result_distance:             # <<<<<<<<<<<<<<
  *                 result_distance = max_ = distance
  *                 result_choice = choice
  */
-      __pyx_t_1 = ((__pyx_v_distance <= __pyx_v_max_) != 0);
-      if (__pyx_t_1) {
-      } else {
-        __pyx_t_2 = __pyx_t_1;
-        goto __pyx_L15_bool_binop_done;
-      }
-      __pyx_t_1 = ((__pyx_v_distance < __pyx_v_result_distance) != 0);
-      __pyx_t_2 = __pyx_t_1;
-      __pyx_L15_bool_binop_done:;
+      __pyx_t_2 = ((__pyx_v_distance <= __pyx_v_max_) != 0);
       if (__pyx_t_2) {
+      } else {
+        __pyx_t_1 = __pyx_t_2;
+        goto __pyx_L16_bool_binop_done;
+      }
+      __pyx_t_2 = ((__pyx_v_distance < __pyx_v_result_distance) != 0);
+      __pyx_t_1 = __pyx_t_2;
+      __pyx_L16_bool_binop_done:;
+      if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":178
+        /* "cpp_process.pyx":250
  * 
  *             if distance <= max_ and distance < result_distance:
  *                 result_distance = max_ = distance             # <<<<<<<<<<<<<<
@@ -3757,7 +4845,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
         __pyx_v_result_distance = __pyx_v_distance;
         __pyx_v_max_ = __pyx_v_distance;
 
-        /* "cpp_process.pyx":179
+        /* "cpp_process.pyx":251
  *             if distance <= max_ and distance < result_distance:
  *                 result_distance = max_ = distance
  *                 result_choice = choice             # <<<<<<<<<<<<<<
@@ -3767,7 +4855,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
         __Pyx_INCREF(__pyx_v_choice);
         __Pyx_DECREF_SET(__pyx_v_result_choice, __pyx_v_choice);
 
-        /* "cpp_process.pyx":180
+        /* "cpp_process.pyx":252
  *                 result_distance = max_ = distance
  *                 result_choice = choice
  *                 result_key = choice_key             # <<<<<<<<<<<<<<
@@ -3777,26 +4865,26 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
         __Pyx_INCREF(__pyx_v_choice_key);
         __Pyx_DECREF_SET(__pyx_v_result_key, __pyx_v_choice_key);
 
-        /* "cpp_process.pyx":182
+        /* "cpp_process.pyx":254
  *                 result_key = choice_key
  * 
  *                 if result_distance == 0:             # <<<<<<<<<<<<<<
  *                     break
  * 
  */
-        __pyx_t_2 = ((__pyx_v_result_distance == 0) != 0);
-        if (__pyx_t_2) {
+        __pyx_t_1 = ((__pyx_v_result_distance == 0) != 0);
+        if (__pyx_t_1) {
 
-          /* "cpp_process.pyx":183
+          /* "cpp_process.pyx":255
  * 
  *                 if result_distance == 0:
  *                     break             # <<<<<<<<<<<<<<
  * 
  *     return (result_choice, result_distance, result_key) if result_choice is not None else None
  */
-          goto __pyx_L12_break;
+          goto __pyx_L13_break;
 
-          /* "cpp_process.pyx":182
+          /* "cpp_process.pyx":254
  *                 result_key = choice_key
  * 
  *                 if result_distance == 0:             # <<<<<<<<<<<<<<
@@ -3805,7 +4893,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
  */
         }
 
-        /* "cpp_process.pyx":177
+        /* "cpp_process.pyx":249
  *             distance = context.scorer(context.context, choice, max_)
  * 
  *             if distance <= max_ and distance < result_distance:             # <<<<<<<<<<<<<<
@@ -3813,14 +4901,14 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
  *                 result_choice = choice
  */
       }
-      __pyx_L11_continue:;
+      __pyx_L12_continue:;
     }
-    __pyx_L12_break:;
+    __pyx_L13_break:;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   }
   __pyx_L3:;
 
-  /* "cpp_process.pyx":185
+  /* "cpp_process.pyx":257
  *                     break
  * 
  *     return (result_choice, result_distance, result_key) if result_choice is not None else None             # <<<<<<<<<<<<<<
@@ -3828,11 +4916,11 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = (__pyx_v_result_choice != Py_None);
-  if ((__pyx_t_2 != 0)) {
-    __pyx_t_7 = __Pyx_PyInt_FromSize_t(__pyx_v_result_distance); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 185, __pyx_L1_error)
+  __pyx_t_1 = (__pyx_v_result_choice != Py_None);
+  if ((__pyx_t_1 != 0)) {
+    __pyx_t_7 = __Pyx_PyInt_FromSize_t(__pyx_v_result_distance); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 257, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 185, __pyx_L1_error)
+    __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 257, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_INCREF(__pyx_v_result_choice);
     __Pyx_GIVEREF(__pyx_v_result_choice);
@@ -3853,7 +4941,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "cpp_process.pyx":145
+  /* "cpp_process.pyx":210
  * 
  * 
  * cdef inline extractOne_distance_dict(distance_context context, choices, processor, size_t max_):             # <<<<<<<<<<<<<<
@@ -3874,12 +4962,13 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_dict(di
   __Pyx_XDECREF(__pyx_v_result_key);
   __Pyx_XDECREF(__pyx_v_choice_key);
   __Pyx_XDECREF(__pyx_v_choice);
+  __Pyx_XDECREF(__pyx_v_proc_choice);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "cpp_process.pyx":188
+/* "cpp_process.pyx":260
  * 
  * 
  * cdef inline extractOne_list(scorer_context context, choices, processor, double score_cutoff):             # <<<<<<<<<<<<<<
@@ -3894,6 +4983,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
   size_t __pyx_v_result_index;
   PyObject *__pyx_v_result_choice = NULL;
   PyObject *__pyx_v_choice = NULL;
+  PyObject *__pyx_v_proc_choice = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
@@ -3911,7 +5001,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("extractOne_list", 0);
 
-  /* "cpp_process.pyx":194
+  /* "cpp_process.pyx":266
  *       - scorer = normalized scorer implemented in C++
  *     """
  *     cdef double score = 0.0             # <<<<<<<<<<<<<<
@@ -3920,7 +5010,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
  */
   __pyx_v_score = 0.0;
 
-  /* "cpp_process.pyx":196
+  /* "cpp_process.pyx":268
  *     cdef double score = 0.0
  *     # use -1 as score, so even a score of 0 in the first iteration is higher
  *     cdef double result_score = -1             # <<<<<<<<<<<<<<
@@ -3929,7 +5019,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
  */
   __pyx_v_result_score = -1.0;
 
-  /* "cpp_process.pyx":197
+  /* "cpp_process.pyx":269
  *     # use -1 as score, so even a score of 0 in the first iteration is higher
  *     cdef double result_score = -1
  *     cdef size_t i = 0             # <<<<<<<<<<<<<<
@@ -3938,7 +5028,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
  */
   __pyx_v_i = 0;
 
-  /* "cpp_process.pyx":198
+  /* "cpp_process.pyx":270
  *     cdef double result_score = -1
  *     cdef size_t i = 0
  *     cdef size_t result_index = 0             # <<<<<<<<<<<<<<
@@ -3947,7 +5037,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
  */
   __pyx_v_result_index = 0;
 
-  /* "cpp_process.pyx":199
+  /* "cpp_process.pyx":271
  *     cdef size_t i = 0
  *     cdef size_t result_index = 0
  *     result_choice = None             # <<<<<<<<<<<<<<
@@ -3957,7 +5047,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
   __Pyx_INCREF(Py_None);
   __pyx_v_result_choice = Py_None;
 
-  /* "cpp_process.pyx":201
+  /* "cpp_process.pyx":273
  *     result_choice = None
  * 
  *     if processor is not None:             # <<<<<<<<<<<<<<
@@ -3968,7 +5058,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":202
+    /* "cpp_process.pyx":274
  * 
  *     if processor is not None:
  *         for choice in choices:             # <<<<<<<<<<<<<<
@@ -3979,26 +5069,26 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
       __pyx_t_3 = __pyx_v_choices; __Pyx_INCREF(__pyx_t_3); __pyx_t_4 = 0;
       __pyx_t_5 = NULL;
     } else {
-      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 202, __pyx_L1_error)
+      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 274, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 202, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 274, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_5)) {
         if (likely(PyList_CheckExact(__pyx_t_3))) {
           if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 202, __pyx_L1_error)
+          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 274, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 202, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 274, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         } else {
           if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 202, __pyx_L1_error)
+          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 274, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 202, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 274, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         }
@@ -4008,7 +5098,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 202, __pyx_L1_error)
+            else __PYX_ERR(0, 274, __pyx_L1_error)
           }
           break;
         }
@@ -4017,7 +5107,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
       __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "cpp_process.pyx":203
+      /* "cpp_process.pyx":275
  *     if processor is not None:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -4028,7 +5118,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
       __pyx_t_1 = (__pyx_t_2 != 0);
       if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":204
+        /* "cpp_process.pyx":276
  *         for choice in choices:
  *             if choice is None:
  *                 i += 1             # <<<<<<<<<<<<<<
@@ -4037,16 +5127,16 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
  */
         __pyx_v_i = (__pyx_v_i + 1);
 
-        /* "cpp_process.pyx":205
+        /* "cpp_process.pyx":277
  *             if choice is None:
  *                 i += 1
  *                 continue             # <<<<<<<<<<<<<<
  * 
- *             score = context.scorer(context.context, processor(choice), score_cutoff)
+ *             proc_choice = processor(choice)
  */
         goto __pyx_L4_continue;
 
-        /* "cpp_process.pyx":203
+        /* "cpp_process.pyx":275
  *     if processor is not None:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -4055,12 +5145,12 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
  */
       }
 
-      /* "cpp_process.pyx":207
+      /* "cpp_process.pyx":279
  *                 continue
  * 
- *             score = context.scorer(context.context, processor(choice), score_cutoff)             # <<<<<<<<<<<<<<
- * 
- *             if score >= score_cutoff and score > result_score:
+ *             proc_choice = processor(choice)             # <<<<<<<<<<<<<<
+ *             if proc_choice is None:
+ *                 i += 1
  */
       __Pyx_INCREF(__pyx_v_processor);
       __pyx_t_7 = __pyx_v_processor; __pyx_t_8 = NULL;
@@ -4079,38 +5169,99 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
         PyObject *__pyx_callargs[2] = {__pyx_t_8, __pyx_v_choice};
         __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-        if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 207, __pyx_L1_error)
+        if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 279, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       }
+      __Pyx_XDECREF_SET(__pyx_v_proc_choice, __pyx_t_6);
+      __pyx_t_6 = 0;
+
+      /* "cpp_process.pyx":280
+ * 
+ *             proc_choice = processor(choice)
+ *             if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                 i += 1
+ *                 continue
+ */
+      __pyx_t_1 = (__pyx_v_proc_choice == Py_None);
+      __pyx_t_2 = (__pyx_t_1 != 0);
+      if (__pyx_t_2) {
+
+        /* "cpp_process.pyx":281
+ *             proc_choice = processor(choice)
+ *             if proc_choice is None:
+ *                 i += 1             # <<<<<<<<<<<<<<
+ *                 continue
+ * 
+ */
+        __pyx_v_i = (__pyx_v_i + 1);
+
+        /* "cpp_process.pyx":282
+ *             if proc_choice is None:
+ *                 i += 1
+ *                 continue             # <<<<<<<<<<<<<<
+ * 
+ *             validate_string(proc_choice, "choice must be a String or None")
+ */
+        goto __pyx_L4_continue;
+
+        /* "cpp_process.pyx":280
+ * 
+ *             proc_choice = processor(choice)
+ *             if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                 i += 1
+ *                 continue
+ */
+      }
+
+      /* "cpp_process.pyx":284
+ *                 continue
+ * 
+ *             validate_string(proc_choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ * 
+ *             score = context.scorer(context.context, proc_choice, score_cutoff)
+ */
       try {
-        __pyx_t_10 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_t_6, __pyx_v_score_cutoff);
+        validate_string(__pyx_v_proc_choice, ((char const *)"choice must be a String or None"));
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 207, __pyx_L1_error)
+        __PYX_ERR(0, 284, __pyx_L1_error)
       }
-      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+
+      /* "cpp_process.pyx":286
+ *             validate_string(proc_choice, "choice must be a String or None")
+ * 
+ *             score = context.scorer(context.context, proc_choice, score_cutoff)             # <<<<<<<<<<<<<<
+ * 
+ *             if score >= score_cutoff and score > result_score:
+ */
+      try {
+        __pyx_t_10 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_v_proc_choice, __pyx_v_score_cutoff);
+      } catch(...) {
+        __Pyx_CppExn2PyErr();
+        __PYX_ERR(0, 286, __pyx_L1_error)
+      }
       __pyx_v_score = __pyx_t_10;
 
-      /* "cpp_process.pyx":209
- *             score = context.scorer(context.context, processor(choice), score_cutoff)
+      /* "cpp_process.pyx":288
+ *             score = context.scorer(context.context, proc_choice, score_cutoff)
  * 
  *             if score >= score_cutoff and score > result_score:             # <<<<<<<<<<<<<<
  *                 result_score = score_cutoff = score
  *                 result_choice = choice
  */
-      __pyx_t_2 = ((__pyx_v_score >= __pyx_v_score_cutoff) != 0);
-      if (__pyx_t_2) {
-      } else {
-        __pyx_t_1 = __pyx_t_2;
-        goto __pyx_L8_bool_binop_done;
-      }
-      __pyx_t_2 = ((__pyx_v_score > __pyx_v_result_score) != 0);
-      __pyx_t_1 = __pyx_t_2;
-      __pyx_L8_bool_binop_done:;
+      __pyx_t_1 = ((__pyx_v_score >= __pyx_v_score_cutoff) != 0);
       if (__pyx_t_1) {
+      } else {
+        __pyx_t_2 = __pyx_t_1;
+        goto __pyx_L9_bool_binop_done;
+      }
+      __pyx_t_1 = ((__pyx_v_score > __pyx_v_result_score) != 0);
+      __pyx_t_2 = __pyx_t_1;
+      __pyx_L9_bool_binop_done:;
+      if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":210
+        /* "cpp_process.pyx":289
  * 
  *             if score >= score_cutoff and score > result_score:
  *                 result_score = score_cutoff = score             # <<<<<<<<<<<<<<
@@ -4120,7 +5271,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
         __pyx_v_result_score = __pyx_v_score;
         __pyx_v_score_cutoff = __pyx_v_score;
 
-        /* "cpp_process.pyx":211
+        /* "cpp_process.pyx":290
  *             if score >= score_cutoff and score > result_score:
  *                 result_score = score_cutoff = score
  *                 result_choice = choice             # <<<<<<<<<<<<<<
@@ -4130,7 +5281,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
         __Pyx_INCREF(__pyx_v_choice);
         __Pyx_DECREF_SET(__pyx_v_result_choice, __pyx_v_choice);
 
-        /* "cpp_process.pyx":212
+        /* "cpp_process.pyx":291
  *                 result_score = score_cutoff = score
  *                 result_choice = choice
  *                 result_index = i             # <<<<<<<<<<<<<<
@@ -4139,17 +5290,17 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
  */
         __pyx_v_result_index = __pyx_v_i;
 
-        /* "cpp_process.pyx":214
+        /* "cpp_process.pyx":293
  *                 result_index = i
  * 
  *                 if result_score == 100:             # <<<<<<<<<<<<<<
  *                     break
  *             i += 1
  */
-        __pyx_t_1 = ((__pyx_v_result_score == 100.0) != 0);
-        if (__pyx_t_1) {
+        __pyx_t_2 = ((__pyx_v_result_score == 100.0) != 0);
+        if (__pyx_t_2) {
 
-          /* "cpp_process.pyx":215
+          /* "cpp_process.pyx":294
  * 
  *                 if result_score == 100:
  *                     break             # <<<<<<<<<<<<<<
@@ -4158,7 +5309,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
  */
           goto __pyx_L5_break;
 
-          /* "cpp_process.pyx":214
+          /* "cpp_process.pyx":293
  *                 result_index = i
  * 
  *                 if result_score == 100:             # <<<<<<<<<<<<<<
@@ -4167,8 +5318,8 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
  */
         }
 
-        /* "cpp_process.pyx":209
- *             score = context.scorer(context.context, processor(choice), score_cutoff)
+        /* "cpp_process.pyx":288
+ *             score = context.scorer(context.context, proc_choice, score_cutoff)
  * 
  *             if score >= score_cutoff and score > result_score:             # <<<<<<<<<<<<<<
  *                 result_score = score_cutoff = score
@@ -4176,7 +5327,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
  */
       }
 
-      /* "cpp_process.pyx":216
+      /* "cpp_process.pyx":295
  *                 if result_score == 100:
  *                     break
  *             i += 1             # <<<<<<<<<<<<<<
@@ -4185,7 +5336,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
  */
       __pyx_v_i = (__pyx_v_i + 1);
 
-      /* "cpp_process.pyx":202
+      /* "cpp_process.pyx":274
  * 
  *     if processor is not None:
  *         for choice in choices:             # <<<<<<<<<<<<<<
@@ -4197,7 +5348,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
     __pyx_L5_break:;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "cpp_process.pyx":201
+    /* "cpp_process.pyx":273
  *     result_choice = None
  * 
  *     if processor is not None:             # <<<<<<<<<<<<<<
@@ -4207,7 +5358,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
     goto __pyx_L3;
   }
 
-  /* "cpp_process.pyx":218
+  /* "cpp_process.pyx":297
  *             i += 1
  *     else:
  *         for choice in choices:             # <<<<<<<<<<<<<<
@@ -4219,26 +5370,26 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
       __pyx_t_3 = __pyx_v_choices; __Pyx_INCREF(__pyx_t_3); __pyx_t_4 = 0;
       __pyx_t_5 = NULL;
     } else {
-      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 218, __pyx_L1_error)
+      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 297, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 218, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 297, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_5)) {
         if (likely(PyList_CheckExact(__pyx_t_3))) {
           if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 218, __pyx_L1_error)
+          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 297, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 218, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 297, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         } else {
           if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 218, __pyx_L1_error)
+          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 297, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 218, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 297, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         }
@@ -4248,7 +5399,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 218, __pyx_L1_error)
+            else __PYX_ERR(0, 297, __pyx_L1_error)
           }
           break;
         }
@@ -4257,18 +5408,18 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
       __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "cpp_process.pyx":219
+      /* "cpp_process.pyx":298
  *     else:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
  *                 i += 1
  *                 continue
  */
-      __pyx_t_1 = (__pyx_v_choice == Py_None);
-      __pyx_t_2 = (__pyx_t_1 != 0);
-      if (__pyx_t_2) {
+      __pyx_t_2 = (__pyx_v_choice == Py_None);
+      __pyx_t_1 = (__pyx_t_2 != 0);
+      if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":220
+        /* "cpp_process.pyx":299
  *         for choice in choices:
  *             if choice is None:
  *                 i += 1             # <<<<<<<<<<<<<<
@@ -4277,16 +5428,16 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
  */
         __pyx_v_i = (__pyx_v_i + 1);
 
-        /* "cpp_process.pyx":221
+        /* "cpp_process.pyx":300
  *             if choice is None:
  *                 i += 1
  *                 continue             # <<<<<<<<<<<<<<
  * 
- *             score = context.scorer(context.context, choice, score_cutoff)
+ *             validate_string(choice, "choice must be a String or None")
  */
-        goto __pyx_L11_continue;
+        goto __pyx_L12_continue;
 
-        /* "cpp_process.pyx":219
+        /* "cpp_process.pyx":298
  *     else:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -4295,9 +5446,23 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
  */
       }
 
-      /* "cpp_process.pyx":223
+      /* "cpp_process.pyx":302
  *                 continue
  * 
+ *             validate_string(choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ *             score = context.scorer(context.context, choice, score_cutoff)
+ * 
+ */
+      try {
+        validate_string(__pyx_v_choice, ((char const *)"choice must be a String or None"));
+      } catch(...) {
+        __Pyx_CppExn2PyErr();
+        __PYX_ERR(0, 302, __pyx_L1_error)
+      }
+
+      /* "cpp_process.pyx":303
+ * 
+ *             validate_string(choice, "choice must be a String or None")
  *             score = context.scorer(context.context, choice, score_cutoff)             # <<<<<<<<<<<<<<
  * 
  *             if score >= score_cutoff and score > result_score:
@@ -4306,29 +5471,29 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
         __pyx_t_10 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_v_choice, __pyx_v_score_cutoff);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 223, __pyx_L1_error)
+        __PYX_ERR(0, 303, __pyx_L1_error)
       }
       __pyx_v_score = __pyx_t_10;
 
-      /* "cpp_process.pyx":225
+      /* "cpp_process.pyx":305
  *             score = context.scorer(context.context, choice, score_cutoff)
  * 
  *             if score >= score_cutoff and score > result_score:             # <<<<<<<<<<<<<<
  *                 result_score = score_cutoff = score
  *                 result_choice = choice
  */
-      __pyx_t_1 = ((__pyx_v_score >= __pyx_v_score_cutoff) != 0);
-      if (__pyx_t_1) {
-      } else {
-        __pyx_t_2 = __pyx_t_1;
-        goto __pyx_L15_bool_binop_done;
-      }
-      __pyx_t_1 = ((__pyx_v_score > __pyx_v_result_score) != 0);
-      __pyx_t_2 = __pyx_t_1;
-      __pyx_L15_bool_binop_done:;
+      __pyx_t_2 = ((__pyx_v_score >= __pyx_v_score_cutoff) != 0);
       if (__pyx_t_2) {
+      } else {
+        __pyx_t_1 = __pyx_t_2;
+        goto __pyx_L16_bool_binop_done;
+      }
+      __pyx_t_2 = ((__pyx_v_score > __pyx_v_result_score) != 0);
+      __pyx_t_1 = __pyx_t_2;
+      __pyx_L16_bool_binop_done:;
+      if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":226
+        /* "cpp_process.pyx":306
  * 
  *             if score >= score_cutoff and score > result_score:
  *                 result_score = score_cutoff = score             # <<<<<<<<<<<<<<
@@ -4338,7 +5503,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
         __pyx_v_result_score = __pyx_v_score;
         __pyx_v_score_cutoff = __pyx_v_score;
 
-        /* "cpp_process.pyx":227
+        /* "cpp_process.pyx":307
  *             if score >= score_cutoff and score > result_score:
  *                 result_score = score_cutoff = score
  *                 result_choice = choice             # <<<<<<<<<<<<<<
@@ -4348,7 +5513,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
         __Pyx_INCREF(__pyx_v_choice);
         __Pyx_DECREF_SET(__pyx_v_result_choice, __pyx_v_choice);
 
-        /* "cpp_process.pyx":228
+        /* "cpp_process.pyx":308
  *                 result_score = score_cutoff = score
  *                 result_choice = choice
  *                 result_index = i             # <<<<<<<<<<<<<<
@@ -4357,26 +5522,26 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
  */
         __pyx_v_result_index = __pyx_v_i;
 
-        /* "cpp_process.pyx":230
+        /* "cpp_process.pyx":310
  *                 result_index = i
  * 
  *                 if result_score == 100:             # <<<<<<<<<<<<<<
  *                     break
  *             i += 1
  */
-        __pyx_t_2 = ((__pyx_v_result_score == 100.0) != 0);
-        if (__pyx_t_2) {
+        __pyx_t_1 = ((__pyx_v_result_score == 100.0) != 0);
+        if (__pyx_t_1) {
 
-          /* "cpp_process.pyx":231
+          /* "cpp_process.pyx":311
  * 
  *                 if result_score == 100:
  *                     break             # <<<<<<<<<<<<<<
  *             i += 1
  * 
  */
-          goto __pyx_L12_break;
+          goto __pyx_L13_break;
 
-          /* "cpp_process.pyx":230
+          /* "cpp_process.pyx":310
  *                 result_index = i
  * 
  *                 if result_score == 100:             # <<<<<<<<<<<<<<
@@ -4385,7 +5550,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
  */
         }
 
-        /* "cpp_process.pyx":225
+        /* "cpp_process.pyx":305
  *             score = context.scorer(context.context, choice, score_cutoff)
  * 
  *             if score >= score_cutoff and score > result_score:             # <<<<<<<<<<<<<<
@@ -4394,7 +5559,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
  */
       }
 
-      /* "cpp_process.pyx":232
+      /* "cpp_process.pyx":312
  *                 if result_score == 100:
  *                     break
  *             i += 1             # <<<<<<<<<<<<<<
@@ -4403,21 +5568,21 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
  */
       __pyx_v_i = (__pyx_v_i + 1);
 
-      /* "cpp_process.pyx":218
+      /* "cpp_process.pyx":297
  *             i += 1
  *     else:
  *         for choice in choices:             # <<<<<<<<<<<<<<
  *             if choice is None:
  *                 i += 1
  */
-      __pyx_L11_continue:;
+      __pyx_L12_continue:;
     }
-    __pyx_L12_break:;
+    __pyx_L13_break:;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   }
   __pyx_L3:;
 
-  /* "cpp_process.pyx":234
+  /* "cpp_process.pyx":314
  *             i += 1
  * 
  *     return (result_choice, result_score, result_index) if result_choice is not None else None             # <<<<<<<<<<<<<<
@@ -4425,13 +5590,13 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = (__pyx_v_result_choice != Py_None);
-  if ((__pyx_t_2 != 0)) {
-    __pyx_t_6 = PyFloat_FromDouble(__pyx_v_result_score); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 234, __pyx_L1_error)
+  __pyx_t_1 = (__pyx_v_result_choice != Py_None);
+  if ((__pyx_t_1 != 0)) {
+    __pyx_t_6 = PyFloat_FromDouble(__pyx_v_result_score); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 314, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __Pyx_PyInt_FromSize_t(__pyx_v_result_index); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 234, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyInt_FromSize_t(__pyx_v_result_index); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 314, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 234, __pyx_L1_error)
+    __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 314, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_INCREF(__pyx_v_result_choice);
     __Pyx_GIVEREF(__pyx_v_result_choice);
@@ -4452,7 +5617,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "cpp_process.pyx":188
+  /* "cpp_process.pyx":260
  * 
  * 
  * cdef inline extractOne_list(scorer_context context, choices, processor, double score_cutoff):             # <<<<<<<<<<<<<<
@@ -4471,12 +5636,13 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_list(scorer_cont
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_result_choice);
   __Pyx_XDECREF(__pyx_v_choice);
+  __Pyx_XDECREF(__pyx_v_proc_choice);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "cpp_process.pyx":237
+/* "cpp_process.pyx":317
  * 
  * 
  * cdef inline extractOne_distance_list(distance_context context, choices, processor, size_t max_):             # <<<<<<<<<<<<<<
@@ -4491,6 +5657,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
   size_t __pyx_v_result_index;
   PyObject *__pyx_v_result_choice = NULL;
   PyObject *__pyx_v_choice = NULL;
+  PyObject *__pyx_v_proc_choice = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
@@ -4508,7 +5675,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("extractOne_distance_list", 0);
 
-  /* "cpp_process.pyx":244
+  /* "cpp_process.pyx":324
  *     """
  *     cdef size_t distance
  *     cdef size_t result_distance = <size_t>-1             # <<<<<<<<<<<<<<
@@ -4517,7 +5684,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
  */
   __pyx_v_result_distance = ((size_t)-1L);
 
-  /* "cpp_process.pyx":245
+  /* "cpp_process.pyx":325
  *     cdef size_t distance
  *     cdef size_t result_distance = <size_t>-1
  *     cdef size_t i = 0             # <<<<<<<<<<<<<<
@@ -4526,7 +5693,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
  */
   __pyx_v_i = 0;
 
-  /* "cpp_process.pyx":246
+  /* "cpp_process.pyx":326
  *     cdef size_t result_distance = <size_t>-1
  *     cdef size_t i = 0
  *     cdef size_t result_index = 0             # <<<<<<<<<<<<<<
@@ -4535,7 +5702,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
  */
   __pyx_v_result_index = 0;
 
-  /* "cpp_process.pyx":247
+  /* "cpp_process.pyx":327
  *     cdef size_t i = 0
  *     cdef size_t result_index = 0
  *     result_choice = None             # <<<<<<<<<<<<<<
@@ -4545,7 +5712,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
   __Pyx_INCREF(Py_None);
   __pyx_v_result_choice = Py_None;
 
-  /* "cpp_process.pyx":249
+  /* "cpp_process.pyx":329
  *     result_choice = None
  * 
  *     if processor is not None:             # <<<<<<<<<<<<<<
@@ -4556,7 +5723,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":250
+    /* "cpp_process.pyx":330
  * 
  *     if processor is not None:
  *         for choice in choices:             # <<<<<<<<<<<<<<
@@ -4567,26 +5734,26 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
       __pyx_t_3 = __pyx_v_choices; __Pyx_INCREF(__pyx_t_3); __pyx_t_4 = 0;
       __pyx_t_5 = NULL;
     } else {
-      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 250, __pyx_L1_error)
+      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 330, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 250, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 330, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_5)) {
         if (likely(PyList_CheckExact(__pyx_t_3))) {
           if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 250, __pyx_L1_error)
+          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 330, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 250, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 330, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         } else {
           if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 250, __pyx_L1_error)
+          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 330, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 250, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 330, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         }
@@ -4596,7 +5763,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 250, __pyx_L1_error)
+            else __PYX_ERR(0, 330, __pyx_L1_error)
           }
           break;
         }
@@ -4605,7 +5772,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
       __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "cpp_process.pyx":251
+      /* "cpp_process.pyx":331
  *     if processor is not None:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -4616,7 +5783,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
       __pyx_t_1 = (__pyx_t_2 != 0);
       if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":252
+        /* "cpp_process.pyx":332
  *         for choice in choices:
  *             if choice is None:
  *                 i += 1             # <<<<<<<<<<<<<<
@@ -4625,16 +5792,16 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
  */
         __pyx_v_i = (__pyx_v_i + 1);
 
-        /* "cpp_process.pyx":253
+        /* "cpp_process.pyx":333
  *             if choice is None:
  *                 i += 1
  *                 continue             # <<<<<<<<<<<<<<
  * 
- *             distance = context.scorer(context.context, processor(choice), max_)
+ *             proc_choice = processor(choice)
  */
         goto __pyx_L4_continue;
 
-        /* "cpp_process.pyx":251
+        /* "cpp_process.pyx":331
  *     if processor is not None:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -4643,12 +5810,12 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
  */
       }
 
-      /* "cpp_process.pyx":255
+      /* "cpp_process.pyx":335
  *                 continue
  * 
- *             distance = context.scorer(context.context, processor(choice), max_)             # <<<<<<<<<<<<<<
- * 
- *             if distance <= max_ and distance < result_distance:
+ *             proc_choice = processor(choice)             # <<<<<<<<<<<<<<
+ *             if proc_choice is None:
+ *                 i += 1
  */
       __Pyx_INCREF(__pyx_v_processor);
       __pyx_t_7 = __pyx_v_processor; __pyx_t_8 = NULL;
@@ -4667,38 +5834,99 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
         PyObject *__pyx_callargs[2] = {__pyx_t_8, __pyx_v_choice};
         __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-        if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 255, __pyx_L1_error)
+        if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 335, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       }
+      __Pyx_XDECREF_SET(__pyx_v_proc_choice, __pyx_t_6);
+      __pyx_t_6 = 0;
+
+      /* "cpp_process.pyx":336
+ * 
+ *             proc_choice = processor(choice)
+ *             if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                 i += 1
+ *                 continue
+ */
+      __pyx_t_1 = (__pyx_v_proc_choice == Py_None);
+      __pyx_t_2 = (__pyx_t_1 != 0);
+      if (__pyx_t_2) {
+
+        /* "cpp_process.pyx":337
+ *             proc_choice = processor(choice)
+ *             if proc_choice is None:
+ *                 i += 1             # <<<<<<<<<<<<<<
+ *                 continue
+ * 
+ */
+        __pyx_v_i = (__pyx_v_i + 1);
+
+        /* "cpp_process.pyx":338
+ *             if proc_choice is None:
+ *                 i += 1
+ *                 continue             # <<<<<<<<<<<<<<
+ * 
+ *             validate_string(proc_choice, "choice must be a String or None")
+ */
+        goto __pyx_L4_continue;
+
+        /* "cpp_process.pyx":336
+ * 
+ *             proc_choice = processor(choice)
+ *             if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                 i += 1
+ *                 continue
+ */
+      }
+
+      /* "cpp_process.pyx":340
+ *                 continue
+ * 
+ *             validate_string(proc_choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ * 
+ *             distance = context.scorer(context.context, proc_choice, max_)
+ */
       try {
-        __pyx_t_10 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_t_6, __pyx_v_max_);
+        validate_string(__pyx_v_proc_choice, ((char const *)"choice must be a String or None"));
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 255, __pyx_L1_error)
+        __PYX_ERR(0, 340, __pyx_L1_error)
       }
-      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+
+      /* "cpp_process.pyx":342
+ *             validate_string(proc_choice, "choice must be a String or None")
+ * 
+ *             distance = context.scorer(context.context, proc_choice, max_)             # <<<<<<<<<<<<<<
+ * 
+ *             if distance <= max_ and distance < result_distance:
+ */
+      try {
+        __pyx_t_10 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_v_proc_choice, __pyx_v_max_);
+      } catch(...) {
+        __Pyx_CppExn2PyErr();
+        __PYX_ERR(0, 342, __pyx_L1_error)
+      }
       __pyx_v_distance = __pyx_t_10;
 
-      /* "cpp_process.pyx":257
- *             distance = context.scorer(context.context, processor(choice), max_)
+      /* "cpp_process.pyx":344
+ *             distance = context.scorer(context.context, proc_choice, max_)
  * 
  *             if distance <= max_ and distance < result_distance:             # <<<<<<<<<<<<<<
  *                 result_distance = max_ = distance
  *                 result_choice = choice
  */
-      __pyx_t_2 = ((__pyx_v_distance <= __pyx_v_max_) != 0);
-      if (__pyx_t_2) {
-      } else {
-        __pyx_t_1 = __pyx_t_2;
-        goto __pyx_L8_bool_binop_done;
-      }
-      __pyx_t_2 = ((__pyx_v_distance < __pyx_v_result_distance) != 0);
-      __pyx_t_1 = __pyx_t_2;
-      __pyx_L8_bool_binop_done:;
+      __pyx_t_1 = ((__pyx_v_distance <= __pyx_v_max_) != 0);
       if (__pyx_t_1) {
+      } else {
+        __pyx_t_2 = __pyx_t_1;
+        goto __pyx_L9_bool_binop_done;
+      }
+      __pyx_t_1 = ((__pyx_v_distance < __pyx_v_result_distance) != 0);
+      __pyx_t_2 = __pyx_t_1;
+      __pyx_L9_bool_binop_done:;
+      if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":258
+        /* "cpp_process.pyx":345
  * 
  *             if distance <= max_ and distance < result_distance:
  *                 result_distance = max_ = distance             # <<<<<<<<<<<<<<
@@ -4708,7 +5936,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
         __pyx_v_result_distance = __pyx_v_distance;
         __pyx_v_max_ = __pyx_v_distance;
 
-        /* "cpp_process.pyx":259
+        /* "cpp_process.pyx":346
  *             if distance <= max_ and distance < result_distance:
  *                 result_distance = max_ = distance
  *                 result_choice = choice             # <<<<<<<<<<<<<<
@@ -4718,7 +5946,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
         __Pyx_INCREF(__pyx_v_choice);
         __Pyx_DECREF_SET(__pyx_v_result_choice, __pyx_v_choice);
 
-        /* "cpp_process.pyx":260
+        /* "cpp_process.pyx":347
  *                 result_distance = max_ = distance
  *                 result_choice = choice
  *                 result_index = i             # <<<<<<<<<<<<<<
@@ -4727,17 +5955,17 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
  */
         __pyx_v_result_index = __pyx_v_i;
 
-        /* "cpp_process.pyx":262
+        /* "cpp_process.pyx":349
  *                 result_index = i
  * 
  *                 if result_distance == 0:             # <<<<<<<<<<<<<<
  *                     break
  *             i += 1
  */
-        __pyx_t_1 = ((__pyx_v_result_distance == 0) != 0);
-        if (__pyx_t_1) {
+        __pyx_t_2 = ((__pyx_v_result_distance == 0) != 0);
+        if (__pyx_t_2) {
 
-          /* "cpp_process.pyx":263
+          /* "cpp_process.pyx":350
  * 
  *                 if result_distance == 0:
  *                     break             # <<<<<<<<<<<<<<
@@ -4746,7 +5974,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
  */
           goto __pyx_L5_break;
 
-          /* "cpp_process.pyx":262
+          /* "cpp_process.pyx":349
  *                 result_index = i
  * 
  *                 if result_distance == 0:             # <<<<<<<<<<<<<<
@@ -4755,8 +5983,8 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
  */
         }
 
-        /* "cpp_process.pyx":257
- *             distance = context.scorer(context.context, processor(choice), max_)
+        /* "cpp_process.pyx":344
+ *             distance = context.scorer(context.context, proc_choice, max_)
  * 
  *             if distance <= max_ and distance < result_distance:             # <<<<<<<<<<<<<<
  *                 result_distance = max_ = distance
@@ -4764,7 +5992,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
  */
       }
 
-      /* "cpp_process.pyx":264
+      /* "cpp_process.pyx":351
  *                 if result_distance == 0:
  *                     break
  *             i += 1             # <<<<<<<<<<<<<<
@@ -4773,7 +6001,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
  */
       __pyx_v_i = (__pyx_v_i + 1);
 
-      /* "cpp_process.pyx":250
+      /* "cpp_process.pyx":330
  * 
  *     if processor is not None:
  *         for choice in choices:             # <<<<<<<<<<<<<<
@@ -4785,7 +6013,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
     __pyx_L5_break:;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "cpp_process.pyx":249
+    /* "cpp_process.pyx":329
  *     result_choice = None
  * 
  *     if processor is not None:             # <<<<<<<<<<<<<<
@@ -4795,7 +6023,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
     goto __pyx_L3;
   }
 
-  /* "cpp_process.pyx":266
+  /* "cpp_process.pyx":353
  *             i += 1
  *     else:
  *         for choice in choices:             # <<<<<<<<<<<<<<
@@ -4807,26 +6035,26 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
       __pyx_t_3 = __pyx_v_choices; __Pyx_INCREF(__pyx_t_3); __pyx_t_4 = 0;
       __pyx_t_5 = NULL;
     } else {
-      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 266, __pyx_L1_error)
+      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 353, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 266, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 353, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_5)) {
         if (likely(PyList_CheckExact(__pyx_t_3))) {
           if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 266, __pyx_L1_error)
+          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 353, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 266, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 353, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         } else {
           if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 266, __pyx_L1_error)
+          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 353, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 266, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 353, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         }
@@ -4836,7 +6064,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 266, __pyx_L1_error)
+            else __PYX_ERR(0, 353, __pyx_L1_error)
           }
           break;
         }
@@ -4845,18 +6073,18 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
       __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "cpp_process.pyx":267
+      /* "cpp_process.pyx":354
  *     else:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
  *                 i += 1
  *                 continue
  */
-      __pyx_t_1 = (__pyx_v_choice == Py_None);
-      __pyx_t_2 = (__pyx_t_1 != 0);
-      if (__pyx_t_2) {
+      __pyx_t_2 = (__pyx_v_choice == Py_None);
+      __pyx_t_1 = (__pyx_t_2 != 0);
+      if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":268
+        /* "cpp_process.pyx":355
  *         for choice in choices:
  *             if choice is None:
  *                 i += 1             # <<<<<<<<<<<<<<
@@ -4865,16 +6093,16 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
  */
         __pyx_v_i = (__pyx_v_i + 1);
 
-        /* "cpp_process.pyx":269
+        /* "cpp_process.pyx":356
  *             if choice is None:
  *                 i += 1
  *                 continue             # <<<<<<<<<<<<<<
  * 
- *             distance = context.scorer(context.context, choice, max_)
+ *             validate_string(choice, "choice must be a String or None")
  */
-        goto __pyx_L11_continue;
+        goto __pyx_L12_continue;
 
-        /* "cpp_process.pyx":267
+        /* "cpp_process.pyx":354
  *     else:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -4883,9 +6111,23 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
  */
       }
 
-      /* "cpp_process.pyx":271
+      /* "cpp_process.pyx":358
  *                 continue
  * 
+ *             validate_string(choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ *             distance = context.scorer(context.context, choice, max_)
+ * 
+ */
+      try {
+        validate_string(__pyx_v_choice, ((char const *)"choice must be a String or None"));
+      } catch(...) {
+        __Pyx_CppExn2PyErr();
+        __PYX_ERR(0, 358, __pyx_L1_error)
+      }
+
+      /* "cpp_process.pyx":359
+ * 
+ *             validate_string(choice, "choice must be a String or None")
  *             distance = context.scorer(context.context, choice, max_)             # <<<<<<<<<<<<<<
  * 
  *             if distance <= max_ and distance < result_distance:
@@ -4894,29 +6136,29 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
         __pyx_t_10 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_v_choice, __pyx_v_max_);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 271, __pyx_L1_error)
+        __PYX_ERR(0, 359, __pyx_L1_error)
       }
       __pyx_v_distance = __pyx_t_10;
 
-      /* "cpp_process.pyx":273
+      /* "cpp_process.pyx":361
  *             distance = context.scorer(context.context, choice, max_)
  * 
  *             if distance <= max_ and distance < result_distance:             # <<<<<<<<<<<<<<
  *                 result_distance = max_ = distance
  *                 result_choice = choice
  */
-      __pyx_t_1 = ((__pyx_v_distance <= __pyx_v_max_) != 0);
-      if (__pyx_t_1) {
-      } else {
-        __pyx_t_2 = __pyx_t_1;
-        goto __pyx_L15_bool_binop_done;
-      }
-      __pyx_t_1 = ((__pyx_v_distance < __pyx_v_result_distance) != 0);
-      __pyx_t_2 = __pyx_t_1;
-      __pyx_L15_bool_binop_done:;
+      __pyx_t_2 = ((__pyx_v_distance <= __pyx_v_max_) != 0);
       if (__pyx_t_2) {
+      } else {
+        __pyx_t_1 = __pyx_t_2;
+        goto __pyx_L16_bool_binop_done;
+      }
+      __pyx_t_2 = ((__pyx_v_distance < __pyx_v_result_distance) != 0);
+      __pyx_t_1 = __pyx_t_2;
+      __pyx_L16_bool_binop_done:;
+      if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":274
+        /* "cpp_process.pyx":362
  * 
  *             if distance <= max_ and distance < result_distance:
  *                 result_distance = max_ = distance             # <<<<<<<<<<<<<<
@@ -4926,7 +6168,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
         __pyx_v_result_distance = __pyx_v_distance;
         __pyx_v_max_ = __pyx_v_distance;
 
-        /* "cpp_process.pyx":275
+        /* "cpp_process.pyx":363
  *             if distance <= max_ and distance < result_distance:
  *                 result_distance = max_ = distance
  *                 result_choice = choice             # <<<<<<<<<<<<<<
@@ -4936,7 +6178,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
         __Pyx_INCREF(__pyx_v_choice);
         __Pyx_DECREF_SET(__pyx_v_result_choice, __pyx_v_choice);
 
-        /* "cpp_process.pyx":276
+        /* "cpp_process.pyx":364
  *                 result_distance = max_ = distance
  *                 result_choice = choice
  *                 result_index = i             # <<<<<<<<<<<<<<
@@ -4945,26 +6187,26 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
  */
         __pyx_v_result_index = __pyx_v_i;
 
-        /* "cpp_process.pyx":278
+        /* "cpp_process.pyx":366
  *                 result_index = i
  * 
  *                 if result_distance == 0:             # <<<<<<<<<<<<<<
  *                     break
  *             i += 1
  */
-        __pyx_t_2 = ((__pyx_v_result_distance == 0) != 0);
-        if (__pyx_t_2) {
+        __pyx_t_1 = ((__pyx_v_result_distance == 0) != 0);
+        if (__pyx_t_1) {
 
-          /* "cpp_process.pyx":279
+          /* "cpp_process.pyx":367
  * 
  *                 if result_distance == 0:
  *                     break             # <<<<<<<<<<<<<<
  *             i += 1
  * 
  */
-          goto __pyx_L12_break;
+          goto __pyx_L13_break;
 
-          /* "cpp_process.pyx":278
+          /* "cpp_process.pyx":366
  *                 result_index = i
  * 
  *                 if result_distance == 0:             # <<<<<<<<<<<<<<
@@ -4973,7 +6215,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
  */
         }
 
-        /* "cpp_process.pyx":273
+        /* "cpp_process.pyx":361
  *             distance = context.scorer(context.context, choice, max_)
  * 
  *             if distance <= max_ and distance < result_distance:             # <<<<<<<<<<<<<<
@@ -4982,7 +6224,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
  */
       }
 
-      /* "cpp_process.pyx":280
+      /* "cpp_process.pyx":368
  *                 if result_distance == 0:
  *                     break
  *             i += 1             # <<<<<<<<<<<<<<
@@ -4991,21 +6233,21 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
  */
       __pyx_v_i = (__pyx_v_i + 1);
 
-      /* "cpp_process.pyx":266
+      /* "cpp_process.pyx":353
  *             i += 1
  *     else:
  *         for choice in choices:             # <<<<<<<<<<<<<<
  *             if choice is None:
  *                 i += 1
  */
-      __pyx_L11_continue:;
+      __pyx_L12_continue:;
     }
-    __pyx_L12_break:;
+    __pyx_L13_break:;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   }
   __pyx_L3:;
 
-  /* "cpp_process.pyx":282
+  /* "cpp_process.pyx":370
  *             i += 1
  * 
  *     return (result_choice, result_distance, result_index) if result_choice is not None else None             # <<<<<<<<<<<<<<
@@ -5013,13 +6255,13 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = (__pyx_v_result_choice != Py_None);
-  if ((__pyx_t_2 != 0)) {
-    __pyx_t_6 = __Pyx_PyInt_FromSize_t(__pyx_v_result_distance); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 282, __pyx_L1_error)
+  __pyx_t_1 = (__pyx_v_result_choice != Py_None);
+  if ((__pyx_t_1 != 0)) {
+    __pyx_t_6 = __Pyx_PyInt_FromSize_t(__pyx_v_result_distance); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 370, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __Pyx_PyInt_FromSize_t(__pyx_v_result_index); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 282, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyInt_FromSize_t(__pyx_v_result_index); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 370, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 282, __pyx_L1_error)
+    __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 370, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_INCREF(__pyx_v_result_choice);
     __Pyx_GIVEREF(__pyx_v_result_choice);
@@ -5040,7 +6282,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "cpp_process.pyx":237
+  /* "cpp_process.pyx":317
  * 
  * 
  * cdef inline extractOne_distance_list(distance_context context, choices, processor, size_t max_):             # <<<<<<<<<<<<<<
@@ -5059,12 +6301,13 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extractOne_distance_list(di
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_result_choice);
   __Pyx_XDECREF(__pyx_v_choice);
+  __Pyx_XDECREF(__pyx_v_proc_choice);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "cpp_process.pyx":285
+/* "cpp_process.pyx":373
  * 
  * 
  * cdef inline py_extractOne_dict(query, choices, scorer, processor, score_cutoff, kwargs):             # <<<<<<<<<<<<<<
@@ -5097,7 +6340,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
   __Pyx_RefNannySetupContext("py_extractOne_dict", 0);
   __Pyx_INCREF(__pyx_v_score_cutoff);
 
-  /* "cpp_process.pyx":286
+  /* "cpp_process.pyx":374
  * 
  * cdef inline py_extractOne_dict(query, choices, scorer, processor, score_cutoff, kwargs):
  *     result_score = -1             # <<<<<<<<<<<<<<
@@ -5107,7 +6350,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
   __Pyx_INCREF(__pyx_int_neg_1);
   __pyx_v_result_score = __pyx_int_neg_1;
 
-  /* "cpp_process.pyx":287
+  /* "cpp_process.pyx":375
  * cdef inline py_extractOne_dict(query, choices, scorer, processor, score_cutoff, kwargs):
  *     result_score = -1
  *     result_choice = None             # <<<<<<<<<<<<<<
@@ -5117,7 +6360,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
   __Pyx_INCREF(Py_None);
   __pyx_v_result_choice = Py_None;
 
-  /* "cpp_process.pyx":288
+  /* "cpp_process.pyx":376
  *     result_score = -1
  *     result_choice = None
  *     result_key = None             # <<<<<<<<<<<<<<
@@ -5127,7 +6370,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
   __Pyx_INCREF(Py_None);
   __pyx_v_result_key = Py_None;
 
-  /* "cpp_process.pyx":290
+  /* "cpp_process.pyx":378
  *     result_key = None
  * 
  *     if processor is not None:             # <<<<<<<<<<<<<<
@@ -5138,7 +6381,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":291
+    /* "cpp_process.pyx":379
  * 
  *     if processor is not None:
  *         for choice_key, choice in choices.items():             # <<<<<<<<<<<<<<
@@ -5148,9 +6391,9 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
     __pyx_t_4 = 0;
     if (unlikely(__pyx_v_choices == Py_None)) {
       PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "items");
-      __PYX_ERR(0, 291, __pyx_L1_error)
+      __PYX_ERR(0, 379, __pyx_L1_error)
     }
-    __pyx_t_7 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_5), (&__pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 291, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_5), (&__pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 379, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_XDECREF(__pyx_t_3);
     __pyx_t_3 = __pyx_t_7;
@@ -5158,7 +6401,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
     while (1) {
       __pyx_t_9 = __Pyx_dict_iter_next(__pyx_t_3, __pyx_t_5, &__pyx_t_4, &__pyx_t_7, &__pyx_t_8, NULL, __pyx_t_6);
       if (unlikely(__pyx_t_9 == 0)) break;
-      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 291, __pyx_L1_error)
+      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 379, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_XDECREF_SET(__pyx_v_choice_key, __pyx_t_7);
@@ -5166,7 +6409,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
       __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_8);
       __pyx_t_8 = 0;
 
-      /* "cpp_process.pyx":292
+      /* "cpp_process.pyx":380
  *     if processor is not None:
  *         for choice_key, choice in choices.items():
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -5177,7 +6420,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
       __pyx_t_1 = (__pyx_t_2 != 0);
       if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":293
+        /* "cpp_process.pyx":381
  *         for choice_key, choice in choices.items():
  *             if choice is None:
  *                 continue             # <<<<<<<<<<<<<<
@@ -5186,7 +6429,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
  */
         goto __pyx_L4_continue;
 
-        /* "cpp_process.pyx":292
+        /* "cpp_process.pyx":380
  *     if processor is not None:
  *         for choice_key, choice in choices.items():
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -5195,7 +6438,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
  */
       }
 
-      /* "cpp_process.pyx":295
+      /* "cpp_process.pyx":383
  *                 continue
  * 
  *             score = scorer(query, processor(choice),             # <<<<<<<<<<<<<<
@@ -5219,11 +6462,11 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
         PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_choice};
         __pyx_t_8 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
         __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-        if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 295, __pyx_L1_error)
+        if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 383, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       }
-      __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 295, __pyx_L1_error)
+      __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 383, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_INCREF(__pyx_v_query);
       __Pyx_GIVEREF(__pyx_v_query);
@@ -5232,62 +6475,62 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
       PyTuple_SET_ITEM(__pyx_t_7, 1, __pyx_t_8);
       __pyx_t_8 = 0;
 
-      /* "cpp_process.pyx":296
+      /* "cpp_process.pyx":384
  * 
  *             score = scorer(query, processor(choice),
  *                 processor=None, score_cutoff=score_cutoff, **kwargs)             # <<<<<<<<<<<<<<
  * 
  *             if score >= score_cutoff and score > result_score:
  */
-      __pyx_t_10 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 296, __pyx_L1_error)
+      __pyx_t_10 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 384, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
-      if (PyDict_SetItem(__pyx_t_10, __pyx_n_s_processor, Py_None) < 0) __PYX_ERR(0, 296, __pyx_L1_error)
-      if (PyDict_SetItem(__pyx_t_10, __pyx_n_s_score_cutoff, __pyx_v_score_cutoff) < 0) __PYX_ERR(0, 296, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_t_10, __pyx_n_s_processor, Py_None) < 0) __PYX_ERR(0, 384, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_t_10, __pyx_n_s_score_cutoff, __pyx_v_score_cutoff) < 0) __PYX_ERR(0, 384, __pyx_L1_error)
       __pyx_t_8 = __pyx_t_10;
       __pyx_t_10 = 0;
       if (unlikely(__pyx_v_kwargs == Py_None)) {
         PyErr_SetString(PyExc_TypeError, "argument after ** must be a mapping, not NoneType");
-        __PYX_ERR(0, 296, __pyx_L1_error)
+        __PYX_ERR(0, 384, __pyx_L1_error)
       }
-      if (__Pyx_MergeKeywords(__pyx_t_8, __pyx_v_kwargs) < 0) __PYX_ERR(0, 296, __pyx_L1_error)
+      if (__Pyx_MergeKeywords(__pyx_t_8, __pyx_v_kwargs) < 0) __PYX_ERR(0, 384, __pyx_L1_error)
 
-      /* "cpp_process.pyx":295
+      /* "cpp_process.pyx":383
  *                 continue
  * 
  *             score = scorer(query, processor(choice),             # <<<<<<<<<<<<<<
  *                 processor=None, score_cutoff=score_cutoff, **kwargs)
  * 
  */
-      __pyx_t_10 = __Pyx_PyObject_Call(__pyx_v_scorer, __pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 295, __pyx_L1_error)
+      __pyx_t_10 = __Pyx_PyObject_Call(__pyx_v_scorer, __pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 383, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __Pyx_XDECREF_SET(__pyx_v_score, __pyx_t_10);
       __pyx_t_10 = 0;
 
-      /* "cpp_process.pyx":298
+      /* "cpp_process.pyx":386
  *                 processor=None, score_cutoff=score_cutoff, **kwargs)
  * 
  *             if score >= score_cutoff and score > result_score:             # <<<<<<<<<<<<<<
  *                 score_cutoff = score
  *                 result_score = score
  */
-      __pyx_t_10 = PyObject_RichCompare(__pyx_v_score, __pyx_v_score_cutoff, Py_GE); __Pyx_XGOTREF(__pyx_t_10); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 298, __pyx_L1_error)
-      __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_10); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 298, __pyx_L1_error)
+      __pyx_t_10 = PyObject_RichCompare(__pyx_v_score, __pyx_v_score_cutoff, Py_GE); __Pyx_XGOTREF(__pyx_t_10); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 386, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_10); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 386, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       if (__pyx_t_2) {
       } else {
         __pyx_t_1 = __pyx_t_2;
         goto __pyx_L8_bool_binop_done;
       }
-      __pyx_t_10 = PyObject_RichCompare(__pyx_v_score, __pyx_v_result_score, Py_GT); __Pyx_XGOTREF(__pyx_t_10); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 298, __pyx_L1_error)
-      __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_10); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 298, __pyx_L1_error)
+      __pyx_t_10 = PyObject_RichCompare(__pyx_v_score, __pyx_v_result_score, Py_GT); __Pyx_XGOTREF(__pyx_t_10); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 386, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_10); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 386, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       __pyx_t_1 = __pyx_t_2;
       __pyx_L8_bool_binop_done:;
       if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":299
+        /* "cpp_process.pyx":387
  * 
  *             if score >= score_cutoff and score > result_score:
  *                 score_cutoff = score             # <<<<<<<<<<<<<<
@@ -5297,7 +6540,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
         __Pyx_INCREF(__pyx_v_score);
         __Pyx_DECREF_SET(__pyx_v_score_cutoff, __pyx_v_score);
 
-        /* "cpp_process.pyx":300
+        /* "cpp_process.pyx":388
  *             if score >= score_cutoff and score > result_score:
  *                 score_cutoff = score
  *                 result_score = score             # <<<<<<<<<<<<<<
@@ -5307,7 +6550,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
         __Pyx_INCREF(__pyx_v_score);
         __Pyx_DECREF_SET(__pyx_v_result_score, __pyx_v_score);
 
-        /* "cpp_process.pyx":301
+        /* "cpp_process.pyx":389
  *                 score_cutoff = score
  *                 result_score = score
  *                 result_choice = choice             # <<<<<<<<<<<<<<
@@ -5317,7 +6560,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
         __Pyx_INCREF(__pyx_v_choice);
         __Pyx_DECREF_SET(__pyx_v_result_choice, __pyx_v_choice);
 
-        /* "cpp_process.pyx":302
+        /* "cpp_process.pyx":390
  *                 result_score = score
  *                 result_choice = choice
  *                 result_key = choice_key             # <<<<<<<<<<<<<<
@@ -5327,20 +6570,20 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
         __Pyx_INCREF(__pyx_v_choice_key);
         __Pyx_DECREF_SET(__pyx_v_result_key, __pyx_v_choice_key);
 
-        /* "cpp_process.pyx":304
+        /* "cpp_process.pyx":392
  *                 result_key = choice_key
  * 
  *                 if score_cutoff == 100:             # <<<<<<<<<<<<<<
  *                     break
  *     else:
  */
-        __pyx_t_10 = __Pyx_PyInt_EqObjC(__pyx_v_score_cutoff, __pyx_int_100, 0x64, 0); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 304, __pyx_L1_error)
+        __pyx_t_10 = __Pyx_PyInt_EqObjC(__pyx_v_score_cutoff, __pyx_int_100, 0x64, 0); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 392, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_10);
-        __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_10); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 304, __pyx_L1_error)
+        __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_10); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 392, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
         if (__pyx_t_1) {
 
-          /* "cpp_process.pyx":305
+          /* "cpp_process.pyx":393
  * 
  *                 if score_cutoff == 100:
  *                     break             # <<<<<<<<<<<<<<
@@ -5349,7 +6592,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
  */
           goto __pyx_L5_break;
 
-          /* "cpp_process.pyx":304
+          /* "cpp_process.pyx":392
  *                 result_key = choice_key
  * 
  *                 if score_cutoff == 100:             # <<<<<<<<<<<<<<
@@ -5358,7 +6601,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
  */
         }
 
-        /* "cpp_process.pyx":298
+        /* "cpp_process.pyx":386
  *                 processor=None, score_cutoff=score_cutoff, **kwargs)
  * 
  *             if score >= score_cutoff and score > result_score:             # <<<<<<<<<<<<<<
@@ -5371,7 +6614,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
     __pyx_L5_break:;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "cpp_process.pyx":290
+    /* "cpp_process.pyx":378
  *     result_key = None
  * 
  *     if processor is not None:             # <<<<<<<<<<<<<<
@@ -5381,7 +6624,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
     goto __pyx_L3;
   }
 
-  /* "cpp_process.pyx":307
+  /* "cpp_process.pyx":395
  *                     break
  *     else:
  *         for choice_key, choice in choices.items():             # <<<<<<<<<<<<<<
@@ -5392,9 +6635,9 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
     __pyx_t_5 = 0;
     if (unlikely(__pyx_v_choices == Py_None)) {
       PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "items");
-      __PYX_ERR(0, 307, __pyx_L1_error)
+      __PYX_ERR(0, 395, __pyx_L1_error)
     }
-    __pyx_t_10 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_4), (&__pyx_t_6)); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 307, __pyx_L1_error)
+    __pyx_t_10 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_4), (&__pyx_t_6)); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 395, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_10);
     __Pyx_XDECREF(__pyx_t_3);
     __pyx_t_3 = __pyx_t_10;
@@ -5402,7 +6645,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
     while (1) {
       __pyx_t_9 = __Pyx_dict_iter_next(__pyx_t_3, __pyx_t_4, &__pyx_t_5, &__pyx_t_10, &__pyx_t_8, NULL, __pyx_t_6);
       if (unlikely(__pyx_t_9 == 0)) break;
-      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 307, __pyx_L1_error)
+      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 395, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_XDECREF_SET(__pyx_v_choice_key, __pyx_t_10);
@@ -5410,7 +6653,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
       __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_8);
       __pyx_t_8 = 0;
 
-      /* "cpp_process.pyx":308
+      /* "cpp_process.pyx":396
  *     else:
  *         for choice_key, choice in choices.items():
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -5421,7 +6664,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
       __pyx_t_2 = (__pyx_t_1 != 0);
       if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":309
+        /* "cpp_process.pyx":397
  *         for choice_key, choice in choices.items():
  *             if choice is None:
  *                 continue             # <<<<<<<<<<<<<<
@@ -5430,7 +6673,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
  */
         goto __pyx_L11_continue;
 
-        /* "cpp_process.pyx":308
+        /* "cpp_process.pyx":396
  *     else:
  *         for choice_key, choice in choices.items():
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -5439,14 +6682,14 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
  */
       }
 
-      /* "cpp_process.pyx":311
+      /* "cpp_process.pyx":399
  *                 continue
  * 
  *             score = scorer(query, choice,             # <<<<<<<<<<<<<<
  *                 processor=None, score_cutoff=score_cutoff, **kwargs)
  * 
  */
-      __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 311, __pyx_L1_error)
+      __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 399, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_INCREF(__pyx_v_query);
       __Pyx_GIVEREF(__pyx_v_query);
@@ -5455,62 +6698,62 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
       __Pyx_GIVEREF(__pyx_v_choice);
       PyTuple_SET_ITEM(__pyx_t_8, 1, __pyx_v_choice);
 
-      /* "cpp_process.pyx":312
+      /* "cpp_process.pyx":400
  * 
  *             score = scorer(query, choice,
  *                 processor=None, score_cutoff=score_cutoff, **kwargs)             # <<<<<<<<<<<<<<
  * 
  *             if score >= score_cutoff and score > result_score:
  */
-      __pyx_t_7 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 312, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 400, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
-      if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_processor, Py_None) < 0) __PYX_ERR(0, 312, __pyx_L1_error)
-      if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_score_cutoff, __pyx_v_score_cutoff) < 0) __PYX_ERR(0, 312, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_processor, Py_None) < 0) __PYX_ERR(0, 400, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_score_cutoff, __pyx_v_score_cutoff) < 0) __PYX_ERR(0, 400, __pyx_L1_error)
       __pyx_t_10 = __pyx_t_7;
       __pyx_t_7 = 0;
       if (unlikely(__pyx_v_kwargs == Py_None)) {
         PyErr_SetString(PyExc_TypeError, "argument after ** must be a mapping, not NoneType");
-        __PYX_ERR(0, 312, __pyx_L1_error)
+        __PYX_ERR(0, 400, __pyx_L1_error)
       }
-      if (__Pyx_MergeKeywords(__pyx_t_10, __pyx_v_kwargs) < 0) __PYX_ERR(0, 312, __pyx_L1_error)
+      if (__Pyx_MergeKeywords(__pyx_t_10, __pyx_v_kwargs) < 0) __PYX_ERR(0, 400, __pyx_L1_error)
 
-      /* "cpp_process.pyx":311
+      /* "cpp_process.pyx":399
  *                 continue
  * 
  *             score = scorer(query, choice,             # <<<<<<<<<<<<<<
  *                 processor=None, score_cutoff=score_cutoff, **kwargs)
  * 
  */
-      __pyx_t_7 = __Pyx_PyObject_Call(__pyx_v_scorer, __pyx_t_8, __pyx_t_10); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 311, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyObject_Call(__pyx_v_scorer, __pyx_t_8, __pyx_t_10); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 399, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       __Pyx_XDECREF_SET(__pyx_v_score, __pyx_t_7);
       __pyx_t_7 = 0;
 
-      /* "cpp_process.pyx":314
+      /* "cpp_process.pyx":402
  *                 processor=None, score_cutoff=score_cutoff, **kwargs)
  * 
  *             if score >= score_cutoff and score > result_score:             # <<<<<<<<<<<<<<
  *                 score_cutoff = score
  *                 result_score = score
  */
-      __pyx_t_7 = PyObject_RichCompare(__pyx_v_score, __pyx_v_score_cutoff, Py_GE); __Pyx_XGOTREF(__pyx_t_7); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 314, __pyx_L1_error)
-      __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 314, __pyx_L1_error)
+      __pyx_t_7 = PyObject_RichCompare(__pyx_v_score, __pyx_v_score_cutoff, Py_GE); __Pyx_XGOTREF(__pyx_t_7); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 402, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 402, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       if (__pyx_t_1) {
       } else {
         __pyx_t_2 = __pyx_t_1;
         goto __pyx_L15_bool_binop_done;
       }
-      __pyx_t_7 = PyObject_RichCompare(__pyx_v_score, __pyx_v_result_score, Py_GT); __Pyx_XGOTREF(__pyx_t_7); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 314, __pyx_L1_error)
-      __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 314, __pyx_L1_error)
+      __pyx_t_7 = PyObject_RichCompare(__pyx_v_score, __pyx_v_result_score, Py_GT); __Pyx_XGOTREF(__pyx_t_7); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 402, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 402, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __pyx_t_2 = __pyx_t_1;
       __pyx_L15_bool_binop_done:;
       if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":315
+        /* "cpp_process.pyx":403
  * 
  *             if score >= score_cutoff and score > result_score:
  *                 score_cutoff = score             # <<<<<<<<<<<<<<
@@ -5520,7 +6763,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
         __Pyx_INCREF(__pyx_v_score);
         __Pyx_DECREF_SET(__pyx_v_score_cutoff, __pyx_v_score);
 
-        /* "cpp_process.pyx":316
+        /* "cpp_process.pyx":404
  *             if score >= score_cutoff and score > result_score:
  *                 score_cutoff = score
  *                 result_score = score             # <<<<<<<<<<<<<<
@@ -5530,7 +6773,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
         __Pyx_INCREF(__pyx_v_score);
         __Pyx_DECREF_SET(__pyx_v_result_score, __pyx_v_score);
 
-        /* "cpp_process.pyx":317
+        /* "cpp_process.pyx":405
  *                 score_cutoff = score
  *                 result_score = score
  *                 result_choice = choice             # <<<<<<<<<<<<<<
@@ -5540,7 +6783,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
         __Pyx_INCREF(__pyx_v_choice);
         __Pyx_DECREF_SET(__pyx_v_result_choice, __pyx_v_choice);
 
-        /* "cpp_process.pyx":318
+        /* "cpp_process.pyx":406
  *                 result_score = score
  *                 result_choice = choice
  *                 result_key = choice_key             # <<<<<<<<<<<<<<
@@ -5550,20 +6793,20 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
         __Pyx_INCREF(__pyx_v_choice_key);
         __Pyx_DECREF_SET(__pyx_v_result_key, __pyx_v_choice_key);
 
-        /* "cpp_process.pyx":320
+        /* "cpp_process.pyx":408
  *                 result_key = choice_key
  * 
  *                 if score_cutoff == 100:             # <<<<<<<<<<<<<<
  *                     break
  * 
  */
-        __pyx_t_7 = __Pyx_PyInt_EqObjC(__pyx_v_score_cutoff, __pyx_int_100, 0x64, 0); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 320, __pyx_L1_error)
+        __pyx_t_7 = __Pyx_PyInt_EqObjC(__pyx_v_score_cutoff, __pyx_int_100, 0x64, 0); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 408, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
-        __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 320, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 408, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         if (__pyx_t_2) {
 
-          /* "cpp_process.pyx":321
+          /* "cpp_process.pyx":409
  * 
  *                 if score_cutoff == 100:
  *                     break             # <<<<<<<<<<<<<<
@@ -5572,7 +6815,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
  */
           goto __pyx_L12_break;
 
-          /* "cpp_process.pyx":320
+          /* "cpp_process.pyx":408
  *                 result_key = choice_key
  * 
  *                 if score_cutoff == 100:             # <<<<<<<<<<<<<<
@@ -5581,7 +6824,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
  */
         }
 
-        /* "cpp_process.pyx":314
+        /* "cpp_process.pyx":402
  *                 processor=None, score_cutoff=score_cutoff, **kwargs)
  * 
  *             if score >= score_cutoff and score > result_score:             # <<<<<<<<<<<<<<
@@ -5596,7 +6839,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
   }
   __pyx_L3:;
 
-  /* "cpp_process.pyx":323
+  /* "cpp_process.pyx":411
  *                     break
  * 
  *     return (result_choice, result_score, result_key) if result_choice is not None else None             # <<<<<<<<<<<<<<
@@ -5606,7 +6849,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_2 = (__pyx_v_result_choice != Py_None);
   if ((__pyx_t_2 != 0)) {
-    __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 323, __pyx_L1_error)
+    __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 411, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_INCREF(__pyx_v_result_choice);
     __Pyx_GIVEREF(__pyx_v_result_choice);
@@ -5627,7 +6870,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "cpp_process.pyx":285
+  /* "cpp_process.pyx":373
  * 
  * 
  * cdef inline py_extractOne_dict(query, choices, scorer, processor, score_cutoff, kwargs):             # <<<<<<<<<<<<<<
@@ -5656,7 +6899,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_dict(PyObject
   return __pyx_r;
 }
 
-/* "cpp_process.pyx":326
+/* "cpp_process.pyx":414
  * 
  * 
  * cdef inline py_extractOne_list(query, choices, scorer, processor, double score_cutoff, kwargs):             # <<<<<<<<<<<<<<
@@ -5689,7 +6932,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("py_extractOne_list", 0);
 
-  /* "cpp_process.pyx":327
+  /* "cpp_process.pyx":415
  * 
  * cdef inline py_extractOne_list(query, choices, scorer, processor, double score_cutoff, kwargs):
  *     cdef size_t result_index = 0             # <<<<<<<<<<<<<<
@@ -5698,7 +6941,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
  */
   __pyx_v_result_index = 0;
 
-  /* "cpp_process.pyx":328
+  /* "cpp_process.pyx":416
  * cdef inline py_extractOne_list(query, choices, scorer, processor, double score_cutoff, kwargs):
  *     cdef size_t result_index = 0
  *     cdef size_t i = 0             # <<<<<<<<<<<<<<
@@ -5707,7 +6950,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
  */
   __pyx_v_i = 0;
 
-  /* "cpp_process.pyx":329
+  /* "cpp_process.pyx":417
  *     cdef size_t result_index = 0
  *     cdef size_t i = 0
  *     result_score = -1             # <<<<<<<<<<<<<<
@@ -5717,7 +6960,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
   __Pyx_INCREF(__pyx_int_neg_1);
   __pyx_v_result_score = __pyx_int_neg_1;
 
-  /* "cpp_process.pyx":330
+  /* "cpp_process.pyx":418
  *     cdef size_t i = 0
  *     result_score = -1
  *     result_choice = None             # <<<<<<<<<<<<<<
@@ -5727,7 +6970,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
   __Pyx_INCREF(Py_None);
   __pyx_v_result_choice = Py_None;
 
-  /* "cpp_process.pyx":332
+  /* "cpp_process.pyx":420
  *     result_choice = None
  * 
  *     if processor is not None:             # <<<<<<<<<<<<<<
@@ -5738,7 +6981,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":333
+    /* "cpp_process.pyx":421
  * 
  *     if processor is not None:
  *         for choice in choices:             # <<<<<<<<<<<<<<
@@ -5749,26 +6992,26 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
       __pyx_t_3 = __pyx_v_choices; __Pyx_INCREF(__pyx_t_3); __pyx_t_4 = 0;
       __pyx_t_5 = NULL;
     } else {
-      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 333, __pyx_L1_error)
+      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 421, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 333, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 421, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_5)) {
         if (likely(PyList_CheckExact(__pyx_t_3))) {
           if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 333, __pyx_L1_error)
+          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 421, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 333, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 421, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         } else {
           if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 333, __pyx_L1_error)
+          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 421, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 333, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 421, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         }
@@ -5778,7 +7021,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 333, __pyx_L1_error)
+            else __PYX_ERR(0, 421, __pyx_L1_error)
           }
           break;
         }
@@ -5787,7 +7030,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
       __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "cpp_process.pyx":334
+      /* "cpp_process.pyx":422
  *     if processor is not None:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -5798,7 +7041,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
       __pyx_t_1 = (__pyx_t_2 != 0);
       if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":335
+        /* "cpp_process.pyx":423
  *         for choice in choices:
  *             if choice is None:
  *                 i += 1             # <<<<<<<<<<<<<<
@@ -5807,7 +7050,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
  */
         __pyx_v_i = (__pyx_v_i + 1);
 
-        /* "cpp_process.pyx":336
+        /* "cpp_process.pyx":424
  *             if choice is None:
  *                 i += 1
  *                 continue             # <<<<<<<<<<<<<<
@@ -5816,7 +7059,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
  */
         goto __pyx_L4_continue;
 
-        /* "cpp_process.pyx":334
+        /* "cpp_process.pyx":422
  *     if processor is not None:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -5825,7 +7068,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
  */
       }
 
-      /* "cpp_process.pyx":338
+      /* "cpp_process.pyx":426
  *                 continue
  * 
  *             score = scorer(query, processor(choice),             # <<<<<<<<<<<<<<
@@ -5849,11 +7092,11 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
         PyObject *__pyx_callargs[2] = {__pyx_t_8, __pyx_v_choice};
         __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-        if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 338, __pyx_L1_error)
+        if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 426, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       }
-      __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 338, __pyx_L1_error)
+      __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 426, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_INCREF(__pyx_v_query);
       __Pyx_GIVEREF(__pyx_v_query);
@@ -5862,78 +7105,78 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
       PyTuple_SET_ITEM(__pyx_t_7, 1, __pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "cpp_process.pyx":339
+      /* "cpp_process.pyx":427
  * 
  *             score = scorer(query, processor(choice),
  *                 processor=None, score_cutoff=score_cutoff, **kwargs)             # <<<<<<<<<<<<<<
  * 
  *             if score >= score_cutoff and score > result_score:
  */
-      __pyx_t_8 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 339, __pyx_L1_error)
+      __pyx_t_8 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 427, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
-      if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_processor, Py_None) < 0) __PYX_ERR(0, 339, __pyx_L1_error)
-      __pyx_t_10 = PyFloat_FromDouble(__pyx_v_score_cutoff); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 339, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_processor, Py_None) < 0) __PYX_ERR(0, 427, __pyx_L1_error)
+      __pyx_t_10 = PyFloat_FromDouble(__pyx_v_score_cutoff); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 427, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
-      if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_score_cutoff, __pyx_t_10) < 0) __PYX_ERR(0, 339, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_score_cutoff, __pyx_t_10) < 0) __PYX_ERR(0, 427, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       __pyx_t_6 = __pyx_t_8;
       __pyx_t_8 = 0;
       if (unlikely(__pyx_v_kwargs == Py_None)) {
         PyErr_SetString(PyExc_TypeError, "argument after ** must be a mapping, not NoneType");
-        __PYX_ERR(0, 339, __pyx_L1_error)
+        __PYX_ERR(0, 427, __pyx_L1_error)
       }
-      if (__Pyx_MergeKeywords(__pyx_t_6, __pyx_v_kwargs) < 0) __PYX_ERR(0, 339, __pyx_L1_error)
+      if (__Pyx_MergeKeywords(__pyx_t_6, __pyx_v_kwargs) < 0) __PYX_ERR(0, 427, __pyx_L1_error)
 
-      /* "cpp_process.pyx":338
+      /* "cpp_process.pyx":426
  *                 continue
  * 
  *             score = scorer(query, processor(choice),             # <<<<<<<<<<<<<<
  *                 processor=None, score_cutoff=score_cutoff, **kwargs)
  * 
  */
-      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_v_scorer, __pyx_t_7, __pyx_t_6); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 338, __pyx_L1_error)
+      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_v_scorer, __pyx_t_7, __pyx_t_6); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 426, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_XDECREF_SET(__pyx_v_score, __pyx_t_8);
       __pyx_t_8 = 0;
 
-      /* "cpp_process.pyx":341
+      /* "cpp_process.pyx":429
  *                 processor=None, score_cutoff=score_cutoff, **kwargs)
  * 
  *             if score >= score_cutoff and score > result_score:             # <<<<<<<<<<<<<<
  *                 score_cutoff = score
  *                 result_score = score
  */
-      __pyx_t_8 = PyFloat_FromDouble(__pyx_v_score_cutoff); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 341, __pyx_L1_error)
+      __pyx_t_8 = PyFloat_FromDouble(__pyx_v_score_cutoff); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 429, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
-      __pyx_t_6 = PyObject_RichCompare(__pyx_v_score, __pyx_t_8, Py_GE); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 341, __pyx_L1_error)
+      __pyx_t_6 = PyObject_RichCompare(__pyx_v_score, __pyx_t_8, Py_GE); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 429, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 341, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 429, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       if (__pyx_t_2) {
       } else {
         __pyx_t_1 = __pyx_t_2;
         goto __pyx_L8_bool_binop_done;
       }
-      __pyx_t_6 = PyObject_RichCompare(__pyx_v_score, __pyx_v_result_score, Py_GT); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 341, __pyx_L1_error)
-      __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 341, __pyx_L1_error)
+      __pyx_t_6 = PyObject_RichCompare(__pyx_v_score, __pyx_v_result_score, Py_GT); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 429, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 429, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       __pyx_t_1 = __pyx_t_2;
       __pyx_L8_bool_binop_done:;
       if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":342
+        /* "cpp_process.pyx":430
  * 
  *             if score >= score_cutoff and score > result_score:
  *                 score_cutoff = score             # <<<<<<<<<<<<<<
  *                 result_score = score
  *                 result_choice = choice
  */
-        __pyx_t_11 = __pyx_PyFloat_AsDouble(__pyx_v_score); if (unlikely((__pyx_t_11 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 342, __pyx_L1_error)
+        __pyx_t_11 = __pyx_PyFloat_AsDouble(__pyx_v_score); if (unlikely((__pyx_t_11 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 430, __pyx_L1_error)
         __pyx_v_score_cutoff = __pyx_t_11;
 
-        /* "cpp_process.pyx":343
+        /* "cpp_process.pyx":431
  *             if score >= score_cutoff and score > result_score:
  *                 score_cutoff = score
  *                 result_score = score             # <<<<<<<<<<<<<<
@@ -5943,7 +7186,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
         __Pyx_INCREF(__pyx_v_score);
         __Pyx_DECREF_SET(__pyx_v_result_score, __pyx_v_score);
 
-        /* "cpp_process.pyx":344
+        /* "cpp_process.pyx":432
  *                 score_cutoff = score
  *                 result_score = score
  *                 result_choice = choice             # <<<<<<<<<<<<<<
@@ -5953,7 +7196,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
         __Pyx_INCREF(__pyx_v_choice);
         __Pyx_DECREF_SET(__pyx_v_result_choice, __pyx_v_choice);
 
-        /* "cpp_process.pyx":345
+        /* "cpp_process.pyx":433
  *                 result_score = score
  *                 result_choice = choice
  *                 result_index = i             # <<<<<<<<<<<<<<
@@ -5962,7 +7205,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
  */
         __pyx_v_result_index = __pyx_v_i;
 
-        /* "cpp_process.pyx":347
+        /* "cpp_process.pyx":435
  *                 result_index = i
  * 
  *                 if score_cutoff == 100:             # <<<<<<<<<<<<<<
@@ -5972,7 +7215,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
         __pyx_t_1 = ((__pyx_v_score_cutoff == 100.0) != 0);
         if (__pyx_t_1) {
 
-          /* "cpp_process.pyx":348
+          /* "cpp_process.pyx":436
  * 
  *                 if score_cutoff == 100:
  *                     break             # <<<<<<<<<<<<<<
@@ -5981,7 +7224,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
  */
           goto __pyx_L5_break;
 
-          /* "cpp_process.pyx":347
+          /* "cpp_process.pyx":435
  *                 result_index = i
  * 
  *                 if score_cutoff == 100:             # <<<<<<<<<<<<<<
@@ -5990,7 +7233,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
  */
         }
 
-        /* "cpp_process.pyx":341
+        /* "cpp_process.pyx":429
  *                 processor=None, score_cutoff=score_cutoff, **kwargs)
  * 
  *             if score >= score_cutoff and score > result_score:             # <<<<<<<<<<<<<<
@@ -5999,7 +7242,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
  */
       }
 
-      /* "cpp_process.pyx":349
+      /* "cpp_process.pyx":437
  *                 if score_cutoff == 100:
  *                     break
  *             i += 1             # <<<<<<<<<<<<<<
@@ -6008,7 +7251,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
  */
       __pyx_v_i = (__pyx_v_i + 1);
 
-      /* "cpp_process.pyx":333
+      /* "cpp_process.pyx":421
  * 
  *     if processor is not None:
  *         for choice in choices:             # <<<<<<<<<<<<<<
@@ -6020,7 +7263,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
     __pyx_L5_break:;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "cpp_process.pyx":332
+    /* "cpp_process.pyx":420
  *     result_choice = None
  * 
  *     if processor is not None:             # <<<<<<<<<<<<<<
@@ -6030,7 +7273,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
     goto __pyx_L3;
   }
 
-  /* "cpp_process.pyx":351
+  /* "cpp_process.pyx":439
  *             i += 1
  *     else:
  *         for choice in choices:             # <<<<<<<<<<<<<<
@@ -6042,26 +7285,26 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
       __pyx_t_3 = __pyx_v_choices; __Pyx_INCREF(__pyx_t_3); __pyx_t_4 = 0;
       __pyx_t_5 = NULL;
     } else {
-      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 351, __pyx_L1_error)
+      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 439, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 351, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 439, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_5)) {
         if (likely(PyList_CheckExact(__pyx_t_3))) {
           if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 351, __pyx_L1_error)
+          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 439, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 351, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 439, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         } else {
           if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 351, __pyx_L1_error)
+          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 439, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 351, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 439, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         }
@@ -6071,7 +7314,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 351, __pyx_L1_error)
+            else __PYX_ERR(0, 439, __pyx_L1_error)
           }
           break;
         }
@@ -6080,7 +7323,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
       __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "cpp_process.pyx":352
+      /* "cpp_process.pyx":440
  *     else:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -6091,7 +7334,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
       __pyx_t_2 = (__pyx_t_1 != 0);
       if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":353
+        /* "cpp_process.pyx":441
  *         for choice in choices:
  *             if choice is None:
  *                 i += 1             # <<<<<<<<<<<<<<
@@ -6100,7 +7343,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
  */
         __pyx_v_i = (__pyx_v_i + 1);
 
-        /* "cpp_process.pyx":354
+        /* "cpp_process.pyx":442
  *             if choice is None:
  *                 i += 1
  *                 continue             # <<<<<<<<<<<<<<
@@ -6109,7 +7352,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
  */
         goto __pyx_L11_continue;
 
-        /* "cpp_process.pyx":352
+        /* "cpp_process.pyx":440
  *     else:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -6118,14 +7361,14 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
  */
       }
 
-      /* "cpp_process.pyx":356
+      /* "cpp_process.pyx":444
  *                 continue
  * 
  *             score = scorer(query, choice,             # <<<<<<<<<<<<<<
  *                 processor=None, score_cutoff=score_cutoff, **kwargs)
  * 
  */
-      __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 356, __pyx_L1_error)
+      __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 444, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_INCREF(__pyx_v_query);
       __Pyx_GIVEREF(__pyx_v_query);
@@ -6134,78 +7377,78 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
       __Pyx_GIVEREF(__pyx_v_choice);
       PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_v_choice);
 
-      /* "cpp_process.pyx":357
+      /* "cpp_process.pyx":445
  * 
  *             score = scorer(query, choice,
  *                 processor=None, score_cutoff=score_cutoff, **kwargs)             # <<<<<<<<<<<<<<
  * 
  *             if score >= score_cutoff and score > result_score:
  */
-      __pyx_t_7 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 357, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 445, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
-      if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_processor, Py_None) < 0) __PYX_ERR(0, 357, __pyx_L1_error)
-      __pyx_t_10 = PyFloat_FromDouble(__pyx_v_score_cutoff); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 357, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_processor, Py_None) < 0) __PYX_ERR(0, 445, __pyx_L1_error)
+      __pyx_t_10 = PyFloat_FromDouble(__pyx_v_score_cutoff); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 445, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
-      if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_score_cutoff, __pyx_t_10) < 0) __PYX_ERR(0, 357, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_score_cutoff, __pyx_t_10) < 0) __PYX_ERR(0, 445, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       __pyx_t_8 = __pyx_t_7;
       __pyx_t_7 = 0;
       if (unlikely(__pyx_v_kwargs == Py_None)) {
         PyErr_SetString(PyExc_TypeError, "argument after ** must be a mapping, not NoneType");
-        __PYX_ERR(0, 357, __pyx_L1_error)
+        __PYX_ERR(0, 445, __pyx_L1_error)
       }
-      if (__Pyx_MergeKeywords(__pyx_t_8, __pyx_v_kwargs) < 0) __PYX_ERR(0, 357, __pyx_L1_error)
+      if (__Pyx_MergeKeywords(__pyx_t_8, __pyx_v_kwargs) < 0) __PYX_ERR(0, 445, __pyx_L1_error)
 
-      /* "cpp_process.pyx":356
+      /* "cpp_process.pyx":444
  *                 continue
  * 
  *             score = scorer(query, choice,             # <<<<<<<<<<<<<<
  *                 processor=None, score_cutoff=score_cutoff, **kwargs)
  * 
  */
-      __pyx_t_7 = __Pyx_PyObject_Call(__pyx_v_scorer, __pyx_t_6, __pyx_t_8); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 356, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyObject_Call(__pyx_v_scorer, __pyx_t_6, __pyx_t_8); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 444, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __Pyx_XDECREF_SET(__pyx_v_score, __pyx_t_7);
       __pyx_t_7 = 0;
 
-      /* "cpp_process.pyx":359
+      /* "cpp_process.pyx":447
  *                 processor=None, score_cutoff=score_cutoff, **kwargs)
  * 
  *             if score >= score_cutoff and score > result_score:             # <<<<<<<<<<<<<<
  *                 score_cutoff = score
  *                 result_score = score
  */
-      __pyx_t_7 = PyFloat_FromDouble(__pyx_v_score_cutoff); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 359, __pyx_L1_error)
+      __pyx_t_7 = PyFloat_FromDouble(__pyx_v_score_cutoff); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 447, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
-      __pyx_t_8 = PyObject_RichCompare(__pyx_v_score, __pyx_t_7, Py_GE); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 359, __pyx_L1_error)
+      __pyx_t_8 = PyObject_RichCompare(__pyx_v_score, __pyx_t_7, Py_GE); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 447, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 359, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 447, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       if (__pyx_t_1) {
       } else {
         __pyx_t_2 = __pyx_t_1;
         goto __pyx_L15_bool_binop_done;
       }
-      __pyx_t_8 = PyObject_RichCompare(__pyx_v_score, __pyx_v_result_score, Py_GT); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 359, __pyx_L1_error)
-      __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 359, __pyx_L1_error)
+      __pyx_t_8 = PyObject_RichCompare(__pyx_v_score, __pyx_v_result_score, Py_GT); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 447, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 447, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __pyx_t_2 = __pyx_t_1;
       __pyx_L15_bool_binop_done:;
       if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":360
+        /* "cpp_process.pyx":448
  * 
  *             if score >= score_cutoff and score > result_score:
  *                 score_cutoff = score             # <<<<<<<<<<<<<<
  *                 result_score = score
  *                 result_choice = choice
  */
-        __pyx_t_11 = __pyx_PyFloat_AsDouble(__pyx_v_score); if (unlikely((__pyx_t_11 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 360, __pyx_L1_error)
+        __pyx_t_11 = __pyx_PyFloat_AsDouble(__pyx_v_score); if (unlikely((__pyx_t_11 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 448, __pyx_L1_error)
         __pyx_v_score_cutoff = __pyx_t_11;
 
-        /* "cpp_process.pyx":361
+        /* "cpp_process.pyx":449
  *             if score >= score_cutoff and score > result_score:
  *                 score_cutoff = score
  *                 result_score = score             # <<<<<<<<<<<<<<
@@ -6215,7 +7458,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
         __Pyx_INCREF(__pyx_v_score);
         __Pyx_DECREF_SET(__pyx_v_result_score, __pyx_v_score);
 
-        /* "cpp_process.pyx":362
+        /* "cpp_process.pyx":450
  *                 score_cutoff = score
  *                 result_score = score
  *                 result_choice = choice             # <<<<<<<<<<<<<<
@@ -6225,7 +7468,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
         __Pyx_INCREF(__pyx_v_choice);
         __Pyx_DECREF_SET(__pyx_v_result_choice, __pyx_v_choice);
 
-        /* "cpp_process.pyx":363
+        /* "cpp_process.pyx":451
  *                 result_score = score
  *                 result_choice = choice
  *                 result_index = i             # <<<<<<<<<<<<<<
@@ -6234,7 +7477,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
  */
         __pyx_v_result_index = __pyx_v_i;
 
-        /* "cpp_process.pyx":365
+        /* "cpp_process.pyx":453
  *                 result_index = i
  * 
  *                 if score_cutoff == 100:             # <<<<<<<<<<<<<<
@@ -6244,7 +7487,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
         __pyx_t_2 = ((__pyx_v_score_cutoff == 100.0) != 0);
         if (__pyx_t_2) {
 
-          /* "cpp_process.pyx":366
+          /* "cpp_process.pyx":454
  * 
  *                 if score_cutoff == 100:
  *                     break             # <<<<<<<<<<<<<<
@@ -6253,7 +7496,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
  */
           goto __pyx_L12_break;
 
-          /* "cpp_process.pyx":365
+          /* "cpp_process.pyx":453
  *                 result_index = i
  * 
  *                 if score_cutoff == 100:             # <<<<<<<<<<<<<<
@@ -6262,7 +7505,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
  */
         }
 
-        /* "cpp_process.pyx":359
+        /* "cpp_process.pyx":447
  *                 processor=None, score_cutoff=score_cutoff, **kwargs)
  * 
  *             if score >= score_cutoff and score > result_score:             # <<<<<<<<<<<<<<
@@ -6271,7 +7514,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
  */
       }
 
-      /* "cpp_process.pyx":367
+      /* "cpp_process.pyx":455
  *                 if score_cutoff == 100:
  *                     break
  *             i += 1             # <<<<<<<<<<<<<<
@@ -6280,7 +7523,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
  */
       __pyx_v_i = (__pyx_v_i + 1);
 
-      /* "cpp_process.pyx":351
+      /* "cpp_process.pyx":439
  *             i += 1
  *     else:
  *         for choice in choices:             # <<<<<<<<<<<<<<
@@ -6294,7 +7537,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
   }
   __pyx_L3:;
 
-  /* "cpp_process.pyx":369
+  /* "cpp_process.pyx":457
  *             i += 1
  * 
  *     return (result_choice, result_score, result_index) if result_choice is not None else None             # <<<<<<<<<<<<<<
@@ -6304,9 +7547,9 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_2 = (__pyx_v_result_choice != Py_None);
   if ((__pyx_t_2 != 0)) {
-    __pyx_t_8 = __Pyx_PyInt_FromSize_t(__pyx_v_result_index); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 369, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyInt_FromSize_t(__pyx_v_result_index); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 457, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 369, __pyx_L1_error)
+    __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 457, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_INCREF(__pyx_v_result_choice);
     __Pyx_GIVEREF(__pyx_v_result_choice);
@@ -6327,7 +7570,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "cpp_process.pyx":326
+  /* "cpp_process.pyx":414
  * 
  * 
  * cdef inline py_extractOne_list(query, choices, scorer, processor, double score_cutoff, kwargs):             # <<<<<<<<<<<<<<
@@ -6354,949 +7597,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extractOne_list(PyObject
   return __pyx_r;
 }
 
-/* "cpp_process.pyx":372
- * 
- * 
- * cdef inline scorer_context CachedNormalizedLevenshteinInit(object query, int def_process, dict kwargs):             # <<<<<<<<<<<<<<
- *     cdef size_t insertion, deletion, substitution
- *     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
- */
-
-static CYTHON_INLINE scorer_context __pyx_f_11cpp_process_CachedNormalizedLevenshteinInit(PyObject *__pyx_v_query, int __pyx_v_def_process, PyObject *__pyx_v_kwargs) {
-  size_t __pyx_v_insertion;
-  size_t __pyx_v_deletion;
-  size_t __pyx_v_substitution;
-  scorer_context __pyx_r;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
-  PyObject *__pyx_t_4 = NULL;
-  PyObject *__pyx_t_5 = NULL;
-  PyObject *(*__pyx_t_6)(PyObject *);
-  size_t __pyx_t_7;
-  size_t __pyx_t_8;
-  size_t __pyx_t_9;
-  scorer_context __pyx_t_10;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("CachedNormalizedLevenshteinInit", 0);
-
-  /* "cpp_process.pyx":374
- * cdef inline scorer_context CachedNormalizedLevenshteinInit(object query, int def_process, dict kwargs):
- *     cdef size_t insertion, deletion, substitution
- *     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))             # <<<<<<<<<<<<<<
- *     return cached_normalized_levenshtein_init(query, def_process, insertion, deletion, substitution)
- * 
- */
-  if (unlikely(__pyx_v_kwargs == Py_None)) {
-    PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "get");
-    __PYX_ERR(0, 374, __pyx_L1_error)
-  }
-  __pyx_t_1 = __Pyx_PyDict_GetItemDefault(__pyx_v_kwargs, __pyx_n_u_weights, __pyx_tuple_); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 374, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if ((likely(PyTuple_CheckExact(__pyx_t_1))) || (PyList_CheckExact(__pyx_t_1))) {
-    PyObject* sequence = __pyx_t_1;
-    Py_ssize_t size = __Pyx_PySequence_SIZE(sequence);
-    if (unlikely(size != 3)) {
-      if (size > 3) __Pyx_RaiseTooManyValuesError(3);
-      else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(0, 374, __pyx_L1_error)
-    }
-    #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-    if (likely(PyTuple_CheckExact(sequence))) {
-      __pyx_t_2 = PyTuple_GET_ITEM(sequence, 0); 
-      __pyx_t_3 = PyTuple_GET_ITEM(sequence, 1); 
-      __pyx_t_4 = PyTuple_GET_ITEM(sequence, 2); 
-    } else {
-      __pyx_t_2 = PyList_GET_ITEM(sequence, 0); 
-      __pyx_t_3 = PyList_GET_ITEM(sequence, 1); 
-      __pyx_t_4 = PyList_GET_ITEM(sequence, 2); 
-    }
-    __Pyx_INCREF(__pyx_t_2);
-    __Pyx_INCREF(__pyx_t_3);
-    __Pyx_INCREF(__pyx_t_4);
-    #else
-    __pyx_t_2 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 374, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 374, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 374, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    #endif
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  } else {
-    Py_ssize_t index = -1;
-    __pyx_t_5 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 374, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_6 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_5);
-    index = 0; __pyx_t_2 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_2)) goto __pyx_L3_unpacking_failed;
-    __Pyx_GOTREF(__pyx_t_2);
-    index = 1; __pyx_t_3 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_3)) goto __pyx_L3_unpacking_failed;
-    __Pyx_GOTREF(__pyx_t_3);
-    index = 2; __pyx_t_4 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_4)) goto __pyx_L3_unpacking_failed;
-    __Pyx_GOTREF(__pyx_t_4);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 3) < 0) __PYX_ERR(0, 374, __pyx_L1_error)
-    __pyx_t_6 = NULL;
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    goto __pyx_L4_unpacking_done;
-    __pyx_L3_unpacking_failed:;
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_6 = NULL;
-    if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(0, 374, __pyx_L1_error)
-    __pyx_L4_unpacking_done:;
-  }
-  __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_7 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 374, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_8 = __Pyx_PyInt_As_size_t(__pyx_t_3); if (unlikely((__pyx_t_8 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 374, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_9 = __Pyx_PyInt_As_size_t(__pyx_t_4); if (unlikely((__pyx_t_9 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 374, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_v_insertion = __pyx_t_7;
-  __pyx_v_deletion = __pyx_t_8;
-  __pyx_v_substitution = __pyx_t_9;
-
-  /* "cpp_process.pyx":375
- *     cdef size_t insertion, deletion, substitution
- *     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
- *     return cached_normalized_levenshtein_init(query, def_process, insertion, deletion, substitution)             # <<<<<<<<<<<<<<
- * 
- * cdef inline distance_context CachedLevenshteinInit(object query, int def_process, dict kwargs):
- */
-  try {
-    __pyx_t_10 = cached_normalized_levenshtein_init(__pyx_v_query, __pyx_v_def_process, __pyx_v_insertion, __pyx_v_deletion, __pyx_v_substitution);
-  } catch(...) {
-    __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 375, __pyx_L1_error)
-  }
-  __pyx_r = __pyx_t_10;
-  goto __pyx_L0;
-
-  /* "cpp_process.pyx":372
- * 
- * 
- * cdef inline scorer_context CachedNormalizedLevenshteinInit(object query, int def_process, dict kwargs):             # <<<<<<<<<<<<<<
- *     cdef size_t insertion, deletion, substitution
- *     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_5);
-  __Pyx_WriteUnraisable("cpp_process.CachedNormalizedLevenshteinInit", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
-  __Pyx_pretend_to_initialize(&__pyx_r);
-  __pyx_L0:;
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "cpp_process.pyx":377
- *     return cached_normalized_levenshtein_init(query, def_process, insertion, deletion, substitution)
- * 
- * cdef inline distance_context CachedLevenshteinInit(object query, int def_process, dict kwargs):             # <<<<<<<<<<<<<<
- *     cdef size_t insertion, deletion, substitution
- *     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
- */
-
-static CYTHON_INLINE distance_context __pyx_f_11cpp_process_CachedLevenshteinInit(PyObject *__pyx_v_query, int __pyx_v_def_process, PyObject *__pyx_v_kwargs) {
-  size_t __pyx_v_insertion;
-  size_t __pyx_v_deletion;
-  size_t __pyx_v_substitution;
-  distance_context __pyx_r;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
-  PyObject *__pyx_t_4 = NULL;
-  PyObject *__pyx_t_5 = NULL;
-  PyObject *(*__pyx_t_6)(PyObject *);
-  size_t __pyx_t_7;
-  size_t __pyx_t_8;
-  size_t __pyx_t_9;
-  distance_context __pyx_t_10;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("CachedLevenshteinInit", 0);
-
-  /* "cpp_process.pyx":379
- * cdef inline distance_context CachedLevenshteinInit(object query, int def_process, dict kwargs):
- *     cdef size_t insertion, deletion, substitution
- *     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))             # <<<<<<<<<<<<<<
- *     return cached_levenshtein_init(query, def_process, insertion, deletion, substitution)
- * 
- */
-  if (unlikely(__pyx_v_kwargs == Py_None)) {
-    PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "get");
-    __PYX_ERR(0, 379, __pyx_L1_error)
-  }
-  __pyx_t_1 = __Pyx_PyDict_GetItemDefault(__pyx_v_kwargs, __pyx_n_u_weights, __pyx_tuple_); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 379, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if ((likely(PyTuple_CheckExact(__pyx_t_1))) || (PyList_CheckExact(__pyx_t_1))) {
-    PyObject* sequence = __pyx_t_1;
-    Py_ssize_t size = __Pyx_PySequence_SIZE(sequence);
-    if (unlikely(size != 3)) {
-      if (size > 3) __Pyx_RaiseTooManyValuesError(3);
-      else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(0, 379, __pyx_L1_error)
-    }
-    #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-    if (likely(PyTuple_CheckExact(sequence))) {
-      __pyx_t_2 = PyTuple_GET_ITEM(sequence, 0); 
-      __pyx_t_3 = PyTuple_GET_ITEM(sequence, 1); 
-      __pyx_t_4 = PyTuple_GET_ITEM(sequence, 2); 
-    } else {
-      __pyx_t_2 = PyList_GET_ITEM(sequence, 0); 
-      __pyx_t_3 = PyList_GET_ITEM(sequence, 1); 
-      __pyx_t_4 = PyList_GET_ITEM(sequence, 2); 
-    }
-    __Pyx_INCREF(__pyx_t_2);
-    __Pyx_INCREF(__pyx_t_3);
-    __Pyx_INCREF(__pyx_t_4);
-    #else
-    __pyx_t_2 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 379, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 379, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 379, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    #endif
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  } else {
-    Py_ssize_t index = -1;
-    __pyx_t_5 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 379, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_6 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_5);
-    index = 0; __pyx_t_2 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_2)) goto __pyx_L3_unpacking_failed;
-    __Pyx_GOTREF(__pyx_t_2);
-    index = 1; __pyx_t_3 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_3)) goto __pyx_L3_unpacking_failed;
-    __Pyx_GOTREF(__pyx_t_3);
-    index = 2; __pyx_t_4 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_4)) goto __pyx_L3_unpacking_failed;
-    __Pyx_GOTREF(__pyx_t_4);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 3) < 0) __PYX_ERR(0, 379, __pyx_L1_error)
-    __pyx_t_6 = NULL;
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    goto __pyx_L4_unpacking_done;
-    __pyx_L3_unpacking_failed:;
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_6 = NULL;
-    if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(0, 379, __pyx_L1_error)
-    __pyx_L4_unpacking_done:;
-  }
-  __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_7 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 379, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_8 = __Pyx_PyInt_As_size_t(__pyx_t_3); if (unlikely((__pyx_t_8 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 379, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_9 = __Pyx_PyInt_As_size_t(__pyx_t_4); if (unlikely((__pyx_t_9 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 379, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_v_insertion = __pyx_t_7;
-  __pyx_v_deletion = __pyx_t_8;
-  __pyx_v_substitution = __pyx_t_9;
-
-  /* "cpp_process.pyx":380
- *     cdef size_t insertion, deletion, substitution
- *     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
- *     return cached_levenshtein_init(query, def_process, insertion, deletion, substitution)             # <<<<<<<<<<<<<<
- * 
- * 
- */
-  try {
-    __pyx_t_10 = cached_levenshtein_init(__pyx_v_query, __pyx_v_def_process, __pyx_v_insertion, __pyx_v_deletion, __pyx_v_substitution);
-  } catch(...) {
-    __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 380, __pyx_L1_error)
-  }
-  __pyx_r = __pyx_t_10;
-  goto __pyx_L0;
-
-  /* "cpp_process.pyx":377
- *     return cached_normalized_levenshtein_init(query, def_process, insertion, deletion, substitution)
- * 
- * cdef inline distance_context CachedLevenshteinInit(object query, int def_process, dict kwargs):             # <<<<<<<<<<<<<<
- *     cdef size_t insertion, deletion, substitution
- *     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_5);
-  __Pyx_WriteUnraisable("cpp_process.CachedLevenshteinInit", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
-  __Pyx_pretend_to_initialize(&__pyx_r);
-  __pyx_L0:;
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "cpp_process.pyx":383
- * 
- * 
- * cdef inline scorer_context CachedScorerInit(object scorer, object query, int def_process, dict kwargs):             # <<<<<<<<<<<<<<
- *     cdef scorer_context context
- * 
- */
-
-static CYTHON_INLINE scorer_context __pyx_f_11cpp_process_CachedScorerInit(PyObject *__pyx_v_scorer, PyObject *__pyx_v_query, int __pyx_v_def_process, PyObject *__pyx_v_kwargs) {
-  scorer_context __pyx_v_context;
-  scorer_context __pyx_r;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  int __pyx_t_2;
-  int __pyx_t_3;
-  scorer_context __pyx_t_4;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("CachedScorerInit", 0);
-
-  /* "cpp_process.pyx":386
- *     cdef scorer_context context
- * 
- *     if scorer is ratio:             # <<<<<<<<<<<<<<
- *         context = cached_ratio_init(query, def_process)
- *     elif scorer is partial_ratio:
- */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 386, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = (__pyx_v_scorer == __pyx_t_1);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = (__pyx_t_2 != 0);
-  if (__pyx_t_3) {
-
-    /* "cpp_process.pyx":387
- * 
- *     if scorer is ratio:
- *         context = cached_ratio_init(query, def_process)             # <<<<<<<<<<<<<<
- *     elif scorer is partial_ratio:
- *         context = cached_partial_ratio_init(query, def_process)
- */
-    try {
-      __pyx_t_4 = cached_ratio_init(__pyx_v_query, __pyx_v_def_process);
-    } catch(...) {
-      __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 387, __pyx_L1_error)
-    }
-    __pyx_v_context = __pyx_t_4;
-
-    /* "cpp_process.pyx":386
- *     cdef scorer_context context
- * 
- *     if scorer is ratio:             # <<<<<<<<<<<<<<
- *         context = cached_ratio_init(query, def_process)
- *     elif scorer is partial_ratio:
- */
-    goto __pyx_L3;
-  }
-
-  /* "cpp_process.pyx":388
- *     if scorer is ratio:
- *         context = cached_ratio_init(query, def_process)
- *     elif scorer is partial_ratio:             # <<<<<<<<<<<<<<
- *         context = cached_partial_ratio_init(query, def_process)
- *     elif scorer is token_sort_ratio:
- */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_partial_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 388, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = (__pyx_v_scorer == __pyx_t_1);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_2 = (__pyx_t_3 != 0);
-  if (__pyx_t_2) {
-
-    /* "cpp_process.pyx":389
- *         context = cached_ratio_init(query, def_process)
- *     elif scorer is partial_ratio:
- *         context = cached_partial_ratio_init(query, def_process)             # <<<<<<<<<<<<<<
- *     elif scorer is token_sort_ratio:
- *         context = cached_token_sort_ratio_init(query, def_process)
- */
-    try {
-      __pyx_t_4 = cached_partial_ratio_init(__pyx_v_query, __pyx_v_def_process);
-    } catch(...) {
-      __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 389, __pyx_L1_error)
-    }
-    __pyx_v_context = __pyx_t_4;
-
-    /* "cpp_process.pyx":388
- *     if scorer is ratio:
- *         context = cached_ratio_init(query, def_process)
- *     elif scorer is partial_ratio:             # <<<<<<<<<<<<<<
- *         context = cached_partial_ratio_init(query, def_process)
- *     elif scorer is token_sort_ratio:
- */
-    goto __pyx_L3;
-  }
-
-  /* "cpp_process.pyx":390
- *     elif scorer is partial_ratio:
- *         context = cached_partial_ratio_init(query, def_process)
- *     elif scorer is token_sort_ratio:             # <<<<<<<<<<<<<<
- *         context = cached_token_sort_ratio_init(query, def_process)
- *     elif scorer is token_set_ratio:
- */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_token_sort_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 390, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = (__pyx_v_scorer == __pyx_t_1);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = (__pyx_t_2 != 0);
-  if (__pyx_t_3) {
-
-    /* "cpp_process.pyx":391
- *         context = cached_partial_ratio_init(query, def_process)
- *     elif scorer is token_sort_ratio:
- *         context = cached_token_sort_ratio_init(query, def_process)             # <<<<<<<<<<<<<<
- *     elif scorer is token_set_ratio:
- *         context = cached_token_set_ratio_init(query, def_process)
- */
-    try {
-      __pyx_t_4 = cached_token_sort_ratio_init(__pyx_v_query, __pyx_v_def_process);
-    } catch(...) {
-      __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 391, __pyx_L1_error)
-    }
-    __pyx_v_context = __pyx_t_4;
-
-    /* "cpp_process.pyx":390
- *     elif scorer is partial_ratio:
- *         context = cached_partial_ratio_init(query, def_process)
- *     elif scorer is token_sort_ratio:             # <<<<<<<<<<<<<<
- *         context = cached_token_sort_ratio_init(query, def_process)
- *     elif scorer is token_set_ratio:
- */
-    goto __pyx_L3;
-  }
-
-  /* "cpp_process.pyx":392
- *     elif scorer is token_sort_ratio:
- *         context = cached_token_sort_ratio_init(query, def_process)
- *     elif scorer is token_set_ratio:             # <<<<<<<<<<<<<<
- *         context = cached_token_set_ratio_init(query, def_process)
- *     elif scorer is token_ratio:
- */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_token_set_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 392, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = (__pyx_v_scorer == __pyx_t_1);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_2 = (__pyx_t_3 != 0);
-  if (__pyx_t_2) {
-
-    /* "cpp_process.pyx":393
- *         context = cached_token_sort_ratio_init(query, def_process)
- *     elif scorer is token_set_ratio:
- *         context = cached_token_set_ratio_init(query, def_process)             # <<<<<<<<<<<<<<
- *     elif scorer is token_ratio:
- *         context = cached_token_ratio_init(query, def_process)
- */
-    try {
-      __pyx_t_4 = cached_token_set_ratio_init(__pyx_v_query, __pyx_v_def_process);
-    } catch(...) {
-      __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 393, __pyx_L1_error)
-    }
-    __pyx_v_context = __pyx_t_4;
-
-    /* "cpp_process.pyx":392
- *     elif scorer is token_sort_ratio:
- *         context = cached_token_sort_ratio_init(query, def_process)
- *     elif scorer is token_set_ratio:             # <<<<<<<<<<<<<<
- *         context = cached_token_set_ratio_init(query, def_process)
- *     elif scorer is token_ratio:
- */
-    goto __pyx_L3;
-  }
-
-  /* "cpp_process.pyx":394
- *     elif scorer is token_set_ratio:
- *         context = cached_token_set_ratio_init(query, def_process)
- *     elif scorer is token_ratio:             # <<<<<<<<<<<<<<
- *         context = cached_token_ratio_init(query, def_process)
- *     elif scorer is partial_token_sort_ratio:
- */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_token_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 394, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = (__pyx_v_scorer == __pyx_t_1);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = (__pyx_t_2 != 0);
-  if (__pyx_t_3) {
-
-    /* "cpp_process.pyx":395
- *         context = cached_token_set_ratio_init(query, def_process)
- *     elif scorer is token_ratio:
- *         context = cached_token_ratio_init(query, def_process)             # <<<<<<<<<<<<<<
- *     elif scorer is partial_token_sort_ratio:
- *         context = cached_partial_token_sort_ratio_init(query, def_process)
- */
-    try {
-      __pyx_t_4 = cached_token_ratio_init(__pyx_v_query, __pyx_v_def_process);
-    } catch(...) {
-      __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 395, __pyx_L1_error)
-    }
-    __pyx_v_context = __pyx_t_4;
-
-    /* "cpp_process.pyx":394
- *     elif scorer is token_set_ratio:
- *         context = cached_token_set_ratio_init(query, def_process)
- *     elif scorer is token_ratio:             # <<<<<<<<<<<<<<
- *         context = cached_token_ratio_init(query, def_process)
- *     elif scorer is partial_token_sort_ratio:
- */
-    goto __pyx_L3;
-  }
-
-  /* "cpp_process.pyx":396
- *     elif scorer is token_ratio:
- *         context = cached_token_ratio_init(query, def_process)
- *     elif scorer is partial_token_sort_ratio:             # <<<<<<<<<<<<<<
- *         context = cached_partial_token_sort_ratio_init(query, def_process)
- *     elif scorer is partial_token_set_ratio:
- */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_partial_token_sort_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 396, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = (__pyx_v_scorer == __pyx_t_1);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_2 = (__pyx_t_3 != 0);
-  if (__pyx_t_2) {
-
-    /* "cpp_process.pyx":397
- *         context = cached_token_ratio_init(query, def_process)
- *     elif scorer is partial_token_sort_ratio:
- *         context = cached_partial_token_sort_ratio_init(query, def_process)             # <<<<<<<<<<<<<<
- *     elif scorer is partial_token_set_ratio:
- *         context = cached_partial_token_set_ratio_init(query, def_process)
- */
-    try {
-      __pyx_t_4 = cached_partial_token_sort_ratio_init(__pyx_v_query, __pyx_v_def_process);
-    } catch(...) {
-      __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 397, __pyx_L1_error)
-    }
-    __pyx_v_context = __pyx_t_4;
-
-    /* "cpp_process.pyx":396
- *     elif scorer is token_ratio:
- *         context = cached_token_ratio_init(query, def_process)
- *     elif scorer is partial_token_sort_ratio:             # <<<<<<<<<<<<<<
- *         context = cached_partial_token_sort_ratio_init(query, def_process)
- *     elif scorer is partial_token_set_ratio:
- */
-    goto __pyx_L3;
-  }
-
-  /* "cpp_process.pyx":398
- *     elif scorer is partial_token_sort_ratio:
- *         context = cached_partial_token_sort_ratio_init(query, def_process)
- *     elif scorer is partial_token_set_ratio:             # <<<<<<<<<<<<<<
- *         context = cached_partial_token_set_ratio_init(query, def_process)
- *     elif scorer is partial_token_ratio:
- */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_partial_token_set_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 398, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = (__pyx_v_scorer == __pyx_t_1);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = (__pyx_t_2 != 0);
-  if (__pyx_t_3) {
-
-    /* "cpp_process.pyx":399
- *         context = cached_partial_token_sort_ratio_init(query, def_process)
- *     elif scorer is partial_token_set_ratio:
- *         context = cached_partial_token_set_ratio_init(query, def_process)             # <<<<<<<<<<<<<<
- *     elif scorer is partial_token_ratio:
- *         context = cached_partial_token_ratio_init(query, def_process)
- */
-    try {
-      __pyx_t_4 = cached_partial_token_set_ratio_init(__pyx_v_query, __pyx_v_def_process);
-    } catch(...) {
-      __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 399, __pyx_L1_error)
-    }
-    __pyx_v_context = __pyx_t_4;
-
-    /* "cpp_process.pyx":398
- *     elif scorer is partial_token_sort_ratio:
- *         context = cached_partial_token_sort_ratio_init(query, def_process)
- *     elif scorer is partial_token_set_ratio:             # <<<<<<<<<<<<<<
- *         context = cached_partial_token_set_ratio_init(query, def_process)
- *     elif scorer is partial_token_ratio:
- */
-    goto __pyx_L3;
-  }
-
-  /* "cpp_process.pyx":400
- *     elif scorer is partial_token_set_ratio:
- *         context = cached_partial_token_set_ratio_init(query, def_process)
- *     elif scorer is partial_token_ratio:             # <<<<<<<<<<<<<<
- *         context = cached_partial_token_ratio_init(query, def_process)
- *     elif scorer is WRatio:
- */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_partial_token_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 400, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = (__pyx_v_scorer == __pyx_t_1);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_2 = (__pyx_t_3 != 0);
-  if (__pyx_t_2) {
-
-    /* "cpp_process.pyx":401
- *         context = cached_partial_token_set_ratio_init(query, def_process)
- *     elif scorer is partial_token_ratio:
- *         context = cached_partial_token_ratio_init(query, def_process)             # <<<<<<<<<<<<<<
- *     elif scorer is WRatio:
- *         context = cached_WRatio_init(query, def_process)
- */
-    try {
-      __pyx_t_4 = cached_partial_token_ratio_init(__pyx_v_query, __pyx_v_def_process);
-    } catch(...) {
-      __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 401, __pyx_L1_error)
-    }
-    __pyx_v_context = __pyx_t_4;
-
-    /* "cpp_process.pyx":400
- *     elif scorer is partial_token_set_ratio:
- *         context = cached_partial_token_set_ratio_init(query, def_process)
- *     elif scorer is partial_token_ratio:             # <<<<<<<<<<<<<<
- *         context = cached_partial_token_ratio_init(query, def_process)
- *     elif scorer is WRatio:
- */
-    goto __pyx_L3;
-  }
-
-  /* "cpp_process.pyx":402
- *     elif scorer is partial_token_ratio:
- *         context = cached_partial_token_ratio_init(query, def_process)
- *     elif scorer is WRatio:             # <<<<<<<<<<<<<<
- *         context = cached_WRatio_init(query, def_process)
- *     elif scorer is QRatio:
- */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_WRatio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 402, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = (__pyx_v_scorer == __pyx_t_1);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = (__pyx_t_2 != 0);
-  if (__pyx_t_3) {
-
-    /* "cpp_process.pyx":403
- *         context = cached_partial_token_ratio_init(query, def_process)
- *     elif scorer is WRatio:
- *         context = cached_WRatio_init(query, def_process)             # <<<<<<<<<<<<<<
- *     elif scorer is QRatio:
- *         context = cached_QRatio_init(query, def_process)
- */
-    try {
-      __pyx_t_4 = cached_WRatio_init(__pyx_v_query, __pyx_v_def_process);
-    } catch(...) {
-      __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 403, __pyx_L1_error)
-    }
-    __pyx_v_context = __pyx_t_4;
-
-    /* "cpp_process.pyx":402
- *     elif scorer is partial_token_ratio:
- *         context = cached_partial_token_ratio_init(query, def_process)
- *     elif scorer is WRatio:             # <<<<<<<<<<<<<<
- *         context = cached_WRatio_init(query, def_process)
- *     elif scorer is QRatio:
- */
-    goto __pyx_L3;
-  }
-
-  /* "cpp_process.pyx":404
- *     elif scorer is WRatio:
- *         context = cached_WRatio_init(query, def_process)
- *     elif scorer is QRatio:             # <<<<<<<<<<<<<<
- *         context = cached_QRatio_init(query, def_process)
- *     elif scorer is normalized_levenshtein:
- */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_QRatio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 404, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = (__pyx_v_scorer == __pyx_t_1);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_2 = (__pyx_t_3 != 0);
-  if (__pyx_t_2) {
-
-    /* "cpp_process.pyx":405
- *         context = cached_WRatio_init(query, def_process)
- *     elif scorer is QRatio:
- *         context = cached_QRatio_init(query, def_process)             # <<<<<<<<<<<<<<
- *     elif scorer is normalized_levenshtein:
- *         context = CachedNormalizedLevenshteinInit(query, def_process, kwargs)
- */
-    try {
-      __pyx_t_4 = cached_QRatio_init(__pyx_v_query, __pyx_v_def_process);
-    } catch(...) {
-      __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 405, __pyx_L1_error)
-    }
-    __pyx_v_context = __pyx_t_4;
-
-    /* "cpp_process.pyx":404
- *     elif scorer is WRatio:
- *         context = cached_WRatio_init(query, def_process)
- *     elif scorer is QRatio:             # <<<<<<<<<<<<<<
- *         context = cached_QRatio_init(query, def_process)
- *     elif scorer is normalized_levenshtein:
- */
-    goto __pyx_L3;
-  }
-
-  /* "cpp_process.pyx":406
- *     elif scorer is QRatio:
- *         context = cached_QRatio_init(query, def_process)
- *     elif scorer is normalized_levenshtein:             # <<<<<<<<<<<<<<
- *         context = CachedNormalizedLevenshteinInit(query, def_process, kwargs)
- *     elif scorer is normalized_hamming:
- */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_normalized_levenshtein); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 406, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = (__pyx_v_scorer == __pyx_t_1);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = (__pyx_t_2 != 0);
-  if (__pyx_t_3) {
-
-    /* "cpp_process.pyx":407
- *         context = cached_QRatio_init(query, def_process)
- *     elif scorer is normalized_levenshtein:
- *         context = CachedNormalizedLevenshteinInit(query, def_process, kwargs)             # <<<<<<<<<<<<<<
- *     elif scorer is normalized_hamming:
- *         context = cached_normalized_hamming_init(query, def_process)
- */
-    __pyx_v_context = __pyx_f_11cpp_process_CachedNormalizedLevenshteinInit(__pyx_v_query, __pyx_v_def_process, __pyx_v_kwargs);
-
-    /* "cpp_process.pyx":406
- *     elif scorer is QRatio:
- *         context = cached_QRatio_init(query, def_process)
- *     elif scorer is normalized_levenshtein:             # <<<<<<<<<<<<<<
- *         context = CachedNormalizedLevenshteinInit(query, def_process, kwargs)
- *     elif scorer is normalized_hamming:
- */
-    goto __pyx_L3;
-  }
-
-  /* "cpp_process.pyx":408
- *     elif scorer is normalized_levenshtein:
- *         context = CachedNormalizedLevenshteinInit(query, def_process, kwargs)
- *     elif scorer is normalized_hamming:             # <<<<<<<<<<<<<<
- *         context = cached_normalized_hamming_init(query, def_process)
- *     else:
- */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_normalized_hamming); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 408, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = (__pyx_v_scorer == __pyx_t_1);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_2 = (__pyx_t_3 != 0);
-  if (__pyx_t_2) {
-
-    /* "cpp_process.pyx":409
- *         context = CachedNormalizedLevenshteinInit(query, def_process, kwargs)
- *     elif scorer is normalized_hamming:
- *         context = cached_normalized_hamming_init(query, def_process)             # <<<<<<<<<<<<<<
- *     else:
- *         context.context = NULL
- */
-    try {
-      __pyx_t_4 = cached_normalized_hamming_init(__pyx_v_query, __pyx_v_def_process);
-    } catch(...) {
-      __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 409, __pyx_L1_error)
-    }
-    __pyx_v_context = __pyx_t_4;
-
-    /* "cpp_process.pyx":408
- *     elif scorer is normalized_levenshtein:
- *         context = CachedNormalizedLevenshteinInit(query, def_process, kwargs)
- *     elif scorer is normalized_hamming:             # <<<<<<<<<<<<<<
- *         context = cached_normalized_hamming_init(query, def_process)
- *     else:
- */
-    goto __pyx_L3;
-  }
-
-  /* "cpp_process.pyx":411
- *         context = cached_normalized_hamming_init(query, def_process)
- *     else:
- *         context.context = NULL             # <<<<<<<<<<<<<<
- *     return context
- * 
- */
-  /*else*/ {
-    __pyx_v_context.context = NULL;
-  }
-  __pyx_L3:;
-
-  /* "cpp_process.pyx":412
- *     else:
- *         context.context = NULL
- *     return context             # <<<<<<<<<<<<<<
- * 
- * 
- */
-  __pyx_r = __pyx_v_context;
-  goto __pyx_L0;
-
-  /* "cpp_process.pyx":383
- * 
- * 
- * cdef inline scorer_context CachedScorerInit(object scorer, object query, int def_process, dict kwargs):             # <<<<<<<<<<<<<<
- *     cdef scorer_context context
- * 
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_WriteUnraisable("cpp_process.CachedScorerInit", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
-  __Pyx_pretend_to_initialize(&__pyx_r);
-  __pyx_L0:;
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "cpp_process.pyx":415
- * 
- * 
- * cdef inline distance_context CachedDistanceInit(object scorer, object query, int def_process, dict kwargs):             # <<<<<<<<<<<<<<
- *     cdef distance_context context
- * 
- */
-
-static CYTHON_INLINE distance_context __pyx_f_11cpp_process_CachedDistanceInit(PyObject *__pyx_v_scorer, PyObject *__pyx_v_query, int __pyx_v_def_process, PyObject *__pyx_v_kwargs) {
-  distance_context __pyx_v_context;
-  distance_context __pyx_r;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  int __pyx_t_2;
-  int __pyx_t_3;
-  distance_context __pyx_t_4;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("CachedDistanceInit", 0);
-
-  /* "cpp_process.pyx":418
- *     cdef distance_context context
- * 
- *     if scorer is levenshtein:             # <<<<<<<<<<<<<<
- *         context = CachedLevenshteinInit(query, def_process, kwargs)
- *     elif scorer is hamming:
- */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_levenshtein); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 418, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = (__pyx_v_scorer == __pyx_t_1);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = (__pyx_t_2 != 0);
-  if (__pyx_t_3) {
-
-    /* "cpp_process.pyx":419
- * 
- *     if scorer is levenshtein:
- *         context = CachedLevenshteinInit(query, def_process, kwargs)             # <<<<<<<<<<<<<<
- *     elif scorer is hamming:
- *         context = cached_hamming_init(query, def_process)
- */
-    __pyx_v_context = __pyx_f_11cpp_process_CachedLevenshteinInit(__pyx_v_query, __pyx_v_def_process, __pyx_v_kwargs);
-
-    /* "cpp_process.pyx":418
- *     cdef distance_context context
- * 
- *     if scorer is levenshtein:             # <<<<<<<<<<<<<<
- *         context = CachedLevenshteinInit(query, def_process, kwargs)
- *     elif scorer is hamming:
- */
-    goto __pyx_L3;
-  }
-
-  /* "cpp_process.pyx":420
- *     if scorer is levenshtein:
- *         context = CachedLevenshteinInit(query, def_process, kwargs)
- *     elif scorer is hamming:             # <<<<<<<<<<<<<<
- *         context = cached_hamming_init(query, def_process)
- *     else:
- */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_hamming); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 420, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = (__pyx_v_scorer == __pyx_t_1);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_2 = (__pyx_t_3 != 0);
-  if (__pyx_t_2) {
-
-    /* "cpp_process.pyx":421
- *         context = CachedLevenshteinInit(query, def_process, kwargs)
- *     elif scorer is hamming:
- *         context = cached_hamming_init(query, def_process)             # <<<<<<<<<<<<<<
- *     else:
- *         context.context = NULL
- */
-    try {
-      __pyx_t_4 = cached_hamming_init(__pyx_v_query, __pyx_v_def_process);
-    } catch(...) {
-      __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 421, __pyx_L1_error)
-    }
-    __pyx_v_context = __pyx_t_4;
-
-    /* "cpp_process.pyx":420
- *     if scorer is levenshtein:
- *         context = CachedLevenshteinInit(query, def_process, kwargs)
- *     elif scorer is hamming:             # <<<<<<<<<<<<<<
- *         context = cached_hamming_init(query, def_process)
- *     else:
- */
-    goto __pyx_L3;
-  }
-
-  /* "cpp_process.pyx":423
- *         context = cached_hamming_init(query, def_process)
- *     else:
- *         context.context = NULL             # <<<<<<<<<<<<<<
- *     return context
- * 
- */
-  /*else*/ {
-    __pyx_v_context.context = NULL;
-  }
-  __pyx_L3:;
-
-  /* "cpp_process.pyx":424
- *     else:
- *         context.context = NULL
- *     return context             # <<<<<<<<<<<<<<
- * 
- * 
- */
-  __pyx_r = __pyx_v_context;
-  goto __pyx_L0;
-
-  /* "cpp_process.pyx":415
- * 
- * 
- * cdef inline distance_context CachedDistanceInit(object scorer, object query, int def_process, dict kwargs):             # <<<<<<<<<<<<<<
- *     cdef distance_context context
- * 
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_WriteUnraisable("cpp_process.CachedDistanceInit", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
-  __Pyx_pretend_to_initialize(&__pyx_r);
-  __pyx_L0:;
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "cpp_process.pyx":427
+/* "cpp_process.pyx":460
  * 
  * 
  * def extractOne(query, choices, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):             # <<<<<<<<<<<<<<
@@ -7314,7 +7615,7 @@ static PyObject *__pyx_pf_11cpp_process_7__defaults__(CYTHON_UNUSED PyObject *__
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__defaults__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyTuple_New(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 427, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 460, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__Pyx_CyFunction_Defaults(__pyx_defaults, __pyx_self)->__pyx_arg_scorer);
   __Pyx_GIVEREF(__Pyx_CyFunction_Defaults(__pyx_defaults, __pyx_self)->__pyx_arg_scorer);
@@ -7325,7 +7626,7 @@ static PyObject *__pyx_pf_11cpp_process_7__defaults__(CYTHON_UNUSED PyObject *__
   __Pyx_INCREF(((PyObject *)Py_None));
   __Pyx_GIVEREF(((PyObject *)Py_None));
   PyTuple_SET_ITEM(__pyx_t_1, 2, ((PyObject *)Py_None));
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 427, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 460, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
@@ -7415,40 +7716,40 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       switch (__pyx_nargs) {
         case  0:
         if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_query)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 427, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 460, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
         if (likely((values[1] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_choices)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 427, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 460, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("extractOne", 0, 2, 5, 1); __PYX_ERR(0, 427, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("extractOne", 0, 2, 5, 1); __PYX_ERR(0, 460, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (kw_args > 0) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_scorer);
           if (value) { values[2] = value; kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 427, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 460, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (kw_args > 0) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_processor);
           if (value) { values[3] = value; kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 427, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 460, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (kw_args > 0) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_score_cutoff);
           if (value) { values[4] = value; kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 427, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 460, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, __pyx_v_kwargs, values + 0, kwd_pos_args, "extractOne") < 0)) __PYX_ERR(0, 427, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, __pyx_v_kwargs, values + 0, kwd_pos_args, "extractOne") < 0)) __PYX_ERR(0, 460, __pyx_L3_error)
       }
     } else {
       switch (__pyx_nargs) {
@@ -7472,7 +7773,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("extractOne", 0, 2, 5, __pyx_nargs); __PYX_ERR(0, 427, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("extractOne", 0, 2, 5, __pyx_nargs); __PYX_ERR(0, 460, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_DECREF(__pyx_v_kwargs); __pyx_v_kwargs = 0;
   __Pyx_AddTraceback("cpp_process.extractOne", __pyx_clineno, __pyx_lineno, __pyx_filename);
@@ -7520,7 +7821,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
   __Pyx_INCREF(__pyx_v_query);
   __Pyx_INCREF(__pyx_v_processor);
 
-  /* "cpp_process.pyx":546
+  /* "cpp_process.pyx":579
  *     """
  * 
  *     cdef int def_process = 0             # <<<<<<<<<<<<<<
@@ -7529,7 +7830,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  */
   __pyx_v_def_process = 0;
 
-  /* "cpp_process.pyx":549
+  /* "cpp_process.pyx":582
  *     cdef scorer_context ScorerContext
  *     cdef distance_context DistanceContext
  *     cdef double c_score_cutoff = 0.0             # <<<<<<<<<<<<<<
@@ -7538,7 +7839,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  */
   __pyx_v_c_score_cutoff = 0.0;
 
-  /* "cpp_process.pyx":550
+  /* "cpp_process.pyx":583
  *     cdef distance_context DistanceContext
  *     cdef double c_score_cutoff = 0.0
  *     cdef size_t c_max = <size_t>-1             # <<<<<<<<<<<<<<
@@ -7547,7 +7848,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  */
   __pyx_v_c_max = ((size_t)-1L);
 
-  /* "cpp_process.pyx":552
+  /* "cpp_process.pyx":585
  *     cdef size_t c_max = <size_t>-1
  * 
  *     if query is None:             # <<<<<<<<<<<<<<
@@ -7558,7 +7859,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":553
+    /* "cpp_process.pyx":586
  * 
  *     if query is None:
  *         return None             # <<<<<<<<<<<<<<
@@ -7569,7 +7870,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
     __pyx_r = Py_None; __Pyx_INCREF(Py_None);
     goto __pyx_L0;
 
-    /* "cpp_process.pyx":552
+    /* "cpp_process.pyx":585
  *     cdef size_t c_max = <size_t>-1
  * 
  *     if query is None:             # <<<<<<<<<<<<<<
@@ -7578,21 +7879,21 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  */
   }
 
-  /* "cpp_process.pyx":556
+  /* "cpp_process.pyx":589
  * 
  *     # preprocess the query
  *     if processor is default_process:             # <<<<<<<<<<<<<<
  *         def_process = 1
  *         # since this call is only performed once it is not very expensive to
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_default_process); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 556, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_default_process); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 589, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_2 = (__pyx_v_processor == __pyx_t_3);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "cpp_process.pyx":557
+    /* "cpp_process.pyx":590
  *     # preprocess the query
  *     if processor is default_process:
  *         def_process = 1             # <<<<<<<<<<<<<<
@@ -7601,7 +7902,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  */
     __pyx_v_def_process = 1;
 
-    /* "cpp_process.pyx":560
+    /* "cpp_process.pyx":593
  *         # since this call is only performed once it is not very expensive to
  *         # make it in Python
  *         query = processor(query)             # <<<<<<<<<<<<<<
@@ -7625,14 +7926,14 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
       PyObject *__pyx_callargs[2] = {__pyx_t_5, __pyx_v_query};
       __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_4, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-      if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 560, __pyx_L1_error)
+      if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 593, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     }
     __Pyx_DECREF_SET(__pyx_v_query, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "cpp_process.pyx":561
+    /* "cpp_process.pyx":594
  *         # make it in Python
  *         query = processor(query)
  *         processor = None             # <<<<<<<<<<<<<<
@@ -7642,7 +7943,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
     __Pyx_INCREF(Py_None);
     __Pyx_DECREF_SET(__pyx_v_processor, Py_None);
 
-    /* "cpp_process.pyx":556
+    /* "cpp_process.pyx":589
  * 
  *     # preprocess the query
  *     if processor is default_process:             # <<<<<<<<<<<<<<
@@ -7652,18 +7953,18 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
     goto __pyx_L4;
   }
 
-  /* "cpp_process.pyx":562
+  /* "cpp_process.pyx":595
  *         query = processor(query)
  *         processor = None
  *     elif callable(processor):             # <<<<<<<<<<<<<<
  *         query = processor(query)
  *     elif processor:
  */
-  __pyx_t_1 = __Pyx_PyCallable_Check(__pyx_v_processor); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 562, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyCallable_Check(__pyx_v_processor); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 595, __pyx_L1_error)
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":563
+    /* "cpp_process.pyx":596
  *         processor = None
  *     elif callable(processor):
  *         query = processor(query)             # <<<<<<<<<<<<<<
@@ -7687,14 +7988,14 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
       PyObject *__pyx_callargs[2] = {__pyx_t_5, __pyx_v_query};
       __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_4, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-      if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 563, __pyx_L1_error)
+      if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 596, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     }
     __Pyx_DECREF_SET(__pyx_v_query, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "cpp_process.pyx":562
+    /* "cpp_process.pyx":595
  *         query = processor(query)
  *         processor = None
  *     elif callable(processor):             # <<<<<<<<<<<<<<
@@ -7704,17 +8005,17 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
     goto __pyx_L4;
   }
 
-  /* "cpp_process.pyx":564
+  /* "cpp_process.pyx":597
  *     elif callable(processor):
  *         query = processor(query)
  *     elif processor:             # <<<<<<<<<<<<<<
  *         def_process = 1
  *         # since this call is only performed once it is not very expensive to
  */
-  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_v_processor); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 564, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_v_processor); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 597, __pyx_L1_error)
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":565
+    /* "cpp_process.pyx":598
  *         query = processor(query)
  *     elif processor:
  *         def_process = 1             # <<<<<<<<<<<<<<
@@ -7723,14 +8024,14 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  */
     __pyx_v_def_process = 1;
 
-    /* "cpp_process.pyx":568
+    /* "cpp_process.pyx":601
  *         # since this call is only performed once it is not very expensive to
  *         # make it in Python
  *         query = default_process(query)             # <<<<<<<<<<<<<<
  *         processor = None
  *     # query might be e.g. False
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_default_process); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 568, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_default_process); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 601, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_5 = NULL;
     __pyx_t_6 = 0;
@@ -7748,14 +8049,14 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
       PyObject *__pyx_callargs[2] = {__pyx_t_5, __pyx_v_query};
       __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_4, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-      if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 568, __pyx_L1_error)
+      if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 601, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     }
     __Pyx_DECREF_SET(__pyx_v_query, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "cpp_process.pyx":569
+    /* "cpp_process.pyx":602
  *         # make it in Python
  *         query = default_process(query)
  *         processor = None             # <<<<<<<<<<<<<<
@@ -7765,7 +8066,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
     __Pyx_INCREF(Py_None);
     __Pyx_DECREF_SET(__pyx_v_processor, Py_None);
 
-    /* "cpp_process.pyx":564
+    /* "cpp_process.pyx":597
  *     elif callable(processor):
  *         query = processor(query)
  *     elif processor:             # <<<<<<<<<<<<<<
@@ -7775,7 +8076,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
     goto __pyx_L4;
   }
 
-  /* "cpp_process.pyx":572
+  /* "cpp_process.pyx":605
  *     # query might be e.g. False
  *     else:
  *         processor = None             # <<<<<<<<<<<<<<
@@ -7788,7 +8089,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
   }
   __pyx_L4:;
 
-  /* "cpp_process.pyx":576
+  /* "cpp_process.pyx":609
  *     # directly use the C++ implementation if possible
  *     # normalized distance implemented in C++
  *     ScorerContext = CachedScorerInit(scorer, query, def_process, kwargs)             # <<<<<<<<<<<<<<
@@ -7797,7 +8098,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  */
   __pyx_v_ScorerContext = __pyx_f_11cpp_process_CachedScorerInit(__pyx_v_scorer, __pyx_v_query, __pyx_v_def_process, __pyx_v_kwargs);
 
-  /* "cpp_process.pyx":577
+  /* "cpp_process.pyx":610
  *     # normalized distance implemented in C++
  *     ScorerContext = CachedScorerInit(scorer, query, def_process, kwargs)
  *     if ScorerContext.context != NULL:             # <<<<<<<<<<<<<<
@@ -7807,7 +8108,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
   __pyx_t_2 = ((__pyx_v_ScorerContext.context != NULL) != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":578
+    /* "cpp_process.pyx":611
  *     ScorerContext = CachedScorerInit(scorer, query, def_process, kwargs)
  *     if ScorerContext.context != NULL:
  *         try:             # <<<<<<<<<<<<<<
@@ -7816,7 +8117,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  */
     /*try:*/ {
 
-      /* "cpp_process.pyx":579
+      /* "cpp_process.pyx":612
  *     if ScorerContext.context != NULL:
  *         try:
  *             if score_cutoff is not None:             # <<<<<<<<<<<<<<
@@ -7827,17 +8128,17 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
       __pyx_t_1 = (__pyx_t_2 != 0);
       if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":580
+        /* "cpp_process.pyx":613
  *         try:
  *             if score_cutoff is not None:
  *                 c_score_cutoff = score_cutoff             # <<<<<<<<<<<<<<
  *             if c_score_cutoff < 0 or c_score_cutoff > 100:
  *                 raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
  */
-        __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 580, __pyx_L7_error)
+        __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 613, __pyx_L7_error)
         __pyx_v_c_score_cutoff = __pyx_t_7;
 
-        /* "cpp_process.pyx":579
+        /* "cpp_process.pyx":612
  *     if ScorerContext.context != NULL:
  *         try:
  *             if score_cutoff is not None:             # <<<<<<<<<<<<<<
@@ -7846,7 +8147,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  */
       }
 
-      /* "cpp_process.pyx":581
+      /* "cpp_process.pyx":614
  *             if score_cutoff is not None:
  *                 c_score_cutoff = score_cutoff
  *             if c_score_cutoff < 0 or c_score_cutoff > 100:             # <<<<<<<<<<<<<<
@@ -7864,20 +8165,20 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
       __pyx_L11_bool_binop_done:;
       if (unlikely(__pyx_t_1)) {
 
-        /* "cpp_process.pyx":582
+        /* "cpp_process.pyx":615
  *                 c_score_cutoff = score_cutoff
  *             if c_score_cutoff < 0 or c_score_cutoff > 100:
  *                 raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")             # <<<<<<<<<<<<<<
  * 
  *             if hasattr(choices, "items"):
  */
-        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 582, __pyx_L7_error)
+        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 615, __pyx_L7_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_Raise(__pyx_t_3, 0, 0, 0);
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-        __PYX_ERR(0, 582, __pyx_L7_error)
+        __PYX_ERR(0, 615, __pyx_L7_error)
 
-        /* "cpp_process.pyx":581
+        /* "cpp_process.pyx":614
  *             if score_cutoff is not None:
  *                 c_score_cutoff = score_cutoff
  *             if c_score_cutoff < 0 or c_score_cutoff > 100:             # <<<<<<<<<<<<<<
@@ -7886,18 +8187,18 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  */
       }
 
-      /* "cpp_process.pyx":584
+      /* "cpp_process.pyx":617
  *                 raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
  * 
  *             if hasattr(choices, "items"):             # <<<<<<<<<<<<<<
  *                 return extractOne_dict(ScorerContext, choices, processor, c_score_cutoff)
  *             else:
  */
-      __pyx_t_1 = __Pyx_HasAttr(__pyx_v_choices, __pyx_n_u_items); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 584, __pyx_L7_error)
+      __pyx_t_1 = __Pyx_HasAttr(__pyx_v_choices, __pyx_n_u_items); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 617, __pyx_L7_error)
       __pyx_t_2 = (__pyx_t_1 != 0);
       if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":585
+        /* "cpp_process.pyx":618
  * 
  *             if hasattr(choices, "items"):
  *                 return extractOne_dict(ScorerContext, choices, processor, c_score_cutoff)             # <<<<<<<<<<<<<<
@@ -7905,13 +8206,13 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  *                 return extractOne_list(ScorerContext, choices, processor, c_score_cutoff)
  */
         __Pyx_XDECREF(__pyx_r);
-        __pyx_t_3 = __pyx_f_11cpp_process_extractOne_dict(__pyx_v_ScorerContext, __pyx_v_choices, __pyx_v_processor, __pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 585, __pyx_L7_error)
+        __pyx_t_3 = __pyx_f_11cpp_process_extractOne_dict(__pyx_v_ScorerContext, __pyx_v_choices, __pyx_v_processor, __pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 618, __pyx_L7_error)
         __Pyx_GOTREF(__pyx_t_3);
         __pyx_r = __pyx_t_3;
         __pyx_t_3 = 0;
         goto __pyx_L6_return;
 
-        /* "cpp_process.pyx":584
+        /* "cpp_process.pyx":617
  *                 raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
  * 
  *             if hasattr(choices, "items"):             # <<<<<<<<<<<<<<
@@ -7920,7 +8221,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  */
       }
 
-      /* "cpp_process.pyx":587
+      /* "cpp_process.pyx":620
  *                 return extractOne_dict(ScorerContext, choices, processor, c_score_cutoff)
  *             else:
  *                 return extractOne_list(ScorerContext, choices, processor, c_score_cutoff)             # <<<<<<<<<<<<<<
@@ -7929,7 +8230,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  */
       /*else*/ {
         __Pyx_XDECREF(__pyx_r);
-        __pyx_t_3 = __pyx_f_11cpp_process_extractOne_list(__pyx_v_ScorerContext, __pyx_v_choices, __pyx_v_processor, __pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 587, __pyx_L7_error)
+        __pyx_t_3 = __pyx_f_11cpp_process_extractOne_list(__pyx_v_ScorerContext, __pyx_v_choices, __pyx_v_processor, __pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 620, __pyx_L7_error)
         __Pyx_GOTREF(__pyx_t_3);
         __pyx_r = __pyx_t_3;
         __pyx_t_3 = 0;
@@ -7937,7 +8238,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
       }
     }
 
-    /* "cpp_process.pyx":590
+    /* "cpp_process.pyx":623
  *         finally:
  *             # part of the context is dynamically allocated, so it has to be freed in any case
  *             ScorerContext.deinit(ScorerContext.context)             # <<<<<<<<<<<<<<
@@ -7967,7 +8268,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
             __pyx_v_ScorerContext.deinit(__pyx_v_ScorerContext.context);
           } catch(...) {
             __Pyx_CppExn2PyErr();
-            __PYX_ERR(0, 590, __pyx_L15_error)
+            __PYX_ERR(0, 623, __pyx_L15_error)
           }
         }
         if (PY_MAJOR_VERSION >= 3) {
@@ -8003,7 +8304,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
           __pyx_v_ScorerContext.deinit(__pyx_v_ScorerContext.context);
         } catch(...) {
           __Pyx_CppExn2PyErr();
-          __PYX_ERR(0, 590, __pyx_L1_error)
+          __PYX_ERR(0, 623, __pyx_L1_error)
         }
         __pyx_r = __pyx_t_15;
         __pyx_t_15 = 0;
@@ -8011,7 +8312,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
       }
     }
 
-    /* "cpp_process.pyx":577
+    /* "cpp_process.pyx":610
  *     # normalized distance implemented in C++
  *     ScorerContext = CachedScorerInit(scorer, query, def_process, kwargs)
  *     if ScorerContext.context != NULL:             # <<<<<<<<<<<<<<
@@ -8020,7 +8321,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  */
   }
 
-  /* "cpp_process.pyx":592
+  /* "cpp_process.pyx":625
  *             ScorerContext.deinit(ScorerContext.context)
  *     # distance implemented in C++
  *     DistanceContext = CachedDistanceInit(scorer, query, def_process, kwargs)             # <<<<<<<<<<<<<<
@@ -8029,7 +8330,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  */
   __pyx_v_DistanceContext = __pyx_f_11cpp_process_CachedDistanceInit(__pyx_v_scorer, __pyx_v_query, __pyx_v_def_process, __pyx_v_kwargs);
 
-  /* "cpp_process.pyx":593
+  /* "cpp_process.pyx":626
  *     # distance implemented in C++
  *     DistanceContext = CachedDistanceInit(scorer, query, def_process, kwargs)
  *     if DistanceContext.context != NULL:             # <<<<<<<<<<<<<<
@@ -8039,7 +8340,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
   __pyx_t_2 = ((__pyx_v_DistanceContext.context != NULL) != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":594
+    /* "cpp_process.pyx":627
  *     DistanceContext = CachedDistanceInit(scorer, query, def_process, kwargs)
  *     if DistanceContext.context != NULL:
  *         try:             # <<<<<<<<<<<<<<
@@ -8048,7 +8349,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  */
     /*try:*/ {
 
-      /* "cpp_process.pyx":595
+      /* "cpp_process.pyx":628
  *     if DistanceContext.context != NULL:
  *         try:
  *             if score_cutoff is not None and score_cutoff != -1:             # <<<<<<<<<<<<<<
@@ -8062,25 +8363,25 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
         __pyx_t_2 = __pyx_t_16;
         goto __pyx_L21_bool_binop_done;
       }
-      __pyx_t_3 = __Pyx_PyInt_NeObjC(__pyx_v_score_cutoff, __pyx_int_neg_1, -1L, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 595, __pyx_L18_error)
+      __pyx_t_3 = __Pyx_PyInt_NeObjC(__pyx_v_score_cutoff, __pyx_int_neg_1, -1L, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 628, __pyx_L18_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_16 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely((__pyx_t_16 < 0))) __PYX_ERR(0, 595, __pyx_L18_error)
+      __pyx_t_16 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely((__pyx_t_16 < 0))) __PYX_ERR(0, 628, __pyx_L18_error)
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __pyx_t_2 = __pyx_t_16;
       __pyx_L21_bool_binop_done:;
       if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":596
+        /* "cpp_process.pyx":629
  *         try:
  *             if score_cutoff is not None and score_cutoff != -1:
  *                 c_max = score_cutoff             # <<<<<<<<<<<<<<
  * 
  *             if hasattr(choices, "items"):
  */
-        __pyx_t_17 = __Pyx_PyInt_As_size_t(__pyx_v_score_cutoff); if (unlikely((__pyx_t_17 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 596, __pyx_L18_error)
+        __pyx_t_17 = __Pyx_PyInt_As_size_t(__pyx_v_score_cutoff); if (unlikely((__pyx_t_17 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 629, __pyx_L18_error)
         __pyx_v_c_max = __pyx_t_17;
 
-        /* "cpp_process.pyx":595
+        /* "cpp_process.pyx":628
  *     if DistanceContext.context != NULL:
  *         try:
  *             if score_cutoff is not None and score_cutoff != -1:             # <<<<<<<<<<<<<<
@@ -8089,18 +8390,18 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  */
       }
 
-      /* "cpp_process.pyx":598
+      /* "cpp_process.pyx":631
  *                 c_max = score_cutoff
  * 
  *             if hasattr(choices, "items"):             # <<<<<<<<<<<<<<
  *                 return extractOne_distance_dict(DistanceContext, choices, processor, c_max)
  *             else:
  */
-      __pyx_t_2 = __Pyx_HasAttr(__pyx_v_choices, __pyx_n_u_items); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 598, __pyx_L18_error)
+      __pyx_t_2 = __Pyx_HasAttr(__pyx_v_choices, __pyx_n_u_items); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 631, __pyx_L18_error)
       __pyx_t_16 = (__pyx_t_2 != 0);
       if (__pyx_t_16) {
 
-        /* "cpp_process.pyx":599
+        /* "cpp_process.pyx":632
  * 
  *             if hasattr(choices, "items"):
  *                 return extractOne_distance_dict(DistanceContext, choices, processor, c_max)             # <<<<<<<<<<<<<<
@@ -8108,13 +8409,13 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  *                 return extractOne_distance_list(DistanceContext, choices, processor, c_max)
  */
         __Pyx_XDECREF(__pyx_r);
-        __pyx_t_3 = __pyx_f_11cpp_process_extractOne_distance_dict(__pyx_v_DistanceContext, __pyx_v_choices, __pyx_v_processor, __pyx_v_c_max); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 599, __pyx_L18_error)
+        __pyx_t_3 = __pyx_f_11cpp_process_extractOne_distance_dict(__pyx_v_DistanceContext, __pyx_v_choices, __pyx_v_processor, __pyx_v_c_max); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 632, __pyx_L18_error)
         __Pyx_GOTREF(__pyx_t_3);
         __pyx_r = __pyx_t_3;
         __pyx_t_3 = 0;
         goto __pyx_L17_return;
 
-        /* "cpp_process.pyx":598
+        /* "cpp_process.pyx":631
  *                 c_max = score_cutoff
  * 
  *             if hasattr(choices, "items"):             # <<<<<<<<<<<<<<
@@ -8123,7 +8424,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  */
       }
 
-      /* "cpp_process.pyx":601
+      /* "cpp_process.pyx":634
  *                 return extractOne_distance_dict(DistanceContext, choices, processor, c_max)
  *             else:
  *                 return extractOne_distance_list(DistanceContext, choices, processor, c_max)             # <<<<<<<<<<<<<<
@@ -8132,7 +8433,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  */
       /*else*/ {
         __Pyx_XDECREF(__pyx_r);
-        __pyx_t_3 = __pyx_f_11cpp_process_extractOne_distance_list(__pyx_v_DistanceContext, __pyx_v_choices, __pyx_v_processor, __pyx_v_c_max); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 601, __pyx_L18_error)
+        __pyx_t_3 = __pyx_f_11cpp_process_extractOne_distance_list(__pyx_v_DistanceContext, __pyx_v_choices, __pyx_v_processor, __pyx_v_c_max); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 634, __pyx_L18_error)
         __Pyx_GOTREF(__pyx_t_3);
         __pyx_r = __pyx_t_3;
         __pyx_t_3 = 0;
@@ -8140,7 +8441,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
       }
     }
 
-    /* "cpp_process.pyx":604
+    /* "cpp_process.pyx":637
  *         finally:
  *             # part of the context is dynamically allocated, so it has to be freed in any case
  *             DistanceContext.deinit(DistanceContext.context)             # <<<<<<<<<<<<<<
@@ -8170,7 +8471,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
             __pyx_v_DistanceContext.deinit(__pyx_v_DistanceContext.context);
           } catch(...) {
             __Pyx_CppExn2PyErr();
-            __PYX_ERR(0, 604, __pyx_L25_error)
+            __PYX_ERR(0, 637, __pyx_L25_error)
           }
         }
         if (PY_MAJOR_VERSION >= 3) {
@@ -8206,7 +8507,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
           __pyx_v_DistanceContext.deinit(__pyx_v_DistanceContext.context);
         } catch(...) {
           __Pyx_CppExn2PyErr();
-          __PYX_ERR(0, 604, __pyx_L1_error)
+          __PYX_ERR(0, 637, __pyx_L1_error)
         }
         __pyx_r = __pyx_t_10;
         __pyx_t_10 = 0;
@@ -8214,7 +8515,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
       }
     }
 
-    /* "cpp_process.pyx":593
+    /* "cpp_process.pyx":626
  *     # distance implemented in C++
  *     DistanceContext = CachedDistanceInit(scorer, query, def_process, kwargs)
  *     if DistanceContext.context != NULL:             # <<<<<<<<<<<<<<
@@ -8223,7 +8524,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  */
   }
 
-  /* "cpp_process.pyx":607
+  /* "cpp_process.pyx":640
  * 
  *     # the scorer has to be called through Python
  *     if score_cutoff is not None:             # <<<<<<<<<<<<<<
@@ -8234,17 +8535,17 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
   __pyx_t_2 = (__pyx_t_16 != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":608
+    /* "cpp_process.pyx":641
  *     # the scorer has to be called through Python
  *     if score_cutoff is not None:
  *         c_score_cutoff = score_cutoff             # <<<<<<<<<<<<<<
  * 
  *     if hasattr(choices, "items"):
  */
-    __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 608, __pyx_L1_error)
+    __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 641, __pyx_L1_error)
     __pyx_v_c_score_cutoff = __pyx_t_7;
 
-    /* "cpp_process.pyx":607
+    /* "cpp_process.pyx":640
  * 
  *     # the scorer has to be called through Python
  *     if score_cutoff is not None:             # <<<<<<<<<<<<<<
@@ -8253,18 +8554,18 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  */
   }
 
-  /* "cpp_process.pyx":610
+  /* "cpp_process.pyx":643
  *         c_score_cutoff = score_cutoff
  * 
  *     if hasattr(choices, "items"):             # <<<<<<<<<<<<<<
  *         return py_extractOne_dict(query, choices, scorer, processor, c_score_cutoff, kwargs)
  *     else:
  */
-  __pyx_t_2 = __Pyx_HasAttr(__pyx_v_choices, __pyx_n_u_items); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 610, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_HasAttr(__pyx_v_choices, __pyx_n_u_items); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 643, __pyx_L1_error)
   __pyx_t_16 = (__pyx_t_2 != 0);
   if (__pyx_t_16) {
 
-    /* "cpp_process.pyx":611
+    /* "cpp_process.pyx":644
  * 
  *     if hasattr(choices, "items"):
  *         return py_extractOne_dict(query, choices, scorer, processor, c_score_cutoff, kwargs)             # <<<<<<<<<<<<<<
@@ -8272,16 +8573,16 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  *         return py_extractOne_list(query, choices, scorer, processor, c_score_cutoff, kwargs)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_3 = PyFloat_FromDouble(__pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 611, __pyx_L1_error)
+    __pyx_t_3 = PyFloat_FromDouble(__pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 644, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __pyx_f_11cpp_process_py_extractOne_dict(__pyx_v_query, __pyx_v_choices, __pyx_v_scorer, __pyx_v_processor, __pyx_t_3, __pyx_v_kwargs); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 611, __pyx_L1_error)
+    __pyx_t_4 = __pyx_f_11cpp_process_py_extractOne_dict(__pyx_v_query, __pyx_v_choices, __pyx_v_scorer, __pyx_v_processor, __pyx_t_3, __pyx_v_kwargs); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 644, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_r = __pyx_t_4;
     __pyx_t_4 = 0;
     goto __pyx_L0;
 
-    /* "cpp_process.pyx":610
+    /* "cpp_process.pyx":643
  *         c_score_cutoff = score_cutoff
  * 
  *     if hasattr(choices, "items"):             # <<<<<<<<<<<<<<
@@ -8290,7 +8591,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  */
   }
 
-  /* "cpp_process.pyx":613
+  /* "cpp_process.pyx":646
  *         return py_extractOne_dict(query, choices, scorer, processor, c_score_cutoff, kwargs)
  *     else:
  *         return py_extractOne_list(query, choices, scorer, processor, c_score_cutoff, kwargs)             # <<<<<<<<<<<<<<
@@ -8299,14 +8600,14 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  */
   /*else*/ {
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_4 = __pyx_f_11cpp_process_py_extractOne_list(__pyx_v_query, __pyx_v_choices, __pyx_v_scorer, __pyx_v_processor, __pyx_v_c_score_cutoff, __pyx_v_kwargs); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 613, __pyx_L1_error)
+    __pyx_t_4 = __pyx_f_11cpp_process_py_extractOne_list(__pyx_v_query, __pyx_v_choices, __pyx_v_scorer, __pyx_v_processor, __pyx_v_c_score_cutoff, __pyx_v_kwargs); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 646, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_r = __pyx_t_4;
     __pyx_t_4 = 0;
     goto __pyx_L0;
   }
 
-  /* "cpp_process.pyx":427
+  /* "cpp_process.pyx":460
  * 
  * 
  * def extractOne(query, choices, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):             # <<<<<<<<<<<<<<
@@ -8329,7 +8630,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
   return __pyx_r;
 }
 
-/* "cpp_process.pyx":616
+/* "cpp_process.pyx":649
  * 
  * 
  * cdef inline extract_dict(scorer_context context, choices, processor, size_t limit, double score_cutoff):             # <<<<<<<<<<<<<<
@@ -8344,6 +8645,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
   PyObject *__pyx_v_result_list = 0;
   PyObject *__pyx_v_choice_key = NULL;
   PyObject *__pyx_v_choice = NULL;
+  PyObject *__pyx_v_proc_choice = NULL;
   PyObject *__pyx_v_result_item = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -8379,7 +8681,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("extract_dict", 0);
 
-  /* "cpp_process.pyx":617
+  /* "cpp_process.pyx":650
  * 
  * cdef inline extract_dict(scorer_context context, choices, processor, size_t limit, double score_cutoff):
  *     cdef double score = 0.0             # <<<<<<<<<<<<<<
@@ -8388,7 +8690,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
  */
   __pyx_v_score = 0.0;
 
-  /* "cpp_process.pyx":618
+  /* "cpp_process.pyx":651
  * cdef inline extract_dict(scorer_context context, choices, processor, size_t limit, double score_cutoff):
  *     cdef double score = 0.0
  *     cdef size_t i = 0             # <<<<<<<<<<<<<<
@@ -8397,17 +8699,17 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
  */
   __pyx_v_i = 0;
 
-  /* "cpp_process.pyx":622
+  /* "cpp_process.pyx":655
  *     # maybe store only key and access the corresponding element when building the list
  *     cdef vector[DictMatchScorerElem] results
  *     results.reserve(<size_t>len(choices))             # <<<<<<<<<<<<<<
  *     cdef list result_list
  * 
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_choices); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 622, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_choices); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 655, __pyx_L1_error)
   __pyx_v_results.reserve(((size_t)__pyx_t_1));
 
-  /* "cpp_process.pyx":625
+  /* "cpp_process.pyx":658
  *     cdef list result_list
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -8416,7 +8718,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
  */
   /*try:*/ {
 
-    /* "cpp_process.pyx":626
+    /* "cpp_process.pyx":659
  * 
  *     try:
  *         if processor is not None:             # <<<<<<<<<<<<<<
@@ -8427,7 +8729,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
     __pyx_t_3 = (__pyx_t_2 != 0);
     if (__pyx_t_3) {
 
-      /* "cpp_process.pyx":627
+      /* "cpp_process.pyx":660
  *     try:
  *         if processor is not None:
  *             for choice_key, choice in choices.items():             # <<<<<<<<<<<<<<
@@ -8437,9 +8739,9 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
       __pyx_t_1 = 0;
       if (unlikely(__pyx_v_choices == Py_None)) {
         PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "items");
-        __PYX_ERR(0, 627, __pyx_L4_error)
+        __PYX_ERR(0, 660, __pyx_L4_error)
       }
-      __pyx_t_7 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_5), (&__pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 627, __pyx_L4_error)
+      __pyx_t_7 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_5), (&__pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 660, __pyx_L4_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_XDECREF(__pyx_t_4);
       __pyx_t_4 = __pyx_t_7;
@@ -8447,7 +8749,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
       while (1) {
         __pyx_t_9 = __Pyx_dict_iter_next(__pyx_t_4, __pyx_t_5, &__pyx_t_1, &__pyx_t_7, &__pyx_t_8, NULL, __pyx_t_6);
         if (unlikely(__pyx_t_9 == 0)) break;
-        if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 627, __pyx_L4_error)
+        if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 660, __pyx_L4_error)
         __Pyx_GOTREF(__pyx_t_7);
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_XDECREF_SET(__pyx_v_choice_key, __pyx_t_7);
@@ -8455,7 +8757,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
         __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_8);
         __pyx_t_8 = 0;
 
-        /* "cpp_process.pyx":628
+        /* "cpp_process.pyx":661
  *         if processor is not None:
  *             for choice_key, choice in choices.items():
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -8466,7 +8768,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
         __pyx_t_2 = (__pyx_t_3 != 0);
         if (__pyx_t_2) {
 
-          /* "cpp_process.pyx":629
+          /* "cpp_process.pyx":662
  *             for choice_key, choice in choices.items():
  *                 if choice is None:
  *                     i += 1             # <<<<<<<<<<<<<<
@@ -8475,16 +8777,16 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
  */
           __pyx_v_i = (__pyx_v_i + 1);
 
-          /* "cpp_process.pyx":630
+          /* "cpp_process.pyx":663
  *                 if choice is None:
  *                     i += 1
  *                     continue             # <<<<<<<<<<<<<<
  * 
- *                 score = context.scorer(context.context, processor(choice), score_cutoff)
+ *                 proc_choice = processor(choice)
  */
           goto __pyx_L7_continue;
 
-          /* "cpp_process.pyx":628
+          /* "cpp_process.pyx":661
  *         if processor is not None:
  *             for choice_key, choice in choices.items():
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -8493,12 +8795,12 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
  */
         }
 
-        /* "cpp_process.pyx":632
+        /* "cpp_process.pyx":665
  *                     continue
  * 
- *                 score = context.scorer(context.context, processor(choice), score_cutoff)             # <<<<<<<<<<<<<<
- * 
- *                 if score >= score_cutoff:
+ *                 proc_choice = processor(choice)             # <<<<<<<<<<<<<<
+ *                 if proc_choice is None:
+ *                     i += 1
  */
         __Pyx_INCREF(__pyx_v_processor);
         __pyx_t_7 = __pyx_v_processor; __pyx_t_10 = NULL;
@@ -8517,30 +8819,91 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
           PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_choice};
           __pyx_t_8 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
           __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-          if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 632, __pyx_L4_error)
+          if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 665, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_8);
           __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         }
+        __Pyx_XDECREF_SET(__pyx_v_proc_choice, __pyx_t_8);
+        __pyx_t_8 = 0;
+
+        /* "cpp_process.pyx":666
+ * 
+ *                 proc_choice = processor(choice)
+ *                 if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                     i += 1
+ *                     continue
+ */
+        __pyx_t_2 = (__pyx_v_proc_choice == Py_None);
+        __pyx_t_3 = (__pyx_t_2 != 0);
+        if (__pyx_t_3) {
+
+          /* "cpp_process.pyx":667
+ *                 proc_choice = processor(choice)
+ *                 if proc_choice is None:
+ *                     i += 1             # <<<<<<<<<<<<<<
+ *                     continue
+ * 
+ */
+          __pyx_v_i = (__pyx_v_i + 1);
+
+          /* "cpp_process.pyx":668
+ *                 if proc_choice is None:
+ *                     i += 1
+ *                     continue             # <<<<<<<<<<<<<<
+ * 
+ *                 validate_string(proc_choice, "choice must be a String or None")
+ */
+          goto __pyx_L7_continue;
+
+          /* "cpp_process.pyx":666
+ * 
+ *                 proc_choice = processor(choice)
+ *                 if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                     i += 1
+ *                     continue
+ */
+        }
+
+        /* "cpp_process.pyx":670
+ *                     continue
+ * 
+ *                 validate_string(proc_choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ * 
+ *                 score = context.scorer(context.context, proc_choice, score_cutoff)
+ */
         try {
-          __pyx_t_11 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_t_8, __pyx_v_score_cutoff);
+          validate_string(__pyx_v_proc_choice, ((char const *)"choice must be a String or None"));
         } catch(...) {
           __Pyx_CppExn2PyErr();
-          __PYX_ERR(0, 632, __pyx_L4_error)
+          __PYX_ERR(0, 670, __pyx_L4_error)
         }
-        __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+
+        /* "cpp_process.pyx":672
+ *                 validate_string(proc_choice, "choice must be a String or None")
+ * 
+ *                 score = context.scorer(context.context, proc_choice, score_cutoff)             # <<<<<<<<<<<<<<
+ * 
+ *                 if score >= score_cutoff:
+ */
+        try {
+          __pyx_t_11 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_v_proc_choice, __pyx_v_score_cutoff);
+        } catch(...) {
+          __Pyx_CppExn2PyErr();
+          __PYX_ERR(0, 672, __pyx_L4_error)
+        }
         __pyx_v_score = __pyx_t_11;
 
-        /* "cpp_process.pyx":634
- *                 score = context.scorer(context.context, processor(choice), score_cutoff)
+        /* "cpp_process.pyx":674
+ *                 score = context.scorer(context.context, proc_choice, score_cutoff)
  * 
  *                 if score >= score_cutoff:             # <<<<<<<<<<<<<<
  *                     # especially the key object might be created on the fly by e.g. pandas.Dataframe
  *                     # so we need to ensure Python does not deallocate it
  */
-        __pyx_t_2 = ((__pyx_v_score >= __pyx_v_score_cutoff) != 0);
-        if (__pyx_t_2) {
+        __pyx_t_3 = ((__pyx_v_score >= __pyx_v_score_cutoff) != 0);
+        if (__pyx_t_3) {
 
-          /* "cpp_process.pyx":637
+          /* "cpp_process.pyx":677
  *                     # especially the key object might be created on the fly by e.g. pandas.Dataframe
  *                     # so we need to ensure Python does not deallocate it
  *                     Py_INCREF(choice)             # <<<<<<<<<<<<<<
@@ -8549,7 +8912,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
  */
           Py_INCREF(__pyx_v_choice);
 
-          /* "cpp_process.pyx":638
+          /* "cpp_process.pyx":678
  *                     # so we need to ensure Python does not deallocate it
  *                     Py_INCREF(choice)
  *                     Py_INCREF(choice_key)             # <<<<<<<<<<<<<<
@@ -8558,7 +8921,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
  */
           Py_INCREF(__pyx_v_choice_key);
 
-          /* "cpp_process.pyx":639
+          /* "cpp_process.pyx":679
  *                     Py_INCREF(choice)
  *                     Py_INCREF(choice_key)
  *                     results.push_back(DictMatchScorerElem(score, i, <PyObject*>choice, <PyObject*>choice_key))             # <<<<<<<<<<<<<<
@@ -8573,11 +8936,11 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
             __pyx_v_results.push_back(__pyx_t_12);
           } catch(...) {
             __Pyx_CppExn2PyErr();
-            __PYX_ERR(0, 639, __pyx_L4_error)
+            __PYX_ERR(0, 679, __pyx_L4_error)
           }
 
-          /* "cpp_process.pyx":634
- *                 score = context.scorer(context.context, processor(choice), score_cutoff)
+          /* "cpp_process.pyx":674
+ *                 score = context.scorer(context.context, proc_choice, score_cutoff)
  * 
  *                 if score >= score_cutoff:             # <<<<<<<<<<<<<<
  *                     # especially the key object might be created on the fly by e.g. pandas.Dataframe
@@ -8585,7 +8948,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
  */
         }
 
-        /* "cpp_process.pyx":640
+        /* "cpp_process.pyx":680
  *                     Py_INCREF(choice_key)
  *                     results.push_back(DictMatchScorerElem(score, i, <PyObject*>choice, <PyObject*>choice_key))
  *                 i += 1             # <<<<<<<<<<<<<<
@@ -8597,7 +8960,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
       }
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-      /* "cpp_process.pyx":626
+      /* "cpp_process.pyx":659
  * 
  *     try:
  *         if processor is not None:             # <<<<<<<<<<<<<<
@@ -8607,7 +8970,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
       goto __pyx_L6;
     }
 
-    /* "cpp_process.pyx":642
+    /* "cpp_process.pyx":682
  *                 i += 1
  *         else:
  *             for choice_key, choice in choices.items():             # <<<<<<<<<<<<<<
@@ -8618,9 +8981,9 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
       __pyx_t_5 = 0;
       if (unlikely(__pyx_v_choices == Py_None)) {
         PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "items");
-        __PYX_ERR(0, 642, __pyx_L4_error)
+        __PYX_ERR(0, 682, __pyx_L4_error)
       }
-      __pyx_t_8 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_1), (&__pyx_t_6)); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 642, __pyx_L4_error)
+      __pyx_t_8 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_1), (&__pyx_t_6)); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 682, __pyx_L4_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_XDECREF(__pyx_t_4);
       __pyx_t_4 = __pyx_t_8;
@@ -8628,7 +8991,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
       while (1) {
         __pyx_t_9 = __Pyx_dict_iter_next(__pyx_t_4, __pyx_t_1, &__pyx_t_5, &__pyx_t_8, &__pyx_t_7, NULL, __pyx_t_6);
         if (unlikely(__pyx_t_9 == 0)) break;
-        if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 642, __pyx_L4_error)
+        if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 682, __pyx_L4_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_GOTREF(__pyx_t_7);
         __Pyx_XDECREF_SET(__pyx_v_choice_key, __pyx_t_8);
@@ -8636,18 +8999,18 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
         __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_7);
         __pyx_t_7 = 0;
 
-        /* "cpp_process.pyx":643
+        /* "cpp_process.pyx":683
  *         else:
  *             for choice_key, choice in choices.items():
  *                 if choice is None:             # <<<<<<<<<<<<<<
  *                     i += 1
  *                     continue
  */
-        __pyx_t_2 = (__pyx_v_choice == Py_None);
-        __pyx_t_3 = (__pyx_t_2 != 0);
-        if (__pyx_t_3) {
+        __pyx_t_3 = (__pyx_v_choice == Py_None);
+        __pyx_t_2 = (__pyx_t_3 != 0);
+        if (__pyx_t_2) {
 
-          /* "cpp_process.pyx":644
+          /* "cpp_process.pyx":684
  *             for choice_key, choice in choices.items():
  *                 if choice is None:
  *                     i += 1             # <<<<<<<<<<<<<<
@@ -8656,16 +9019,16 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
  */
           __pyx_v_i = (__pyx_v_i + 1);
 
-          /* "cpp_process.pyx":645
+          /* "cpp_process.pyx":685
  *                 if choice is None:
  *                     i += 1
  *                     continue             # <<<<<<<<<<<<<<
  * 
- *                 score = context.scorer(context.context, choice, score_cutoff)
+ *                 validate_string(choice, "choice must be a String or None")
  */
-          goto __pyx_L11_continue;
+          goto __pyx_L12_continue;
 
-          /* "cpp_process.pyx":643
+          /* "cpp_process.pyx":683
  *         else:
  *             for choice_key, choice in choices.items():
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -8674,9 +9037,23 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
  */
         }
 
-        /* "cpp_process.pyx":647
+        /* "cpp_process.pyx":687
  *                     continue
  * 
+ *                 validate_string(choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ *                 score = context.scorer(context.context, choice, score_cutoff)
+ * 
+ */
+        try {
+          validate_string(__pyx_v_choice, ((char const *)"choice must be a String or None"));
+        } catch(...) {
+          __Pyx_CppExn2PyErr();
+          __PYX_ERR(0, 687, __pyx_L4_error)
+        }
+
+        /* "cpp_process.pyx":688
+ * 
+ *                 validate_string(choice, "choice must be a String or None")
  *                 score = context.scorer(context.context, choice, score_cutoff)             # <<<<<<<<<<<<<<
  * 
  *                 if score >= score_cutoff:
@@ -8685,21 +9062,21 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
           __pyx_t_11 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_v_choice, __pyx_v_score_cutoff);
         } catch(...) {
           __Pyx_CppExn2PyErr();
-          __PYX_ERR(0, 647, __pyx_L4_error)
+          __PYX_ERR(0, 688, __pyx_L4_error)
         }
         __pyx_v_score = __pyx_t_11;
 
-        /* "cpp_process.pyx":649
+        /* "cpp_process.pyx":690
  *                 score = context.scorer(context.context, choice, score_cutoff)
  * 
  *                 if score >= score_cutoff:             # <<<<<<<<<<<<<<
  *                     # especially the key object might be created on the fly by e.g. pandas.Dataframe
  *                     # so we need to ensure Python does not deallocate it
  */
-        __pyx_t_3 = ((__pyx_v_score >= __pyx_v_score_cutoff) != 0);
-        if (__pyx_t_3) {
+        __pyx_t_2 = ((__pyx_v_score >= __pyx_v_score_cutoff) != 0);
+        if (__pyx_t_2) {
 
-          /* "cpp_process.pyx":652
+          /* "cpp_process.pyx":693
  *                     # especially the key object might be created on the fly by e.g. pandas.Dataframe
  *                     # so we need to ensure Python does not deallocate it
  *                     Py_INCREF(choice)             # <<<<<<<<<<<<<<
@@ -8708,7 +9085,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
  */
           Py_INCREF(__pyx_v_choice);
 
-          /* "cpp_process.pyx":653
+          /* "cpp_process.pyx":694
  *                     # so we need to ensure Python does not deallocate it
  *                     Py_INCREF(choice)
  *                     Py_INCREF(choice_key)             # <<<<<<<<<<<<<<
@@ -8717,7 +9094,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
  */
           Py_INCREF(__pyx_v_choice_key);
 
-          /* "cpp_process.pyx":654
+          /* "cpp_process.pyx":695
  *                     Py_INCREF(choice)
  *                     Py_INCREF(choice_key)
  *                     results.push_back(DictMatchScorerElem(score, i, <PyObject*>choice, <PyObject*>choice_key))             # <<<<<<<<<<<<<<
@@ -8732,10 +9109,10 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
             __pyx_v_results.push_back(__pyx_t_12);
           } catch(...) {
             __Pyx_CppExn2PyErr();
-            __PYX_ERR(0, 654, __pyx_L4_error)
+            __PYX_ERR(0, 695, __pyx_L4_error)
           }
 
-          /* "cpp_process.pyx":649
+          /* "cpp_process.pyx":690
  *                 score = context.scorer(context.context, choice, score_cutoff)
  * 
  *                 if score >= score_cutoff:             # <<<<<<<<<<<<<<
@@ -8744,7 +9121,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
  */
         }
 
-        /* "cpp_process.pyx":655
+        /* "cpp_process.pyx":696
  *                     Py_INCREF(choice_key)
  *                     results.push_back(DictMatchScorerElem(score, i, <PyObject*>choice, <PyObject*>choice_key))
  *                 i += 1             # <<<<<<<<<<<<<<
@@ -8752,23 +9129,23 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
  *         # due to score_cutoff not always completely filled
  */
         __pyx_v_i = (__pyx_v_i + 1);
-        __pyx_L11_continue:;
+        __pyx_L12_continue:;
       }
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     }
     __pyx_L6:;
 
-    /* "cpp_process.pyx":658
+    /* "cpp_process.pyx":699
  * 
  *         # due to score_cutoff not always completely filled
  *         if limit > results.size():             # <<<<<<<<<<<<<<
  *             limit = results.size()
  * 
  */
-    __pyx_t_3 = ((__pyx_v_limit > __pyx_v_results.size()) != 0);
-    if (__pyx_t_3) {
+    __pyx_t_2 = ((__pyx_v_limit > __pyx_v_results.size()) != 0);
+    if (__pyx_t_2) {
 
-      /* "cpp_process.pyx":659
+      /* "cpp_process.pyx":700
  *         # due to score_cutoff not always completely filled
  *         if limit > results.size():
  *             limit = results.size()             # <<<<<<<<<<<<<<
@@ -8777,7 +9154,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
  */
       __pyx_v_limit = __pyx_v_results.size();
 
-      /* "cpp_process.pyx":658
+      /* "cpp_process.pyx":699
  * 
  *         # due to score_cutoff not always completely filled
  *         if limit > results.size():             # <<<<<<<<<<<<<<
@@ -8786,17 +9163,17 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
  */
     }
 
-    /* "cpp_process.pyx":661
+    /* "cpp_process.pyx":702
  *             limit = results.size()
  * 
  *         if limit >= results.size():             # <<<<<<<<<<<<<<
  *             algorithm.sort(results.begin(), results.end(), ExtractScorerComp())
  *         else:
  */
-    __pyx_t_3 = ((__pyx_v_limit >= __pyx_v_results.size()) != 0);
-    if (__pyx_t_3) {
+    __pyx_t_2 = ((__pyx_v_limit >= __pyx_v_results.size()) != 0);
+    if (__pyx_t_2) {
 
-      /* "cpp_process.pyx":662
+      /* "cpp_process.pyx":703
  * 
  *         if limit >= results.size():
  *             algorithm.sort(results.begin(), results.end(), ExtractScorerComp())             # <<<<<<<<<<<<<<
@@ -8807,20 +9184,20 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
         std::sort<std::vector<DictMatchScorerElem> ::iterator,ExtractScorerComp>(__pyx_v_results.begin(), __pyx_v_results.end(), __pyx_t_13);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 662, __pyx_L4_error)
+        __PYX_ERR(0, 703, __pyx_L4_error)
       }
 
-      /* "cpp_process.pyx":661
+      /* "cpp_process.pyx":702
  *             limit = results.size()
  * 
  *         if limit >= results.size():             # <<<<<<<<<<<<<<
  *             algorithm.sort(results.begin(), results.end(), ExtractScorerComp())
  *         else:
  */
-      goto __pyx_L16;
+      goto __pyx_L17;
     }
 
-    /* "cpp_process.pyx":664
+    /* "cpp_process.pyx":705
  *             algorithm.sort(results.begin(), results.end(), ExtractScorerComp())
  *         else:
  *             algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractScorerComp())             # <<<<<<<<<<<<<<
@@ -8832,24 +9209,24 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
         std::partial_sort<std::vector<DictMatchScorerElem> ::iterator,ExtractScorerComp>(__pyx_v_results.begin(), (__pyx_v_results.begin() + ((ptrdiff_t)__pyx_v_limit)), __pyx_v_results.end(), __pyx_t_13);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 664, __pyx_L4_error)
+        __PYX_ERR(0, 705, __pyx_L4_error)
       }
     }
-    __pyx_L16:;
+    __pyx_L17:;
 
-    /* "cpp_process.pyx":667
+    /* "cpp_process.pyx":708
  * 
  *         # copy elements into Python List
  *         result_list = PyList_New(<Py_ssize_t>limit)             # <<<<<<<<<<<<<<
  *         for i in range(limit):
  *             result_item = (<object>results[i].choice, results[i].score, <object>results[i].key)
  */
-    __pyx_t_4 = PyList_New(((Py_ssize_t)__pyx_v_limit)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 667, __pyx_L4_error)
+    __pyx_t_4 = PyList_New(((Py_ssize_t)__pyx_v_limit)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 708, __pyx_L4_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_v_result_list = ((PyObject*)__pyx_t_4);
     __pyx_t_4 = 0;
 
-    /* "cpp_process.pyx":668
+    /* "cpp_process.pyx":709
  *         # copy elements into Python List
  *         result_list = PyList_New(<Py_ssize_t>limit)
  *         for i in range(limit):             # <<<<<<<<<<<<<<
@@ -8861,7 +9238,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
     for (__pyx_t_16 = 0; __pyx_t_16 < __pyx_t_15; __pyx_t_16+=1) {
       __pyx_v_i = __pyx_t_16;
 
-      /* "cpp_process.pyx":669
+      /* "cpp_process.pyx":710
  *         result_list = PyList_New(<Py_ssize_t>limit)
  *         for i in range(limit):
  *             result_item = (<object>results[i].choice, results[i].score, <object>results[i].key)             # <<<<<<<<<<<<<<
@@ -8869,10 +9246,10 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
  *             PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
  */
       __pyx_t_17 = (__pyx_v_results[__pyx_v_i]).choice;
-      __pyx_t_4 = PyFloat_FromDouble((__pyx_v_results[__pyx_v_i]).score); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 669, __pyx_L4_error)
+      __pyx_t_4 = PyFloat_FromDouble((__pyx_v_results[__pyx_v_i]).score); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 710, __pyx_L4_error)
       __Pyx_GOTREF(__pyx_t_4);
       __pyx_t_18 = (__pyx_v_results[__pyx_v_i]).key;
-      __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 669, __pyx_L4_error)
+      __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 710, __pyx_L4_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_INCREF(((PyObject *)__pyx_t_17));
       __Pyx_GIVEREF(((PyObject *)__pyx_t_17));
@@ -8886,7 +9263,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
       __Pyx_XDECREF_SET(__pyx_v_result_item, ((PyObject*)__pyx_t_7));
       __pyx_t_7 = 0;
 
-      /* "cpp_process.pyx":670
+      /* "cpp_process.pyx":711
  *         for i in range(limit):
  *             result_item = (<object>results[i].choice, results[i].score, <object>results[i].key)
  *             Py_INCREF(result_item)             # <<<<<<<<<<<<<<
@@ -8895,7 +9272,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
  */
       Py_INCREF(__pyx_v_result_item);
 
-      /* "cpp_process.pyx":671
+      /* "cpp_process.pyx":712
  *             result_item = (<object>results[i].choice, results[i].score, <object>results[i].key)
  *             Py_INCREF(result_item)
  *             PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)             # <<<<<<<<<<<<<<
@@ -8906,7 +9283,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
     }
   }
 
-  /* "cpp_process.pyx":675
+  /* "cpp_process.pyx":716
  *     finally:
  *         # decref all reference counts
  *         for i in range(results.size()):             # <<<<<<<<<<<<<<
@@ -8920,7 +9297,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
       for (__pyx_t_14 = 0; __pyx_t_14 < __pyx_t_20; __pyx_t_14+=1) {
         __pyx_v_i = __pyx_t_14;
 
-        /* "cpp_process.pyx":676
+        /* "cpp_process.pyx":717
  *         # decref all reference counts
  *         for i in range(results.size()):
  *             Py_DECREF(<object>results[i].choice)             # <<<<<<<<<<<<<<
@@ -8930,7 +9307,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
         __pyx_t_18 = (__pyx_v_results[__pyx_v_i]).choice;
         Py_DECREF(((PyObject *)__pyx_t_18));
 
-        /* "cpp_process.pyx":677
+        /* "cpp_process.pyx":718
  *         for i in range(results.size()):
  *             Py_DECREF(<object>results[i].choice)
  *             Py_DECREF(<object>results[i].key)             # <<<<<<<<<<<<<<
@@ -8962,7 +9339,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
       __pyx_t_6 = __pyx_lineno; __pyx_t_9 = __pyx_clineno; __pyx_t_21 = __pyx_filename;
       {
 
-        /* "cpp_process.pyx":675
+        /* "cpp_process.pyx":716
  *     finally:
  *         # decref all reference counts
  *         for i in range(results.size()):             # <<<<<<<<<<<<<<
@@ -8974,7 +9351,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
         for (__pyx_t_14 = 0; __pyx_t_14 < __pyx_t_20; __pyx_t_14+=1) {
           __pyx_v_i = __pyx_t_14;
 
-          /* "cpp_process.pyx":676
+          /* "cpp_process.pyx":717
  *         # decref all reference counts
  *         for i in range(results.size()):
  *             Py_DECREF(<object>results[i].choice)             # <<<<<<<<<<<<<<
@@ -8984,7 +9361,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
           __pyx_t_18 = (__pyx_v_results[__pyx_v_i]).choice;
           Py_DECREF(((PyObject *)__pyx_t_18));
 
-          /* "cpp_process.pyx":677
+          /* "cpp_process.pyx":718
  *         for i in range(results.size()):
  *             Py_DECREF(<object>results[i].choice)
  *             Py_DECREF(<object>results[i].key)             # <<<<<<<<<<<<<<
@@ -9012,7 +9389,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
     __pyx_L5:;
   }
 
-  /* "cpp_process.pyx":679
+  /* "cpp_process.pyx":720
  *             Py_DECREF(<object>results[i].key)
  * 
  *     return result_list             # <<<<<<<<<<<<<<
@@ -9024,7 +9401,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
   __pyx_r = __pyx_v_result_list;
   goto __pyx_L0;
 
-  /* "cpp_process.pyx":616
+  /* "cpp_process.pyx":649
  * 
  * 
  * cdef inline extract_dict(scorer_context context, choices, processor, size_t limit, double score_cutoff):             # <<<<<<<<<<<<<<
@@ -9044,13 +9421,14 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_dict(scorer_context
   __Pyx_XDECREF(__pyx_v_result_list);
   __Pyx_XDECREF(__pyx_v_choice_key);
   __Pyx_XDECREF(__pyx_v_choice);
+  __Pyx_XDECREF(__pyx_v_proc_choice);
   __Pyx_XDECREF(__pyx_v_result_item);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "cpp_process.pyx":682
+/* "cpp_process.pyx":723
  * 
  * 
  * cdef inline extract_distance_dict(distance_context context, choices, processor, size_t limit, size_t max_):             # <<<<<<<<<<<<<<
@@ -9065,6 +9443,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
   PyObject *__pyx_v_result_list = 0;
   PyObject *__pyx_v_choice_key = NULL;
   PyObject *__pyx_v_choice = NULL;
+  PyObject *__pyx_v_proc_choice = NULL;
   PyObject *__pyx_v_result_item = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -9099,7 +9478,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("extract_distance_dict", 0);
 
-  /* "cpp_process.pyx":684
+  /* "cpp_process.pyx":725
  * cdef inline extract_distance_dict(distance_context context, choices, processor, size_t limit, size_t max_):
  *     cdef size_t distance
  *     cdef size_t i = 0             # <<<<<<<<<<<<<<
@@ -9108,17 +9487,17 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
  */
   __pyx_v_i = 0;
 
-  /* "cpp_process.pyx":688
+  /* "cpp_process.pyx":729
  *     # maybe store only key and access the corresponding element when building the list
  *     cdef vector[DictMatchDistanceElem] results
  *     results.reserve(<size_t>len(choices))             # <<<<<<<<<<<<<<
  *     cdef list result_list
  * 
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_choices); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 688, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_choices); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 729, __pyx_L1_error)
   __pyx_v_results.reserve(((size_t)__pyx_t_1));
 
-  /* "cpp_process.pyx":691
+  /* "cpp_process.pyx":732
  *     cdef list result_list
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -9127,7 +9506,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
  */
   /*try:*/ {
 
-    /* "cpp_process.pyx":692
+    /* "cpp_process.pyx":733
  * 
  *     try:
  *         if processor is not None:             # <<<<<<<<<<<<<<
@@ -9138,7 +9517,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
     __pyx_t_3 = (__pyx_t_2 != 0);
     if (__pyx_t_3) {
 
-      /* "cpp_process.pyx":693
+      /* "cpp_process.pyx":734
  *     try:
  *         if processor is not None:
  *             for choice_key, choice in choices.items():             # <<<<<<<<<<<<<<
@@ -9148,9 +9527,9 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
       __pyx_t_1 = 0;
       if (unlikely(__pyx_v_choices == Py_None)) {
         PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "items");
-        __PYX_ERR(0, 693, __pyx_L4_error)
+        __PYX_ERR(0, 734, __pyx_L4_error)
       }
-      __pyx_t_7 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_5), (&__pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 693, __pyx_L4_error)
+      __pyx_t_7 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_5), (&__pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 734, __pyx_L4_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_XDECREF(__pyx_t_4);
       __pyx_t_4 = __pyx_t_7;
@@ -9158,7 +9537,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
       while (1) {
         __pyx_t_9 = __Pyx_dict_iter_next(__pyx_t_4, __pyx_t_5, &__pyx_t_1, &__pyx_t_7, &__pyx_t_8, NULL, __pyx_t_6);
         if (unlikely(__pyx_t_9 == 0)) break;
-        if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 693, __pyx_L4_error)
+        if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 734, __pyx_L4_error)
         __Pyx_GOTREF(__pyx_t_7);
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_XDECREF_SET(__pyx_v_choice_key, __pyx_t_7);
@@ -9166,7 +9545,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
         __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_8);
         __pyx_t_8 = 0;
 
-        /* "cpp_process.pyx":694
+        /* "cpp_process.pyx":735
  *         if processor is not None:
  *             for choice_key, choice in choices.items():
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -9177,7 +9556,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
         __pyx_t_2 = (__pyx_t_3 != 0);
         if (__pyx_t_2) {
 
-          /* "cpp_process.pyx":695
+          /* "cpp_process.pyx":736
  *             for choice_key, choice in choices.items():
  *                 if choice is None:
  *                     i += 1             # <<<<<<<<<<<<<<
@@ -9186,16 +9565,16 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
  */
           __pyx_v_i = (__pyx_v_i + 1);
 
-          /* "cpp_process.pyx":696
+          /* "cpp_process.pyx":737
  *                 if choice is None:
  *                     i += 1
  *                     continue             # <<<<<<<<<<<<<<
  * 
- *                 distance = context.scorer(context.context, processor(choice), max_)
+ *                 proc_choice = processor(choice)
  */
           goto __pyx_L7_continue;
 
-          /* "cpp_process.pyx":694
+          /* "cpp_process.pyx":735
  *         if processor is not None:
  *             for choice_key, choice in choices.items():
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -9204,12 +9583,12 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
  */
         }
 
-        /* "cpp_process.pyx":698
+        /* "cpp_process.pyx":739
  *                     continue
  * 
- *                 distance = context.scorer(context.context, processor(choice), max_)             # <<<<<<<<<<<<<<
- * 
- *                 if distance <= max_:
+ *                 proc_choice = processor(choice)             # <<<<<<<<<<<<<<
+ *                 if proc_choice is None:
+ *                     i += 1
  */
         __Pyx_INCREF(__pyx_v_processor);
         __pyx_t_7 = __pyx_v_processor; __pyx_t_10 = NULL;
@@ -9228,30 +9607,91 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
           PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_choice};
           __pyx_t_8 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
           __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-          if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 698, __pyx_L4_error)
+          if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 739, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_8);
           __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         }
+        __Pyx_XDECREF_SET(__pyx_v_proc_choice, __pyx_t_8);
+        __pyx_t_8 = 0;
+
+        /* "cpp_process.pyx":740
+ * 
+ *                 proc_choice = processor(choice)
+ *                 if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                     i += 1
+ *                     continue
+ */
+        __pyx_t_2 = (__pyx_v_proc_choice == Py_None);
+        __pyx_t_3 = (__pyx_t_2 != 0);
+        if (__pyx_t_3) {
+
+          /* "cpp_process.pyx":741
+ *                 proc_choice = processor(choice)
+ *                 if proc_choice is None:
+ *                     i += 1             # <<<<<<<<<<<<<<
+ *                     continue
+ * 
+ */
+          __pyx_v_i = (__pyx_v_i + 1);
+
+          /* "cpp_process.pyx":742
+ *                 if proc_choice is None:
+ *                     i += 1
+ *                     continue             # <<<<<<<<<<<<<<
+ * 
+ *                 validate_string(proc_choice, "choice must be a String or None")
+ */
+          goto __pyx_L7_continue;
+
+          /* "cpp_process.pyx":740
+ * 
+ *                 proc_choice = processor(choice)
+ *                 if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                     i += 1
+ *                     continue
+ */
+        }
+
+        /* "cpp_process.pyx":744
+ *                     continue
+ * 
+ *                 validate_string(proc_choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ * 
+ *                 distance = context.scorer(context.context, proc_choice, max_)
+ */
         try {
-          __pyx_t_11 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_t_8, __pyx_v_max_);
+          validate_string(__pyx_v_proc_choice, ((char const *)"choice must be a String or None"));
         } catch(...) {
           __Pyx_CppExn2PyErr();
-          __PYX_ERR(0, 698, __pyx_L4_error)
+          __PYX_ERR(0, 744, __pyx_L4_error)
         }
-        __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+
+        /* "cpp_process.pyx":746
+ *                 validate_string(proc_choice, "choice must be a String or None")
+ * 
+ *                 distance = context.scorer(context.context, proc_choice, max_)             # <<<<<<<<<<<<<<
+ * 
+ *                 if distance <= max_:
+ */
+        try {
+          __pyx_t_11 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_v_proc_choice, __pyx_v_max_);
+        } catch(...) {
+          __Pyx_CppExn2PyErr();
+          __PYX_ERR(0, 746, __pyx_L4_error)
+        }
         __pyx_v_distance = __pyx_t_11;
 
-        /* "cpp_process.pyx":700
- *                 distance = context.scorer(context.context, processor(choice), max_)
+        /* "cpp_process.pyx":748
+ *                 distance = context.scorer(context.context, proc_choice, max_)
  * 
  *                 if distance <= max_:             # <<<<<<<<<<<<<<
  *                     # especially the key object might be created on the fly by e.g. pandas.Dataframe
  *                     # so we need to ensure Python does not deallocate it
  */
-        __pyx_t_2 = ((__pyx_v_distance <= __pyx_v_max_) != 0);
-        if (__pyx_t_2) {
+        __pyx_t_3 = ((__pyx_v_distance <= __pyx_v_max_) != 0);
+        if (__pyx_t_3) {
 
-          /* "cpp_process.pyx":703
+          /* "cpp_process.pyx":751
  *                     # especially the key object might be created on the fly by e.g. pandas.Dataframe
  *                     # so we need to ensure Python does not deallocate it
  *                     Py_INCREF(choice)             # <<<<<<<<<<<<<<
@@ -9260,7 +9700,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
  */
           Py_INCREF(__pyx_v_choice);
 
-          /* "cpp_process.pyx":704
+          /* "cpp_process.pyx":752
  *                     # so we need to ensure Python does not deallocate it
  *                     Py_INCREF(choice)
  *                     Py_INCREF(choice_key)             # <<<<<<<<<<<<<<
@@ -9269,7 +9709,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
  */
           Py_INCREF(__pyx_v_choice_key);
 
-          /* "cpp_process.pyx":705
+          /* "cpp_process.pyx":753
  *                     Py_INCREF(choice)
  *                     Py_INCREF(choice_key)
  *                     results.push_back(DictMatchDistanceElem(distance, i, <PyObject*>choice, <PyObject*>choice_key))             # <<<<<<<<<<<<<<
@@ -9284,11 +9724,11 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
             __pyx_v_results.push_back(__pyx_t_12);
           } catch(...) {
             __Pyx_CppExn2PyErr();
-            __PYX_ERR(0, 705, __pyx_L4_error)
+            __PYX_ERR(0, 753, __pyx_L4_error)
           }
 
-          /* "cpp_process.pyx":700
- *                 distance = context.scorer(context.context, processor(choice), max_)
+          /* "cpp_process.pyx":748
+ *                 distance = context.scorer(context.context, proc_choice, max_)
  * 
  *                 if distance <= max_:             # <<<<<<<<<<<<<<
  *                     # especially the key object might be created on the fly by e.g. pandas.Dataframe
@@ -9296,7 +9736,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
  */
         }
 
-        /* "cpp_process.pyx":706
+        /* "cpp_process.pyx":754
  *                     Py_INCREF(choice_key)
  *                     results.push_back(DictMatchDistanceElem(distance, i, <PyObject*>choice, <PyObject*>choice_key))
  *                 i += 1             # <<<<<<<<<<<<<<
@@ -9308,7 +9748,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
       }
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-      /* "cpp_process.pyx":692
+      /* "cpp_process.pyx":733
  * 
  *     try:
  *         if processor is not None:             # <<<<<<<<<<<<<<
@@ -9318,7 +9758,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
       goto __pyx_L6;
     }
 
-    /* "cpp_process.pyx":708
+    /* "cpp_process.pyx":756
  *                 i += 1
  *         else:
  *             for choice_key, choice in choices.items():             # <<<<<<<<<<<<<<
@@ -9329,9 +9769,9 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
       __pyx_t_5 = 0;
       if (unlikely(__pyx_v_choices == Py_None)) {
         PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "items");
-        __PYX_ERR(0, 708, __pyx_L4_error)
+        __PYX_ERR(0, 756, __pyx_L4_error)
       }
-      __pyx_t_8 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_1), (&__pyx_t_6)); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 708, __pyx_L4_error)
+      __pyx_t_8 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_1), (&__pyx_t_6)); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 756, __pyx_L4_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_XDECREF(__pyx_t_4);
       __pyx_t_4 = __pyx_t_8;
@@ -9339,7 +9779,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
       while (1) {
         __pyx_t_9 = __Pyx_dict_iter_next(__pyx_t_4, __pyx_t_1, &__pyx_t_5, &__pyx_t_8, &__pyx_t_7, NULL, __pyx_t_6);
         if (unlikely(__pyx_t_9 == 0)) break;
-        if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 708, __pyx_L4_error)
+        if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 756, __pyx_L4_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_GOTREF(__pyx_t_7);
         __Pyx_XDECREF_SET(__pyx_v_choice_key, __pyx_t_8);
@@ -9347,18 +9787,18 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
         __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_7);
         __pyx_t_7 = 0;
 
-        /* "cpp_process.pyx":709
+        /* "cpp_process.pyx":757
  *         else:
  *             for choice_key, choice in choices.items():
  *                 if choice is None:             # <<<<<<<<<<<<<<
  *                     i += 1
  *                     continue
  */
-        __pyx_t_2 = (__pyx_v_choice == Py_None);
-        __pyx_t_3 = (__pyx_t_2 != 0);
-        if (__pyx_t_3) {
+        __pyx_t_3 = (__pyx_v_choice == Py_None);
+        __pyx_t_2 = (__pyx_t_3 != 0);
+        if (__pyx_t_2) {
 
-          /* "cpp_process.pyx":710
+          /* "cpp_process.pyx":758
  *             for choice_key, choice in choices.items():
  *                 if choice is None:
  *                     i += 1             # <<<<<<<<<<<<<<
@@ -9367,16 +9807,16 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
  */
           __pyx_v_i = (__pyx_v_i + 1);
 
-          /* "cpp_process.pyx":711
+          /* "cpp_process.pyx":759
  *                 if choice is None:
  *                     i += 1
  *                     continue             # <<<<<<<<<<<<<<
  * 
- *                 distance = context.scorer(context.context, choice, max_)
+ *                 validate_string(choice, "choice must be a String or None")
  */
-          goto __pyx_L11_continue;
+          goto __pyx_L12_continue;
 
-          /* "cpp_process.pyx":709
+          /* "cpp_process.pyx":757
  *         else:
  *             for choice_key, choice in choices.items():
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -9385,9 +9825,23 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
  */
         }
 
-        /* "cpp_process.pyx":713
+        /* "cpp_process.pyx":761
  *                     continue
  * 
+ *                 validate_string(choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ *                 distance = context.scorer(context.context, choice, max_)
+ * 
+ */
+        try {
+          validate_string(__pyx_v_choice, ((char const *)"choice must be a String or None"));
+        } catch(...) {
+          __Pyx_CppExn2PyErr();
+          __PYX_ERR(0, 761, __pyx_L4_error)
+        }
+
+        /* "cpp_process.pyx":762
+ * 
+ *                 validate_string(choice, "choice must be a String or None")
  *                 distance = context.scorer(context.context, choice, max_)             # <<<<<<<<<<<<<<
  * 
  *                 if distance <= max_:
@@ -9396,21 +9850,21 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
           __pyx_t_11 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_v_choice, __pyx_v_max_);
         } catch(...) {
           __Pyx_CppExn2PyErr();
-          __PYX_ERR(0, 713, __pyx_L4_error)
+          __PYX_ERR(0, 762, __pyx_L4_error)
         }
         __pyx_v_distance = __pyx_t_11;
 
-        /* "cpp_process.pyx":715
+        /* "cpp_process.pyx":764
  *                 distance = context.scorer(context.context, choice, max_)
  * 
  *                 if distance <= max_:             # <<<<<<<<<<<<<<
  *                     # especially the key object might be created on the fly by e.g. pandas.Dataframe
  *                     # so we need to ensure Python does not deallocate it
  */
-        __pyx_t_3 = ((__pyx_v_distance <= __pyx_v_max_) != 0);
-        if (__pyx_t_3) {
+        __pyx_t_2 = ((__pyx_v_distance <= __pyx_v_max_) != 0);
+        if (__pyx_t_2) {
 
-          /* "cpp_process.pyx":718
+          /* "cpp_process.pyx":767
  *                     # especially the key object might be created on the fly by e.g. pandas.Dataframe
  *                     # so we need to ensure Python does not deallocate it
  *                     Py_INCREF(choice)             # <<<<<<<<<<<<<<
@@ -9419,7 +9873,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
  */
           Py_INCREF(__pyx_v_choice);
 
-          /* "cpp_process.pyx":719
+          /* "cpp_process.pyx":768
  *                     # so we need to ensure Python does not deallocate it
  *                     Py_INCREF(choice)
  *                     Py_INCREF(choice_key)             # <<<<<<<<<<<<<<
@@ -9428,7 +9882,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
  */
           Py_INCREF(__pyx_v_choice_key);
 
-          /* "cpp_process.pyx":720
+          /* "cpp_process.pyx":769
  *                     Py_INCREF(choice)
  *                     Py_INCREF(choice_key)
  *                     results.push_back(DictMatchDistanceElem(distance, i, <PyObject*>choice, <PyObject*>choice_key))             # <<<<<<<<<<<<<<
@@ -9443,10 +9897,10 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
             __pyx_v_results.push_back(__pyx_t_12);
           } catch(...) {
             __Pyx_CppExn2PyErr();
-            __PYX_ERR(0, 720, __pyx_L4_error)
+            __PYX_ERR(0, 769, __pyx_L4_error)
           }
 
-          /* "cpp_process.pyx":715
+          /* "cpp_process.pyx":764
  *                 distance = context.scorer(context.context, choice, max_)
  * 
  *                 if distance <= max_:             # <<<<<<<<<<<<<<
@@ -9455,7 +9909,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
  */
         }
 
-        /* "cpp_process.pyx":721
+        /* "cpp_process.pyx":770
  *                     Py_INCREF(choice_key)
  *                     results.push_back(DictMatchDistanceElem(distance, i, <PyObject*>choice, <PyObject*>choice_key))
  *                 i += 1             # <<<<<<<<<<<<<<
@@ -9463,23 +9917,23 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
  *         # due to max_ not always completely filled
  */
         __pyx_v_i = (__pyx_v_i + 1);
-        __pyx_L11_continue:;
+        __pyx_L12_continue:;
       }
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     }
     __pyx_L6:;
 
-    /* "cpp_process.pyx":724
+    /* "cpp_process.pyx":773
  * 
  *         # due to max_ not always completely filled
  *         if limit > results.size():             # <<<<<<<<<<<<<<
  *             limit = results.size()
  * 
  */
-    __pyx_t_3 = ((__pyx_v_limit > __pyx_v_results.size()) != 0);
-    if (__pyx_t_3) {
+    __pyx_t_2 = ((__pyx_v_limit > __pyx_v_results.size()) != 0);
+    if (__pyx_t_2) {
 
-      /* "cpp_process.pyx":725
+      /* "cpp_process.pyx":774
  *         # due to max_ not always completely filled
  *         if limit > results.size():
  *             limit = results.size()             # <<<<<<<<<<<<<<
@@ -9488,7 +9942,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
  */
       __pyx_v_limit = __pyx_v_results.size();
 
-      /* "cpp_process.pyx":724
+      /* "cpp_process.pyx":773
  * 
  *         # due to max_ not always completely filled
  *         if limit > results.size():             # <<<<<<<<<<<<<<
@@ -9497,17 +9951,17 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
  */
     }
 
-    /* "cpp_process.pyx":727
+    /* "cpp_process.pyx":776
  *             limit = results.size()
  * 
  *         if limit >= results.size():             # <<<<<<<<<<<<<<
  *             algorithm.sort(results.begin(), results.end(), ExtractDistanceComp())
  *         else:
  */
-    __pyx_t_3 = ((__pyx_v_limit >= __pyx_v_results.size()) != 0);
-    if (__pyx_t_3) {
+    __pyx_t_2 = ((__pyx_v_limit >= __pyx_v_results.size()) != 0);
+    if (__pyx_t_2) {
 
-      /* "cpp_process.pyx":728
+      /* "cpp_process.pyx":777
  * 
  *         if limit >= results.size():
  *             algorithm.sort(results.begin(), results.end(), ExtractDistanceComp())             # <<<<<<<<<<<<<<
@@ -9518,20 +9972,20 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
         std::sort<std::vector<DictMatchDistanceElem> ::iterator,ExtractDistanceComp>(__pyx_v_results.begin(), __pyx_v_results.end(), __pyx_t_13);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 728, __pyx_L4_error)
+        __PYX_ERR(0, 777, __pyx_L4_error)
       }
 
-      /* "cpp_process.pyx":727
+      /* "cpp_process.pyx":776
  *             limit = results.size()
  * 
  *         if limit >= results.size():             # <<<<<<<<<<<<<<
  *             algorithm.sort(results.begin(), results.end(), ExtractDistanceComp())
  *         else:
  */
-      goto __pyx_L16;
+      goto __pyx_L17;
     }
 
-    /* "cpp_process.pyx":730
+    /* "cpp_process.pyx":779
  *             algorithm.sort(results.begin(), results.end(), ExtractDistanceComp())
  *         else:
  *             algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractDistanceComp())             # <<<<<<<<<<<<<<
@@ -9543,24 +9997,24 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
         std::partial_sort<std::vector<DictMatchDistanceElem> ::iterator,ExtractDistanceComp>(__pyx_v_results.begin(), (__pyx_v_results.begin() + ((ptrdiff_t)__pyx_v_limit)), __pyx_v_results.end(), __pyx_t_13);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 730, __pyx_L4_error)
+        __PYX_ERR(0, 779, __pyx_L4_error)
       }
     }
-    __pyx_L16:;
+    __pyx_L17:;
 
-    /* "cpp_process.pyx":733
+    /* "cpp_process.pyx":782
  * 
  *         # copy elements into Python List
  *         result_list = PyList_New(<Py_ssize_t>limit)             # <<<<<<<<<<<<<<
  *         for i in range(limit):
  *             result_item = (<object>results[i].choice, results[i].distance, <object>results[i].key)
  */
-    __pyx_t_4 = PyList_New(((Py_ssize_t)__pyx_v_limit)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 733, __pyx_L4_error)
+    __pyx_t_4 = PyList_New(((Py_ssize_t)__pyx_v_limit)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 782, __pyx_L4_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_v_result_list = ((PyObject*)__pyx_t_4);
     __pyx_t_4 = 0;
 
-    /* "cpp_process.pyx":734
+    /* "cpp_process.pyx":783
  *         # copy elements into Python List
  *         result_list = PyList_New(<Py_ssize_t>limit)
  *         for i in range(limit):             # <<<<<<<<<<<<<<
@@ -9572,7 +10026,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
     for (__pyx_t_15 = 0; __pyx_t_15 < __pyx_t_14; __pyx_t_15+=1) {
       __pyx_v_i = __pyx_t_15;
 
-      /* "cpp_process.pyx":735
+      /* "cpp_process.pyx":784
  *         result_list = PyList_New(<Py_ssize_t>limit)
  *         for i in range(limit):
  *             result_item = (<object>results[i].choice, results[i].distance, <object>results[i].key)             # <<<<<<<<<<<<<<
@@ -9580,10 +10034,10 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
  *             PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
  */
       __pyx_t_16 = (__pyx_v_results[__pyx_v_i]).choice;
-      __pyx_t_4 = __Pyx_PyInt_FromSize_t((__pyx_v_results[__pyx_v_i]).distance); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 735, __pyx_L4_error)
+      __pyx_t_4 = __Pyx_PyInt_FromSize_t((__pyx_v_results[__pyx_v_i]).distance); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 784, __pyx_L4_error)
       __Pyx_GOTREF(__pyx_t_4);
       __pyx_t_17 = (__pyx_v_results[__pyx_v_i]).key;
-      __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 735, __pyx_L4_error)
+      __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 784, __pyx_L4_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_INCREF(((PyObject *)__pyx_t_16));
       __Pyx_GIVEREF(((PyObject *)__pyx_t_16));
@@ -9597,7 +10051,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
       __Pyx_XDECREF_SET(__pyx_v_result_item, ((PyObject*)__pyx_t_7));
       __pyx_t_7 = 0;
 
-      /* "cpp_process.pyx":736
+      /* "cpp_process.pyx":785
  *         for i in range(limit):
  *             result_item = (<object>results[i].choice, results[i].distance, <object>results[i].key)
  *             Py_INCREF(result_item)             # <<<<<<<<<<<<<<
@@ -9606,7 +10060,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
  */
       Py_INCREF(__pyx_v_result_item);
 
-      /* "cpp_process.pyx":737
+      /* "cpp_process.pyx":786
  *             result_item = (<object>results[i].choice, results[i].distance, <object>results[i].key)
  *             Py_INCREF(result_item)
  *             PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)             # <<<<<<<<<<<<<<
@@ -9617,7 +10071,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
     }
   }
 
-  /* "cpp_process.pyx":741
+  /* "cpp_process.pyx":790
  *     finally:
  *         # decref all reference counts
  *         for i in range(results.size()):             # <<<<<<<<<<<<<<
@@ -9631,7 +10085,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
       for (__pyx_t_11 = 0; __pyx_t_11 < __pyx_t_19; __pyx_t_11+=1) {
         __pyx_v_i = __pyx_t_11;
 
-        /* "cpp_process.pyx":742
+        /* "cpp_process.pyx":791
  *         # decref all reference counts
  *         for i in range(results.size()):
  *             Py_DECREF(<object>results[i].choice)             # <<<<<<<<<<<<<<
@@ -9641,7 +10095,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
         __pyx_t_17 = (__pyx_v_results[__pyx_v_i]).choice;
         Py_DECREF(((PyObject *)__pyx_t_17));
 
-        /* "cpp_process.pyx":743
+        /* "cpp_process.pyx":792
  *         for i in range(results.size()):
  *             Py_DECREF(<object>results[i].choice)
  *             Py_DECREF(<object>results[i].key)             # <<<<<<<<<<<<<<
@@ -9673,7 +10127,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
       __pyx_t_6 = __pyx_lineno; __pyx_t_9 = __pyx_clineno; __pyx_t_20 = __pyx_filename;
       {
 
-        /* "cpp_process.pyx":741
+        /* "cpp_process.pyx":790
  *     finally:
  *         # decref all reference counts
  *         for i in range(results.size()):             # <<<<<<<<<<<<<<
@@ -9685,7 +10139,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
         for (__pyx_t_11 = 0; __pyx_t_11 < __pyx_t_19; __pyx_t_11+=1) {
           __pyx_v_i = __pyx_t_11;
 
-          /* "cpp_process.pyx":742
+          /* "cpp_process.pyx":791
  *         # decref all reference counts
  *         for i in range(results.size()):
  *             Py_DECREF(<object>results[i].choice)             # <<<<<<<<<<<<<<
@@ -9695,7 +10149,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
           __pyx_t_17 = (__pyx_v_results[__pyx_v_i]).choice;
           Py_DECREF(((PyObject *)__pyx_t_17));
 
-          /* "cpp_process.pyx":743
+          /* "cpp_process.pyx":792
  *         for i in range(results.size()):
  *             Py_DECREF(<object>results[i].choice)
  *             Py_DECREF(<object>results[i].key)             # <<<<<<<<<<<<<<
@@ -9723,7 +10177,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
     __pyx_L5:;
   }
 
-  /* "cpp_process.pyx":745
+  /* "cpp_process.pyx":794
  *             Py_DECREF(<object>results[i].key)
  * 
  *     return result_list             # <<<<<<<<<<<<<<
@@ -9735,7 +10189,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
   __pyx_r = __pyx_v_result_list;
   goto __pyx_L0;
 
-  /* "cpp_process.pyx":682
+  /* "cpp_process.pyx":723
  * 
  * 
  * cdef inline extract_distance_dict(distance_context context, choices, processor, size_t limit, size_t max_):             # <<<<<<<<<<<<<<
@@ -9755,13 +10209,14 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_dict(dista
   __Pyx_XDECREF(__pyx_v_result_list);
   __Pyx_XDECREF(__pyx_v_choice_key);
   __Pyx_XDECREF(__pyx_v_choice);
+  __Pyx_XDECREF(__pyx_v_proc_choice);
   __Pyx_XDECREF(__pyx_v_result_item);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "cpp_process.pyx":748
+/* "cpp_process.pyx":797
  * 
  * 
  * cdef inline extract_list(scorer_context context, choices, processor, size_t limit, double score_cutoff):             # <<<<<<<<<<<<<<
@@ -9775,6 +10230,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
   std::vector<ListMatchScorerElem>  __pyx_v_results;
   PyObject *__pyx_v_result_list = 0;
   PyObject *__pyx_v_choice = NULL;
+  PyObject *__pyx_v_proc_choice = NULL;
   PyObject *__pyx_v_result_item = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -9799,7 +10255,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("extract_list", 0);
 
-  /* "cpp_process.pyx":749
+  /* "cpp_process.pyx":798
  * 
  * cdef inline extract_list(scorer_context context, choices, processor, size_t limit, double score_cutoff):
  *     cdef double score = 0.0             # <<<<<<<<<<<<<<
@@ -9808,7 +10264,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
  */
   __pyx_v_score = 0.0;
 
-  /* "cpp_process.pyx":750
+  /* "cpp_process.pyx":799
  * cdef inline extract_list(scorer_context context, choices, processor, size_t limit, double score_cutoff):
  *     cdef double score = 0.0
  *     cdef size_t i = 0             # <<<<<<<<<<<<<<
@@ -9817,17 +10273,17 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
  */
   __pyx_v_i = 0;
 
-  /* "cpp_process.pyx":753
+  /* "cpp_process.pyx":802
  *     # todo possibly a smaller vector would be good to reduce memory usage
  *     cdef vector[ListMatchScorerElem] results
  *     results.reserve(<size_t>len(choices))             # <<<<<<<<<<<<<<
  *     cdef list result_list
  * 
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_choices); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 753, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_choices); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 802, __pyx_L1_error)
   __pyx_v_results.reserve(((size_t)__pyx_t_1));
 
-  /* "cpp_process.pyx":756
+  /* "cpp_process.pyx":805
  *     cdef list result_list
  * 
  *     if processor is not None:             # <<<<<<<<<<<<<<
@@ -9838,7 +10294,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
   __pyx_t_3 = (__pyx_t_2 != 0);
   if (__pyx_t_3) {
 
-    /* "cpp_process.pyx":757
+    /* "cpp_process.pyx":806
  * 
  *     if processor is not None:
  *         for choice in choices:             # <<<<<<<<<<<<<<
@@ -9849,26 +10305,26 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
       __pyx_t_4 = __pyx_v_choices; __Pyx_INCREF(__pyx_t_4); __pyx_t_1 = 0;
       __pyx_t_5 = NULL;
     } else {
-      __pyx_t_1 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 757, __pyx_L1_error)
+      __pyx_t_1 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 806, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 757, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 806, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_5)) {
         if (likely(PyList_CheckExact(__pyx_t_4))) {
           if (__pyx_t_1 >= PyList_GET_SIZE(__pyx_t_4)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_1); __Pyx_INCREF(__pyx_t_6); __pyx_t_1++; if (unlikely((0 < 0))) __PYX_ERR(0, 757, __pyx_L1_error)
+          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_1); __Pyx_INCREF(__pyx_t_6); __pyx_t_1++; if (unlikely((0 < 0))) __PYX_ERR(0, 806, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_4, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 757, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_4, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 806, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         } else {
           if (__pyx_t_1 >= PyTuple_GET_SIZE(__pyx_t_4)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_1); __Pyx_INCREF(__pyx_t_6); __pyx_t_1++; if (unlikely((0 < 0))) __PYX_ERR(0, 757, __pyx_L1_error)
+          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_1); __Pyx_INCREF(__pyx_t_6); __pyx_t_1++; if (unlikely((0 < 0))) __PYX_ERR(0, 806, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_4, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 757, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_4, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 806, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         }
@@ -9878,7 +10334,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 757, __pyx_L1_error)
+            else __PYX_ERR(0, 806, __pyx_L1_error)
           }
           break;
         }
@@ -9887,7 +10343,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
       __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "cpp_process.pyx":758
+      /* "cpp_process.pyx":807
  *     if processor is not None:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -9898,7 +10354,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
       __pyx_t_2 = (__pyx_t_3 != 0);
       if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":759
+        /* "cpp_process.pyx":808
  *         for choice in choices:
  *             if choice is None:
  *                 i += 1             # <<<<<<<<<<<<<<
@@ -9907,16 +10363,16 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
  */
         __pyx_v_i = (__pyx_v_i + 1);
 
-        /* "cpp_process.pyx":760
+        /* "cpp_process.pyx":809
  *             if choice is None:
  *                 i += 1
  *                 continue             # <<<<<<<<<<<<<<
  * 
- *             score = context.scorer(context.context, processor(choice), score_cutoff)
+ *             proc_choice = processor(choice)
  */
         goto __pyx_L4_continue;
 
-        /* "cpp_process.pyx":758
+        /* "cpp_process.pyx":807
  *     if processor is not None:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -9925,12 +10381,12 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
  */
       }
 
-      /* "cpp_process.pyx":762
+      /* "cpp_process.pyx":811
  *                 continue
  * 
- *             score = context.scorer(context.context, processor(choice), score_cutoff)             # <<<<<<<<<<<<<<
- * 
- *             if score >= score_cutoff:
+ *             proc_choice = processor(choice)             # <<<<<<<<<<<<<<
+ *             if proc_choice is None:
+ *                 i += 1
  */
       __Pyx_INCREF(__pyx_v_processor);
       __pyx_t_7 = __pyx_v_processor; __pyx_t_8 = NULL;
@@ -9949,30 +10405,91 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
         PyObject *__pyx_callargs[2] = {__pyx_t_8, __pyx_v_choice};
         __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-        if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 762, __pyx_L1_error)
+        if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 811, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       }
+      __Pyx_XDECREF_SET(__pyx_v_proc_choice, __pyx_t_6);
+      __pyx_t_6 = 0;
+
+      /* "cpp_process.pyx":812
+ * 
+ *             proc_choice = processor(choice)
+ *             if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                 i += 1
+ *                 continue
+ */
+      __pyx_t_2 = (__pyx_v_proc_choice == Py_None);
+      __pyx_t_3 = (__pyx_t_2 != 0);
+      if (__pyx_t_3) {
+
+        /* "cpp_process.pyx":813
+ *             proc_choice = processor(choice)
+ *             if proc_choice is None:
+ *                 i += 1             # <<<<<<<<<<<<<<
+ *                 continue
+ * 
+ */
+        __pyx_v_i = (__pyx_v_i + 1);
+
+        /* "cpp_process.pyx":814
+ *             if proc_choice is None:
+ *                 i += 1
+ *                 continue             # <<<<<<<<<<<<<<
+ * 
+ *             validate_string(proc_choice, "choice must be a String or None")
+ */
+        goto __pyx_L4_continue;
+
+        /* "cpp_process.pyx":812
+ * 
+ *             proc_choice = processor(choice)
+ *             if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                 i += 1
+ *                 continue
+ */
+      }
+
+      /* "cpp_process.pyx":816
+ *                 continue
+ * 
+ *             validate_string(proc_choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ * 
+ *             score = context.scorer(context.context, proc_choice, score_cutoff)
+ */
       try {
-        __pyx_t_10 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_t_6, __pyx_v_score_cutoff);
+        validate_string(__pyx_v_proc_choice, ((char const *)"choice must be a String or None"));
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 762, __pyx_L1_error)
+        __PYX_ERR(0, 816, __pyx_L1_error)
       }
-      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+
+      /* "cpp_process.pyx":818
+ *             validate_string(proc_choice, "choice must be a String or None")
+ * 
+ *             score = context.scorer(context.context, proc_choice, score_cutoff)             # <<<<<<<<<<<<<<
+ * 
+ *             if score >= score_cutoff:
+ */
+      try {
+        __pyx_t_10 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_v_proc_choice, __pyx_v_score_cutoff);
+      } catch(...) {
+        __Pyx_CppExn2PyErr();
+        __PYX_ERR(0, 818, __pyx_L1_error)
+      }
       __pyx_v_score = __pyx_t_10;
 
-      /* "cpp_process.pyx":764
- *             score = context.scorer(context.context, processor(choice), score_cutoff)
+      /* "cpp_process.pyx":820
+ *             score = context.scorer(context.context, proc_choice, score_cutoff)
  * 
  *             if score >= score_cutoff:             # <<<<<<<<<<<<<<
  *                 results.push_back(ListMatchScorerElem(score, i))
  *             i += 1
  */
-      __pyx_t_2 = ((__pyx_v_score >= __pyx_v_score_cutoff) != 0);
-      if (__pyx_t_2) {
+      __pyx_t_3 = ((__pyx_v_score >= __pyx_v_score_cutoff) != 0);
+      if (__pyx_t_3) {
 
-        /* "cpp_process.pyx":765
+        /* "cpp_process.pyx":821
  * 
  *             if score >= score_cutoff:
  *                 results.push_back(ListMatchScorerElem(score, i))             # <<<<<<<<<<<<<<
@@ -9985,11 +10502,11 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
           __pyx_v_results.push_back(__pyx_t_11);
         } catch(...) {
           __Pyx_CppExn2PyErr();
-          __PYX_ERR(0, 765, __pyx_L1_error)
+          __PYX_ERR(0, 821, __pyx_L1_error)
         }
 
-        /* "cpp_process.pyx":764
- *             score = context.scorer(context.context, processor(choice), score_cutoff)
+        /* "cpp_process.pyx":820
+ *             score = context.scorer(context.context, proc_choice, score_cutoff)
  * 
  *             if score >= score_cutoff:             # <<<<<<<<<<<<<<
  *                 results.push_back(ListMatchScorerElem(score, i))
@@ -9997,7 +10514,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
  */
       }
 
-      /* "cpp_process.pyx":766
+      /* "cpp_process.pyx":822
  *             if score >= score_cutoff:
  *                 results.push_back(ListMatchScorerElem(score, i))
  *             i += 1             # <<<<<<<<<<<<<<
@@ -10006,7 +10523,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
  */
       __pyx_v_i = (__pyx_v_i + 1);
 
-      /* "cpp_process.pyx":757
+      /* "cpp_process.pyx":806
  * 
  *     if processor is not None:
  *         for choice in choices:             # <<<<<<<<<<<<<<
@@ -10017,7 +10534,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
     }
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-    /* "cpp_process.pyx":756
+    /* "cpp_process.pyx":805
  *     cdef list result_list
  * 
  *     if processor is not None:             # <<<<<<<<<<<<<<
@@ -10027,7 +10544,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
     goto __pyx_L3;
   }
 
-  /* "cpp_process.pyx":768
+  /* "cpp_process.pyx":824
  *             i += 1
  *     else:
  *         for choice in choices:             # <<<<<<<<<<<<<<
@@ -10039,26 +10556,26 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
       __pyx_t_4 = __pyx_v_choices; __Pyx_INCREF(__pyx_t_4); __pyx_t_1 = 0;
       __pyx_t_5 = NULL;
     } else {
-      __pyx_t_1 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 768, __pyx_L1_error)
+      __pyx_t_1 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 824, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 768, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 824, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_5)) {
         if (likely(PyList_CheckExact(__pyx_t_4))) {
           if (__pyx_t_1 >= PyList_GET_SIZE(__pyx_t_4)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_1); __Pyx_INCREF(__pyx_t_6); __pyx_t_1++; if (unlikely((0 < 0))) __PYX_ERR(0, 768, __pyx_L1_error)
+          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_1); __Pyx_INCREF(__pyx_t_6); __pyx_t_1++; if (unlikely((0 < 0))) __PYX_ERR(0, 824, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_4, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 768, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_4, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 824, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         } else {
           if (__pyx_t_1 >= PyTuple_GET_SIZE(__pyx_t_4)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_1); __Pyx_INCREF(__pyx_t_6); __pyx_t_1++; if (unlikely((0 < 0))) __PYX_ERR(0, 768, __pyx_L1_error)
+          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_1); __Pyx_INCREF(__pyx_t_6); __pyx_t_1++; if (unlikely((0 < 0))) __PYX_ERR(0, 824, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_4, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 768, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_4, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 824, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         }
@@ -10068,7 +10585,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 768, __pyx_L1_error)
+            else __PYX_ERR(0, 824, __pyx_L1_error)
           }
           break;
         }
@@ -10077,18 +10594,18 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
       __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "cpp_process.pyx":769
+      /* "cpp_process.pyx":825
  *     else:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
  *                 i += 1
  *                 continue
  */
-      __pyx_t_2 = (__pyx_v_choice == Py_None);
-      __pyx_t_3 = (__pyx_t_2 != 0);
-      if (__pyx_t_3) {
+      __pyx_t_3 = (__pyx_v_choice == Py_None);
+      __pyx_t_2 = (__pyx_t_3 != 0);
+      if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":770
+        /* "cpp_process.pyx":826
  *         for choice in choices:
  *             if choice is None:
  *                 i += 1             # <<<<<<<<<<<<<<
@@ -10097,16 +10614,16 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
  */
         __pyx_v_i = (__pyx_v_i + 1);
 
-        /* "cpp_process.pyx":771
+        /* "cpp_process.pyx":827
  *             if choice is None:
  *                 i += 1
  *                 continue             # <<<<<<<<<<<<<<
  * 
- *             score = context.scorer(context.context, choice, score_cutoff)
+ *             validate_string(choice, "choice must be a String or None")
  */
-        goto __pyx_L8_continue;
+        goto __pyx_L9_continue;
 
-        /* "cpp_process.pyx":769
+        /* "cpp_process.pyx":825
  *     else:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -10115,9 +10632,23 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
  */
       }
 
-      /* "cpp_process.pyx":773
+      /* "cpp_process.pyx":829
  *                 continue
  * 
+ *             validate_string(choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ *             score = context.scorer(context.context, choice, score_cutoff)
+ * 
+ */
+      try {
+        validate_string(__pyx_v_choice, ((char const *)"choice must be a String or None"));
+      } catch(...) {
+        __Pyx_CppExn2PyErr();
+        __PYX_ERR(0, 829, __pyx_L1_error)
+      }
+
+      /* "cpp_process.pyx":830
+ * 
+ *             validate_string(choice, "choice must be a String or None")
  *             score = context.scorer(context.context, choice, score_cutoff)             # <<<<<<<<<<<<<<
  * 
  *             if score >= score_cutoff:
@@ -10126,21 +10657,21 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
         __pyx_t_10 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_v_choice, __pyx_v_score_cutoff);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 773, __pyx_L1_error)
+        __PYX_ERR(0, 830, __pyx_L1_error)
       }
       __pyx_v_score = __pyx_t_10;
 
-      /* "cpp_process.pyx":775
+      /* "cpp_process.pyx":832
  *             score = context.scorer(context.context, choice, score_cutoff)
  * 
  *             if score >= score_cutoff:             # <<<<<<<<<<<<<<
  *                 results.push_back(ListMatchScorerElem(score, i))
  *             i += 1
  */
-      __pyx_t_3 = ((__pyx_v_score >= __pyx_v_score_cutoff) != 0);
-      if (__pyx_t_3) {
+      __pyx_t_2 = ((__pyx_v_score >= __pyx_v_score_cutoff) != 0);
+      if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":776
+        /* "cpp_process.pyx":833
  * 
  *             if score >= score_cutoff:
  *                 results.push_back(ListMatchScorerElem(score, i))             # <<<<<<<<<<<<<<
@@ -10153,10 +10684,10 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
           __pyx_v_results.push_back(__pyx_t_11);
         } catch(...) {
           __Pyx_CppExn2PyErr();
-          __PYX_ERR(0, 776, __pyx_L1_error)
+          __PYX_ERR(0, 833, __pyx_L1_error)
         }
 
-        /* "cpp_process.pyx":775
+        /* "cpp_process.pyx":832
  *             score = context.scorer(context.context, choice, score_cutoff)
  * 
  *             if score >= score_cutoff:             # <<<<<<<<<<<<<<
@@ -10165,7 +10696,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
  */
       }
 
-      /* "cpp_process.pyx":777
+      /* "cpp_process.pyx":834
  *             if score >= score_cutoff:
  *                 results.push_back(ListMatchScorerElem(score, i))
  *             i += 1             # <<<<<<<<<<<<<<
@@ -10174,30 +10705,30 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
  */
       __pyx_v_i = (__pyx_v_i + 1);
 
-      /* "cpp_process.pyx":768
+      /* "cpp_process.pyx":824
  *             i += 1
  *     else:
  *         for choice in choices:             # <<<<<<<<<<<<<<
  *             if choice is None:
  *                 i += 1
  */
-      __pyx_L8_continue:;
+      __pyx_L9_continue:;
     }
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
   __pyx_L3:;
 
-  /* "cpp_process.pyx":780
+  /* "cpp_process.pyx":837
  * 
  *     # due to score_cutoff not always completely filled
  *     if limit > results.size():             # <<<<<<<<<<<<<<
  *         limit = results.size()
  * 
  */
-  __pyx_t_3 = ((__pyx_v_limit > __pyx_v_results.size()) != 0);
-  if (__pyx_t_3) {
+  __pyx_t_2 = ((__pyx_v_limit > __pyx_v_results.size()) != 0);
+  if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":781
+    /* "cpp_process.pyx":838
  *     # due to score_cutoff not always completely filled
  *     if limit > results.size():
  *         limit = results.size()             # <<<<<<<<<<<<<<
@@ -10206,7 +10737,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
  */
     __pyx_v_limit = __pyx_v_results.size();
 
-    /* "cpp_process.pyx":780
+    /* "cpp_process.pyx":837
  * 
  *     # due to score_cutoff not always completely filled
  *     if limit > results.size():             # <<<<<<<<<<<<<<
@@ -10215,17 +10746,17 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
  */
   }
 
-  /* "cpp_process.pyx":783
+  /* "cpp_process.pyx":840
  *         limit = results.size()
  * 
  *     if limit >= results.size():             # <<<<<<<<<<<<<<
  *         algorithm.sort(results.begin(), results.end(), ExtractScorerComp())
  *     else:
  */
-  __pyx_t_3 = ((__pyx_v_limit >= __pyx_v_results.size()) != 0);
-  if (__pyx_t_3) {
+  __pyx_t_2 = ((__pyx_v_limit >= __pyx_v_results.size()) != 0);
+  if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":784
+    /* "cpp_process.pyx":841
  * 
  *     if limit >= results.size():
  *         algorithm.sort(results.begin(), results.end(), ExtractScorerComp())             # <<<<<<<<<<<<<<
@@ -10236,20 +10767,20 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
       std::sort<std::vector<ListMatchScorerElem> ::iterator,ExtractScorerComp>(__pyx_v_results.begin(), __pyx_v_results.end(), __pyx_t_12);
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 784, __pyx_L1_error)
+      __PYX_ERR(0, 841, __pyx_L1_error)
     }
 
-    /* "cpp_process.pyx":783
+    /* "cpp_process.pyx":840
  *         limit = results.size()
  * 
  *     if limit >= results.size():             # <<<<<<<<<<<<<<
  *         algorithm.sort(results.begin(), results.end(), ExtractScorerComp())
  *     else:
  */
-    goto __pyx_L13;
+    goto __pyx_L14;
   }
 
-  /* "cpp_process.pyx":786
+  /* "cpp_process.pyx":843
  *         algorithm.sort(results.begin(), results.end(), ExtractScorerComp())
  *     else:
  *         algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractScorerComp())             # <<<<<<<<<<<<<<
@@ -10261,24 +10792,24 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
       std::partial_sort<std::vector<ListMatchScorerElem> ::iterator,ExtractScorerComp>(__pyx_v_results.begin(), (__pyx_v_results.begin() + ((ptrdiff_t)__pyx_v_limit)), __pyx_v_results.end(), __pyx_t_12);
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 786, __pyx_L1_error)
+      __PYX_ERR(0, 843, __pyx_L1_error)
     }
   }
-  __pyx_L13:;
+  __pyx_L14:;
 
-  /* "cpp_process.pyx":789
+  /* "cpp_process.pyx":846
  * 
  *     # copy elements into Python List
  *     result_list = PyList_New(<Py_ssize_t>limit)             # <<<<<<<<<<<<<<
  *     for i in range(limit):
  *         result_item = (choices[results[i].index], results[i].score, results[i].index)
  */
-  __pyx_t_4 = PyList_New(((Py_ssize_t)__pyx_v_limit)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 789, __pyx_L1_error)
+  __pyx_t_4 = PyList_New(((Py_ssize_t)__pyx_v_limit)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 846, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_v_result_list = ((PyObject*)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "cpp_process.pyx":790
+  /* "cpp_process.pyx":847
  *     # copy elements into Python List
  *     result_list = PyList_New(<Py_ssize_t>limit)
  *     for i in range(limit):             # <<<<<<<<<<<<<<
@@ -10290,7 +10821,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
   for (__pyx_t_15 = 0; __pyx_t_15 < __pyx_t_14; __pyx_t_15+=1) {
     __pyx_v_i = __pyx_t_15;
 
-    /* "cpp_process.pyx":791
+    /* "cpp_process.pyx":848
  *     result_list = PyList_New(<Py_ssize_t>limit)
  *     for i in range(limit):
  *         result_item = (choices[results[i].index], results[i].score, results[i].index)             # <<<<<<<<<<<<<<
@@ -10298,13 +10829,13 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
  *         PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
  */
     __pyx_t_16 = (__pyx_v_results[__pyx_v_i]).index;
-    __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_choices, __pyx_t_16, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 791, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_choices, __pyx_t_16, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 848, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_6 = PyFloat_FromDouble((__pyx_v_results[__pyx_v_i]).score); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 791, __pyx_L1_error)
+    __pyx_t_6 = PyFloat_FromDouble((__pyx_v_results[__pyx_v_i]).score); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 848, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __Pyx_PyInt_FromSize_t((__pyx_v_results[__pyx_v_i]).index); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 791, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyInt_FromSize_t((__pyx_v_results[__pyx_v_i]).index); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 848, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 791, __pyx_L1_error)
+    __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 848, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_GIVEREF(__pyx_t_4);
     PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_4);
@@ -10318,7 +10849,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
     __Pyx_XDECREF_SET(__pyx_v_result_item, ((PyObject*)__pyx_t_8));
     __pyx_t_8 = 0;
 
-    /* "cpp_process.pyx":792
+    /* "cpp_process.pyx":849
  *     for i in range(limit):
  *         result_item = (choices[results[i].index], results[i].score, results[i].index)
  *         Py_INCREF(result_item)             # <<<<<<<<<<<<<<
@@ -10327,7 +10858,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
  */
     Py_INCREF(__pyx_v_result_item);
 
-    /* "cpp_process.pyx":793
+    /* "cpp_process.pyx":850
  *         result_item = (choices[results[i].index], results[i].score, results[i].index)
  *         Py_INCREF(result_item)
  *         PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)             # <<<<<<<<<<<<<<
@@ -10337,7 +10868,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
     PyList_SET_ITEM(__pyx_v_result_list, ((Py_ssize_t)__pyx_v_i), __pyx_v_result_item);
   }
 
-  /* "cpp_process.pyx":795
+  /* "cpp_process.pyx":852
  *         PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
  * 
  *     return result_list             # <<<<<<<<<<<<<<
@@ -10349,7 +10880,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
   __pyx_r = __pyx_v_result_list;
   goto __pyx_L0;
 
-  /* "cpp_process.pyx":748
+  /* "cpp_process.pyx":797
  * 
  * 
  * cdef inline extract_list(scorer_context context, choices, processor, size_t limit, double score_cutoff):             # <<<<<<<<<<<<<<
@@ -10368,13 +10899,14 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_list(scorer_context
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_result_list);
   __Pyx_XDECREF(__pyx_v_choice);
+  __Pyx_XDECREF(__pyx_v_proc_choice);
   __Pyx_XDECREF(__pyx_v_result_item);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "cpp_process.pyx":798
+/* "cpp_process.pyx":855
  * 
  * 
  * cdef inline extract_distance_list(distance_context context, choices, processor, size_t limit, size_t max_):             # <<<<<<<<<<<<<<
@@ -10388,6 +10920,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
   std::vector<ListMatchDistanceElem>  __pyx_v_results;
   PyObject *__pyx_v_result_list = 0;
   PyObject *__pyx_v_choice = NULL;
+  PyObject *__pyx_v_proc_choice = NULL;
   PyObject *__pyx_v_result_item = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -10411,7 +10944,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("extract_distance_list", 0);
 
-  /* "cpp_process.pyx":800
+  /* "cpp_process.pyx":857
  * cdef inline extract_distance_list(distance_context context, choices, processor, size_t limit, size_t max_):
  *     cdef size_t distance
  *     cdef size_t i = 0             # <<<<<<<<<<<<<<
@@ -10420,17 +10953,17 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
  */
   __pyx_v_i = 0;
 
-  /* "cpp_process.pyx":803
+  /* "cpp_process.pyx":860
  *     # todo possibly a smaller vector would be good to reduce memory usage
  *     cdef vector[ListMatchDistanceElem] results
  *     results.reserve(<size_t>len(choices))             # <<<<<<<<<<<<<<
  *     cdef list result_list
  * 
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_choices); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 803, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_choices); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 860, __pyx_L1_error)
   __pyx_v_results.reserve(((size_t)__pyx_t_1));
 
-  /* "cpp_process.pyx":806
+  /* "cpp_process.pyx":863
  *     cdef list result_list
  * 
  *     if processor is not None:             # <<<<<<<<<<<<<<
@@ -10441,7 +10974,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
   __pyx_t_3 = (__pyx_t_2 != 0);
   if (__pyx_t_3) {
 
-    /* "cpp_process.pyx":807
+    /* "cpp_process.pyx":864
  * 
  *     if processor is not None:
  *         for choice in choices:             # <<<<<<<<<<<<<<
@@ -10452,26 +10985,26 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
       __pyx_t_4 = __pyx_v_choices; __Pyx_INCREF(__pyx_t_4); __pyx_t_1 = 0;
       __pyx_t_5 = NULL;
     } else {
-      __pyx_t_1 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 807, __pyx_L1_error)
+      __pyx_t_1 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 864, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 807, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 864, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_5)) {
         if (likely(PyList_CheckExact(__pyx_t_4))) {
           if (__pyx_t_1 >= PyList_GET_SIZE(__pyx_t_4)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_1); __Pyx_INCREF(__pyx_t_6); __pyx_t_1++; if (unlikely((0 < 0))) __PYX_ERR(0, 807, __pyx_L1_error)
+          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_1); __Pyx_INCREF(__pyx_t_6); __pyx_t_1++; if (unlikely((0 < 0))) __PYX_ERR(0, 864, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_4, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 807, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_4, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 864, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         } else {
           if (__pyx_t_1 >= PyTuple_GET_SIZE(__pyx_t_4)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_1); __Pyx_INCREF(__pyx_t_6); __pyx_t_1++; if (unlikely((0 < 0))) __PYX_ERR(0, 807, __pyx_L1_error)
+          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_1); __Pyx_INCREF(__pyx_t_6); __pyx_t_1++; if (unlikely((0 < 0))) __PYX_ERR(0, 864, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_4, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 807, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_4, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 864, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         }
@@ -10481,7 +11014,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 807, __pyx_L1_error)
+            else __PYX_ERR(0, 864, __pyx_L1_error)
           }
           break;
         }
@@ -10490,7 +11023,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
       __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "cpp_process.pyx":808
+      /* "cpp_process.pyx":865
  *     if processor is not None:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -10501,7 +11034,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
       __pyx_t_2 = (__pyx_t_3 != 0);
       if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":809
+        /* "cpp_process.pyx":866
  *         for choice in choices:
  *             if choice is None:
  *                 i += 1             # <<<<<<<<<<<<<<
@@ -10510,16 +11043,16 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
  */
         __pyx_v_i = (__pyx_v_i + 1);
 
-        /* "cpp_process.pyx":810
+        /* "cpp_process.pyx":867
  *             if choice is None:
  *                 i += 1
  *                 continue             # <<<<<<<<<<<<<<
  * 
- *             distance = context.scorer(context.context, processor(choice), max_)
+ *             proc_choice = processor(choice)
  */
         goto __pyx_L4_continue;
 
-        /* "cpp_process.pyx":808
+        /* "cpp_process.pyx":865
  *     if processor is not None:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -10528,8 +11061,91 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
  */
       }
 
-      /* "cpp_process.pyx":812
+      /* "cpp_process.pyx":869
  *                 continue
+ * 
+ *             proc_choice = processor(choice)             # <<<<<<<<<<<<<<
+ *             if proc_choice is None:
+ *                 i += 1
+ */
+      __Pyx_INCREF(__pyx_v_processor);
+      __pyx_t_7 = __pyx_v_processor; __pyx_t_8 = NULL;
+      __pyx_t_9 = 0;
+      if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_7))) {
+        __pyx_t_8 = PyMethod_GET_SELF(__pyx_t_7);
+        if (likely(__pyx_t_8)) {
+          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_7);
+          __Pyx_INCREF(__pyx_t_8);
+          __Pyx_INCREF(function);
+          __Pyx_DECREF_SET(__pyx_t_7, function);
+          __pyx_t_9 = 1;
+        }
+      }
+      {
+        PyObject *__pyx_callargs[2] = {__pyx_t_8, __pyx_v_choice};
+        __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
+        __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+        if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 869, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_6);
+        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+      }
+      __Pyx_XDECREF_SET(__pyx_v_proc_choice, __pyx_t_6);
+      __pyx_t_6 = 0;
+
+      /* "cpp_process.pyx":870
+ * 
+ *             proc_choice = processor(choice)
+ *             if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                 i += 1
+ *                 continue
+ */
+      __pyx_t_2 = (__pyx_v_proc_choice == Py_None);
+      __pyx_t_3 = (__pyx_t_2 != 0);
+      if (__pyx_t_3) {
+
+        /* "cpp_process.pyx":871
+ *             proc_choice = processor(choice)
+ *             if proc_choice is None:
+ *                 i += 1             # <<<<<<<<<<<<<<
+ *                 continue
+ * 
+ */
+        __pyx_v_i = (__pyx_v_i + 1);
+
+        /* "cpp_process.pyx":872
+ *             if proc_choice is None:
+ *                 i += 1
+ *                 continue             # <<<<<<<<<<<<<<
+ * 
+ *             validate_string(proc_choice, "choice must be a String or None")
+ */
+        goto __pyx_L4_continue;
+
+        /* "cpp_process.pyx":870
+ * 
+ *             proc_choice = processor(choice)
+ *             if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                 i += 1
+ *                 continue
+ */
+      }
+
+      /* "cpp_process.pyx":874
+ *                 continue
+ * 
+ *             validate_string(proc_choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ * 
+ *             distance = context.scorer(context.context, processor(choice), max_)
+ */
+      try {
+        validate_string(__pyx_v_proc_choice, ((char const *)"choice must be a String or None"));
+      } catch(...) {
+        __Pyx_CppExn2PyErr();
+        __PYX_ERR(0, 874, __pyx_L1_error)
+      }
+
+      /* "cpp_process.pyx":876
+ *             validate_string(proc_choice, "choice must be a String or None")
  * 
  *             distance = context.scorer(context.context, processor(choice), max_)             # <<<<<<<<<<<<<<
  * 
@@ -10552,7 +11168,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
         PyObject *__pyx_callargs[2] = {__pyx_t_8, __pyx_v_choice};
         __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-        if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 812, __pyx_L1_error)
+        if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 876, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       }
@@ -10560,22 +11176,22 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
         __pyx_t_10 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_t_6, __pyx_v_max_);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 812, __pyx_L1_error)
+        __PYX_ERR(0, 876, __pyx_L1_error)
       }
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       __pyx_v_distance = __pyx_t_10;
 
-      /* "cpp_process.pyx":814
+      /* "cpp_process.pyx":878
  *             distance = context.scorer(context.context, processor(choice), max_)
  * 
  *             if distance <= max_:             # <<<<<<<<<<<<<<
  *                 results.push_back(ListMatchDistanceElem(distance, i))
  *             i += 1
  */
-      __pyx_t_2 = ((__pyx_v_distance <= __pyx_v_max_) != 0);
-      if (__pyx_t_2) {
+      __pyx_t_3 = ((__pyx_v_distance <= __pyx_v_max_) != 0);
+      if (__pyx_t_3) {
 
-        /* "cpp_process.pyx":815
+        /* "cpp_process.pyx":879
  * 
  *             if distance <= max_:
  *                 results.push_back(ListMatchDistanceElem(distance, i))             # <<<<<<<<<<<<<<
@@ -10588,10 +11204,10 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
           __pyx_v_results.push_back(__pyx_t_11);
         } catch(...) {
           __Pyx_CppExn2PyErr();
-          __PYX_ERR(0, 815, __pyx_L1_error)
+          __PYX_ERR(0, 879, __pyx_L1_error)
         }
 
-        /* "cpp_process.pyx":814
+        /* "cpp_process.pyx":878
  *             distance = context.scorer(context.context, processor(choice), max_)
  * 
  *             if distance <= max_:             # <<<<<<<<<<<<<<
@@ -10600,7 +11216,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
  */
       }
 
-      /* "cpp_process.pyx":816
+      /* "cpp_process.pyx":880
  *             if distance <= max_:
  *                 results.push_back(ListMatchDistanceElem(distance, i))
  *             i += 1             # <<<<<<<<<<<<<<
@@ -10609,7 +11225,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
  */
       __pyx_v_i = (__pyx_v_i + 1);
 
-      /* "cpp_process.pyx":807
+      /* "cpp_process.pyx":864
  * 
  *     if processor is not None:
  *         for choice in choices:             # <<<<<<<<<<<<<<
@@ -10620,7 +11236,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
     }
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-    /* "cpp_process.pyx":806
+    /* "cpp_process.pyx":863
  *     cdef list result_list
  * 
  *     if processor is not None:             # <<<<<<<<<<<<<<
@@ -10630,7 +11246,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
     goto __pyx_L3;
   }
 
-  /* "cpp_process.pyx":818
+  /* "cpp_process.pyx":882
  *             i += 1
  *     else:
  *         for choice in choices:             # <<<<<<<<<<<<<<
@@ -10642,26 +11258,26 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
       __pyx_t_4 = __pyx_v_choices; __Pyx_INCREF(__pyx_t_4); __pyx_t_1 = 0;
       __pyx_t_5 = NULL;
     } else {
-      __pyx_t_1 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 818, __pyx_L1_error)
+      __pyx_t_1 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 882, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 818, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 882, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_5)) {
         if (likely(PyList_CheckExact(__pyx_t_4))) {
           if (__pyx_t_1 >= PyList_GET_SIZE(__pyx_t_4)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_1); __Pyx_INCREF(__pyx_t_6); __pyx_t_1++; if (unlikely((0 < 0))) __PYX_ERR(0, 818, __pyx_L1_error)
+          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_1); __Pyx_INCREF(__pyx_t_6); __pyx_t_1++; if (unlikely((0 < 0))) __PYX_ERR(0, 882, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_4, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 818, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_4, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 882, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         } else {
           if (__pyx_t_1 >= PyTuple_GET_SIZE(__pyx_t_4)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_1); __Pyx_INCREF(__pyx_t_6); __pyx_t_1++; if (unlikely((0 < 0))) __PYX_ERR(0, 818, __pyx_L1_error)
+          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_1); __Pyx_INCREF(__pyx_t_6); __pyx_t_1++; if (unlikely((0 < 0))) __PYX_ERR(0, 882, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_4, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 818, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_4, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 882, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         }
@@ -10671,7 +11287,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 818, __pyx_L1_error)
+            else __PYX_ERR(0, 882, __pyx_L1_error)
           }
           break;
         }
@@ -10680,18 +11296,18 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
       __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "cpp_process.pyx":819
+      /* "cpp_process.pyx":883
  *     else:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
  *                 i += 1
  *                 continue
  */
-      __pyx_t_2 = (__pyx_v_choice == Py_None);
-      __pyx_t_3 = (__pyx_t_2 != 0);
-      if (__pyx_t_3) {
+      __pyx_t_3 = (__pyx_v_choice == Py_None);
+      __pyx_t_2 = (__pyx_t_3 != 0);
+      if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":820
+        /* "cpp_process.pyx":884
  *         for choice in choices:
  *             if choice is None:
  *                 i += 1             # <<<<<<<<<<<<<<
@@ -10700,16 +11316,16 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
  */
         __pyx_v_i = (__pyx_v_i + 1);
 
-        /* "cpp_process.pyx":821
+        /* "cpp_process.pyx":885
  *             if choice is None:
  *                 i += 1
  *                 continue             # <<<<<<<<<<<<<<
  * 
- *             distance = context.scorer(context.context, choice, max_)
+ *             validate_string(choice, "choice must be a String or None")
  */
-        goto __pyx_L8_continue;
+        goto __pyx_L9_continue;
 
-        /* "cpp_process.pyx":819
+        /* "cpp_process.pyx":883
  *     else:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -10718,9 +11334,23 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
  */
       }
 
-      /* "cpp_process.pyx":823
+      /* "cpp_process.pyx":887
  *                 continue
  * 
+ *             validate_string(choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ *             distance = context.scorer(context.context, choice, max_)
+ * 
+ */
+      try {
+        validate_string(__pyx_v_choice, ((char const *)"choice must be a String or None"));
+      } catch(...) {
+        __Pyx_CppExn2PyErr();
+        __PYX_ERR(0, 887, __pyx_L1_error)
+      }
+
+      /* "cpp_process.pyx":888
+ * 
+ *             validate_string(choice, "choice must be a String or None")
  *             distance = context.scorer(context.context, choice, max_)             # <<<<<<<<<<<<<<
  * 
  *             if distance <= max_:
@@ -10729,21 +11359,21 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
         __pyx_t_10 = __pyx_v_context.scorer(__pyx_v_context.context, __pyx_v_choice, __pyx_v_max_);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 823, __pyx_L1_error)
+        __PYX_ERR(0, 888, __pyx_L1_error)
       }
       __pyx_v_distance = __pyx_t_10;
 
-      /* "cpp_process.pyx":825
+      /* "cpp_process.pyx":890
  *             distance = context.scorer(context.context, choice, max_)
  * 
  *             if distance <= max_:             # <<<<<<<<<<<<<<
  *                 results.push_back(ListMatchDistanceElem(distance, i))
  *             i += 1
  */
-      __pyx_t_3 = ((__pyx_v_distance <= __pyx_v_max_) != 0);
-      if (__pyx_t_3) {
+      __pyx_t_2 = ((__pyx_v_distance <= __pyx_v_max_) != 0);
+      if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":826
+        /* "cpp_process.pyx":891
  * 
  *             if distance <= max_:
  *                 results.push_back(ListMatchDistanceElem(distance, i))             # <<<<<<<<<<<<<<
@@ -10756,10 +11386,10 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
           __pyx_v_results.push_back(__pyx_t_11);
         } catch(...) {
           __Pyx_CppExn2PyErr();
-          __PYX_ERR(0, 826, __pyx_L1_error)
+          __PYX_ERR(0, 891, __pyx_L1_error)
         }
 
-        /* "cpp_process.pyx":825
+        /* "cpp_process.pyx":890
  *             distance = context.scorer(context.context, choice, max_)
  * 
  *             if distance <= max_:             # <<<<<<<<<<<<<<
@@ -10768,7 +11398,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
  */
       }
 
-      /* "cpp_process.pyx":827
+      /* "cpp_process.pyx":892
  *             if distance <= max_:
  *                 results.push_back(ListMatchDistanceElem(distance, i))
  *             i += 1             # <<<<<<<<<<<<<<
@@ -10777,30 +11407,30 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
  */
       __pyx_v_i = (__pyx_v_i + 1);
 
-      /* "cpp_process.pyx":818
+      /* "cpp_process.pyx":882
  *             i += 1
  *     else:
  *         for choice in choices:             # <<<<<<<<<<<<<<
  *             if choice is None:
  *                 i += 1
  */
-      __pyx_L8_continue:;
+      __pyx_L9_continue:;
     }
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
   __pyx_L3:;
 
-  /* "cpp_process.pyx":830
+  /* "cpp_process.pyx":895
  * 
  *     # due to max_ not always completely filled
  *     if limit > results.size():             # <<<<<<<<<<<<<<
  *         limit = results.size()
  * 
  */
-  __pyx_t_3 = ((__pyx_v_limit > __pyx_v_results.size()) != 0);
-  if (__pyx_t_3) {
+  __pyx_t_2 = ((__pyx_v_limit > __pyx_v_results.size()) != 0);
+  if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":831
+    /* "cpp_process.pyx":896
  *     # due to max_ not always completely filled
  *     if limit > results.size():
  *         limit = results.size()             # <<<<<<<<<<<<<<
@@ -10809,7 +11439,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
  */
     __pyx_v_limit = __pyx_v_results.size();
 
-    /* "cpp_process.pyx":830
+    /* "cpp_process.pyx":895
  * 
  *     # due to max_ not always completely filled
  *     if limit > results.size():             # <<<<<<<<<<<<<<
@@ -10818,17 +11448,17 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
  */
   }
 
-  /* "cpp_process.pyx":833
+  /* "cpp_process.pyx":898
  *         limit = results.size()
  * 
  *     if limit >= results.size():             # <<<<<<<<<<<<<<
  *         algorithm.sort(results.begin(), results.end(), ExtractDistanceComp())
  *     else:
  */
-  __pyx_t_3 = ((__pyx_v_limit >= __pyx_v_results.size()) != 0);
-  if (__pyx_t_3) {
+  __pyx_t_2 = ((__pyx_v_limit >= __pyx_v_results.size()) != 0);
+  if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":834
+    /* "cpp_process.pyx":899
  * 
  *     if limit >= results.size():
  *         algorithm.sort(results.begin(), results.end(), ExtractDistanceComp())             # <<<<<<<<<<<<<<
@@ -10839,20 +11469,20 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
       std::sort<std::vector<ListMatchDistanceElem> ::iterator,ExtractDistanceComp>(__pyx_v_results.begin(), __pyx_v_results.end(), __pyx_t_12);
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 834, __pyx_L1_error)
+      __PYX_ERR(0, 899, __pyx_L1_error)
     }
 
-    /* "cpp_process.pyx":833
+    /* "cpp_process.pyx":898
  *         limit = results.size()
  * 
  *     if limit >= results.size():             # <<<<<<<<<<<<<<
  *         algorithm.sort(results.begin(), results.end(), ExtractDistanceComp())
  *     else:
  */
-    goto __pyx_L13;
+    goto __pyx_L14;
   }
 
-  /* "cpp_process.pyx":836
+  /* "cpp_process.pyx":901
  *         algorithm.sort(results.begin(), results.end(), ExtractDistanceComp())
  *     else:
  *         algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractDistanceComp())             # <<<<<<<<<<<<<<
@@ -10864,24 +11494,24 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
       std::partial_sort<std::vector<ListMatchDistanceElem> ::iterator,ExtractDistanceComp>(__pyx_v_results.begin(), (__pyx_v_results.begin() + ((ptrdiff_t)__pyx_v_limit)), __pyx_v_results.end(), __pyx_t_12);
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 836, __pyx_L1_error)
+      __PYX_ERR(0, 901, __pyx_L1_error)
     }
   }
-  __pyx_L13:;
+  __pyx_L14:;
 
-  /* "cpp_process.pyx":839
+  /* "cpp_process.pyx":904
  * 
  *     # copy elements into Python List
  *     result_list = PyList_New(<Py_ssize_t>limit)             # <<<<<<<<<<<<<<
  *     for i in range(limit):
  *         result_item = (choices[results[i].index], results[i].distance, results[i].index)
  */
-  __pyx_t_4 = PyList_New(((Py_ssize_t)__pyx_v_limit)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 839, __pyx_L1_error)
+  __pyx_t_4 = PyList_New(((Py_ssize_t)__pyx_v_limit)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 904, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_v_result_list = ((PyObject*)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "cpp_process.pyx":840
+  /* "cpp_process.pyx":905
  *     # copy elements into Python List
  *     result_list = PyList_New(<Py_ssize_t>limit)
  *     for i in range(limit):             # <<<<<<<<<<<<<<
@@ -10893,7 +11523,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
   for (__pyx_t_14 = 0; __pyx_t_14 < __pyx_t_13; __pyx_t_14+=1) {
     __pyx_v_i = __pyx_t_14;
 
-    /* "cpp_process.pyx":841
+    /* "cpp_process.pyx":906
  *     result_list = PyList_New(<Py_ssize_t>limit)
  *     for i in range(limit):
  *         result_item = (choices[results[i].index], results[i].distance, results[i].index)             # <<<<<<<<<<<<<<
@@ -10901,13 +11531,13 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
  *         PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
  */
     __pyx_t_15 = (__pyx_v_results[__pyx_v_i]).index;
-    __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_choices, __pyx_t_15, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 841, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_choices, __pyx_t_15, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 906, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_6 = __Pyx_PyInt_FromSize_t((__pyx_v_results[__pyx_v_i]).distance); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 841, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyInt_FromSize_t((__pyx_v_results[__pyx_v_i]).distance); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 906, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __Pyx_PyInt_FromSize_t((__pyx_v_results[__pyx_v_i]).index); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 841, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyInt_FromSize_t((__pyx_v_results[__pyx_v_i]).index); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 906, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 841, __pyx_L1_error)
+    __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 906, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_GIVEREF(__pyx_t_4);
     PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_4);
@@ -10921,7 +11551,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
     __Pyx_XDECREF_SET(__pyx_v_result_item, ((PyObject*)__pyx_t_8));
     __pyx_t_8 = 0;
 
-    /* "cpp_process.pyx":842
+    /* "cpp_process.pyx":907
  *     for i in range(limit):
  *         result_item = (choices[results[i].index], results[i].distance, results[i].index)
  *         Py_INCREF(result_item)             # <<<<<<<<<<<<<<
@@ -10930,7 +11560,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
  */
     Py_INCREF(__pyx_v_result_item);
 
-    /* "cpp_process.pyx":843
+    /* "cpp_process.pyx":908
  *         result_item = (choices[results[i].index], results[i].distance, results[i].index)
  *         Py_INCREF(result_item)
  *         PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)             # <<<<<<<<<<<<<<
@@ -10940,7 +11570,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
     PyList_SET_ITEM(__pyx_v_result_list, ((Py_ssize_t)__pyx_v_i), __pyx_v_result_item);
   }
 
-  /* "cpp_process.pyx":845
+  /* "cpp_process.pyx":910
  *         PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
  * 
  *     return result_list             # <<<<<<<<<<<<<<
@@ -10952,7 +11582,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
   __pyx_r = __pyx_v_result_list;
   goto __pyx_L0;
 
-  /* "cpp_process.pyx":798
+  /* "cpp_process.pyx":855
  * 
  * 
  * cdef inline extract_distance_list(distance_context context, choices, processor, size_t limit, size_t max_):             # <<<<<<<<<<<<<<
@@ -10971,13 +11601,14 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_extract_distance_list(dista
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_result_list);
   __Pyx_XDECREF(__pyx_v_choice);
+  __Pyx_XDECREF(__pyx_v_proc_choice);
   __Pyx_XDECREF(__pyx_v_result_item);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "cpp_process.pyx":873
+/* "cpp_process.pyx":938
  *                 result_list.append((choice, score, choice_key))
  * 
  *     return heapq.nlargest(limit, result_list, key=lambda i: i[1])             # <<<<<<<<<<<<<<
@@ -11031,12 +11662,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       switch (__pyx_nargs) {
         case  0:
         if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_i)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 873, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 938, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "lambda") < 0)) __PYX_ERR(0, 873, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "lambda") < 0)) __PYX_ERR(0, 938, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 1)) {
       goto __pyx_L5_argtuple_error;
@@ -11047,7 +11678,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("lambda", 1, 1, 1, __pyx_nargs); __PYX_ERR(0, 873, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("lambda", 1, 1, 1, __pyx_nargs); __PYX_ERR(0, 938, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("cpp_process.py_extract_dict.lambda", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -11069,7 +11700,7 @@ static PyObject *__pyx_lambda_funcdef_lambda(CYTHON_UNUSED PyObject *__pyx_self,
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("lambda", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_i, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 873, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_i, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 938, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -11086,7 +11717,7 @@ static PyObject *__pyx_lambda_funcdef_lambda(CYTHON_UNUSED PyObject *__pyx_self,
   return __pyx_r;
 }
 
-/* "cpp_process.pyx":847
+/* "cpp_process.pyx":912
  *     return result_list
  * 
  * cdef inline py_extract_dict(query, choices, scorer, processor, size_t limit, double score_cutoff, kwargs):             # <<<<<<<<<<<<<<
@@ -11117,7 +11748,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("py_extract_dict", 0);
 
-  /* "cpp_process.pyx":848
+  /* "cpp_process.pyx":913
  * 
  * cdef inline py_extract_dict(query, choices, scorer, processor, size_t limit, double score_cutoff, kwargs):
  *     cdef object score = None             # <<<<<<<<<<<<<<
@@ -11127,19 +11758,19 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
   __Pyx_INCREF(Py_None);
   __pyx_v_score = Py_None;
 
-  /* "cpp_process.pyx":852
+  /* "cpp_process.pyx":917
  *     # also it is not very memory efficient to allocate space for all elements even when only
  *     # a part is used. This should be optimised in the future
  *     cdef list result_list = []             # <<<<<<<<<<<<<<
  * 
  *     if processor is not None:
  */
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 852, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 917, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_result_list = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "cpp_process.pyx":854
+  /* "cpp_process.pyx":919
  *     cdef list result_list = []
  * 
  *     if processor is not None:             # <<<<<<<<<<<<<<
@@ -11150,7 +11781,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
   __pyx_t_3 = (__pyx_t_2 != 0);
   if (__pyx_t_3) {
 
-    /* "cpp_process.pyx":855
+    /* "cpp_process.pyx":920
  * 
  *     if processor is not None:
  *         for choice_key, choice in choices.items():             # <<<<<<<<<<<<<<
@@ -11160,9 +11791,9 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
     __pyx_t_4 = 0;
     if (unlikely(__pyx_v_choices == Py_None)) {
       PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "items");
-      __PYX_ERR(0, 855, __pyx_L1_error)
+      __PYX_ERR(0, 920, __pyx_L1_error)
     }
-    __pyx_t_7 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_5), (&__pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 855, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_5), (&__pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 920, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_XDECREF(__pyx_t_1);
     __pyx_t_1 = __pyx_t_7;
@@ -11170,7 +11801,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
     while (1) {
       __pyx_t_9 = __Pyx_dict_iter_next(__pyx_t_1, __pyx_t_5, &__pyx_t_4, &__pyx_t_7, &__pyx_t_8, NULL, __pyx_t_6);
       if (unlikely(__pyx_t_9 == 0)) break;
-      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 855, __pyx_L1_error)
+      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 920, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_XDECREF_SET(__pyx_v_choice_key, __pyx_t_7);
@@ -11178,7 +11809,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
       __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_8);
       __pyx_t_8 = 0;
 
-      /* "cpp_process.pyx":856
+      /* "cpp_process.pyx":921
  *     if processor is not None:
  *         for choice_key, choice in choices.items():
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -11189,7 +11820,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
       __pyx_t_2 = (__pyx_t_3 != 0);
       if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":857
+        /* "cpp_process.pyx":922
  *         for choice_key, choice in choices.items():
  *             if choice is None:
  *                 continue             # <<<<<<<<<<<<<<
@@ -11198,7 +11829,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
  */
         goto __pyx_L4_continue;
 
-        /* "cpp_process.pyx":856
+        /* "cpp_process.pyx":921
  *     if processor is not None:
  *         for choice_key, choice in choices.items():
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -11207,7 +11838,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
  */
       }
 
-      /* "cpp_process.pyx":859
+      /* "cpp_process.pyx":924
  *                 continue
  * 
  *             score = scorer(query, processor(choice), score_cutoff, **kwargs)             # <<<<<<<<<<<<<<
@@ -11231,13 +11862,13 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
         PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_choice};
         __pyx_t_8 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
         __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-        if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 859, __pyx_L1_error)
+        if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 924, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       }
-      __pyx_t_7 = PyFloat_FromDouble(__pyx_v_score_cutoff); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 859, __pyx_L1_error)
+      __pyx_t_7 = PyFloat_FromDouble(__pyx_v_score_cutoff); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 924, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
-      __pyx_t_10 = PyTuple_New(3); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 859, __pyx_L1_error)
+      __pyx_t_10 = PyTuple_New(3); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 924, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
       __Pyx_INCREF(__pyx_v_query);
       __Pyx_GIVEREF(__pyx_v_query);
@@ -11250,45 +11881,45 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
       __pyx_t_7 = 0;
       if (unlikely(__pyx_v_kwargs == Py_None)) {
         PyErr_SetString(PyExc_TypeError, "argument after ** must be a mapping, not NoneType");
-        __PYX_ERR(0, 859, __pyx_L1_error)
+        __PYX_ERR(0, 924, __pyx_L1_error)
       }
       if (likely(PyDict_CheckExact(__pyx_v_kwargs))) {
-        __pyx_t_7 = PyDict_Copy(__pyx_v_kwargs); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 859, __pyx_L1_error)
+        __pyx_t_7 = PyDict_Copy(__pyx_v_kwargs); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 924, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
       } else {
-        __pyx_t_7 = __Pyx_PyObject_CallOneArg((PyObject*)&PyDict_Type, __pyx_v_kwargs); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 859, __pyx_L1_error)
+        __pyx_t_7 = __Pyx_PyObject_CallOneArg((PyObject*)&PyDict_Type, __pyx_v_kwargs); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 924, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
       }
-      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_v_scorer, __pyx_t_10, __pyx_t_7); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 859, __pyx_L1_error)
+      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_v_scorer, __pyx_t_10, __pyx_t_7); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 924, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_DECREF_SET(__pyx_v_score, __pyx_t_8);
       __pyx_t_8 = 0;
 
-      /* "cpp_process.pyx":861
+      /* "cpp_process.pyx":926
  *             score = scorer(query, processor(choice), score_cutoff, **kwargs)
  * 
  *             if score >= score_cutoff:             # <<<<<<<<<<<<<<
  *                 result_list.append((choice, score, choice_key))
  *     else:
  */
-      __pyx_t_8 = PyFloat_FromDouble(__pyx_v_score_cutoff); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 861, __pyx_L1_error)
+      __pyx_t_8 = PyFloat_FromDouble(__pyx_v_score_cutoff); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 926, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
-      __pyx_t_7 = PyObject_RichCompare(__pyx_v_score, __pyx_t_8, Py_GE); __Pyx_XGOTREF(__pyx_t_7); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 861, __pyx_L1_error)
+      __pyx_t_7 = PyObject_RichCompare(__pyx_v_score, __pyx_t_8, Py_GE); __Pyx_XGOTREF(__pyx_t_7); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 926, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 861, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 926, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":862
+        /* "cpp_process.pyx":927
  * 
  *             if score >= score_cutoff:
  *                 result_list.append((choice, score, choice_key))             # <<<<<<<<<<<<<<
  *     else:
  *         for choice_key, choice in choices.items():
  */
-        __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 862, __pyx_L1_error)
+        __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 927, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
         __Pyx_INCREF(__pyx_v_choice);
         __Pyx_GIVEREF(__pyx_v_choice);
@@ -11299,10 +11930,10 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
         __Pyx_INCREF(__pyx_v_choice_key);
         __Pyx_GIVEREF(__pyx_v_choice_key);
         PyTuple_SET_ITEM(__pyx_t_7, 2, __pyx_v_choice_key);
-        __pyx_t_11 = __Pyx_PyList_Append(__pyx_v_result_list, __pyx_t_7); if (unlikely(__pyx_t_11 == ((int)-1))) __PYX_ERR(0, 862, __pyx_L1_error)
+        __pyx_t_11 = __Pyx_PyList_Append(__pyx_v_result_list, __pyx_t_7); if (unlikely(__pyx_t_11 == ((int)-1))) __PYX_ERR(0, 927, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-        /* "cpp_process.pyx":861
+        /* "cpp_process.pyx":926
  *             score = scorer(query, processor(choice), score_cutoff, **kwargs)
  * 
  *             if score >= score_cutoff:             # <<<<<<<<<<<<<<
@@ -11314,7 +11945,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
     }
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "cpp_process.pyx":854
+    /* "cpp_process.pyx":919
  *     cdef list result_list = []
  * 
  *     if processor is not None:             # <<<<<<<<<<<<<<
@@ -11324,7 +11955,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
     goto __pyx_L3;
   }
 
-  /* "cpp_process.pyx":864
+  /* "cpp_process.pyx":929
  *                 result_list.append((choice, score, choice_key))
  *     else:
  *         for choice_key, choice in choices.items():             # <<<<<<<<<<<<<<
@@ -11335,9 +11966,9 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
     __pyx_t_5 = 0;
     if (unlikely(__pyx_v_choices == Py_None)) {
       PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "items");
-      __PYX_ERR(0, 864, __pyx_L1_error)
+      __PYX_ERR(0, 929, __pyx_L1_error)
     }
-    __pyx_t_7 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_4), (&__pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 864, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_dict_iterator(__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_4), (&__pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 929, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_XDECREF(__pyx_t_1);
     __pyx_t_1 = __pyx_t_7;
@@ -11345,7 +11976,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
     while (1) {
       __pyx_t_9 = __Pyx_dict_iter_next(__pyx_t_1, __pyx_t_4, &__pyx_t_5, &__pyx_t_7, &__pyx_t_8, NULL, __pyx_t_6);
       if (unlikely(__pyx_t_9 == 0)) break;
-      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 864, __pyx_L1_error)
+      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 929, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_XDECREF_SET(__pyx_v_choice_key, __pyx_t_7);
@@ -11353,7 +11984,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
       __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_8);
       __pyx_t_8 = 0;
 
-      /* "cpp_process.pyx":865
+      /* "cpp_process.pyx":930
  *     else:
  *         for choice_key, choice in choices.items():
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -11364,7 +11995,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
       __pyx_t_3 = (__pyx_t_2 != 0);
       if (__pyx_t_3) {
 
-        /* "cpp_process.pyx":866
+        /* "cpp_process.pyx":931
  *         for choice_key, choice in choices.items():
  *             if choice is None:
  *                 continue             # <<<<<<<<<<<<<<
@@ -11373,7 +12004,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
  */
         goto __pyx_L8_continue;
 
-        /* "cpp_process.pyx":865
+        /* "cpp_process.pyx":930
  *     else:
  *         for choice_key, choice in choices.items():
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -11382,16 +12013,16 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
  */
       }
 
-      /* "cpp_process.pyx":868
+      /* "cpp_process.pyx":933
  *                 continue
  * 
  *             score = scorer(query, choice, score_cutoff, **kwargs)             # <<<<<<<<<<<<<<
  * 
  *             if score >= score_cutoff:
  */
-      __pyx_t_8 = PyFloat_FromDouble(__pyx_v_score_cutoff); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 868, __pyx_L1_error)
+      __pyx_t_8 = PyFloat_FromDouble(__pyx_v_score_cutoff); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 933, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
-      __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 868, __pyx_L1_error)
+      __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 933, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_INCREF(__pyx_v_query);
       __Pyx_GIVEREF(__pyx_v_query);
@@ -11404,45 +12035,45 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
       __pyx_t_8 = 0;
       if (unlikely(__pyx_v_kwargs == Py_None)) {
         PyErr_SetString(PyExc_TypeError, "argument after ** must be a mapping, not NoneType");
-        __PYX_ERR(0, 868, __pyx_L1_error)
+        __PYX_ERR(0, 933, __pyx_L1_error)
       }
       if (likely(PyDict_CheckExact(__pyx_v_kwargs))) {
-        __pyx_t_8 = PyDict_Copy(__pyx_v_kwargs); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 868, __pyx_L1_error)
+        __pyx_t_8 = PyDict_Copy(__pyx_v_kwargs); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 933, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
       } else {
-        __pyx_t_8 = __Pyx_PyObject_CallOneArg((PyObject*)&PyDict_Type, __pyx_v_kwargs); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 868, __pyx_L1_error)
+        __pyx_t_8 = __Pyx_PyObject_CallOneArg((PyObject*)&PyDict_Type, __pyx_v_kwargs); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 933, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
       }
-      __pyx_t_10 = __Pyx_PyObject_Call(__pyx_v_scorer, __pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 868, __pyx_L1_error)
+      __pyx_t_10 = __Pyx_PyObject_Call(__pyx_v_scorer, __pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 933, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __Pyx_DECREF_SET(__pyx_v_score, __pyx_t_10);
       __pyx_t_10 = 0;
 
-      /* "cpp_process.pyx":870
+      /* "cpp_process.pyx":935
  *             score = scorer(query, choice, score_cutoff, **kwargs)
  * 
  *             if score >= score_cutoff:             # <<<<<<<<<<<<<<
  *                 result_list.append((choice, score, choice_key))
  * 
  */
-      __pyx_t_10 = PyFloat_FromDouble(__pyx_v_score_cutoff); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 870, __pyx_L1_error)
+      __pyx_t_10 = PyFloat_FromDouble(__pyx_v_score_cutoff); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 935, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
-      __pyx_t_8 = PyObject_RichCompare(__pyx_v_score, __pyx_t_10, Py_GE); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 870, __pyx_L1_error)
+      __pyx_t_8 = PyObject_RichCompare(__pyx_v_score, __pyx_t_10, Py_GE); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 935, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-      __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_3 < 0))) __PYX_ERR(0, 870, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_3 < 0))) __PYX_ERR(0, 935, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       if (__pyx_t_3) {
 
-        /* "cpp_process.pyx":871
+        /* "cpp_process.pyx":936
  * 
  *             if score >= score_cutoff:
  *                 result_list.append((choice, score, choice_key))             # <<<<<<<<<<<<<<
  * 
  *     return heapq.nlargest(limit, result_list, key=lambda i: i[1])
  */
-        __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 871, __pyx_L1_error)
+        __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 936, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_INCREF(__pyx_v_choice);
         __Pyx_GIVEREF(__pyx_v_choice);
@@ -11453,10 +12084,10 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
         __Pyx_INCREF(__pyx_v_choice_key);
         __Pyx_GIVEREF(__pyx_v_choice_key);
         PyTuple_SET_ITEM(__pyx_t_8, 2, __pyx_v_choice_key);
-        __pyx_t_11 = __Pyx_PyList_Append(__pyx_v_result_list, __pyx_t_8); if (unlikely(__pyx_t_11 == ((int)-1))) __PYX_ERR(0, 871, __pyx_L1_error)
+        __pyx_t_11 = __Pyx_PyList_Append(__pyx_v_result_list, __pyx_t_8); if (unlikely(__pyx_t_11 == ((int)-1))) __PYX_ERR(0, 936, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
 
-        /* "cpp_process.pyx":870
+        /* "cpp_process.pyx":935
  *             score = scorer(query, choice, score_cutoff, **kwargs)
  * 
  *             if score >= score_cutoff:             # <<<<<<<<<<<<<<
@@ -11470,7 +12101,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
   }
   __pyx_L3:;
 
-  /* "cpp_process.pyx":873
+  /* "cpp_process.pyx":938
  *                 result_list.append((choice, score, choice_key))
  * 
  *     return heapq.nlargest(limit, result_list, key=lambda i: i[1])             # <<<<<<<<<<<<<<
@@ -11478,14 +12109,14 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_heapq); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 873, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_heapq); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 938, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_nlargest); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 873, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_nlargest); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 938, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_FromSize_t(__pyx_v_limit); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 873, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_FromSize_t(__pyx_v_limit); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 938, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_10 = PyTuple_New(2); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 873, __pyx_L1_error)
+  __pyx_t_10 = PyTuple_New(2); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 938, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_10);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_1);
@@ -11493,13 +12124,13 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
   __Pyx_GIVEREF(__pyx_v_result_list);
   PyTuple_SET_ITEM(__pyx_t_10, 1, __pyx_v_result_list);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 873, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 938, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_11cpp_process_15py_extract_dict_lambda, 0, __pyx_n_s_py_extract_dict_locals_lambda, NULL, __pyx_n_s_cpp_process, __pyx_d, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 873, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_11cpp_process_15py_extract_dict_lambda, 0, __pyx_n_s_py_extract_dict_locals_lambda, NULL, __pyx_n_s_cpp_process, __pyx_d, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 938, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_key, __pyx_t_7) < 0) __PYX_ERR(0, 873, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_key, __pyx_t_7) < 0) __PYX_ERR(0, 938, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_10, __pyx_t_1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 873, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_10, __pyx_t_1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 938, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
@@ -11508,7 +12139,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
   __pyx_t_7 = 0;
   goto __pyx_L0;
 
-  /* "cpp_process.pyx":847
+  /* "cpp_process.pyx":912
  *     return result_list
  * 
  * cdef inline py_extract_dict(query, choices, scorer, processor, size_t limit, double score_cutoff, kwargs):             # <<<<<<<<<<<<<<
@@ -11534,7 +12165,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_dict(PyObject *_
   return __pyx_r;
 }
 
-/* "cpp_process.pyx":907
+/* "cpp_process.pyx":972
  *             i += 1
  * 
  *     return heapq.nlargest(limit, result_list, key=lambda i: i[1])             # <<<<<<<<<<<<<<
@@ -11588,12 +12219,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       switch (__pyx_nargs) {
         case  0:
         if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_i)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 907, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 972, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "lambda1") < 0)) __PYX_ERR(0, 907, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "lambda1") < 0)) __PYX_ERR(0, 972, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 1)) {
       goto __pyx_L5_argtuple_error;
@@ -11604,7 +12235,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("lambda1", 1, 1, 1, __pyx_nargs); __PYX_ERR(0, 907, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("lambda1", 1, 1, 1, __pyx_nargs); __PYX_ERR(0, 972, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("cpp_process.py_extract_list.lambda1", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -11626,7 +12257,7 @@ static PyObject *__pyx_lambda_funcdef_lambda1(CYTHON_UNUSED PyObject *__pyx_self
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("lambda1", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_i, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 907, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_i, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 972, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -11643,7 +12274,7 @@ static PyObject *__pyx_lambda_funcdef_lambda1(CYTHON_UNUSED PyObject *__pyx_self
   return __pyx_r;
 }
 
-/* "cpp_process.pyx":876
+/* "cpp_process.pyx":941
  * 
  * 
  * cdef inline py_extract_list(query, choices, scorer, processor, size_t limit, double score_cutoff, kwargs):             # <<<<<<<<<<<<<<
@@ -11673,7 +12304,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("py_extract_list", 0);
 
-  /* "cpp_process.pyx":877
+  /* "cpp_process.pyx":942
  * 
  * cdef inline py_extract_list(query, choices, scorer, processor, size_t limit, double score_cutoff, kwargs):
  *     cdef object score = None             # <<<<<<<<<<<<<<
@@ -11683,19 +12314,19 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
   __Pyx_INCREF(Py_None);
   __pyx_v_score = Py_None;
 
-  /* "cpp_process.pyx":881
+  /* "cpp_process.pyx":946
  *     # also it is not very memory efficient to allocate space for all elements even when only
  *     # a part is used. This should be optimised in the future
  *     cdef list result_list = []             # <<<<<<<<<<<<<<
  *     cdef size_t i = 0
  * 
  */
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 881, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 946, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_result_list = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "cpp_process.pyx":882
+  /* "cpp_process.pyx":947
  *     # a part is used. This should be optimised in the future
  *     cdef list result_list = []
  *     cdef size_t i = 0             # <<<<<<<<<<<<<<
@@ -11704,7 +12335,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
  */
   __pyx_v_i = 0;
 
-  /* "cpp_process.pyx":884
+  /* "cpp_process.pyx":949
  *     cdef size_t i = 0
  * 
  *     if processor is not None:             # <<<<<<<<<<<<<<
@@ -11715,7 +12346,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
   __pyx_t_3 = (__pyx_t_2 != 0);
   if (__pyx_t_3) {
 
-    /* "cpp_process.pyx":885
+    /* "cpp_process.pyx":950
  * 
  *     if processor is not None:
  *         for choice in choices:             # <<<<<<<<<<<<<<
@@ -11726,26 +12357,26 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
       __pyx_t_1 = __pyx_v_choices; __Pyx_INCREF(__pyx_t_1); __pyx_t_4 = 0;
       __pyx_t_5 = NULL;
     } else {
-      __pyx_t_4 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 885, __pyx_L1_error)
+      __pyx_t_4 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 950, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 885, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 950, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_5)) {
         if (likely(PyList_CheckExact(__pyx_t_1))) {
           if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_1)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 885, __pyx_L1_error)
+          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 950, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 885, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 950, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         } else {
           if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 885, __pyx_L1_error)
+          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 950, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 885, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 950, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         }
@@ -11755,7 +12386,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 885, __pyx_L1_error)
+            else __PYX_ERR(0, 950, __pyx_L1_error)
           }
           break;
         }
@@ -11764,7 +12395,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
       __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "cpp_process.pyx":886
+      /* "cpp_process.pyx":951
  *     if processor is not None:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -11775,7 +12406,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
       __pyx_t_2 = (__pyx_t_3 != 0);
       if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":887
+        /* "cpp_process.pyx":952
  *         for choice in choices:
  *             if choice is None:
  *                 i += 1             # <<<<<<<<<<<<<<
@@ -11784,7 +12415,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
  */
         __pyx_v_i = (__pyx_v_i + 1);
 
-        /* "cpp_process.pyx":888
+        /* "cpp_process.pyx":953
  *             if choice is None:
  *                 i += 1
  *                 continue             # <<<<<<<<<<<<<<
@@ -11793,7 +12424,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
  */
         goto __pyx_L4_continue;
 
-        /* "cpp_process.pyx":886
+        /* "cpp_process.pyx":951
  *     if processor is not None:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -11802,7 +12433,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
  */
       }
 
-      /* "cpp_process.pyx":890
+      /* "cpp_process.pyx":955
  *                 continue
  * 
  *             score = scorer(query, processor(choice), score_cutoff, **kwargs)             # <<<<<<<<<<<<<<
@@ -11826,13 +12457,13 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
         PyObject *__pyx_callargs[2] = {__pyx_t_8, __pyx_v_choice};
         __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-        if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 890, __pyx_L1_error)
+        if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 955, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       }
-      __pyx_t_7 = PyFloat_FromDouble(__pyx_v_score_cutoff); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 890, __pyx_L1_error)
+      __pyx_t_7 = PyFloat_FromDouble(__pyx_v_score_cutoff); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 955, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
-      __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 890, __pyx_L1_error)
+      __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 955, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_INCREF(__pyx_v_query);
       __Pyx_GIVEREF(__pyx_v_query);
@@ -11845,47 +12476,47 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
       __pyx_t_7 = 0;
       if (unlikely(__pyx_v_kwargs == Py_None)) {
         PyErr_SetString(PyExc_TypeError, "argument after ** must be a mapping, not NoneType");
-        __PYX_ERR(0, 890, __pyx_L1_error)
+        __PYX_ERR(0, 955, __pyx_L1_error)
       }
       if (likely(PyDict_CheckExact(__pyx_v_kwargs))) {
-        __pyx_t_7 = PyDict_Copy(__pyx_v_kwargs); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 890, __pyx_L1_error)
+        __pyx_t_7 = PyDict_Copy(__pyx_v_kwargs); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 955, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
       } else {
-        __pyx_t_7 = __Pyx_PyObject_CallOneArg((PyObject*)&PyDict_Type, __pyx_v_kwargs); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 890, __pyx_L1_error)
+        __pyx_t_7 = __Pyx_PyObject_CallOneArg((PyObject*)&PyDict_Type, __pyx_v_kwargs); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 955, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
       }
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_v_scorer, __pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 890, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_v_scorer, __pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 955, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_DECREF_SET(__pyx_v_score, __pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "cpp_process.pyx":892
+      /* "cpp_process.pyx":957
  *             score = scorer(query, processor(choice), score_cutoff, **kwargs)
  * 
  *             if score >= score_cutoff:             # <<<<<<<<<<<<<<
  *                 result_list.append((choice, score, i))
  *             i += 1
  */
-      __pyx_t_6 = PyFloat_FromDouble(__pyx_v_score_cutoff); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 892, __pyx_L1_error)
+      __pyx_t_6 = PyFloat_FromDouble(__pyx_v_score_cutoff); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 957, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
-      __pyx_t_7 = PyObject_RichCompare(__pyx_v_score, __pyx_t_6, Py_GE); __Pyx_XGOTREF(__pyx_t_7); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 892, __pyx_L1_error)
+      __pyx_t_7 = PyObject_RichCompare(__pyx_v_score, __pyx_t_6, Py_GE); __Pyx_XGOTREF(__pyx_t_7); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 957, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-      __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 892, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 957, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":893
+        /* "cpp_process.pyx":958
  * 
  *             if score >= score_cutoff:
  *                 result_list.append((choice, score, i))             # <<<<<<<<<<<<<<
  *             i += 1
  *     else:
  */
-        __pyx_t_7 = __Pyx_PyInt_FromSize_t(__pyx_v_i); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 893, __pyx_L1_error)
+        __pyx_t_7 = __Pyx_PyInt_FromSize_t(__pyx_v_i); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 958, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
-        __pyx_t_6 = PyTuple_New(3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 893, __pyx_L1_error)
+        __pyx_t_6 = PyTuple_New(3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 958, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_INCREF(__pyx_v_choice);
         __Pyx_GIVEREF(__pyx_v_choice);
@@ -11896,10 +12527,10 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
         __Pyx_GIVEREF(__pyx_t_7);
         PyTuple_SET_ITEM(__pyx_t_6, 2, __pyx_t_7);
         __pyx_t_7 = 0;
-        __pyx_t_10 = __Pyx_PyList_Append(__pyx_v_result_list, __pyx_t_6); if (unlikely(__pyx_t_10 == ((int)-1))) __PYX_ERR(0, 893, __pyx_L1_error)
+        __pyx_t_10 = __Pyx_PyList_Append(__pyx_v_result_list, __pyx_t_6); if (unlikely(__pyx_t_10 == ((int)-1))) __PYX_ERR(0, 958, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-        /* "cpp_process.pyx":892
+        /* "cpp_process.pyx":957
  *             score = scorer(query, processor(choice), score_cutoff, **kwargs)
  * 
  *             if score >= score_cutoff:             # <<<<<<<<<<<<<<
@@ -11908,7 +12539,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
  */
       }
 
-      /* "cpp_process.pyx":894
+      /* "cpp_process.pyx":959
  *             if score >= score_cutoff:
  *                 result_list.append((choice, score, i))
  *             i += 1             # <<<<<<<<<<<<<<
@@ -11917,7 +12548,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
  */
       __pyx_v_i = (__pyx_v_i + 1);
 
-      /* "cpp_process.pyx":885
+      /* "cpp_process.pyx":950
  * 
  *     if processor is not None:
  *         for choice in choices:             # <<<<<<<<<<<<<<
@@ -11928,7 +12559,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
     }
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "cpp_process.pyx":884
+    /* "cpp_process.pyx":949
  *     cdef size_t i = 0
  * 
  *     if processor is not None:             # <<<<<<<<<<<<<<
@@ -11938,7 +12569,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
     goto __pyx_L3;
   }
 
-  /* "cpp_process.pyx":896
+  /* "cpp_process.pyx":961
  *             i += 1
  *     else:
  *         for choice in choices:             # <<<<<<<<<<<<<<
@@ -11950,26 +12581,26 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
       __pyx_t_1 = __pyx_v_choices; __Pyx_INCREF(__pyx_t_1); __pyx_t_4 = 0;
       __pyx_t_5 = NULL;
     } else {
-      __pyx_t_4 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 896, __pyx_L1_error)
+      __pyx_t_4 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_v_choices); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 961, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 896, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 961, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_5)) {
         if (likely(PyList_CheckExact(__pyx_t_1))) {
           if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_1)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 896, __pyx_L1_error)
+          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 961, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 896, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 961, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         } else {
           if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 896, __pyx_L1_error)
+          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 961, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 896, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 961, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         }
@@ -11979,7 +12610,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 896, __pyx_L1_error)
+            else __PYX_ERR(0, 961, __pyx_L1_error)
           }
           break;
         }
@@ -11988,7 +12619,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
       __Pyx_XDECREF_SET(__pyx_v_choice, __pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "cpp_process.pyx":897
+      /* "cpp_process.pyx":962
  *     else:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -11999,7 +12630,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
       __pyx_t_3 = (__pyx_t_2 != 0);
       if (__pyx_t_3) {
 
-        /* "cpp_process.pyx":898
+        /* "cpp_process.pyx":963
  *         for choice in choices:
  *             if choice is None:
  *                 i += 1             # <<<<<<<<<<<<<<
@@ -12008,7 +12639,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
  */
         __pyx_v_i = (__pyx_v_i + 1);
 
-        /* "cpp_process.pyx":899
+        /* "cpp_process.pyx":964
  *             if choice is None:
  *                 i += 1
  *                 continue             # <<<<<<<<<<<<<<
@@ -12017,7 +12648,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
  */
         goto __pyx_L8_continue;
 
-        /* "cpp_process.pyx":897
+        /* "cpp_process.pyx":962
  *     else:
  *         for choice in choices:
  *             if choice is None:             # <<<<<<<<<<<<<<
@@ -12026,16 +12657,16 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
  */
       }
 
-      /* "cpp_process.pyx":901
+      /* "cpp_process.pyx":966
  *                 continue
  * 
  *             score = scorer(query, choice, i, **kwargs)             # <<<<<<<<<<<<<<
  * 
  *             if score >= score_cutoff:
  */
-      __pyx_t_6 = __Pyx_PyInt_FromSize_t(__pyx_v_i); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 901, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyInt_FromSize_t(__pyx_v_i); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 966, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
-      __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 901, __pyx_L1_error)
+      __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 966, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_INCREF(__pyx_v_query);
       __Pyx_GIVEREF(__pyx_v_query);
@@ -12048,47 +12679,47 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
       __pyx_t_6 = 0;
       if (unlikely(__pyx_v_kwargs == Py_None)) {
         PyErr_SetString(PyExc_TypeError, "argument after ** must be a mapping, not NoneType");
-        __PYX_ERR(0, 901, __pyx_L1_error)
+        __PYX_ERR(0, 966, __pyx_L1_error)
       }
       if (likely(PyDict_CheckExact(__pyx_v_kwargs))) {
-        __pyx_t_6 = PyDict_Copy(__pyx_v_kwargs); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 901, __pyx_L1_error)
+        __pyx_t_6 = PyDict_Copy(__pyx_v_kwargs); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 966, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
       } else {
-        __pyx_t_6 = __Pyx_PyObject_CallOneArg((PyObject*)&PyDict_Type, __pyx_v_kwargs); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 901, __pyx_L1_error)
+        __pyx_t_6 = __Pyx_PyObject_CallOneArg((PyObject*)&PyDict_Type, __pyx_v_kwargs); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 966, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
       }
-      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_v_scorer, __pyx_t_7, __pyx_t_6); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 901, __pyx_L1_error)
+      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_v_scorer, __pyx_t_7, __pyx_t_6); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 966, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_DECREF_SET(__pyx_v_score, __pyx_t_8);
       __pyx_t_8 = 0;
 
-      /* "cpp_process.pyx":903
+      /* "cpp_process.pyx":968
  *             score = scorer(query, choice, i, **kwargs)
  * 
  *             if score >= score_cutoff:             # <<<<<<<<<<<<<<
  *                 result_list.append((choice, score, i))
  *             i += 1
  */
-      __pyx_t_8 = PyFloat_FromDouble(__pyx_v_score_cutoff); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 903, __pyx_L1_error)
+      __pyx_t_8 = PyFloat_FromDouble(__pyx_v_score_cutoff); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 968, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
-      __pyx_t_6 = PyObject_RichCompare(__pyx_v_score, __pyx_t_8, Py_GE); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 903, __pyx_L1_error)
+      __pyx_t_6 = PyObject_RichCompare(__pyx_v_score, __pyx_t_8, Py_GE); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 968, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_3 < 0))) __PYX_ERR(0, 903, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_3 < 0))) __PYX_ERR(0, 968, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       if (__pyx_t_3) {
 
-        /* "cpp_process.pyx":904
+        /* "cpp_process.pyx":969
  * 
  *             if score >= score_cutoff:
  *                 result_list.append((choice, score, i))             # <<<<<<<<<<<<<<
  *             i += 1
  * 
  */
-        __pyx_t_6 = __Pyx_PyInt_FromSize_t(__pyx_v_i); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 904, __pyx_L1_error)
+        __pyx_t_6 = __Pyx_PyInt_FromSize_t(__pyx_v_i); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 969, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
-        __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 904, __pyx_L1_error)
+        __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 969, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_INCREF(__pyx_v_choice);
         __Pyx_GIVEREF(__pyx_v_choice);
@@ -12099,10 +12730,10 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
         __Pyx_GIVEREF(__pyx_t_6);
         PyTuple_SET_ITEM(__pyx_t_8, 2, __pyx_t_6);
         __pyx_t_6 = 0;
-        __pyx_t_10 = __Pyx_PyList_Append(__pyx_v_result_list, __pyx_t_8); if (unlikely(__pyx_t_10 == ((int)-1))) __PYX_ERR(0, 904, __pyx_L1_error)
+        __pyx_t_10 = __Pyx_PyList_Append(__pyx_v_result_list, __pyx_t_8); if (unlikely(__pyx_t_10 == ((int)-1))) __PYX_ERR(0, 969, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
 
-        /* "cpp_process.pyx":903
+        /* "cpp_process.pyx":968
  *             score = scorer(query, choice, i, **kwargs)
  * 
  *             if score >= score_cutoff:             # <<<<<<<<<<<<<<
@@ -12111,7 +12742,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
  */
       }
 
-      /* "cpp_process.pyx":905
+      /* "cpp_process.pyx":970
  *             if score >= score_cutoff:
  *                 result_list.append((choice, score, i))
  *             i += 1             # <<<<<<<<<<<<<<
@@ -12120,7 +12751,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
  */
       __pyx_v_i = (__pyx_v_i + 1);
 
-      /* "cpp_process.pyx":896
+      /* "cpp_process.pyx":961
  *             i += 1
  *     else:
  *         for choice in choices:             # <<<<<<<<<<<<<<
@@ -12133,7 +12764,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
   }
   __pyx_L3:;
 
-  /* "cpp_process.pyx":907
+  /* "cpp_process.pyx":972
  *             i += 1
  * 
  *     return heapq.nlargest(limit, result_list, key=lambda i: i[1])             # <<<<<<<<<<<<<<
@@ -12141,14 +12772,14 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_heapq); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 907, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_heapq); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 972, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_nlargest); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 907, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_nlargest); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 972, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_FromSize_t(__pyx_v_limit); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 907, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_FromSize_t(__pyx_v_limit); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 972, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 907, __pyx_L1_error)
+  __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 972, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_1);
@@ -12156,13 +12787,13 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
   __Pyx_GIVEREF(__pyx_v_result_list);
   PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_v_result_list);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 907, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 972, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_11cpp_process_15py_extract_list_lambda1, 0, __pyx_n_s_py_extract_list_locals_lambda, NULL, __pyx_n_s_cpp_process, __pyx_d, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 907, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_11cpp_process_15py_extract_list_lambda1, 0, __pyx_n_s_py_extract_list_locals_lambda, NULL, __pyx_n_s_cpp_process, __pyx_d, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 972, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_key, __pyx_t_7) < 0) __PYX_ERR(0, 907, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_key, __pyx_t_7) < 0) __PYX_ERR(0, 972, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_6, __pyx_t_1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 907, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_6, __pyx_t_1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 972, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -12171,7 +12802,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
   __pyx_t_7 = 0;
   goto __pyx_L0;
 
-  /* "cpp_process.pyx":876
+  /* "cpp_process.pyx":941
  * 
  * 
  * cdef inline py_extract_list(query, choices, scorer, processor, size_t limit, double score_cutoff, kwargs):             # <<<<<<<<<<<<<<
@@ -12196,7 +12827,7 @@ static CYTHON_INLINE PyObject *__pyx_f_11cpp_process_py_extract_list(PyObject *_
   return __pyx_r;
 }
 
-/* "cpp_process.pyx":910
+/* "cpp_process.pyx":975
  * 
  * 
  * def extract(query, choices, scorer=WRatio, processor=default_process, limit=5, score_cutoff=None, **kwargs):             # <<<<<<<<<<<<<<
@@ -12214,7 +12845,7 @@ static PyObject *__pyx_pf_11cpp_process_9__defaults__(CYTHON_UNUSED PyObject *__
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__defaults__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyTuple_New(4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 910, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 975, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__Pyx_CyFunction_Defaults(__pyx_defaults1, __pyx_self)->__pyx_arg_scorer);
   __Pyx_GIVEREF(__Pyx_CyFunction_Defaults(__pyx_defaults1, __pyx_self)->__pyx_arg_scorer);
@@ -12228,7 +12859,7 @@ static PyObject *__pyx_pf_11cpp_process_9__defaults__(CYTHON_UNUSED PyObject *__
   __Pyx_INCREF(((PyObject *)Py_None));
   __Pyx_GIVEREF(((PyObject *)Py_None));
   PyTuple_SET_ITEM(__pyx_t_1, 3, ((PyObject *)Py_None));
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 910, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 975, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
@@ -12322,47 +12953,47 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       switch (__pyx_nargs) {
         case  0:
         if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_query)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 910, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 975, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
         if (likely((values[1] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_choices)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 910, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 975, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("extract", 0, 2, 6, 1); __PYX_ERR(0, 910, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("extract", 0, 2, 6, 1); __PYX_ERR(0, 975, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (kw_args > 0) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_scorer);
           if (value) { values[2] = value; kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 910, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 975, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (kw_args > 0) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_processor);
           if (value) { values[3] = value; kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 910, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 975, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (kw_args > 0) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_limit);
           if (value) { values[4] = value; kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 910, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 975, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
         if (kw_args > 0) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_score_cutoff);
           if (value) { values[5] = value; kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 910, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 975, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, __pyx_v_kwargs, values + 0, kwd_pos_args, "extract") < 0)) __PYX_ERR(0, 910, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, __pyx_v_kwargs, values + 0, kwd_pos_args, "extract") < 0)) __PYX_ERR(0, 975, __pyx_L3_error)
       }
     } else {
       switch (__pyx_nargs) {
@@ -12389,7 +13020,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("extract", 0, 2, 6, __pyx_nargs); __PYX_ERR(0, 910, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("extract", 0, 2, 6, __pyx_nargs); __PYX_ERR(0, 975, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_DECREF(__pyx_v_kwargs); __pyx_v_kwargs = 0;
   __Pyx_AddTraceback("cpp_process.extract", __pyx_clineno, __pyx_lineno, __pyx_filename);
@@ -12439,7 +13070,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
   __Pyx_INCREF(__pyx_v_processor);
   __Pyx_INCREF(__pyx_v_limit);
 
-  /* "cpp_process.pyx":971
+  /* "cpp_process.pyx":1036
  * 
  *     """
  *     cdef int def_process = 0             # <<<<<<<<<<<<<<
@@ -12448,7 +13079,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  */
   __pyx_v_def_process = 0;
 
-  /* "cpp_process.pyx":974
+  /* "cpp_process.pyx":1039
  *     cdef scorer_context ScorerContext
  *     cdef distance_context DistanceContext
  *     cdef double c_score_cutoff = 0.0             # <<<<<<<<<<<<<<
@@ -12457,7 +13088,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  */
   __pyx_v_c_score_cutoff = 0.0;
 
-  /* "cpp_process.pyx":975
+  /* "cpp_process.pyx":1040
  *     cdef distance_context DistanceContext
  *     cdef double c_score_cutoff = 0.0
  *     cdef size_t c_max = <size_t>-1             # <<<<<<<<<<<<<<
@@ -12466,7 +13097,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  */
   __pyx_v_c_max = ((size_t)-1L);
 
-  /* "cpp_process.pyx":977
+  /* "cpp_process.pyx":1042
  *     cdef size_t c_max = <size_t>-1
  * 
  *     if query is None:             # <<<<<<<<<<<<<<
@@ -12477,7 +13108,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":978
+    /* "cpp_process.pyx":1043
  * 
  *     if query is None:
  *         return None             # <<<<<<<<<<<<<<
@@ -12488,7 +13119,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
     __pyx_r = Py_None; __Pyx_INCREF(Py_None);
     goto __pyx_L0;
 
-    /* "cpp_process.pyx":977
+    /* "cpp_process.pyx":1042
  *     cdef size_t c_max = <size_t>-1
  * 
  *     if query is None:             # <<<<<<<<<<<<<<
@@ -12497,7 +13128,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  */
   }
 
-  /* "cpp_process.pyx":980
+  /* "cpp_process.pyx":1045
  *         return None
  * 
  *     if limit is None or limit > len(choices):             # <<<<<<<<<<<<<<
@@ -12511,31 +13142,31 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
     __pyx_t_2 = __pyx_t_3;
     goto __pyx_L5_bool_binop_done;
   }
-  __pyx_t_4 = PyObject_Length(__pyx_v_choices); if (unlikely(__pyx_t_4 == ((Py_ssize_t)-1))) __PYX_ERR(0, 980, __pyx_L1_error)
-  __pyx_t_5 = PyInt_FromSsize_t(__pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 980, __pyx_L1_error)
+  __pyx_t_4 = PyObject_Length(__pyx_v_choices); if (unlikely(__pyx_t_4 == ((Py_ssize_t)-1))) __PYX_ERR(0, 1045, __pyx_L1_error)
+  __pyx_t_5 = PyInt_FromSsize_t(__pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1045, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = PyObject_RichCompare(__pyx_v_limit, __pyx_t_5, Py_GT); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 980, __pyx_L1_error)
+  __pyx_t_6 = PyObject_RichCompare(__pyx_v_limit, __pyx_t_5, Py_GT); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1045, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_3 < 0))) __PYX_ERR(0, 980, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_3 < 0))) __PYX_ERR(0, 1045, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __pyx_t_2 = __pyx_t_3;
   __pyx_L5_bool_binop_done:;
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":981
+    /* "cpp_process.pyx":1046
  * 
  *     if limit is None or limit > len(choices):
  *         limit = len(choices)             # <<<<<<<<<<<<<<
  * 
  *     # preprocess the query
  */
-    __pyx_t_4 = PyObject_Length(__pyx_v_choices); if (unlikely(__pyx_t_4 == ((Py_ssize_t)-1))) __PYX_ERR(0, 981, __pyx_L1_error)
-    __pyx_t_6 = PyInt_FromSsize_t(__pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 981, __pyx_L1_error)
+    __pyx_t_4 = PyObject_Length(__pyx_v_choices); if (unlikely(__pyx_t_4 == ((Py_ssize_t)-1))) __PYX_ERR(0, 1046, __pyx_L1_error)
+    __pyx_t_6 = PyInt_FromSsize_t(__pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1046, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF_SET(__pyx_v_limit, __pyx_t_6);
     __pyx_t_6 = 0;
 
-    /* "cpp_process.pyx":980
+    /* "cpp_process.pyx":1045
  *         return None
  * 
  *     if limit is None or limit > len(choices):             # <<<<<<<<<<<<<<
@@ -12544,21 +13175,21 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  */
   }
 
-  /* "cpp_process.pyx":984
+  /* "cpp_process.pyx":1049
  * 
  *     # preprocess the query
  *     if processor is default_process:             # <<<<<<<<<<<<<<
  *         def_process = 1
  *         # since this call is only performed once it is not very expensive to
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_default_process); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 984, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_default_process); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1049, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __pyx_t_2 = (__pyx_v_processor == __pyx_t_6);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __pyx_t_3 = (__pyx_t_2 != 0);
   if (__pyx_t_3) {
 
-    /* "cpp_process.pyx":985
+    /* "cpp_process.pyx":1050
  *     # preprocess the query
  *     if processor is default_process:
  *         def_process = 1             # <<<<<<<<<<<<<<
@@ -12567,7 +13198,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  */
     __pyx_v_def_process = 1;
 
-    /* "cpp_process.pyx":988
+    /* "cpp_process.pyx":1053
  *         # since this call is only performed once it is not very expensive to
  *         # make it in Python
  *         query = processor(query)             # <<<<<<<<<<<<<<
@@ -12591,14 +13222,14 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
       PyObject *__pyx_callargs[2] = {__pyx_t_7, __pyx_v_query};
       __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_8, 1+__pyx_t_8);
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 988, __pyx_L1_error)
+      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1053, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     }
     __Pyx_DECREF_SET(__pyx_v_query, __pyx_t_6);
     __pyx_t_6 = 0;
 
-    /* "cpp_process.pyx":989
+    /* "cpp_process.pyx":1054
  *         # make it in Python
  *         query = processor(query)
  *         processor = None             # <<<<<<<<<<<<<<
@@ -12608,7 +13239,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
     __Pyx_INCREF(Py_None);
     __Pyx_DECREF_SET(__pyx_v_processor, Py_None);
 
-    /* "cpp_process.pyx":984
+    /* "cpp_process.pyx":1049
  * 
  *     # preprocess the query
  *     if processor is default_process:             # <<<<<<<<<<<<<<
@@ -12618,18 +13249,18 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
     goto __pyx_L7;
   }
 
-  /* "cpp_process.pyx":990
+  /* "cpp_process.pyx":1055
  *         query = processor(query)
  *         processor = None
  *     elif callable(processor):             # <<<<<<<<<<<<<<
  *         query = processor(query)
  *     elif processor:
  */
-  __pyx_t_3 = __Pyx_PyCallable_Check(__pyx_v_processor); if (unlikely(__pyx_t_3 == ((int)-1))) __PYX_ERR(0, 990, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyCallable_Check(__pyx_v_processor); if (unlikely(__pyx_t_3 == ((int)-1))) __PYX_ERR(0, 1055, __pyx_L1_error)
   __pyx_t_2 = (__pyx_t_3 != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":991
+    /* "cpp_process.pyx":1056
  *         processor = None
  *     elif callable(processor):
  *         query = processor(query)             # <<<<<<<<<<<<<<
@@ -12653,14 +13284,14 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
       PyObject *__pyx_callargs[2] = {__pyx_t_7, __pyx_v_query};
       __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_8, 1+__pyx_t_8);
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 991, __pyx_L1_error)
+      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1056, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     }
     __Pyx_DECREF_SET(__pyx_v_query, __pyx_t_6);
     __pyx_t_6 = 0;
 
-    /* "cpp_process.pyx":990
+    /* "cpp_process.pyx":1055
  *         query = processor(query)
  *         processor = None
  *     elif callable(processor):             # <<<<<<<<<<<<<<
@@ -12670,17 +13301,17 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
     goto __pyx_L7;
   }
 
-  /* "cpp_process.pyx":992
+  /* "cpp_process.pyx":1057
  *     elif callable(processor):
  *         query = processor(query)
  *     elif processor:             # <<<<<<<<<<<<<<
  *         def_process = 1
  *         # since this call is only performed once it is not very expensive to
  */
-  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_v_processor); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 992, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_v_processor); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 1057, __pyx_L1_error)
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":993
+    /* "cpp_process.pyx":1058
  *         query = processor(query)
  *     elif processor:
  *         def_process = 1             # <<<<<<<<<<<<<<
@@ -12689,14 +13320,14 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  */
     __pyx_v_def_process = 1;
 
-    /* "cpp_process.pyx":996
+    /* "cpp_process.pyx":1061
  *         # since this call is only performed once it is not very expensive to
  *         # make it in Python
  *         query = default_process(query)             # <<<<<<<<<<<<<<
  *         processor = None
  *     # query might be e.g. False
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_default_process); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 996, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_default_process); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1061, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_t_7 = NULL;
     __pyx_t_8 = 0;
@@ -12714,14 +13345,14 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
       PyObject *__pyx_callargs[2] = {__pyx_t_7, __pyx_v_query};
       __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_8, 1+__pyx_t_8);
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 996, __pyx_L1_error)
+      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1061, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     }
     __Pyx_DECREF_SET(__pyx_v_query, __pyx_t_6);
     __pyx_t_6 = 0;
 
-    /* "cpp_process.pyx":997
+    /* "cpp_process.pyx":1062
  *         # make it in Python
  *         query = default_process(query)
  *         processor = None             # <<<<<<<<<<<<<<
@@ -12731,7 +13362,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
     __Pyx_INCREF(Py_None);
     __Pyx_DECREF_SET(__pyx_v_processor, Py_None);
 
-    /* "cpp_process.pyx":992
+    /* "cpp_process.pyx":1057
  *     elif callable(processor):
  *         query = processor(query)
  *     elif processor:             # <<<<<<<<<<<<<<
@@ -12741,7 +13372,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
     goto __pyx_L7;
   }
 
-  /* "cpp_process.pyx":1000
+  /* "cpp_process.pyx":1065
  *     # query might be e.g. False
  *     else:
  *         processor = None             # <<<<<<<<<<<<<<
@@ -12754,7 +13385,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
   }
   __pyx_L7:;
 
-  /* "cpp_process.pyx":1003
+  /* "cpp_process.pyx":1068
  * 
  *     # directly use the C++ implementation if possible
  *     ScorerContext = CachedScorerInit(scorer, query, def_process, kwargs)             # <<<<<<<<<<<<<<
@@ -12763,7 +13394,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  */
   __pyx_v_ScorerContext = __pyx_f_11cpp_process_CachedScorerInit(__pyx_v_scorer, __pyx_v_query, __pyx_v_def_process, __pyx_v_kwargs);
 
-  /* "cpp_process.pyx":1004
+  /* "cpp_process.pyx":1069
  *     # directly use the C++ implementation if possible
  *     ScorerContext = CachedScorerInit(scorer, query, def_process, kwargs)
  *     if ScorerContext.context != NULL:             # <<<<<<<<<<<<<<
@@ -12773,7 +13404,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
   __pyx_t_2 = ((__pyx_v_ScorerContext.context != NULL) != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":1005
+    /* "cpp_process.pyx":1070
  *     ScorerContext = CachedScorerInit(scorer, query, def_process, kwargs)
  *     if ScorerContext.context != NULL:
  *         try:             # <<<<<<<<<<<<<<
@@ -12782,7 +13413,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  */
     /*try:*/ {
 
-      /* "cpp_process.pyx":1006
+      /* "cpp_process.pyx":1071
  *     if ScorerContext.context != NULL:
  *         try:
  *             if score_cutoff is not None:             # <<<<<<<<<<<<<<
@@ -12793,17 +13424,17 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
       __pyx_t_3 = (__pyx_t_2 != 0);
       if (__pyx_t_3) {
 
-        /* "cpp_process.pyx":1007
+        /* "cpp_process.pyx":1072
  *         try:
  *             if score_cutoff is not None:
  *                 c_score_cutoff = score_cutoff             # <<<<<<<<<<<<<<
  *             if c_score_cutoff < 0 or c_score_cutoff > 100:
  *                 raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
  */
-        __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 1007, __pyx_L10_error)
+        __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 1072, __pyx_L10_error)
         __pyx_v_c_score_cutoff = __pyx_t_9;
 
-        /* "cpp_process.pyx":1006
+        /* "cpp_process.pyx":1071
  *     if ScorerContext.context != NULL:
  *         try:
  *             if score_cutoff is not None:             # <<<<<<<<<<<<<<
@@ -12812,7 +13443,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  */
       }
 
-      /* "cpp_process.pyx":1008
+      /* "cpp_process.pyx":1073
  *             if score_cutoff is not None:
  *                 c_score_cutoff = score_cutoff
  *             if c_score_cutoff < 0 or c_score_cutoff > 100:             # <<<<<<<<<<<<<<
@@ -12830,20 +13461,20 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
       __pyx_L14_bool_binop_done:;
       if (unlikely(__pyx_t_3)) {
 
-        /* "cpp_process.pyx":1009
+        /* "cpp_process.pyx":1074
  *                 c_score_cutoff = score_cutoff
  *             if c_score_cutoff < 0 or c_score_cutoff > 100:
  *                 raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")             # <<<<<<<<<<<<<<
  * 
  *             if hasattr(choices, "items"):
  */
-        __pyx_t_6 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1009, __pyx_L10_error)
+        __pyx_t_6 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1074, __pyx_L10_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_Raise(__pyx_t_6, 0, 0, 0);
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-        __PYX_ERR(0, 1009, __pyx_L10_error)
+        __PYX_ERR(0, 1074, __pyx_L10_error)
 
-        /* "cpp_process.pyx":1008
+        /* "cpp_process.pyx":1073
  *             if score_cutoff is not None:
  *                 c_score_cutoff = score_cutoff
  *             if c_score_cutoff < 0 or c_score_cutoff > 100:             # <<<<<<<<<<<<<<
@@ -12852,18 +13483,18 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  */
       }
 
-      /* "cpp_process.pyx":1011
+      /* "cpp_process.pyx":1076
  *                 raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
  * 
  *             if hasattr(choices, "items"):             # <<<<<<<<<<<<<<
  *                 return extract_dict(ScorerContext, choices, processor, limit, c_score_cutoff)
  *             else:
  */
-      __pyx_t_3 = __Pyx_HasAttr(__pyx_v_choices, __pyx_n_u_items); if (unlikely(__pyx_t_3 == ((int)-1))) __PYX_ERR(0, 1011, __pyx_L10_error)
+      __pyx_t_3 = __Pyx_HasAttr(__pyx_v_choices, __pyx_n_u_items); if (unlikely(__pyx_t_3 == ((int)-1))) __PYX_ERR(0, 1076, __pyx_L10_error)
       __pyx_t_2 = (__pyx_t_3 != 0);
       if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":1012
+        /* "cpp_process.pyx":1077
  * 
  *             if hasattr(choices, "items"):
  *                 return extract_dict(ScorerContext, choices, processor, limit, c_score_cutoff)             # <<<<<<<<<<<<<<
@@ -12871,14 +13502,14 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  *                 return extract_list(ScorerContext, choices, processor, limit, c_score_cutoff)
  */
         __Pyx_XDECREF(__pyx_r);
-        __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_v_limit); if (unlikely((__pyx_t_10 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 1012, __pyx_L10_error)
-        __pyx_t_6 = __pyx_f_11cpp_process_extract_dict(__pyx_v_ScorerContext, __pyx_v_choices, __pyx_v_processor, __pyx_t_10, __pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1012, __pyx_L10_error)
+        __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_v_limit); if (unlikely((__pyx_t_10 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 1077, __pyx_L10_error)
+        __pyx_t_6 = __pyx_f_11cpp_process_extract_dict(__pyx_v_ScorerContext, __pyx_v_choices, __pyx_v_processor, __pyx_t_10, __pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1077, __pyx_L10_error)
         __Pyx_GOTREF(__pyx_t_6);
         __pyx_r = __pyx_t_6;
         __pyx_t_6 = 0;
         goto __pyx_L9_return;
 
-        /* "cpp_process.pyx":1011
+        /* "cpp_process.pyx":1076
  *                 raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
  * 
  *             if hasattr(choices, "items"):             # <<<<<<<<<<<<<<
@@ -12887,7 +13518,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  */
       }
 
-      /* "cpp_process.pyx":1014
+      /* "cpp_process.pyx":1079
  *                 return extract_dict(ScorerContext, choices, processor, limit, c_score_cutoff)
  *             else:
  *                 return extract_list(ScorerContext, choices, processor, limit, c_score_cutoff)             # <<<<<<<<<<<<<<
@@ -12896,8 +13527,8 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  */
       /*else*/ {
         __Pyx_XDECREF(__pyx_r);
-        __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_v_limit); if (unlikely((__pyx_t_10 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 1014, __pyx_L10_error)
-        __pyx_t_6 = __pyx_f_11cpp_process_extract_list(__pyx_v_ScorerContext, __pyx_v_choices, __pyx_v_processor, __pyx_t_10, __pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1014, __pyx_L10_error)
+        __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_v_limit); if (unlikely((__pyx_t_10 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 1079, __pyx_L10_error)
+        __pyx_t_6 = __pyx_f_11cpp_process_extract_list(__pyx_v_ScorerContext, __pyx_v_choices, __pyx_v_processor, __pyx_t_10, __pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1079, __pyx_L10_error)
         __Pyx_GOTREF(__pyx_t_6);
         __pyx_r = __pyx_t_6;
         __pyx_t_6 = 0;
@@ -12905,7 +13536,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
       }
     }
 
-    /* "cpp_process.pyx":1018
+    /* "cpp_process.pyx":1083
  *         finally:
  *             # part of the context is dynamically allocated, so it has to be freed in any case
  *             ScorerContext.deinit(ScorerContext.context)             # <<<<<<<<<<<<<<
@@ -12935,7 +13566,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
             __pyx_v_ScorerContext.deinit(__pyx_v_ScorerContext.context);
           } catch(...) {
             __Pyx_CppExn2PyErr();
-            __PYX_ERR(0, 1018, __pyx_L18_error)
+            __PYX_ERR(0, 1083, __pyx_L18_error)
           }
         }
         if (PY_MAJOR_VERSION >= 3) {
@@ -12971,7 +13602,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
           __pyx_v_ScorerContext.deinit(__pyx_v_ScorerContext.context);
         } catch(...) {
           __Pyx_CppExn2PyErr();
-          __PYX_ERR(0, 1018, __pyx_L1_error)
+          __PYX_ERR(0, 1083, __pyx_L1_error)
         }
         __pyx_r = __pyx_t_18;
         __pyx_t_18 = 0;
@@ -12979,7 +13610,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
       }
     }
 
-    /* "cpp_process.pyx":1004
+    /* "cpp_process.pyx":1069
  *     # directly use the C++ implementation if possible
  *     ScorerContext = CachedScorerInit(scorer, query, def_process, kwargs)
  *     if ScorerContext.context != NULL:             # <<<<<<<<<<<<<<
@@ -12988,7 +13619,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  */
   }
 
-  /* "cpp_process.pyx":1021
+  /* "cpp_process.pyx":1086
  * 
  *     # distance implemented in C++
  *     DistanceContext = CachedDistanceInit(scorer, query, def_process, kwargs)             # <<<<<<<<<<<<<<
@@ -12997,7 +13628,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  */
   __pyx_v_DistanceContext = __pyx_f_11cpp_process_CachedDistanceInit(__pyx_v_scorer, __pyx_v_query, __pyx_v_def_process, __pyx_v_kwargs);
 
-  /* "cpp_process.pyx":1022
+  /* "cpp_process.pyx":1087
  *     # distance implemented in C++
  *     DistanceContext = CachedDistanceInit(scorer, query, def_process, kwargs)
  *     if DistanceContext.context != NULL:             # <<<<<<<<<<<<<<
@@ -13007,7 +13638,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
   __pyx_t_2 = ((__pyx_v_DistanceContext.context != NULL) != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":1023
+    /* "cpp_process.pyx":1088
  *     DistanceContext = CachedDistanceInit(scorer, query, def_process, kwargs)
  *     if DistanceContext.context != NULL:
  *         try:             # <<<<<<<<<<<<<<
@@ -13016,7 +13647,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  */
     /*try:*/ {
 
-      /* "cpp_process.pyx":1024
+      /* "cpp_process.pyx":1089
  *     if DistanceContext.context != NULL:
  *         try:
  *             if score_cutoff is not None and score_cutoff != -1:             # <<<<<<<<<<<<<<
@@ -13030,25 +13661,25 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
         __pyx_t_2 = __pyx_t_1;
         goto __pyx_L24_bool_binop_done;
       }
-      __pyx_t_6 = __Pyx_PyInt_NeObjC(__pyx_v_score_cutoff, __pyx_int_neg_1, -1L, 0); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1024, __pyx_L21_error)
+      __pyx_t_6 = __Pyx_PyInt_NeObjC(__pyx_v_score_cutoff, __pyx_int_neg_1, -1L, 0); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1089, __pyx_L21_error)
       __Pyx_GOTREF(__pyx_t_6);
-      __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 1024, __pyx_L21_error)
+      __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 1089, __pyx_L21_error)
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       __pyx_t_2 = __pyx_t_1;
       __pyx_L24_bool_binop_done:;
       if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":1025
+        /* "cpp_process.pyx":1090
  *         try:
  *             if score_cutoff is not None and score_cutoff != -1:
  *                 c_max = score_cutoff             # <<<<<<<<<<<<<<
  * 
  *             if hasattr(choices, "items"):
  */
-        __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_v_score_cutoff); if (unlikely((__pyx_t_10 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 1025, __pyx_L21_error)
+        __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_v_score_cutoff); if (unlikely((__pyx_t_10 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 1090, __pyx_L21_error)
         __pyx_v_c_max = __pyx_t_10;
 
-        /* "cpp_process.pyx":1024
+        /* "cpp_process.pyx":1089
  *     if DistanceContext.context != NULL:
  *         try:
  *             if score_cutoff is not None and score_cutoff != -1:             # <<<<<<<<<<<<<<
@@ -13057,18 +13688,18 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  */
       }
 
-      /* "cpp_process.pyx":1027
+      /* "cpp_process.pyx":1092
  *                 c_max = score_cutoff
  * 
  *             if hasattr(choices, "items"):             # <<<<<<<<<<<<<<
  *                 return extract_distance_dict(DistanceContext, choices, processor, limit, c_max)
  *             else:
  */
-      __pyx_t_2 = __Pyx_HasAttr(__pyx_v_choices, __pyx_n_u_items); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1027, __pyx_L21_error)
+      __pyx_t_2 = __Pyx_HasAttr(__pyx_v_choices, __pyx_n_u_items); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1092, __pyx_L21_error)
       __pyx_t_1 = (__pyx_t_2 != 0);
       if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":1028
+        /* "cpp_process.pyx":1093
  * 
  *             if hasattr(choices, "items"):
  *                 return extract_distance_dict(DistanceContext, choices, processor, limit, c_max)             # <<<<<<<<<<<<<<
@@ -13076,14 +13707,14 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  *                 return extract_distance_list(DistanceContext, choices, processor, limit, c_max)
  */
         __Pyx_XDECREF(__pyx_r);
-        __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_v_limit); if (unlikely((__pyx_t_10 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 1028, __pyx_L21_error)
-        __pyx_t_6 = __pyx_f_11cpp_process_extract_distance_dict(__pyx_v_DistanceContext, __pyx_v_choices, __pyx_v_processor, __pyx_t_10, __pyx_v_c_max); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1028, __pyx_L21_error)
+        __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_v_limit); if (unlikely((__pyx_t_10 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 1093, __pyx_L21_error)
+        __pyx_t_6 = __pyx_f_11cpp_process_extract_distance_dict(__pyx_v_DistanceContext, __pyx_v_choices, __pyx_v_processor, __pyx_t_10, __pyx_v_c_max); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1093, __pyx_L21_error)
         __Pyx_GOTREF(__pyx_t_6);
         __pyx_r = __pyx_t_6;
         __pyx_t_6 = 0;
         goto __pyx_L20_return;
 
-        /* "cpp_process.pyx":1027
+        /* "cpp_process.pyx":1092
  *                 c_max = score_cutoff
  * 
  *             if hasattr(choices, "items"):             # <<<<<<<<<<<<<<
@@ -13092,7 +13723,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  */
       }
 
-      /* "cpp_process.pyx":1030
+      /* "cpp_process.pyx":1095
  *                 return extract_distance_dict(DistanceContext, choices, processor, limit, c_max)
  *             else:
  *                 return extract_distance_list(DistanceContext, choices, processor, limit, c_max)             # <<<<<<<<<<<<<<
@@ -13101,8 +13732,8 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  */
       /*else*/ {
         __Pyx_XDECREF(__pyx_r);
-        __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_v_limit); if (unlikely((__pyx_t_10 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 1030, __pyx_L21_error)
-        __pyx_t_6 = __pyx_f_11cpp_process_extract_distance_list(__pyx_v_DistanceContext, __pyx_v_choices, __pyx_v_processor, __pyx_t_10, __pyx_v_c_max); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1030, __pyx_L21_error)
+        __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_v_limit); if (unlikely((__pyx_t_10 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 1095, __pyx_L21_error)
+        __pyx_t_6 = __pyx_f_11cpp_process_extract_distance_list(__pyx_v_DistanceContext, __pyx_v_choices, __pyx_v_processor, __pyx_t_10, __pyx_v_c_max); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1095, __pyx_L21_error)
         __Pyx_GOTREF(__pyx_t_6);
         __pyx_r = __pyx_t_6;
         __pyx_t_6 = 0;
@@ -13110,7 +13741,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
       }
     }
 
-    /* "cpp_process.pyx":1033
+    /* "cpp_process.pyx":1098
  *         finally:
  *             # part of the context is dynamically allocated, so it has to be freed in any case
  *             DistanceContext.deinit(DistanceContext.context)             # <<<<<<<<<<<<<<
@@ -13140,7 +13771,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
             __pyx_v_DistanceContext.deinit(__pyx_v_DistanceContext.context);
           } catch(...) {
             __Pyx_CppExn2PyErr();
-            __PYX_ERR(0, 1033, __pyx_L28_error)
+            __PYX_ERR(0, 1098, __pyx_L28_error)
           }
         }
         if (PY_MAJOR_VERSION >= 3) {
@@ -13176,7 +13807,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
           __pyx_v_DistanceContext.deinit(__pyx_v_DistanceContext.context);
         } catch(...) {
           __Pyx_CppExn2PyErr();
-          __PYX_ERR(0, 1033, __pyx_L1_error)
+          __PYX_ERR(0, 1098, __pyx_L1_error)
         }
         __pyx_r = __pyx_t_13;
         __pyx_t_13 = 0;
@@ -13184,7 +13815,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
       }
     }
 
-    /* "cpp_process.pyx":1022
+    /* "cpp_process.pyx":1087
  *     # distance implemented in C++
  *     DistanceContext = CachedDistanceInit(scorer, query, def_process, kwargs)
  *     if DistanceContext.context != NULL:             # <<<<<<<<<<<<<<
@@ -13193,7 +13824,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  */
   }
 
-  /* "cpp_process.pyx":1036
+  /* "cpp_process.pyx":1101
  * 
  *     # the scorer has to be called through Python
  *     if score_cutoff is not None:             # <<<<<<<<<<<<<<
@@ -13204,17 +13835,17 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":1037
+    /* "cpp_process.pyx":1102
  *     # the scorer has to be called through Python
  *     if score_cutoff is not None:
  *         c_score_cutoff = score_cutoff             # <<<<<<<<<<<<<<
  * 
  *     if hasattr(choices, "items"):
  */
-    __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 1037, __pyx_L1_error)
+    __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 1102, __pyx_L1_error)
     __pyx_v_c_score_cutoff = __pyx_t_9;
 
-    /* "cpp_process.pyx":1036
+    /* "cpp_process.pyx":1101
  * 
  *     # the scorer has to be called through Python
  *     if score_cutoff is not None:             # <<<<<<<<<<<<<<
@@ -13223,18 +13854,18 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  */
   }
 
-  /* "cpp_process.pyx":1039
+  /* "cpp_process.pyx":1104
  *         c_score_cutoff = score_cutoff
  * 
  *     if hasattr(choices, "items"):             # <<<<<<<<<<<<<<
  *         return py_extract_dict(query, choices, scorer, processor, limit, c_score_cutoff, kwargs)
  *     else:
  */
-  __pyx_t_2 = __Pyx_HasAttr(__pyx_v_choices, __pyx_n_u_items); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1039, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_HasAttr(__pyx_v_choices, __pyx_n_u_items); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1104, __pyx_L1_error)
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "cpp_process.pyx":1040
+    /* "cpp_process.pyx":1105
  * 
  *     if hasattr(choices, "items"):
  *         return py_extract_dict(query, choices, scorer, processor, limit, c_score_cutoff, kwargs)             # <<<<<<<<<<<<<<
@@ -13242,14 +13873,14 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  *         return py_extract_list(query, choices, scorer, processor, limit, c_score_cutoff, kwargs)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_v_limit); if (unlikely((__pyx_t_10 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 1040, __pyx_L1_error)
-    __pyx_t_6 = __pyx_f_11cpp_process_py_extract_dict(__pyx_v_query, __pyx_v_choices, __pyx_v_scorer, __pyx_v_processor, __pyx_t_10, __pyx_v_c_score_cutoff, __pyx_v_kwargs); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1040, __pyx_L1_error)
+    __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_v_limit); if (unlikely((__pyx_t_10 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 1105, __pyx_L1_error)
+    __pyx_t_6 = __pyx_f_11cpp_process_py_extract_dict(__pyx_v_query, __pyx_v_choices, __pyx_v_scorer, __pyx_v_processor, __pyx_t_10, __pyx_v_c_score_cutoff, __pyx_v_kwargs); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1105, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_r = __pyx_t_6;
     __pyx_t_6 = 0;
     goto __pyx_L0;
 
-    /* "cpp_process.pyx":1039
+    /* "cpp_process.pyx":1104
  *         c_score_cutoff = score_cutoff
  * 
  *     if hasattr(choices, "items"):             # <<<<<<<<<<<<<<
@@ -13258,7 +13889,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  */
   }
 
-  /* "cpp_process.pyx":1042
+  /* "cpp_process.pyx":1107
  *         return py_extract_dict(query, choices, scorer, processor, limit, c_score_cutoff, kwargs)
  *     else:
  *         return py_extract_list(query, choices, scorer, processor, limit, c_score_cutoff, kwargs)             # <<<<<<<<<<<<<<
@@ -13267,15 +13898,15 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  */
   /*else*/ {
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_v_limit); if (unlikely((__pyx_t_10 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 1042, __pyx_L1_error)
-    __pyx_t_6 = __pyx_f_11cpp_process_py_extract_list(__pyx_v_query, __pyx_v_choices, __pyx_v_scorer, __pyx_v_processor, __pyx_t_10, __pyx_v_c_score_cutoff, __pyx_v_kwargs); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1042, __pyx_L1_error)
+    __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_v_limit); if (unlikely((__pyx_t_10 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 1107, __pyx_L1_error)
+    __pyx_t_6 = __pyx_f_11cpp_process_py_extract_list(__pyx_v_query, __pyx_v_choices, __pyx_v_scorer, __pyx_v_processor, __pyx_t_10, __pyx_v_c_score_cutoff, __pyx_v_kwargs); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1107, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_r = __pyx_t_6;
     __pyx_t_6 = 0;
     goto __pyx_L0;
   }
 
-  /* "cpp_process.pyx":910
+  /* "cpp_process.pyx":975
  * 
  * 
  * def extract(query, choices, scorer=WRatio, processor=default_process, limit=5, score_cutoff=None, **kwargs):             # <<<<<<<<<<<<<<
@@ -13300,7 +13931,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
 }
 static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_generator, CYTHON_UNUSED PyThreadState *__pyx_tstate, PyObject *__pyx_sent_value); /* proto */
 
-/* "cpp_process.pyx":1045
+/* "cpp_process.pyx":1110
  * 
  * 
  * def extract_iter(query, choices, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):             # <<<<<<<<<<<<<<
@@ -13318,7 +13949,7 @@ static PyObject *__pyx_pf_11cpp_process_11__defaults__(CYTHON_UNUSED PyObject *_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__defaults__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyTuple_New(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1045, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1110, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__Pyx_CyFunction_Defaults(__pyx_defaults2, __pyx_self)->__pyx_arg_scorer);
   __Pyx_GIVEREF(__Pyx_CyFunction_Defaults(__pyx_defaults2, __pyx_self)->__pyx_arg_scorer);
@@ -13329,7 +13960,7 @@ static PyObject *__pyx_pf_11cpp_process_11__defaults__(CYTHON_UNUSED PyObject *_
   __Pyx_INCREF(((PyObject *)Py_None));
   __Pyx_GIVEREF(((PyObject *)Py_None));
   PyTuple_SET_ITEM(__pyx_t_1, 2, ((PyObject *)Py_None));
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1045, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1110, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
@@ -13419,40 +14050,40 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       switch (__pyx_nargs) {
         case  0:
         if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_query)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 1045, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 1110, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
         if (likely((values[1] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_choices)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 1045, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 1110, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("extract_iter", 0, 2, 5, 1); __PYX_ERR(0, 1045, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("extract_iter", 0, 2, 5, 1); __PYX_ERR(0, 1110, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (kw_args > 0) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_scorer);
           if (value) { values[2] = value; kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 1045, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 1110, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (kw_args > 0) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_processor);
           if (value) { values[3] = value; kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 1045, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 1110, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (kw_args > 0) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_score_cutoff);
           if (value) { values[4] = value; kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 1045, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 1110, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, __pyx_v_kwargs, values + 0, kwd_pos_args, "extract_iter") < 0)) __PYX_ERR(0, 1045, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, __pyx_v_kwargs, values + 0, kwd_pos_args, "extract_iter") < 0)) __PYX_ERR(0, 1110, __pyx_L3_error)
       }
     } else {
       switch (__pyx_nargs) {
@@ -13476,7 +14107,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("extract_iter", 0, 2, 5, __pyx_nargs); __PYX_ERR(0, 1045, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("extract_iter", 0, 2, 5, __pyx_nargs); __PYX_ERR(0, 1110, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_CLEAR(__pyx_v_kwargs);
   __Pyx_AddTraceback("cpp_process.extract_iter", __pyx_clineno, __pyx_lineno, __pyx_filename);
@@ -13503,7 +14134,7 @@ static PyObject *__pyx_pf_11cpp_process_4extract_iter(CYTHON_UNUSED PyObject *__
   if (unlikely(!__pyx_cur_scope)) {
     __pyx_cur_scope = ((struct __pyx_obj_11cpp_process___pyx_scope_struct__extract_iter *)Py_None);
     __Pyx_INCREF(Py_None);
-    __PYX_ERR(0, 1045, __pyx_L1_error)
+    __PYX_ERR(0, 1110, __pyx_L1_error)
   } else {
     __Pyx_GOTREF((PyObject *)__pyx_cur_scope);
   }
@@ -13526,7 +14157,7 @@ static PyObject *__pyx_pf_11cpp_process_4extract_iter(CYTHON_UNUSED PyObject *__
   __Pyx_INCREF(__pyx_cur_scope->__pyx_v_kwargs);
   __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_kwargs);
   {
-    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_11cpp_process_6generator, __pyx_codeobj__3, (PyObject *) __pyx_cur_scope, __pyx_n_s_extract_iter, __pyx_n_s_extract_iter, __pyx_n_s_cpp_process); if (unlikely(!gen)) __PYX_ERR(0, 1045, __pyx_L1_error)
+    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_11cpp_process_6generator, __pyx_codeobj__3, (PyObject *) __pyx_cur_scope, __pyx_n_s_extract_iter, __pyx_n_s_extract_iter, __pyx_n_s_cpp_process); if (unlikely(!gen)) __PYX_ERR(0, 1110, __pyx_L1_error)
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -13543,7 +14174,7 @@ static PyObject *__pyx_pf_11cpp_process_4extract_iter(CYTHON_UNUSED PyObject *__
 }
 static PyObject *__pyx_gb_11cpp_process_12extract_iter_2generator1(__pyx_CoroutineObject *__pyx_generator, CYTHON_UNUSED PyThreadState *__pyx_tstate, PyObject *__pyx_sent_value); /* proto */
 
-/* "cpp_process.pyx":1106
+/* "cpp_process.pyx":1171
  *     cdef size_t c_max = <size_t>-1
  * 
  *     def extract_iter_dict():             # <<<<<<<<<<<<<<
@@ -13579,7 +14210,7 @@ static PyObject *__pyx_pf_11cpp_process_12extract_iter_extract_iter_dict(PyObjec
   if (unlikely(!__pyx_cur_scope)) {
     __pyx_cur_scope = ((struct __pyx_obj_11cpp_process___pyx_scope_struct_1_extract_iter_dict *)Py_None);
     __Pyx_INCREF(Py_None);
-    __PYX_ERR(0, 1106, __pyx_L1_error)
+    __PYX_ERR(0, 1171, __pyx_L1_error)
   } else {
     __Pyx_GOTREF((PyObject *)__pyx_cur_scope);
   }
@@ -13587,7 +14218,7 @@ static PyObject *__pyx_pf_11cpp_process_12extract_iter_extract_iter_dict(PyObjec
   __Pyx_INCREF((PyObject *)__pyx_cur_scope->__pyx_outer_scope);
   __Pyx_GIVEREF((PyObject *)__pyx_cur_scope->__pyx_outer_scope);
   {
-    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_11cpp_process_12extract_iter_2generator1, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_extract_iter_dict, __pyx_n_s_extract_iter_locals_extract_iter, __pyx_n_s_cpp_process); if (unlikely(!gen)) __PYX_ERR(0, 1106, __pyx_L1_error)
+    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_11cpp_process_12extract_iter_2generator1, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_extract_iter_dict, __pyx_n_s_extract_iter_locals_extract_iter, __pyx_n_s_cpp_process); if (unlikely(!gen)) __PYX_ERR(0, 1171, __pyx_L1_error)
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -13625,28 +14256,28 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_2generator1(__pyx_Corouti
   __Pyx_RefNannySetupContext("extract_iter_dict", 0);
   switch (__pyx_generator->resume_label) {
     case 0: goto __pyx_L3_first_run;
-    case 1: goto __pyx_L9_resume_from_yield;
-    case 2: goto __pyx_L14_resume_from_yield;
+    case 1: goto __pyx_L10_resume_from_yield;
+    case 2: goto __pyx_L15_resume_from_yield;
     default: /* CPython raises the right error here */
     __Pyx_RefNannyFinishContext();
     return NULL;
   }
   __pyx_L3_first_run:;
-  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1106, __pyx_L1_error)
+  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1171, __pyx_L1_error)
 
-  /* "cpp_process.pyx":1114
+  /* "cpp_process.pyx":1179
  *         cdef double score
  * 
  *         if processor is not None:             # <<<<<<<<<<<<<<
  *             for choice_key, choice in choices.items():
  *                 if choice is None:
  */
-  if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1114, __pyx_L1_error) }
+  if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1179, __pyx_L1_error) }
   __pyx_t_1 = (__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor != Py_None);
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":1115
+    /* "cpp_process.pyx":1180
  * 
  *         if processor is not None:
  *             for choice_key, choice in choices.items():             # <<<<<<<<<<<<<<
@@ -13654,12 +14285,12 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_2generator1(__pyx_Corouti
  *                     continue
  */
     __pyx_t_4 = 0;
-    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1115, __pyx_L1_error) }
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1180, __pyx_L1_error) }
     if (unlikely(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices == Py_None)) {
       PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "items");
-      __PYX_ERR(0, 1115, __pyx_L1_error)
+      __PYX_ERR(0, 1180, __pyx_L1_error)
     }
-    __pyx_t_7 = __Pyx_dict_iterator(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_5), (&__pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1115, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_dict_iterator(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_5), (&__pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1180, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_XDECREF(__pyx_t_3);
     __pyx_t_3 = __pyx_t_7;
@@ -13667,7 +14298,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_2generator1(__pyx_Corouti
     while (1) {
       __pyx_t_9 = __Pyx_dict_iter_next(__pyx_t_3, __pyx_t_5, &__pyx_t_4, &__pyx_t_7, &__pyx_t_8, NULL, __pyx_t_6);
       if (unlikely(__pyx_t_9 == 0)) break;
-      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 1115, __pyx_L1_error)
+      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 1180, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_choice_key);
@@ -13679,7 +14310,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_2generator1(__pyx_Corouti
       __Pyx_GIVEREF(__pyx_t_8);
       __pyx_t_8 = 0;
 
-      /* "cpp_process.pyx":1116
+      /* "cpp_process.pyx":1181
  *         if processor is not None:
  *             for choice_key, choice in choices.items():
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -13690,16 +14321,16 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_2generator1(__pyx_Corouti
       __pyx_t_1 = (__pyx_t_2 != 0);
       if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":1117
+        /* "cpp_process.pyx":1182
  *             for choice_key, choice in choices.items():
  *                 if choice is None:
  *                     continue             # <<<<<<<<<<<<<<
  * 
- *                 score = ScorerContext.scorer(ScorerContext.context, processor(choice), c_score_cutoff)
+ *                 proc_choice = processor(choice)
  */
         goto __pyx_L5_continue;
 
-        /* "cpp_process.pyx":1116
+        /* "cpp_process.pyx":1181
  *         if processor is not None:
  *             for choice_key, choice in choices.items():
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -13708,14 +14339,14 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_2generator1(__pyx_Corouti
  */
       }
 
-      /* "cpp_process.pyx":1119
+      /* "cpp_process.pyx":1184
  *                     continue
  * 
- *                 score = ScorerContext.scorer(ScorerContext.context, processor(choice), c_score_cutoff)             # <<<<<<<<<<<<<<
- * 
- *                 if score >= score_cutoff:
+ *                 proc_choice = processor(choice)             # <<<<<<<<<<<<<<
+ *                 if proc_choice is None:
+ *                     continue
  */
-      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1119, __pyx_L1_error) }
+      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1184, __pyx_L1_error) }
       __Pyx_INCREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor);
       __pyx_t_7 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor; __pyx_t_10 = NULL;
       __pyx_t_9 = 0;
@@ -13733,45 +14364,99 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_2generator1(__pyx_Corouti
         PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_cur_scope->__pyx_v_choice};
         __pyx_t_8 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
         __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-        if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1119, __pyx_L1_error)
+        if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1184, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       }
+      __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_proc_choice);
+      __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_proc_choice, __pyx_t_8);
+      __Pyx_GIVEREF(__pyx_t_8);
+      __pyx_t_8 = 0;
+
+      /* "cpp_process.pyx":1185
+ * 
+ *                 proc_choice = processor(choice)
+ *                 if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                     continue
+ * 
+ */
+      __pyx_t_1 = (__pyx_cur_scope->__pyx_v_proc_choice == Py_None);
+      __pyx_t_2 = (__pyx_t_1 != 0);
+      if (__pyx_t_2) {
+
+        /* "cpp_process.pyx":1186
+ *                 proc_choice = processor(choice)
+ *                 if proc_choice is None:
+ *                     continue             # <<<<<<<<<<<<<<
+ * 
+ *                 validate_string(proc_choice, "choice must be a String or None")
+ */
+        goto __pyx_L5_continue;
+
+        /* "cpp_process.pyx":1185
+ * 
+ *                 proc_choice = processor(choice)
+ *                 if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                     continue
+ * 
+ */
+      }
+
+      /* "cpp_process.pyx":1188
+ *                     continue
+ * 
+ *                 validate_string(proc_choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ * 
+ *                 score = ScorerContext.scorer(ScorerContext.context, proc_choice, c_score_cutoff)
+ */
       try {
-        __pyx_t_11 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_ScorerContext.scorer(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_ScorerContext.context, __pyx_t_8, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff);
+        validate_string(__pyx_cur_scope->__pyx_v_proc_choice, ((char const *)"choice must be a String or None"));
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 1119, __pyx_L1_error)
+        __PYX_ERR(0, 1188, __pyx_L1_error)
       }
-      __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+
+      /* "cpp_process.pyx":1190
+ *                 validate_string(proc_choice, "choice must be a String or None")
+ * 
+ *                 score = ScorerContext.scorer(ScorerContext.context, proc_choice, c_score_cutoff)             # <<<<<<<<<<<<<<
+ * 
+ *                 if score >= score_cutoff:
+ */
+      try {
+        __pyx_t_11 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_ScorerContext.scorer(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_ScorerContext.context, __pyx_cur_scope->__pyx_v_proc_choice, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff);
+      } catch(...) {
+        __Pyx_CppExn2PyErr();
+        __PYX_ERR(0, 1190, __pyx_L1_error)
+      }
       __pyx_cur_scope->__pyx_v_score = __pyx_t_11;
 
-      /* "cpp_process.pyx":1121
- *                 score = ScorerContext.scorer(ScorerContext.context, processor(choice), c_score_cutoff)
+      /* "cpp_process.pyx":1192
+ *                 score = ScorerContext.scorer(ScorerContext.context, proc_choice, c_score_cutoff)
  * 
  *                 if score >= score_cutoff:             # <<<<<<<<<<<<<<
  *                     yield (choice, score, choice_key)
  *         else:
  */
-      __pyx_t_8 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_score); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1121, __pyx_L1_error)
+      __pyx_t_8 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_score); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1192, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
-      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_score_cutoff)) { __Pyx_RaiseClosureNameError("score_cutoff"); __PYX_ERR(0, 1121, __pyx_L1_error) }
-      __pyx_t_7 = PyObject_RichCompare(__pyx_t_8, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_score_cutoff, Py_GE); __Pyx_XGOTREF(__pyx_t_7); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1121, __pyx_L1_error)
+      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_score_cutoff)) { __Pyx_RaiseClosureNameError("score_cutoff"); __PYX_ERR(0, 1192, __pyx_L1_error) }
+      __pyx_t_7 = PyObject_RichCompare(__pyx_t_8, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_score_cutoff, Py_GE); __Pyx_XGOTREF(__pyx_t_7); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1192, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 1121, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 1192, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      if (__pyx_t_1) {
+      if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":1122
+        /* "cpp_process.pyx":1193
  * 
  *                 if score >= score_cutoff:
  *                     yield (choice, score, choice_key)             # <<<<<<<<<<<<<<
  *         else:
  *             for choice_key, choice in choices.items():
  */
-        __pyx_t_7 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_score); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1122, __pyx_L1_error)
+        __pyx_t_7 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_score); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1193, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
-        __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1122, __pyx_L1_error)
+        __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1193, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_INCREF(__pyx_cur_scope->__pyx_v_choice);
         __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_choice);
@@ -13795,17 +14480,17 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_2generator1(__pyx_Corouti
         /* return from generator, yielding value */
         __pyx_generator->resume_label = 1;
         return __pyx_r;
-        __pyx_L9_resume_from_yield:;
+        __pyx_L10_resume_from_yield:;
         __pyx_t_3 = __pyx_cur_scope->__pyx_t_0;
         __pyx_cur_scope->__pyx_t_0 = 0;
         __Pyx_XGOTREF(__pyx_t_3);
         __pyx_t_4 = __pyx_cur_scope->__pyx_t_1;
         __pyx_t_5 = __pyx_cur_scope->__pyx_t_2;
         __pyx_t_6 = __pyx_cur_scope->__pyx_t_3;
-        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1122, __pyx_L1_error)
+        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1193, __pyx_L1_error)
 
-        /* "cpp_process.pyx":1121
- *                 score = ScorerContext.scorer(ScorerContext.context, processor(choice), c_score_cutoff)
+        /* "cpp_process.pyx":1192
+ *                 score = ScorerContext.scorer(ScorerContext.context, proc_choice, c_score_cutoff)
  * 
  *                 if score >= score_cutoff:             # <<<<<<<<<<<<<<
  *                     yield (choice, score, choice_key)
@@ -13816,7 +14501,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_2generator1(__pyx_Corouti
     }
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "cpp_process.pyx":1114
+    /* "cpp_process.pyx":1179
  *         cdef double score
  * 
  *         if processor is not None:             # <<<<<<<<<<<<<<
@@ -13826,7 +14511,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_2generator1(__pyx_Corouti
     goto __pyx_L4;
   }
 
-  /* "cpp_process.pyx":1124
+  /* "cpp_process.pyx":1195
  *                     yield (choice, score, choice_key)
  *         else:
  *             for choice_key, choice in choices.items():             # <<<<<<<<<<<<<<
@@ -13835,12 +14520,12 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_2generator1(__pyx_Corouti
  */
   /*else*/ {
     __pyx_t_5 = 0;
-    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1124, __pyx_L1_error) }
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1195, __pyx_L1_error) }
     if (unlikely(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices == Py_None)) {
       PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "items");
-      __PYX_ERR(0, 1124, __pyx_L1_error)
+      __PYX_ERR(0, 1195, __pyx_L1_error)
     }
-    __pyx_t_8 = __Pyx_dict_iterator(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_4), (&__pyx_t_6)); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1124, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_dict_iterator(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_4), (&__pyx_t_6)); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1195, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_XDECREF(__pyx_t_3);
     __pyx_t_3 = __pyx_t_8;
@@ -13848,7 +14533,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_2generator1(__pyx_Corouti
     while (1) {
       __pyx_t_9 = __Pyx_dict_iter_next(__pyx_t_3, __pyx_t_4, &__pyx_t_5, &__pyx_t_8, &__pyx_t_7, NULL, __pyx_t_6);
       if (unlikely(__pyx_t_9 == 0)) break;
-      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 1124, __pyx_L1_error)
+      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 1195, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_choice_key);
@@ -13860,27 +14545,27 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_2generator1(__pyx_Corouti
       __Pyx_GIVEREF(__pyx_t_7);
       __pyx_t_7 = 0;
 
-      /* "cpp_process.pyx":1125
+      /* "cpp_process.pyx":1196
  *         else:
  *             for choice_key, choice in choices.items():
  *                 if choice is None:             # <<<<<<<<<<<<<<
  *                     continue
  * 
  */
-      __pyx_t_1 = (__pyx_cur_scope->__pyx_v_choice == Py_None);
-      __pyx_t_2 = (__pyx_t_1 != 0);
-      if (__pyx_t_2) {
+      __pyx_t_2 = (__pyx_cur_scope->__pyx_v_choice == Py_None);
+      __pyx_t_1 = (__pyx_t_2 != 0);
+      if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":1126
+        /* "cpp_process.pyx":1197
  *             for choice_key, choice in choices.items():
  *                 if choice is None:
  *                     continue             # <<<<<<<<<<<<<<
  * 
- *                 score = ScorerContext.scorer(ScorerContext.context, choice, c_score_cutoff)
+ *                 validate_string(choice, "choice must be a String or None")
  */
-        goto __pyx_L10_continue;
+        goto __pyx_L11_continue;
 
-        /* "cpp_process.pyx":1125
+        /* "cpp_process.pyx":1196
  *         else:
  *             for choice_key, choice in choices.items():
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -13889,9 +14574,23 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_2generator1(__pyx_Corouti
  */
       }
 
-      /* "cpp_process.pyx":1128
+      /* "cpp_process.pyx":1199
  *                     continue
  * 
+ *                 validate_string(choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ *                 score = ScorerContext.scorer(ScorerContext.context, choice, c_score_cutoff)
+ * 
+ */
+      try {
+        validate_string(__pyx_cur_scope->__pyx_v_choice, ((char const *)"choice must be a String or None"));
+      } catch(...) {
+        __Pyx_CppExn2PyErr();
+        __PYX_ERR(0, 1199, __pyx_L1_error)
+      }
+
+      /* "cpp_process.pyx":1200
+ * 
+ *                 validate_string(choice, "choice must be a String or None")
  *                 score = ScorerContext.scorer(ScorerContext.context, choice, c_score_cutoff)             # <<<<<<<<<<<<<<
  * 
  *                 if score >= score_cutoff:
@@ -13900,36 +14599,36 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_2generator1(__pyx_Corouti
         __pyx_t_11 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_ScorerContext.scorer(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_ScorerContext.context, __pyx_cur_scope->__pyx_v_choice, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 1128, __pyx_L1_error)
+        __PYX_ERR(0, 1200, __pyx_L1_error)
       }
       __pyx_cur_scope->__pyx_v_score = __pyx_t_11;
 
-      /* "cpp_process.pyx":1130
+      /* "cpp_process.pyx":1202
  *                 score = ScorerContext.scorer(ScorerContext.context, choice, c_score_cutoff)
  * 
  *                 if score >= score_cutoff:             # <<<<<<<<<<<<<<
  *                     yield (choice, score, choice_key)
  * 
  */
-      __pyx_t_7 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_score); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1130, __pyx_L1_error)
+      __pyx_t_7 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_score); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1202, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
-      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_score_cutoff)) { __Pyx_RaiseClosureNameError("score_cutoff"); __PYX_ERR(0, 1130, __pyx_L1_error) }
-      __pyx_t_8 = PyObject_RichCompare(__pyx_t_7, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_score_cutoff, Py_GE); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1130, __pyx_L1_error)
+      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_score_cutoff)) { __Pyx_RaiseClosureNameError("score_cutoff"); __PYX_ERR(0, 1202, __pyx_L1_error) }
+      __pyx_t_8 = PyObject_RichCompare(__pyx_t_7, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_score_cutoff, Py_GE); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1202, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 1130, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 1202, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      if (__pyx_t_2) {
+      if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":1131
+        /* "cpp_process.pyx":1203
  * 
  *                 if score >= score_cutoff:
  *                     yield (choice, score, choice_key)             # <<<<<<<<<<<<<<
  * 
  *     def extract_iter_list():
  */
-        __pyx_t_8 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_score); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1131, __pyx_L1_error)
+        __pyx_t_8 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_score); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1203, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
-        __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1131, __pyx_L1_error)
+        __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1203, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
         __Pyx_INCREF(__pyx_cur_scope->__pyx_v_choice);
         __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_choice);
@@ -13953,16 +14652,16 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_2generator1(__pyx_Corouti
         /* return from generator, yielding value */
         __pyx_generator->resume_label = 2;
         return __pyx_r;
-        __pyx_L14_resume_from_yield:;
+        __pyx_L15_resume_from_yield:;
         __pyx_t_3 = __pyx_cur_scope->__pyx_t_0;
         __pyx_cur_scope->__pyx_t_0 = 0;
         __Pyx_XGOTREF(__pyx_t_3);
         __pyx_t_4 = __pyx_cur_scope->__pyx_t_1;
         __pyx_t_5 = __pyx_cur_scope->__pyx_t_2;
         __pyx_t_6 = __pyx_cur_scope->__pyx_t_3;
-        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1131, __pyx_L1_error)
+        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1203, __pyx_L1_error)
 
-        /* "cpp_process.pyx":1130
+        /* "cpp_process.pyx":1202
  *                 score = ScorerContext.scorer(ScorerContext.context, choice, c_score_cutoff)
  * 
  *                 if score >= score_cutoff:             # <<<<<<<<<<<<<<
@@ -13970,14 +14669,14 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_2generator1(__pyx_Corouti
  * 
  */
       }
-      __pyx_L10_continue:;
+      __pyx_L11_continue:;
     }
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   }
   __pyx_L4:;
   CYTHON_MAYBE_UNUSED_VAR(__pyx_cur_scope);
 
-  /* "cpp_process.pyx":1106
+  /* "cpp_process.pyx":1171
  *     cdef size_t c_max = <size_t>-1
  * 
  *     def extract_iter_dict():             # <<<<<<<<<<<<<<
@@ -14007,7 +14706,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_2generator1(__pyx_Corouti
 }
 static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_CoroutineObject *__pyx_generator, CYTHON_UNUSED PyThreadState *__pyx_tstate, PyObject *__pyx_sent_value); /* proto */
 
-/* "cpp_process.pyx":1133
+/* "cpp_process.pyx":1205
  *                     yield (choice, score, choice_key)
  * 
  *     def extract_iter_list():             # <<<<<<<<<<<<<<
@@ -14043,7 +14742,7 @@ static PyObject *__pyx_pf_11cpp_process_12extract_iter_3extract_iter_list(PyObje
   if (unlikely(!__pyx_cur_scope)) {
     __pyx_cur_scope = ((struct __pyx_obj_11cpp_process___pyx_scope_struct_2_extract_iter_list *)Py_None);
     __Pyx_INCREF(Py_None);
-    __PYX_ERR(0, 1133, __pyx_L1_error)
+    __PYX_ERR(0, 1205, __pyx_L1_error)
   } else {
     __Pyx_GOTREF((PyObject *)__pyx_cur_scope);
   }
@@ -14051,7 +14750,7 @@ static PyObject *__pyx_pf_11cpp_process_12extract_iter_3extract_iter_list(PyObje
   __Pyx_INCREF((PyObject *)__pyx_cur_scope->__pyx_outer_scope);
   __Pyx_GIVEREF((PyObject *)__pyx_cur_scope->__pyx_outer_scope);
   {
-    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_11cpp_process_12extract_iter_5generator2, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_extract_iter_list, __pyx_n_s_extract_iter_locals_extract_iter_2, __pyx_n_s_cpp_process); if (unlikely(!gen)) __PYX_ERR(0, 1133, __pyx_L1_error)
+    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_11cpp_process_12extract_iter_5generator2, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_extract_iter_list, __pyx_n_s_extract_iter_locals_extract_iter_2, __pyx_n_s_cpp_process); if (unlikely(!gen)) __PYX_ERR(0, 1205, __pyx_L1_error)
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -14088,16 +14787,16 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_Corouti
   __Pyx_RefNannySetupContext("extract_iter_list", 0);
   switch (__pyx_generator->resume_label) {
     case 0: goto __pyx_L3_first_run;
-    case 1: goto __pyx_L9_resume_from_yield;
-    case 2: goto __pyx_L14_resume_from_yield;
+    case 1: goto __pyx_L10_resume_from_yield;
+    case 2: goto __pyx_L15_resume_from_yield;
     default: /* CPython raises the right error here */
     __Pyx_RefNannyFinishContext();
     return NULL;
   }
   __pyx_L3_first_run:;
-  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1133, __pyx_L1_error)
+  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1205, __pyx_L1_error)
 
-  /* "cpp_process.pyx":1139
+  /* "cpp_process.pyx":1211
  *           - scorer = normalized scorer implemented in C++
  *         """
  *         cdef size_t i = 0             # <<<<<<<<<<<<<<
@@ -14106,50 +14805,50 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_Corouti
  */
   __pyx_cur_scope->__pyx_v_i = 0;
 
-  /* "cpp_process.pyx":1142
+  /* "cpp_process.pyx":1214
  *         cdef double score
  * 
  *         if processor is not None:             # <<<<<<<<<<<<<<
  *             for choice in choices:
  *                 if choice is None:
  */
-  if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1142, __pyx_L1_error) }
+  if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1214, __pyx_L1_error) }
   __pyx_t_1 = (__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor != Py_None);
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":1143
+    /* "cpp_process.pyx":1215
  * 
  *         if processor is not None:
  *             for choice in choices:             # <<<<<<<<<<<<<<
  *                 if choice is None:
  *                     i += 1
  */
-    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1143, __pyx_L1_error) }
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1215, __pyx_L1_error) }
     if (likely(PyList_CheckExact(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) || PyTuple_CheckExact(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) {
       __pyx_t_3 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices; __Pyx_INCREF(__pyx_t_3); __pyx_t_4 = 0;
       __pyx_t_5 = NULL;
     } else {
-      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1143, __pyx_L1_error)
+      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1215, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1143, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1215, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_5)) {
         if (likely(PyList_CheckExact(__pyx_t_3))) {
           if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1143, __pyx_L1_error)
+          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1215, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1143, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1215, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         } else {
           if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1143, __pyx_L1_error)
+          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1215, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1143, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1215, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         }
@@ -14159,7 +14858,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_Corouti
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 1143, __pyx_L1_error)
+            else __PYX_ERR(0, 1215, __pyx_L1_error)
           }
           break;
         }
@@ -14170,7 +14869,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_Corouti
       __Pyx_GIVEREF(__pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "cpp_process.pyx":1144
+      /* "cpp_process.pyx":1216
  *         if processor is not None:
  *             for choice in choices:
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -14181,7 +14880,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_Corouti
       __pyx_t_1 = (__pyx_t_2 != 0);
       if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":1145
+        /* "cpp_process.pyx":1217
  *             for choice in choices:
  *                 if choice is None:
  *                     i += 1             # <<<<<<<<<<<<<<
@@ -14190,16 +14889,16 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_Corouti
  */
         __pyx_cur_scope->__pyx_v_i = (__pyx_cur_scope->__pyx_v_i + 1);
 
-        /* "cpp_process.pyx":1146
+        /* "cpp_process.pyx":1218
  *                 if choice is None:
  *                     i += 1
  *                     continue             # <<<<<<<<<<<<<<
  * 
- *                 score = ScorerContext.scorer(ScorerContext.context, processor(choice), c_score_cutoff)
+ *                 proc_choice = processor(choice)
  */
         goto __pyx_L5_continue;
 
-        /* "cpp_process.pyx":1144
+        /* "cpp_process.pyx":1216
  *         if processor is not None:
  *             for choice in choices:
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -14208,14 +14907,14 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_Corouti
  */
       }
 
-      /* "cpp_process.pyx":1148
+      /* "cpp_process.pyx":1220
  *                     continue
  * 
- *                 score = ScorerContext.scorer(ScorerContext.context, processor(choice), c_score_cutoff)             # <<<<<<<<<<<<<<
- * 
- *                 if score >= c_score_cutoff:
+ *                 proc_choice = processor(choice)             # <<<<<<<<<<<<<<
+ *                 if proc_choice is None:
+ *                     i += 1
  */
-      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1148, __pyx_L1_error) }
+      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1220, __pyx_L1_error) }
       __Pyx_INCREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor);
       __pyx_t_7 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor; __pyx_t_8 = NULL;
       __pyx_t_9 = 0;
@@ -14233,41 +14932,104 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_Corouti
         PyObject *__pyx_callargs[2] = {__pyx_t_8, __pyx_cur_scope->__pyx_v_choice};
         __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-        if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1148, __pyx_L1_error)
+        if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1220, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       }
+      __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_proc_choice);
+      __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_proc_choice, __pyx_t_6);
+      __Pyx_GIVEREF(__pyx_t_6);
+      __pyx_t_6 = 0;
+
+      /* "cpp_process.pyx":1221
+ * 
+ *                 proc_choice = processor(choice)
+ *                 if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                     i += 1
+ *                     continue
+ */
+      __pyx_t_1 = (__pyx_cur_scope->__pyx_v_proc_choice == Py_None);
+      __pyx_t_2 = (__pyx_t_1 != 0);
+      if (__pyx_t_2) {
+
+        /* "cpp_process.pyx":1222
+ *                 proc_choice = processor(choice)
+ *                 if proc_choice is None:
+ *                     i += 1             # <<<<<<<<<<<<<<
+ *                     continue
+ * 
+ */
+        __pyx_cur_scope->__pyx_v_i = (__pyx_cur_scope->__pyx_v_i + 1);
+
+        /* "cpp_process.pyx":1223
+ *                 if proc_choice is None:
+ *                     i += 1
+ *                     continue             # <<<<<<<<<<<<<<
+ * 
+ *                 validate_string(proc_choice, "choice must be a String or None")
+ */
+        goto __pyx_L5_continue;
+
+        /* "cpp_process.pyx":1221
+ * 
+ *                 proc_choice = processor(choice)
+ *                 if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                     i += 1
+ *                     continue
+ */
+      }
+
+      /* "cpp_process.pyx":1225
+ *                     continue
+ * 
+ *                 validate_string(proc_choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ * 
+ *                 score = ScorerContext.scorer(ScorerContext.context, proc_choice, c_score_cutoff)
+ */
       try {
-        __pyx_t_10 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_ScorerContext.scorer(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_ScorerContext.context, __pyx_t_6, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff);
+        validate_string(__pyx_cur_scope->__pyx_v_proc_choice, ((char const *)"choice must be a String or None"));
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 1148, __pyx_L1_error)
+        __PYX_ERR(0, 1225, __pyx_L1_error)
       }
-      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+
+      /* "cpp_process.pyx":1227
+ *                 validate_string(proc_choice, "choice must be a String or None")
+ * 
+ *                 score = ScorerContext.scorer(ScorerContext.context, proc_choice, c_score_cutoff)             # <<<<<<<<<<<<<<
+ * 
+ *                 if score >= c_score_cutoff:
+ */
+      try {
+        __pyx_t_10 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_ScorerContext.scorer(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_ScorerContext.context, __pyx_cur_scope->__pyx_v_proc_choice, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff);
+      } catch(...) {
+        __Pyx_CppExn2PyErr();
+        __PYX_ERR(0, 1227, __pyx_L1_error)
+      }
       __pyx_cur_scope->__pyx_v_score = __pyx_t_10;
 
-      /* "cpp_process.pyx":1150
- *                 score = ScorerContext.scorer(ScorerContext.context, processor(choice), c_score_cutoff)
+      /* "cpp_process.pyx":1229
+ *                 score = ScorerContext.scorer(ScorerContext.context, proc_choice, c_score_cutoff)
  * 
  *                 if score >= c_score_cutoff:             # <<<<<<<<<<<<<<
  *                     yield (choice, score, i)
  *                 i += 1
  */
-      __pyx_t_1 = ((__pyx_cur_scope->__pyx_v_score >= __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff) != 0);
-      if (__pyx_t_1) {
+      __pyx_t_2 = ((__pyx_cur_scope->__pyx_v_score >= __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff) != 0);
+      if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":1151
+        /* "cpp_process.pyx":1230
  * 
  *                 if score >= c_score_cutoff:
  *                     yield (choice, score, i)             # <<<<<<<<<<<<<<
  *                 i += 1
  *         else:
  */
-        __pyx_t_6 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_score); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1151, __pyx_L1_error)
+        __pyx_t_6 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_score); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1230, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
-        __pyx_t_7 = __Pyx_PyInt_FromSize_t(__pyx_cur_scope->__pyx_v_i); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1151, __pyx_L1_error)
+        __pyx_t_7 = __Pyx_PyInt_FromSize_t(__pyx_cur_scope->__pyx_v_i); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1230, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
-        __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1151, __pyx_L1_error)
+        __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1230, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_INCREF(__pyx_cur_scope->__pyx_v_choice);
         __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_choice);
@@ -14290,16 +15052,16 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_Corouti
         /* return from generator, yielding value */
         __pyx_generator->resume_label = 1;
         return __pyx_r;
-        __pyx_L9_resume_from_yield:;
+        __pyx_L10_resume_from_yield:;
         __pyx_t_3 = __pyx_cur_scope->__pyx_t_0;
         __pyx_cur_scope->__pyx_t_0 = 0;
         __Pyx_XGOTREF(__pyx_t_3);
         __pyx_t_4 = __pyx_cur_scope->__pyx_t_1;
         __pyx_t_5 = __pyx_cur_scope->__pyx_t_2;
-        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1151, __pyx_L1_error)
+        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1230, __pyx_L1_error)
 
-        /* "cpp_process.pyx":1150
- *                 score = ScorerContext.scorer(ScorerContext.context, processor(choice), c_score_cutoff)
+        /* "cpp_process.pyx":1229
+ *                 score = ScorerContext.scorer(ScorerContext.context, proc_choice, c_score_cutoff)
  * 
  *                 if score >= c_score_cutoff:             # <<<<<<<<<<<<<<
  *                     yield (choice, score, i)
@@ -14307,7 +15069,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_Corouti
  */
       }
 
-      /* "cpp_process.pyx":1152
+      /* "cpp_process.pyx":1231
  *                 if score >= c_score_cutoff:
  *                     yield (choice, score, i)
  *                 i += 1             # <<<<<<<<<<<<<<
@@ -14316,7 +15078,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_Corouti
  */
       __pyx_cur_scope->__pyx_v_i = (__pyx_cur_scope->__pyx_v_i + 1);
 
-      /* "cpp_process.pyx":1143
+      /* "cpp_process.pyx":1215
  * 
  *         if processor is not None:
  *             for choice in choices:             # <<<<<<<<<<<<<<
@@ -14327,7 +15089,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_Corouti
     }
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "cpp_process.pyx":1142
+    /* "cpp_process.pyx":1214
  *         cdef double score
  * 
  *         if processor is not None:             # <<<<<<<<<<<<<<
@@ -14337,7 +15099,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_Corouti
     goto __pyx_L4;
   }
 
-  /* "cpp_process.pyx":1154
+  /* "cpp_process.pyx":1233
  *                 i += 1
  *         else:
  *             for choice in choices:             # <<<<<<<<<<<<<<
@@ -14345,31 +15107,31 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_Corouti
  *                     i += 1
  */
   /*else*/ {
-    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1154, __pyx_L1_error) }
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1233, __pyx_L1_error) }
     if (likely(PyList_CheckExact(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) || PyTuple_CheckExact(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) {
       __pyx_t_3 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices; __Pyx_INCREF(__pyx_t_3); __pyx_t_4 = 0;
       __pyx_t_5 = NULL;
     } else {
-      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1154, __pyx_L1_error)
+      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1233, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1154, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1233, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_5)) {
         if (likely(PyList_CheckExact(__pyx_t_3))) {
           if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_8 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_8); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1154, __pyx_L1_error)
+          __pyx_t_8 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_8); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1233, __pyx_L1_error)
           #else
-          __pyx_t_8 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1154, __pyx_L1_error)
+          __pyx_t_8 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1233, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
           #endif
         } else {
           if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_8 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_8); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1154, __pyx_L1_error)
+          __pyx_t_8 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_8); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1233, __pyx_L1_error)
           #else
-          __pyx_t_8 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1154, __pyx_L1_error)
+          __pyx_t_8 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1233, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
           #endif
         }
@@ -14379,7 +15141,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_Corouti
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 1154, __pyx_L1_error)
+            else __PYX_ERR(0, 1233, __pyx_L1_error)
           }
           break;
         }
@@ -14390,18 +15152,18 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_Corouti
       __Pyx_GIVEREF(__pyx_t_8);
       __pyx_t_8 = 0;
 
-      /* "cpp_process.pyx":1155
+      /* "cpp_process.pyx":1234
  *         else:
  *             for choice in choices:
  *                 if choice is None:             # <<<<<<<<<<<<<<
  *                     i += 1
  *                     continue
  */
-      __pyx_t_1 = (__pyx_cur_scope->__pyx_v_choice == Py_None);
-      __pyx_t_2 = (__pyx_t_1 != 0);
-      if (__pyx_t_2) {
+      __pyx_t_2 = (__pyx_cur_scope->__pyx_v_choice == Py_None);
+      __pyx_t_1 = (__pyx_t_2 != 0);
+      if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":1156
+        /* "cpp_process.pyx":1235
  *             for choice in choices:
  *                 if choice is None:
  *                     i += 1             # <<<<<<<<<<<<<<
@@ -14410,16 +15172,16 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_Corouti
  */
         __pyx_cur_scope->__pyx_v_i = (__pyx_cur_scope->__pyx_v_i + 1);
 
-        /* "cpp_process.pyx":1157
+        /* "cpp_process.pyx":1236
  *                 if choice is None:
  *                     i += 1
  *                     continue             # <<<<<<<<<<<<<<
  * 
- *                 score = ScorerContext.scorer(ScorerContext.context, choice, c_score_cutoff)
+ *                 validate_string(choice, "choice must be a String or None")
  */
-        goto __pyx_L10_continue;
+        goto __pyx_L11_continue;
 
-        /* "cpp_process.pyx":1155
+        /* "cpp_process.pyx":1234
  *         else:
  *             for choice in choices:
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -14428,9 +15190,23 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_Corouti
  */
       }
 
-      /* "cpp_process.pyx":1159
+      /* "cpp_process.pyx":1238
  *                     continue
  * 
+ *                 validate_string(choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ *                 score = ScorerContext.scorer(ScorerContext.context, choice, c_score_cutoff)
+ * 
+ */
+      try {
+        validate_string(__pyx_cur_scope->__pyx_v_choice, ((char const *)"choice must be a String or None"));
+      } catch(...) {
+        __Pyx_CppExn2PyErr();
+        __PYX_ERR(0, 1238, __pyx_L1_error)
+      }
+
+      /* "cpp_process.pyx":1239
+ * 
+ *                 validate_string(choice, "choice must be a String or None")
  *                 score = ScorerContext.scorer(ScorerContext.context, choice, c_score_cutoff)             # <<<<<<<<<<<<<<
  * 
  *                 if score >= c_score_cutoff:
@@ -14439,32 +15215,32 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_Corouti
         __pyx_t_10 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_ScorerContext.scorer(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_ScorerContext.context, __pyx_cur_scope->__pyx_v_choice, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 1159, __pyx_L1_error)
+        __PYX_ERR(0, 1239, __pyx_L1_error)
       }
       __pyx_cur_scope->__pyx_v_score = __pyx_t_10;
 
-      /* "cpp_process.pyx":1161
+      /* "cpp_process.pyx":1241
  *                 score = ScorerContext.scorer(ScorerContext.context, choice, c_score_cutoff)
  * 
  *                 if score >= c_score_cutoff:             # <<<<<<<<<<<<<<
  *                     yield (choice, score, i)
  *                 i += 1
  */
-      __pyx_t_2 = ((__pyx_cur_scope->__pyx_v_score >= __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff) != 0);
-      if (__pyx_t_2) {
+      __pyx_t_1 = ((__pyx_cur_scope->__pyx_v_score >= __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff) != 0);
+      if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":1162
+        /* "cpp_process.pyx":1242
  * 
  *                 if score >= c_score_cutoff:
  *                     yield (choice, score, i)             # <<<<<<<<<<<<<<
  *                 i += 1
  * 
  */
-        __pyx_t_8 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_score); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1162, __pyx_L1_error)
+        __pyx_t_8 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_score); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1242, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
-        __pyx_t_7 = __Pyx_PyInt_FromSize_t(__pyx_cur_scope->__pyx_v_i); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1162, __pyx_L1_error)
+        __pyx_t_7 = __Pyx_PyInt_FromSize_t(__pyx_cur_scope->__pyx_v_i); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1242, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
-        __pyx_t_6 = PyTuple_New(3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1162, __pyx_L1_error)
+        __pyx_t_6 = PyTuple_New(3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1242, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_INCREF(__pyx_cur_scope->__pyx_v_choice);
         __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_choice);
@@ -14487,15 +15263,15 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_Corouti
         /* return from generator, yielding value */
         __pyx_generator->resume_label = 2;
         return __pyx_r;
-        __pyx_L14_resume_from_yield:;
+        __pyx_L15_resume_from_yield:;
         __pyx_t_3 = __pyx_cur_scope->__pyx_t_0;
         __pyx_cur_scope->__pyx_t_0 = 0;
         __Pyx_XGOTREF(__pyx_t_3);
         __pyx_t_4 = __pyx_cur_scope->__pyx_t_1;
         __pyx_t_5 = __pyx_cur_scope->__pyx_t_2;
-        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1162, __pyx_L1_error)
+        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1242, __pyx_L1_error)
 
-        /* "cpp_process.pyx":1161
+        /* "cpp_process.pyx":1241
  *                 score = ScorerContext.scorer(ScorerContext.context, choice, c_score_cutoff)
  * 
  *                 if score >= c_score_cutoff:             # <<<<<<<<<<<<<<
@@ -14504,7 +15280,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_Corouti
  */
       }
 
-      /* "cpp_process.pyx":1163
+      /* "cpp_process.pyx":1243
  *                 if score >= c_score_cutoff:
  *                     yield (choice, score, i)
  *                 i += 1             # <<<<<<<<<<<<<<
@@ -14513,21 +15289,21 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_Corouti
  */
       __pyx_cur_scope->__pyx_v_i = (__pyx_cur_scope->__pyx_v_i + 1);
 
-      /* "cpp_process.pyx":1154
+      /* "cpp_process.pyx":1233
  *                 i += 1
  *         else:
  *             for choice in choices:             # <<<<<<<<<<<<<<
  *                 if choice is None:
  *                     i += 1
  */
-      __pyx_L10_continue:;
+      __pyx_L11_continue:;
     }
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   }
   __pyx_L4:;
   CYTHON_MAYBE_UNUSED_VAR(__pyx_cur_scope);
 
-  /* "cpp_process.pyx":1133
+  /* "cpp_process.pyx":1205
  *                     yield (choice, score, choice_key)
  * 
  *     def extract_iter_list():             # <<<<<<<<<<<<<<
@@ -14557,7 +15333,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_5generator2(__pyx_Corouti
 }
 static PyObject *__pyx_gb_11cpp_process_12extract_iter_8generator3(__pyx_CoroutineObject *__pyx_generator, CYTHON_UNUSED PyThreadState *__pyx_tstate, PyObject *__pyx_sent_value); /* proto */
 
-/* "cpp_process.pyx":1165
+/* "cpp_process.pyx":1245
  *                 i += 1
  * 
  *     def extract_iter_distance_dict():             # <<<<<<<<<<<<<<
@@ -14593,7 +15369,7 @@ static PyObject *__pyx_pf_11cpp_process_12extract_iter_6extract_iter_distance_di
   if (unlikely(!__pyx_cur_scope)) {
     __pyx_cur_scope = ((struct __pyx_obj_11cpp_process___pyx_scope_struct_3_extract_iter_distance_dict *)Py_None);
     __Pyx_INCREF(Py_None);
-    __PYX_ERR(0, 1165, __pyx_L1_error)
+    __PYX_ERR(0, 1245, __pyx_L1_error)
   } else {
     __Pyx_GOTREF((PyObject *)__pyx_cur_scope);
   }
@@ -14601,7 +15377,7 @@ static PyObject *__pyx_pf_11cpp_process_12extract_iter_6extract_iter_distance_di
   __Pyx_INCREF((PyObject *)__pyx_cur_scope->__pyx_outer_scope);
   __Pyx_GIVEREF((PyObject *)__pyx_cur_scope->__pyx_outer_scope);
   {
-    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_11cpp_process_12extract_iter_8generator3, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_extract_iter_distance_dict, __pyx_n_s_extract_iter_locals_extract_iter_3, __pyx_n_s_cpp_process); if (unlikely(!gen)) __PYX_ERR(0, 1165, __pyx_L1_error)
+    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_11cpp_process_12extract_iter_8generator3, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_extract_iter_distance_dict, __pyx_n_s_extract_iter_locals_extract_iter_3, __pyx_n_s_cpp_process); if (unlikely(!gen)) __PYX_ERR(0, 1245, __pyx_L1_error)
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -14639,28 +15415,28 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_8generator3(__pyx_Corouti
   __Pyx_RefNannySetupContext("extract_iter_distance_dict", 0);
   switch (__pyx_generator->resume_label) {
     case 0: goto __pyx_L3_first_run;
-    case 1: goto __pyx_L9_resume_from_yield;
-    case 2: goto __pyx_L14_resume_from_yield;
+    case 1: goto __pyx_L10_resume_from_yield;
+    case 2: goto __pyx_L15_resume_from_yield;
     default: /* CPython raises the right error here */
     __Pyx_RefNannyFinishContext();
     return NULL;
   }
   __pyx_L3_first_run:;
-  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1165, __pyx_L1_error)
+  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1245, __pyx_L1_error)
 
-  /* "cpp_process.pyx":1173
+  /* "cpp_process.pyx":1253
  *         cdef size_t distance
  * 
  *         if processor is not None:             # <<<<<<<<<<<<<<
  *             for choice_key, choice in choices.items():
  *                 if choice is None:
  */
-  if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1173, __pyx_L1_error) }
+  if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1253, __pyx_L1_error) }
   __pyx_t_1 = (__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor != Py_None);
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":1174
+    /* "cpp_process.pyx":1254
  * 
  *         if processor is not None:
  *             for choice_key, choice in choices.items():             # <<<<<<<<<<<<<<
@@ -14668,12 +15444,12 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_8generator3(__pyx_Corouti
  *                     continue
  */
     __pyx_t_4 = 0;
-    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1174, __pyx_L1_error) }
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1254, __pyx_L1_error) }
     if (unlikely(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices == Py_None)) {
       PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "items");
-      __PYX_ERR(0, 1174, __pyx_L1_error)
+      __PYX_ERR(0, 1254, __pyx_L1_error)
     }
-    __pyx_t_7 = __Pyx_dict_iterator(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_5), (&__pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1174, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_dict_iterator(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_5), (&__pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1254, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_XDECREF(__pyx_t_3);
     __pyx_t_3 = __pyx_t_7;
@@ -14681,7 +15457,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_8generator3(__pyx_Corouti
     while (1) {
       __pyx_t_9 = __Pyx_dict_iter_next(__pyx_t_3, __pyx_t_5, &__pyx_t_4, &__pyx_t_7, &__pyx_t_8, NULL, __pyx_t_6);
       if (unlikely(__pyx_t_9 == 0)) break;
-      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 1174, __pyx_L1_error)
+      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 1254, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_choice_key);
@@ -14693,7 +15469,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_8generator3(__pyx_Corouti
       __Pyx_GIVEREF(__pyx_t_8);
       __pyx_t_8 = 0;
 
-      /* "cpp_process.pyx":1175
+      /* "cpp_process.pyx":1255
  *         if processor is not None:
  *             for choice_key, choice in choices.items():
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -14704,16 +15480,16 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_8generator3(__pyx_Corouti
       __pyx_t_1 = (__pyx_t_2 != 0);
       if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":1176
+        /* "cpp_process.pyx":1256
  *             for choice_key, choice in choices.items():
  *                 if choice is None:
  *                     continue             # <<<<<<<<<<<<<<
  * 
- *                 distance = DistanceContext.scorer(DistanceContext.context, processor(choice), c_max)
+ *                 proc_choice = processor(choice)
  */
         goto __pyx_L5_continue;
 
-        /* "cpp_process.pyx":1175
+        /* "cpp_process.pyx":1255
  *         if processor is not None:
  *             for choice_key, choice in choices.items():
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -14722,14 +15498,14 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_8generator3(__pyx_Corouti
  */
       }
 
-      /* "cpp_process.pyx":1178
+      /* "cpp_process.pyx":1258
  *                     continue
  * 
- *                 distance = DistanceContext.scorer(DistanceContext.context, processor(choice), c_max)             # <<<<<<<<<<<<<<
- * 
- *                 if distance <= c_max:
+ *                 proc_choice = processor(choice)             # <<<<<<<<<<<<<<
+ *                 if proc_choice is None:
+ *                     continue
  */
-      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1178, __pyx_L1_error) }
+      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1258, __pyx_L1_error) }
       __Pyx_INCREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor);
       __pyx_t_7 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor; __pyx_t_10 = NULL;
       __pyx_t_9 = 0;
@@ -14747,39 +15523,93 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_8generator3(__pyx_Corouti
         PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_cur_scope->__pyx_v_choice};
         __pyx_t_8 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
         __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-        if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1178, __pyx_L1_error)
+        if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1258, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       }
+      __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_proc_choice);
+      __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_proc_choice, __pyx_t_8);
+      __Pyx_GIVEREF(__pyx_t_8);
+      __pyx_t_8 = 0;
+
+      /* "cpp_process.pyx":1259
+ * 
+ *                 proc_choice = processor(choice)
+ *                 if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                     continue
+ * 
+ */
+      __pyx_t_1 = (__pyx_cur_scope->__pyx_v_proc_choice == Py_None);
+      __pyx_t_2 = (__pyx_t_1 != 0);
+      if (__pyx_t_2) {
+
+        /* "cpp_process.pyx":1260
+ *                 proc_choice = processor(choice)
+ *                 if proc_choice is None:
+ *                     continue             # <<<<<<<<<<<<<<
+ * 
+ *                 validate_string(proc_choice, "choice must be a String or None")
+ */
+        goto __pyx_L5_continue;
+
+        /* "cpp_process.pyx":1259
+ * 
+ *                 proc_choice = processor(choice)
+ *                 if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                     continue
+ * 
+ */
+      }
+
+      /* "cpp_process.pyx":1262
+ *                     continue
+ * 
+ *                 validate_string(proc_choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ * 
+ *                 distance = DistanceContext.scorer(DistanceContext.context, proc_choice, c_max)
+ */
       try {
-        __pyx_t_11 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_DistanceContext.scorer(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_DistanceContext.context, __pyx_t_8, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_max);
+        validate_string(__pyx_cur_scope->__pyx_v_proc_choice, ((char const *)"choice must be a String or None"));
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 1178, __pyx_L1_error)
+        __PYX_ERR(0, 1262, __pyx_L1_error)
       }
-      __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+
+      /* "cpp_process.pyx":1264
+ *                 validate_string(proc_choice, "choice must be a String or None")
+ * 
+ *                 distance = DistanceContext.scorer(DistanceContext.context, proc_choice, c_max)             # <<<<<<<<<<<<<<
+ * 
+ *                 if distance <= c_max:
+ */
+      try {
+        __pyx_t_11 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_DistanceContext.scorer(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_DistanceContext.context, __pyx_cur_scope->__pyx_v_proc_choice, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_max);
+      } catch(...) {
+        __Pyx_CppExn2PyErr();
+        __PYX_ERR(0, 1264, __pyx_L1_error)
+      }
       __pyx_cur_scope->__pyx_v_distance = __pyx_t_11;
 
-      /* "cpp_process.pyx":1180
- *                 distance = DistanceContext.scorer(DistanceContext.context, processor(choice), c_max)
+      /* "cpp_process.pyx":1266
+ *                 distance = DistanceContext.scorer(DistanceContext.context, proc_choice, c_max)
  * 
  *                 if distance <= c_max:             # <<<<<<<<<<<<<<
  *                     yield (choice, distance, choice_key)
  *         else:
  */
-      __pyx_t_1 = ((__pyx_cur_scope->__pyx_v_distance <= __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_max) != 0);
-      if (__pyx_t_1) {
+      __pyx_t_2 = ((__pyx_cur_scope->__pyx_v_distance <= __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_max) != 0);
+      if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":1181
+        /* "cpp_process.pyx":1267
  * 
  *                 if distance <= c_max:
  *                     yield (choice, distance, choice_key)             # <<<<<<<<<<<<<<
  *         else:
  *             for choice_key, choice in choices.items():
  */
-        __pyx_t_8 = __Pyx_PyInt_FromSize_t(__pyx_cur_scope->__pyx_v_distance); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1181, __pyx_L1_error)
+        __pyx_t_8 = __Pyx_PyInt_FromSize_t(__pyx_cur_scope->__pyx_v_distance); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1267, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
-        __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1181, __pyx_L1_error)
+        __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1267, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
         __Pyx_INCREF(__pyx_cur_scope->__pyx_v_choice);
         __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_choice);
@@ -14803,17 +15633,17 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_8generator3(__pyx_Corouti
         /* return from generator, yielding value */
         __pyx_generator->resume_label = 1;
         return __pyx_r;
-        __pyx_L9_resume_from_yield:;
+        __pyx_L10_resume_from_yield:;
         __pyx_t_3 = __pyx_cur_scope->__pyx_t_0;
         __pyx_cur_scope->__pyx_t_0 = 0;
         __Pyx_XGOTREF(__pyx_t_3);
         __pyx_t_4 = __pyx_cur_scope->__pyx_t_1;
         __pyx_t_5 = __pyx_cur_scope->__pyx_t_2;
         __pyx_t_6 = __pyx_cur_scope->__pyx_t_3;
-        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1181, __pyx_L1_error)
+        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1267, __pyx_L1_error)
 
-        /* "cpp_process.pyx":1180
- *                 distance = DistanceContext.scorer(DistanceContext.context, processor(choice), c_max)
+        /* "cpp_process.pyx":1266
+ *                 distance = DistanceContext.scorer(DistanceContext.context, proc_choice, c_max)
  * 
  *                 if distance <= c_max:             # <<<<<<<<<<<<<<
  *                     yield (choice, distance, choice_key)
@@ -14824,7 +15654,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_8generator3(__pyx_Corouti
     }
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "cpp_process.pyx":1173
+    /* "cpp_process.pyx":1253
  *         cdef size_t distance
  * 
  *         if processor is not None:             # <<<<<<<<<<<<<<
@@ -14834,7 +15664,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_8generator3(__pyx_Corouti
     goto __pyx_L4;
   }
 
-  /* "cpp_process.pyx":1183
+  /* "cpp_process.pyx":1269
  *                     yield (choice, distance, choice_key)
  *         else:
  *             for choice_key, choice in choices.items():             # <<<<<<<<<<<<<<
@@ -14843,12 +15673,12 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_8generator3(__pyx_Corouti
  */
   /*else*/ {
     __pyx_t_5 = 0;
-    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1183, __pyx_L1_error) }
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1269, __pyx_L1_error) }
     if (unlikely(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices == Py_None)) {
       PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "items");
-      __PYX_ERR(0, 1183, __pyx_L1_error)
+      __PYX_ERR(0, 1269, __pyx_L1_error)
     }
-    __pyx_t_7 = __Pyx_dict_iterator(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_4), (&__pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1183, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_dict_iterator(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_4), (&__pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1269, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_XDECREF(__pyx_t_3);
     __pyx_t_3 = __pyx_t_7;
@@ -14856,7 +15686,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_8generator3(__pyx_Corouti
     while (1) {
       __pyx_t_9 = __Pyx_dict_iter_next(__pyx_t_3, __pyx_t_4, &__pyx_t_5, &__pyx_t_7, &__pyx_t_8, NULL, __pyx_t_6);
       if (unlikely(__pyx_t_9 == 0)) break;
-      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 1183, __pyx_L1_error)
+      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 1269, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_choice_key);
@@ -14868,27 +15698,27 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_8generator3(__pyx_Corouti
       __Pyx_GIVEREF(__pyx_t_8);
       __pyx_t_8 = 0;
 
-      /* "cpp_process.pyx":1184
+      /* "cpp_process.pyx":1270
  *         else:
  *             for choice_key, choice in choices.items():
  *                 if choice is None:             # <<<<<<<<<<<<<<
  *                     continue
  * 
  */
-      __pyx_t_1 = (__pyx_cur_scope->__pyx_v_choice == Py_None);
-      __pyx_t_2 = (__pyx_t_1 != 0);
-      if (__pyx_t_2) {
+      __pyx_t_2 = (__pyx_cur_scope->__pyx_v_choice == Py_None);
+      __pyx_t_1 = (__pyx_t_2 != 0);
+      if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":1185
+        /* "cpp_process.pyx":1271
  *             for choice_key, choice in choices.items():
  *                 if choice is None:
  *                     continue             # <<<<<<<<<<<<<<
  * 
- *                 distance = DistanceContext.scorer(DistanceContext.context, choice, c_max)
+ *                 validate_string(choice, "choice must be a String or None")
  */
-        goto __pyx_L10_continue;
+        goto __pyx_L11_continue;
 
-        /* "cpp_process.pyx":1184
+        /* "cpp_process.pyx":1270
  *         else:
  *             for choice_key, choice in choices.items():
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -14897,9 +15727,23 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_8generator3(__pyx_Corouti
  */
       }
 
-      /* "cpp_process.pyx":1187
+      /* "cpp_process.pyx":1273
  *                     continue
  * 
+ *                 validate_string(choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ *                 distance = DistanceContext.scorer(DistanceContext.context, choice, c_max)
+ * 
+ */
+      try {
+        validate_string(__pyx_cur_scope->__pyx_v_choice, ((char const *)"choice must be a String or None"));
+      } catch(...) {
+        __Pyx_CppExn2PyErr();
+        __PYX_ERR(0, 1273, __pyx_L1_error)
+      }
+
+      /* "cpp_process.pyx":1274
+ * 
+ *                 validate_string(choice, "choice must be a String or None")
  *                 distance = DistanceContext.scorer(DistanceContext.context, choice, c_max)             # <<<<<<<<<<<<<<
  * 
  *                 if distance <= c_max:
@@ -14908,30 +15752,30 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_8generator3(__pyx_Corouti
         __pyx_t_11 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_DistanceContext.scorer(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_DistanceContext.context, __pyx_cur_scope->__pyx_v_choice, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_max);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 1187, __pyx_L1_error)
+        __PYX_ERR(0, 1274, __pyx_L1_error)
       }
       __pyx_cur_scope->__pyx_v_distance = __pyx_t_11;
 
-      /* "cpp_process.pyx":1189
+      /* "cpp_process.pyx":1276
  *                 distance = DistanceContext.scorer(DistanceContext.context, choice, c_max)
  * 
  *                 if distance <= c_max:             # <<<<<<<<<<<<<<
  *                     yield (choice, distance, choice_key)
  * 
  */
-      __pyx_t_2 = ((__pyx_cur_scope->__pyx_v_distance <= __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_max) != 0);
-      if (__pyx_t_2) {
+      __pyx_t_1 = ((__pyx_cur_scope->__pyx_v_distance <= __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_max) != 0);
+      if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":1190
+        /* "cpp_process.pyx":1277
  * 
  *                 if distance <= c_max:
  *                     yield (choice, distance, choice_key)             # <<<<<<<<<<<<<<
  * 
  *     def extract_iter_distance_list():
  */
-        __pyx_t_8 = __Pyx_PyInt_FromSize_t(__pyx_cur_scope->__pyx_v_distance); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1190, __pyx_L1_error)
+        __pyx_t_8 = __Pyx_PyInt_FromSize_t(__pyx_cur_scope->__pyx_v_distance); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1277, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
-        __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1190, __pyx_L1_error)
+        __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1277, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
         __Pyx_INCREF(__pyx_cur_scope->__pyx_v_choice);
         __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_choice);
@@ -14955,16 +15799,16 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_8generator3(__pyx_Corouti
         /* return from generator, yielding value */
         __pyx_generator->resume_label = 2;
         return __pyx_r;
-        __pyx_L14_resume_from_yield:;
+        __pyx_L15_resume_from_yield:;
         __pyx_t_3 = __pyx_cur_scope->__pyx_t_0;
         __pyx_cur_scope->__pyx_t_0 = 0;
         __Pyx_XGOTREF(__pyx_t_3);
         __pyx_t_4 = __pyx_cur_scope->__pyx_t_1;
         __pyx_t_5 = __pyx_cur_scope->__pyx_t_2;
         __pyx_t_6 = __pyx_cur_scope->__pyx_t_3;
-        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1190, __pyx_L1_error)
+        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1277, __pyx_L1_error)
 
-        /* "cpp_process.pyx":1189
+        /* "cpp_process.pyx":1276
  *                 distance = DistanceContext.scorer(DistanceContext.context, choice, c_max)
  * 
  *                 if distance <= c_max:             # <<<<<<<<<<<<<<
@@ -14972,14 +15816,14 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_8generator3(__pyx_Corouti
  * 
  */
       }
-      __pyx_L10_continue:;
+      __pyx_L11_continue:;
     }
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   }
   __pyx_L4:;
   CYTHON_MAYBE_UNUSED_VAR(__pyx_cur_scope);
 
-  /* "cpp_process.pyx":1165
+  /* "cpp_process.pyx":1245
  *                 i += 1
  * 
  *     def extract_iter_distance_dict():             # <<<<<<<<<<<<<<
@@ -15009,7 +15853,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_8generator3(__pyx_Corouti
 }
 static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_CoroutineObject *__pyx_generator, CYTHON_UNUSED PyThreadState *__pyx_tstate, PyObject *__pyx_sent_value); /* proto */
 
-/* "cpp_process.pyx":1192
+/* "cpp_process.pyx":1279
  *                     yield (choice, distance, choice_key)
  * 
  *     def extract_iter_distance_list():             # <<<<<<<<<<<<<<
@@ -15045,7 +15889,7 @@ static PyObject *__pyx_pf_11cpp_process_12extract_iter_9extract_iter_distance_li
   if (unlikely(!__pyx_cur_scope)) {
     __pyx_cur_scope = ((struct __pyx_obj_11cpp_process___pyx_scope_struct_4_extract_iter_distance_list *)Py_None);
     __Pyx_INCREF(Py_None);
-    __PYX_ERR(0, 1192, __pyx_L1_error)
+    __PYX_ERR(0, 1279, __pyx_L1_error)
   } else {
     __Pyx_GOTREF((PyObject *)__pyx_cur_scope);
   }
@@ -15053,7 +15897,7 @@ static PyObject *__pyx_pf_11cpp_process_12extract_iter_9extract_iter_distance_li
   __Pyx_INCREF((PyObject *)__pyx_cur_scope->__pyx_outer_scope);
   __Pyx_GIVEREF((PyObject *)__pyx_cur_scope->__pyx_outer_scope);
   {
-    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_11cpp_process_12extract_iter_11generator4, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_extract_iter_distance_list, __pyx_n_s_extract_iter_locals_extract_iter_4, __pyx_n_s_cpp_process); if (unlikely(!gen)) __PYX_ERR(0, 1192, __pyx_L1_error)
+    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_11cpp_process_12extract_iter_11generator4, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_extract_iter_distance_list, __pyx_n_s_extract_iter_locals_extract_iter_4, __pyx_n_s_cpp_process); if (unlikely(!gen)) __PYX_ERR(0, 1279, __pyx_L1_error)
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -15090,16 +15934,16 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_Corout
   __Pyx_RefNannySetupContext("extract_iter_distance_list", 0);
   switch (__pyx_generator->resume_label) {
     case 0: goto __pyx_L3_first_run;
-    case 1: goto __pyx_L9_resume_from_yield;
-    case 2: goto __pyx_L14_resume_from_yield;
+    case 1: goto __pyx_L10_resume_from_yield;
+    case 2: goto __pyx_L15_resume_from_yield;
     default: /* CPython raises the right error here */
     __Pyx_RefNannyFinishContext();
     return NULL;
   }
   __pyx_L3_first_run:;
-  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1192, __pyx_L1_error)
+  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1279, __pyx_L1_error)
 
-  /* "cpp_process.pyx":1198
+  /* "cpp_process.pyx":1285
  *           - scorer = distance implemented in C++
  *         """
  *         cdef size_t i = 0             # <<<<<<<<<<<<<<
@@ -15108,50 +15952,50 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_Corout
  */
   __pyx_cur_scope->__pyx_v_i = 0;
 
-  /* "cpp_process.pyx":1201
+  /* "cpp_process.pyx":1288
  *         cdef size_t distance
  * 
  *         if processor is not None:             # <<<<<<<<<<<<<<
  *             for choice in choices:
  *                 if choice is None:
  */
-  if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1201, __pyx_L1_error) }
+  if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1288, __pyx_L1_error) }
   __pyx_t_1 = (__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor != Py_None);
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":1202
+    /* "cpp_process.pyx":1289
  * 
  *         if processor is not None:
  *             for choice in choices:             # <<<<<<<<<<<<<<
  *                 if choice is None:
  *                     i += 1
  */
-    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1202, __pyx_L1_error) }
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1289, __pyx_L1_error) }
     if (likely(PyList_CheckExact(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) || PyTuple_CheckExact(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) {
       __pyx_t_3 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices; __Pyx_INCREF(__pyx_t_3); __pyx_t_4 = 0;
       __pyx_t_5 = NULL;
     } else {
-      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1202, __pyx_L1_error)
+      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1289, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1202, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1289, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_5)) {
         if (likely(PyList_CheckExact(__pyx_t_3))) {
           if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1202, __pyx_L1_error)
+          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1289, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1202, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1289, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         } else {
           if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1202, __pyx_L1_error)
+          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1289, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1202, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1289, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         }
@@ -15161,7 +16005,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_Corout
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 1202, __pyx_L1_error)
+            else __PYX_ERR(0, 1289, __pyx_L1_error)
           }
           break;
         }
@@ -15172,7 +16016,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_Corout
       __Pyx_GIVEREF(__pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "cpp_process.pyx":1203
+      /* "cpp_process.pyx":1290
  *         if processor is not None:
  *             for choice in choices:
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -15183,7 +16027,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_Corout
       __pyx_t_1 = (__pyx_t_2 != 0);
       if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":1204
+        /* "cpp_process.pyx":1291
  *             for choice in choices:
  *                 if choice is None:
  *                     i += 1             # <<<<<<<<<<<<<<
@@ -15192,16 +16036,16 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_Corout
  */
         __pyx_cur_scope->__pyx_v_i = (__pyx_cur_scope->__pyx_v_i + 1);
 
-        /* "cpp_process.pyx":1205
+        /* "cpp_process.pyx":1292
  *                 if choice is None:
  *                     i += 1
  *                     continue             # <<<<<<<<<<<<<<
  * 
- *                 distance = DistanceContext.scorer(DistanceContext.context, processor(choice), c_max)
+ *                 proc_choice = processor(choice)
  */
         goto __pyx_L5_continue;
 
-        /* "cpp_process.pyx":1203
+        /* "cpp_process.pyx":1290
  *         if processor is not None:
  *             for choice in choices:
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -15210,14 +16054,14 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_Corout
  */
       }
 
-      /* "cpp_process.pyx":1207
+      /* "cpp_process.pyx":1294
  *                     continue
  * 
- *                 distance = DistanceContext.scorer(DistanceContext.context, processor(choice), c_max)             # <<<<<<<<<<<<<<
- * 
- *                 if distance <= c_max:
+ *                 proc_choice = processor(choice)             # <<<<<<<<<<<<<<
+ *                 if proc_choice is None:
+ *                     i += 1
  */
-      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1207, __pyx_L1_error) }
+      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1294, __pyx_L1_error) }
       __Pyx_INCREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor);
       __pyx_t_7 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor; __pyx_t_8 = NULL;
       __pyx_t_9 = 0;
@@ -15235,41 +16079,104 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_Corout
         PyObject *__pyx_callargs[2] = {__pyx_t_8, __pyx_cur_scope->__pyx_v_choice};
         __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-        if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1207, __pyx_L1_error)
+        if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1294, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       }
+      __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_proc_choice);
+      __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_proc_choice, __pyx_t_6);
+      __Pyx_GIVEREF(__pyx_t_6);
+      __pyx_t_6 = 0;
+
+      /* "cpp_process.pyx":1295
+ * 
+ *                 proc_choice = processor(choice)
+ *                 if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                     i += 1
+ *                     continue
+ */
+      __pyx_t_1 = (__pyx_cur_scope->__pyx_v_proc_choice == Py_None);
+      __pyx_t_2 = (__pyx_t_1 != 0);
+      if (__pyx_t_2) {
+
+        /* "cpp_process.pyx":1296
+ *                 proc_choice = processor(choice)
+ *                 if proc_choice is None:
+ *                     i += 1             # <<<<<<<<<<<<<<
+ *                     continue
+ * 
+ */
+        __pyx_cur_scope->__pyx_v_i = (__pyx_cur_scope->__pyx_v_i + 1);
+
+        /* "cpp_process.pyx":1297
+ *                 if proc_choice is None:
+ *                     i += 1
+ *                     continue             # <<<<<<<<<<<<<<
+ * 
+ *                 validate_string(proc_choice, "choice must be a String or None")
+ */
+        goto __pyx_L5_continue;
+
+        /* "cpp_process.pyx":1295
+ * 
+ *                 proc_choice = processor(choice)
+ *                 if proc_choice is None:             # <<<<<<<<<<<<<<
+ *                     i += 1
+ *                     continue
+ */
+      }
+
+      /* "cpp_process.pyx":1299
+ *                     continue
+ * 
+ *                 validate_string(proc_choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ * 
+ *                 distance = DistanceContext.scorer(DistanceContext.context, proc_choice, c_max)
+ */
       try {
-        __pyx_t_10 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_DistanceContext.scorer(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_DistanceContext.context, __pyx_t_6, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_max);
+        validate_string(__pyx_cur_scope->__pyx_v_proc_choice, ((char const *)"choice must be a String or None"));
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 1207, __pyx_L1_error)
+        __PYX_ERR(0, 1299, __pyx_L1_error)
       }
-      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+
+      /* "cpp_process.pyx":1301
+ *                 validate_string(proc_choice, "choice must be a String or None")
+ * 
+ *                 distance = DistanceContext.scorer(DistanceContext.context, proc_choice, c_max)             # <<<<<<<<<<<<<<
+ * 
+ *                 if distance <= c_max:
+ */
+      try {
+        __pyx_t_10 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_DistanceContext.scorer(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_DistanceContext.context, __pyx_cur_scope->__pyx_v_proc_choice, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_max);
+      } catch(...) {
+        __Pyx_CppExn2PyErr();
+        __PYX_ERR(0, 1301, __pyx_L1_error)
+      }
       __pyx_cur_scope->__pyx_v_distance = __pyx_t_10;
 
-      /* "cpp_process.pyx":1209
- *                 distance = DistanceContext.scorer(DistanceContext.context, processor(choice), c_max)
+      /* "cpp_process.pyx":1303
+ *                 distance = DistanceContext.scorer(DistanceContext.context, proc_choice, c_max)
  * 
  *                 if distance <= c_max:             # <<<<<<<<<<<<<<
  *                     yield (choice, distance, i)
  *                 i += 1
  */
-      __pyx_t_1 = ((__pyx_cur_scope->__pyx_v_distance <= __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_max) != 0);
-      if (__pyx_t_1) {
+      __pyx_t_2 = ((__pyx_cur_scope->__pyx_v_distance <= __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_max) != 0);
+      if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":1210
+        /* "cpp_process.pyx":1304
  * 
  *                 if distance <= c_max:
  *                     yield (choice, distance, i)             # <<<<<<<<<<<<<<
  *                 i += 1
  *         else:
  */
-        __pyx_t_6 = __Pyx_PyInt_FromSize_t(__pyx_cur_scope->__pyx_v_distance); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1210, __pyx_L1_error)
+        __pyx_t_6 = __Pyx_PyInt_FromSize_t(__pyx_cur_scope->__pyx_v_distance); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1304, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
-        __pyx_t_7 = __Pyx_PyInt_FromSize_t(__pyx_cur_scope->__pyx_v_i); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1210, __pyx_L1_error)
+        __pyx_t_7 = __Pyx_PyInt_FromSize_t(__pyx_cur_scope->__pyx_v_i); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1304, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
-        __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1210, __pyx_L1_error)
+        __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1304, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_INCREF(__pyx_cur_scope->__pyx_v_choice);
         __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_choice);
@@ -15292,16 +16199,16 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_Corout
         /* return from generator, yielding value */
         __pyx_generator->resume_label = 1;
         return __pyx_r;
-        __pyx_L9_resume_from_yield:;
+        __pyx_L10_resume_from_yield:;
         __pyx_t_3 = __pyx_cur_scope->__pyx_t_0;
         __pyx_cur_scope->__pyx_t_0 = 0;
         __Pyx_XGOTREF(__pyx_t_3);
         __pyx_t_4 = __pyx_cur_scope->__pyx_t_1;
         __pyx_t_5 = __pyx_cur_scope->__pyx_t_2;
-        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1210, __pyx_L1_error)
+        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1304, __pyx_L1_error)
 
-        /* "cpp_process.pyx":1209
- *                 distance = DistanceContext.scorer(DistanceContext.context, processor(choice), c_max)
+        /* "cpp_process.pyx":1303
+ *                 distance = DistanceContext.scorer(DistanceContext.context, proc_choice, c_max)
  * 
  *                 if distance <= c_max:             # <<<<<<<<<<<<<<
  *                     yield (choice, distance, i)
@@ -15309,7 +16216,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_Corout
  */
       }
 
-      /* "cpp_process.pyx":1211
+      /* "cpp_process.pyx":1305
  *                 if distance <= c_max:
  *                     yield (choice, distance, i)
  *                 i += 1             # <<<<<<<<<<<<<<
@@ -15318,7 +16225,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_Corout
  */
       __pyx_cur_scope->__pyx_v_i = (__pyx_cur_scope->__pyx_v_i + 1);
 
-      /* "cpp_process.pyx":1202
+      /* "cpp_process.pyx":1289
  * 
  *         if processor is not None:
  *             for choice in choices:             # <<<<<<<<<<<<<<
@@ -15329,7 +16236,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_Corout
     }
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "cpp_process.pyx":1201
+    /* "cpp_process.pyx":1288
  *         cdef size_t distance
  * 
  *         if processor is not None:             # <<<<<<<<<<<<<<
@@ -15339,7 +16246,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_Corout
     goto __pyx_L4;
   }
 
-  /* "cpp_process.pyx":1213
+  /* "cpp_process.pyx":1307
  *                 i += 1
  *         else:
  *             for choice in choices:             # <<<<<<<<<<<<<<
@@ -15347,31 +16254,31 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_Corout
  *                     i += 1
  */
   /*else*/ {
-    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1213, __pyx_L1_error) }
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1307, __pyx_L1_error) }
     if (likely(PyList_CheckExact(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) || PyTuple_CheckExact(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) {
       __pyx_t_3 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices; __Pyx_INCREF(__pyx_t_3); __pyx_t_4 = 0;
       __pyx_t_5 = NULL;
     } else {
-      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1213, __pyx_L1_error)
+      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1307, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1213, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1307, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_5)) {
         if (likely(PyList_CheckExact(__pyx_t_3))) {
           if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_8 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_8); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1213, __pyx_L1_error)
+          __pyx_t_8 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_8); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1307, __pyx_L1_error)
           #else
-          __pyx_t_8 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1213, __pyx_L1_error)
+          __pyx_t_8 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1307, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
           #endif
         } else {
           if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_8 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_8); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1213, __pyx_L1_error)
+          __pyx_t_8 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_8); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1307, __pyx_L1_error)
           #else
-          __pyx_t_8 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1213, __pyx_L1_error)
+          __pyx_t_8 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1307, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
           #endif
         }
@@ -15381,7 +16288,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_Corout
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 1213, __pyx_L1_error)
+            else __PYX_ERR(0, 1307, __pyx_L1_error)
           }
           break;
         }
@@ -15392,18 +16299,18 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_Corout
       __Pyx_GIVEREF(__pyx_t_8);
       __pyx_t_8 = 0;
 
-      /* "cpp_process.pyx":1214
+      /* "cpp_process.pyx":1308
  *         else:
  *             for choice in choices:
  *                 if choice is None:             # <<<<<<<<<<<<<<
  *                     i += 1
  *                     continue
  */
-      __pyx_t_1 = (__pyx_cur_scope->__pyx_v_choice == Py_None);
-      __pyx_t_2 = (__pyx_t_1 != 0);
-      if (__pyx_t_2) {
+      __pyx_t_2 = (__pyx_cur_scope->__pyx_v_choice == Py_None);
+      __pyx_t_1 = (__pyx_t_2 != 0);
+      if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":1215
+        /* "cpp_process.pyx":1309
  *             for choice in choices:
  *                 if choice is None:
  *                     i += 1             # <<<<<<<<<<<<<<
@@ -15412,16 +16319,16 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_Corout
  */
         __pyx_cur_scope->__pyx_v_i = (__pyx_cur_scope->__pyx_v_i + 1);
 
-        /* "cpp_process.pyx":1216
+        /* "cpp_process.pyx":1310
  *                 if choice is None:
  *                     i += 1
  *                     continue             # <<<<<<<<<<<<<<
  * 
- *                 distance = DistanceContext.scorer(DistanceContext.context, choice, c_max)
+ *                 validate_string(choice, "choice must be a String or None")
  */
-        goto __pyx_L10_continue;
+        goto __pyx_L11_continue;
 
-        /* "cpp_process.pyx":1214
+        /* "cpp_process.pyx":1308
  *         else:
  *             for choice in choices:
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -15430,9 +16337,23 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_Corout
  */
       }
 
-      /* "cpp_process.pyx":1218
+      /* "cpp_process.pyx":1312
  *                     continue
  * 
+ *                 validate_string(choice, "choice must be a String or None")             # <<<<<<<<<<<<<<
+ *                 distance = DistanceContext.scorer(DistanceContext.context, choice, c_max)
+ * 
+ */
+      try {
+        validate_string(__pyx_cur_scope->__pyx_v_choice, ((char const *)"choice must be a String or None"));
+      } catch(...) {
+        __Pyx_CppExn2PyErr();
+        __PYX_ERR(0, 1312, __pyx_L1_error)
+      }
+
+      /* "cpp_process.pyx":1313
+ * 
+ *                 validate_string(choice, "choice must be a String or None")
  *                 distance = DistanceContext.scorer(DistanceContext.context, choice, c_max)             # <<<<<<<<<<<<<<
  * 
  *                 if distance <= c_max:
@@ -15441,32 +16362,32 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_Corout
         __pyx_t_10 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_DistanceContext.scorer(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_DistanceContext.context, __pyx_cur_scope->__pyx_v_choice, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_max);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 1218, __pyx_L1_error)
+        __PYX_ERR(0, 1313, __pyx_L1_error)
       }
       __pyx_cur_scope->__pyx_v_distance = __pyx_t_10;
 
-      /* "cpp_process.pyx":1220
+      /* "cpp_process.pyx":1315
  *                 distance = DistanceContext.scorer(DistanceContext.context, choice, c_max)
  * 
  *                 if distance <= c_max:             # <<<<<<<<<<<<<<
  *                     yield (choice, distance, i)
  *                 i += 1
  */
-      __pyx_t_2 = ((__pyx_cur_scope->__pyx_v_distance <= __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_max) != 0);
-      if (__pyx_t_2) {
+      __pyx_t_1 = ((__pyx_cur_scope->__pyx_v_distance <= __pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_max) != 0);
+      if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":1221
+        /* "cpp_process.pyx":1316
  * 
  *                 if distance <= c_max:
  *                     yield (choice, distance, i)             # <<<<<<<<<<<<<<
  *                 i += 1
  * 
  */
-        __pyx_t_8 = __Pyx_PyInt_FromSize_t(__pyx_cur_scope->__pyx_v_distance); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1221, __pyx_L1_error)
+        __pyx_t_8 = __Pyx_PyInt_FromSize_t(__pyx_cur_scope->__pyx_v_distance); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1316, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
-        __pyx_t_7 = __Pyx_PyInt_FromSize_t(__pyx_cur_scope->__pyx_v_i); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1221, __pyx_L1_error)
+        __pyx_t_7 = __Pyx_PyInt_FromSize_t(__pyx_cur_scope->__pyx_v_i); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1316, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
-        __pyx_t_6 = PyTuple_New(3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1221, __pyx_L1_error)
+        __pyx_t_6 = PyTuple_New(3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1316, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_INCREF(__pyx_cur_scope->__pyx_v_choice);
         __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_choice);
@@ -15489,15 +16410,15 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_Corout
         /* return from generator, yielding value */
         __pyx_generator->resume_label = 2;
         return __pyx_r;
-        __pyx_L14_resume_from_yield:;
+        __pyx_L15_resume_from_yield:;
         __pyx_t_3 = __pyx_cur_scope->__pyx_t_0;
         __pyx_cur_scope->__pyx_t_0 = 0;
         __Pyx_XGOTREF(__pyx_t_3);
         __pyx_t_4 = __pyx_cur_scope->__pyx_t_1;
         __pyx_t_5 = __pyx_cur_scope->__pyx_t_2;
-        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1221, __pyx_L1_error)
+        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1316, __pyx_L1_error)
 
-        /* "cpp_process.pyx":1220
+        /* "cpp_process.pyx":1315
  *                 distance = DistanceContext.scorer(DistanceContext.context, choice, c_max)
  * 
  *                 if distance <= c_max:             # <<<<<<<<<<<<<<
@@ -15506,7 +16427,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_Corout
  */
       }
 
-      /* "cpp_process.pyx":1222
+      /* "cpp_process.pyx":1317
  *                 if distance <= c_max:
  *                     yield (choice, distance, i)
  *                 i += 1             # <<<<<<<<<<<<<<
@@ -15515,21 +16436,21 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_Corout
  */
       __pyx_cur_scope->__pyx_v_i = (__pyx_cur_scope->__pyx_v_i + 1);
 
-      /* "cpp_process.pyx":1213
+      /* "cpp_process.pyx":1307
  *                 i += 1
  *         else:
  *             for choice in choices:             # <<<<<<<<<<<<<<
  *                 if choice is None:
  *                     i += 1
  */
-      __pyx_L10_continue:;
+      __pyx_L11_continue:;
     }
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   }
   __pyx_L4:;
   CYTHON_MAYBE_UNUSED_VAR(__pyx_cur_scope);
 
-  /* "cpp_process.pyx":1192
+  /* "cpp_process.pyx":1279
  *                     yield (choice, distance, choice_key)
  * 
  *     def extract_iter_distance_list():             # <<<<<<<<<<<<<<
@@ -15559,7 +16480,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_11generator4(__pyx_Corout
 }
 static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_CoroutineObject *__pyx_generator, CYTHON_UNUSED PyThreadState *__pyx_tstate, PyObject *__pyx_sent_value); /* proto */
 
-/* "cpp_process.pyx":1224
+/* "cpp_process.pyx":1319
  *                 i += 1
  * 
  *     def py_extract_iter_dict():             # <<<<<<<<<<<<<<
@@ -15595,7 +16516,7 @@ static PyObject *__pyx_pf_11cpp_process_12extract_iter_12py_extract_iter_dict(Py
   if (unlikely(!__pyx_cur_scope)) {
     __pyx_cur_scope = ((struct __pyx_obj_11cpp_process___pyx_scope_struct_5_py_extract_iter_dict *)Py_None);
     __Pyx_INCREF(Py_None);
-    __PYX_ERR(0, 1224, __pyx_L1_error)
+    __PYX_ERR(0, 1319, __pyx_L1_error)
   } else {
     __Pyx_GOTREF((PyObject *)__pyx_cur_scope);
   }
@@ -15603,7 +16524,7 @@ static PyObject *__pyx_pf_11cpp_process_12extract_iter_12py_extract_iter_dict(Py
   __Pyx_INCREF((PyObject *)__pyx_cur_scope->__pyx_outer_scope);
   __Pyx_GIVEREF((PyObject *)__pyx_cur_scope->__pyx_outer_scope);
   {
-    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_11cpp_process_12extract_iter_14generator5, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_py_extract_iter_dict, __pyx_n_s_extract_iter_locals_py_extract_i, __pyx_n_s_cpp_process); if (unlikely(!gen)) __PYX_ERR(0, 1224, __pyx_L1_error)
+    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_11cpp_process_12extract_iter_14generator5, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_py_extract_iter_dict, __pyx_n_s_extract_iter_locals_py_extract_i, __pyx_n_s_cpp_process); if (unlikely(!gen)) __PYX_ERR(0, 1319, __pyx_L1_error)
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -15648,21 +16569,21 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
     return NULL;
   }
   __pyx_L3_first_run:;
-  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1224, __pyx_L1_error)
+  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1319, __pyx_L1_error)
 
-  /* "cpp_process.pyx":1231
+  /* "cpp_process.pyx":1326
  *         """
  * 
  *         if processor is not None:             # <<<<<<<<<<<<<<
  *             for choice_key, choice in choices.items():
  *                 if choice is None:
  */
-  if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1231, __pyx_L1_error) }
+  if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1326, __pyx_L1_error) }
   __pyx_t_1 = (__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor != Py_None);
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":1232
+    /* "cpp_process.pyx":1327
  * 
  *         if processor is not None:
  *             for choice_key, choice in choices.items():             # <<<<<<<<<<<<<<
@@ -15670,12 +16591,12 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
  *                     continue
  */
     __pyx_t_4 = 0;
-    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1232, __pyx_L1_error) }
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1327, __pyx_L1_error) }
     if (unlikely(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices == Py_None)) {
       PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "items");
-      __PYX_ERR(0, 1232, __pyx_L1_error)
+      __PYX_ERR(0, 1327, __pyx_L1_error)
     }
-    __pyx_t_7 = __Pyx_dict_iterator(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_5), (&__pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1232, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_dict_iterator(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_5), (&__pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1327, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_XDECREF(__pyx_t_3);
     __pyx_t_3 = __pyx_t_7;
@@ -15683,7 +16604,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
     while (1) {
       __pyx_t_9 = __Pyx_dict_iter_next(__pyx_t_3, __pyx_t_5, &__pyx_t_4, &__pyx_t_7, &__pyx_t_8, NULL, __pyx_t_6);
       if (unlikely(__pyx_t_9 == 0)) break;
-      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 1232, __pyx_L1_error)
+      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 1327, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_choice_key);
@@ -15695,7 +16616,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
       __Pyx_GIVEREF(__pyx_t_8);
       __pyx_t_8 = 0;
 
-      /* "cpp_process.pyx":1233
+      /* "cpp_process.pyx":1328
  *         if processor is not None:
  *             for choice_key, choice in choices.items():
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -15706,7 +16627,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
       __pyx_t_1 = (__pyx_t_2 != 0);
       if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":1234
+        /* "cpp_process.pyx":1329
  *             for choice_key, choice in choices.items():
  *                 if choice is None:
  *                     continue             # <<<<<<<<<<<<<<
@@ -15715,7 +16636,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
  */
         goto __pyx_L5_continue;
 
-        /* "cpp_process.pyx":1233
+        /* "cpp_process.pyx":1328
  *         if processor is not None:
  *             for choice_key, choice in choices.items():
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -15724,16 +16645,16 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
  */
       }
 
-      /* "cpp_process.pyx":1236
+      /* "cpp_process.pyx":1331
  *                     continue
  * 
  *                 score = scorer(query, processor(choice),             # <<<<<<<<<<<<<<
  *                     processor=None, score_cutoff=c_score_cutoff, **kwargs)
  * 
  */
-      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_scorer)) { __Pyx_RaiseClosureNameError("scorer"); __PYX_ERR(0, 1236, __pyx_L1_error) }
-      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_query)) { __Pyx_RaiseClosureNameError("query"); __PYX_ERR(0, 1236, __pyx_L1_error) }
-      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1236, __pyx_L1_error) }
+      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_scorer)) { __Pyx_RaiseClosureNameError("scorer"); __PYX_ERR(0, 1331, __pyx_L1_error) }
+      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_query)) { __Pyx_RaiseClosureNameError("query"); __PYX_ERR(0, 1331, __pyx_L1_error) }
+      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1331, __pyx_L1_error) }
       __Pyx_INCREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor);
       __pyx_t_7 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor; __pyx_t_10 = NULL;
       __pyx_t_9 = 0;
@@ -15751,11 +16672,11 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
         PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_cur_scope->__pyx_v_choice};
         __pyx_t_8 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
         __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-        if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1236, __pyx_L1_error)
+        if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1331, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       }
-      __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1236, __pyx_L1_error)
+      __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1331, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_INCREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_query);
       __Pyx_GIVEREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_query);
@@ -15764,37 +16685,37 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
       PyTuple_SET_ITEM(__pyx_t_7, 1, __pyx_t_8);
       __pyx_t_8 = 0;
 
-      /* "cpp_process.pyx":1237
+      /* "cpp_process.pyx":1332
  * 
  *                 score = scorer(query, processor(choice),
  *                     processor=None, score_cutoff=c_score_cutoff, **kwargs)             # <<<<<<<<<<<<<<
  * 
  *                 if score >= c_score_cutoff:
  */
-      __pyx_t_10 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1237, __pyx_L1_error)
+      __pyx_t_10 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1332, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
-      if (PyDict_SetItem(__pyx_t_10, __pyx_n_s_processor, Py_None) < 0) __PYX_ERR(0, 1237, __pyx_L1_error)
-      __pyx_t_11 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 1237, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_t_10, __pyx_n_s_processor, Py_None) < 0) __PYX_ERR(0, 1332, __pyx_L1_error)
+      __pyx_t_11 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 1332, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_11);
-      if (PyDict_SetItem(__pyx_t_10, __pyx_n_s_score_cutoff, __pyx_t_11) < 0) __PYX_ERR(0, 1237, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_t_10, __pyx_n_s_score_cutoff, __pyx_t_11) < 0) __PYX_ERR(0, 1332, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
       __pyx_t_8 = __pyx_t_10;
       __pyx_t_10 = 0;
-      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_kwargs)) { __Pyx_RaiseClosureNameError("kwargs"); __PYX_ERR(0, 1237, __pyx_L1_error) }
+      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_kwargs)) { __Pyx_RaiseClosureNameError("kwargs"); __PYX_ERR(0, 1332, __pyx_L1_error) }
       if (unlikely(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_kwargs == Py_None)) {
         PyErr_SetString(PyExc_TypeError, "argument after ** must be a mapping, not NoneType");
-        __PYX_ERR(0, 1237, __pyx_L1_error)
+        __PYX_ERR(0, 1332, __pyx_L1_error)
       }
-      if (__Pyx_MergeKeywords(__pyx_t_8, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_kwargs) < 0) __PYX_ERR(0, 1237, __pyx_L1_error)
+      if (__Pyx_MergeKeywords(__pyx_t_8, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_kwargs) < 0) __PYX_ERR(0, 1332, __pyx_L1_error)
 
-      /* "cpp_process.pyx":1236
+      /* "cpp_process.pyx":1331
  *                     continue
  * 
  *                 score = scorer(query, processor(choice),             # <<<<<<<<<<<<<<
  *                     processor=None, score_cutoff=c_score_cutoff, **kwargs)
  * 
  */
-      __pyx_t_10 = __Pyx_PyObject_Call(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_scorer, __pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1236, __pyx_L1_error)
+      __pyx_t_10 = __Pyx_PyObject_Call(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_scorer, __pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1331, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
@@ -15803,29 +16724,29 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
       __Pyx_GIVEREF(__pyx_t_10);
       __pyx_t_10 = 0;
 
-      /* "cpp_process.pyx":1239
+      /* "cpp_process.pyx":1334
  *                     processor=None, score_cutoff=c_score_cutoff, **kwargs)
  * 
  *                 if score >= c_score_cutoff:             # <<<<<<<<<<<<<<
  *                     yield (choice, score, choice_key)
  *         else:
  */
-      __pyx_t_10 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1239, __pyx_L1_error)
+      __pyx_t_10 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1334, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
-      __pyx_t_8 = PyObject_RichCompare(__pyx_cur_scope->__pyx_v_score, __pyx_t_10, Py_GE); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1239, __pyx_L1_error)
+      __pyx_t_8 = PyObject_RichCompare(__pyx_cur_scope->__pyx_v_score, __pyx_t_10, Py_GE); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1334, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-      __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 1239, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 1334, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":1240
+        /* "cpp_process.pyx":1335
  * 
  *                 if score >= c_score_cutoff:
  *                     yield (choice, score, choice_key)             # <<<<<<<<<<<<<<
  *         else:
  *             for choice_key, choice in choices.items():
  */
-        __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1240, __pyx_L1_error)
+        __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1335, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_INCREF(__pyx_cur_scope->__pyx_v_choice);
         __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_choice);
@@ -15856,9 +16777,9 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
         __pyx_t_4 = __pyx_cur_scope->__pyx_t_1;
         __pyx_t_5 = __pyx_cur_scope->__pyx_t_2;
         __pyx_t_6 = __pyx_cur_scope->__pyx_t_3;
-        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1240, __pyx_L1_error)
+        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1335, __pyx_L1_error)
 
-        /* "cpp_process.pyx":1239
+        /* "cpp_process.pyx":1334
  *                     processor=None, score_cutoff=c_score_cutoff, **kwargs)
  * 
  *                 if score >= c_score_cutoff:             # <<<<<<<<<<<<<<
@@ -15870,7 +16791,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
     }
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "cpp_process.pyx":1231
+    /* "cpp_process.pyx":1326
  *         """
  * 
  *         if processor is not None:             # <<<<<<<<<<<<<<
@@ -15880,7 +16801,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
     goto __pyx_L4;
   }
 
-  /* "cpp_process.pyx":1242
+  /* "cpp_process.pyx":1337
  *                     yield (choice, score, choice_key)
  *         else:
  *             for choice_key, choice in choices.items():             # <<<<<<<<<<<<<<
@@ -15889,12 +16810,12 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
  */
   /*else*/ {
     __pyx_t_5 = 0;
-    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1242, __pyx_L1_error) }
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1337, __pyx_L1_error) }
     if (unlikely(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices == Py_None)) {
       PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "items");
-      __PYX_ERR(0, 1242, __pyx_L1_error)
+      __PYX_ERR(0, 1337, __pyx_L1_error)
     }
-    __pyx_t_8 = __Pyx_dict_iterator(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_4), (&__pyx_t_6)); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1242, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_dict_iterator(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices, 0, __pyx_n_s_items, (&__pyx_t_4), (&__pyx_t_6)); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1337, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_XDECREF(__pyx_t_3);
     __pyx_t_3 = __pyx_t_8;
@@ -15902,7 +16823,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
     while (1) {
       __pyx_t_9 = __Pyx_dict_iter_next(__pyx_t_3, __pyx_t_4, &__pyx_t_5, &__pyx_t_8, &__pyx_t_10, NULL, __pyx_t_6);
       if (unlikely(__pyx_t_9 == 0)) break;
-      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 1242, __pyx_L1_error)
+      if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 1337, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_GOTREF(__pyx_t_10);
       __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_choice_key);
@@ -15914,7 +16835,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
       __Pyx_GIVEREF(__pyx_t_10);
       __pyx_t_10 = 0;
 
-      /* "cpp_process.pyx":1243
+      /* "cpp_process.pyx":1338
  *         else:
  *             for choice_key, choice in choices.items():
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -15925,7 +16846,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
       __pyx_t_2 = (__pyx_t_1 != 0);
       if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":1244
+        /* "cpp_process.pyx":1339
  *             for choice_key, choice in choices.items():
  *                 if choice is None:
  *                     continue             # <<<<<<<<<<<<<<
@@ -15934,7 +16855,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
  */
         goto __pyx_L10_continue;
 
-        /* "cpp_process.pyx":1243
+        /* "cpp_process.pyx":1338
  *         else:
  *             for choice_key, choice in choices.items():
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -15943,16 +16864,16 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
  */
       }
 
-      /* "cpp_process.pyx":1246
+      /* "cpp_process.pyx":1341
  *                     continue
  * 
  *                 score = scorer(query, choice,             # <<<<<<<<<<<<<<
  *                     processor=None, score_cutoff=c_score_cutoff, **kwargs)
  * 
  */
-      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_scorer)) { __Pyx_RaiseClosureNameError("scorer"); __PYX_ERR(0, 1246, __pyx_L1_error) }
-      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_query)) { __Pyx_RaiseClosureNameError("query"); __PYX_ERR(0, 1246, __pyx_L1_error) }
-      __pyx_t_10 = PyTuple_New(2); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1246, __pyx_L1_error)
+      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_scorer)) { __Pyx_RaiseClosureNameError("scorer"); __PYX_ERR(0, 1341, __pyx_L1_error) }
+      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_query)) { __Pyx_RaiseClosureNameError("query"); __PYX_ERR(0, 1341, __pyx_L1_error) }
+      __pyx_t_10 = PyTuple_New(2); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1341, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
       __Pyx_INCREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_query);
       __Pyx_GIVEREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_query);
@@ -15961,37 +16882,37 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
       __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_choice);
       PyTuple_SET_ITEM(__pyx_t_10, 1, __pyx_cur_scope->__pyx_v_choice);
 
-      /* "cpp_process.pyx":1247
+      /* "cpp_process.pyx":1342
  * 
  *                 score = scorer(query, choice,
  *                     processor=None, score_cutoff=c_score_cutoff, **kwargs)             # <<<<<<<<<<<<<<
  * 
  *                 if score >= c_score_cutoff:
  */
-      __pyx_t_7 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1247, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1342, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
-      if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_processor, Py_None) < 0) __PYX_ERR(0, 1247, __pyx_L1_error)
-      __pyx_t_11 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 1247, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_processor, Py_None) < 0) __PYX_ERR(0, 1342, __pyx_L1_error)
+      __pyx_t_11 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 1342, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_11);
-      if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_score_cutoff, __pyx_t_11) < 0) __PYX_ERR(0, 1247, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_score_cutoff, __pyx_t_11) < 0) __PYX_ERR(0, 1342, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
       __pyx_t_8 = __pyx_t_7;
       __pyx_t_7 = 0;
-      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_kwargs)) { __Pyx_RaiseClosureNameError("kwargs"); __PYX_ERR(0, 1247, __pyx_L1_error) }
+      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_kwargs)) { __Pyx_RaiseClosureNameError("kwargs"); __PYX_ERR(0, 1342, __pyx_L1_error) }
       if (unlikely(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_kwargs == Py_None)) {
         PyErr_SetString(PyExc_TypeError, "argument after ** must be a mapping, not NoneType");
-        __PYX_ERR(0, 1247, __pyx_L1_error)
+        __PYX_ERR(0, 1342, __pyx_L1_error)
       }
-      if (__Pyx_MergeKeywords(__pyx_t_8, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_kwargs) < 0) __PYX_ERR(0, 1247, __pyx_L1_error)
+      if (__Pyx_MergeKeywords(__pyx_t_8, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_kwargs) < 0) __PYX_ERR(0, 1342, __pyx_L1_error)
 
-      /* "cpp_process.pyx":1246
+      /* "cpp_process.pyx":1341
  *                     continue
  * 
  *                 score = scorer(query, choice,             # <<<<<<<<<<<<<<
  *                     processor=None, score_cutoff=c_score_cutoff, **kwargs)
  * 
  */
-      __pyx_t_7 = __Pyx_PyObject_Call(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_scorer, __pyx_t_10, __pyx_t_8); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1246, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyObject_Call(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_scorer, __pyx_t_10, __pyx_t_8); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1341, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
@@ -16000,29 +16921,29 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
       __Pyx_GIVEREF(__pyx_t_7);
       __pyx_t_7 = 0;
 
-      /* "cpp_process.pyx":1249
+      /* "cpp_process.pyx":1344
  *                     processor=None, score_cutoff=c_score_cutoff, **kwargs)
  * 
  *                 if score >= c_score_cutoff:             # <<<<<<<<<<<<<<
  *                     yield (choice, score, choice_key)
  * 
  */
-      __pyx_t_7 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1249, __pyx_L1_error)
+      __pyx_t_7 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1344, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
-      __pyx_t_8 = PyObject_RichCompare(__pyx_cur_scope->__pyx_v_score, __pyx_t_7, Py_GE); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1249, __pyx_L1_error)
+      __pyx_t_8 = PyObject_RichCompare(__pyx_cur_scope->__pyx_v_score, __pyx_t_7, Py_GE); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1344, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 1249, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 1344, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":1250
+        /* "cpp_process.pyx":1345
  * 
  *                 if score >= c_score_cutoff:
  *                     yield (choice, score, choice_key)             # <<<<<<<<<<<<<<
  * 
  *     def py_extract_iter_list():
  */
-        __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1250, __pyx_L1_error)
+        __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1345, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_INCREF(__pyx_cur_scope->__pyx_v_choice);
         __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_choice);
@@ -16053,9 +16974,9 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
         __pyx_t_4 = __pyx_cur_scope->__pyx_t_1;
         __pyx_t_5 = __pyx_cur_scope->__pyx_t_2;
         __pyx_t_6 = __pyx_cur_scope->__pyx_t_3;
-        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1250, __pyx_L1_error)
+        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1345, __pyx_L1_error)
 
-        /* "cpp_process.pyx":1249
+        /* "cpp_process.pyx":1344
  *                     processor=None, score_cutoff=c_score_cutoff, **kwargs)
  * 
  *                 if score >= c_score_cutoff:             # <<<<<<<<<<<<<<
@@ -16070,7 +16991,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
   __pyx_L4:;
   CYTHON_MAYBE_UNUSED_VAR(__pyx_cur_scope);
 
-  /* "cpp_process.pyx":1224
+  /* "cpp_process.pyx":1319
  *                 i += 1
  * 
  *     def py_extract_iter_dict():             # <<<<<<<<<<<<<<
@@ -16101,7 +17022,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_14generator5(__pyx_Corout
 }
 static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_CoroutineObject *__pyx_generator, CYTHON_UNUSED PyThreadState *__pyx_tstate, PyObject *__pyx_sent_value); /* proto */
 
-/* "cpp_process.pyx":1252
+/* "cpp_process.pyx":1347
  *                     yield (choice, score, choice_key)
  * 
  *     def py_extract_iter_list():             # <<<<<<<<<<<<<<
@@ -16137,7 +17058,7 @@ static PyObject *__pyx_pf_11cpp_process_12extract_iter_15py_extract_iter_list(Py
   if (unlikely(!__pyx_cur_scope)) {
     __pyx_cur_scope = ((struct __pyx_obj_11cpp_process___pyx_scope_struct_6_py_extract_iter_list *)Py_None);
     __Pyx_INCREF(Py_None);
-    __PYX_ERR(0, 1252, __pyx_L1_error)
+    __PYX_ERR(0, 1347, __pyx_L1_error)
   } else {
     __Pyx_GOTREF((PyObject *)__pyx_cur_scope);
   }
@@ -16145,7 +17066,7 @@ static PyObject *__pyx_pf_11cpp_process_12extract_iter_15py_extract_iter_list(Py
   __Pyx_INCREF((PyObject *)__pyx_cur_scope->__pyx_outer_scope);
   __Pyx_GIVEREF((PyObject *)__pyx_cur_scope->__pyx_outer_scope);
   {
-    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_11cpp_process_12extract_iter_17generator6, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_py_extract_iter_list, __pyx_n_s_extract_iter_locals_py_extract_i_2, __pyx_n_s_cpp_process); if (unlikely(!gen)) __PYX_ERR(0, 1252, __pyx_L1_error)
+    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_11cpp_process_12extract_iter_17generator6, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_py_extract_iter_list, __pyx_n_s_extract_iter_locals_py_extract_i_2, __pyx_n_s_cpp_process); if (unlikely(!gen)) __PYX_ERR(0, 1347, __pyx_L1_error)
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -16189,9 +17110,9 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
     return NULL;
   }
   __pyx_L3_first_run:;
-  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1252, __pyx_L1_error)
+  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1347, __pyx_L1_error)
 
-  /* "cpp_process.pyx":1258
+  /* "cpp_process.pyx":1353
  *           - scorer = python function
  *         """
  *         cdef size_t i = 0             # <<<<<<<<<<<<<<
@@ -16200,50 +17121,50 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
  */
   __pyx_cur_scope->__pyx_v_i = 0;
 
-  /* "cpp_process.pyx":1260
+  /* "cpp_process.pyx":1355
  *         cdef size_t i = 0
  * 
  *         if processor is not None:             # <<<<<<<<<<<<<<
  *             for choice in choices:
  *                 if choice is None:
  */
-  if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1260, __pyx_L1_error) }
+  if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1355, __pyx_L1_error) }
   __pyx_t_1 = (__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor != Py_None);
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":1261
+    /* "cpp_process.pyx":1356
  * 
  *         if processor is not None:
  *             for choice in choices:             # <<<<<<<<<<<<<<
  *                 if choice is None:
  *                     i += 1
  */
-    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1261, __pyx_L1_error) }
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1356, __pyx_L1_error) }
     if (likely(PyList_CheckExact(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) || PyTuple_CheckExact(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) {
       __pyx_t_3 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices; __Pyx_INCREF(__pyx_t_3); __pyx_t_4 = 0;
       __pyx_t_5 = NULL;
     } else {
-      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1261, __pyx_L1_error)
+      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1356, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1261, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1356, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_5)) {
         if (likely(PyList_CheckExact(__pyx_t_3))) {
           if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1261, __pyx_L1_error)
+          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1356, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1261, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1356, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         } else {
           if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1261, __pyx_L1_error)
+          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_6); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1356, __pyx_L1_error)
           #else
-          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1261, __pyx_L1_error)
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1356, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           #endif
         }
@@ -16253,7 +17174,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 1261, __pyx_L1_error)
+            else __PYX_ERR(0, 1356, __pyx_L1_error)
           }
           break;
         }
@@ -16264,7 +17185,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
       __Pyx_GIVEREF(__pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "cpp_process.pyx":1262
+      /* "cpp_process.pyx":1357
  *         if processor is not None:
  *             for choice in choices:
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -16275,7 +17196,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
       __pyx_t_1 = (__pyx_t_2 != 0);
       if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":1263
+        /* "cpp_process.pyx":1358
  *             for choice in choices:
  *                 if choice is None:
  *                     i += 1             # <<<<<<<<<<<<<<
@@ -16284,7 +17205,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
  */
         __pyx_cur_scope->__pyx_v_i = (__pyx_cur_scope->__pyx_v_i + 1);
 
-        /* "cpp_process.pyx":1264
+        /* "cpp_process.pyx":1359
  *                 if choice is None:
  *                     i += 1
  *                     continue             # <<<<<<<<<<<<<<
@@ -16293,7 +17214,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
  */
         goto __pyx_L5_continue;
 
-        /* "cpp_process.pyx":1262
+        /* "cpp_process.pyx":1357
  *         if processor is not None:
  *             for choice in choices:
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -16302,16 +17223,16 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
  */
       }
 
-      /* "cpp_process.pyx":1266
+      /* "cpp_process.pyx":1361
  *                     continue
  * 
  *                 score = scorer(query, processor(choice),             # <<<<<<<<<<<<<<
  *                     processor=None, score_cutoff=c_score_cutoff, **kwargs)
  * 
  */
-      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_scorer)) { __Pyx_RaiseClosureNameError("scorer"); __PYX_ERR(0, 1266, __pyx_L1_error) }
-      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_query)) { __Pyx_RaiseClosureNameError("query"); __PYX_ERR(0, 1266, __pyx_L1_error) }
-      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1266, __pyx_L1_error) }
+      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_scorer)) { __Pyx_RaiseClosureNameError("scorer"); __PYX_ERR(0, 1361, __pyx_L1_error) }
+      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_query)) { __Pyx_RaiseClosureNameError("query"); __PYX_ERR(0, 1361, __pyx_L1_error) }
+      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor)) { __Pyx_RaiseClosureNameError("processor"); __PYX_ERR(0, 1361, __pyx_L1_error) }
       __Pyx_INCREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor);
       __pyx_t_7 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_processor; __pyx_t_8 = NULL;
       __pyx_t_9 = 0;
@@ -16329,11 +17250,11 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
         PyObject *__pyx_callargs[2] = {__pyx_t_8, __pyx_cur_scope->__pyx_v_choice};
         __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-        if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1266, __pyx_L1_error)
+        if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1361, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       }
-      __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1266, __pyx_L1_error)
+      __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1361, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_INCREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_query);
       __Pyx_GIVEREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_query);
@@ -16342,37 +17263,37 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
       PyTuple_SET_ITEM(__pyx_t_7, 1, __pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "cpp_process.pyx":1267
+      /* "cpp_process.pyx":1362
  * 
  *                 score = scorer(query, processor(choice),
  *                     processor=None, score_cutoff=c_score_cutoff, **kwargs)             # <<<<<<<<<<<<<<
  * 
  *                 if score >= c_score_cutoff:
  */
-      __pyx_t_8 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1267, __pyx_L1_error)
+      __pyx_t_8 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1362, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
-      if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_processor, Py_None) < 0) __PYX_ERR(0, 1267, __pyx_L1_error)
-      __pyx_t_10 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1267, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_processor, Py_None) < 0) __PYX_ERR(0, 1362, __pyx_L1_error)
+      __pyx_t_10 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1362, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
-      if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_score_cutoff, __pyx_t_10) < 0) __PYX_ERR(0, 1267, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_score_cutoff, __pyx_t_10) < 0) __PYX_ERR(0, 1362, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       __pyx_t_6 = __pyx_t_8;
       __pyx_t_8 = 0;
-      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_kwargs)) { __Pyx_RaiseClosureNameError("kwargs"); __PYX_ERR(0, 1267, __pyx_L1_error) }
+      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_kwargs)) { __Pyx_RaiseClosureNameError("kwargs"); __PYX_ERR(0, 1362, __pyx_L1_error) }
       if (unlikely(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_kwargs == Py_None)) {
         PyErr_SetString(PyExc_TypeError, "argument after ** must be a mapping, not NoneType");
-        __PYX_ERR(0, 1267, __pyx_L1_error)
+        __PYX_ERR(0, 1362, __pyx_L1_error)
       }
-      if (__Pyx_MergeKeywords(__pyx_t_6, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_kwargs) < 0) __PYX_ERR(0, 1267, __pyx_L1_error)
+      if (__Pyx_MergeKeywords(__pyx_t_6, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_kwargs) < 0) __PYX_ERR(0, 1362, __pyx_L1_error)
 
-      /* "cpp_process.pyx":1266
+      /* "cpp_process.pyx":1361
  *                     continue
  * 
  *                 score = scorer(query, processor(choice),             # <<<<<<<<<<<<<<
  *                     processor=None, score_cutoff=c_score_cutoff, **kwargs)
  * 
  */
-      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_scorer, __pyx_t_7, __pyx_t_6); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1266, __pyx_L1_error)
+      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_scorer, __pyx_t_7, __pyx_t_6); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1361, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -16381,31 +17302,31 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
       __Pyx_GIVEREF(__pyx_t_8);
       __pyx_t_8 = 0;
 
-      /* "cpp_process.pyx":1269
+      /* "cpp_process.pyx":1364
  *                     processor=None, score_cutoff=c_score_cutoff, **kwargs)
  * 
  *                 if score >= c_score_cutoff:             # <<<<<<<<<<<<<<
  *                     yield(choice, score, i)
  *                 i += 1
  */
-      __pyx_t_8 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1269, __pyx_L1_error)
+      __pyx_t_8 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1364, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
-      __pyx_t_6 = PyObject_RichCompare(__pyx_cur_scope->__pyx_v_score, __pyx_t_8, Py_GE); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1269, __pyx_L1_error)
+      __pyx_t_6 = PyObject_RichCompare(__pyx_cur_scope->__pyx_v_score, __pyx_t_8, Py_GE); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1364, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 1269, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 1364, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       if (__pyx_t_1) {
 
-        /* "cpp_process.pyx":1270
+        /* "cpp_process.pyx":1365
  * 
  *                 if score >= c_score_cutoff:
  *                     yield(choice, score, i)             # <<<<<<<<<<<<<<
  *                 i += 1
  *         else:
  */
-        __pyx_t_6 = __Pyx_PyInt_FromSize_t(__pyx_cur_scope->__pyx_v_i); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1270, __pyx_L1_error)
+        __pyx_t_6 = __Pyx_PyInt_FromSize_t(__pyx_cur_scope->__pyx_v_i); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1365, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
-        __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1270, __pyx_L1_error)
+        __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1365, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_INCREF(__pyx_cur_scope->__pyx_v_choice);
         __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_choice);
@@ -16434,9 +17355,9 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
         __Pyx_XGOTREF(__pyx_t_3);
         __pyx_t_4 = __pyx_cur_scope->__pyx_t_1;
         __pyx_t_5 = __pyx_cur_scope->__pyx_t_2;
-        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1270, __pyx_L1_error)
+        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1365, __pyx_L1_error)
 
-        /* "cpp_process.pyx":1269
+        /* "cpp_process.pyx":1364
  *                     processor=None, score_cutoff=c_score_cutoff, **kwargs)
  * 
  *                 if score >= c_score_cutoff:             # <<<<<<<<<<<<<<
@@ -16445,7 +17366,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
  */
       }
 
-      /* "cpp_process.pyx":1271
+      /* "cpp_process.pyx":1366
  *                 if score >= c_score_cutoff:
  *                     yield(choice, score, i)
  *                 i += 1             # <<<<<<<<<<<<<<
@@ -16454,7 +17375,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
  */
       __pyx_cur_scope->__pyx_v_i = (__pyx_cur_scope->__pyx_v_i + 1);
 
-      /* "cpp_process.pyx":1261
+      /* "cpp_process.pyx":1356
  * 
  *         if processor is not None:
  *             for choice in choices:             # <<<<<<<<<<<<<<
@@ -16465,7 +17386,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
     }
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "cpp_process.pyx":1260
+    /* "cpp_process.pyx":1355
  *         cdef size_t i = 0
  * 
  *         if processor is not None:             # <<<<<<<<<<<<<<
@@ -16475,7 +17396,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
     goto __pyx_L4;
   }
 
-  /* "cpp_process.pyx":1273
+  /* "cpp_process.pyx":1368
  *                 i += 1
  *         else:
  *             for choice in choices:             # <<<<<<<<<<<<<<
@@ -16483,31 +17404,31 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
  *                     i += 1
  */
   /*else*/ {
-    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1273, __pyx_L1_error) }
+    if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) { __Pyx_RaiseClosureNameError("choices"); __PYX_ERR(0, 1368, __pyx_L1_error) }
     if (likely(PyList_CheckExact(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) || PyTuple_CheckExact(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices)) {
       __pyx_t_3 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices; __Pyx_INCREF(__pyx_t_3); __pyx_t_4 = 0;
       __pyx_t_5 = NULL;
     } else {
-      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1273, __pyx_L1_error)
+      __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_choices); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1368, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1273, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1368, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_5)) {
         if (likely(PyList_CheckExact(__pyx_t_3))) {
           if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_8 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_8); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1273, __pyx_L1_error)
+          __pyx_t_8 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_8); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1368, __pyx_L1_error)
           #else
-          __pyx_t_8 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1273, __pyx_L1_error)
+          __pyx_t_8 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1368, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
           #endif
         } else {
           if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_8 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_8); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1273, __pyx_L1_error)
+          __pyx_t_8 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_8); __pyx_t_4++; if (unlikely((0 < 0))) __PYX_ERR(0, 1368, __pyx_L1_error)
           #else
-          __pyx_t_8 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1273, __pyx_L1_error)
+          __pyx_t_8 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1368, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
           #endif
         }
@@ -16517,7 +17438,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 1273, __pyx_L1_error)
+            else __PYX_ERR(0, 1368, __pyx_L1_error)
           }
           break;
         }
@@ -16528,7 +17449,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
       __Pyx_GIVEREF(__pyx_t_8);
       __pyx_t_8 = 0;
 
-      /* "cpp_process.pyx":1274
+      /* "cpp_process.pyx":1369
  *         else:
  *             for choice in choices:
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -16539,7 +17460,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
       __pyx_t_2 = (__pyx_t_1 != 0);
       if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":1275
+        /* "cpp_process.pyx":1370
  *             for choice in choices:
  *                 if choice is None:
  *                     i += 1             # <<<<<<<<<<<<<<
@@ -16548,7 +17469,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
  */
         __pyx_cur_scope->__pyx_v_i = (__pyx_cur_scope->__pyx_v_i + 1);
 
-        /* "cpp_process.pyx":1276
+        /* "cpp_process.pyx":1371
  *                 if choice is None:
  *                     i += 1
  *                     continue             # <<<<<<<<<<<<<<
@@ -16557,7 +17478,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
  */
         goto __pyx_L10_continue;
 
-        /* "cpp_process.pyx":1274
+        /* "cpp_process.pyx":1369
  *         else:
  *             for choice in choices:
  *                 if choice is None:             # <<<<<<<<<<<<<<
@@ -16566,16 +17487,16 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
  */
       }
 
-      /* "cpp_process.pyx":1278
+      /* "cpp_process.pyx":1373
  *                     continue
  * 
  *                 score = scorer(query, choice,             # <<<<<<<<<<<<<<
  *                     processor=None, score_cutoff=c_score_cutoff, **kwargs)
  * 
  */
-      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_scorer)) { __Pyx_RaiseClosureNameError("scorer"); __PYX_ERR(0, 1278, __pyx_L1_error) }
-      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_query)) { __Pyx_RaiseClosureNameError("query"); __PYX_ERR(0, 1278, __pyx_L1_error) }
-      __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1278, __pyx_L1_error)
+      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_scorer)) { __Pyx_RaiseClosureNameError("scorer"); __PYX_ERR(0, 1373, __pyx_L1_error) }
+      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_query)) { __Pyx_RaiseClosureNameError("query"); __PYX_ERR(0, 1373, __pyx_L1_error) }
+      __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 1373, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_INCREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_query);
       __Pyx_GIVEREF(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_query);
@@ -16584,37 +17505,37 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
       __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_choice);
       PyTuple_SET_ITEM(__pyx_t_8, 1, __pyx_cur_scope->__pyx_v_choice);
 
-      /* "cpp_process.pyx":1279
+      /* "cpp_process.pyx":1374
  * 
  *                 score = scorer(query, choice,
  *                     processor=None, score_cutoff=c_score_cutoff, **kwargs)             # <<<<<<<<<<<<<<
  * 
  *                 if score >= c_score_cutoff:
  */
-      __pyx_t_7 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1279, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1374, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
-      if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_processor, Py_None) < 0) __PYX_ERR(0, 1279, __pyx_L1_error)
-      __pyx_t_10 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1279, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_processor, Py_None) < 0) __PYX_ERR(0, 1374, __pyx_L1_error)
+      __pyx_t_10 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1374, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
-      if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_score_cutoff, __pyx_t_10) < 0) __PYX_ERR(0, 1279, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_score_cutoff, __pyx_t_10) < 0) __PYX_ERR(0, 1374, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       __pyx_t_6 = __pyx_t_7;
       __pyx_t_7 = 0;
-      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_kwargs)) { __Pyx_RaiseClosureNameError("kwargs"); __PYX_ERR(0, 1279, __pyx_L1_error) }
+      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_kwargs)) { __Pyx_RaiseClosureNameError("kwargs"); __PYX_ERR(0, 1374, __pyx_L1_error) }
       if (unlikely(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_kwargs == Py_None)) {
         PyErr_SetString(PyExc_TypeError, "argument after ** must be a mapping, not NoneType");
-        __PYX_ERR(0, 1279, __pyx_L1_error)
+        __PYX_ERR(0, 1374, __pyx_L1_error)
       }
-      if (__Pyx_MergeKeywords(__pyx_t_6, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_kwargs) < 0) __PYX_ERR(0, 1279, __pyx_L1_error)
+      if (__Pyx_MergeKeywords(__pyx_t_6, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_kwargs) < 0) __PYX_ERR(0, 1374, __pyx_L1_error)
 
-      /* "cpp_process.pyx":1278
+      /* "cpp_process.pyx":1373
  *                     continue
  * 
  *                 score = scorer(query, choice,             # <<<<<<<<<<<<<<
  *                     processor=None, score_cutoff=c_score_cutoff, **kwargs)
  * 
  */
-      __pyx_t_7 = __Pyx_PyObject_Call(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_scorer, __pyx_t_8, __pyx_t_6); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1278, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyObject_Call(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_scorer, __pyx_t_8, __pyx_t_6); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1373, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -16623,31 +17544,31 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
       __Pyx_GIVEREF(__pyx_t_7);
       __pyx_t_7 = 0;
 
-      /* "cpp_process.pyx":1281
+      /* "cpp_process.pyx":1376
  *                     processor=None, score_cutoff=c_score_cutoff, **kwargs)
  * 
  *                 if score >= c_score_cutoff:             # <<<<<<<<<<<<<<
  *                     yield(choice, score, i)
  *                 i += 1
  */
-      __pyx_t_7 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1281, __pyx_L1_error)
+      __pyx_t_7 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_c_score_cutoff); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1376, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
-      __pyx_t_6 = PyObject_RichCompare(__pyx_cur_scope->__pyx_v_score, __pyx_t_7, Py_GE); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1281, __pyx_L1_error)
+      __pyx_t_6 = PyObject_RichCompare(__pyx_cur_scope->__pyx_v_score, __pyx_t_7, Py_GE); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1376, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 1281, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 1376, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":1282
+        /* "cpp_process.pyx":1377
  * 
  *                 if score >= c_score_cutoff:
  *                     yield(choice, score, i)             # <<<<<<<<<<<<<<
  *                 i += 1
  * 
  */
-        __pyx_t_6 = __Pyx_PyInt_FromSize_t(__pyx_cur_scope->__pyx_v_i); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1282, __pyx_L1_error)
+        __pyx_t_6 = __Pyx_PyInt_FromSize_t(__pyx_cur_scope->__pyx_v_i); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1377, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
-        __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1282, __pyx_L1_error)
+        __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1377, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
         __Pyx_INCREF(__pyx_cur_scope->__pyx_v_choice);
         __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_choice);
@@ -16676,9 +17597,9 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
         __Pyx_XGOTREF(__pyx_t_3);
         __pyx_t_4 = __pyx_cur_scope->__pyx_t_1;
         __pyx_t_5 = __pyx_cur_scope->__pyx_t_2;
-        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1282, __pyx_L1_error)
+        if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1377, __pyx_L1_error)
 
-        /* "cpp_process.pyx":1281
+        /* "cpp_process.pyx":1376
  *                     processor=None, score_cutoff=c_score_cutoff, **kwargs)
  * 
  *                 if score >= c_score_cutoff:             # <<<<<<<<<<<<<<
@@ -16687,7 +17608,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
  */
       }
 
-      /* "cpp_process.pyx":1283
+      /* "cpp_process.pyx":1378
  *                 if score >= c_score_cutoff:
  *                     yield(choice, score, i)
  *                 i += 1             # <<<<<<<<<<<<<<
@@ -16696,7 +17617,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
  */
       __pyx_cur_scope->__pyx_v_i = (__pyx_cur_scope->__pyx_v_i + 1);
 
-      /* "cpp_process.pyx":1273
+      /* "cpp_process.pyx":1368
  *                 i += 1
  *         else:
  *             for choice in choices:             # <<<<<<<<<<<<<<
@@ -16710,7 +17631,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
   __pyx_L4:;
   CYTHON_MAYBE_UNUSED_VAR(__pyx_cur_scope);
 
-  /* "cpp_process.pyx":1252
+  /* "cpp_process.pyx":1347
  *                     yield (choice, score, choice_key)
  * 
  *     def py_extract_iter_list():             # <<<<<<<<<<<<<<
@@ -16740,7 +17661,7 @@ static PyObject *__pyx_gb_11cpp_process_12extract_iter_17generator6(__pyx_Corout
   return __pyx_r;
 }
 
-/* "cpp_process.pyx":1045
+/* "cpp_process.pyx":1110
  * 
  * 
  * def extract_iter(query, choices, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):             # <<<<<<<<<<<<<<
@@ -16788,9 +17709,9 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
     return NULL;
   }
   __pyx_L3_first_run:;
-  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1045, __pyx_L1_error)
+  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1110, __pyx_L1_error)
 
-  /* "cpp_process.pyx":1100
+  /* "cpp_process.pyx":1165
  * 
  *     """
  *     cdef int def_process = 0             # <<<<<<<<<<<<<<
@@ -16799,7 +17720,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  */
   __pyx_cur_scope->__pyx_v_def_process = 0;
 
-  /* "cpp_process.pyx":1103
+  /* "cpp_process.pyx":1168
  *     cdef scorer_context ScorerContext
  *     cdef distance_context DistanceContext
  *     cdef double c_score_cutoff = 0.0             # <<<<<<<<<<<<<<
@@ -16808,7 +17729,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  */
   __pyx_cur_scope->__pyx_v_c_score_cutoff = 0.0;
 
-  /* "cpp_process.pyx":1104
+  /* "cpp_process.pyx":1169
  *     cdef distance_context DistanceContext
  *     cdef double c_score_cutoff = 0.0
  *     cdef size_t c_max = <size_t>-1             # <<<<<<<<<<<<<<
@@ -16817,85 +17738,85 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  */
   __pyx_cur_scope->__pyx_v_c_max = ((size_t)-1L);
 
-  /* "cpp_process.pyx":1106
+  /* "cpp_process.pyx":1171
  *     cdef size_t c_max = <size_t>-1
  * 
  *     def extract_iter_dict():             # <<<<<<<<<<<<<<
  *         """
  *         implementation of extract_iter for:
  */
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_11cpp_process_12extract_iter_1extract_iter_dict, 0, __pyx_n_s_extract_iter_locals_extract_iter, ((PyObject*)__pyx_cur_scope), __pyx_n_s_cpp_process, __pyx_d, ((PyObject *)__pyx_codeobj__5)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1106, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_11cpp_process_12extract_iter_1extract_iter_dict, 0, __pyx_n_s_extract_iter_locals_extract_iter, ((PyObject*)__pyx_cur_scope), __pyx_n_s_cpp_process, __pyx_d, ((PyObject *)__pyx_codeobj__5)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1171, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_cur_scope->__pyx_v_extract_iter_dict = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "cpp_process.pyx":1133
+  /* "cpp_process.pyx":1205
  *                     yield (choice, score, choice_key)
  * 
  *     def extract_iter_list():             # <<<<<<<<<<<<<<
  *         """
  *         implementation of extract_iter for:
  */
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_11cpp_process_12extract_iter_4extract_iter_list, 0, __pyx_n_s_extract_iter_locals_extract_iter_2, ((PyObject*)__pyx_cur_scope), __pyx_n_s_cpp_process, __pyx_d, ((PyObject *)__pyx_codeobj__7)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1133, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_11cpp_process_12extract_iter_4extract_iter_list, 0, __pyx_n_s_extract_iter_locals_extract_iter_2, ((PyObject*)__pyx_cur_scope), __pyx_n_s_cpp_process, __pyx_d, ((PyObject *)__pyx_codeobj__7)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1205, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_cur_scope->__pyx_v_extract_iter_list = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "cpp_process.pyx":1165
+  /* "cpp_process.pyx":1245
  *                 i += 1
  * 
  *     def extract_iter_distance_dict():             # <<<<<<<<<<<<<<
  *         """
  *         implementation of extract_iter for:
  */
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_11cpp_process_12extract_iter_7extract_iter_distance_dict, 0, __pyx_n_s_extract_iter_locals_extract_iter_3, ((PyObject*)__pyx_cur_scope), __pyx_n_s_cpp_process, __pyx_d, ((PyObject *)__pyx_codeobj__9)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1165, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_11cpp_process_12extract_iter_7extract_iter_distance_dict, 0, __pyx_n_s_extract_iter_locals_extract_iter_3, ((PyObject*)__pyx_cur_scope), __pyx_n_s_cpp_process, __pyx_d, ((PyObject *)__pyx_codeobj__9)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1245, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_cur_scope->__pyx_v_extract_iter_distance_dict = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "cpp_process.pyx":1192
+  /* "cpp_process.pyx":1279
  *                     yield (choice, distance, choice_key)
  * 
  *     def extract_iter_distance_list():             # <<<<<<<<<<<<<<
  *         """
  *         implementation of extract_iter for:
  */
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_11cpp_process_12extract_iter_10extract_iter_distance_list, 0, __pyx_n_s_extract_iter_locals_extract_iter_4, ((PyObject*)__pyx_cur_scope), __pyx_n_s_cpp_process, __pyx_d, ((PyObject *)__pyx_codeobj__11)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1192, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_11cpp_process_12extract_iter_10extract_iter_distance_list, 0, __pyx_n_s_extract_iter_locals_extract_iter_4, ((PyObject*)__pyx_cur_scope), __pyx_n_s_cpp_process, __pyx_d, ((PyObject *)__pyx_codeobj__11)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1279, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_cur_scope->__pyx_v_extract_iter_distance_list = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "cpp_process.pyx":1224
+  /* "cpp_process.pyx":1319
  *                 i += 1
  * 
  *     def py_extract_iter_dict():             # <<<<<<<<<<<<<<
  *         """
  *         implementation of extract_iter for:
  */
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_11cpp_process_12extract_iter_13py_extract_iter_dict, 0, __pyx_n_s_extract_iter_locals_py_extract_i, ((PyObject*)__pyx_cur_scope), __pyx_n_s_cpp_process, __pyx_d, ((PyObject *)__pyx_codeobj__13)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1224, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_11cpp_process_12extract_iter_13py_extract_iter_dict, 0, __pyx_n_s_extract_iter_locals_py_extract_i, ((PyObject*)__pyx_cur_scope), __pyx_n_s_cpp_process, __pyx_d, ((PyObject *)__pyx_codeobj__13)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1319, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_cur_scope->__pyx_v_py_extract_iter_dict = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "cpp_process.pyx":1252
+  /* "cpp_process.pyx":1347
  *                     yield (choice, score, choice_key)
  * 
  *     def py_extract_iter_list():             # <<<<<<<<<<<<<<
  *         """
  *         implementation of extract_iter for:
  */
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_11cpp_process_12extract_iter_16py_extract_iter_list, 0, __pyx_n_s_extract_iter_locals_py_extract_i_2, ((PyObject*)__pyx_cur_scope), __pyx_n_s_cpp_process, __pyx_d, ((PyObject *)__pyx_codeobj__15)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1252, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_11cpp_process_12extract_iter_16py_extract_iter_list, 0, __pyx_n_s_extract_iter_locals_py_extract_i_2, ((PyObject*)__pyx_cur_scope), __pyx_n_s_cpp_process, __pyx_d, ((PyObject *)__pyx_codeobj__15)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1347, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_cur_scope->__pyx_v_py_extract_iter_list = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "cpp_process.pyx":1285
+  /* "cpp_process.pyx":1380
  *                 i += 1
  * 
  *     if query is None:             # <<<<<<<<<<<<<<
@@ -16906,7 +17827,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
   __pyx_t_3 = (__pyx_t_2 != 0);
   if (__pyx_t_3) {
 
-    /* "cpp_process.pyx":1287
+    /* "cpp_process.pyx":1382
  *     if query is None:
  *         # finish generator
  *         return             # <<<<<<<<<<<<<<
@@ -16917,7 +17838,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
     __pyx_r = NULL;
     goto __pyx_L0;
 
-    /* "cpp_process.pyx":1285
+    /* "cpp_process.pyx":1380
  *                 i += 1
  * 
  *     if query is None:             # <<<<<<<<<<<<<<
@@ -16926,21 +17847,21 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  */
   }
 
-  /* "cpp_process.pyx":1290
+  /* "cpp_process.pyx":1385
  * 
  *     # preprocess the query
  *     if processor is default_process:             # <<<<<<<<<<<<<<
  *         def_process = 1
  *         # since this call is only performed once it is not very expensive to
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_default_process); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1290, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_default_process); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1385, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_3 = (__pyx_cur_scope->__pyx_v_processor == __pyx_t_1);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_2 = (__pyx_t_3 != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_process.pyx":1291
+    /* "cpp_process.pyx":1386
  *     # preprocess the query
  *     if processor is default_process:
  *         def_process = 1             # <<<<<<<<<<<<<<
@@ -16949,7 +17870,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  */
     __pyx_cur_scope->__pyx_v_def_process = 1;
 
-    /* "cpp_process.pyx":1294
+    /* "cpp_process.pyx":1389
  *         # since this call is only performed once it is not very expensive to
  *         # make it in Python
  *         query = processor(query)             # <<<<<<<<<<<<<<
@@ -16973,7 +17894,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
       PyObject *__pyx_callargs[2] = {__pyx_t_5, __pyx_cur_scope->__pyx_v_query};
       __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_4, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1294, __pyx_L1_error)
+      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1389, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     }
@@ -16982,7 +17903,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
     __Pyx_GIVEREF(__pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "cpp_process.pyx":1295
+    /* "cpp_process.pyx":1390
  *         # make it in Python
  *         query = processor(query)
  *         processor = None             # <<<<<<<<<<<<<<
@@ -16994,7 +17915,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
     __Pyx_DECREF_SET(__pyx_cur_scope->__pyx_v_processor, Py_None);
     __Pyx_GIVEREF(Py_None);
 
-    /* "cpp_process.pyx":1290
+    /* "cpp_process.pyx":1385
  * 
  *     # preprocess the query
  *     if processor is default_process:             # <<<<<<<<<<<<<<
@@ -17004,7 +17925,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
     goto __pyx_L5;
   }
 
-  /* "cpp_process.pyx":1296
+  /* "cpp_process.pyx":1391
  *         query = processor(query)
  *         processor = None
  *     elif callable(processor):             # <<<<<<<<<<<<<<
@@ -17013,12 +17934,12 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  */
   __pyx_t_1 = __pyx_cur_scope->__pyx_v_processor;
   __Pyx_INCREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyCallable_Check(__pyx_t_1); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1296, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyCallable_Check(__pyx_t_1); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1391, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_3 = (__pyx_t_2 != 0);
   if (__pyx_t_3) {
 
-    /* "cpp_process.pyx":1297
+    /* "cpp_process.pyx":1392
  *         processor = None
  *     elif callable(processor):
  *         query = processor(query)             # <<<<<<<<<<<<<<
@@ -17042,7 +17963,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
       PyObject *__pyx_callargs[2] = {__pyx_t_5, __pyx_cur_scope->__pyx_v_query};
       __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_4, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1297, __pyx_L1_error)
+      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1392, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     }
@@ -17051,7 +17972,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
     __Pyx_GIVEREF(__pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "cpp_process.pyx":1296
+    /* "cpp_process.pyx":1391
  *         query = processor(query)
  *         processor = None
  *     elif callable(processor):             # <<<<<<<<<<<<<<
@@ -17061,17 +17982,17 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
     goto __pyx_L5;
   }
 
-  /* "cpp_process.pyx":1298
+  /* "cpp_process.pyx":1393
  *     elif callable(processor):
  *         query = processor(query)
  *     elif processor:             # <<<<<<<<<<<<<<
  *         def_process = 1
  *         # since this call is only performed once it is not very expensive to
  */
-  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_cur_scope->__pyx_v_processor); if (unlikely((__pyx_t_3 < 0))) __PYX_ERR(0, 1298, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_cur_scope->__pyx_v_processor); if (unlikely((__pyx_t_3 < 0))) __PYX_ERR(0, 1393, __pyx_L1_error)
   if (__pyx_t_3) {
 
-    /* "cpp_process.pyx":1299
+    /* "cpp_process.pyx":1394
  *         query = processor(query)
  *     elif processor:
  *         def_process = 1             # <<<<<<<<<<<<<<
@@ -17080,14 +18001,14 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  */
     __pyx_cur_scope->__pyx_v_def_process = 1;
 
-    /* "cpp_process.pyx":1302
+    /* "cpp_process.pyx":1397
  *         # since this call is only performed once it is not very expensive to
  *         # make it in Python
  *         query = default_process(query)             # <<<<<<<<<<<<<<
  *         processor = None
  *     # query might be e.g. False
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_default_process); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1302, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_default_process); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1397, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_5 = NULL;
     __pyx_t_6 = 0;
@@ -17105,7 +18026,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
       PyObject *__pyx_callargs[2] = {__pyx_t_5, __pyx_cur_scope->__pyx_v_query};
       __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_4, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1302, __pyx_L1_error)
+      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1397, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     }
@@ -17114,7 +18035,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
     __Pyx_GIVEREF(__pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "cpp_process.pyx":1303
+    /* "cpp_process.pyx":1398
  *         # make it in Python
  *         query = default_process(query)
  *         processor = None             # <<<<<<<<<<<<<<
@@ -17126,7 +18047,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
     __Pyx_DECREF_SET(__pyx_cur_scope->__pyx_v_processor, Py_None);
     __Pyx_GIVEREF(Py_None);
 
-    /* "cpp_process.pyx":1298
+    /* "cpp_process.pyx":1393
  *     elif callable(processor):
  *         query = processor(query)
  *     elif processor:             # <<<<<<<<<<<<<<
@@ -17136,7 +18057,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
     goto __pyx_L5;
   }
 
-  /* "cpp_process.pyx":1306
+  /* "cpp_process.pyx":1401
  *     # query might be e.g. False
  *     else:
  *         processor = None             # <<<<<<<<<<<<<<
@@ -17151,7 +18072,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
   }
   __pyx_L5:;
 
-  /* "cpp_process.pyx":1309
+  /* "cpp_process.pyx":1404
  * 
  *     # normalized distance implemented in C++
  *     ScorerContext = CachedScorerInit(scorer, query, def_process, kwargs)             # <<<<<<<<<<<<<<
@@ -17169,7 +18090,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "cpp_process.pyx":1310
+  /* "cpp_process.pyx":1405
  *     # normalized distance implemented in C++
  *     ScorerContext = CachedScorerInit(scorer, query, def_process, kwargs)
  *     if ScorerContext.context != NULL:             # <<<<<<<<<<<<<<
@@ -17179,7 +18100,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
   __pyx_t_3 = ((__pyx_cur_scope->__pyx_v_ScorerContext.context != NULL) != 0);
   if (__pyx_t_3) {
 
-    /* "cpp_process.pyx":1311
+    /* "cpp_process.pyx":1406
  *     ScorerContext = CachedScorerInit(scorer, query, def_process, kwargs)
  *     if ScorerContext.context != NULL:
  *         try:             # <<<<<<<<<<<<<<
@@ -17188,7 +18109,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  */
     /*try:*/ {
 
-      /* "cpp_process.pyx":1312
+      /* "cpp_process.pyx":1407
  *     if ScorerContext.context != NULL:
  *         try:
  *             if score_cutoff is not None:             # <<<<<<<<<<<<<<
@@ -17199,17 +18120,17 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
       __pyx_t_2 = (__pyx_t_3 != 0);
       if (__pyx_t_2) {
 
-        /* "cpp_process.pyx":1313
+        /* "cpp_process.pyx":1408
  *         try:
  *             if score_cutoff is not None:
  *                 c_score_cutoff = score_cutoff             # <<<<<<<<<<<<<<
  *             if c_score_cutoff < 0 or c_score_cutoff > 100:
  *                 raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
  */
-        __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_cur_scope->__pyx_v_score_cutoff); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 1313, __pyx_L8_error)
+        __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_cur_scope->__pyx_v_score_cutoff); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 1408, __pyx_L8_error)
         __pyx_cur_scope->__pyx_v_c_score_cutoff = __pyx_t_7;
 
-        /* "cpp_process.pyx":1312
+        /* "cpp_process.pyx":1407
  *     if ScorerContext.context != NULL:
  *         try:
  *             if score_cutoff is not None:             # <<<<<<<<<<<<<<
@@ -17218,7 +18139,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  */
       }
 
-      /* "cpp_process.pyx":1314
+      /* "cpp_process.pyx":1409
  *             if score_cutoff is not None:
  *                 c_score_cutoff = score_cutoff
  *             if c_score_cutoff < 0 or c_score_cutoff > 100:             # <<<<<<<<<<<<<<
@@ -17236,20 +18157,20 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
       __pyx_L12_bool_binop_done:;
       if (unlikely(__pyx_t_2)) {
 
-        /* "cpp_process.pyx":1315
+        /* "cpp_process.pyx":1410
  *                 c_score_cutoff = score_cutoff
  *             if c_score_cutoff < 0 or c_score_cutoff > 100:
  *                 raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")             # <<<<<<<<<<<<<<
  * 
  *             if hasattr(choices, "items"):
  */
-        __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1315, __pyx_L8_error)
+        __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1410, __pyx_L8_error)
         __Pyx_GOTREF(__pyx_t_5);
         __Pyx_Raise(__pyx_t_5, 0, 0, 0);
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-        __PYX_ERR(0, 1315, __pyx_L8_error)
+        __PYX_ERR(0, 1410, __pyx_L8_error)
 
-        /* "cpp_process.pyx":1314
+        /* "cpp_process.pyx":1409
  *             if score_cutoff is not None:
  *                 c_score_cutoff = score_cutoff
  *             if c_score_cutoff < 0 or c_score_cutoff > 100:             # <<<<<<<<<<<<<<
@@ -17258,7 +18179,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  */
       }
 
-      /* "cpp_process.pyx":1317
+      /* "cpp_process.pyx":1412
  *                 raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
  * 
  *             if hasattr(choices, "items"):             # <<<<<<<<<<<<<<
@@ -17267,19 +18188,19 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  */
       __pyx_t_5 = __pyx_cur_scope->__pyx_v_choices;
       __Pyx_INCREF(__pyx_t_5);
-      __pyx_t_2 = __Pyx_HasAttr(__pyx_t_5, __pyx_n_u_items); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1317, __pyx_L8_error)
+      __pyx_t_2 = __Pyx_HasAttr(__pyx_t_5, __pyx_n_u_items); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1412, __pyx_L8_error)
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       __pyx_t_3 = (__pyx_t_2 != 0);
       if (__pyx_t_3) {
 
-        /* "cpp_process.pyx":1318
+        /* "cpp_process.pyx":1413
  * 
  *             if hasattr(choices, "items"):
  *                 yield from extract_iter_dict()             # <<<<<<<<<<<<<<
  *             else:
  *                 yield from extract_iter_list()
  */
-        __pyx_t_5 = __pyx_pf_11cpp_process_12extract_iter_extract_iter_dict(__pyx_cur_scope->__pyx_v_extract_iter_dict); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1318, __pyx_L8_error)
+        __pyx_t_5 = __pyx_pf_11cpp_process_12extract_iter_extract_iter_dict(__pyx_cur_scope->__pyx_v_extract_iter_dict); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1413, __pyx_L8_error)
         __Pyx_GOTREF(__pyx_t_5);
         __pyx_r = __Pyx_Generator_Yield_From(__pyx_generator, __pyx_t_5);
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -17292,16 +18213,16 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
           __pyx_generator->resume_label = 1;
           return __pyx_r;
           __pyx_L15_resume_from_yield_from:;
-          if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1318, __pyx_L8_error)
+          if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1413, __pyx_L8_error)
         } else {
           PyObject* exc_type = __Pyx_PyErr_Occurred();
           if (exc_type) {
             if (likely(exc_type == PyExc_StopIteration || (exc_type != PyExc_GeneratorExit && __Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration)))) PyErr_Clear();
-            else __PYX_ERR(0, 1318, __pyx_L8_error)
+            else __PYX_ERR(0, 1413, __pyx_L8_error)
           }
         }
 
-        /* "cpp_process.pyx":1317
+        /* "cpp_process.pyx":1412
  *                 raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
  * 
  *             if hasattr(choices, "items"):             # <<<<<<<<<<<<<<
@@ -17311,7 +18232,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
         goto __pyx_L14;
       }
 
-      /* "cpp_process.pyx":1320
+      /* "cpp_process.pyx":1415
  *                 yield from extract_iter_dict()
  *             else:
  *                 yield from extract_iter_list()             # <<<<<<<<<<<<<<
@@ -17319,7 +18240,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  *         finally:
  */
       /*else*/ {
-        __pyx_t_5 = __pyx_pf_11cpp_process_12extract_iter_3extract_iter_list(__pyx_cur_scope->__pyx_v_extract_iter_list); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1320, __pyx_L8_error)
+        __pyx_t_5 = __pyx_pf_11cpp_process_12extract_iter_3extract_iter_list(__pyx_cur_scope->__pyx_v_extract_iter_list); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1415, __pyx_L8_error)
         __Pyx_GOTREF(__pyx_t_5);
         __pyx_r = __Pyx_Generator_Yield_From(__pyx_generator, __pyx_t_5);
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -17332,19 +18253,19 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
           __pyx_generator->resume_label = 2;
           return __pyx_r;
           __pyx_L16_resume_from_yield_from:;
-          if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1320, __pyx_L8_error)
+          if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1415, __pyx_L8_error)
         } else {
           PyObject* exc_type = __Pyx_PyErr_Occurred();
           if (exc_type) {
             if (likely(exc_type == PyExc_StopIteration || (exc_type != PyExc_GeneratorExit && __Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration)))) PyErr_Clear();
-            else __PYX_ERR(0, 1320, __pyx_L8_error)
+            else __PYX_ERR(0, 1415, __pyx_L8_error)
           }
         }
       }
       __pyx_L14:;
     }
 
-    /* "cpp_process.pyx":1324
+    /* "cpp_process.pyx":1419
  *         finally:
  *             # part of the context is dynamically allocated, so it has to be freed in any case
  *             ScorerContext.deinit(ScorerContext.context)             # <<<<<<<<<<<<<<
@@ -17357,7 +18278,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
           __pyx_cur_scope->__pyx_v_ScorerContext.deinit(__pyx_cur_scope->__pyx_v_ScorerContext.context);
         } catch(...) {
           __Pyx_CppExn2PyErr();
-          __PYX_ERR(0, 1324, __pyx_L1_error)
+          __PYX_ERR(0, 1419, __pyx_L1_error)
         }
         goto __pyx_L9;
       }
@@ -17382,7 +18303,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
             __pyx_cur_scope->__pyx_v_ScorerContext.deinit(__pyx_cur_scope->__pyx_v_ScorerContext.context);
           } catch(...) {
             __Pyx_CppExn2PyErr();
-            __PYX_ERR(0, 1324, __pyx_L18_error)
+            __PYX_ERR(0, 1419, __pyx_L18_error)
           }
         }
         if (PY_MAJOR_VERSION >= 3) {
@@ -17414,7 +18335,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
       __pyx_L9:;
     }
 
-    /* "cpp_process.pyx":1326
+    /* "cpp_process.pyx":1421
  *             ScorerContext.deinit(ScorerContext.context)
  *         # finish generator
  *         return             # <<<<<<<<<<<<<<
@@ -17425,7 +18346,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
     __pyx_r = NULL;
     goto __pyx_L0;
 
-    /* "cpp_process.pyx":1310
+    /* "cpp_process.pyx":1405
  *     # normalized distance implemented in C++
  *     ScorerContext = CachedScorerInit(scorer, query, def_process, kwargs)
  *     if ScorerContext.context != NULL:             # <<<<<<<<<<<<<<
@@ -17434,7 +18355,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  */
   }
 
-  /* "cpp_process.pyx":1329
+  /* "cpp_process.pyx":1424
  * 
  *     # distance implemented in C++
  *     DistanceContext = CachedDistanceInit(scorer, query, def_process, kwargs)             # <<<<<<<<<<<<<<
@@ -17452,7 +18373,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "cpp_process.pyx":1330
+  /* "cpp_process.pyx":1425
  *     # distance implemented in C++
  *     DistanceContext = CachedDistanceInit(scorer, query, def_process, kwargs)
  *     if DistanceContext.context != NULL:             # <<<<<<<<<<<<<<
@@ -17462,7 +18383,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
   __pyx_t_3 = ((__pyx_cur_scope->__pyx_v_DistanceContext.context != NULL) != 0);
   if (__pyx_t_3) {
 
-    /* "cpp_process.pyx":1331
+    /* "cpp_process.pyx":1426
  *     DistanceContext = CachedDistanceInit(scorer, query, def_process, kwargs)
  *     if DistanceContext.context != NULL:
  *         try:             # <<<<<<<<<<<<<<
@@ -17471,7 +18392,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  */
     /*try:*/ {
 
-      /* "cpp_process.pyx":1332
+      /* "cpp_process.pyx":1427
  *     if DistanceContext.context != NULL:
  *         try:
  *             if score_cutoff is not None and score_cutoff != -1:             # <<<<<<<<<<<<<<
@@ -17485,25 +18406,25 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
         __pyx_t_3 = __pyx_t_16;
         goto __pyx_L24_bool_binop_done;
       }
-      __pyx_t_1 = __Pyx_PyInt_NeObjC(__pyx_cur_scope->__pyx_v_score_cutoff, __pyx_int_neg_1, -1L, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1332, __pyx_L21_error)
+      __pyx_t_1 = __Pyx_PyInt_NeObjC(__pyx_cur_scope->__pyx_v_score_cutoff, __pyx_int_neg_1, -1L, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1427, __pyx_L21_error)
       __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_16 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely((__pyx_t_16 < 0))) __PYX_ERR(0, 1332, __pyx_L21_error)
+      __pyx_t_16 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely((__pyx_t_16 < 0))) __PYX_ERR(0, 1427, __pyx_L21_error)
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       __pyx_t_3 = __pyx_t_16;
       __pyx_L24_bool_binop_done:;
       if (__pyx_t_3) {
 
-        /* "cpp_process.pyx":1333
+        /* "cpp_process.pyx":1428
  *         try:
  *             if score_cutoff is not None and score_cutoff != -1:
  *                 c_max = score_cutoff             # <<<<<<<<<<<<<<
  * 
  *             if hasattr(choices, "items"):
  */
-        __pyx_t_17 = __Pyx_PyInt_As_size_t(__pyx_cur_scope->__pyx_v_score_cutoff); if (unlikely((__pyx_t_17 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 1333, __pyx_L21_error)
+        __pyx_t_17 = __Pyx_PyInt_As_size_t(__pyx_cur_scope->__pyx_v_score_cutoff); if (unlikely((__pyx_t_17 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 1428, __pyx_L21_error)
         __pyx_cur_scope->__pyx_v_c_max = __pyx_t_17;
 
-        /* "cpp_process.pyx":1332
+        /* "cpp_process.pyx":1427
  *     if DistanceContext.context != NULL:
  *         try:
  *             if score_cutoff is not None and score_cutoff != -1:             # <<<<<<<<<<<<<<
@@ -17512,7 +18433,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  */
       }
 
-      /* "cpp_process.pyx":1335
+      /* "cpp_process.pyx":1430
  *                 c_max = score_cutoff
  * 
  *             if hasattr(choices, "items"):             # <<<<<<<<<<<<<<
@@ -17521,19 +18442,19 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  */
       __pyx_t_1 = __pyx_cur_scope->__pyx_v_choices;
       __Pyx_INCREF(__pyx_t_1);
-      __pyx_t_3 = __Pyx_HasAttr(__pyx_t_1, __pyx_n_u_items); if (unlikely(__pyx_t_3 == ((int)-1))) __PYX_ERR(0, 1335, __pyx_L21_error)
+      __pyx_t_3 = __Pyx_HasAttr(__pyx_t_1, __pyx_n_u_items); if (unlikely(__pyx_t_3 == ((int)-1))) __PYX_ERR(0, 1430, __pyx_L21_error)
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       __pyx_t_16 = (__pyx_t_3 != 0);
       if (__pyx_t_16) {
 
-        /* "cpp_process.pyx":1336
+        /* "cpp_process.pyx":1431
  * 
  *             if hasattr(choices, "items"):
  *                 yield from extract_iter_distance_dict()             # <<<<<<<<<<<<<<
  *             else:
  *                 yield from extract_iter_distance_list()
  */
-        __pyx_t_1 = __pyx_pf_11cpp_process_12extract_iter_6extract_iter_distance_dict(__pyx_cur_scope->__pyx_v_extract_iter_distance_dict); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1336, __pyx_L21_error)
+        __pyx_t_1 = __pyx_pf_11cpp_process_12extract_iter_6extract_iter_distance_dict(__pyx_cur_scope->__pyx_v_extract_iter_distance_dict); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1431, __pyx_L21_error)
         __Pyx_GOTREF(__pyx_t_1);
         __pyx_r = __Pyx_Generator_Yield_From(__pyx_generator, __pyx_t_1);
         __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -17546,16 +18467,16 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
           __pyx_generator->resume_label = 3;
           return __pyx_r;
           __pyx_L27_resume_from_yield_from:;
-          if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1336, __pyx_L21_error)
+          if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1431, __pyx_L21_error)
         } else {
           PyObject* exc_type = __Pyx_PyErr_Occurred();
           if (exc_type) {
             if (likely(exc_type == PyExc_StopIteration || (exc_type != PyExc_GeneratorExit && __Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration)))) PyErr_Clear();
-            else __PYX_ERR(0, 1336, __pyx_L21_error)
+            else __PYX_ERR(0, 1431, __pyx_L21_error)
           }
         }
 
-        /* "cpp_process.pyx":1335
+        /* "cpp_process.pyx":1430
  *                 c_max = score_cutoff
  * 
  *             if hasattr(choices, "items"):             # <<<<<<<<<<<<<<
@@ -17565,7 +18486,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
         goto __pyx_L26;
       }
 
-      /* "cpp_process.pyx":1338
+      /* "cpp_process.pyx":1433
  *                 yield from extract_iter_distance_dict()
  *             else:
  *                 yield from extract_iter_distance_list()             # <<<<<<<<<<<<<<
@@ -17573,7 +18494,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  *         finally:
  */
       /*else*/ {
-        __pyx_t_1 = __pyx_pf_11cpp_process_12extract_iter_9extract_iter_distance_list(__pyx_cur_scope->__pyx_v_extract_iter_distance_list); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1338, __pyx_L21_error)
+        __pyx_t_1 = __pyx_pf_11cpp_process_12extract_iter_9extract_iter_distance_list(__pyx_cur_scope->__pyx_v_extract_iter_distance_list); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1433, __pyx_L21_error)
         __Pyx_GOTREF(__pyx_t_1);
         __pyx_r = __Pyx_Generator_Yield_From(__pyx_generator, __pyx_t_1);
         __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -17586,19 +18507,19 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
           __pyx_generator->resume_label = 4;
           return __pyx_r;
           __pyx_L28_resume_from_yield_from:;
-          if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1338, __pyx_L21_error)
+          if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1433, __pyx_L21_error)
         } else {
           PyObject* exc_type = __Pyx_PyErr_Occurred();
           if (exc_type) {
             if (likely(exc_type == PyExc_StopIteration || (exc_type != PyExc_GeneratorExit && __Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration)))) PyErr_Clear();
-            else __PYX_ERR(0, 1338, __pyx_L21_error)
+            else __PYX_ERR(0, 1433, __pyx_L21_error)
           }
         }
       }
       __pyx_L26:;
     }
 
-    /* "cpp_process.pyx":1342
+    /* "cpp_process.pyx":1437
  *         finally:
  *             # part of the context is dynamically allocated, so it has to be freed in any case
  *             DistanceContext.deinit(DistanceContext.context)             # <<<<<<<<<<<<<<
@@ -17611,7 +18532,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
           __pyx_cur_scope->__pyx_v_DistanceContext.deinit(__pyx_cur_scope->__pyx_v_DistanceContext.context);
         } catch(...) {
           __Pyx_CppExn2PyErr();
-          __PYX_ERR(0, 1342, __pyx_L1_error)
+          __PYX_ERR(0, 1437, __pyx_L1_error)
         }
         goto __pyx_L22;
       }
@@ -17636,7 +18557,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
             __pyx_cur_scope->__pyx_v_DistanceContext.deinit(__pyx_cur_scope->__pyx_v_DistanceContext.context);
           } catch(...) {
             __Pyx_CppExn2PyErr();
-            __PYX_ERR(0, 1342, __pyx_L30_error)
+            __PYX_ERR(0, 1437, __pyx_L30_error)
           }
         }
         if (PY_MAJOR_VERSION >= 3) {
@@ -17668,7 +18589,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
       __pyx_L22:;
     }
 
-    /* "cpp_process.pyx":1344
+    /* "cpp_process.pyx":1439
  *             DistanceContext.deinit(DistanceContext.context)
  *         # finish generator
  *         return             # <<<<<<<<<<<<<<
@@ -17679,7 +18600,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
     __pyx_r = NULL;
     goto __pyx_L0;
 
-    /* "cpp_process.pyx":1330
+    /* "cpp_process.pyx":1425
  *     # distance implemented in C++
  *     DistanceContext = CachedDistanceInit(scorer, query, def_process, kwargs)
  *     if DistanceContext.context != NULL:             # <<<<<<<<<<<<<<
@@ -17688,7 +18609,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  */
   }
 
-  /* "cpp_process.pyx":1348
+  /* "cpp_process.pyx":1443
  * 
  *     # the scorer has to be called through Python
  *     if score_cutoff is not None:             # <<<<<<<<<<<<<<
@@ -17699,17 +18620,17 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
   __pyx_t_3 = (__pyx_t_16 != 0);
   if (__pyx_t_3) {
 
-    /* "cpp_process.pyx":1349
+    /* "cpp_process.pyx":1444
  *     # the scorer has to be called through Python
  *     if score_cutoff is not None:
  *         c_score_cutoff = score_cutoff             # <<<<<<<<<<<<<<
  * 
  *     if hasattr(choices, "items"):
  */
-    __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_cur_scope->__pyx_v_score_cutoff); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 1349, __pyx_L1_error)
+    __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_cur_scope->__pyx_v_score_cutoff); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 1444, __pyx_L1_error)
     __pyx_cur_scope->__pyx_v_c_score_cutoff = __pyx_t_7;
 
-    /* "cpp_process.pyx":1348
+    /* "cpp_process.pyx":1443
  * 
  *     # the scorer has to be called through Python
  *     if score_cutoff is not None:             # <<<<<<<<<<<<<<
@@ -17718,7 +18639,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  */
   }
 
-  /* "cpp_process.pyx":1351
+  /* "cpp_process.pyx":1446
  *         c_score_cutoff = score_cutoff
  * 
  *     if hasattr(choices, "items"):             # <<<<<<<<<<<<<<
@@ -17727,19 +18648,19 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  */
   __pyx_t_1 = __pyx_cur_scope->__pyx_v_choices;
   __Pyx_INCREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_HasAttr(__pyx_t_1, __pyx_n_u_items); if (unlikely(__pyx_t_3 == ((int)-1))) __PYX_ERR(0, 1351, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_HasAttr(__pyx_t_1, __pyx_n_u_items); if (unlikely(__pyx_t_3 == ((int)-1))) __PYX_ERR(0, 1446, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_16 = (__pyx_t_3 != 0);
   if (__pyx_t_16) {
 
-    /* "cpp_process.pyx":1352
+    /* "cpp_process.pyx":1447
  * 
  *     if hasattr(choices, "items"):
  *         yield from py_extract_iter_dict()             # <<<<<<<<<<<<<<
  *     else:
  *         yield from py_extract_iter_list()
  */
-    __pyx_t_1 = __pyx_pf_11cpp_process_12extract_iter_12py_extract_iter_dict(__pyx_cur_scope->__pyx_v_py_extract_iter_dict); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1352, __pyx_L1_error)
+    __pyx_t_1 = __pyx_pf_11cpp_process_12extract_iter_12py_extract_iter_dict(__pyx_cur_scope->__pyx_v_py_extract_iter_dict); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1447, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_r = __Pyx_Generator_Yield_From(__pyx_generator, __pyx_t_1);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -17752,16 +18673,16 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
       __pyx_generator->resume_label = 5;
       return __pyx_r;
       __pyx_L33_resume_from_yield_from:;
-      if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1352, __pyx_L1_error)
+      if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1447, __pyx_L1_error)
     } else {
       PyObject* exc_type = __Pyx_PyErr_Occurred();
       if (exc_type) {
         if (likely(exc_type == PyExc_StopIteration || (exc_type != PyExc_GeneratorExit && __Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration)))) PyErr_Clear();
-        else __PYX_ERR(0, 1352, __pyx_L1_error)
+        else __PYX_ERR(0, 1447, __pyx_L1_error)
       }
     }
 
-    /* "cpp_process.pyx":1351
+    /* "cpp_process.pyx":1446
  *         c_score_cutoff = score_cutoff
  * 
  *     if hasattr(choices, "items"):             # <<<<<<<<<<<<<<
@@ -17771,13 +18692,13 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
     goto __pyx_L32;
   }
 
-  /* "cpp_process.pyx":1354
+  /* "cpp_process.pyx":1449
  *         yield from py_extract_iter_dict()
  *     else:
  *         yield from py_extract_iter_list()             # <<<<<<<<<<<<<<
  */
   /*else*/ {
-    __pyx_t_1 = __pyx_pf_11cpp_process_12extract_iter_15py_extract_iter_list(__pyx_cur_scope->__pyx_v_py_extract_iter_list); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1354, __pyx_L1_error)
+    __pyx_t_1 = __pyx_pf_11cpp_process_12extract_iter_15py_extract_iter_list(__pyx_cur_scope->__pyx_v_py_extract_iter_list); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1449, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_r = __Pyx_Generator_Yield_From(__pyx_generator, __pyx_t_1);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -17790,19 +18711,19 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
       __pyx_generator->resume_label = 6;
       return __pyx_r;
       __pyx_L34_resume_from_yield_from:;
-      if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1354, __pyx_L1_error)
+      if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 1449, __pyx_L1_error)
     } else {
       PyObject* exc_type = __Pyx_PyErr_Occurred();
       if (exc_type) {
         if (likely(exc_type == PyExc_StopIteration || (exc_type != PyExc_GeneratorExit && __Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration)))) PyErr_Clear();
-        else __PYX_ERR(0, 1354, __pyx_L1_error)
+        else __PYX_ERR(0, 1449, __pyx_L1_error)
       }
     }
   }
   __pyx_L32:;
   CYTHON_MAYBE_UNUSED_VAR(__pyx_cur_scope);
 
-  /* "cpp_process.pyx":1045
+  /* "cpp_process.pyx":1110
  * 
  * 
  * def extract_iter(query, choices, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):             # <<<<<<<<<<<<<<
@@ -18041,6 +18962,7 @@ static void __pyx_tp_dealloc_11cpp_process___pyx_scope_struct_1_extract_iter_dic
   Py_CLEAR(p->__pyx_outer_scope);
   Py_CLEAR(p->__pyx_v_choice);
   Py_CLEAR(p->__pyx_v_choice_key);
+  Py_CLEAR(p->__pyx_v_proc_choice);
   Py_CLEAR(p->__pyx_t_0);
   if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_11cpp_process___pyx_scope_struct_1_extract_iter_dict < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_11cpp_process___pyx_scope_struct_1_extract_iter_dict)))) {
     __pyx_freelist_11cpp_process___pyx_scope_struct_1_extract_iter_dict[__pyx_freecount_11cpp_process___pyx_scope_struct_1_extract_iter_dict++] = ((struct __pyx_obj_11cpp_process___pyx_scope_struct_1_extract_iter_dict *)o);
@@ -18061,6 +18983,9 @@ static int __pyx_tp_traverse_11cpp_process___pyx_scope_struct_1_extract_iter_dic
   }
   if (p->__pyx_v_choice_key) {
     e = (*v)(p->__pyx_v_choice_key, a); if (e) return e;
+  }
+  if (p->__pyx_v_proc_choice) {
+    e = (*v)(p->__pyx_v_proc_choice, a); if (e) return e;
   }
   if (p->__pyx_t_0) {
     e = (*v)(p->__pyx_t_0, a); if (e) return e;
@@ -18184,6 +19109,7 @@ static void __pyx_tp_dealloc_11cpp_process___pyx_scope_struct_2_extract_iter_lis
   PyObject_GC_UnTrack(o);
   Py_CLEAR(p->__pyx_outer_scope);
   Py_CLEAR(p->__pyx_v_choice);
+  Py_CLEAR(p->__pyx_v_proc_choice);
   Py_CLEAR(p->__pyx_t_0);
   if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_11cpp_process___pyx_scope_struct_2_extract_iter_list < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_11cpp_process___pyx_scope_struct_2_extract_iter_list)))) {
     __pyx_freelist_11cpp_process___pyx_scope_struct_2_extract_iter_list[__pyx_freecount_11cpp_process___pyx_scope_struct_2_extract_iter_list++] = ((struct __pyx_obj_11cpp_process___pyx_scope_struct_2_extract_iter_list *)o);
@@ -18201,6 +19127,9 @@ static int __pyx_tp_traverse_11cpp_process___pyx_scope_struct_2_extract_iter_lis
   }
   if (p->__pyx_v_choice) {
     e = (*v)(p->__pyx_v_choice, a); if (e) return e;
+  }
+  if (p->__pyx_v_proc_choice) {
+    e = (*v)(p->__pyx_v_proc_choice, a); if (e) return e;
   }
   if (p->__pyx_t_0) {
     e = (*v)(p->__pyx_t_0, a); if (e) return e;
@@ -18325,6 +19254,7 @@ static void __pyx_tp_dealloc_11cpp_process___pyx_scope_struct_3_extract_iter_dis
   Py_CLEAR(p->__pyx_outer_scope);
   Py_CLEAR(p->__pyx_v_choice);
   Py_CLEAR(p->__pyx_v_choice_key);
+  Py_CLEAR(p->__pyx_v_proc_choice);
   Py_CLEAR(p->__pyx_t_0);
   if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_11cpp_process___pyx_scope_struct_3_extract_iter_distance_dict < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_11cpp_process___pyx_scope_struct_3_extract_iter_distance_dict)))) {
     __pyx_freelist_11cpp_process___pyx_scope_struct_3_extract_iter_distance_dict[__pyx_freecount_11cpp_process___pyx_scope_struct_3_extract_iter_distance_dict++] = ((struct __pyx_obj_11cpp_process___pyx_scope_struct_3_extract_iter_distance_dict *)o);
@@ -18345,6 +19275,9 @@ static int __pyx_tp_traverse_11cpp_process___pyx_scope_struct_3_extract_iter_dis
   }
   if (p->__pyx_v_choice_key) {
     e = (*v)(p->__pyx_v_choice_key, a); if (e) return e;
+  }
+  if (p->__pyx_v_proc_choice) {
+    e = (*v)(p->__pyx_v_proc_choice, a); if (e) return e;
   }
   if (p->__pyx_t_0) {
     e = (*v)(p->__pyx_t_0, a); if (e) return e;
@@ -18468,6 +19401,7 @@ static void __pyx_tp_dealloc_11cpp_process___pyx_scope_struct_4_extract_iter_dis
   PyObject_GC_UnTrack(o);
   Py_CLEAR(p->__pyx_outer_scope);
   Py_CLEAR(p->__pyx_v_choice);
+  Py_CLEAR(p->__pyx_v_proc_choice);
   Py_CLEAR(p->__pyx_t_0);
   if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_11cpp_process___pyx_scope_struct_4_extract_iter_distance_list < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_11cpp_process___pyx_scope_struct_4_extract_iter_distance_list)))) {
     __pyx_freelist_11cpp_process___pyx_scope_struct_4_extract_iter_distance_list[__pyx_freecount_11cpp_process___pyx_scope_struct_4_extract_iter_distance_list++] = ((struct __pyx_obj_11cpp_process___pyx_scope_struct_4_extract_iter_distance_list *)o);
@@ -18485,6 +19419,9 @@ static int __pyx_tp_traverse_11cpp_process___pyx_scope_struct_4_extract_iter_dis
   }
   if (p->__pyx_v_choice) {
     e = (*v)(p->__pyx_v_choice, a); if (e) return e;
+  }
+  if (p->__pyx_v_proc_choice) {
+    e = (*v)(p->__pyx_v_proc_choice, a); if (e) return e;
   }
   if (p->__pyx_t_0) {
     e = (*v)(p->__pyx_t_0, a); if (e) return e;
@@ -18911,7 +19848,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, __pyx_k_distance, sizeof(__pyx_k_distance), 0, 0, 1, 1},
   {0, __pyx_k_extract, sizeof(__pyx_k_extract), 0, 0, 1, 1},
   {0, __pyx_k_extractOne, sizeof(__pyx_k_extractOne), 0, 0, 1, 1},
-  {0, __pyx_k_extractOne_line_427, sizeof(__pyx_k_extractOne_line_427), 0, 1, 0, 0},
+  {0, __pyx_k_extractOne_line_460, sizeof(__pyx_k_extractOne_line_460), 0, 1, 0, 0},
   {0, __pyx_k_extract_iter, sizeof(__pyx_k_extract_iter), 0, 0, 1, 1},
   {0, __pyx_k_extract_iter_dict, sizeof(__pyx_k_extract_iter_dict), 0, 0, 1, 1},
   {0, __pyx_k_extract_iter_distance_dict, sizeof(__pyx_k_extract_iter_distance_dict), 0, 0, 1, 1},
@@ -18946,6 +19883,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, __pyx_k_partial_token_ratio, sizeof(__pyx_k_partial_token_ratio), 0, 0, 1, 1},
   {0, __pyx_k_partial_token_set_ratio, sizeof(__pyx_k_partial_token_set_ratio), 0, 0, 1, 1},
   {0, __pyx_k_partial_token_sort_ratio, sizeof(__pyx_k_partial_token_sort_ratio), 0, 0, 1, 1},
+  {0, __pyx_k_proc_choice, sizeof(__pyx_k_proc_choice), 0, 0, 1, 1},
   {0, __pyx_k_processor, sizeof(__pyx_k_processor), 0, 0, 1, 1},
   {0, __pyx_k_py_extract_dict_locals_lambda, sizeof(__pyx_k_py_extract_dict_locals_lambda), 0, 0, 1, 1},
   {0, __pyx_k_py_extract_iter_dict, sizeof(__pyx_k_py_extract_iter_dict), 0, 0, 1, 1},
@@ -18994,7 +19932,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_distance, __pyx_k_distance, sizeof(__pyx_k_distance), 0, 0, 1, 1},
   {&__pyx_n_s_extract, __pyx_k_extract, sizeof(__pyx_k_extract), 0, 0, 1, 1},
   {&__pyx_n_s_extractOne, __pyx_k_extractOne, sizeof(__pyx_k_extractOne), 0, 0, 1, 1},
-  {&__pyx_kp_u_extractOne_line_427, __pyx_k_extractOne_line_427, sizeof(__pyx_k_extractOne_line_427), 0, 1, 0, 0},
+  {&__pyx_kp_u_extractOne_line_460, __pyx_k_extractOne_line_460, sizeof(__pyx_k_extractOne_line_460), 0, 1, 0, 0},
   {&__pyx_n_s_extract_iter, __pyx_k_extract_iter, sizeof(__pyx_k_extract_iter), 0, 0, 1, 1},
   {&__pyx_n_s_extract_iter_dict, __pyx_k_extract_iter_dict, sizeof(__pyx_k_extract_iter_dict), 0, 0, 1, 1},
   {&__pyx_n_s_extract_iter_distance_dict, __pyx_k_extract_iter_distance_dict, sizeof(__pyx_k_extract_iter_distance_dict), 0, 0, 1, 1},
@@ -19029,6 +19967,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_partial_token_ratio, __pyx_k_partial_token_ratio, sizeof(__pyx_k_partial_token_ratio), 0, 0, 1, 1},
   {&__pyx_n_s_partial_token_set_ratio, __pyx_k_partial_token_set_ratio, sizeof(__pyx_k_partial_token_set_ratio), 0, 0, 1, 1},
   {&__pyx_n_s_partial_token_sort_ratio, __pyx_k_partial_token_sort_ratio, sizeof(__pyx_k_partial_token_sort_ratio), 0, 0, 1, 1},
+  {&__pyx_n_s_proc_choice, __pyx_k_proc_choice, sizeof(__pyx_k_proc_choice), 0, 0, 1, 1},
   {&__pyx_n_s_processor, __pyx_k_processor, sizeof(__pyx_k_processor), 0, 0, 1, 1},
   {&__pyx_n_s_py_extract_dict_locals_lambda, __pyx_k_py_extract_dict_locals_lambda, sizeof(__pyx_k_py_extract_dict_locals_lambda), 0, 0, 1, 1},
   {&__pyx_n_s_py_extract_iter_dict, __pyx_k_py_extract_iter_dict, sizeof(__pyx_k_py_extract_iter_dict), 0, 0, 1, 1},
@@ -19058,8 +19997,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
 };
 /* #### Code section: cached_builtins ### */
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(0, 582, __pyx_L1_error)
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 668, __pyx_L1_error)
+  __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(0, 615, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 709, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -19070,135 +20009,135 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "cpp_process.pyx":374
+  /* "cpp_process.pyx":106
  * cdef inline scorer_context CachedNormalizedLevenshteinInit(object query, int def_process, dict kwargs):
  *     cdef size_t insertion, deletion, substitution
  *     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))             # <<<<<<<<<<<<<<
  *     return cached_normalized_levenshtein_init(query, def_process, insertion, deletion, substitution)
  * 
  */
-  __pyx_tuple_ = PyTuple_Pack(3, __pyx_int_1, __pyx_int_1, __pyx_int_1); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 374, __pyx_L1_error)
+  __pyx_tuple_ = PyTuple_Pack(3, __pyx_int_1, __pyx_int_1, __pyx_int_1); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 106, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
 
-  /* "cpp_process.pyx":582
+  /* "cpp_process.pyx":615
  *                 c_score_cutoff = score_cutoff
  *             if c_score_cutoff < 0 or c_score_cutoff > 100:
  *                 raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")             # <<<<<<<<<<<<<<
  * 
  *             if hasattr(choices, "items"):
  */
-  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_kp_u_score_cutoff_has_to_be_in_the_ra); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 582, __pyx_L1_error)
+  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_kp_u_score_cutoff_has_to_be_in_the_ra); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 615, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
 
-  /* "cpp_process.pyx":1106
+  /* "cpp_process.pyx":1171
  *     cdef size_t c_max = <size_t>-1
  * 
  *     def extract_iter_dict():             # <<<<<<<<<<<<<<
  *         """
  *         implementation of extract_iter for:
  */
-  __pyx_tuple__4 = PyTuple_Pack(3, __pyx_n_s_score, __pyx_n_s_choice_key, __pyx_n_s_choice); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(0, 1106, __pyx_L1_error)
+  __pyx_tuple__4 = PyTuple_Pack(4, __pyx_n_s_score, __pyx_n_s_choice_key, __pyx_n_s_choice, __pyx_n_s_proc_choice); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(0, 1171, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__4);
   __Pyx_GIVEREF(__pyx_tuple__4);
-  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__4, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_cpp_process_pyx, __pyx_n_s_extract_iter_dict, 1106, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(0, 1106, __pyx_L1_error)
+  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__4, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_cpp_process_pyx, __pyx_n_s_extract_iter_dict, 1171, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(0, 1171, __pyx_L1_error)
 
-  /* "cpp_process.pyx":1133
+  /* "cpp_process.pyx":1205
  *                     yield (choice, score, choice_key)
  * 
  *     def extract_iter_list():             # <<<<<<<<<<<<<<
  *         """
  *         implementation of extract_iter for:
  */
-  __pyx_tuple__6 = PyTuple_Pack(3, __pyx_n_s_i, __pyx_n_s_score, __pyx_n_s_choice); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(0, 1133, __pyx_L1_error)
+  __pyx_tuple__6 = PyTuple_Pack(4, __pyx_n_s_i, __pyx_n_s_score, __pyx_n_s_choice, __pyx_n_s_proc_choice); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(0, 1205, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__6);
   __Pyx_GIVEREF(__pyx_tuple__6);
-  __pyx_codeobj__7 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__6, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_cpp_process_pyx, __pyx_n_s_extract_iter_list, 1133, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__7)) __PYX_ERR(0, 1133, __pyx_L1_error)
+  __pyx_codeobj__7 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__6, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_cpp_process_pyx, __pyx_n_s_extract_iter_list, 1205, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__7)) __PYX_ERR(0, 1205, __pyx_L1_error)
 
-  /* "cpp_process.pyx":1165
+  /* "cpp_process.pyx":1245
  *                 i += 1
  * 
  *     def extract_iter_distance_dict():             # <<<<<<<<<<<<<<
  *         """
  *         implementation of extract_iter for:
  */
-  __pyx_tuple__8 = PyTuple_Pack(3, __pyx_n_s_distance, __pyx_n_s_choice_key, __pyx_n_s_choice); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(0, 1165, __pyx_L1_error)
+  __pyx_tuple__8 = PyTuple_Pack(4, __pyx_n_s_distance, __pyx_n_s_choice_key, __pyx_n_s_choice, __pyx_n_s_proc_choice); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(0, 1245, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__8);
   __Pyx_GIVEREF(__pyx_tuple__8);
-  __pyx_codeobj__9 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__8, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_cpp_process_pyx, __pyx_n_s_extract_iter_distance_dict, 1165, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__9)) __PYX_ERR(0, 1165, __pyx_L1_error)
+  __pyx_codeobj__9 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__8, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_cpp_process_pyx, __pyx_n_s_extract_iter_distance_dict, 1245, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__9)) __PYX_ERR(0, 1245, __pyx_L1_error)
 
-  /* "cpp_process.pyx":1192
+  /* "cpp_process.pyx":1279
  *                     yield (choice, distance, choice_key)
  * 
  *     def extract_iter_distance_list():             # <<<<<<<<<<<<<<
  *         """
  *         implementation of extract_iter for:
  */
-  __pyx_tuple__10 = PyTuple_Pack(3, __pyx_n_s_i, __pyx_n_s_distance, __pyx_n_s_choice); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(0, 1192, __pyx_L1_error)
+  __pyx_tuple__10 = PyTuple_Pack(4, __pyx_n_s_i, __pyx_n_s_distance, __pyx_n_s_choice, __pyx_n_s_proc_choice); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(0, 1279, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__10);
   __Pyx_GIVEREF(__pyx_tuple__10);
-  __pyx_codeobj__11 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__10, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_cpp_process_pyx, __pyx_n_s_extract_iter_distance_list, 1192, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__11)) __PYX_ERR(0, 1192, __pyx_L1_error)
+  __pyx_codeobj__11 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__10, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_cpp_process_pyx, __pyx_n_s_extract_iter_distance_list, 1279, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__11)) __PYX_ERR(0, 1279, __pyx_L1_error)
 
-  /* "cpp_process.pyx":1224
+  /* "cpp_process.pyx":1319
  *                 i += 1
  * 
  *     def py_extract_iter_dict():             # <<<<<<<<<<<<<<
  *         """
  *         implementation of extract_iter for:
  */
-  __pyx_tuple__12 = PyTuple_Pack(3, __pyx_n_s_choice_key, __pyx_n_s_choice, __pyx_n_s_score); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(0, 1224, __pyx_L1_error)
+  __pyx_tuple__12 = PyTuple_Pack(3, __pyx_n_s_choice_key, __pyx_n_s_choice, __pyx_n_s_score); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(0, 1319, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__12);
   __Pyx_GIVEREF(__pyx_tuple__12);
-  __pyx_codeobj__13 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__12, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_cpp_process_pyx, __pyx_n_s_py_extract_iter_dict, 1224, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__13)) __PYX_ERR(0, 1224, __pyx_L1_error)
+  __pyx_codeobj__13 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__12, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_cpp_process_pyx, __pyx_n_s_py_extract_iter_dict, 1319, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__13)) __PYX_ERR(0, 1319, __pyx_L1_error)
 
-  /* "cpp_process.pyx":1252
+  /* "cpp_process.pyx":1347
  *                     yield (choice, score, choice_key)
  * 
  *     def py_extract_iter_list():             # <<<<<<<<<<<<<<
  *         """
  *         implementation of extract_iter for:
  */
-  __pyx_tuple__14 = PyTuple_Pack(3, __pyx_n_s_i, __pyx_n_s_choice, __pyx_n_s_score); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(0, 1252, __pyx_L1_error)
+  __pyx_tuple__14 = PyTuple_Pack(3, __pyx_n_s_i, __pyx_n_s_choice, __pyx_n_s_score); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(0, 1347, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__14);
   __Pyx_GIVEREF(__pyx_tuple__14);
-  __pyx_codeobj__15 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__14, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_cpp_process_pyx, __pyx_n_s_py_extract_iter_list, 1252, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__15)) __PYX_ERR(0, 1252, __pyx_L1_error)
+  __pyx_codeobj__15 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__14, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_cpp_process_pyx, __pyx_n_s_py_extract_iter_list, 1347, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__15)) __PYX_ERR(0, 1347, __pyx_L1_error)
 
-  /* "cpp_process.pyx":427
+  /* "cpp_process.pyx":460
  * 
  * 
  * def extractOne(query, choices, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):             # <<<<<<<<<<<<<<
  *     """
  *     Find the best match in a list of choices. When multiple elements have the same similarity,
  */
-  __pyx_tuple__17 = PyTuple_Pack(11, __pyx_n_s_query, __pyx_n_s_choices, __pyx_n_s_scorer, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_kwargs, __pyx_n_s_def_process, __pyx_n_s_ScorerContext, __pyx_n_s_DistanceContext, __pyx_n_s_c_score_cutoff, __pyx_n_s_c_max); if (unlikely(!__pyx_tuple__17)) __PYX_ERR(0, 427, __pyx_L1_error)
+  __pyx_tuple__17 = PyTuple_Pack(11, __pyx_n_s_query, __pyx_n_s_choices, __pyx_n_s_scorer, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_kwargs, __pyx_n_s_def_process, __pyx_n_s_ScorerContext, __pyx_n_s_DistanceContext, __pyx_n_s_c_score_cutoff, __pyx_n_s_c_max); if (unlikely(!__pyx_tuple__17)) __PYX_ERR(0, 460, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__17);
   __Pyx_GIVEREF(__pyx_tuple__17);
-  __pyx_codeobj__18 = (PyObject*)__Pyx_PyCode_New(5, 0, 0, 11, 0, CO_OPTIMIZED|CO_NEWLOCALS|CO_VARKEYWORDS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__17, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_cpp_process_pyx, __pyx_n_s_extractOne, 427, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__18)) __PYX_ERR(0, 427, __pyx_L1_error)
+  __pyx_codeobj__18 = (PyObject*)__Pyx_PyCode_New(5, 0, 0, 11, 0, CO_OPTIMIZED|CO_NEWLOCALS|CO_VARKEYWORDS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__17, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_cpp_process_pyx, __pyx_n_s_extractOne, 460, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__18)) __PYX_ERR(0, 460, __pyx_L1_error)
 
-  /* "cpp_process.pyx":910
+  /* "cpp_process.pyx":975
  * 
  * 
  * def extract(query, choices, scorer=WRatio, processor=default_process, limit=5, score_cutoff=None, **kwargs):             # <<<<<<<<<<<<<<
  *     """
  *     Find the best matches in a list of choices. The list is sorted by the similarity.
  */
-  __pyx_tuple__19 = PyTuple_Pack(12, __pyx_n_s_query, __pyx_n_s_choices, __pyx_n_s_scorer, __pyx_n_s_processor, __pyx_n_s_limit, __pyx_n_s_score_cutoff, __pyx_n_s_kwargs, __pyx_n_s_def_process, __pyx_n_s_ScorerContext, __pyx_n_s_DistanceContext, __pyx_n_s_c_score_cutoff, __pyx_n_s_c_max); if (unlikely(!__pyx_tuple__19)) __PYX_ERR(0, 910, __pyx_L1_error)
+  __pyx_tuple__19 = PyTuple_Pack(12, __pyx_n_s_query, __pyx_n_s_choices, __pyx_n_s_scorer, __pyx_n_s_processor, __pyx_n_s_limit, __pyx_n_s_score_cutoff, __pyx_n_s_kwargs, __pyx_n_s_def_process, __pyx_n_s_ScorerContext, __pyx_n_s_DistanceContext, __pyx_n_s_c_score_cutoff, __pyx_n_s_c_max); if (unlikely(!__pyx_tuple__19)) __PYX_ERR(0, 975, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__19);
   __Pyx_GIVEREF(__pyx_tuple__19);
-  __pyx_codeobj__20 = (PyObject*)__Pyx_PyCode_New(6, 0, 0, 12, 0, CO_OPTIMIZED|CO_NEWLOCALS|CO_VARKEYWORDS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__19, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_cpp_process_pyx, __pyx_n_s_extract, 910, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__20)) __PYX_ERR(0, 910, __pyx_L1_error)
+  __pyx_codeobj__20 = (PyObject*)__Pyx_PyCode_New(6, 0, 0, 12, 0, CO_OPTIMIZED|CO_NEWLOCALS|CO_VARKEYWORDS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__19, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_cpp_process_pyx, __pyx_n_s_extract, 975, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__20)) __PYX_ERR(0, 975, __pyx_L1_error)
 
-  /* "cpp_process.pyx":1045
+  /* "cpp_process.pyx":1110
  * 
  * 
  * def extract_iter(query, choices, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):             # <<<<<<<<<<<<<<
  *     """
  *     Find the best match in a list of choices
  */
-  __pyx_tuple__21 = PyTuple_Pack(23, __pyx_n_s_query, __pyx_n_s_choices, __pyx_n_s_scorer, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_kwargs, __pyx_n_s_def_process, __pyx_n_s_ScorerContext, __pyx_n_s_DistanceContext, __pyx_n_s_c_score_cutoff, __pyx_n_s_c_max, __pyx_n_s_extract_iter_dict, __pyx_n_s_extract_iter_dict, __pyx_n_s_extract_iter_list, __pyx_n_s_extract_iter_list, __pyx_n_s_extract_iter_distance_dict, __pyx_n_s_extract_iter_distance_dict, __pyx_n_s_extract_iter_distance_list, __pyx_n_s_extract_iter_distance_list, __pyx_n_s_py_extract_iter_dict, __pyx_n_s_py_extract_iter_dict, __pyx_n_s_py_extract_iter_list, __pyx_n_s_py_extract_iter_list); if (unlikely(!__pyx_tuple__21)) __PYX_ERR(0, 1045, __pyx_L1_error)
+  __pyx_tuple__21 = PyTuple_Pack(23, __pyx_n_s_query, __pyx_n_s_choices, __pyx_n_s_scorer, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_kwargs, __pyx_n_s_def_process, __pyx_n_s_ScorerContext, __pyx_n_s_DistanceContext, __pyx_n_s_c_score_cutoff, __pyx_n_s_c_max, __pyx_n_s_extract_iter_dict, __pyx_n_s_extract_iter_dict, __pyx_n_s_extract_iter_list, __pyx_n_s_extract_iter_list, __pyx_n_s_extract_iter_distance_dict, __pyx_n_s_extract_iter_distance_dict, __pyx_n_s_extract_iter_distance_list, __pyx_n_s_extract_iter_distance_list, __pyx_n_s_py_extract_iter_dict, __pyx_n_s_py_extract_iter_dict, __pyx_n_s_py_extract_iter_list, __pyx_n_s_py_extract_iter_list); if (unlikely(!__pyx_tuple__21)) __PYX_ERR(0, 1110, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__21);
   __Pyx_GIVEREF(__pyx_tuple__21);
-  __pyx_codeobj__3 = (PyObject*)__Pyx_PyCode_New(5, 0, 0, 23, 0, CO_OPTIMIZED|CO_NEWLOCALS|CO_VARKEYWORDS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__21, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_cpp_process_pyx, __pyx_n_s_extract_iter, 1045, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__3)) __PYX_ERR(0, 1045, __pyx_L1_error)
+  __pyx_codeobj__3 = (PyObject*)__Pyx_PyCode_New(5, 0, 0, 23, 0, CO_OPTIMIZED|CO_NEWLOCALS|CO_VARKEYWORDS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__21, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_cpp_process_pyx, __pyx_n_s_extract_iter, 1110, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__3)) __PYX_ERR(0, 1110, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -19234,7 +20173,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitGlobals(void) {
   if (__Pyx_InitString(__pyx_string_tab[20], &__pyx_n_s_distance) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   if (__Pyx_InitString(__pyx_string_tab[21], &__pyx_n_s_extract) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   if (__Pyx_InitString(__pyx_string_tab[22], &__pyx_n_s_extractOne) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[23], &__pyx_kp_u_extractOne_line_427) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[23], &__pyx_kp_u_extractOne_line_460) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   if (__Pyx_InitString(__pyx_string_tab[24], &__pyx_n_s_extract_iter) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   if (__Pyx_InitString(__pyx_string_tab[25], &__pyx_n_s_extract_iter_dict) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   if (__Pyx_InitString(__pyx_string_tab[26], &__pyx_n_s_extract_iter_distance_dict) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
@@ -19269,30 +20208,31 @@ static CYTHON_SMALL_CODE int __Pyx_InitGlobals(void) {
   if (__Pyx_InitString(__pyx_string_tab[55], &__pyx_n_s_partial_token_ratio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   if (__Pyx_InitString(__pyx_string_tab[56], &__pyx_n_s_partial_token_set_ratio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   if (__Pyx_InitString(__pyx_string_tab[57], &__pyx_n_s_partial_token_sort_ratio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[58], &__pyx_n_s_processor) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[59], &__pyx_n_s_py_extract_dict_locals_lambda) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[60], &__pyx_n_s_py_extract_iter_dict) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[61], &__pyx_n_s_py_extract_iter_list) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[62], &__pyx_n_s_py_extract_list_locals_lambda) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[63], &__pyx_n_s_query) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[64], &__pyx_n_s_range) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[65], &__pyx_n_s_rapidfuzz_fuzz) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[66], &__pyx_n_s_rapidfuzz_string_metric) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[67], &__pyx_n_s_rapidfuzz_utils) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[68], &__pyx_n_s_ratio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[69], &__pyx_n_s_score) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[70], &__pyx_n_s_score_cutoff) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[71], &__pyx_kp_u_score_cutoff_has_to_be_in_the_ra) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[72], &__pyx_n_s_scorer) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[73], &__pyx_n_s_send) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[74], &__pyx_n_s_spec) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[75], &__pyx_kp_s_src_cpp_process_pyx) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[76], &__pyx_n_s_test) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[77], &__pyx_n_s_throw) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[78], &__pyx_n_s_token_ratio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[79], &__pyx_n_s_token_set_ratio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[80], &__pyx_n_s_token_sort_ratio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[81], &__pyx_n_u_weights) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[58], &__pyx_n_s_proc_choice) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[59], &__pyx_n_s_processor) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[60], &__pyx_n_s_py_extract_dict_locals_lambda) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[61], &__pyx_n_s_py_extract_iter_dict) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[62], &__pyx_n_s_py_extract_iter_list) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[63], &__pyx_n_s_py_extract_list_locals_lambda) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[64], &__pyx_n_s_query) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[65], &__pyx_n_s_range) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[66], &__pyx_n_s_rapidfuzz_fuzz) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[67], &__pyx_n_s_rapidfuzz_string_metric) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[68], &__pyx_n_s_rapidfuzz_utils) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[69], &__pyx_n_s_ratio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[70], &__pyx_n_s_score) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[71], &__pyx_n_s_score_cutoff) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[72], &__pyx_kp_u_score_cutoff_has_to_be_in_the_ra) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[73], &__pyx_n_s_scorer) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[74], &__pyx_n_s_send) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[75], &__pyx_n_s_spec) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[76], &__pyx_kp_s_src_cpp_process_pyx) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[77], &__pyx_n_s_test) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[78], &__pyx_n_s_throw) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[79], &__pyx_n_s_token_ratio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[80], &__pyx_n_s_token_set_ratio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[81], &__pyx_n_s_token_sort_ratio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[82], &__pyx_n_u_weights) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   #endif
   #if !CYTHON_COMPILING_IN_LIMITED_API
   if (__Pyx_InitStrings(__pyx_string_tab) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
@@ -19347,9 +20287,9 @@ static int __Pyx_modinit_type_init_code(void) {
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_init_code", 0);
   /*--- Type init code ---*/
   #if CYTHON_COMPILING_IN_LIMITED_API
-  __pyx_type_11cpp_process___pyx_scope_struct__extract_iter = PyType_FromSpec(&__pyx_type_11cpp_process___pyx_scope_struct__extract_iter_spec); if (unlikely(!__pyx_type_11cpp_process___pyx_scope_struct__extract_iter)) __PYX_ERR(0, 1045, __pyx_L1_error)
+  __pyx_type_11cpp_process___pyx_scope_struct__extract_iter = PyType_FromSpec(&__pyx_type_11cpp_process___pyx_scope_struct__extract_iter_spec); if (unlikely(!__pyx_type_11cpp_process___pyx_scope_struct__extract_iter)) __PYX_ERR(0, 1110, __pyx_L1_error)
   #else
-  if (PyType_Ready(&__pyx_type_11cpp_process___pyx_scope_struct__extract_iter) < 0) __PYX_ERR(0, 1045, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_11cpp_process___pyx_scope_struct__extract_iter) < 0) __PYX_ERR(0, 1110, __pyx_L1_error)
   #if PY_MAJOR_VERSION < 3
   __pyx_type_11cpp_process___pyx_scope_struct__extract_iter.tp_print = 0;
   #endif
@@ -19363,9 +20303,9 @@ static int __Pyx_modinit_type_init_code(void) {
   __pyx_ptype_11cpp_process___pyx_scope_struct__extract_iter = &__pyx_type_11cpp_process___pyx_scope_struct__extract_iter;
   #endif
   #if CYTHON_COMPILING_IN_LIMITED_API
-  __pyx_type_11cpp_process___pyx_scope_struct_1_extract_iter_dict = PyType_FromSpec(&__pyx_type_11cpp_process___pyx_scope_struct_1_extract_iter_dict_spec); if (unlikely(!__pyx_type_11cpp_process___pyx_scope_struct_1_extract_iter_dict)) __PYX_ERR(0, 1106, __pyx_L1_error)
+  __pyx_type_11cpp_process___pyx_scope_struct_1_extract_iter_dict = PyType_FromSpec(&__pyx_type_11cpp_process___pyx_scope_struct_1_extract_iter_dict_spec); if (unlikely(!__pyx_type_11cpp_process___pyx_scope_struct_1_extract_iter_dict)) __PYX_ERR(0, 1171, __pyx_L1_error)
   #else
-  if (PyType_Ready(&__pyx_type_11cpp_process___pyx_scope_struct_1_extract_iter_dict) < 0) __PYX_ERR(0, 1106, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_11cpp_process___pyx_scope_struct_1_extract_iter_dict) < 0) __PYX_ERR(0, 1171, __pyx_L1_error)
   #if PY_MAJOR_VERSION < 3
   __pyx_type_11cpp_process___pyx_scope_struct_1_extract_iter_dict.tp_print = 0;
   #endif
@@ -19379,9 +20319,9 @@ static int __Pyx_modinit_type_init_code(void) {
   __pyx_ptype_11cpp_process___pyx_scope_struct_1_extract_iter_dict = &__pyx_type_11cpp_process___pyx_scope_struct_1_extract_iter_dict;
   #endif
   #if CYTHON_COMPILING_IN_LIMITED_API
-  __pyx_type_11cpp_process___pyx_scope_struct_2_extract_iter_list = PyType_FromSpec(&__pyx_type_11cpp_process___pyx_scope_struct_2_extract_iter_list_spec); if (unlikely(!__pyx_type_11cpp_process___pyx_scope_struct_2_extract_iter_list)) __PYX_ERR(0, 1133, __pyx_L1_error)
+  __pyx_type_11cpp_process___pyx_scope_struct_2_extract_iter_list = PyType_FromSpec(&__pyx_type_11cpp_process___pyx_scope_struct_2_extract_iter_list_spec); if (unlikely(!__pyx_type_11cpp_process___pyx_scope_struct_2_extract_iter_list)) __PYX_ERR(0, 1205, __pyx_L1_error)
   #else
-  if (PyType_Ready(&__pyx_type_11cpp_process___pyx_scope_struct_2_extract_iter_list) < 0) __PYX_ERR(0, 1133, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_11cpp_process___pyx_scope_struct_2_extract_iter_list) < 0) __PYX_ERR(0, 1205, __pyx_L1_error)
   #if PY_MAJOR_VERSION < 3
   __pyx_type_11cpp_process___pyx_scope_struct_2_extract_iter_list.tp_print = 0;
   #endif
@@ -19395,9 +20335,9 @@ static int __Pyx_modinit_type_init_code(void) {
   __pyx_ptype_11cpp_process___pyx_scope_struct_2_extract_iter_list = &__pyx_type_11cpp_process___pyx_scope_struct_2_extract_iter_list;
   #endif
   #if CYTHON_COMPILING_IN_LIMITED_API
-  __pyx_type_11cpp_process___pyx_scope_struct_3_extract_iter_distance_dict = PyType_FromSpec(&__pyx_type_11cpp_process___pyx_scope_struct_3_extract_iter_distance_dict_spec); if (unlikely(!__pyx_type_11cpp_process___pyx_scope_struct_3_extract_iter_distance_dict)) __PYX_ERR(0, 1165, __pyx_L1_error)
+  __pyx_type_11cpp_process___pyx_scope_struct_3_extract_iter_distance_dict = PyType_FromSpec(&__pyx_type_11cpp_process___pyx_scope_struct_3_extract_iter_distance_dict_spec); if (unlikely(!__pyx_type_11cpp_process___pyx_scope_struct_3_extract_iter_distance_dict)) __PYX_ERR(0, 1245, __pyx_L1_error)
   #else
-  if (PyType_Ready(&__pyx_type_11cpp_process___pyx_scope_struct_3_extract_iter_distance_dict) < 0) __PYX_ERR(0, 1165, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_11cpp_process___pyx_scope_struct_3_extract_iter_distance_dict) < 0) __PYX_ERR(0, 1245, __pyx_L1_error)
   #if PY_MAJOR_VERSION < 3
   __pyx_type_11cpp_process___pyx_scope_struct_3_extract_iter_distance_dict.tp_print = 0;
   #endif
@@ -19411,9 +20351,9 @@ static int __Pyx_modinit_type_init_code(void) {
   __pyx_ptype_11cpp_process___pyx_scope_struct_3_extract_iter_distance_dict = &__pyx_type_11cpp_process___pyx_scope_struct_3_extract_iter_distance_dict;
   #endif
   #if CYTHON_COMPILING_IN_LIMITED_API
-  __pyx_type_11cpp_process___pyx_scope_struct_4_extract_iter_distance_list = PyType_FromSpec(&__pyx_type_11cpp_process___pyx_scope_struct_4_extract_iter_distance_list_spec); if (unlikely(!__pyx_type_11cpp_process___pyx_scope_struct_4_extract_iter_distance_list)) __PYX_ERR(0, 1192, __pyx_L1_error)
+  __pyx_type_11cpp_process___pyx_scope_struct_4_extract_iter_distance_list = PyType_FromSpec(&__pyx_type_11cpp_process___pyx_scope_struct_4_extract_iter_distance_list_spec); if (unlikely(!__pyx_type_11cpp_process___pyx_scope_struct_4_extract_iter_distance_list)) __PYX_ERR(0, 1279, __pyx_L1_error)
   #else
-  if (PyType_Ready(&__pyx_type_11cpp_process___pyx_scope_struct_4_extract_iter_distance_list) < 0) __PYX_ERR(0, 1192, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_11cpp_process___pyx_scope_struct_4_extract_iter_distance_list) < 0) __PYX_ERR(0, 1279, __pyx_L1_error)
   #if PY_MAJOR_VERSION < 3
   __pyx_type_11cpp_process___pyx_scope_struct_4_extract_iter_distance_list.tp_print = 0;
   #endif
@@ -19427,9 +20367,9 @@ static int __Pyx_modinit_type_init_code(void) {
   __pyx_ptype_11cpp_process___pyx_scope_struct_4_extract_iter_distance_list = &__pyx_type_11cpp_process___pyx_scope_struct_4_extract_iter_distance_list;
   #endif
   #if CYTHON_COMPILING_IN_LIMITED_API
-  __pyx_type_11cpp_process___pyx_scope_struct_5_py_extract_iter_dict = PyType_FromSpec(&__pyx_type_11cpp_process___pyx_scope_struct_5_py_extract_iter_dict_spec); if (unlikely(!__pyx_type_11cpp_process___pyx_scope_struct_5_py_extract_iter_dict)) __PYX_ERR(0, 1224, __pyx_L1_error)
+  __pyx_type_11cpp_process___pyx_scope_struct_5_py_extract_iter_dict = PyType_FromSpec(&__pyx_type_11cpp_process___pyx_scope_struct_5_py_extract_iter_dict_spec); if (unlikely(!__pyx_type_11cpp_process___pyx_scope_struct_5_py_extract_iter_dict)) __PYX_ERR(0, 1319, __pyx_L1_error)
   #else
-  if (PyType_Ready(&__pyx_type_11cpp_process___pyx_scope_struct_5_py_extract_iter_dict) < 0) __PYX_ERR(0, 1224, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_11cpp_process___pyx_scope_struct_5_py_extract_iter_dict) < 0) __PYX_ERR(0, 1319, __pyx_L1_error)
   #if PY_MAJOR_VERSION < 3
   __pyx_type_11cpp_process___pyx_scope_struct_5_py_extract_iter_dict.tp_print = 0;
   #endif
@@ -19443,9 +20383,9 @@ static int __Pyx_modinit_type_init_code(void) {
   __pyx_ptype_11cpp_process___pyx_scope_struct_5_py_extract_iter_dict = &__pyx_type_11cpp_process___pyx_scope_struct_5_py_extract_iter_dict;
   #endif
   #if CYTHON_COMPILING_IN_LIMITED_API
-  __pyx_type_11cpp_process___pyx_scope_struct_6_py_extract_iter_list = PyType_FromSpec(&__pyx_type_11cpp_process___pyx_scope_struct_6_py_extract_iter_list_spec); if (unlikely(!__pyx_type_11cpp_process___pyx_scope_struct_6_py_extract_iter_list)) __PYX_ERR(0, 1252, __pyx_L1_error)
+  __pyx_type_11cpp_process___pyx_scope_struct_6_py_extract_iter_list = PyType_FromSpec(&__pyx_type_11cpp_process___pyx_scope_struct_6_py_extract_iter_list_spec); if (unlikely(!__pyx_type_11cpp_process___pyx_scope_struct_6_py_extract_iter_list)) __PYX_ERR(0, 1347, __pyx_L1_error)
   #else
-  if (PyType_Ready(&__pyx_type_11cpp_process___pyx_scope_struct_6_py_extract_iter_list) < 0) __PYX_ERR(0, 1252, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_11cpp_process___pyx_scope_struct_6_py_extract_iter_list) < 0) __PYX_ERR(0, 1347, __pyx_L1_error)
   #if PY_MAJOR_VERSION < 3
   __pyx_type_11cpp_process___pyx_scope_struct_6_py_extract_iter_list.tp_print = 0;
   #endif
@@ -19947,83 +20887,83 @@ if (!__Pyx_RefNanny) {
  * 
  * import heapq             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_process.hpp":
+ * cdef extern from "cpp_common.hpp":
  */
   __pyx_t_2 = __Pyx_ImportDottedModule(__pyx_n_s_heapq, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 36, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_heapq, __pyx_t_2) < 0) __PYX_ERR(0, 36, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "cpp_process.pyx":427
+  /* "cpp_process.pyx":460
  * 
  * 
  * def extractOne(query, choices, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):             # <<<<<<<<<<<<<<
  *     """
  *     Find the best match in a list of choices. When multiple elements have the same similarity,
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_11cpp_process_1extractOne, 0, __pyx_n_s_extractOne, NULL, __pyx_n_s_cpp_process, __pyx_d, ((PyObject *)__pyx_codeobj__18)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 427, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_11cpp_process_1extractOne, 0, __pyx_n_s_extractOne, NULL, __pyx_n_s_cpp_process, __pyx_d, ((PyObject *)__pyx_codeobj__18)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 460, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_2, sizeof(__pyx_defaults), 2)) __PYX_ERR(0, 427, __pyx_L1_error)
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_WRatio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 427, __pyx_L1_error)
+  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_2, sizeof(__pyx_defaults), 2)) __PYX_ERR(0, 460, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_WRatio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 460, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_CyFunction_Defaults(__pyx_defaults, __pyx_t_2)->__pyx_arg_scorer = __pyx_t_1;
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_t_1 = 0;
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_default_process); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 427, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_default_process); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 460, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_CyFunction_Defaults(__pyx_defaults, __pyx_t_2)->__pyx_arg_processor = __pyx_t_1;
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_t_1 = 0;
   __Pyx_CyFunction_SetDefaultsGetter(__pyx_t_2, __pyx_pf_11cpp_process_7__defaults__);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_extractOne, __pyx_t_2) < 0) __PYX_ERR(0, 427, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_extractOne, __pyx_t_2) < 0) __PYX_ERR(0, 460, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "cpp_process.pyx":910
+  /* "cpp_process.pyx":975
  * 
  * 
  * def extract(query, choices, scorer=WRatio, processor=default_process, limit=5, score_cutoff=None, **kwargs):             # <<<<<<<<<<<<<<
  *     """
  *     Find the best matches in a list of choices. The list is sorted by the similarity.
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_11cpp_process_3extract, 0, __pyx_n_s_extract, NULL, __pyx_n_s_cpp_process, __pyx_d, ((PyObject *)__pyx_codeobj__20)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 910, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_11cpp_process_3extract, 0, __pyx_n_s_extract, NULL, __pyx_n_s_cpp_process, __pyx_d, ((PyObject *)__pyx_codeobj__20)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 975, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_2, sizeof(__pyx_defaults1), 2)) __PYX_ERR(0, 910, __pyx_L1_error)
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_WRatio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 910, __pyx_L1_error)
+  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_2, sizeof(__pyx_defaults1), 2)) __PYX_ERR(0, 975, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_WRatio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 975, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_CyFunction_Defaults(__pyx_defaults1, __pyx_t_2)->__pyx_arg_scorer = __pyx_t_1;
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_t_1 = 0;
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_default_process); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 910, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_default_process); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 975, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_CyFunction_Defaults(__pyx_defaults1, __pyx_t_2)->__pyx_arg_processor = __pyx_t_1;
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_t_1 = 0;
   __Pyx_CyFunction_SetDefaultsGetter(__pyx_t_2, __pyx_pf_11cpp_process_9__defaults__);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_extract, __pyx_t_2) < 0) __PYX_ERR(0, 910, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_extract, __pyx_t_2) < 0) __PYX_ERR(0, 975, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "cpp_process.pyx":1045
+  /* "cpp_process.pyx":1110
  * 
  * 
  * def extract_iter(query, choices, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):             # <<<<<<<<<<<<<<
  *     """
  *     Find the best match in a list of choices
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_11cpp_process_5extract_iter, 0, __pyx_n_s_extract_iter, NULL, __pyx_n_s_cpp_process, __pyx_d, ((PyObject *)__pyx_codeobj__3)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1045, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_11cpp_process_5extract_iter, 0, __pyx_n_s_extract_iter, NULL, __pyx_n_s_cpp_process, __pyx_d, ((PyObject *)__pyx_codeobj__3)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1110, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_2, sizeof(__pyx_defaults2), 2)) __PYX_ERR(0, 1045, __pyx_L1_error)
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_WRatio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1045, __pyx_L1_error)
+  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_2, sizeof(__pyx_defaults2), 2)) __PYX_ERR(0, 1110, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_WRatio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1110, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_CyFunction_Defaults(__pyx_defaults2, __pyx_t_2)->__pyx_arg_scorer = __pyx_t_1;
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_t_1 = 0;
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_default_process); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1045, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_default_process); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1110, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_CyFunction_Defaults(__pyx_defaults2, __pyx_t_2)->__pyx_arg_processor = __pyx_t_1;
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_t_1 = 0;
   __Pyx_CyFunction_SetDefaultsGetter(__pyx_t_2, __pyx_pf_11cpp_process_11__defaults__);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_extract_iter, __pyx_t_2) < 0) __PYX_ERR(0, 1045, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_extract_iter, __pyx_t_2) < 0) __PYX_ERR(0, 1110, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "cpp_process.pyx":1
@@ -20033,7 +20973,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_2 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_kp_u_extractOne_line_427, __pyx_kp_u_Find_the_best_match_in_a_list_o) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_kp_u_extractOne_line_460, __pyx_kp_u_Find_the_best_match_in_a_list_o) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_2) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
@@ -20191,6 +21131,197 @@ static PyObject *__Pyx_GetBuiltinName(PyObject *name) {
     return result;
 }
 
+/* PyObjectCall */
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw) {
+    PyObject *result;
+    ternaryfunc call = Py_TYPE(func)->tp_call;
+    if (unlikely(!call))
+        return PyObject_Call(func, arg, kw);
+    if (unlikely(Py_EnterRecursiveCall((char*)" while calling a Python object")))
+        return NULL;
+    result = (*call)(func, arg, kw);
+    Py_LeaveRecursiveCall();
+    if (unlikely(!result) && unlikely(!PyErr_Occurred())) {
+        PyErr_SetString(
+            PyExc_SystemError,
+            "NULL result without error in PyObject_Call");
+    }
+    return result;
+}
+#endif
+
+/* UnpackUnboundCMethod */
+static int __Pyx_TryUnpackUnboundCMethod(__Pyx_CachedCFunction* target) {
+    PyObject *method;
+    method = __Pyx_PyObject_GetAttrStr(target->type, *target->method_name);
+    if (unlikely(!method))
+        return -1;
+    target->method = method;
+#if CYTHON_COMPILING_IN_CPYTHON
+    #if PY_MAJOR_VERSION >= 3
+    if (likely(__Pyx_TypeCheck(method, &PyMethodDescr_Type)))
+    #endif
+    {
+        PyMethodDescrObject *descr = (PyMethodDescrObject*) method;
+        target->func = descr->d_method->ml_meth;
+        target->flag = descr->d_method->ml_flags & ~(METH_CLASS | METH_STATIC | METH_COEXIST | METH_STACKLESS);
+    }
+#endif
+    return 0;
+}
+
+/* CallUnboundCMethod1 */
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_CallUnboundCMethod1(__Pyx_CachedCFunction* cfunc, PyObject* self, PyObject* arg) {
+    if (likely(cfunc->func)) {
+        int flag = cfunc->flag;
+        if (flag == METH_O) {
+            return (*(cfunc->func))(self, arg);
+        } else if ((PY_VERSION_HEX >= 0x030600B1) && flag == METH_FASTCALL) {
+            if ((PY_VERSION_HEX >= 0x030700A0)) {
+                return (*(__Pyx_PyCFunctionFast)(void*)(PyCFunction)cfunc->func)(self, &arg, 1);
+            } else {
+                return (*(__Pyx_PyCFunctionFastWithKeywords)(void*)(PyCFunction)cfunc->func)(self, &arg, 1, NULL);
+            }
+        } else if ((PY_VERSION_HEX >= 0x030700A0) && flag == (METH_FASTCALL | METH_KEYWORDS)) {
+            return (*(__Pyx_PyCFunctionFastWithKeywords)(void*)(PyCFunction)cfunc->func)(self, &arg, 1, NULL);
+        }
+    }
+    return __Pyx__CallUnboundCMethod1(cfunc, self, arg);
+}
+#endif
+static PyObject* __Pyx__CallUnboundCMethod1(__Pyx_CachedCFunction* cfunc, PyObject* self, PyObject* arg){
+    PyObject *args, *result = NULL;
+    if (unlikely(!cfunc->func && !cfunc->method) && unlikely(__Pyx_TryUnpackUnboundCMethod(cfunc) < 0)) return NULL;
+#if CYTHON_COMPILING_IN_CPYTHON
+    if (cfunc->func && (cfunc->flag & METH_VARARGS)) {
+        args = PyTuple_New(1);
+        if (unlikely(!args)) goto bad;
+        Py_INCREF(arg);
+        PyTuple_SET_ITEM(args, 0, arg);
+        if (cfunc->flag & METH_KEYWORDS)
+            result = (*(PyCFunctionWithKeywords)(void*)(PyCFunction)cfunc->func)(self, args, NULL);
+        else
+            result = (*cfunc->func)(self, args);
+    } else {
+        args = PyTuple_New(2);
+        if (unlikely(!args)) goto bad;
+        Py_INCREF(self);
+        PyTuple_SET_ITEM(args, 0, self);
+        Py_INCREF(arg);
+        PyTuple_SET_ITEM(args, 1, arg);
+        result = __Pyx_PyObject_Call(cfunc->method, args, NULL);
+    }
+#else
+    args = PyTuple_Pack(2, self, arg);
+    if (unlikely(!args)) goto bad;
+    result = __Pyx_PyObject_Call(cfunc->method, args, NULL);
+#endif
+bad:
+    Py_XDECREF(args);
+    return result;
+}
+
+/* CallUnboundCMethod2 */
+#if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030600B1
+static CYTHON_INLINE PyObject *__Pyx_CallUnboundCMethod2(__Pyx_CachedCFunction *cfunc, PyObject *self, PyObject *arg1, PyObject *arg2) {
+    if (likely(cfunc->func)) {
+        PyObject *args[2] = {arg1, arg2};
+        if (cfunc->flag == METH_FASTCALL) {
+            #if PY_VERSION_HEX >= 0x030700A0
+            return (*(__Pyx_PyCFunctionFast)(void*)(PyCFunction)cfunc->func)(self, args, 2);
+            #else
+            return (*(__Pyx_PyCFunctionFastWithKeywords)(void*)(PyCFunction)cfunc->func)(self, args, 2, NULL);
+            #endif
+        }
+        #if PY_VERSION_HEX >= 0x030700A0
+        if (cfunc->flag == (METH_FASTCALL | METH_KEYWORDS))
+            return (*(__Pyx_PyCFunctionFastWithKeywords)(void*)(PyCFunction)cfunc->func)(self, args, 2, NULL);
+        #endif
+    }
+    return __Pyx__CallUnboundCMethod2(cfunc, self, arg1, arg2);
+}
+#endif
+static PyObject* __Pyx__CallUnboundCMethod2(__Pyx_CachedCFunction* cfunc, PyObject* self, PyObject* arg1, PyObject* arg2){
+    PyObject *args, *result = NULL;
+    if (unlikely(!cfunc->func && !cfunc->method) && unlikely(__Pyx_TryUnpackUnboundCMethod(cfunc) < 0)) return NULL;
+#if CYTHON_COMPILING_IN_CPYTHON
+    if (cfunc->func && (cfunc->flag & METH_VARARGS)) {
+        args = PyTuple_New(2);
+        if (unlikely(!args)) goto bad;
+        Py_INCREF(arg1);
+        PyTuple_SET_ITEM(args, 0, arg1);
+        Py_INCREF(arg2);
+        PyTuple_SET_ITEM(args, 1, arg2);
+        if (cfunc->flag & METH_KEYWORDS)
+            result = (*(PyCFunctionWithKeywords)(void*)(PyCFunction)cfunc->func)(self, args, NULL);
+        else
+            result = (*cfunc->func)(self, args);
+    } else {
+        args = PyTuple_New(3);
+        if (unlikely(!args)) goto bad;
+        Py_INCREF(self);
+        PyTuple_SET_ITEM(args, 0, self);
+        Py_INCREF(arg1);
+        PyTuple_SET_ITEM(args, 1, arg1);
+        Py_INCREF(arg2);
+        PyTuple_SET_ITEM(args, 2, arg2);
+        result = __Pyx_PyObject_Call(cfunc->method, args, NULL);
+    }
+#else
+    args = PyTuple_Pack(3, self, arg1, arg2);
+    if (unlikely(!args)) goto bad;
+    result = __Pyx_PyObject_Call(cfunc->method, args, NULL);
+#endif
+bad:
+    Py_XDECREF(args);
+    return result;
+}
+
+/* dict_getitem_default */
+static PyObject* __Pyx_PyDict_GetItemDefault(PyObject* d, PyObject* key, PyObject* default_value) {
+    PyObject* value;
+#if PY_MAJOR_VERSION >= 3 && (!CYTHON_COMPILING_IN_PYPY || PYPY_VERSION_NUM >= 0x07020000)
+    value = PyDict_GetItemWithError(d, key);
+    if (unlikely(!value)) {
+        if (unlikely(PyErr_Occurred()))
+            return NULL;
+        value = default_value;
+    }
+    Py_INCREF(value);
+    if ((1));
+#else
+    if (PyString_CheckExact(key) || PyUnicode_CheckExact(key) || PyInt_CheckExact(key)) {
+        value = PyDict_GetItem(d, key);
+        if (unlikely(!value)) {
+            value = default_value;
+        }
+        Py_INCREF(value);
+    }
+#endif
+    else {
+        if (default_value == Py_None)
+            value = __Pyx_CallUnboundCMethod1(&__pyx_umethod_PyDict_Type_get, d, key);
+        else
+            value = __Pyx_CallUnboundCMethod2(&__pyx_umethod_PyDict_Type_get, d, key, default_value);
+    }
+    return value;
+}
+
+/* RaiseTooManyValuesToUnpack */
+static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected) {
+    PyErr_Format(PyExc_ValueError,
+                 "too many values to unpack (expected %" CYTHON_FORMAT_SSIZE_T "d)", expected);
+}
+
+/* RaiseNeedMoreValuesToUnpack */
+static CYTHON_INLINE void __Pyx_RaiseNeedMoreValuesError(Py_ssize_t index) {
+    PyErr_Format(PyExc_ValueError,
+                 "need more than %" CYTHON_FORMAT_SSIZE_T "d value%.1s to unpack",
+                 index, (index == 1) ? "" : "s");
+}
+
 /* IterFinish */
 static CYTHON_INLINE int __Pyx_IterFinish(void) {
 #if CYTHON_FAST_THREAD_STATE
@@ -20224,6 +21355,129 @@ static CYTHON_INLINE int __Pyx_IterFinish(void) {
     }
     return 0;
 #endif
+}
+
+/* UnpackItemEndCheck */
+static int __Pyx_IternextUnpackEndCheck(PyObject *retval, Py_ssize_t expected) {
+    if (unlikely(retval)) {
+        Py_DECREF(retval);
+        __Pyx_RaiseTooManyValuesError(expected);
+        return -1;
+    } else {
+        return __Pyx_IterFinish();
+    }
+    return 0;
+}
+
+/* WriteUnraisableException */
+static void __Pyx_WriteUnraisable(const char *name, CYTHON_UNUSED int clineno,
+                                  CYTHON_UNUSED int lineno, CYTHON_UNUSED const char *filename,
+                                  int full_traceback, CYTHON_UNUSED int nogil) {
+    PyObject *old_exc, *old_val, *old_tb;
+    PyObject *ctx;
+    __Pyx_PyThreadState_declare
+#ifdef WITH_THREAD
+    PyGILState_STATE state;
+    if (nogil)
+        state = PyGILState_Ensure();
+#ifdef _MSC_VER
+    else state = (PyGILState_STATE)-1;
+#endif
+#endif
+    __Pyx_PyThreadState_assign
+    __Pyx_ErrFetch(&old_exc, &old_val, &old_tb);
+    if (full_traceback) {
+        Py_XINCREF(old_exc);
+        Py_XINCREF(old_val);
+        Py_XINCREF(old_tb);
+        __Pyx_ErrRestore(old_exc, old_val, old_tb);
+        PyErr_PrintEx(1);
+    }
+    #if PY_MAJOR_VERSION < 3
+    ctx = PyString_FromString(name);
+    #else
+    ctx = PyUnicode_FromString(name);
+    #endif
+    __Pyx_ErrRestore(old_exc, old_val, old_tb);
+    if (!ctx) {
+        PyErr_WriteUnraisable(Py_None);
+    } else {
+        PyErr_WriteUnraisable(ctx);
+        Py_DECREF(ctx);
+    }
+#ifdef WITH_THREAD
+    if (nogil)
+        PyGILState_Release(state);
+#endif
+}
+
+/* PyDictVersioning */
+#if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
+static CYTHON_INLINE PY_UINT64_T __Pyx_get_tp_dict_version(PyObject *obj) {
+    PyObject *dict = Py_TYPE(obj)->tp_dict;
+    return likely(dict) ? __PYX_GET_DICT_VERSION(dict) : 0;
+}
+static CYTHON_INLINE PY_UINT64_T __Pyx_get_object_dict_version(PyObject *obj) {
+    PyObject **dictptr = NULL;
+    Py_ssize_t offset = Py_TYPE(obj)->tp_dictoffset;
+    if (offset) {
+#if CYTHON_COMPILING_IN_CPYTHON
+        dictptr = (likely(offset > 0)) ? (PyObject **) ((char *)obj + offset) : _PyObject_GetDictPtr(obj);
+#else
+        dictptr = _PyObject_GetDictPtr(obj);
+#endif
+    }
+    return (dictptr && *dictptr) ? __PYX_GET_DICT_VERSION(*dictptr) : 0;
+}
+static CYTHON_INLINE int __Pyx_object_dict_version_matches(PyObject* obj, PY_UINT64_T tp_dict_version, PY_UINT64_T obj_dict_version) {
+    PyObject *dict = Py_TYPE(obj)->tp_dict;
+    if (unlikely(!dict) || unlikely(tp_dict_version != __PYX_GET_DICT_VERSION(dict)))
+        return 0;
+    return obj_dict_version == __Pyx_get_object_dict_version(obj);
+}
+#endif
+
+/* GetModuleGlobalName */
+#if CYTHON_USE_DICT_VERSIONS
+static PyObject *__Pyx__GetModuleGlobalName(PyObject *name, PY_UINT64_T *dict_version, PyObject **dict_cached_value)
+#else
+static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name)
+#endif
+{
+    PyObject *result;
+#if !CYTHON_AVOID_BORROWED_REFS
+#if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030500A1
+    result = _PyDict_GetItem_KnownHash(__pyx_d, name, ((PyASCIIObject *) name)->hash);
+    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
+    if (likely(result)) {
+        return __Pyx_NewRef(result);
+    } else if (unlikely(PyErr_Occurred())) {
+        return NULL;
+    }
+#elif CYTHON_COMPILING_IN_LIMITED_API
+    if (unlikely(!__pyx_m)) {
+        return NULL;
+    }
+    result = PyObject_GetAttr(__pyx_m, name);
+    if (likely(result)) {
+        return result;
+    }
+#else
+    result = PyDict_GetItem(__pyx_d, name);
+    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
+    if (likely(result)) {
+        return __Pyx_NewRef(result);
+    }
+#endif
+#else
+    result = PyObject_GetItem(__pyx_d, name);
+    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
+    if (likely(result)) {
+        return __Pyx_NewRef(result);
+    }
+    PyErr_Clear();
+#endif
+    return __Pyx_GetBuiltinName(name);
 }
 
 /* PyFunctionFastCall */
@@ -20339,26 +21593,6 @@ static PyObject *__Pyx_PyFunction_FastCallDict(PyObject *func, PyObject **args, 
     Py_XDECREF(kwtuple);
 done:
     Py_LeaveRecursiveCall();
-    return result;
-}
-#endif
-
-/* PyObjectCall */
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw) {
-    PyObject *result;
-    ternaryfunc call = Py_TYPE(func)->tp_call;
-    if (unlikely(!call))
-        return PyObject_Call(func, arg, kw);
-    if (unlikely(Py_EnterRecursiveCall((char*)" while calling a Python object")))
-        return NULL;
-    result = (*call)(func, arg, kw);
-    Py_LeaveRecursiveCall();
-    if (unlikely(!result) && unlikely(!PyErr_Occurred())) {
-        PyErr_SetString(
-            PyExc_SystemError,
-            "NULL result without error in PyObject_Call");
-    }
     return result;
 }
 #endif
@@ -20587,31 +21821,6 @@ static PyObject* __Pyx_PyObject_CallMethod0(PyObject* obj, PyObject* method_name
     Py_DECREF(method);
 bad:
     return result;
-}
-
-/* RaiseNeedMoreValuesToUnpack */
-static CYTHON_INLINE void __Pyx_RaiseNeedMoreValuesError(Py_ssize_t index) {
-    PyErr_Format(PyExc_ValueError,
-                 "need more than %" CYTHON_FORMAT_SSIZE_T "d value%.1s to unpack",
-                 index, (index == 1) ? "" : "s");
-}
-
-/* RaiseTooManyValuesToUnpack */
-static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected) {
-    PyErr_Format(PyExc_ValueError,
-                 "too many values to unpack (expected %" CYTHON_FORMAT_SSIZE_T "d)", expected);
-}
-
-/* UnpackItemEndCheck */
-static int __Pyx_IternextUnpackEndCheck(PyObject *retval, Py_ssize_t expected) {
-    if (unlikely(retval)) {
-        Py_DECREF(retval);
-        __Pyx_RaiseTooManyValuesError(expected);
-        return -1;
-    } else {
-        return __Pyx_IterFinish();
-    }
-    return 0;
 }
 
 /* RaiseNoneIterError */
@@ -20920,275 +22129,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_EqObjC(PyObject *op1, PyObject *op2, 
     }
     return (
         PyObject_RichCompare(op1, op2, Py_EQ));
-}
-
-/* UnpackUnboundCMethod */
-static int __Pyx_TryUnpackUnboundCMethod(__Pyx_CachedCFunction* target) {
-    PyObject *method;
-    method = __Pyx_PyObject_GetAttrStr(target->type, *target->method_name);
-    if (unlikely(!method))
-        return -1;
-    target->method = method;
-#if CYTHON_COMPILING_IN_CPYTHON
-    #if PY_MAJOR_VERSION >= 3
-    if (likely(__Pyx_TypeCheck(method, &PyMethodDescr_Type)))
-    #endif
-    {
-        PyMethodDescrObject *descr = (PyMethodDescrObject*) method;
-        target->func = descr->d_method->ml_meth;
-        target->flag = descr->d_method->ml_flags & ~(METH_CLASS | METH_STATIC | METH_COEXIST | METH_STACKLESS);
-    }
-#endif
-    return 0;
-}
-
-/* CallUnboundCMethod1 */
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_CallUnboundCMethod1(__Pyx_CachedCFunction* cfunc, PyObject* self, PyObject* arg) {
-    if (likely(cfunc->func)) {
-        int flag = cfunc->flag;
-        if (flag == METH_O) {
-            return (*(cfunc->func))(self, arg);
-        } else if ((PY_VERSION_HEX >= 0x030600B1) && flag == METH_FASTCALL) {
-            if ((PY_VERSION_HEX >= 0x030700A0)) {
-                return (*(__Pyx_PyCFunctionFast)(void*)(PyCFunction)cfunc->func)(self, &arg, 1);
-            } else {
-                return (*(__Pyx_PyCFunctionFastWithKeywords)(void*)(PyCFunction)cfunc->func)(self, &arg, 1, NULL);
-            }
-        } else if ((PY_VERSION_HEX >= 0x030700A0) && flag == (METH_FASTCALL | METH_KEYWORDS)) {
-            return (*(__Pyx_PyCFunctionFastWithKeywords)(void*)(PyCFunction)cfunc->func)(self, &arg, 1, NULL);
-        }
-    }
-    return __Pyx__CallUnboundCMethod1(cfunc, self, arg);
-}
-#endif
-static PyObject* __Pyx__CallUnboundCMethod1(__Pyx_CachedCFunction* cfunc, PyObject* self, PyObject* arg){
-    PyObject *args, *result = NULL;
-    if (unlikely(!cfunc->func && !cfunc->method) && unlikely(__Pyx_TryUnpackUnboundCMethod(cfunc) < 0)) return NULL;
-#if CYTHON_COMPILING_IN_CPYTHON
-    if (cfunc->func && (cfunc->flag & METH_VARARGS)) {
-        args = PyTuple_New(1);
-        if (unlikely(!args)) goto bad;
-        Py_INCREF(arg);
-        PyTuple_SET_ITEM(args, 0, arg);
-        if (cfunc->flag & METH_KEYWORDS)
-            result = (*(PyCFunctionWithKeywords)(void*)(PyCFunction)cfunc->func)(self, args, NULL);
-        else
-            result = (*cfunc->func)(self, args);
-    } else {
-        args = PyTuple_New(2);
-        if (unlikely(!args)) goto bad;
-        Py_INCREF(self);
-        PyTuple_SET_ITEM(args, 0, self);
-        Py_INCREF(arg);
-        PyTuple_SET_ITEM(args, 1, arg);
-        result = __Pyx_PyObject_Call(cfunc->method, args, NULL);
-    }
-#else
-    args = PyTuple_Pack(2, self, arg);
-    if (unlikely(!args)) goto bad;
-    result = __Pyx_PyObject_Call(cfunc->method, args, NULL);
-#endif
-bad:
-    Py_XDECREF(args);
-    return result;
-}
-
-/* CallUnboundCMethod2 */
-#if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030600B1
-static CYTHON_INLINE PyObject *__Pyx_CallUnboundCMethod2(__Pyx_CachedCFunction *cfunc, PyObject *self, PyObject *arg1, PyObject *arg2) {
-    if (likely(cfunc->func)) {
-        PyObject *args[2] = {arg1, arg2};
-        if (cfunc->flag == METH_FASTCALL) {
-            #if PY_VERSION_HEX >= 0x030700A0
-            return (*(__Pyx_PyCFunctionFast)(void*)(PyCFunction)cfunc->func)(self, args, 2);
-            #else
-            return (*(__Pyx_PyCFunctionFastWithKeywords)(void*)(PyCFunction)cfunc->func)(self, args, 2, NULL);
-            #endif
-        }
-        #if PY_VERSION_HEX >= 0x030700A0
-        if (cfunc->flag == (METH_FASTCALL | METH_KEYWORDS))
-            return (*(__Pyx_PyCFunctionFastWithKeywords)(void*)(PyCFunction)cfunc->func)(self, args, 2, NULL);
-        #endif
-    }
-    return __Pyx__CallUnboundCMethod2(cfunc, self, arg1, arg2);
-}
-#endif
-static PyObject* __Pyx__CallUnboundCMethod2(__Pyx_CachedCFunction* cfunc, PyObject* self, PyObject* arg1, PyObject* arg2){
-    PyObject *args, *result = NULL;
-    if (unlikely(!cfunc->func && !cfunc->method) && unlikely(__Pyx_TryUnpackUnboundCMethod(cfunc) < 0)) return NULL;
-#if CYTHON_COMPILING_IN_CPYTHON
-    if (cfunc->func && (cfunc->flag & METH_VARARGS)) {
-        args = PyTuple_New(2);
-        if (unlikely(!args)) goto bad;
-        Py_INCREF(arg1);
-        PyTuple_SET_ITEM(args, 0, arg1);
-        Py_INCREF(arg2);
-        PyTuple_SET_ITEM(args, 1, arg2);
-        if (cfunc->flag & METH_KEYWORDS)
-            result = (*(PyCFunctionWithKeywords)(void*)(PyCFunction)cfunc->func)(self, args, NULL);
-        else
-            result = (*cfunc->func)(self, args);
-    } else {
-        args = PyTuple_New(3);
-        if (unlikely(!args)) goto bad;
-        Py_INCREF(self);
-        PyTuple_SET_ITEM(args, 0, self);
-        Py_INCREF(arg1);
-        PyTuple_SET_ITEM(args, 1, arg1);
-        Py_INCREF(arg2);
-        PyTuple_SET_ITEM(args, 2, arg2);
-        result = __Pyx_PyObject_Call(cfunc->method, args, NULL);
-    }
-#else
-    args = PyTuple_Pack(3, self, arg1, arg2);
-    if (unlikely(!args)) goto bad;
-    result = __Pyx_PyObject_Call(cfunc->method, args, NULL);
-#endif
-bad:
-    Py_XDECREF(args);
-    return result;
-}
-
-/* dict_getitem_default */
-static PyObject* __Pyx_PyDict_GetItemDefault(PyObject* d, PyObject* key, PyObject* default_value) {
-    PyObject* value;
-#if PY_MAJOR_VERSION >= 3 && (!CYTHON_COMPILING_IN_PYPY || PYPY_VERSION_NUM >= 0x07020000)
-    value = PyDict_GetItemWithError(d, key);
-    if (unlikely(!value)) {
-        if (unlikely(PyErr_Occurred()))
-            return NULL;
-        value = default_value;
-    }
-    Py_INCREF(value);
-    if ((1));
-#else
-    if (PyString_CheckExact(key) || PyUnicode_CheckExact(key) || PyInt_CheckExact(key)) {
-        value = PyDict_GetItem(d, key);
-        if (unlikely(!value)) {
-            value = default_value;
-        }
-        Py_INCREF(value);
-    }
-#endif
-    else {
-        if (default_value == Py_None)
-            value = __Pyx_CallUnboundCMethod1(&__pyx_umethod_PyDict_Type_get, d, key);
-        else
-            value = __Pyx_CallUnboundCMethod2(&__pyx_umethod_PyDict_Type_get, d, key, default_value);
-    }
-    return value;
-}
-
-/* WriteUnraisableException */
-static void __Pyx_WriteUnraisable(const char *name, CYTHON_UNUSED int clineno,
-                                  CYTHON_UNUSED int lineno, CYTHON_UNUSED const char *filename,
-                                  int full_traceback, CYTHON_UNUSED int nogil) {
-    PyObject *old_exc, *old_val, *old_tb;
-    PyObject *ctx;
-    __Pyx_PyThreadState_declare
-#ifdef WITH_THREAD
-    PyGILState_STATE state;
-    if (nogil)
-        state = PyGILState_Ensure();
-#ifdef _MSC_VER
-    else state = (PyGILState_STATE)-1;
-#endif
-#endif
-    __Pyx_PyThreadState_assign
-    __Pyx_ErrFetch(&old_exc, &old_val, &old_tb);
-    if (full_traceback) {
-        Py_XINCREF(old_exc);
-        Py_XINCREF(old_val);
-        Py_XINCREF(old_tb);
-        __Pyx_ErrRestore(old_exc, old_val, old_tb);
-        PyErr_PrintEx(1);
-    }
-    #if PY_MAJOR_VERSION < 3
-    ctx = PyString_FromString(name);
-    #else
-    ctx = PyUnicode_FromString(name);
-    #endif
-    __Pyx_ErrRestore(old_exc, old_val, old_tb);
-    if (!ctx) {
-        PyErr_WriteUnraisable(Py_None);
-    } else {
-        PyErr_WriteUnraisable(ctx);
-        Py_DECREF(ctx);
-    }
-#ifdef WITH_THREAD
-    if (nogil)
-        PyGILState_Release(state);
-#endif
-}
-
-/* PyDictVersioning */
-#if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
-static CYTHON_INLINE PY_UINT64_T __Pyx_get_tp_dict_version(PyObject *obj) {
-    PyObject *dict = Py_TYPE(obj)->tp_dict;
-    return likely(dict) ? __PYX_GET_DICT_VERSION(dict) : 0;
-}
-static CYTHON_INLINE PY_UINT64_T __Pyx_get_object_dict_version(PyObject *obj) {
-    PyObject **dictptr = NULL;
-    Py_ssize_t offset = Py_TYPE(obj)->tp_dictoffset;
-    if (offset) {
-#if CYTHON_COMPILING_IN_CPYTHON
-        dictptr = (likely(offset > 0)) ? (PyObject **) ((char *)obj + offset) : _PyObject_GetDictPtr(obj);
-#else
-        dictptr = _PyObject_GetDictPtr(obj);
-#endif
-    }
-    return (dictptr && *dictptr) ? __PYX_GET_DICT_VERSION(*dictptr) : 0;
-}
-static CYTHON_INLINE int __Pyx_object_dict_version_matches(PyObject* obj, PY_UINT64_T tp_dict_version, PY_UINT64_T obj_dict_version) {
-    PyObject *dict = Py_TYPE(obj)->tp_dict;
-    if (unlikely(!dict) || unlikely(tp_dict_version != __PYX_GET_DICT_VERSION(dict)))
-        return 0;
-    return obj_dict_version == __Pyx_get_object_dict_version(obj);
-}
-#endif
-
-/* GetModuleGlobalName */
-#if CYTHON_USE_DICT_VERSIONS
-static PyObject *__Pyx__GetModuleGlobalName(PyObject *name, PY_UINT64_T *dict_version, PyObject **dict_cached_value)
-#else
-static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name)
-#endif
-{
-    PyObject *result;
-#if !CYTHON_AVOID_BORROWED_REFS
-#if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030500A1
-    result = _PyDict_GetItem_KnownHash(__pyx_d, name, ((PyASCIIObject *) name)->hash);
-    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
-    if (likely(result)) {
-        return __Pyx_NewRef(result);
-    } else if (unlikely(PyErr_Occurred())) {
-        return NULL;
-    }
-#elif CYTHON_COMPILING_IN_LIMITED_API
-    if (unlikely(!__pyx_m)) {
-        return NULL;
-    }
-    result = PyObject_GetAttr(__pyx_m, name);
-    if (likely(result)) {
-        return result;
-    }
-#else
-    result = PyDict_GetItem(__pyx_d, name);
-    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
-    if (likely(result)) {
-        return __Pyx_NewRef(result);
-    }
-#endif
-#else
-    result = PyObject_GetItem(__pyx_d, name);
-    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
-    if (likely(result)) {
-        return __Pyx_NewRef(result);
-    }
-    PyErr_Clear();
-#endif
-    return __Pyx_GetBuiltinName(name);
 }
 
 /* TupleAndListFromArray */

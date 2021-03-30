@@ -1,3 +1,4 @@
+#pragma once
 #include "Python.h"
 #define RAPIDFUZZ_PYTHON
 #include <rapidfuzz/fuzz.hpp>
@@ -30,10 +31,10 @@ struct proc_string {
     size_t length;
 };
 
-static inline proc_string convert_string(PyObject* py_str, const char* err)
+// this has to be separate from the string conversion, since it can not be called without
+// the GIL
+static inline void validate_string(PyObject* py_str, const char* err)
 {
-    proc_string str = {0, NULL, 0};
-
     if (!PyUnicode_Check(py_str)) {
         throw PythonTypeError(err);
     }
@@ -46,11 +47,18 @@ static inline proc_string convert_string(PyObject* py_str, const char* err)
       throw std::runtime_error("");
     }
 #endif
+}
 
-    str.kind = PyUnicode_KIND(py_str);
-    str.data = PyUnicode_DATA(py_str);
-    str.length = static_cast<std::size_t>(PyUnicode_GET_LENGTH(py_str));
-
-    return str;
+// Right now this can be called without the GIL, since the used Python API
+// is implemented using macros, which directly access the PyObject both in
+// CPython and PyPy. If this changes the multiprocessing module needs to be updated
+static inline proc_string convert_string(PyObject* py_str)
+{
+    return {
+        // see https://bugs.python.org/issue43565
+        static_cast<int>(PyUnicode_KIND(py_str)),
+        PyUnicode_DATA(py_str),
+        static_cast<std::size_t>(PyUnicode_GET_LENGTH(py_str))
+    };
 }
 

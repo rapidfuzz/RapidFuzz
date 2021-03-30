@@ -806,6 +806,7 @@ static CYTHON_INLINE float __PYX_NAN() {
 #include "new"
 #include "stdexcept"
 #include "typeinfo"
+#include "cpp_common.hpp"
 #include "cpp_utils.hpp"
 #ifdef _OPENMP
 #include <omp.h>
@@ -1660,8 +1661,8 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #endif
 /* #### Code section: module_code ### */
 
-/* "cpp_utils.pyx":8
- *     object default_process_impl(object) except +
+/* "cpp_utils.pyx":11
+ *     object default_process_impl(object) nogil except +
  * 
  * def default_process(sentence):             # <<<<<<<<<<<<<<
  *     """
@@ -1715,12 +1716,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       switch (__pyx_nargs) {
         case  0:
         if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_sentence)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 8, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 11, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "default_process") < 0)) __PYX_ERR(0, 8, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "default_process") < 0)) __PYX_ERR(0, 11, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 1)) {
       goto __pyx_L5_argtuple_error;
@@ -1731,7 +1732,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("default_process", 1, 1, 1, __pyx_nargs); __PYX_ERR(0, 8, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("default_process", 1, 1, 1, __pyx_nargs); __PYX_ERR(0, 11, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("cpp_utils.default_process", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -1753,26 +1754,39 @@ static PyObject *__pyx_pf_9cpp_utils_default_process(CYTHON_UNUSED PyObject *__p
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("default_process", 0);
 
-  /* "cpp_utils.pyx":25
+  /* "cpp_utils.pyx":28
  *         processed string
  *     """
+ *     validate_string(sentence, "sentence must be a String")             # <<<<<<<<<<<<<<
+ *     return default_process_impl(sentence)
+ */
+  try {
+    validate_string(__pyx_v_sentence, ((char const *)"sentence must be a String"));
+  } catch(...) {
+    __Pyx_CppExn2PyErr();
+    __PYX_ERR(0, 28, __pyx_L1_error)
+  }
+
+  /* "cpp_utils.pyx":29
+ *     """
+ *     validate_string(sentence, "sentence must be a String")
  *     return default_process_impl(sentence)             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
   try {
     __pyx_t_1 = default_process_impl(__pyx_v_sentence);
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 25, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 29, __pyx_L1_error)
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 25, __pyx_L1_error)
+    __PYX_ERR(0, 29, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "cpp_utils.pyx":8
- *     object default_process_impl(object) except +
+  /* "cpp_utils.pyx":11
+ *     object default_process_impl(object) nogil except +
  * 
  * def default_process(sentence):             # <<<<<<<<<<<<<<
  *     """
@@ -1842,17 +1856,17 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "cpp_utils.pyx":8
- *     object default_process_impl(object) except +
+  /* "cpp_utils.pyx":11
+ *     object default_process_impl(object) nogil except +
  * 
  * def default_process(sentence):             # <<<<<<<<<<<<<<
  *     """
  *     This function preprocesses a string by:
  */
-  __pyx_tuple_ = PyTuple_Pack(1, __pyx_n_s_sentence); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 8, __pyx_L1_error)
+  __pyx_tuple_ = PyTuple_Pack(1, __pyx_n_s_sentence); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 11, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
-  __pyx_codeobj__2 = (PyObject*)__Pyx_PyCode_New(1, 0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_cpp_utils_pyx, __pyx_n_s_default_process, 8, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__2)) __PYX_ERR(0, 8, __pyx_L1_error)
+  __pyx_codeobj__2 = (PyObject*)__Pyx_PyCode_New(1, 0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_cpp_utils_pyx, __pyx_n_s_default_process, 11, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__2)) __PYX_ERR(0, 11, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -2216,16 +2230,16 @@ if (!__Pyx_RefNanny) {
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
-  /* "cpp_utils.pyx":8
- *     object default_process_impl(object) except +
+  /* "cpp_utils.pyx":11
+ *     object default_process_impl(object) nogil except +
  * 
  * def default_process(sentence):             # <<<<<<<<<<<<<<
  *     """
  *     This function preprocesses a string by:
  */
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_9cpp_utils_1default_process, 0, __pyx_n_s_default_process, NULL, __pyx_n_s_cpp_utils, __pyx_d, ((PyObject *)__pyx_codeobj__2)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 8, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_9cpp_utils_1default_process, 0, __pyx_n_s_default_process, NULL, __pyx_n_s_cpp_utils, __pyx_d, ((PyObject *)__pyx_codeobj__2)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 11, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_default_process, __pyx_t_1) < 0) __PYX_ERR(0, 8, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_default_process, __pyx_t_1) < 0) __PYX_ERR(0, 11, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "cpp_utils.pyx":1

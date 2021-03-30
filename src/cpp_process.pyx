@@ -35,9 +35,12 @@ from cpython.ref cimport Py_DECREF
 
 import heapq
 
+cdef extern from "cpp_common.hpp":
+    void validate_string(object py_str, const char* err) except +
+
 cdef extern from "cpp_process.hpp":
-    ctypedef double (*scorer_func) (void* context, object py_str, double score_cutoff) except +
-    ctypedef size_t (*distance_func) (void* context, object py_str, size_t max) except +
+    ctypedef double (*scorer_func) (void* context, object py_str, double score_cutoff) nogil except +
+    ctypedef size_t (*distance_func) (void* context, object py_str, size_t max) nogil except +
     ctypedef void (*context_deinit) (void* context) except +
 
     ctypedef struct scorer_context:
@@ -98,6 +101,61 @@ cdef extern from "cpp_process.hpp":
         PyObject* key
 
 
+cdef inline scorer_context CachedNormalizedLevenshteinInit(object query, int def_process, dict kwargs):
+    cdef size_t insertion, deletion, substitution
+    insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
+    return cached_normalized_levenshtein_init(query, def_process, insertion, deletion, substitution)
+
+cdef inline distance_context CachedLevenshteinInit(object query, int def_process, dict kwargs):
+    cdef size_t insertion, deletion, substitution
+    insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
+    return cached_levenshtein_init(query, def_process, insertion, deletion, substitution)
+
+
+cdef inline scorer_context CachedScorerInit(object scorer, object query, int def_process, dict kwargs):
+    cdef scorer_context context
+
+    if scorer is ratio:
+        context = cached_ratio_init(query, def_process)
+    elif scorer is partial_ratio:
+        context = cached_partial_ratio_init(query, def_process)
+    elif scorer is token_sort_ratio:
+        context = cached_token_sort_ratio_init(query, def_process)
+    elif scorer is token_set_ratio:
+        context = cached_token_set_ratio_init(query, def_process)
+    elif scorer is token_ratio:
+        context = cached_token_ratio_init(query, def_process)
+    elif scorer is partial_token_sort_ratio:
+        context = cached_partial_token_sort_ratio_init(query, def_process)
+    elif scorer is partial_token_set_ratio:
+        context = cached_partial_token_set_ratio_init(query, def_process)
+    elif scorer is partial_token_ratio:
+        context = cached_partial_token_ratio_init(query, def_process)
+    elif scorer is WRatio:
+        context = cached_WRatio_init(query, def_process)
+    elif scorer is QRatio:
+        context = cached_QRatio_init(query, def_process)
+    elif scorer is normalized_levenshtein:
+        context = CachedNormalizedLevenshteinInit(query, def_process, kwargs)
+    elif scorer is normalized_hamming:
+        context = cached_normalized_hamming_init(query, def_process)
+    else:
+        context.context = NULL
+    return context
+
+
+cdef inline distance_context CachedDistanceInit(object scorer, object query, int def_process, dict kwargs):
+    cdef distance_context context
+
+    if scorer is levenshtein:
+        context = CachedLevenshteinInit(query, def_process, kwargs)
+    elif scorer is hamming:
+        context = cached_hamming_init(query, def_process)
+    else:
+        context.context = NULL
+    return context
+
+
 cdef inline extractOne_dict(scorer_context context, choices, processor, double score_cutoff):
     """
     implementation of extractOne for:
@@ -115,7 +173,13 @@ cdef inline extractOne_dict(scorer_context context, choices, processor, double s
             if choice is None:
                 continue
 
-            score = context.scorer(context.context, processor(choice), score_cutoff)
+            proc_choice = processor(choice)
+            if proc_choice is None:
+                continue
+
+            validate_string(proc_choice, "choice must be a String or None")
+
+            score = context.scorer(context.context, proc_choice, score_cutoff)
 
             if score >= score_cutoff and score > result_score:
                 result_score = score_cutoff = score
@@ -129,6 +193,7 @@ cdef inline extractOne_dict(scorer_context context, choices, processor, double s
             if choice is None:
                 continue
 
+            validate_string(choice, "choice must be a String or None")
             score = context.scorer(context.context, choice, score_cutoff)
 
             if score >= score_cutoff and score > result_score:
@@ -158,7 +223,13 @@ cdef inline extractOne_distance_dict(distance_context context, choices, processo
             if choice is None:
                 continue
 
-            distance = context.scorer(context.context, processor(choice), max_)
+            proc_choice = processor(choice)
+            if proc_choice is None:
+                continue
+
+            validate_string(proc_choice, "choice must be a String or None")
+
+            distance = context.scorer(context.context, proc_choice, max_)
 
             if distance <= max_ and distance < result_distance:
                 result_distance = max_ = distance
@@ -172,6 +243,7 @@ cdef inline extractOne_distance_dict(distance_context context, choices, processo
             if choice is None:
                 continue
 
+            validate_string(choice, "choice must be a String or None")
             distance = context.scorer(context.context, choice, max_)
 
             if distance <= max_ and distance < result_distance:
@@ -204,7 +276,14 @@ cdef inline extractOne_list(scorer_context context, choices, processor, double s
                 i += 1
                 continue
 
-            score = context.scorer(context.context, processor(choice), score_cutoff)
+            proc_choice = processor(choice)
+            if proc_choice is None:
+                i += 1
+                continue
+
+            validate_string(proc_choice, "choice must be a String or None")
+
+            score = context.scorer(context.context, proc_choice, score_cutoff)
 
             if score >= score_cutoff and score > result_score:
                 result_score = score_cutoff = score
@@ -220,6 +299,7 @@ cdef inline extractOne_list(scorer_context context, choices, processor, double s
                 i += 1
                 continue
 
+            validate_string(choice, "choice must be a String or None")
             score = context.scorer(context.context, choice, score_cutoff)
 
             if score >= score_cutoff and score > result_score:
@@ -252,7 +332,14 @@ cdef inline extractOne_distance_list(distance_context context, choices, processo
                 i += 1
                 continue
 
-            distance = context.scorer(context.context, processor(choice), max_)
+            proc_choice = processor(choice)
+            if proc_choice is None:
+                i += 1
+                continue
+
+            validate_string(proc_choice, "choice must be a String or None")
+
+            distance = context.scorer(context.context, proc_choice, max_)
 
             if distance <= max_ and distance < result_distance:
                 result_distance = max_ = distance
@@ -268,6 +355,7 @@ cdef inline extractOne_distance_list(distance_context context, choices, processo
                 i += 1
                 continue
 
+            validate_string(choice, "choice must be a String or None")
             distance = context.scorer(context.context, choice, max_)
 
             if distance <= max_ and distance < result_distance:
@@ -367,61 +455,6 @@ cdef inline py_extractOne_list(query, choices, scorer, processor, double score_c
             i += 1
 
     return (result_choice, result_score, result_index) if result_choice is not None else None
-
-
-cdef inline scorer_context CachedNormalizedLevenshteinInit(object query, int def_process, dict kwargs):
-    cdef size_t insertion, deletion, substitution
-    insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
-    return cached_normalized_levenshtein_init(query, def_process, insertion, deletion, substitution)
-
-cdef inline distance_context CachedLevenshteinInit(object query, int def_process, dict kwargs):
-    cdef size_t insertion, deletion, substitution
-    insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
-    return cached_levenshtein_init(query, def_process, insertion, deletion, substitution)
-
-
-cdef inline scorer_context CachedScorerInit(object scorer, object query, int def_process, dict kwargs):
-    cdef scorer_context context
-
-    if scorer is ratio:
-        context = cached_ratio_init(query, def_process)
-    elif scorer is partial_ratio:
-        context = cached_partial_ratio_init(query, def_process)
-    elif scorer is token_sort_ratio:
-        context = cached_token_sort_ratio_init(query, def_process)
-    elif scorer is token_set_ratio:
-        context = cached_token_set_ratio_init(query, def_process)
-    elif scorer is token_ratio:
-        context = cached_token_ratio_init(query, def_process)
-    elif scorer is partial_token_sort_ratio:
-        context = cached_partial_token_sort_ratio_init(query, def_process)
-    elif scorer is partial_token_set_ratio:
-        context = cached_partial_token_set_ratio_init(query, def_process)
-    elif scorer is partial_token_ratio:
-        context = cached_partial_token_ratio_init(query, def_process)
-    elif scorer is WRatio:
-        context = cached_WRatio_init(query, def_process)
-    elif scorer is QRatio:
-        context = cached_QRatio_init(query, def_process)
-    elif scorer is normalized_levenshtein:
-        context = CachedNormalizedLevenshteinInit(query, def_process, kwargs)
-    elif scorer is normalized_hamming:
-        context = cached_normalized_hamming_init(query, def_process)
-    else:
-        context.context = NULL
-    return context
-
-
-cdef inline distance_context CachedDistanceInit(object scorer, object query, int def_process, dict kwargs):
-    cdef distance_context context
-
-    if scorer is levenshtein:
-        context = CachedLevenshteinInit(query, def_process, kwargs)
-    elif scorer is hamming:
-        context = cached_hamming_init(query, def_process)
-    else:
-        context.context = NULL
-    return context
 
 
 def extractOne(query, choices, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):
@@ -629,7 +662,14 @@ cdef inline extract_dict(scorer_context context, choices, processor, size_t limi
                     i += 1
                     continue
 
-                score = context.scorer(context.context, processor(choice), score_cutoff)
+                proc_choice = processor(choice)
+                if proc_choice is None:
+                    i += 1
+                    continue
+    
+                validate_string(proc_choice, "choice must be a String or None")
+
+                score = context.scorer(context.context, proc_choice, score_cutoff)
 
                 if score >= score_cutoff:
                     # especially the key object might be created on the fly by e.g. pandas.Dataframe
@@ -644,6 +684,7 @@ cdef inline extract_dict(scorer_context context, choices, processor, size_t limi
                     i += 1
                     continue
 
+                validate_string(choice, "choice must be a String or None")
                 score = context.scorer(context.context, choice, score_cutoff)
 
                 if score >= score_cutoff:
@@ -695,7 +736,14 @@ cdef inline extract_distance_dict(distance_context context, choices, processor, 
                     i += 1
                     continue
 
-                distance = context.scorer(context.context, processor(choice), max_)
+                proc_choice = processor(choice)
+                if proc_choice is None:
+                    i += 1
+                    continue
+    
+                validate_string(proc_choice, "choice must be a String or None")
+
+                distance = context.scorer(context.context, proc_choice, max_)
 
                 if distance <= max_:
                     # especially the key object might be created on the fly by e.g. pandas.Dataframe
@@ -710,6 +758,7 @@ cdef inline extract_distance_dict(distance_context context, choices, processor, 
                     i += 1
                     continue
 
+                validate_string(choice, "choice must be a String or None")
                 distance = context.scorer(context.context, choice, max_)
 
                 if distance <= max_:
@@ -759,7 +808,14 @@ cdef inline extract_list(scorer_context context, choices, processor, size_t limi
                 i += 1
                 continue
 
-            score = context.scorer(context.context, processor(choice), score_cutoff)
+            proc_choice = processor(choice)
+            if proc_choice is None:
+                i += 1
+                continue
+    
+            validate_string(proc_choice, "choice must be a String or None")
+
+            score = context.scorer(context.context, proc_choice, score_cutoff)
 
             if score >= score_cutoff:
                 results.push_back(ListMatchScorerElem(score, i))
@@ -770,6 +826,7 @@ cdef inline extract_list(scorer_context context, choices, processor, size_t limi
                 i += 1
                 continue
 
+            validate_string(choice, "choice must be a String or None")
             score = context.scorer(context.context, choice, score_cutoff)
 
             if score >= score_cutoff:
@@ -809,6 +866,13 @@ cdef inline extract_distance_list(distance_context context, choices, processor, 
                 i += 1
                 continue
 
+            proc_choice = processor(choice)
+            if proc_choice is None:
+                i += 1
+                continue
+    
+            validate_string(proc_choice, "choice must be a String or None")
+
             distance = context.scorer(context.context, processor(choice), max_)
 
             if distance <= max_:
@@ -820,6 +884,7 @@ cdef inline extract_distance_list(distance_context context, choices, processor, 
                 i += 1
                 continue
 
+            validate_string(choice, "choice must be a String or None")
             distance = context.scorer(context.context, choice, max_)
 
             if distance <= max_:
@@ -1116,7 +1181,13 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
                 if choice is None:
                     continue
 
-                score = ScorerContext.scorer(ScorerContext.context, processor(choice), c_score_cutoff)
+                proc_choice = processor(choice)
+                if proc_choice is None:
+                    continue
+    
+                validate_string(proc_choice, "choice must be a String or None")
+
+                score = ScorerContext.scorer(ScorerContext.context, proc_choice, c_score_cutoff)
 
                 if score >= score_cutoff:
                     yield (choice, score, choice_key)
@@ -1125,6 +1196,7 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
                 if choice is None:
                     continue
 
+                validate_string(choice, "choice must be a String or None")
                 score = ScorerContext.scorer(ScorerContext.context, choice, c_score_cutoff)
 
                 if score >= score_cutoff:
@@ -1145,7 +1217,14 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
                     i += 1
                     continue
 
-                score = ScorerContext.scorer(ScorerContext.context, processor(choice), c_score_cutoff)
+                proc_choice = processor(choice)
+                if proc_choice is None:
+                    i += 1
+                    continue
+    
+                validate_string(proc_choice, "choice must be a String or None")
+
+                score = ScorerContext.scorer(ScorerContext.context, proc_choice, c_score_cutoff)
 
                 if score >= c_score_cutoff:
                     yield (choice, score, i)
@@ -1156,6 +1235,7 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
                     i += 1
                     continue
 
+                validate_string(choice, "choice must be a String or None")
                 score = ScorerContext.scorer(ScorerContext.context, choice, c_score_cutoff)
 
                 if score >= c_score_cutoff:
@@ -1175,7 +1255,13 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
                 if choice is None:
                     continue
 
-                distance = DistanceContext.scorer(DistanceContext.context, processor(choice), c_max)
+                proc_choice = processor(choice)
+                if proc_choice is None:
+                    continue
+    
+                validate_string(proc_choice, "choice must be a String or None")
+
+                distance = DistanceContext.scorer(DistanceContext.context, proc_choice, c_max)
 
                 if distance <= c_max:
                     yield (choice, distance, choice_key)
@@ -1184,6 +1270,7 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
                 if choice is None:
                     continue
 
+                validate_string(choice, "choice must be a String or None")
                 distance = DistanceContext.scorer(DistanceContext.context, choice, c_max)
 
                 if distance <= c_max:
@@ -1204,7 +1291,14 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
                     i += 1
                     continue
 
-                distance = DistanceContext.scorer(DistanceContext.context, processor(choice), c_max)
+                proc_choice = processor(choice)
+                if proc_choice is None:
+                    i += 1
+                    continue
+    
+                validate_string(proc_choice, "choice must be a String or None")
+
+                distance = DistanceContext.scorer(DistanceContext.context, proc_choice, c_max)
 
                 if distance <= c_max:
                     yield (choice, distance, i)
@@ -1215,6 +1309,7 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
                     i += 1
                     continue
 
+                validate_string(choice, "choice must be a String or None")
                 distance = DistanceContext.scorer(DistanceContext.context, choice, c_max)
 
                 if distance <= c_max:

@@ -79,7 +79,7 @@ template<typename CachedScorer>
 static inline double cached_scorer_func_default_process(
     void* context, PyObject* py_str, double score_cutoff)
 {
-    proc_string str = convert_string(py_str, "choice must be a String or None");
+    proc_string str = convert_string(py_str);
     CachedScorer* ratio = (CachedScorer*)context;
 
     switch(str.kind){
@@ -109,7 +109,7 @@ static inline double cached_scorer_func_default_process(
 template<typename CachedScorer>
 static inline double cached_scorer_func(void* context, PyObject* py_str, double score_cutoff)
 {
-    proc_string str = convert_string(py_str, "choice must be a String or None");
+    proc_string str = convert_string(py_str);
     CachedScorer* ratio = (CachedScorer*)context;
 
     switch(str.kind){
@@ -152,7 +152,8 @@ static inline scorer_context get_scorer_context(const proc_string& str, int def_
 template<template <typename> class CachedScorer, typename ...Args>
 static inline scorer_context cached_scorer_init(PyObject* py_str, int def_process, Args... args)
 {
-    proc_string str = convert_string(py_str, "query must be a String");
+    validate_string(py_str, "query must be a String");
+    proc_string str = convert_string(py_str);
 
     switch(str.kind){
     case PyUnicode_1BYTE_KIND:
@@ -242,7 +243,7 @@ template<typename CachedDistance>
 static inline std::size_t cached_distance_func_default_process(
     void* context, PyObject* py_str, std::size_t max)
 {
-    proc_string str = convert_string(py_str, "choice must be a String or None");
+    proc_string str = convert_string(py_str);
     CachedDistance* distance = (CachedDistance*)context;
 
     switch(str.kind){
@@ -272,7 +273,7 @@ static inline std::size_t cached_distance_func_default_process(
 template<typename CachedDistance>
 static inline std::size_t cached_distance_func(void* context, PyObject* py_str, std::size_t max)
 {
-    proc_string str = convert_string(py_str, "choice must be a String or None");
+    proc_string str = convert_string(py_str);
     CachedDistance* distance = (CachedDistance*)context;
 
     switch(str.kind){
@@ -315,7 +316,8 @@ static inline distance_context get_distance_context(const proc_string& str, int 
 template<template <typename> class CachedDistance, typename ...Args>
 static inline distance_context cached_distance_init(PyObject* py_str, int def_process, Args... args)
 {
-    proc_string str = convert_string(py_str, "query must be a String");
+    validate_string(py_str, "query must be a String");
+    proc_string str = convert_string(py_str);
 
     switch(str.kind){
     case PyUnicode_1BYTE_KIND:
