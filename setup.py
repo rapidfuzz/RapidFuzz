@@ -44,6 +44,14 @@ class BuildExt(build_ext):
         for ext in self.extensions:
             ext.extra_compile_args += opts
             ext.extra_link_args += link_opts
+
+            # multiprocess requires
+            if ext.name == 'rapidfuzz.cpp_multiprocess':
+                if sys.platform == 'darwin':
+                    ext.extra_compile_args.append('-Xpreprocessor')
+                    #ext.extra_link_args.append('-lomp')
+                ext.extra_compile_args.append('-fopenmp')
+                ext.extra_link_args.append('-fopenmp')
         build_ext.build_extensions(self)
 
 

@@ -61,4 +61,3 @@ static inline proc_string convert_string(PyObject* py_str)
         static_cast<std::size_t>(PyUnicode_GET_LENGTH(py_str))
     };
 }
-
