@@ -1,5 +1,10 @@
 #include "cpp_common.hpp"
 
+struct DictElem {
+    PyObject* key;
+    PyObject* value;
+};
+
 struct ListMatchScorerElem {
     double score;
     size_t index;

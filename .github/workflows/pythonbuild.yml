@@ -8,14 +8,13 @@ on:
       - published
 
 jobs:
-  build_wheels:
-    name: Build wheel on ${{ matrix.os }}/auto/${{matrix.python_tag}}
-    runs-on: ${{ matrix.os }}
+  build_wheels_windows:
+    name: Build wheel on windows-latest/auto/${{matrix.python_tag}}
+    runs-on: windows-latest
     strategy:
       fail-fast: false
       matrix:
         python_tag: [ "cp35-*", "cp36-*", "cp37-*", "cp38-*", "cp39-*"]
-        os: [windows-latest, macos-latest]
     env:
       CIBW_BUILD: ${{matrix.python_tag}}
       CIBW_TEST_REQUIRES: pytest hypothesis pandas
@@ -25,6 +24,39 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: 'true'
+
+      - name: Build wheels
+        uses: joerick/cibuildwheel@v1.10.0
+        with:
+          output-dir: wheelhouse
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v2
+        with:
+          path: ./wheelhouse/*.whl
+
+  build_wheels_macos:
+    name: Build wheel on macos-latest/auto/${{matrix.python_tag}}
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python_tag: [ "cp35-*", "cp36-*", "cp37-*", "cp38-*", "cp39-*"]
+    env:
+      CIBW_BUILD: ${{matrix.python_tag}}
+      CIBW_TEST_REQUIRES: pytest hypothesis pandas
+      CIBW_TEST_COMMAND: pytest {package}/tests
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+
+      - name: install build tools
+        run: brew install pcre openssl nasm automake libtool snappy ninja meson cmake
+
+      - name: build and install libomp
+        run: bash build_utils/build_libomp.sh
 
       - name: Build wheels
         uses: joerick/cibuildwheel@v1.10.0
@@ -147,7 +179,7 @@ jobs:
 
   deploy-wheels:
     if: github.event_name == 'release' && github.event.action == 'published'
-    needs: [build_wheels, build_wheels_apple_silicon, build_wheels_manylinux, build_wheels_pypy, build_sdist]
+    needs: [build_wheels_windows, build_wheels_macos, build_wheels_apple_silicon, build_wheels_manylinux, build_wheels_pypy, build_sdist]
     name: deploy wheels to pypi
     runs-on: ubuntu-18.04
 
