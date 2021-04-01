@@ -34,8 +34,8 @@ PyObject* levenshtein_impl(PyObject* s1, PyObject* s2,
     size_t insertion, size_t deletion, size_t substitution, size_t max)
 {
     size_t result = 0;
-    proc_string c_s1 = convert_string(s1, "s1 must be a String");
-    proc_string c_s2 = convert_string(s2, "s2 must be a String");
+    proc_string c_s1 = convert_string(s1);
+    proc_string c_s2 = convert_string(s2);
 
     switch(c_s1.kind){
     case PyUnicode_1BYTE_KIND:
@@ -100,8 +100,8 @@ PyObject* levenshtein_impl_default_process(PyObject* s1, PyObject* s2,
     size_t insertion, size_t deletion, size_t substitution, size_t max)
 {
     size_t result = 0;
-    proc_string c_s1 = convert_string(s1, "s1 must be a String");
-    proc_string c_s2 = convert_string(s2, "s2 must be a String");
+    proc_string c_s1 = convert_string(s1);
+    proc_string c_s2 = convert_string(s2);
 
     switch(c_s1.kind){
     case PyUnicode_1BYTE_KIND:
@@ -159,8 +159,8 @@ inline double normalized_levenshtein_impl_inner(proc_string s1, proc_string s2,
 double normalized_levenshtein_impl(PyObject* s1, PyObject* s2,
     size_t insertion, size_t deletion, size_t substitution, double score_cutoff)
 {
-    proc_string c_s1 = convert_string(s1, "s1 must be a String");
-    proc_string c_s2 = convert_string(s2, "s2 must be a String");
+    proc_string c_s1 = convert_string(s1);
+    proc_string c_s2 = convert_string(s2);
 
     switch(c_s1.kind){
     case PyUnicode_1BYTE_KIND:
@@ -217,8 +217,8 @@ inline double normalized_levenshtein_impl_inner_default_process(proc_string s1, 
 double normalized_levenshtein_impl_default_process(PyObject* s1, PyObject* s2,
     size_t insertion, size_t deletion, size_t substitution, double score_cutoff)
 {
-    proc_string c_s1 = convert_string(s1, "s1 must be a String");
-    proc_string c_s2 = convert_string(s2, "s2 must be a String");
+    proc_string c_s1 = convert_string(s1);
+    proc_string c_s2 = convert_string(s2);
 
     switch(c_s1.kind){
     case PyUnicode_1BYTE_KIND:
@@ -265,8 +265,8 @@ size_t hamming_impl_inner(proc_string s1, proc_string s2, size_t max)
 PyObject* hamming_impl(PyObject* s1, PyObject* s2, size_t max)
 {
     size_t result = 0;
-    proc_string c_s1 = convert_string(s1, "s1 must be a String");
-    proc_string c_s2 = convert_string(s2, "s2 must be a String");
+    proc_string c_s1 = convert_string(s1);
+    proc_string c_s2 = convert_string(s2);
 
     switch(c_s1.kind){
     case PyUnicode_1BYTE_KIND:
@@ -326,8 +326,8 @@ size_t hamming_impl_inner_default_process(proc_string s1, proc_string s2, size_t
 PyObject* hamming_impl_default_process(PyObject* s1, PyObject* s2, size_t max)
 {
     size_t result = 0;
-    proc_string c_s1 = convert_string(s1, "s1 must be a String");
-    proc_string c_s2 = convert_string(s2, "s2 must be a String");
+    proc_string c_s1 = convert_string(s1);
+    proc_string c_s2 = convert_string(s2);
 
     switch(c_s1.kind){
     case PyUnicode_1BYTE_KIND:
@@ -379,8 +379,8 @@ inline double normalized_hamming_impl_inner(proc_string s1, proc_string s2, doub
 
 double normalized_hamming_impl(PyObject* s1, PyObject* s2, double score_cutoff)
 {
-    proc_string c_s1 = convert_string(s1, "s1 must be a String");
-    proc_string c_s2 = convert_string(s2, "s2 must be a String");
+    proc_string c_s1 = convert_string(s1);
+    proc_string c_s2 = convert_string(s2);
 
     switch(c_s1.kind){
     case PyUnicode_1BYTE_KIND:
@@ -432,8 +432,8 @@ inline double normalized_hamming_impl_inner_default_process(
 
 double normalized_hamming_impl_default_process(PyObject* s1, PyObject* s2, double score_cutoff)
 {
-    proc_string c_s1 = convert_string(s1, "s1 must be a String");
-    proc_string c_s2 = convert_string(s2, "s2 must be a String");
+    proc_string c_s1 = convert_string(s1);
+    proc_string c_s2 = convert_string(s2);
 
     switch(c_s1.kind){
     case PyUnicode_1BYTE_KIND:

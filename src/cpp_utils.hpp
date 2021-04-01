@@ -1,7 +1,7 @@
 #include "cpp_common.hpp"
 
 PyObject* default_process_impl(PyObject* sentence) {
-    proc_string c_sentence = convert_string(sentence, "sentence must be a String");
+    proc_string c_sentence = convert_string(sentence);
 
     switch (c_sentence.kind) {
     case PyUnicode_1BYTE_KIND:

@@ -2,8 +2,11 @@
 # cython: language_level=3
 # cython: binding=True
 
+cdef extern from "cpp_common.hpp":
+    void validate_string(object py_str, const char* err) except +
+
 cdef extern from "cpp_utils.hpp":
-    object default_process_impl(object) except +
+    object default_process_impl(object) nogil except +
 
 def default_process(sentence):
     """
@@ -22,4 +25,5 @@ def default_process(sentence):
     processed_string : str
         processed string
     """
+    validate_string(sentence, "sentence must be a String")
     return default_process_impl(sentence)
