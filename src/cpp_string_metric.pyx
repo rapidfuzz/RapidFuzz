@@ -4,16 +4,19 @@
 
 from rapidfuzz.utils import default_process
 
-cdef extern from "cpp_string_metric.hpp":
-    object levenshtein_impl(object, object, size_t, size_t, size_t, size_t) except +
-    object levenshtein_impl_default_process(object, object, size_t, size_t, size_t, size_t) except +
-    double normalized_levenshtein_impl(object, object, size_t, size_t, size_t, double) except +
-    double normalized_levenshtein_impl_default_process(object, object, size_t, size_t, size_t, double) except +
+cdef extern from "cpp_common.hpp":
+    void validate_string(object py_str, const char* err) except +
 
-    object hamming_impl(object, object, size_t) except +
-    object hamming_impl_default_process(object, object, size_t) except +
-    double normalized_hamming_impl(object, object, double) except +
-    double normalized_hamming_impl_default_process(object, object, double) except +
+cdef extern from "cpp_string_metric.hpp":
+    object levenshtein_impl(object, object, size_t, size_t, size_t, size_t) nogil except +
+    object levenshtein_impl_default_process(object, object, size_t, size_t, size_t, size_t) nogil except +
+    double normalized_levenshtein_impl(object, object, size_t, size_t, size_t, double) nogil except +
+    double normalized_levenshtein_impl_default_process(object, object, size_t, size_t, size_t, double) nogil except +
+
+    object hamming_impl(object, object, size_t) nogil except +
+    object hamming_impl_default_process(object, object, size_t) nogil except +
+    double normalized_hamming_impl(object, object, double) nogil except +
+    double normalized_hamming_impl_default_process(object, object, double) nogil except +
 
 
 def levenshtein(s1, s2, weights=(1,1,1), processor=None, max=None):
@@ -195,6 +198,9 @@ def levenshtein(s1, s2, weights=(1,1,1), processor=None, max=None):
         s1 = processor(s1)
         s2 = processor(s2)
 
+    validate_string(s1, "s1 must be a String")
+    validate_string(s2, "s2 must be a String")
+
     return levenshtein_impl(s1, s2, insertion, deletion, substitution, max_)
 
 
@@ -301,6 +307,9 @@ def normalized_levenshtein(s1, s2, weights=(1,1,1), processor=None, double score
         s1 = processor(s1)
         s2 = processor(s2)
 
+    validate_string(s1, "s1 must be a String")
+    validate_string(s2, "s2 must be a String")
+
     return normalized_levenshtein_impl(s1, s2, insertion, deletion, substitution, score_cutoff)
 
 
@@ -348,6 +357,9 @@ def hamming(s1, s2, processor=None, max=None):
         s1 = processor(s1)
         s2 = processor(s2)
 
+    validate_string(s1, "s1 must be a String")
+    validate_string(s2, "s2 must be a String")
+
     return hamming_impl(s1, s2, max_)
 
 
@@ -393,5 +405,8 @@ def normalized_hamming(s1, s2, processor=None, double score_cutoff=0.0):
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
+
+    validate_string(s1, "s1 must be a String")
+    validate_string(s2, "s2 must be a String")
 
     return normalized_hamming_impl(s1, s2, score_cutoff)

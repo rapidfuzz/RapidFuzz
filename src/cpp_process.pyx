@@ -35,9 +35,12 @@ from cpython.ref cimport Py_DECREF
 
 import heapq
 
+cdef extern from "cpp_common.hpp":
+    void validate_string(object py_str, const char* err) except +
+
 cdef extern from "cpp_process.hpp":
-    ctypedef double (*scorer_func) (void* context, object py_str, double score_cutoff) except +
-    ctypedef size_t (*distance_func) (void* context, object py_str, size_t max) except +
+    ctypedef double (*scorer_func) (void* context, object py_str, double score_cutoff) nogil except +
+    ctypedef size_t (*distance_func) (void* context, object py_str, size_t max) nogil except +
     ctypedef void (*context_deinit) (void* context) except +
 
     ctypedef struct scorer_context:
@@ -98,277 +101,6 @@ cdef extern from "cpp_process.hpp":
         PyObject* key
 
 
-cdef inline extractOne_dict(scorer_context context, choices, processor, double score_cutoff):
-    """
-    implementation of extractOne for:
-      - type of choices = dict
-      - scorer = normalized scorer implemented in C++
-    """
-    cdef double score
-    # use -1 as score, so even a score of 0 in the first iteration is higher
-    cdef double result_score = -1
-    result_choice = None
-    result_key = None
-
-    if processor is not None:
-        for choice_key, choice in choices.items():
-            if choice is None:
-                continue
-
-            score = context.scorer(context.context, processor(choice), score_cutoff)
-
-            if score >= score_cutoff and score > result_score:
-                result_score = score_cutoff = score
-                result_choice = choice
-                result_key = choice_key
-
-                if result_score == 100:
-                    break
-    else:
-        for choice_key, choice in choices.items():
-            if choice is None:
-                continue
-
-            score = context.scorer(context.context, choice, score_cutoff)
-
-            if score >= score_cutoff and score > result_score:
-                result_score = score_cutoff = score
-                result_choice = choice
-                result_key = choice_key
-
-                if result_score == 100:
-                    break
-
-    return (result_choice, result_score, result_key) if result_choice is not None else None
-
-
-cdef inline extractOne_distance_dict(distance_context context, choices, processor, size_t max_):
-    """
-    implementation of extractOne for:
-      - type of choices = dict
-      - scorer = Distance implemented in C++
-    """
-    cdef size_t distance
-    cdef size_t result_distance = <size_t>-1
-    result_choice = None
-    result_key = None
-
-    if processor is not None:
-        for choice_key, choice in choices.items():
-            if choice is None:
-                continue
-
-            distance = context.scorer(context.context, processor(choice), max_)
-
-            if distance <= max_ and distance < result_distance:
-                result_distance = max_ = distance
-                result_choice = choice
-                result_key = choice_key
-
-                if result_distance == 0:
-                    break
-    else:
-        for choice_key, choice in choices.items():
-            if choice is None:
-                continue
-
-            distance = context.scorer(context.context, choice, max_)
-
-            if distance <= max_ and distance < result_distance:
-                result_distance = max_ = distance
-                result_choice = choice
-                result_key = choice_key
-
-                if result_distance == 0:
-                    break
-
-    return (result_choice, result_distance, result_key) if result_choice is not None else None
-
-
-cdef inline extractOne_list(scorer_context context, choices, processor, double score_cutoff):
-    """
-    implementation of extractOne for:
-      - type of choices = list
-      - scorer = normalized scorer implemented in C++
-    """
-    cdef double score = 0.0
-    # use -1 as score, so even a score of 0 in the first iteration is higher
-    cdef double result_score = -1
-    cdef size_t i = 0
-    cdef size_t result_index = 0
-    result_choice = None
-
-    if processor is not None:
-        for choice in choices:
-            if choice is None:
-                i += 1
-                continue
-
-            score = context.scorer(context.context, processor(choice), score_cutoff)
-
-            if score >= score_cutoff and score > result_score:
-                result_score = score_cutoff = score
-                result_choice = choice
-                result_index = i
-
-                if result_score == 100:
-                    break
-            i += 1
-    else:
-        for choice in choices:
-            if choice is None:
-                i += 1
-                continue
-
-            score = context.scorer(context.context, choice, score_cutoff)
-
-            if score >= score_cutoff and score > result_score:
-                result_score = score_cutoff = score
-                result_choice = choice
-                result_index = i
-
-                if result_score == 100:
-                    break
-            i += 1
-
-    return (result_choice, result_score, result_index) if result_choice is not None else None
-
-
-cdef inline extractOne_distance_list(distance_context context, choices, processor, size_t max_):
-    """
-    implementation of extractOne for:
-      - type of choices = list
-      - scorer = Distance implemented in C++
-    """
-    cdef size_t distance
-    cdef size_t result_distance = <size_t>-1
-    cdef size_t i = 0
-    cdef size_t result_index = 0
-    result_choice = None
-
-    if processor is not None:
-        for choice in choices:
-            if choice is None:
-                i += 1
-                continue
-
-            distance = context.scorer(context.context, processor(choice), max_)
-
-            if distance <= max_ and distance < result_distance:
-                result_distance = max_ = distance
-                result_choice = choice
-                result_index = i
-
-                if result_distance == 0:
-                    break
-            i += 1
-    else:
-        for choice in choices:
-            if choice is None:
-                i += 1
-                continue
-
-            distance = context.scorer(context.context, choice, max_)
-
-            if distance <= max_ and distance < result_distance:
-                result_distance = max_ = distance
-                result_choice = choice
-                result_index = i
-
-                if result_distance == 0:
-                    break
-            i += 1
-
-    return (result_choice, result_distance, result_index) if result_choice is not None else None
-
-
-cdef inline py_extractOne_dict(query, choices, scorer, processor, score_cutoff, kwargs):
-    result_score = -1
-    result_choice = None
-    result_key = None
-
-    if processor is not None:
-        for choice_key, choice in choices.items():
-            if choice is None:
-                continue
-
-            score = scorer(query, processor(choice),
-                processor=None, score_cutoff=score_cutoff, **kwargs)
-
-            if score >= score_cutoff and score > result_score:
-                score_cutoff = score
-                result_score = score
-                result_choice = choice
-                result_key = choice_key
-
-                if score_cutoff == 100:
-                    break
-    else:
-        for choice_key, choice in choices.items():
-            if choice is None:
-                continue
-
-            score = scorer(query, choice,
-                processor=None, score_cutoff=score_cutoff, **kwargs)
-
-            if score >= score_cutoff and score > result_score:
-                score_cutoff = score
-                result_score = score
-                result_choice = choice
-                result_key = choice_key
-
-                if score_cutoff == 100:
-                    break
-
-    return (result_choice, result_score, result_key) if result_choice is not None else None
-
-
-cdef inline py_extractOne_list(query, choices, scorer, processor, double score_cutoff, kwargs):
-    cdef size_t result_index = 0
-    cdef size_t i = 0
-    result_score = -1
-    result_choice = None
-
-    if processor is not None:
-        for choice in choices:
-            if choice is None:
-                i += 1
-                continue
-
-            score = scorer(query, processor(choice),
-                processor=None, score_cutoff=score_cutoff, **kwargs)
-
-            if score >= score_cutoff and score > result_score:
-                score_cutoff = score
-                result_score = score
-                result_choice = choice
-                result_index = i
-
-                if score_cutoff == 100:
-                    break
-            i += 1
-    else:
-        for choice in choices:
-            if choice is None:
-                i += 1
-                continue
-
-            score = scorer(query, choice,
-                processor=None, score_cutoff=score_cutoff, **kwargs)
-
-            if score >= score_cutoff and score > result_score:
-                score_cutoff = score
-                result_score = score
-                result_choice = choice
-                result_index = i
-
-                if score_cutoff == 100:
-                    break
-            i += 1
-
-    return (result_choice, result_score, result_index) if result_choice is not None else None
-
-
 cdef inline scorer_context CachedNormalizedLevenshteinInit(object query, int def_process, dict kwargs):
     cdef size_t insertion, deletion, substitution
     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
@@ -422,6 +154,293 @@ cdef inline distance_context CachedDistanceInit(object scorer, object query, int
     else:
         context.context = NULL
     return context
+
+
+cdef inline extractOne_dict(scorer_context context, choices, processor, double score_cutoff):
+    """
+    implementation of extractOne for:
+      - type of choices = dict
+      - scorer = normalized scorer implemented in C++
+    """
+    cdef double score
+    # use -1 as score, so even a score of 0 in the first iteration is higher
+    cdef double result_score = -1
+    result_choice = None
+    result_key = None
+
+    if processor is not None:
+        for choice_key, choice in choices.items():
+            if choice is None:
+                continue
+
+            proc_choice = processor(choice)
+            if proc_choice is None:
+                continue
+
+            validate_string(proc_choice, "choice must be a String or None")
+
+            score = context.scorer(context.context, proc_choice, score_cutoff)
+
+            if score >= score_cutoff and score > result_score:
+                result_score = score_cutoff = score
+                result_choice = choice
+                result_key = choice_key
+
+                if result_score == 100:
+                    break
+    else:
+        for choice_key, choice in choices.items():
+            if choice is None:
+                continue
+
+            validate_string(choice, "choice must be a String or None")
+            score = context.scorer(context.context, choice, score_cutoff)
+
+            if score >= score_cutoff and score > result_score:
+                result_score = score_cutoff = score
+                result_choice = choice
+                result_key = choice_key
+
+                if result_score == 100:
+                    break
+
+    return (result_choice, result_score, result_key) if result_choice is not None else None
+
+
+cdef inline extractOne_distance_dict(distance_context context, choices, processor, size_t max_):
+    """
+    implementation of extractOne for:
+      - type of choices = dict
+      - scorer = Distance implemented in C++
+    """
+    cdef size_t distance
+    cdef size_t result_distance = <size_t>-1
+    result_choice = None
+    result_key = None
+
+    if processor is not None:
+        for choice_key, choice in choices.items():
+            if choice is None:
+                continue
+
+            proc_choice = processor(choice)
+            if proc_choice is None:
+                continue
+
+            validate_string(proc_choice, "choice must be a String or None")
+
+            distance = context.scorer(context.context, proc_choice, max_)
+
+            if distance <= max_ and distance < result_distance:
+                result_distance = max_ = distance
+                result_choice = choice
+                result_key = choice_key
+
+                if result_distance == 0:
+                    break
+    else:
+        for choice_key, choice in choices.items():
+            if choice is None:
+                continue
+
+            validate_string(choice, "choice must be a String or None")
+            distance = context.scorer(context.context, choice, max_)
+
+            if distance <= max_ and distance < result_distance:
+                result_distance = max_ = distance
+                result_choice = choice
+                result_key = choice_key
+
+                if result_distance == 0:
+                    break
+
+    return (result_choice, result_distance, result_key) if result_choice is not None else None
+
+
+cdef inline extractOne_list(scorer_context context, choices, processor, double score_cutoff):
+    """
+    implementation of extractOne for:
+      - type of choices = list
+      - scorer = normalized scorer implemented in C++
+    """
+    cdef double score = 0.0
+    # use -1 as score, so even a score of 0 in the first iteration is higher
+    cdef double result_score = -1
+    cdef size_t i
+    cdef size_t result_index = 0
+    result_choice = None
+
+    if processor is not None:
+        for i, choice in enumerate(choices):
+            if choice is None:
+                continue
+
+            proc_choice = processor(choice)
+            if proc_choice is None:
+                continue
+
+            validate_string(proc_choice, "choice must be a String or None")
+
+            score = context.scorer(context.context, proc_choice, score_cutoff)
+
+            if score >= score_cutoff and score > result_score:
+                result_score = score_cutoff = score
+                result_choice = choice
+                result_index = i
+
+                if result_score == 100:
+                    break
+    else:
+        for i, choice in enumerate(choices):
+            if choice is None:
+                continue
+
+            validate_string(choice, "choice must be a String or None")
+            score = context.scorer(context.context, choice, score_cutoff)
+
+            if score >= score_cutoff and score > result_score:
+                result_score = score_cutoff = score
+                result_choice = choice
+                result_index = i
+
+                if result_score == 100:
+                    break
+
+    return (result_choice, result_score, result_index) if result_choice is not None else None
+
+
+cdef inline extractOne_distance_list(distance_context context, choices, processor, size_t max_):
+    """
+    implementation of extractOne for:
+      - type of choices = list
+      - scorer = Distance implemented in C++
+    """
+    cdef size_t distance
+    cdef size_t result_distance = <size_t>-1
+    cdef size_t i
+    cdef size_t result_index = 0
+    result_choice = None
+
+    if processor is not None:
+        for i, choice in enumerate(choices):
+            if choice is None:
+                continue
+
+            proc_choice = processor(choice)
+            if proc_choice is None:
+                continue
+
+            validate_string(proc_choice, "choice must be a String or None")
+
+            distance = context.scorer(context.context, proc_choice, max_)
+
+            if distance <= max_ and distance < result_distance:
+                result_distance = max_ = distance
+                result_choice = choice
+                result_index = i
+
+                if result_distance == 0:
+                    break
+    else:
+        for i, choice in enumerate(choices):
+            if choice is None:
+                continue
+
+            validate_string(choice, "choice must be a String or None")
+            distance = context.scorer(context.context, choice, max_)
+
+            if distance <= max_ and distance < result_distance:
+                result_distance = max_ = distance
+                result_choice = choice
+                result_index = i
+
+                if result_distance == 0:
+                    break
+
+    return (result_choice, result_distance, result_index) if result_choice is not None else None
+
+
+cdef inline py_extractOne_dict(query, choices, scorer, processor, score_cutoff, kwargs):
+    result_score = -1
+    result_choice = None
+    result_key = None
+
+    if processor is not None:
+        for choice_key, choice in choices.items():
+            if choice is None:
+                continue
+
+            score = scorer(query, processor(choice),
+                processor=None, score_cutoff=score_cutoff, **kwargs)
+
+            if score >= score_cutoff and score > result_score:
+                score_cutoff = score
+                result_score = score
+                result_choice = choice
+                result_key = choice_key
+
+                if score_cutoff == 100:
+                    break
+    else:
+        for choice_key, choice in choices.items():
+            if choice is None:
+                continue
+
+            score = scorer(query, choice,
+                processor=None, score_cutoff=score_cutoff, **kwargs)
+
+            if score >= score_cutoff and score > result_score:
+                score_cutoff = score
+                result_score = score
+                result_choice = choice
+                result_key = choice_key
+
+                if score_cutoff == 100:
+                    break
+
+    return (result_choice, result_score, result_key) if result_choice is not None else None
+
+
+cdef inline py_extractOne_list(query, choices, scorer, processor, double score_cutoff, kwargs):
+    cdef size_t result_index = 0
+    cdef size_t i
+    result_score = -1
+    result_choice = None
+
+    if processor is not None:
+        for i, choice in enumerate(choices):
+            if choice is None:
+                continue
+
+            score = scorer(query, processor(choice),
+                processor=None, score_cutoff=score_cutoff, **kwargs)
+
+            if score >= score_cutoff and score > result_score:
+                score_cutoff = score
+                result_score = score
+                result_choice = choice
+                result_index = i
+
+                if score_cutoff == 100:
+                    break
+    else:
+        for i, choice in enumerate(choices):
+            if choice is None:
+                continue
+
+            score = scorer(query, choice,
+                processor=None, score_cutoff=score_cutoff, **kwargs)
+
+            if score >= score_cutoff and score > result_score:
+                score_cutoff = score
+                result_score = score
+                result_choice = choice
+                result_index = i
+
+                if score_cutoff == 100:
+                    break
+
+    return (result_choice, result_score, result_index) if result_choice is not None else None
 
 
 def extractOne(query, choices, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):
@@ -615,7 +634,7 @@ def extractOne(query, choices, scorer=WRatio, processor=default_process, score_c
 
 cdef inline extract_dict(scorer_context context, choices, processor, size_t limit, double score_cutoff):
     cdef double score = 0.0
-    cdef size_t i = 0
+    cdef size_t i
     # todo storing 32 Byte per element is a bit wasteful
     # maybe store only key and access the corresponding element when building the list
     cdef vector[DictMatchScorerElem] results
@@ -624,12 +643,17 @@ cdef inline extract_dict(scorer_context context, choices, processor, size_t limi
 
     try:
         if processor is not None:
-            for choice_key, choice in choices.items():
+            for i, (choice_key, choice) in enumerate(choices.items()):
                 if choice is None:
-                    i += 1
                     continue
 
-                score = context.scorer(context.context, processor(choice), score_cutoff)
+                proc_choice = processor(choice)
+                if proc_choice is None:
+                    continue
+    
+                validate_string(proc_choice, "choice must be a String or None")
+
+                score = context.scorer(context.context, proc_choice, score_cutoff)
 
                 if score >= score_cutoff:
                     # especially the key object might be created on the fly by e.g. pandas.Dataframe
@@ -637,13 +661,12 @@ cdef inline extract_dict(scorer_context context, choices, processor, size_t limi
                     Py_INCREF(choice)
                     Py_INCREF(choice_key)
                     results.push_back(DictMatchScorerElem(score, i, <PyObject*>choice, <PyObject*>choice_key))
-                i += 1
         else:
-            for choice_key, choice in choices.items():
+            for i, (choice_key, choice) in enumerate(choices.items()):
                 if choice is None:
-                    i += 1
                     continue
 
+                validate_string(choice, "choice must be a String or None")
                 score = context.scorer(context.context, choice, score_cutoff)
 
                 if score >= score_cutoff:
@@ -652,7 +675,6 @@ cdef inline extract_dict(scorer_context context, choices, processor, size_t limi
                     Py_INCREF(choice)
                     Py_INCREF(choice_key)
                     results.push_back(DictMatchScorerElem(score, i, <PyObject*>choice, <PyObject*>choice_key))
-                i += 1
 
         # due to score_cutoff not always completely filled
         if limit > results.size():
@@ -662,6 +684,7 @@ cdef inline extract_dict(scorer_context context, choices, processor, size_t limi
             algorithm.sort(results.begin(), results.end(), ExtractScorerComp())
         else:
             algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractScorerComp())
+            results.resize(limit)
 
         # copy elements into Python List
         result_list = PyList_New(<Py_ssize_t>limit)
@@ -672,16 +695,16 @@ cdef inline extract_dict(scorer_context context, choices, processor, size_t limi
 
     finally:
         # decref all reference counts
-        for i in range(results.size()):
-            Py_DECREF(<object>results[i].choice)
-            Py_DECREF(<object>results[i].key)
+        for item in results:
+            Py_DECREF(<object>item.choice)
+            Py_DECREF(<object>item.key)
 
     return result_list
 
 
 cdef inline extract_distance_dict(distance_context context, choices, processor, size_t limit, size_t max_):
     cdef size_t distance
-    cdef size_t i = 0
+    cdef size_t i
     # todo storing 32 Byte per element is a bit wasteful
     # maybe store only key and access the corresponding element when building the list
     cdef vector[DictMatchDistanceElem] results
@@ -690,12 +713,17 @@ cdef inline extract_distance_dict(distance_context context, choices, processor, 
 
     try:
         if processor is not None:
-            for choice_key, choice in choices.items():
+            for i, (choice_key, choice) in enumerate(choices.items()):
                 if choice is None:
-                    i += 1
                     continue
 
-                distance = context.scorer(context.context, processor(choice), max_)
+                proc_choice = processor(choice)
+                if proc_choice is None:
+                    continue
+    
+                validate_string(proc_choice, "choice must be a String or None")
+
+                distance = context.scorer(context.context, proc_choice, max_)
 
                 if distance <= max_:
                     # especially the key object might be created on the fly by e.g. pandas.Dataframe
@@ -703,13 +731,12 @@ cdef inline extract_distance_dict(distance_context context, choices, processor, 
                     Py_INCREF(choice)
                     Py_INCREF(choice_key)
                     results.push_back(DictMatchDistanceElem(distance, i, <PyObject*>choice, <PyObject*>choice_key))
-                i += 1
         else:
-            for choice_key, choice in choices.items():
+            for i, (choice_key, choice) in enumerate(choices.items()):
                 if choice is None:
-                    i += 1
                     continue
 
+                validate_string(choice, "choice must be a String or None")
                 distance = context.scorer(context.context, choice, max_)
 
                 if distance <= max_:
@@ -718,7 +745,6 @@ cdef inline extract_distance_dict(distance_context context, choices, processor, 
                     Py_INCREF(choice)
                     Py_INCREF(choice_key)
                     results.push_back(DictMatchDistanceElem(distance, i, <PyObject*>choice, <PyObject*>choice_key))
-                i += 1
 
         # due to max_ not always completely filled
         if limit > results.size():
@@ -728,6 +754,7 @@ cdef inline extract_distance_dict(distance_context context, choices, processor, 
             algorithm.sort(results.begin(), results.end(), ExtractDistanceComp())
         else:
             algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractDistanceComp())
+            results.resize(limit)
 
         # copy elements into Python List
         result_list = PyList_New(<Py_ssize_t>limit)
@@ -738,43 +765,46 @@ cdef inline extract_distance_dict(distance_context context, choices, processor, 
 
     finally:
         # decref all reference counts
-        for i in range(results.size()):
-            Py_DECREF(<object>results[i].choice)
-            Py_DECREF(<object>results[i].key)
+        for item in results:
+            Py_DECREF(<object>item.choice)
+            Py_DECREF(<object>item.key)
 
     return result_list
 
 
 cdef inline extract_list(scorer_context context, choices, processor, size_t limit, double score_cutoff):
     cdef double score = 0.0
-    cdef size_t i = 0
+    cdef size_t i
     # todo possibly a smaller vector would be good to reduce memory usage
     cdef vector[ListMatchScorerElem] results
     results.reserve(<size_t>len(choices))
     cdef list result_list
 
     if processor is not None:
-        for choice in choices:
+        for i, choice in enumerate(choices):
             if choice is None:
-                i += 1
                 continue
 
-            score = context.scorer(context.context, processor(choice), score_cutoff)
+            proc_choice = processor(choice)
+            if proc_choice is None:
+                continue
+    
+            validate_string(proc_choice, "choice must be a String or None")
+
+            score = context.scorer(context.context, proc_choice, score_cutoff)
 
             if score >= score_cutoff:
                 results.push_back(ListMatchScorerElem(score, i))
-            i += 1
     else:
-        for choice in choices:
+        for i, choice in enumerate(choices):
             if choice is None:
-                i += 1
                 continue
 
+            validate_string(choice, "choice must be a String or None")
             score = context.scorer(context.context, choice, score_cutoff)
 
             if score >= score_cutoff:
                 results.push_back(ListMatchScorerElem(score, i))
-            i += 1
 
     # due to score_cutoff not always completely filled
     if limit > results.size():
@@ -784,6 +814,7 @@ cdef inline extract_list(scorer_context context, choices, processor, size_t limi
         algorithm.sort(results.begin(), results.end(), ExtractScorerComp())
     else:
         algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractScorerComp())
+        results.resize(limit)
 
     # copy elements into Python List
     result_list = PyList_New(<Py_ssize_t>limit)
@@ -797,34 +828,37 @@ cdef inline extract_list(scorer_context context, choices, processor, size_t limi
 
 cdef inline extract_distance_list(distance_context context, choices, processor, size_t limit, size_t max_):
     cdef size_t distance
-    cdef size_t i = 0
+    cdef size_t i
     # todo possibly a smaller vector would be good to reduce memory usage
     cdef vector[ListMatchDistanceElem] results
     results.reserve(<size_t>len(choices))
     cdef list result_list
 
     if processor is not None:
-        for choice in choices:
+        for i, choice in enumerate(choices):
             if choice is None:
-                i += 1
                 continue
+
+            proc_choice = processor(choice)
+            if proc_choice is None:
+                continue
+    
+            validate_string(proc_choice, "choice must be a String or None")
 
             distance = context.scorer(context.context, processor(choice), max_)
 
             if distance <= max_:
                 results.push_back(ListMatchDistanceElem(distance, i))
-            i += 1
     else:
-        for choice in choices:
+        for i, choice in enumerate(choices):
             if choice is None:
-                i += 1
                 continue
 
+            validate_string(choice, "choice must be a String or None")
             distance = context.scorer(context.context, choice, max_)
 
             if distance <= max_:
                 results.push_back(ListMatchDistanceElem(distance, i))
-            i += 1
 
     # due to max_ not always completely filled
     if limit > results.size():
@@ -834,6 +868,7 @@ cdef inline extract_distance_list(distance_context context, choices, processor, 
         algorithm.sort(results.begin(), results.end(), ExtractDistanceComp())
     else:
         algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractDistanceComp())
+        results.resize(limit)
 
     # copy elements into Python List
     result_list = PyList_New(<Py_ssize_t>limit)
@@ -879,30 +914,26 @@ cdef inline py_extract_list(query, choices, scorer, processor, size_t limit, dou
     # also it is not very memory efficient to allocate space for all elements even when only
     # a part is used. This should be optimised in the future
     cdef list result_list = []
-    cdef size_t i = 0
+    cdef size_t i
 
     if processor is not None:
-        for choice in choices:
+        for i, choice in enumerate(choices):
             if choice is None:
-                i += 1
                 continue
 
             score = scorer(query, processor(choice), score_cutoff, **kwargs)
 
             if score >= score_cutoff:
                 result_list.append((choice, score, i))
-            i += 1
     else:
-        for choice in choices:
+        for i, choice in enumerate(choices):
             if choice is None:
-                i += 1
                 continue
 
             score = scorer(query, choice, i, **kwargs)
 
             if score >= score_cutoff:
                 result_list.append((choice, score, i))
-            i += 1
 
     return heapq.nlargest(limit, result_list, key=lambda i: i[1])
 
@@ -1116,7 +1147,13 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
                 if choice is None:
                     continue
 
-                score = ScorerContext.scorer(ScorerContext.context, processor(choice), c_score_cutoff)
+                proc_choice = processor(choice)
+                if proc_choice is None:
+                    continue
+    
+                validate_string(proc_choice, "choice must be a String or None")
+
+                score = ScorerContext.scorer(ScorerContext.context, proc_choice, c_score_cutoff)
 
                 if score >= score_cutoff:
                     yield (choice, score, choice_key)
@@ -1125,6 +1162,7 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
                 if choice is None:
                     continue
 
+                validate_string(choice, "choice must be a String or None")
                 score = ScorerContext.scorer(ScorerContext.context, choice, c_score_cutoff)
 
                 if score >= score_cutoff:
@@ -1136,31 +1174,34 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
           - type of choices = list
           - scorer = normalized scorer implemented in C++
         """
-        cdef size_t i = 0
+        cdef size_t i
         cdef double score
 
         if processor is not None:
-            for choice in choices:
+            for i, choice in enumerate(choices):
                 if choice is None:
-                    i += 1
                     continue
 
-                score = ScorerContext.scorer(ScorerContext.context, processor(choice), c_score_cutoff)
+                proc_choice = processor(choice)
+                if proc_choice is None:
+                    continue
+    
+                validate_string(proc_choice, "choice must be a String or None")
+
+                score = ScorerContext.scorer(ScorerContext.context, proc_choice, c_score_cutoff)
 
                 if score >= c_score_cutoff:
                     yield (choice, score, i)
-                i += 1
         else:
-            for choice in choices:
+            for i, choice in enumerate(choices):
                 if choice is None:
-                    i += 1
                     continue
 
+                validate_string(choice, "choice must be a String or None")
                 score = ScorerContext.scorer(ScorerContext.context, choice, c_score_cutoff)
 
                 if score >= c_score_cutoff:
                     yield (choice, score, i)
-                i += 1
 
     def extract_iter_distance_dict():
         """
@@ -1175,7 +1216,13 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
                 if choice is None:
                     continue
 
-                distance = DistanceContext.scorer(DistanceContext.context, processor(choice), c_max)
+                proc_choice = processor(choice)
+                if proc_choice is None:
+                    continue
+    
+                validate_string(proc_choice, "choice must be a String or None")
+
+                distance = DistanceContext.scorer(DistanceContext.context, proc_choice, c_max)
 
                 if distance <= c_max:
                     yield (choice, distance, choice_key)
@@ -1184,6 +1231,7 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
                 if choice is None:
                     continue
 
+                validate_string(choice, "choice must be a String or None")
                 distance = DistanceContext.scorer(DistanceContext.context, choice, c_max)
 
                 if distance <= c_max:
@@ -1195,31 +1243,34 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
           - type of choices = list
           - scorer = distance implemented in C++
         """
-        cdef size_t i = 0
+        cdef size_t i
         cdef size_t distance
 
         if processor is not None:
-            for choice in choices:
+            for i, choice in enumerate(choices):
                 if choice is None:
-                    i += 1
                     continue
 
-                distance = DistanceContext.scorer(DistanceContext.context, processor(choice), c_max)
+                proc_choice = processor(choice)
+                if proc_choice is None:
+                    continue
+    
+                validate_string(proc_choice, "choice must be a String or None")
+
+                distance = DistanceContext.scorer(DistanceContext.context, proc_choice, c_max)
 
                 if distance <= c_max:
                     yield (choice, distance, i)
-                i += 1
         else:
-            for choice in choices:
+            for i, choice in enumerate(choices):
                 if choice is None:
-                    i += 1
                     continue
 
+                validate_string(choice, "choice must be a String or None")
                 distance = DistanceContext.scorer(DistanceContext.context, choice, c_max)
 
                 if distance <= c_max:
                     yield (choice, distance, i)
-                i += 1
 
     def py_extract_iter_dict():
         """
@@ -1255,12 +1306,11 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
           - type of choices = list
           - scorer = python function
         """
-        cdef size_t i = 0
+        cdef size_t i
 
         if processor is not None:
-            for choice in choices:
+            for i, choice in enumerate(choices):
                 if choice is None:
-                    i += 1
                     continue
 
                 score = scorer(query, processor(choice),
@@ -1268,11 +1318,9 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
 
                 if score >= c_score_cutoff:
                     yield(choice, score, i)
-                i += 1
         else:
-            for choice in choices:
+            for i, choice in enumerate(choices):
                 if choice is None:
-                    i += 1
                     continue
 
                 score = scorer(query, choice,
@@ -1280,7 +1328,6 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
 
                 if score >= c_score_cutoff:
                     yield(choice, score, i)
-                i += 1
 
     if query is None:
         # finish generator

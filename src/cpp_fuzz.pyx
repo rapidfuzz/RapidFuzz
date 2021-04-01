@@ -4,28 +4,31 @@
 
 from rapidfuzz.utils import default_process
 
-cdef extern from "cpp_fuzz.hpp":
-    double ratio_impl(                   object, object, double) except +
-    double partial_ratio_impl(           object, object, double) except +
-    double token_sort_ratio_impl(        object, object, double) except +
-    double token_set_ratio_impl(         object, object, double) except +
-    double token_ratio_impl(             object, object, double) except +
-    double partial_token_sort_ratio_impl(object, object, double) except +
-    double partial_token_set_ratio_impl( object, object, double) except +
-    double partial_token_ratio_impl(     object, object, double) except +
-    double WRatio_impl(                  object, object, double) except +
-    double QRatio_impl(                  object, object, double) except +
+cdef extern from "cpp_common.hpp":
+    void validate_string(object py_str, const char* err) except +
 
-    double ratio_impl_default_process(                   object, object, double) except +
-    double partial_ratio_impl_default_process(           object, object, double) except +
-    double token_sort_ratio_impl_default_process(        object, object, double) except +
-    double token_set_ratio_impl_default_process(         object, object, double) except +
-    double token_ratio_impl_default_process(             object, object, double) except +
-    double partial_token_sort_ratio_impl_default_process(object, object, double) except +
-    double partial_token_set_ratio_impl_default_process( object, object, double) except +
-    double partial_token_ratio_impl_default_process(     object, object, double) except +
-    double WRatio_impl_default_process(                  object, object, double) except +
-    double QRatio_impl_default_process(                  object, object, double) except +
+cdef extern from "cpp_fuzz.hpp":
+    double ratio_impl(                   object, object, double) nogil except +
+    double partial_ratio_impl(           object, object, double) nogil except +
+    double token_sort_ratio_impl(        object, object, double) nogil except +
+    double token_set_ratio_impl(         object, object, double) nogil except +
+    double token_ratio_impl(             object, object, double) nogil except +
+    double partial_token_sort_ratio_impl(object, object, double) nogil except +
+    double partial_token_set_ratio_impl( object, object, double) nogil except +
+    double partial_token_ratio_impl(     object, object, double) nogil except +
+    double WRatio_impl(                  object, object, double) nogil except +
+    double QRatio_impl(                  object, object, double) nogil except +
+
+    double ratio_impl_default_process(                   object, object, double) nogil except +
+    double partial_ratio_impl_default_process(           object, object, double) nogil except +
+    double token_sort_ratio_impl_default_process(        object, object, double) nogil except +
+    double token_set_ratio_impl_default_process(         object, object, double) nogil except +
+    double token_ratio_impl_default_process(             object, object, double) nogil except +
+    double partial_token_sort_ratio_impl_default_process(object, object, double) nogil except +
+    double partial_token_set_ratio_impl_default_process( object, object, double) nogil except +
+    double partial_token_ratio_impl_default_process(     object, object, double) nogil except +
+    double WRatio_impl_default_process(                  object, object, double) nogil except +
+    double QRatio_impl_default_process(                  object, object, double) nogil except +
 
 
 def ratio(s1, s2, processor=False, double score_cutoff=0.0):
@@ -73,6 +76,9 @@ def ratio(s1, s2, processor=False, double score_cutoff=0.0):
         s1 = processor(s1)
         s2 = processor(s2)
 
+    validate_string(s1, "s1 must be a String")
+    validate_string(s2, "s2 must be a String")
+
     return ratio_impl(s1, s2, score_cutoff)
 
 
@@ -119,6 +125,9 @@ def partial_ratio(s1, s2, processor=False, double score_cutoff=0.0):
         s1 = processor(s1)
         s2 = processor(s2)
 
+    validate_string(s1, "s1 must be a String")
+    validate_string(s2, "s2 must be a String")
+
     return partial_ratio_impl(s1, s2, score_cutoff)
 
 
@@ -164,6 +173,9 @@ def token_sort_ratio(s1, s2, processor=True, double score_cutoff=0.0):
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
+
+    validate_string(s1, "s1 must be a String")
+    validate_string(s2, "s2 must be a String")
 
     return token_sort_ratio_impl(s1, s2, score_cutoff)
 
@@ -214,6 +226,9 @@ def token_set_ratio(s1, s2, processor=True, double score_cutoff=0.0):
         s1 = processor(s1)
         s2 = processor(s2)
 
+    validate_string(s1, "s1 must be a String")
+    validate_string(s2, "s2 must be a String")
+
     return token_set_ratio_impl(s1, s2, score_cutoff)
 
 
@@ -256,6 +271,9 @@ def token_ratio(s1, s2, processor=True, double score_cutoff=0.0):
         s1 = processor(s1)
         s2 = processor(s2)
 
+    validate_string(s1, "s1 must be a String")
+    validate_string(s2, "s2 must be a String")
+
     return token_ratio_impl(s1, s2, score_cutoff)
 
 
@@ -296,6 +314,9 @@ def partial_token_sort_ratio(s1, s2, processor=True, double score_cutoff=0.0):
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
+
+    validate_string(s1, "s1 must be a String")
+    validate_string(s2, "s2 must be a String")
 
     return partial_token_sort_ratio_impl(s1, s2, score_cutoff)
 
@@ -339,6 +360,9 @@ def partial_token_set_ratio(s1, s2, processor=True, double score_cutoff=0.0):
         s1 = processor(s1)
         s2 = processor(s2)
 
+    validate_string(s1, "s1 must be a String")
+    validate_string(s2, "s2 must be a String")
+
     return partial_token_set_ratio_impl(s1, s2, score_cutoff)
 
 
@@ -381,6 +405,9 @@ def partial_token_ratio(s1, s2, processor=True, double score_cutoff=0.0):
         s1 = processor(s1)
         s2 = processor(s2)
 
+    validate_string(s1, "s1 must be a String")
+    validate_string(s2, "s2 must be a String")
+
     return partial_token_ratio_impl(s1, s2, score_cutoff)
 
 
@@ -421,6 +448,9 @@ def WRatio(s1, s2, processor=True, double score_cutoff=0.0):
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
+
+    validate_string(s1, "s1 must be a String")
+    validate_string(s2, "s2 must be a String")
 
     return WRatio_impl(s1, s2, score_cutoff)
 
@@ -464,5 +494,8 @@ def QRatio(s1, s2, processor=True, double score_cutoff=0.0):
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
+
+    validate_string(s1, "s1 must be a String")
+    validate_string(s2, "s2 must be a String")
 
     return QRatio_impl(s1, s2, score_cutoff)
