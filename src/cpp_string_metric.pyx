@@ -3,20 +3,28 @@
 # cython: binding=True
 
 from rapidfuzz.utils import default_process
+from cpp_common cimport proc_string, is_valid_string, convert_string, hash_array, hash_sequence#, conv_sequence
+from array import array
 
-cdef extern from "cpp_common.hpp":
-    void validate_string(object py_str, const char* err) except +
+cdef inline proc_string conv_sequence(seq):
+    if is_valid_string(seq):
+        return convert_string(seq)
+    elif isinstance(seq, array):
+        print("test")
+        return hash_array(seq)
+    else:
+        return hash_sequence(seq)
 
 cdef extern from "cpp_string_metric.hpp":
-    object levenshtein_impl(object, object, size_t, size_t, size_t, size_t) nogil except +
-    object levenshtein_impl_default_process(object, object, size_t, size_t, size_t, size_t) nogil except +
-    double normalized_levenshtein_impl(object, object, size_t, size_t, size_t, double) nogil except +
-    double normalized_levenshtein_impl_default_process(object, object, size_t, size_t, size_t, double) nogil except +
+    object levenshtein_no_process(                proc_string, proc_string, size_t, size_t, size_t, size_t) nogil except +
+    object levenshtein_default_process(           proc_string, proc_string, size_t, size_t, size_t, size_t) nogil except +
+    double normalized_levenshtein_no_process(     proc_string, proc_string, size_t, size_t, size_t, double) nogil except +
+    double normalized_levenshtein_default_process(proc_string, proc_string, size_t, size_t, size_t, double) nogil except +
 
-    object hamming_impl(object, object, size_t) nogil except +
-    object hamming_impl_default_process(object, object, size_t) nogil except +
-    double normalized_hamming_impl(object, object, double) nogil except +
-    double normalized_hamming_impl_default_process(object, object, double) nogil except +
+    object hamming_no_process(                proc_string, proc_string, size_t) nogil except +
+    object hamming_default_process(           proc_string, proc_string, size_t) nogil except +
+    double normalized_hamming_no_process(     proc_string, proc_string, double) nogil except +
+    double normalized_hamming_default_process(proc_string, proc_string, double) nogil except +
 
 
 def levenshtein(s1, s2, weights=(1,1,1), processor=None, max=None):
@@ -193,15 +201,12 @@ def levenshtein(s1, s2, weights=(1,1,1), processor=None, max=None):
         max_ = max
 
     if processor is True or processor == default_process:
-        return levenshtein_impl_default_process(s1, s2, insertion, deletion, substitution, max_)
+        return levenshtein_default_process(conv_sequence(s1), conv_sequence(s2), insertion, deletion, substitution, max_)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return levenshtein_impl(s1, s2, insertion, deletion, substitution, max_)
+    return levenshtein_no_process(conv_sequence(s1), conv_sequence(s2), insertion, deletion, substitution, max_)
 
 
 def normalized_levenshtein(s1, s2, weights=(1,1,1), processor=None, double score_cutoff=0.0):
@@ -301,16 +306,13 @@ def normalized_levenshtein(s1, s2, weights=(1,1,1), processor=None, double score
         insertion, deletion, substitution = weights
 
     if processor is True or processor == default_process:
-        return normalized_levenshtein_impl_default_process(
-            s1, s2, insertion, deletion, substitution, score_cutoff)
+        return normalized_levenshtein_default_process(
+            conv_sequence(s1), conv_sequence(s2), insertion, deletion, substitution, score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return normalized_levenshtein_impl(s1, s2, insertion, deletion, substitution, score_cutoff)
+    return normalized_levenshtein_no_process(conv_sequence(s1), conv_sequence(s2), insertion, deletion, substitution, score_cutoff)
 
 
 def hamming(s1, s2, processor=None, max=None):
@@ -352,15 +354,12 @@ def hamming(s1, s2, processor=None, max=None):
         max_ = max
 
     if processor is True or processor == default_process:
-        return hamming_impl_default_process(s1, s2, max_)
+        return hamming_default_process(conv_sequence(s1), conv_sequence(s2), max_)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return hamming_impl(s1, s2, max_)
+    return hamming_no_process(conv_sequence(s1), conv_sequence(s2), max_)
 
 
 def normalized_hamming(s1, s2, processor=None, double score_cutoff=0.0):
@@ -401,12 +400,9 @@ def normalized_hamming(s1, s2, processor=None, double score_cutoff=0.0):
         return 0
 
     if processor is True or processor == default_process:
-        return normalized_hamming_impl_default_process(s1, s2, score_cutoff)
+        return normalized_hamming_default_process(conv_sequence(s1), conv_sequence(s2), score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return normalized_hamming_impl(s1, s2, score_cutoff)
+    return normalized_hamming_no_process(conv_sequence(s1), conv_sequence(s2), score_cutoff)

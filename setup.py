@@ -7,8 +7,8 @@ class BuildExt(build_ext):
     c_opts = {
         'msvc': ['/EHsc', '/O2', '/std:c++11', '/W4', 
         # disable some warnings from the Cython code
-            #'/wd4127', # conditional expression is constant
-            #'/wd4100', # '__pyx_self': unreferenced formal parameter
+            '/wd4127', # conditional expression is constant
+            '/wd4100', # '__pyx_self': unreferenced formal parameter
             #'/wd4505', # unreferenced local function has been removed
             #'/wd4125', # decimal digit terminates octal escape sequence
             #'/wd4310', # cast truncates constant value

@@ -3,32 +3,40 @@
 # cython: binding=True
 
 from rapidfuzz.utils import default_process
+from cpp_common cimport proc_string, is_valid_string, convert_string, hash_array, hash_sequence#, conv_sequence
+from array import array
 
-cdef extern from "cpp_common.hpp":
-    void validate_string(object py_str, const char* err) except +
+cdef inline proc_string conv_sequence(seq):
+    if is_valid_string(seq):
+        return convert_string(seq)
+    elif isinstance(seq, array):
+        return hash_array(seq)
+    else:
+        return hash_sequence(seq)
+
 
 cdef extern from "cpp_fuzz.hpp":
-    double ratio_impl(                   object, object, double) nogil except +
-    double partial_ratio_impl(           object, object, double) nogil except +
-    double token_sort_ratio_impl(        object, object, double) nogil except +
-    double token_set_ratio_impl(         object, object, double) nogil except +
-    double token_ratio_impl(             object, object, double) nogil except +
-    double partial_token_sort_ratio_impl(object, object, double) nogil except +
-    double partial_token_set_ratio_impl( object, object, double) nogil except +
-    double partial_token_ratio_impl(     object, object, double) nogil except +
-    double WRatio_impl(                  object, object, double) nogil except +
-    double QRatio_impl(                  object, object, double) nogil except +
+    double ratio_no_process(                   proc_string, proc_string, double) nogil except +
+    double partial_ratio_no_process(           proc_string, proc_string, double) nogil except +
+    double token_sort_ratio_no_process(        proc_string, proc_string, double) nogil except +
+    double token_set_ratio_no_process(         proc_string, proc_string, double) nogil except +
+    double token_ratio_no_process(             proc_string, proc_string, double) nogil except +
+    double partial_token_sort_ratio_no_process(proc_string, proc_string, double) nogil except +
+    double partial_token_set_ratio_no_process( proc_string, proc_string, double) nogil except +
+    double partial_token_ratio_no_process(     proc_string, proc_string, double) nogil except +
+    double WRatio_no_process(                  proc_string, proc_string, double) nogil except +
+    double QRatio_no_process(                  proc_string, proc_string, double) nogil except +
 
-    double ratio_impl_default_process(                   object, object, double) nogil except +
-    double partial_ratio_impl_default_process(           object, object, double) nogil except +
-    double token_sort_ratio_impl_default_process(        object, object, double) nogil except +
-    double token_set_ratio_impl_default_process(         object, object, double) nogil except +
-    double token_ratio_impl_default_process(             object, object, double) nogil except +
-    double partial_token_sort_ratio_impl_default_process(object, object, double) nogil except +
-    double partial_token_set_ratio_impl_default_process( object, object, double) nogil except +
-    double partial_token_ratio_impl_default_process(     object, object, double) nogil except +
-    double WRatio_impl_default_process(                  object, object, double) nogil except +
-    double QRatio_impl_default_process(                  object, object, double) nogil except +
+    double ratio_default_process(                   proc_string, proc_string, double) nogil except +
+    double partial_ratio_default_process(           proc_string, proc_string, double) nogil except +
+    double token_sort_ratio_default_process(        proc_string, proc_string, double) nogil except +
+    double token_set_ratio_default_process(         proc_string, proc_string, double) nogil except +
+    double token_ratio_default_process(             proc_string, proc_string, double) nogil except +
+    double partial_token_sort_ratio_default_process(proc_string, proc_string, double) nogil except +
+    double partial_token_set_ratio_default_process( proc_string, proc_string, double) nogil except +
+    double partial_token_ratio_default_process(     proc_string, proc_string, double) nogil except +
+    double WRatio_default_process(                  proc_string, proc_string, double) nogil except +
+    double QRatio_default_process(                  proc_string, proc_string, double) nogil except +
 
 
 def ratio(s1, s2, processor=False, double score_cutoff=0.0):
@@ -71,15 +79,12 @@ def ratio(s1, s2, processor=False, double score_cutoff=0.0):
         return 0
 
     if processor is True or processor == default_process:
-        return ratio_impl_default_process(s1, s2, score_cutoff)
+        return ratio_default_process(conv_sequence(s1), conv_sequence(s2), score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return ratio_impl(s1, s2, score_cutoff)
+    return ratio_no_process(conv_sequence(s1), conv_sequence(s2), score_cutoff)
 
 
 def partial_ratio(s1, s2, processor=False, double score_cutoff=0.0):
@@ -120,15 +125,12 @@ def partial_ratio(s1, s2, processor=False, double score_cutoff=0.0):
         return 0
 
     if processor is True or processor == default_process:
-        return partial_ratio_impl_default_process(s1, s2, score_cutoff)
+        return partial_ratio_default_process(conv_sequence(s1), conv_sequence(s2), score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return partial_ratio_impl(s1, s2, score_cutoff)
+    return partial_ratio_no_process(conv_sequence(s1), conv_sequence(s2), score_cutoff)
 
 
 def token_sort_ratio(s1, s2, processor=True, double score_cutoff=0.0):
@@ -169,15 +171,12 @@ def token_sort_ratio(s1, s2, processor=True, double score_cutoff=0.0):
         return 0
 
     if processor is True or processor == default_process:
-        return token_sort_ratio_impl_default_process(s1, s2, score_cutoff)
+        return token_sort_ratio_default_process(conv_sequence(s1), conv_sequence(s2), score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return token_sort_ratio_impl(s1, s2, score_cutoff)
+    return token_sort_ratio_no_process(conv_sequence(s1), conv_sequence(s2), score_cutoff)
 
 
 def token_set_ratio(s1, s2, processor=True, double score_cutoff=0.0):
@@ -221,15 +220,12 @@ def token_set_ratio(s1, s2, processor=True, double score_cutoff=0.0):
         return 0
 
     if processor is True or processor == default_process:
-        return token_set_ratio_impl_default_process(s1, s2, score_cutoff)
+        return token_set_ratio_default_process(conv_sequence(s1), conv_sequence(s2), score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return token_set_ratio_impl(s1, s2, score_cutoff)
+    return token_set_ratio_no_process(conv_sequence(s1), conv_sequence(s2), score_cutoff)
 
 
 def token_ratio(s1, s2, processor=True, double score_cutoff=0.0):
@@ -266,15 +262,12 @@ def token_ratio(s1, s2, processor=True, double score_cutoff=0.0):
         return 0
 
     if processor is True or processor == default_process:
-        return token_ratio_impl_default_process(s1, s2, score_cutoff)
+        return token_ratio_default_process(conv_sequence(s1), conv_sequence(s2), score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return token_ratio_impl(s1, s2, score_cutoff)
+    return token_ratio_no_process(conv_sequence(s1), conv_sequence(s2), score_cutoff)
 
 
 def partial_token_sort_ratio(s1, s2, processor=True, double score_cutoff=0.0):
@@ -310,15 +303,12 @@ def partial_token_sort_ratio(s1, s2, processor=True, double score_cutoff=0.0):
         return 0
 
     if processor is True or processor == default_process:
-        return partial_token_sort_ratio_impl_default_process(s1, s2, score_cutoff)
+        return partial_token_sort_ratio_default_process(conv_sequence(s1), conv_sequence(s2), score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return partial_token_sort_ratio_impl(s1, s2, score_cutoff)
+    return partial_token_sort_ratio_no_process(conv_sequence(s1), conv_sequence(s2), score_cutoff)
 
 
 def partial_token_set_ratio(s1, s2, processor=True, double score_cutoff=0.0):
@@ -355,15 +345,12 @@ def partial_token_set_ratio(s1, s2, processor=True, double score_cutoff=0.0):
         return 0
 
     if processor is True or processor == default_process:
-        return partial_token_set_ratio_impl_default_process(s1, s2, score_cutoff)
+        return partial_token_set_ratio_default_process(conv_sequence(s1), conv_sequence(s2), score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return partial_token_set_ratio_impl(s1, s2, score_cutoff)
+    return partial_token_set_ratio_no_process(conv_sequence(s1), conv_sequence(s2), score_cutoff)
 
 
 def partial_token_ratio(s1, s2, processor=True, double score_cutoff=0.0):
@@ -400,15 +387,12 @@ def partial_token_ratio(s1, s2, processor=True, double score_cutoff=0.0):
         return 0
 
     if processor is True or processor == default_process:
-        return partial_token_ratio_impl_default_process(s1, s2, score_cutoff)
+        return partial_token_ratio_default_process(conv_sequence(s1), conv_sequence(s2), score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return partial_token_ratio_impl(s1, s2, score_cutoff)
+    return partial_token_ratio_no_process(conv_sequence(s1), conv_sequence(s2), score_cutoff)
 
 
 def WRatio(s1, s2, processor=True, double score_cutoff=0.0):
@@ -444,15 +428,12 @@ def WRatio(s1, s2, processor=True, double score_cutoff=0.0):
         return 0
 
     if processor is True or processor == default_process:
-        return WRatio_impl_default_process(s1, s2, score_cutoff)
+        return WRatio_default_process(conv_sequence(s1), conv_sequence(s2), score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return WRatio_impl(s1, s2, score_cutoff)
+    return WRatio_no_process(conv_sequence(s1), conv_sequence(s2), score_cutoff)
 
 
 def QRatio(s1, s2, processor=True, double score_cutoff=0.0):
@@ -490,12 +471,9 @@ def QRatio(s1, s2, processor=True, double score_cutoff=0.0):
         return 0
 
     if processor is True or processor == default_process:
-        return QRatio_impl_default_process(s1, s2, score_cutoff)
+        return QRatio_default_process(conv_sequence(s1), conv_sequence(s2), score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return QRatio_impl(s1, s2, score_cutoff)
+    return QRatio_no_process(conv_sequence(s1), conv_sequence(s2), score_cutoff)

@@ -88,24 +88,9 @@ static inline double cached_scorer_func_default_process(
     CachedScorer* ratio = (CachedScorer*)context;
 
     switch(str.kind){
-    case PyUnicode_1BYTE_KIND:
-        return ratio->ratio(
-            utils::default_process(
-                rapidfuzz::basic_string_view<uint8_t>((uint8_t*)str.data, str.length)),
-            score_cutoff
-        );
-    case PyUnicode_2BYTE_KIND:
-        return ratio->ratio(
-            utils::default_process(
-                rapidfuzz::basic_string_view<uint16_t>((uint16_t*)str.data, str.length)),
-            score_cutoff
-        );
-    case PyUnicode_4BYTE_KIND:
-        return ratio->ratio(
-            utils::default_process(
-                rapidfuzz::basic_string_view<uint32_t>((uint32_t*)str.data, str.length)),
-            score_cutoff
-        );
+# define X_ENUM(KIND, TYPE, ...) case KIND: return ratio->ratio(default_process<TYPE>(str), score_cutoff);
+        LIST_OF_CASES()
+# undef X_ENUM
     default:
        throw std::logic_error("Reached end of control flow in cached_scorer_func_default_process");
     }
@@ -118,21 +103,9 @@ static inline double cached_scorer_func(void* context, PyObject* py_str, double 
     CachedScorer* ratio = (CachedScorer*)context;
 
     switch(str.kind){
-    case PyUnicode_1BYTE_KIND:
-        return ratio->ratio(
-            rapidfuzz::basic_string_view<uint8_t>((uint8_t*)str.data, str.length),
-            score_cutoff
-        );
-    case PyUnicode_2BYTE_KIND:
-        return ratio->ratio(
-            rapidfuzz::basic_string_view<uint16_t>((uint16_t*)str.data, str.length),
-            score_cutoff
-        );
-    case PyUnicode_4BYTE_KIND:
-        return ratio->ratio(
-            rapidfuzz::basic_string_view<uint32_t>((uint32_t*)str.data, str.length),
-            score_cutoff
-        );
+# define X_ENUM(KIND, TYPE, ...) case KIND: return ratio->ratio(no_process<TYPE>(str), score_cutoff);
+        LIST_OF_CASES()
+# undef X_ENUM
     default:
        throw std::logic_error("Reached end of control flow in cached_scorer_func");
     }
@@ -161,12 +134,9 @@ static inline scorer_context cached_scorer_init(PyObject* py_str, int def_proces
     proc_string str = convert_string(py_str);
 
     switch(str.kind){
-    case PyUnicode_1BYTE_KIND:
-        return get_scorer_context<CachedScorer, uint8_t>(str, def_process, args...);
-    case PyUnicode_2BYTE_KIND:
-        return get_scorer_context<CachedScorer, uint16_t>(str, def_process, args...);
-    case PyUnicode_4BYTE_KIND:
-        return get_scorer_context<CachedScorer, uint32_t>(str, def_process, args...);
+# define X_ENUM(KIND, TYPE, ...) case KIND: return get_scorer_context<CachedScorer, TYPE>(str, def_process, args...);
+        LIST_OF_CASES()
+# undef X_ENUM
     default:
        throw std::logic_error("Reached end of control flow in cached_scorer_init");
     }
@@ -252,24 +222,9 @@ static inline std::size_t cached_distance_func_default_process(
     CachedDistance* distance = (CachedDistance*)context;
 
     switch(str.kind){
-    case PyUnicode_1BYTE_KIND:
-        return distance->distance(
-            utils::default_process(
-                rapidfuzz::basic_string_view<uint8_t>((uint8_t*)str.data, str.length)),
-            max
-        );
-    case PyUnicode_2BYTE_KIND:
-        return distance->distance(
-            utils::default_process(
-                rapidfuzz::basic_string_view<uint16_t>((uint16_t*)str.data, str.length)),
-            max
-        );
-    case PyUnicode_4BYTE_KIND:
-        return distance->distance(
-            utils::default_process(
-                rapidfuzz::basic_string_view<uint32_t>((uint32_t*)str.data, str.length)),
-            max
-        );
+# define X_ENUM(KIND, TYPE, ...) case KIND: return distance->distance(default_process<TYPE>(str), max);
+        LIST_OF_CASES()
+# undef X_ENUM
     default:
        throw std::logic_error("Reached end of control flow in cached_distance_func_default_process");
     }
@@ -282,21 +237,9 @@ static inline std::size_t cached_distance_func(void* context, PyObject* py_str, 
     CachedDistance* distance = (CachedDistance*)context;
 
     switch(str.kind){
-    case PyUnicode_1BYTE_KIND:
-        return distance->distance(
-            rapidfuzz::basic_string_view<uint8_t>((uint8_t*)str.data, str.length),
-            max
-        );
-    case PyUnicode_2BYTE_KIND:
-        return distance->distance(
-            rapidfuzz::basic_string_view<uint16_t>((uint16_t*)str.data, str.length),
-            max
-        );
-    case PyUnicode_4BYTE_KIND:
-        return distance->distance(
-            rapidfuzz::basic_string_view<uint32_t>((uint32_t*)str.data, str.length),
-            max
-        );
+# define X_ENUM(KIND, TYPE, ...) case KIND: return distance->distance(no_process<TYPE>(str), max);
+        LIST_OF_CASES()
+# undef X_ENUM
     default:
        throw std::logic_error("Reached end of control flow in cached_distance_func");
     }
@@ -325,12 +268,9 @@ static inline distance_context cached_distance_init(PyObject* py_str, int def_pr
     proc_string str = convert_string(py_str);
 
     switch(str.kind){
-    case PyUnicode_1BYTE_KIND:
-        return get_distance_context<CachedDistance, uint8_t>(str, def_process, args...);
-    case PyUnicode_2BYTE_KIND:
-        return get_distance_context<CachedDistance, uint16_t>(str, def_process, args...);
-    case PyUnicode_4BYTE_KIND:
-        return get_distance_context<CachedDistance, uint32_t>(str, def_process, args...);
+# define X_ENUM(KIND, TYPE, ...) case KIND: return get_distance_context<CachedDistance, TYPE>(str, def_process, args...);
+        LIST_OF_CASES()
+# undef X_ENUM
     default:
        throw std::logic_error("Reached end of control flow in cached_distance_init");
     }
