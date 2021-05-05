@@ -5,7 +5,7 @@ import sys
 class BuildExt(build_ext):
     """A custom build extension for adding compiler-specific options."""
     c_opts = {
-        'msvc': ['/EHsc', '/O2', '/std:c++11', '/W4', 
+        'msvc': ['/EHsc', '/O2', '/std:c++11', '/W3', 
         # disable some warnings from the Cython code
             '/wd4127', # conditional expression is constant
             '/wd4100', # '__pyx_self': unreferenced formal parameter
@@ -49,7 +49,7 @@ class BuildExt(build_ext):
 
 ext_modules = [
     Extension(
-        name='rapidfuzz.cpp_process',
+       name='rapidfuzz.cpp_process',
         sources=[
             'src/cpp_process.cpp',
             'src/rapidfuzz-cpp/rapidfuzz/details/unicode.cpp'

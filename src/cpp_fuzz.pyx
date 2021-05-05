@@ -1,7 +1,6 @@
 # distutils: language=c++
 # cython: language_level=3
 # cython: binding=True
-
 from rapidfuzz.utils import default_process
 from cpp_common cimport proc_string, is_valid_string, convert_string, hash_array, hash_sequence
 from array import array
@@ -47,7 +46,6 @@ def ratio(s1, s2, processor=None, score_cutoff=None):
 
     Notes
     -----
-
     .. image:: img/ratio.svg
 
     Examples
@@ -118,7 +116,6 @@ def partial_ratio(s1, s2, processor=None, score_cutoff=None):
 
     Notes
     -----
-
     .. image:: img/partial_ratio.svg
 
     Examples
@@ -189,7 +186,6 @@ def token_sort_ratio(s1, s2, processor=True, score_cutoff=None):
 
     Notes
     -----
-
     .. image:: img/token_sort_ratio.svg
 
     Examples
@@ -261,7 +257,6 @@ def token_set_ratio(s1, s2, processor=True, score_cutoff=None):
 
     Notes
     -----
-
     .. image:: img/token_set_ratio.svg
 
     Examples
@@ -335,7 +330,6 @@ def token_ratio(s1, s2, processor=True, score_cutoff=None):
 
     Notes
     -----
-
     .. image:: img/token_ratio.svg
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
@@ -401,7 +395,6 @@ def partial_token_sort_ratio(s1, s2, processor=True, score_cutoff=None):
 
     Notes
     -----
-
     .. image:: img/partial_token_sort_ratio.svg
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
@@ -468,7 +461,6 @@ def partial_token_set_ratio(s1, s2, processor=True, score_cutoff=None):
 
     Notes
     -----
-
     .. image:: img/partial_token_set_ratio.svg
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
@@ -535,7 +527,6 @@ def partial_token_ratio(s1, s2, processor=True, score_cutoff=None):
 
     Notes
     -----
-
     .. image:: img/partial_token_ratio.svg
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
@@ -601,7 +592,6 @@ def WRatio(s1, s2, processor=True, score_cutoff=None):
 
     Notes
     -----
-
     .. image:: img/WRatio.svg
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
@@ -666,7 +656,6 @@ def QRatio(s1, s2, processor=True, score_cutoff=None):
     -------
     similarity : float
         similarity between s1 and s2 as a float between 0 and 100
-
 
     Examples
     --------
