@@ -7,20 +7,20 @@ class BuildExt(build_ext):
     c_opts = {
         'msvc': ['/EHsc', '/O2', '/std:c++11', '/W3', 
         # disable some warnings from the Cython code
-            '/wd4127', # conditional expression is constant
-            '/wd4100', # '__pyx_self': unreferenced formal parameter
+            #'/wd4127', # conditional expression is constant
+            #'/wd4100', # '__pyx_self': unreferenced formal parameter
             #'/wd4505', # unreferenced local function has been removed
             #'/wd4125', # decimal digit terminates octal escape sequence
             #'/wd4310', # cast truncates constant value
         ],
         'unix': ['-O3', '-std=c++11',
             '-Wextra', '-Wall', '-Wconversion', '-g0',
-            '-Wno-deprecated-declarations',
+            #'-Wno-deprecated-declarations',
             # the xcode implementation used in the CI has a bug, which causes
             # this to be thrown even when it is ignored using brackets around the statement
-            '-Wno-unreachable-code',
+            #'-Wno-unreachable-code',
             # this caused issues on the conda forge build
-            '-Wno-unused-command-line-argument'
+            #'-Wno-unused-command-line-argument'
             ],
     }
     l_opts = {
