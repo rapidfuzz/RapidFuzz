@@ -14,7 +14,7 @@ cdef inline proc_string conv_sequence(seq):
     else:
         return hash_sequence(seq)
 
-cdef extern from "cpp_fuzz.hpp":
+cdef extern from "cpp_scorer.hpp":
     double ratio_no_process( proc_string, proc_string, double) nogil except +
     double ratio_default_process( proc_string, proc_string, double) nogil except +
 
@@ -86,7 +86,7 @@ def ratio(s1, s2, processor=None, score_cutoff=None):
         if string1.allocated:
             free(string1.data)
 
-cdef extern from "cpp_fuzz.hpp":
+cdef extern from "cpp_scorer.hpp":
     double partial_ratio_no_process( proc_string, proc_string, double) nogil except +
     double partial_ratio_default_process( proc_string, proc_string, double) nogil except +
 
@@ -156,7 +156,7 @@ def partial_ratio(s1, s2, processor=None, score_cutoff=None):
         if string1.allocated:
             free(string1.data)
 
-cdef extern from "cpp_fuzz.hpp":
+cdef extern from "cpp_scorer.hpp":
     double token_sort_ratio_no_process( proc_string, proc_string, double) nogil except +
     double token_sort_ratio_default_process( proc_string, proc_string, double) nogil except +
 
@@ -226,7 +226,7 @@ def token_sort_ratio(s1, s2, processor=True, score_cutoff=None):
         if string1.allocated:
             free(string1.data)
 
-cdef extern from "cpp_fuzz.hpp":
+cdef extern from "cpp_scorer.hpp":
     double token_set_ratio_no_process( proc_string, proc_string, double) nogil except +
     double token_set_ratio_default_process( proc_string, proc_string, double) nogil except +
 
@@ -299,7 +299,7 @@ def token_set_ratio(s1, s2, processor=True, score_cutoff=None):
         if string1.allocated:
             free(string1.data)
 
-cdef extern from "cpp_fuzz.hpp":
+cdef extern from "cpp_scorer.hpp":
     double token_ratio_no_process( proc_string, proc_string, double) nogil except +
     double token_ratio_default_process( proc_string, proc_string, double) nogil except +
 
@@ -365,7 +365,7 @@ def token_ratio(s1, s2, processor=True, score_cutoff=None):
         if string1.allocated:
             free(string1.data)
 
-cdef extern from "cpp_fuzz.hpp":
+cdef extern from "cpp_scorer.hpp":
     double partial_token_sort_ratio_no_process( proc_string, proc_string, double) nogil except +
     double partial_token_sort_ratio_default_process( proc_string, proc_string, double) nogil except +
 
@@ -430,7 +430,7 @@ def partial_token_sort_ratio(s1, s2, processor=True, score_cutoff=None):
         if string1.allocated:
             free(string1.data)
 
-cdef extern from "cpp_fuzz.hpp":
+cdef extern from "cpp_scorer.hpp":
     double partial_token_set_ratio_no_process( proc_string, proc_string, double) nogil except +
     double partial_token_set_ratio_default_process( proc_string, proc_string, double) nogil except +
 
@@ -496,7 +496,7 @@ def partial_token_set_ratio(s1, s2, processor=True, score_cutoff=None):
         if string1.allocated:
             free(string1.data)
 
-cdef extern from "cpp_fuzz.hpp":
+cdef extern from "cpp_scorer.hpp":
     double partial_token_ratio_no_process( proc_string, proc_string, double) nogil except +
     double partial_token_ratio_default_process( proc_string, proc_string, double) nogil except +
 
@@ -562,7 +562,7 @@ def partial_token_ratio(s1, s2, processor=True, score_cutoff=None):
         if string1.allocated:
             free(string1.data)
 
-cdef extern from "cpp_fuzz.hpp":
+cdef extern from "cpp_scorer.hpp":
     double WRatio_no_process( proc_string, proc_string, double) nogil except +
     double WRatio_default_process( proc_string, proc_string, double) nogil except +
 
@@ -627,7 +627,7 @@ def WRatio(s1, s2, processor=True, score_cutoff=None):
         if string1.allocated:
             free(string1.data)
 
-cdef extern from "cpp_fuzz.hpp":
+cdef extern from "cpp_scorer.hpp":
     double QRatio_no_process( proc_string, proc_string, double) nogil except +
     double QRatio_default_process( proc_string, proc_string, double) nogil except +
 

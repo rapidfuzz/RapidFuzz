@@ -811,7 +811,7 @@ static CYTHON_INLINE float __PYX_NAN() {
 #include "stdexcept"
 #include "typeinfo"
 #include "cpp_common.hpp"
-#include "cpp_fuzz.hpp"
+#include "cpp_scorer.hpp"
 #ifdef _OPENMP
 #include <omp.h>
 #endif /* _OPENMP */
@@ -2295,7 +2295,7 @@ static CYTHON_INLINE proc_string __pyx_f_8cpp_fuzz_conv_sequence(PyObject *__pyx
  *     else:
  *         return hash_sequence(seq)             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_fuzz.hpp":
+ * cdef extern from "cpp_scorer.hpp":
  */
   /*else*/ {
     __pyx_r = __pyx_f_10cpp_common_hash_sequence(__pyx_v_seq);
@@ -3069,7 +3069,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_ratio(CYTHON_UNUSED PyObject *__pyx_self, Py
  *         if string1.allocated:
  *             free(string1.data)             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_fuzz.hpp":
+ * cdef extern from "cpp_scorer.hpp":
  */
           free(__pyx_v_string1.data);
 
@@ -3107,7 +3107,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_ratio(CYTHON_UNUSED PyObject *__pyx_self, Py
  *         if string1.allocated:
  *             free(string1.data)             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_fuzz.hpp":
+ * cdef extern from "cpp_scorer.hpp":
  */
         free(__pyx_v_string1.data);
 
@@ -3897,7 +3897,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_2partial_ratio(CYTHON_UNUSED PyObject *__pyx
  *         if string1.allocated:
  *             free(string1.data)             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_fuzz.hpp":
+ * cdef extern from "cpp_scorer.hpp":
  */
           free(__pyx_v_string1.data);
 
@@ -3935,7 +3935,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_2partial_ratio(CYTHON_UNUSED PyObject *__pyx
  *         if string1.allocated:
  *             free(string1.data)             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_fuzz.hpp":
+ * cdef extern from "cpp_scorer.hpp":
  */
         free(__pyx_v_string1.data);
 
@@ -4725,7 +4725,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_4token_sort_ratio(CYTHON_UNUSED PyObject *__
  *         if string1.allocated:
  *             free(string1.data)             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_fuzz.hpp":
+ * cdef extern from "cpp_scorer.hpp":
  */
           free(__pyx_v_string1.data);
 
@@ -4763,7 +4763,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_4token_sort_ratio(CYTHON_UNUSED PyObject *__
  *         if string1.allocated:
  *             free(string1.data)             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_fuzz.hpp":
+ * cdef extern from "cpp_scorer.hpp":
  */
         free(__pyx_v_string1.data);
 
@@ -5553,7 +5553,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_6token_set_ratio(CYTHON_UNUSED PyObject *__p
  *         if string1.allocated:
  *             free(string1.data)             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_fuzz.hpp":
+ * cdef extern from "cpp_scorer.hpp":
  */
           free(__pyx_v_string1.data);
 
@@ -5591,7 +5591,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_6token_set_ratio(CYTHON_UNUSED PyObject *__p
  *         if string1.allocated:
  *             free(string1.data)             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_fuzz.hpp":
+ * cdef extern from "cpp_scorer.hpp":
  */
         free(__pyx_v_string1.data);
 
@@ -6381,7 +6381,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_8token_ratio(CYTHON_UNUSED PyObject *__pyx_s
  *         if string1.allocated:
  *             free(string1.data)             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_fuzz.hpp":
+ * cdef extern from "cpp_scorer.hpp":
  */
           free(__pyx_v_string1.data);
 
@@ -6419,7 +6419,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_8token_ratio(CYTHON_UNUSED PyObject *__pyx_s
  *         if string1.allocated:
  *             free(string1.data)             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_fuzz.hpp":
+ * cdef extern from "cpp_scorer.hpp":
  */
         free(__pyx_v_string1.data);
 
@@ -7209,7 +7209,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_10partial_token_sort_ratio(CYTHON_UNUSED PyO
  *         if string1.allocated:
  *             free(string1.data)             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_fuzz.hpp":
+ * cdef extern from "cpp_scorer.hpp":
  */
           free(__pyx_v_string1.data);
 
@@ -7247,7 +7247,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_10partial_token_sort_ratio(CYTHON_UNUSED PyO
  *         if string1.allocated:
  *             free(string1.data)             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_fuzz.hpp":
+ * cdef extern from "cpp_scorer.hpp":
  */
         free(__pyx_v_string1.data);
 
@@ -8037,7 +8037,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_12partial_token_set_ratio(CYTHON_UNUSED PyOb
  *         if string1.allocated:
  *             free(string1.data)             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_fuzz.hpp":
+ * cdef extern from "cpp_scorer.hpp":
  */
           free(__pyx_v_string1.data);
 
@@ -8075,7 +8075,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_12partial_token_set_ratio(CYTHON_UNUSED PyOb
  *         if string1.allocated:
  *             free(string1.data)             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_fuzz.hpp":
+ * cdef extern from "cpp_scorer.hpp":
  */
         free(__pyx_v_string1.data);
 
@@ -8865,7 +8865,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_14partial_token_ratio(CYTHON_UNUSED PyObject
  *         if string1.allocated:
  *             free(string1.data)             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_fuzz.hpp":
+ * cdef extern from "cpp_scorer.hpp":
  */
           free(__pyx_v_string1.data);
 
@@ -8903,7 +8903,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_14partial_token_ratio(CYTHON_UNUSED PyObject
  *         if string1.allocated:
  *             free(string1.data)             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_fuzz.hpp":
+ * cdef extern from "cpp_scorer.hpp":
  */
         free(__pyx_v_string1.data);
 
@@ -9693,7 +9693,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_16WRatio(CYTHON_UNUSED PyObject *__pyx_self,
  *         if string1.allocated:
  *             free(string1.data)             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_fuzz.hpp":
+ * cdef extern from "cpp_scorer.hpp":
  */
           free(__pyx_v_string1.data);
 
@@ -9731,7 +9731,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_16WRatio(CYTHON_UNUSED PyObject *__pyx_self,
  *         if string1.allocated:
  *             free(string1.data)             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_fuzz.hpp":
+ * cdef extern from "cpp_scorer.hpp":
  */
         free(__pyx_v_string1.data);
 

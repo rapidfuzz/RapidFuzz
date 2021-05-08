@@ -811,8 +811,7 @@ static CYTHON_INLINE float __PYX_NAN() {
 #include "stdexcept"
 #include "typeinfo"
 #include "cpp_common.hpp"
-#include "cpp_string_metric.hpp"
-#include "cpp_fuzz.hpp"
+#include "cpp_scorer.hpp"
 #ifdef _OPENMP
 #include <omp.h>
 #endif /* _OPENMP */
@@ -2215,7 +2214,7 @@ static CYTHON_INLINE proc_string __pyx_f_17cpp_string_metric_conv_sequence(PyObj
  *     else:
  *         return hash_sequence(seq)             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_string_metric.hpp":
+ * cdef extern from "cpp_scorer.hpp":
  */
   /*else*/ {
     __pyx_r = __pyx_f_10cpp_common_hash_sequence(__pyx_v_seq);
@@ -4110,7 +4109,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
 }
 
 /* "cpp_string_metric.pyx":358
- *     double hamming_default_process( proc_string, proc_string, size_t) nogil except +
+ *     object hamming_default_process( proc_string, proc_string, size_t) nogil except +
  * 
  * def hamming(s1, s2, processor=None, max=None):             # <<<<<<<<<<<<<<
  *     """
@@ -4248,20 +4247,19 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
   PyObject *__pyx_t_7 = NULL;
-  double __pyx_t_8;
+  int __pyx_t_8;
   int __pyx_t_9;
-  int __pyx_t_10;
-  char const *__pyx_t_11;
+  char const *__pyx_t_10;
+  PyObject *__pyx_t_11 = NULL;
   PyObject *__pyx_t_12 = NULL;
   PyObject *__pyx_t_13 = NULL;
   PyObject *__pyx_t_14 = NULL;
   PyObject *__pyx_t_15 = NULL;
   PyObject *__pyx_t_16 = NULL;
-  PyObject *__pyx_t_17 = NULL;
-  char const *__pyx_t_18;
-  PyObject *__pyx_t_19 = NULL;
+  char const *__pyx_t_17;
+  PyObject *__pyx_t_18 = NULL;
+  char const *__pyx_t_19;
   char const *__pyx_t_20;
-  char const *__pyx_t_21;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -4395,12 +4393,12 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
  */
         __Pyx_XDECREF(__pyx_r);
         try {
-          __pyx_t_8 = hamming_default_process(__pyx_v_string1, __pyx_v_string2, __pyx_v_c_max);
+          __pyx_t_7 = hamming_default_process(__pyx_v_string1, __pyx_v_string2, __pyx_v_c_max);
+          if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 401, __pyx_L13_error)
         } catch(...) {
           __Pyx_CppExn2PyErr();
           __PYX_ERR(0, 401, __pyx_L13_error)
         }
-        __pyx_t_7 = PyFloat_FromDouble(__pyx_t_8); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 401, __pyx_L13_error)
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_r = __pyx_t_7;
         __pyx_t_7 = 0;
@@ -4419,18 +4417,18 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
         /*exception exit:*/{
           __Pyx_PyThreadState_declare
           __Pyx_PyThreadState_assign
-          __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0; __pyx_t_17 = 0;
+          __pyx_t_11 = 0; __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0;
           __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
           __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-          if (PY_MAJOR_VERSION >= 3) __Pyx_ExceptionSwap(&__pyx_t_15, &__pyx_t_16, &__pyx_t_17);
-          if ((PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_12, &__pyx_t_13, &__pyx_t_14) < 0)) __Pyx_ErrFetch(&__pyx_t_12, &__pyx_t_13, &__pyx_t_14);
+          if (PY_MAJOR_VERSION >= 3) __Pyx_ExceptionSwap(&__pyx_t_14, &__pyx_t_15, &__pyx_t_16);
+          if ((PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_11, &__pyx_t_12, &__pyx_t_13) < 0)) __Pyx_ErrFetch(&__pyx_t_11, &__pyx_t_12, &__pyx_t_13);
+          __Pyx_XGOTREF(__pyx_t_11);
           __Pyx_XGOTREF(__pyx_t_12);
           __Pyx_XGOTREF(__pyx_t_13);
           __Pyx_XGOTREF(__pyx_t_14);
           __Pyx_XGOTREF(__pyx_t_15);
           __Pyx_XGOTREF(__pyx_t_16);
-          __Pyx_XGOTREF(__pyx_t_17);
-          __pyx_t_9 = __pyx_lineno; __pyx_t_10 = __pyx_clineno; __pyx_t_11 = __pyx_filename;
+          __pyx_t_8 = __pyx_lineno; __pyx_t_9 = __pyx_clineno; __pyx_t_10 = __pyx_filename;
           {
             __pyx_t_2 = (__pyx_v_string2.allocated != 0);
             if (__pyx_t_2) {
@@ -4454,21 +4452,21 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
             }
           }
           if (PY_MAJOR_VERSION >= 3) {
+            __Pyx_XGIVEREF(__pyx_t_14);
             __Pyx_XGIVEREF(__pyx_t_15);
             __Pyx_XGIVEREF(__pyx_t_16);
-            __Pyx_XGIVEREF(__pyx_t_17);
-            __Pyx_ExceptionReset(__pyx_t_15, __pyx_t_16, __pyx_t_17);
+            __Pyx_ExceptionReset(__pyx_t_14, __pyx_t_15, __pyx_t_16);
           }
+          __Pyx_XGIVEREF(__pyx_t_11);
           __Pyx_XGIVEREF(__pyx_t_12);
           __Pyx_XGIVEREF(__pyx_t_13);
-          __Pyx_XGIVEREF(__pyx_t_14);
-          __Pyx_ErrRestore(__pyx_t_12, __pyx_t_13, __pyx_t_14);
-          __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0; __pyx_t_17 = 0;
-          __pyx_lineno = __pyx_t_9; __pyx_clineno = __pyx_t_10; __pyx_filename = __pyx_t_11;
+          __Pyx_ErrRestore(__pyx_t_11, __pyx_t_12, __pyx_t_13);
+          __pyx_t_11 = 0; __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0;
+          __pyx_lineno = __pyx_t_8; __pyx_clineno = __pyx_t_9; __pyx_filename = __pyx_t_10;
           goto __pyx_L10_error;
         }
         __pyx_L12_return: {
-          __pyx_t_17 = __pyx_r;
+          __pyx_t_16 = __pyx_r;
           __pyx_r = 0;
           __pyx_t_2 = (__pyx_v_string2.allocated != 0);
           if (__pyx_t_2) {
@@ -4490,8 +4488,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
  *         finally:
  */
           }
-          __pyx_r = __pyx_t_17;
-          __pyx_t_17 = 0;
+          __pyx_r = __pyx_t_16;
+          __pyx_t_16 = 0;
           goto __pyx_L9_return;
         }
       }
@@ -4509,18 +4507,18 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
       /*exception exit:*/{
         __Pyx_PyThreadState_declare
         __Pyx_PyThreadState_assign
-        __pyx_t_17 = 0; __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0;
+        __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0; __pyx_t_11 = 0;
         __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
         __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-        if (PY_MAJOR_VERSION >= 3) __Pyx_ExceptionSwap(&__pyx_t_14, &__pyx_t_13, &__pyx_t_12);
-        if ((PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_17, &__pyx_t_16, &__pyx_t_15) < 0)) __Pyx_ErrFetch(&__pyx_t_17, &__pyx_t_16, &__pyx_t_15);
-        __Pyx_XGOTREF(__pyx_t_17);
+        if (PY_MAJOR_VERSION >= 3) __Pyx_ExceptionSwap(&__pyx_t_13, &__pyx_t_12, &__pyx_t_11);
+        if ((PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_16, &__pyx_t_15, &__pyx_t_14) < 0)) __Pyx_ErrFetch(&__pyx_t_16, &__pyx_t_15, &__pyx_t_14);
         __Pyx_XGOTREF(__pyx_t_16);
         __Pyx_XGOTREF(__pyx_t_15);
         __Pyx_XGOTREF(__pyx_t_14);
         __Pyx_XGOTREF(__pyx_t_13);
         __Pyx_XGOTREF(__pyx_t_12);
-        __pyx_t_10 = __pyx_lineno; __pyx_t_9 = __pyx_clineno; __pyx_t_18 = __pyx_filename;
+        __Pyx_XGOTREF(__pyx_t_11);
+        __pyx_t_9 = __pyx_lineno; __pyx_t_8 = __pyx_clineno; __pyx_t_17 = __pyx_filename;
         {
           __pyx_t_2 = (__pyx_v_string1.allocated != 0);
           if (__pyx_t_2) {
@@ -4544,21 +4542,21 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
           }
         }
         if (PY_MAJOR_VERSION >= 3) {
-          __Pyx_XGIVEREF(__pyx_t_14);
           __Pyx_XGIVEREF(__pyx_t_13);
           __Pyx_XGIVEREF(__pyx_t_12);
-          __Pyx_ExceptionReset(__pyx_t_14, __pyx_t_13, __pyx_t_12);
+          __Pyx_XGIVEREF(__pyx_t_11);
+          __Pyx_ExceptionReset(__pyx_t_13, __pyx_t_12, __pyx_t_11);
         }
-        __Pyx_XGIVEREF(__pyx_t_17);
         __Pyx_XGIVEREF(__pyx_t_16);
         __Pyx_XGIVEREF(__pyx_t_15);
-        __Pyx_ErrRestore(__pyx_t_17, __pyx_t_16, __pyx_t_15);
-        __pyx_t_17 = 0; __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0;
-        __pyx_lineno = __pyx_t_10; __pyx_clineno = __pyx_t_9; __pyx_filename = __pyx_t_18;
+        __Pyx_XGIVEREF(__pyx_t_14);
+        __Pyx_ErrRestore(__pyx_t_16, __pyx_t_15, __pyx_t_14);
+        __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0; __pyx_t_11 = 0;
+        __pyx_lineno = __pyx_t_9; __pyx_clineno = __pyx_t_8; __pyx_filename = __pyx_t_17;
         goto __pyx_L1_error;
       }
       __pyx_L9_return: {
-        __pyx_t_12 = __pyx_r;
+        __pyx_t_11 = __pyx_r;
         __pyx_r = 0;
         __pyx_t_2 = (__pyx_v_string1.allocated != 0);
         if (__pyx_t_2) {
@@ -4580,8 +4578,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
  *     elif callable(processor):
  */
         }
-        __pyx_r = __pyx_t_12;
-        __pyx_t_12 = 0;
+        __pyx_r = __pyx_t_11;
+        __pyx_t_11 = 0;
         goto __pyx_L0;
       }
     }
@@ -4614,22 +4612,22 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
  * 
  */
     __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_6 = __pyx_v_processor; __pyx_t_19 = NULL;
-    __pyx_t_9 = 0;
+    __pyx_t_6 = __pyx_v_processor; __pyx_t_18 = NULL;
+    __pyx_t_8 = 0;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
-      __pyx_t_19 = PyMethod_GET_SELF(__pyx_t_6);
-      if (likely(__pyx_t_19)) {
+      __pyx_t_18 = PyMethod_GET_SELF(__pyx_t_6);
+      if (likely(__pyx_t_18)) {
         PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
-        __Pyx_INCREF(__pyx_t_19);
+        __Pyx_INCREF(__pyx_t_18);
         __Pyx_INCREF(function);
         __Pyx_DECREF_SET(__pyx_t_6, function);
-        __pyx_t_9 = 1;
+        __pyx_t_8 = 1;
       }
     }
     {
-      PyObject *__pyx_callargs[2] = {__pyx_t_19, __pyx_v_s1};
-      __pyx_t_7 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
-      __Pyx_XDECREF(__pyx_t_19); __pyx_t_19 = 0;
+      PyObject *__pyx_callargs[2] = {__pyx_t_18, __pyx_v_s1};
+      __pyx_t_7 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_8, 1+__pyx_t_8);
+      __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
       if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 409, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -4645,22 +4643,22 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
  *     string1 = conv_sequence(s1)
  */
     __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_6 = __pyx_v_processor; __pyx_t_19 = NULL;
-    __pyx_t_9 = 0;
+    __pyx_t_6 = __pyx_v_processor; __pyx_t_18 = NULL;
+    __pyx_t_8 = 0;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
-      __pyx_t_19 = PyMethod_GET_SELF(__pyx_t_6);
-      if (likely(__pyx_t_19)) {
+      __pyx_t_18 = PyMethod_GET_SELF(__pyx_t_6);
+      if (likely(__pyx_t_18)) {
         PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
-        __Pyx_INCREF(__pyx_t_19);
+        __Pyx_INCREF(__pyx_t_18);
         __Pyx_INCREF(function);
         __Pyx_DECREF_SET(__pyx_t_6, function);
-        __pyx_t_9 = 1;
+        __pyx_t_8 = 1;
       }
     }
     {
-      PyObject *__pyx_callargs[2] = {__pyx_t_19, __pyx_v_s2};
-      __pyx_t_7 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
-      __Pyx_XDECREF(__pyx_t_19); __pyx_t_19 = 0;
+      PyObject *__pyx_callargs[2] = {__pyx_t_18, __pyx_v_s2};
+      __pyx_t_7 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_8, 1+__pyx_t_8);
+      __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
       if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 410, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -4722,12 +4720,12 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
  */
       __Pyx_XDECREF(__pyx_r);
       try {
-        __pyx_t_8 = hamming_no_process(__pyx_v_string1, __pyx_v_string2, __pyx_v_c_max);
+        __pyx_t_7 = hamming_no_process(__pyx_v_string1, __pyx_v_string2, __pyx_v_c_max);
+        if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 416, __pyx_L27_error)
       } catch(...) {
         __Pyx_CppExn2PyErr();
         __PYX_ERR(0, 416, __pyx_L27_error)
       }
-      __pyx_t_7 = PyFloat_FromDouble(__pyx_t_8); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 416, __pyx_L27_error)
       __Pyx_GOTREF(__pyx_t_7);
       __pyx_r = __pyx_t_7;
       __pyx_t_7 = 0;
@@ -4746,19 +4744,19 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
       /*exception exit:*/{
         __Pyx_PyThreadState_declare
         __Pyx_PyThreadState_assign
-        __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0; __pyx_t_17 = 0;
-        __Pyx_XDECREF(__pyx_t_19); __pyx_t_19 = 0;
+        __pyx_t_11 = 0; __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0;
+        __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
         __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
         __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-        if (PY_MAJOR_VERSION >= 3) __Pyx_ExceptionSwap(&__pyx_t_15, &__pyx_t_16, &__pyx_t_17);
-        if ((PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_12, &__pyx_t_13, &__pyx_t_14) < 0)) __Pyx_ErrFetch(&__pyx_t_12, &__pyx_t_13, &__pyx_t_14);
+        if (PY_MAJOR_VERSION >= 3) __Pyx_ExceptionSwap(&__pyx_t_14, &__pyx_t_15, &__pyx_t_16);
+        if ((PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_11, &__pyx_t_12, &__pyx_t_13) < 0)) __Pyx_ErrFetch(&__pyx_t_11, &__pyx_t_12, &__pyx_t_13);
+        __Pyx_XGOTREF(__pyx_t_11);
         __Pyx_XGOTREF(__pyx_t_12);
         __Pyx_XGOTREF(__pyx_t_13);
         __Pyx_XGOTREF(__pyx_t_14);
         __Pyx_XGOTREF(__pyx_t_15);
         __Pyx_XGOTREF(__pyx_t_16);
-        __Pyx_XGOTREF(__pyx_t_17);
-        __pyx_t_9 = __pyx_lineno; __pyx_t_10 = __pyx_clineno; __pyx_t_20 = __pyx_filename;
+        __pyx_t_8 = __pyx_lineno; __pyx_t_9 = __pyx_clineno; __pyx_t_19 = __pyx_filename;
         {
           __pyx_t_5 = (__pyx_v_string2.allocated != 0);
           if (__pyx_t_5) {
@@ -4782,21 +4780,21 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
           }
         }
         if (PY_MAJOR_VERSION >= 3) {
+          __Pyx_XGIVEREF(__pyx_t_14);
           __Pyx_XGIVEREF(__pyx_t_15);
           __Pyx_XGIVEREF(__pyx_t_16);
-          __Pyx_XGIVEREF(__pyx_t_17);
-          __Pyx_ExceptionReset(__pyx_t_15, __pyx_t_16, __pyx_t_17);
+          __Pyx_ExceptionReset(__pyx_t_14, __pyx_t_15, __pyx_t_16);
         }
+        __Pyx_XGIVEREF(__pyx_t_11);
         __Pyx_XGIVEREF(__pyx_t_12);
         __Pyx_XGIVEREF(__pyx_t_13);
-        __Pyx_XGIVEREF(__pyx_t_14);
-        __Pyx_ErrRestore(__pyx_t_12, __pyx_t_13, __pyx_t_14);
-        __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0; __pyx_t_17 = 0;
-        __pyx_lineno = __pyx_t_9; __pyx_clineno = __pyx_t_10; __pyx_filename = __pyx_t_20;
+        __Pyx_ErrRestore(__pyx_t_11, __pyx_t_12, __pyx_t_13);
+        __pyx_t_11 = 0; __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0;
+        __pyx_lineno = __pyx_t_8; __pyx_clineno = __pyx_t_9; __pyx_filename = __pyx_t_19;
         goto __pyx_L24_error;
       }
       __pyx_L26_return: {
-        __pyx_t_17 = __pyx_r;
+        __pyx_t_16 = __pyx_r;
         __pyx_r = 0;
         __pyx_t_5 = (__pyx_v_string2.allocated != 0);
         if (__pyx_t_5) {
@@ -4818,8 +4816,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
  *     finally:
  */
         }
-        __pyx_r = __pyx_t_17;
-        __pyx_t_17 = 0;
+        __pyx_r = __pyx_t_16;
+        __pyx_t_16 = 0;
         goto __pyx_L23_return;
       }
     }
@@ -4837,19 +4835,19 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
     /*exception exit:*/{
       __Pyx_PyThreadState_declare
       __Pyx_PyThreadState_assign
-      __pyx_t_17 = 0; __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0;
-      __Pyx_XDECREF(__pyx_t_19); __pyx_t_19 = 0;
+      __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0; __pyx_t_11 = 0;
+      __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
       __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-      if (PY_MAJOR_VERSION >= 3) __Pyx_ExceptionSwap(&__pyx_t_14, &__pyx_t_13, &__pyx_t_12);
-      if ((PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_17, &__pyx_t_16, &__pyx_t_15) < 0)) __Pyx_ErrFetch(&__pyx_t_17, &__pyx_t_16, &__pyx_t_15);
-      __Pyx_XGOTREF(__pyx_t_17);
+      if (PY_MAJOR_VERSION >= 3) __Pyx_ExceptionSwap(&__pyx_t_13, &__pyx_t_12, &__pyx_t_11);
+      if ((PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_16, &__pyx_t_15, &__pyx_t_14) < 0)) __Pyx_ErrFetch(&__pyx_t_16, &__pyx_t_15, &__pyx_t_14);
       __Pyx_XGOTREF(__pyx_t_16);
       __Pyx_XGOTREF(__pyx_t_15);
       __Pyx_XGOTREF(__pyx_t_14);
       __Pyx_XGOTREF(__pyx_t_13);
       __Pyx_XGOTREF(__pyx_t_12);
-      __pyx_t_10 = __pyx_lineno; __pyx_t_9 = __pyx_clineno; __pyx_t_21 = __pyx_filename;
+      __Pyx_XGOTREF(__pyx_t_11);
+      __pyx_t_9 = __pyx_lineno; __pyx_t_8 = __pyx_clineno; __pyx_t_20 = __pyx_filename;
       {
         __pyx_t_5 = (__pyx_v_string1.allocated != 0);
         if (__pyx_t_5) {
@@ -4859,7 +4857,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
  *         if string1.allocated:
  *             free(string1.data)             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_fuzz.hpp":
+ * cdef extern from "cpp_scorer.hpp":
  */
           free(__pyx_v_string1.data);
 
@@ -4873,21 +4871,21 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
         }
       }
       if (PY_MAJOR_VERSION >= 3) {
-        __Pyx_XGIVEREF(__pyx_t_14);
         __Pyx_XGIVEREF(__pyx_t_13);
         __Pyx_XGIVEREF(__pyx_t_12);
-        __Pyx_ExceptionReset(__pyx_t_14, __pyx_t_13, __pyx_t_12);
+        __Pyx_XGIVEREF(__pyx_t_11);
+        __Pyx_ExceptionReset(__pyx_t_13, __pyx_t_12, __pyx_t_11);
       }
-      __Pyx_XGIVEREF(__pyx_t_17);
       __Pyx_XGIVEREF(__pyx_t_16);
       __Pyx_XGIVEREF(__pyx_t_15);
-      __Pyx_ErrRestore(__pyx_t_17, __pyx_t_16, __pyx_t_15);
-      __pyx_t_17 = 0; __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0;
-      __pyx_lineno = __pyx_t_10; __pyx_clineno = __pyx_t_9; __pyx_filename = __pyx_t_21;
+      __Pyx_XGIVEREF(__pyx_t_14);
+      __Pyx_ErrRestore(__pyx_t_16, __pyx_t_15, __pyx_t_14);
+      __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0; __pyx_t_11 = 0;
+      __pyx_lineno = __pyx_t_9; __pyx_clineno = __pyx_t_8; __pyx_filename = __pyx_t_20;
       goto __pyx_L1_error;
     }
     __pyx_L23_return: {
-      __pyx_t_12 = __pyx_r;
+      __pyx_t_11 = __pyx_r;
       __pyx_r = 0;
       __pyx_t_5 = (__pyx_v_string1.allocated != 0);
       if (__pyx_t_5) {
@@ -4897,7 +4895,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
  *         if string1.allocated:
  *             free(string1.data)             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_fuzz.hpp":
+ * cdef extern from "cpp_scorer.hpp":
  */
         free(__pyx_v_string1.data);
 
@@ -4909,14 +4907,14 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
  * 
  */
       }
-      __pyx_r = __pyx_t_12;
-      __pyx_t_12 = 0;
+      __pyx_r = __pyx_t_11;
+      __pyx_t_11 = 0;
       goto __pyx_L0;
     }
   }
 
   /* "cpp_string_metric.pyx":358
- *     double hamming_default_process( proc_string, proc_string, size_t) nogil except +
+ *     object hamming_default_process( proc_string, proc_string, size_t) nogil except +
  * 
  * def hamming(s1, s2, processor=None, max=None):             # <<<<<<<<<<<<<<
  *     """
@@ -4927,7 +4925,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_6);
   __Pyx_XDECREF(__pyx_t_7);
-  __Pyx_XDECREF(__pyx_t_19);
+  __Pyx_XDECREF(__pyx_t_18);
   __Pyx_AddTraceback("cpp_string_metric.hamming", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -6965,7 +6963,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__8);
 
   /* "cpp_string_metric.pyx":358
- *     double hamming_default_process( proc_string, proc_string, size_t) nogil except +
+ *     object hamming_default_process( proc_string, proc_string, size_t) nogil except +
  * 
  * def hamming(s1, s2, processor=None, max=None):             # <<<<<<<<<<<<<<
  *     """
@@ -7457,7 +7455,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "cpp_string_metric.pyx":358
- *     double hamming_default_process( proc_string, proc_string, size_t) nogil except +
+ *     object hamming_default_process( proc_string, proc_string, size_t) nogil except +
  * 
  * def hamming(s1, s2, processor=None, max=None):             # <<<<<<<<<<<<<<
  *     """

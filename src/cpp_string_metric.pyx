@@ -17,7 +17,7 @@ cdef inline proc_string conv_sequence(seq):
     else:
         return hash_sequence(seq)
 
-cdef extern from "cpp_string_metric.hpp":
+cdef extern from "cpp_scorer.hpp":
     object levenshtein_no_process(                proc_string, proc_string, size_t, size_t, size_t, size_t) nogil except +
     object levenshtein_default_process(           proc_string, proc_string, size_t, size_t, size_t, size_t) nogil except +
 
@@ -223,7 +223,7 @@ def levenshtein(s1, s2, weights=(1,1,1), processor=None, max=None):
             free(string1.data)
 
 
-cdef extern from "cpp_string_metric.hpp":
+cdef extern from "cpp_scorer.hpp":
     double normalized_levenshtein_no_process(     proc_string, proc_string, size_t, size_t, size_t, double) nogil except +
     double normalized_levenshtein_default_process(proc_string, proc_string, size_t, size_t, size_t, double) nogil except +
 
@@ -351,9 +351,9 @@ def normalized_levenshtein(s1, s2, weights=(1,1,1), processor=None, score_cutoff
             free(string1.data)
 
 
-cdef extern from "cpp_fuzz.hpp":
-    double hamming_no_process( proc_string, proc_string, size_t) nogil except +
-    double hamming_default_process( proc_string, proc_string, size_t) nogil except +
+cdef extern from "cpp_scorer.hpp":
+    object hamming_no_process( proc_string, proc_string, size_t) nogil except +
+    object hamming_default_process( proc_string, proc_string, size_t) nogil except +
 
 def hamming(s1, s2, processor=None, max=None):
     """
@@ -421,7 +421,7 @@ def hamming(s1, s2, processor=None, max=None):
         if string1.allocated:
             free(string1.data)
 
-cdef extern from "cpp_fuzz.hpp":
+cdef extern from "cpp_scorer.hpp":
     double normalized_hamming_no_process( proc_string, proc_string, double) nogil except +
     double normalized_hamming_default_process( proc_string, proc_string, double) nogil except +
 
