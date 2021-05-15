@@ -289,6 +289,14 @@
 #ifndef __has_cpp_attribute
   #define __has_cpp_attribute(x) 0
 #endif
+/* This macro can be used to suppress the MSVC
+ * compiler warning C4127: conditional expression is constant
+ */
+#ifdef _MSC_VER
+  #define CYTHON_CONDITION(CONDITION) ((void)0, (CONDITION))
+#else
+  #define CYTHON_CONDITION(CONDITION) (CONDITION)
+#endif
 #ifndef CYTHON_RESTRICT
   #if defined(__GNUC__)
     #define CYTHON_RESTRICT __restrict__
@@ -4033,7 +4041,7 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
                 func_type zero = 0;\
                 if (exc && unlikely(value == (func_type)-1 && PyErr_Occurred()))\
                     return (target_type) -1;\
-                if (is_unsigned && unlikely(value < zero))\
+                if (is_unsigned && unlikely(CYTHON_CONDITION(value < zero)))\
                     goto raise_neg_overflow;\
                 else\
                     goto raise_overflow;\

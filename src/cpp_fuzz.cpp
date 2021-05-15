@@ -289,6 +289,14 @@
 #ifndef __has_cpp_attribute
   #define __has_cpp_attribute(x) 0
 #endif
+/* This macro can be used to suppress the MSVC
+ * compiler warning C4127: conditional expression is constant
+ */
+#ifdef _MSC_VER
+  #define CYTHON_CONDITION(CONDITION) ((void)0, (CONDITION))
+#else
+  #define CYTHON_CONDITION(CONDITION) (CONDITION)
+#endif
 #ifndef CYTHON_RESTRICT
   #if defined(__GNUC__)
     #define CYTHON_RESTRICT __restrict__
@@ -11302,7 +11310,7 @@ static CYTHON_INLINE proc_string __pyx_f_10cpp_common_hash_array(PyObject *__pyx
  * 
  * cdef inline proc_string hash_sequence(seq):             # <<<<<<<<<<<<<<
  *     cdef proc_string s_proc
- *     s_proc.length = len(seq)
+ *     s_proc.length = <size_t>len(seq)
  */
 
 static CYTHON_INLINE proc_string __pyx_f_10cpp_common_hash_sequence(PyObject *__pyx_v_seq) {
@@ -11344,15 +11352,15 @@ static CYTHON_INLINE proc_string __pyx_f_10cpp_common_hash_sequence(PyObject *__
   /* "cpp_common.pxd":85
  * cdef inline proc_string hash_sequence(seq):
  *     cdef proc_string s_proc
- *     s_proc.length = len(seq)             # <<<<<<<<<<<<<<
+ *     s_proc.length = <size_t>len(seq)             # <<<<<<<<<<<<<<
  * 
  *     s_proc.data = malloc(s_proc.length * sizeof(Py_hash_t))
  */
   __pyx_t_1 = PyObject_Length(__pyx_v_seq); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(1, 85, __pyx_L1_error)
-  __pyx_v_s_proc.length = __pyx_t_1;
+  __pyx_v_s_proc.length = ((size_t)__pyx_t_1);
 
   /* "cpp_common.pxd":87
- *     s_proc.length = len(seq)
+ *     s_proc.length = <size_t>len(seq)
  * 
  *     s_proc.data = malloc(s_proc.length * sizeof(Py_hash_t))             # <<<<<<<<<<<<<<
  * 
@@ -11640,7 +11648,7 @@ static CYTHON_INLINE proc_string __pyx_f_10cpp_common_hash_sequence(PyObject *__
  * 
  * cdef inline proc_string hash_sequence(seq):             # <<<<<<<<<<<<<<
  *     cdef proc_string s_proc
- *     s_proc.length = len(seq)
+ *     s_proc.length = <size_t>len(seq)
  */
 
   /* function exit code */
@@ -12519,7 +12527,7 @@ if (!__Pyx_RefNanny) {
  * 
  * cdef inline proc_string hash_sequence(seq):             # <<<<<<<<<<<<<<
  *     cdef proc_string s_proc
- *     s_proc.length = len(seq)
+ *     s_proc.length = <size_t>len(seq)
  */
 
   /*--- Wrapped vars code ---*/
@@ -14942,7 +14950,7 @@ static CYTHON_INLINE Py_UCS4 __Pyx_PyUnicode_AsPy_UCS4(PyObject* x) {
                 func_type zero = 0;\
                 if (exc && unlikely(value == (func_type)-1 && PyErr_Occurred()))\
                     return (target_type) -1;\
-                if (is_unsigned && unlikely(value < zero))\
+                if (is_unsigned && unlikely(CYTHON_CONDITION(value < zero)))\
                     goto raise_neg_overflow;\
                 else\
                     goto raise_overflow;\
