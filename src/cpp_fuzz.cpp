@@ -11310,7 +11310,7 @@ static CYTHON_INLINE proc_string __pyx_f_10cpp_common_hash_array(PyObject *__pyx
  * 
  * cdef inline proc_string hash_sequence(seq):             # <<<<<<<<<<<<<<
  *     cdef proc_string s_proc
- *     s_proc.length = <size_t>len(seq)
+ *     s_proc.length = len(seq)
  */
 
 static CYTHON_INLINE proc_string __pyx_f_10cpp_common_hash_sequence(PyObject *__pyx_v_seq) {
@@ -11352,15 +11352,15 @@ static CYTHON_INLINE proc_string __pyx_f_10cpp_common_hash_sequence(PyObject *__
   /* "cpp_common.pxd":85
  * cdef inline proc_string hash_sequence(seq):
  *     cdef proc_string s_proc
- *     s_proc.length = <size_t>len(seq)             # <<<<<<<<<<<<<<
+ *     s_proc.length = len(seq)             # <<<<<<<<<<<<<<
  * 
  *     s_proc.data = malloc(s_proc.length * sizeof(Py_hash_t))
  */
   __pyx_t_1 = PyObject_Length(__pyx_v_seq); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(1, 85, __pyx_L1_error)
-  __pyx_v_s_proc.length = ((size_t)__pyx_t_1);
+  __pyx_v_s_proc.length = __pyx_t_1;
 
   /* "cpp_common.pxd":87
- *     s_proc.length = <size_t>len(seq)
+ *     s_proc.length = len(seq)
  * 
  *     s_proc.data = malloc(s_proc.length * sizeof(Py_hash_t))             # <<<<<<<<<<<<<<
  * 
@@ -11648,7 +11648,7 @@ static CYTHON_INLINE proc_string __pyx_f_10cpp_common_hash_sequence(PyObject *__
  * 
  * cdef inline proc_string hash_sequence(seq):             # <<<<<<<<<<<<<<
  *     cdef proc_string s_proc
- *     s_proc.length = <size_t>len(seq)
+ *     s_proc.length = len(seq)
  */
 
   /* function exit code */
@@ -12527,7 +12527,7 @@ if (!__Pyx_RefNanny) {
  * 
  * cdef inline proc_string hash_sequence(seq):             # <<<<<<<<<<<<<<
  *     cdef proc_string s_proc
- *     s_proc.length = <size_t>len(seq)
+ *     s_proc.length = len(seq)
  */
 
   /*--- Wrapped vars code ---*/
@@ -14949,7 +14949,7 @@ static CYTHON_INLINE Py_UCS4 __Pyx_PyUnicode_AsPy_UCS4(PyObject* x) {
             if (unlikely(value != (func_type) (target_type) value)) {\
                 if (exc && unlikely(value == (func_type)-1 && PyErr_Occurred()))\
                     return (target_type) -1;\
-                if (is_unsigned && unlikely(CYTHON_CONDITION(value < 0)))\
+                if (CYTHON_CONDITION(is_unsigned && unlikely(value < 0)))\
                     goto raise_neg_overflow;\
                 else\
                     goto raise_overflow;\
@@ -15004,7 +15004,7 @@ static CYTHON_INLINE size_t __Pyx_PyInt_As_size_t(PyObject *x) {
     } else
 #endif
     if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
+        if (CYTHON_CONDITION(is_unsigned)) {
 #if CYTHON_USE_PYLONG_INTERNALS
             const digit* digits = ((PyLongObject*)x)->ob_digit;
             switch (Py_SIZE(x)) {
@@ -15200,7 +15200,7 @@ static CYTHON_INLINE unsigned char __Pyx_PyInt_As_unsigned_char(PyObject *x) {
     } else
 #endif
     if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
+        if (CYTHON_CONDITION(is_unsigned)) {
 #if CYTHON_USE_PYLONG_INTERNALS
             const digit* digits = ((PyLongObject*)x)->ob_digit;
             switch (Py_SIZE(x)) {
@@ -15396,7 +15396,7 @@ static CYTHON_INLINE unsigned short __Pyx_PyInt_As_unsigned_short(PyObject *x) {
     } else
 #endif
     if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
+        if (CYTHON_CONDITION(is_unsigned)) {
 #if CYTHON_USE_PYLONG_INTERNALS
             const digit* digits = ((PyLongObject*)x)->ob_digit;
             switch (Py_SIZE(x)) {
@@ -15592,7 +15592,7 @@ static CYTHON_INLINE unsigned int __Pyx_PyInt_As_unsigned_int(PyObject *x) {
     } else
 #endif
     if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
+        if (CYTHON_CONDITION(is_unsigned)) {
 #if CYTHON_USE_PYLONG_INTERNALS
             const digit* digits = ((PyLongObject*)x)->ob_digit;
             switch (Py_SIZE(x)) {
@@ -15788,7 +15788,7 @@ static CYTHON_INLINE unsigned long __Pyx_PyInt_As_unsigned_long(PyObject *x) {
     } else
 #endif
     if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
+        if (CYTHON_CONDITION(is_unsigned)) {
 #if CYTHON_USE_PYLONG_INTERNALS
             const digit* digits = ((PyLongObject*)x)->ob_digit;
             switch (Py_SIZE(x)) {
@@ -15984,7 +15984,7 @@ static CYTHON_INLINE unsigned PY_LONG_LONG __Pyx_PyInt_As_unsigned_PY_LONG_LONG(
     } else
 #endif
     if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
+        if (CYTHON_CONDITION(is_unsigned)) {
 #if CYTHON_USE_PYLONG_INTERNALS
             const digit* digits = ((PyLongObject*)x)->ob_digit;
             switch (Py_SIZE(x)) {
@@ -16233,7 +16233,7 @@ static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *x) {
     } else
 #endif
     if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
+        if (CYTHON_CONDITION(is_unsigned)) {
 #if CYTHON_USE_PYLONG_INTERNALS
             const digit* digits = ((PyLongObject*)x)->ob_digit;
             switch (Py_SIZE(x)) {
@@ -16429,7 +16429,7 @@ static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *x) {
     } else
 #endif
     if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
+        if (CYTHON_CONDITION(is_unsigned)) {
 #if CYTHON_USE_PYLONG_INTERNALS
             const digit* digits = ((PyLongObject*)x)->ob_digit;
             switch (Py_SIZE(x)) {

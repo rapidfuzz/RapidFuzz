@@ -4040,7 +4040,7 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
             if (unlikely(value != (func_type) (target_type) value)) {\
                 if (exc && unlikely(value == (func_type)-1 && PyErr_Occurred()))\
                     return (target_type) -1;\
-                if (is_unsigned && unlikely(CYTHON_CONDITION(value < 0)))\
+                if (CYTHON_CONDITION(is_unsigned && unlikely(value < 0)))\
                     goto raise_neg_overflow;\
                 else\
                     goto raise_overflow;\
@@ -4074,7 +4074,7 @@ static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *x) {
     } else
 #endif
     if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
+        if (CYTHON_CONDITION(is_unsigned)) {
 #if CYTHON_USE_PYLONG_INTERNALS
             const digit* digits = ((PyLongObject*)x)->ob_digit;
             switch (Py_SIZE(x)) {
@@ -4270,7 +4270,7 @@ static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *x) {
     } else
 #endif
     if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
+        if (CYTHON_CONDITION(is_unsigned)) {
 #if CYTHON_USE_PYLONG_INTERNALS
             const digit* digits = ((PyLongObject*)x)->ob_digit;
             switch (Py_SIZE(x)) {
