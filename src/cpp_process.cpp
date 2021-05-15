@@ -1966,7 +1966,7 @@ static void __Pyx_AddTraceback(const char *funcname, int c_line,
                                int py_line, const char *filename);
 
 /* GCCDiagnostics.proto */
-#if defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
+#if defined(__GNUC__) && !defined(__clang__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
 #define __Pyx_HAS_GCC_DIAGNOSTIC
 #endif
 
@@ -2010,6 +2010,11 @@ static void __Pyx_CppExn2PyErr() {
     PyErr_SetString(PyExc_RuntimeError, "Unknown exception");
   }
 }
+#endif
+
+/* ClangDiagnostics.proto */
+#if defined(__clang__)
+#define __Pyx_HAS_CLANG_DIAGNOSTIC
 #endif
 
 /* None.proto */
@@ -25663,9 +25668,9 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
 #endif
         }
     }
-#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunreachable-code"
+#ifdef __Pyx_HAS_CLANG_DIAGNOSTIC
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
 #endif
     {
         int one = 1; int little = (int)*(unsigned char *)&one;
@@ -25674,7 +25679,7 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
                                      little, !is_unsigned);
     }
 #ifdef __Pyx_HAS_GCC_DIAGNOSTIC
-#pragma GCC diagnostic pop
+#pragma clang diagnostic pop
 #endif
 }
 
