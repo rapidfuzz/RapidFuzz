@@ -4,7 +4,7 @@
 import unittest
 import pytest
 
-from rapidfuzz import process, fuzz, utils
+from rapidfuzz import fuzz, utils
 
 scorers = [
     fuzz.ratio,

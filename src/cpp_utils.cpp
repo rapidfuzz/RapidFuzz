@@ -313,12 +313,15 @@
 #   define CYTHON_UNUSED
 # endif
 #endif
-#ifndef CYTHON_MAYBE_UNUSED_VAR
+#ifndef CYTHON_UNUSED_VAR
 #  if defined(__cplusplus)
-     template<class T> void CYTHON_MAYBE_UNUSED_VAR( const T& ) { }
+     template<class T> void CYTHON_UNUSED_VAR( const T& ) { }
 #  else
-#    define CYTHON_MAYBE_UNUSED_VAR(x) (void)(x)
+#    define CYTHON_UNUSED_VAR(x) (void)(x)
 #  endif
+#endif
+#ifndef CYTHON_MAYBE_UNUSED_VAR
+  #define CYTHON_MAYBE_UNUSED_VAR(x) CYTHON_UNUSED_VAR(x)
 #endif
 #ifndef CYTHON_NCP_UNUSED
 # if CYTHON_COMPILING_IN_CPYTHON
@@ -1191,7 +1194,8 @@ static PyTypeObject* __Pyx_FetchCommonTypeFromSpec(PyType_Spec *spec, PyObject *
 
 /* PyMethodNew.proto */
 #if PY_MAJOR_VERSION >= 3
-static PyObject *__Pyx_PyMethod_New(PyObject *func, PyObject *self, CYTHON_UNUSED PyObject *typ) {
+static PyObject *__Pyx_PyMethod_New(PyObject *func, PyObject *self, PyObject *typ) {
+    CYTHON_UNUSED_VAR(typ);
     if (!self)
         return __Pyx_NewRef(func);
     return PyMethod_New(func, self);
@@ -2100,8 +2104,9 @@ static CYTHON_SMALL_CODE int __Pyx_copy_spec_to_module(PyObject *spec, PyObject 
     }
     return result;
 }
-static CYTHON_SMALL_CODE PyObject* __pyx_pymod_create(PyObject *spec, CYTHON_UNUSED PyModuleDef *def) {
+static CYTHON_SMALL_CODE PyObject* __pyx_pymod_create(PyObject *spec, PyModuleDef *def) {
     PyObject *module = NULL, *moddict, *modname;
+    CYTHON_UNUSED_VAR(def);
     if (__Pyx_check_single_interpreter())
         return NULL;
     if (__pyx_m)
@@ -2844,8 +2849,9 @@ static CYTHON_INLINE PyObject *__Pyx_PyVectorcall_FastCallDict(PyObject *func, _
 /* CythonFunctionShared */
 #include <structmember.h>
 static PyObject *
-__Pyx_CyFunction_get_doc(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *closure)
+__Pyx_CyFunction_get_doc(__pyx_CyFunctionObject *op, void *closure)
 {
+    CYTHON_UNUSED_VAR(closure);
     if (unlikely(op->func_doc == NULL)) {
         if (op->func.m_ml->ml_doc) {
 #if PY_MAJOR_VERSION >= 3
@@ -2864,8 +2870,9 @@ __Pyx_CyFunction_get_doc(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *closure
     return op->func_doc;
 }
 static int
-__Pyx_CyFunction_set_doc(__pyx_CyFunctionObject *op, PyObject *value, CYTHON_UNUSED void *context)
+__Pyx_CyFunction_set_doc(__pyx_CyFunctionObject *op, PyObject *value, void *context)
 {
+    CYTHON_UNUSED_VAR(context);
     if (value == NULL) {
         value = Py_None;
     }
@@ -2874,8 +2881,9 @@ __Pyx_CyFunction_set_doc(__pyx_CyFunctionObject *op, PyObject *value, CYTHON_UNU
     return 0;
 }
 static PyObject *
-__Pyx_CyFunction_get_name(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *context)
+__Pyx_CyFunction_get_name(__pyx_CyFunctionObject *op, void *context)
 {
+    CYTHON_UNUSED_VAR(context);
     if (unlikely(op->func_name == NULL)) {
 #if PY_MAJOR_VERSION >= 3
         op->func_name = PyUnicode_InternFromString(op->func.m_ml->ml_name);
@@ -2889,8 +2897,9 @@ __Pyx_CyFunction_get_name(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *contex
     return op->func_name;
 }
 static int
-__Pyx_CyFunction_set_name(__pyx_CyFunctionObject *op, PyObject *value, CYTHON_UNUSED void *context)
+__Pyx_CyFunction_set_name(__pyx_CyFunctionObject *op, PyObject *value, void *context)
 {
+    CYTHON_UNUSED_VAR(context);
 #if PY_MAJOR_VERSION >= 3
     if (unlikely(value == NULL || !PyUnicode_Check(value)))
 #else
@@ -2906,14 +2915,16 @@ __Pyx_CyFunction_set_name(__pyx_CyFunctionObject *op, PyObject *value, CYTHON_UN
     return 0;
 }
 static PyObject *
-__Pyx_CyFunction_get_qualname(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *context)
+__Pyx_CyFunction_get_qualname(__pyx_CyFunctionObject *op, void *context)
 {
+    CYTHON_UNUSED_VAR(context);
     Py_INCREF(op->func_qualname);
     return op->func_qualname;
 }
 static int
-__Pyx_CyFunction_set_qualname(__pyx_CyFunctionObject *op, PyObject *value, CYTHON_UNUSED void *context)
+__Pyx_CyFunction_set_qualname(__pyx_CyFunctionObject *op, PyObject *value, void *context)
 {
+    CYTHON_UNUSED_VAR(context);
 #if PY_MAJOR_VERSION >= 3
     if (unlikely(value == NULL || !PyUnicode_Check(value)))
 #else
@@ -2929,8 +2940,9 @@ __Pyx_CyFunction_set_qualname(__pyx_CyFunctionObject *op, PyObject *value, CYTHO
     return 0;
 }
 static PyObject *
-__Pyx_CyFunction_get_dict(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *context)
+__Pyx_CyFunction_get_dict(__pyx_CyFunctionObject *op, void *context)
 {
+    CYTHON_UNUSED_VAR(context);
     if (unlikely(op->func_dict == NULL)) {
         op->func_dict = PyDict_New();
         if (unlikely(op->func_dict == NULL))
@@ -2940,8 +2952,9 @@ __Pyx_CyFunction_get_dict(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *contex
     return op->func_dict;
 }
 static int
-__Pyx_CyFunction_set_dict(__pyx_CyFunctionObject *op, PyObject *value, CYTHON_UNUSED void *context)
+__Pyx_CyFunction_set_dict(__pyx_CyFunctionObject *op, PyObject *value, void *context)
 {
+    CYTHON_UNUSED_VAR(context);
     if (unlikely(value == NULL)) {
         PyErr_SetString(PyExc_TypeError,
                "function's dictionary may not be deleted");
@@ -2957,21 +2970,25 @@ __Pyx_CyFunction_set_dict(__pyx_CyFunctionObject *op, PyObject *value, CYTHON_UN
     return 0;
 }
 static PyObject *
-__Pyx_CyFunction_get_globals(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *context)
+__Pyx_CyFunction_get_globals(__pyx_CyFunctionObject *op, void *context)
 {
+    CYTHON_UNUSED_VAR(context);
     Py_INCREF(op->func_globals);
     return op->func_globals;
 }
 static PyObject *
-__Pyx_CyFunction_get_closure(CYTHON_UNUSED __pyx_CyFunctionObject *op, CYTHON_UNUSED void *context)
+__Pyx_CyFunction_get_closure(__pyx_CyFunctionObject *op, void *context)
 {
+    CYTHON_UNUSED_VAR(op);
+    CYTHON_UNUSED_VAR(context);
     Py_INCREF(Py_None);
     return Py_None;
 }
 static PyObject *
-__Pyx_CyFunction_get_code(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *context)
+__Pyx_CyFunction_get_code(__pyx_CyFunctionObject *op, void *context)
 {
     PyObject* result = (op->func_code) ? op->func_code : Py_None;
+    CYTHON_UNUSED_VAR(context);
     Py_INCREF(result);
     return result;
 }
@@ -2998,7 +3015,8 @@ __Pyx_CyFunction_init_defaults(__pyx_CyFunctionObject *op) {
     return result;
 }
 static int
-__Pyx_CyFunction_set_defaults(__pyx_CyFunctionObject *op, PyObject* value, CYTHON_UNUSED void *context) {
+__Pyx_CyFunction_set_defaults(__pyx_CyFunctionObject *op, PyObject* value, void *context) {
+    CYTHON_UNUSED_VAR(context);
     if (!value) {
         value = Py_None;
     } else if (unlikely(value != Py_None && !PyTuple_Check(value))) {
@@ -3011,8 +3029,9 @@ __Pyx_CyFunction_set_defaults(__pyx_CyFunctionObject *op, PyObject* value, CYTHO
     return 0;
 }
 static PyObject *
-__Pyx_CyFunction_get_defaults(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *context) {
+__Pyx_CyFunction_get_defaults(__pyx_CyFunctionObject *op, void *context) {
     PyObject* result = op->defaults_tuple;
+    CYTHON_UNUSED_VAR(context);
     if (unlikely(!result)) {
         if (op->defaults_getter) {
             if (unlikely(__Pyx_CyFunction_init_defaults(op) < 0)) return NULL;
@@ -3025,7 +3044,8 @@ __Pyx_CyFunction_get_defaults(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *co
     return result;
 }
 static int
-__Pyx_CyFunction_set_kwdefaults(__pyx_CyFunctionObject *op, PyObject* value, CYTHON_UNUSED void *context) {
+__Pyx_CyFunction_set_kwdefaults(__pyx_CyFunctionObject *op, PyObject* value, void *context) {
+    CYTHON_UNUSED_VAR(context);
     if (!value) {
         value = Py_None;
     } else if (unlikely(value != Py_None && !PyDict_Check(value))) {
@@ -3038,8 +3058,9 @@ __Pyx_CyFunction_set_kwdefaults(__pyx_CyFunctionObject *op, PyObject* value, CYT
     return 0;
 }
 static PyObject *
-__Pyx_CyFunction_get_kwdefaults(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *context) {
+__Pyx_CyFunction_get_kwdefaults(__pyx_CyFunctionObject *op, void *context) {
     PyObject* result = op->defaults_kwdict;
+    CYTHON_UNUSED_VAR(context);
     if (unlikely(!result)) {
         if (op->defaults_getter) {
             if (unlikely(__Pyx_CyFunction_init_defaults(op) < 0)) return NULL;
@@ -3052,7 +3073,8 @@ __Pyx_CyFunction_get_kwdefaults(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *
     return result;
 }
 static int
-__Pyx_CyFunction_set_annotations(__pyx_CyFunctionObject *op, PyObject* value, CYTHON_UNUSED void *context) {
+__Pyx_CyFunction_set_annotations(__pyx_CyFunctionObject *op, PyObject* value, void *context) {
+    CYTHON_UNUSED_VAR(context);
     if (!value || value == Py_None) {
         value = NULL;
     } else if (unlikely(!PyDict_Check(value))) {
@@ -3065,8 +3087,9 @@ __Pyx_CyFunction_set_annotations(__pyx_CyFunctionObject *op, PyObject* value, CY
     return 0;
 }
 static PyObject *
-__Pyx_CyFunction_get_annotations(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *context) {
+__Pyx_CyFunction_get_annotations(__pyx_CyFunctionObject *op, void *context) {
     PyObject* result = op->func_annotations;
+    CYTHON_UNUSED_VAR(context);
     if (unlikely(!result)) {
         result = PyDict_New();
         if (unlikely(!result)) return NULL;
@@ -3076,8 +3099,9 @@ __Pyx_CyFunction_get_annotations(__pyx_CyFunctionObject *op, CYTHON_UNUSED void 
     return result;
 }
 static PyObject *
-__Pyx_CyFunction_get_is_coroutine(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *context) {
+__Pyx_CyFunction_get_is_coroutine(__pyx_CyFunctionObject *op, void *context) {
     int is_coroutine;
+    CYTHON_UNUSED_VAR(context);
     if (op->func_is_coroutine) {
         return __Pyx_NewRef(op->func_is_coroutine);
     }
@@ -3137,8 +3161,9 @@ static PyMemberDef __pyx_CyFunction_members[] = {
     {0, 0, 0,  0, 0}
 };
 static PyObject *
-__Pyx_CyFunction_reduce(__pyx_CyFunctionObject *m, CYTHON_UNUSED PyObject *args)
+__Pyx_CyFunction_reduce(__pyx_CyFunctionObject *m, PyObject *args)
 {
+    CYTHON_UNUSED_VAR(args);
 #if PY_MAJOR_VERSION >= 3
     Py_INCREF(m->func_qualname);
     return m->func_qualname;

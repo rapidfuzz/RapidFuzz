@@ -31,7 +31,7 @@ cdef inline proc_string hash_array(arr):
     # TODO on Cpython this does not require any copies
     cdef proc_string s_proc
     cdef Py_UCS4 typecode = <Py_UCS4>arr.typecode
-    s_proc.length = len(arr)
+    s_proc.length = <size_t>len(arr)
 
     if typecode in {'f', 'd'}: # float/double are hashed
         s_proc.data = malloc(s_proc.length * sizeof(Py_hash_t))
