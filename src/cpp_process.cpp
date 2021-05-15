@@ -25590,10 +25590,6 @@ static CYTHON_INLINE size_t __Pyx_PyInt_As_size_t(PyObject *x) {
 #endif
             }
         }
-#ifdef __Pyx_HAS_CLANG_DIAGNOSTIC
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunreachable-code"
-#endif
         {
 #if (CYTHON_COMPILING_IN_PYPY || CYTHON_COMPILING_IN_LIMITED_API) && !defined(_PyLong_AsByteArray)
             PyErr_SetString(PyExc_RuntimeError,
@@ -25621,9 +25617,6 @@ static CYTHON_INLINE size_t __Pyx_PyInt_As_size_t(PyObject *x) {
 #endif
             return (size_t) -1;
         }
-#ifdef __Pyx_HAS_CLANG_DIAGNOSTIC
-#pragma clang diagnostic pop
-#endif
     } else {
         size_t val;
         PyObject *tmp = __Pyx_PyNumber_IntOrLong(x);
@@ -25672,19 +25665,12 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
 #endif
         }
     }
-#ifdef __Pyx_HAS_CLANG_DIAGNOSTIC
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunreachable-code"
-#endif
     {
         int one = 1; int little = (int)*(unsigned char *)&one;
         unsigned char *bytes = (unsigned char *)&value;
         return _PyLong_FromByteArray(bytes, sizeof(long),
                                      little, !is_unsigned);
     }
-#ifdef __Pyx_HAS_CLANG_DIAGNOSTIC
-#pragma clang diagnostic pop
-#endif
 }
 
 /* FormatTypeName */
@@ -25853,10 +25839,6 @@ static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *x) {
 #endif
             }
         }
-#ifdef __Pyx_HAS_CLANG_DIAGNOSTIC
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunreachable-code"
-#endif
         {
 #if (CYTHON_COMPILING_IN_PYPY || CYTHON_COMPILING_IN_LIMITED_API) && !defined(_PyLong_AsByteArray)
             PyErr_SetString(PyExc_RuntimeError,
@@ -25884,9 +25866,6 @@ static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *x) {
 #endif
             return (long) -1;
         }
-#ifdef __Pyx_HAS_CLANG_DIAGNOSTIC
-#pragma clang diagnostic pop
-#endif
     } else {
         long val;
         PyObject *tmp = __Pyx_PyNumber_IntOrLong(x);
@@ -26056,10 +26035,6 @@ static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *x) {
 #endif
             }
         }
-#ifdef __Pyx_HAS_CLANG_DIAGNOSTIC
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunreachable-code"
-#endif
         {
 #if (CYTHON_COMPILING_IN_PYPY || CYTHON_COMPILING_IN_LIMITED_API) && !defined(_PyLong_AsByteArray)
             PyErr_SetString(PyExc_RuntimeError,
@@ -26087,9 +26062,6 @@ static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *x) {
 #endif
             return (int) -1;
         }
-#ifdef __Pyx_HAS_CLANG_DIAGNOSTIC
-#pragma clang diagnostic pop
-#endif
     } else {
         int val;
         PyObject *tmp = __Pyx_PyNumber_IntOrLong(x);
