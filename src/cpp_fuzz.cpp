@@ -16199,12 +16199,19 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
 #endif
         }
     }
+#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunreachable-code"
+#endif
     {
         int one = 1; int little = (int)*(unsigned char *)&one;
         unsigned char *bytes = (unsigned char *)&value;
         return _PyLong_FromByteArray(bytes, sizeof(long),
                                      little, !is_unsigned);
     }
+#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
+#pragma GCC diagnostic pop
+#endif
 }
 
 /* CIntFromPy */
