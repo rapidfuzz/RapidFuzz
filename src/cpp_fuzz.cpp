@@ -1589,6 +1589,11 @@ static void __Pyx_CppExn2PyErr() {
 /* UnicodeAsUCS4.proto */
 static CYTHON_INLINE Py_UCS4 __Pyx_PyUnicode_AsPy_UCS4(PyObject*);
 
+/* ClangDiagnostics.proto */
+#if defined(__clang__)
+#define __Pyx_HAS_CLANG_DIAGNOSTIC
+#endif
+
 /* GCCDiagnostics.proto */
 #if defined(__GNUC__) && !defined(__clang__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
 #define __Pyx_HAS_GCC_DIAGNOSTIC
@@ -1628,11 +1633,6 @@ typedef const char *__Pyx_TypeName;
 #define __Pyx_FMT_TYPENAME "%.200s"
 #define __Pyx_PyType_GetName(tp) ((tp)->tp_name)
 #define __Pyx_DECREF_TypeName(obj)
-#endif
-
-/* ClangDiagnostics.proto */
-#if defined(__clang__)
-#define __Pyx_HAS_CLANG_DIAGNOSTIC
 #endif
 
 /* CIntToPy.proto */
@@ -15012,7 +15012,7 @@ static CYTHON_INLINE size_t __Pyx_PyInt_As_size_t(PyObject *x) {
     } else
 #endif
     if (likely(PyLong_Check(x))) {
-        if (CYTHON_CONDITION(is_unsigned)) {
+        if (is_unsigned) {
 #if CYTHON_USE_PYLONG_INTERNALS
             const digit* digits = ((PyLongObject*)x)->ob_digit;
             switch (Py_SIZE(x)) {
@@ -15138,6 +15138,10 @@ static CYTHON_INLINE size_t __Pyx_PyInt_As_size_t(PyObject *x) {
 #endif
             }
         }
+#ifdef __Pyx_HAS_CLANG_DIAGNOSTIC
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
+#endif
         {
 #if (CYTHON_COMPILING_IN_PYPY || CYTHON_COMPILING_IN_LIMITED_API) && !defined(_PyLong_AsByteArray)
             PyErr_SetString(PyExc_RuntimeError,
@@ -15165,6 +15169,9 @@ static CYTHON_INLINE size_t __Pyx_PyInt_As_size_t(PyObject *x) {
 #endif
             return (size_t) -1;
         }
+#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
+#pragma clang diagnostic pop
+#endif
     } else {
         size_t val;
         PyObject *tmp = __Pyx_PyNumber_IntOrLong(x);
@@ -15208,7 +15215,7 @@ static CYTHON_INLINE unsigned char __Pyx_PyInt_As_unsigned_char(PyObject *x) {
     } else
 #endif
     if (likely(PyLong_Check(x))) {
-        if (CYTHON_CONDITION(is_unsigned)) {
+        if (is_unsigned) {
 #if CYTHON_USE_PYLONG_INTERNALS
             const digit* digits = ((PyLongObject*)x)->ob_digit;
             switch (Py_SIZE(x)) {
@@ -15334,6 +15341,10 @@ static CYTHON_INLINE unsigned char __Pyx_PyInt_As_unsigned_char(PyObject *x) {
 #endif
             }
         }
+#ifdef __Pyx_HAS_CLANG_DIAGNOSTIC
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
+#endif
         {
 #if (CYTHON_COMPILING_IN_PYPY || CYTHON_COMPILING_IN_LIMITED_API) && !defined(_PyLong_AsByteArray)
             PyErr_SetString(PyExc_RuntimeError,
@@ -15361,6 +15372,9 @@ static CYTHON_INLINE unsigned char __Pyx_PyInt_As_unsigned_char(PyObject *x) {
 #endif
             return (unsigned char) -1;
         }
+#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
+#pragma clang diagnostic pop
+#endif
     } else {
         unsigned char val;
         PyObject *tmp = __Pyx_PyNumber_IntOrLong(x);
@@ -15404,7 +15418,7 @@ static CYTHON_INLINE unsigned short __Pyx_PyInt_As_unsigned_short(PyObject *x) {
     } else
 #endif
     if (likely(PyLong_Check(x))) {
-        if (CYTHON_CONDITION(is_unsigned)) {
+        if (is_unsigned) {
 #if CYTHON_USE_PYLONG_INTERNALS
             const digit* digits = ((PyLongObject*)x)->ob_digit;
             switch (Py_SIZE(x)) {
@@ -15530,6 +15544,10 @@ static CYTHON_INLINE unsigned short __Pyx_PyInt_As_unsigned_short(PyObject *x) {
 #endif
             }
         }
+#ifdef __Pyx_HAS_CLANG_DIAGNOSTIC
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
+#endif
         {
 #if (CYTHON_COMPILING_IN_PYPY || CYTHON_COMPILING_IN_LIMITED_API) && !defined(_PyLong_AsByteArray)
             PyErr_SetString(PyExc_RuntimeError,
@@ -15557,6 +15575,9 @@ static CYTHON_INLINE unsigned short __Pyx_PyInt_As_unsigned_short(PyObject *x) {
 #endif
             return (unsigned short) -1;
         }
+#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
+#pragma clang diagnostic pop
+#endif
     } else {
         unsigned short val;
         PyObject *tmp = __Pyx_PyNumber_IntOrLong(x);
@@ -15600,7 +15621,7 @@ static CYTHON_INLINE unsigned int __Pyx_PyInt_As_unsigned_int(PyObject *x) {
     } else
 #endif
     if (likely(PyLong_Check(x))) {
-        if (CYTHON_CONDITION(is_unsigned)) {
+        if (is_unsigned) {
 #if CYTHON_USE_PYLONG_INTERNALS
             const digit* digits = ((PyLongObject*)x)->ob_digit;
             switch (Py_SIZE(x)) {
@@ -15726,6 +15747,10 @@ static CYTHON_INLINE unsigned int __Pyx_PyInt_As_unsigned_int(PyObject *x) {
 #endif
             }
         }
+#ifdef __Pyx_HAS_CLANG_DIAGNOSTIC
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
+#endif
         {
 #if (CYTHON_COMPILING_IN_PYPY || CYTHON_COMPILING_IN_LIMITED_API) && !defined(_PyLong_AsByteArray)
             PyErr_SetString(PyExc_RuntimeError,
@@ -15753,6 +15778,9 @@ static CYTHON_INLINE unsigned int __Pyx_PyInt_As_unsigned_int(PyObject *x) {
 #endif
             return (unsigned int) -1;
         }
+#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
+#pragma clang diagnostic pop
+#endif
     } else {
         unsigned int val;
         PyObject *tmp = __Pyx_PyNumber_IntOrLong(x);
@@ -15796,7 +15824,7 @@ static CYTHON_INLINE unsigned long __Pyx_PyInt_As_unsigned_long(PyObject *x) {
     } else
 #endif
     if (likely(PyLong_Check(x))) {
-        if (CYTHON_CONDITION(is_unsigned)) {
+        if (is_unsigned) {
 #if CYTHON_USE_PYLONG_INTERNALS
             const digit* digits = ((PyLongObject*)x)->ob_digit;
             switch (Py_SIZE(x)) {
@@ -15922,6 +15950,10 @@ static CYTHON_INLINE unsigned long __Pyx_PyInt_As_unsigned_long(PyObject *x) {
 #endif
             }
         }
+#ifdef __Pyx_HAS_CLANG_DIAGNOSTIC
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
+#endif
         {
 #if (CYTHON_COMPILING_IN_PYPY || CYTHON_COMPILING_IN_LIMITED_API) && !defined(_PyLong_AsByteArray)
             PyErr_SetString(PyExc_RuntimeError,
@@ -15949,6 +15981,9 @@ static CYTHON_INLINE unsigned long __Pyx_PyInt_As_unsigned_long(PyObject *x) {
 #endif
             return (unsigned long) -1;
         }
+#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
+#pragma clang diagnostic pop
+#endif
     } else {
         unsigned long val;
         PyObject *tmp = __Pyx_PyNumber_IntOrLong(x);
@@ -15992,7 +16027,7 @@ static CYTHON_INLINE unsigned PY_LONG_LONG __Pyx_PyInt_As_unsigned_PY_LONG_LONG(
     } else
 #endif
     if (likely(PyLong_Check(x))) {
-        if (CYTHON_CONDITION(is_unsigned)) {
+        if (is_unsigned) {
 #if CYTHON_USE_PYLONG_INTERNALS
             const digit* digits = ((PyLongObject*)x)->ob_digit;
             switch (Py_SIZE(x)) {
@@ -16118,6 +16153,10 @@ static CYTHON_INLINE unsigned PY_LONG_LONG __Pyx_PyInt_As_unsigned_PY_LONG_LONG(
 #endif
             }
         }
+#ifdef __Pyx_HAS_CLANG_DIAGNOSTIC
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
+#endif
         {
 #if (CYTHON_COMPILING_IN_PYPY || CYTHON_COMPILING_IN_LIMITED_API) && !defined(_PyLong_AsByteArray)
             PyErr_SetString(PyExc_RuntimeError,
@@ -16145,6 +16184,9 @@ static CYTHON_INLINE unsigned PY_LONG_LONG __Pyx_PyInt_As_unsigned_PY_LONG_LONG(
 #endif
             return (unsigned PY_LONG_LONG) -1;
         }
+#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
+#pragma clang diagnostic pop
+#endif
     } else {
         unsigned PY_LONG_LONG val;
         PyObject *tmp = __Pyx_PyNumber_IntOrLong(x);
@@ -16248,7 +16290,7 @@ static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *x) {
     } else
 #endif
     if (likely(PyLong_Check(x))) {
-        if (CYTHON_CONDITION(is_unsigned)) {
+        if (is_unsigned) {
 #if CYTHON_USE_PYLONG_INTERNALS
             const digit* digits = ((PyLongObject*)x)->ob_digit;
             switch (Py_SIZE(x)) {
@@ -16374,6 +16416,10 @@ static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *x) {
 #endif
             }
         }
+#ifdef __Pyx_HAS_CLANG_DIAGNOSTIC
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
+#endif
         {
 #if (CYTHON_COMPILING_IN_PYPY || CYTHON_COMPILING_IN_LIMITED_API) && !defined(_PyLong_AsByteArray)
             PyErr_SetString(PyExc_RuntimeError,
@@ -16401,6 +16447,9 @@ static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *x) {
 #endif
             return (long) -1;
         }
+#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
+#pragma clang diagnostic pop
+#endif
     } else {
         long val;
         PyObject *tmp = __Pyx_PyNumber_IntOrLong(x);
@@ -16444,7 +16493,7 @@ static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *x) {
     } else
 #endif
     if (likely(PyLong_Check(x))) {
-        if (CYTHON_CONDITION(is_unsigned)) {
+        if (is_unsigned) {
 #if CYTHON_USE_PYLONG_INTERNALS
             const digit* digits = ((PyLongObject*)x)->ob_digit;
             switch (Py_SIZE(x)) {
@@ -16570,6 +16619,10 @@ static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *x) {
 #endif
             }
         }
+#ifdef __Pyx_HAS_CLANG_DIAGNOSTIC
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
+#endif
         {
 #if (CYTHON_COMPILING_IN_PYPY || CYTHON_COMPILING_IN_LIMITED_API) && !defined(_PyLong_AsByteArray)
             PyErr_SetString(PyExc_RuntimeError,
@@ -16597,6 +16650,9 @@ static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *x) {
 #endif
             return (int) -1;
         }
+#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
+#pragma clang diagnostic pop
+#endif
     } else {
         int val;
         PyObject *tmp = __Pyx_PyNumber_IntOrLong(x);
