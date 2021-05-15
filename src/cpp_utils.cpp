@@ -4003,7 +4003,7 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
 #pragma GCC diagnostic pop
 #endif
     const int is_unsigned = neg_one > const_zero;
-    if (is_unsigned) {
+    if (CYTHON_CONDITION(is_unsigned)) {
         if (CYTHON_CONDITION(sizeof(long) < sizeof(long))) {
             return PyInt_FromLong((long) value);
         } else if (CYTHON_CONDITION(sizeof(long) <= sizeof(unsigned long))) {

@@ -82,7 +82,7 @@ cdef inline proc_string hash_array(arr):
 
 cdef inline proc_string hash_sequence(seq):
     cdef proc_string s_proc
-    s_proc.length = len(seq)
+    s_proc.length = <size_t>len(seq)
 
     s_proc.data = malloc(s_proc.length * sizeof(Py_hash_t))
 

@@ -6476,7 +6476,7 @@ static CYTHON_INLINE proc_string __pyx_f_10cpp_common_hash_array(PyObject *__pyx
  * 
  * cdef inline proc_string hash_sequence(seq):             # <<<<<<<<<<<<<<
  *     cdef proc_string s_proc
- *     s_proc.length = len(seq)
+ *     s_proc.length = <size_t>len(seq)
  */
 
 static CYTHON_INLINE proc_string __pyx_f_10cpp_common_hash_sequence(PyObject *__pyx_v_seq) {
@@ -6518,15 +6518,15 @@ static CYTHON_INLINE proc_string __pyx_f_10cpp_common_hash_sequence(PyObject *__
   /* "cpp_common.pxd":85
  * cdef inline proc_string hash_sequence(seq):
  *     cdef proc_string s_proc
- *     s_proc.length = len(seq)             # <<<<<<<<<<<<<<
+ *     s_proc.length = <size_t>len(seq)             # <<<<<<<<<<<<<<
  * 
  *     s_proc.data = malloc(s_proc.length * sizeof(Py_hash_t))
  */
   __pyx_t_1 = PyObject_Length(__pyx_v_seq); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(1, 85, __pyx_L1_error)
-  __pyx_v_s_proc.length = __pyx_t_1;
+  __pyx_v_s_proc.length = ((size_t)__pyx_t_1);
 
   /* "cpp_common.pxd":87
- *     s_proc.length = len(seq)
+ *     s_proc.length = <size_t>len(seq)
  * 
  *     s_proc.data = malloc(s_proc.length * sizeof(Py_hash_t))             # <<<<<<<<<<<<<<
  * 
@@ -6814,7 +6814,7 @@ static CYTHON_INLINE proc_string __pyx_f_10cpp_common_hash_sequence(PyObject *__
  * 
  * cdef inline proc_string hash_sequence(seq):             # <<<<<<<<<<<<<<
  *     cdef proc_string s_proc
- *     s_proc.length = len(seq)
+ *     s_proc.length = <size_t>len(seq)
  */
 
   /* function exit code */
@@ -7526,7 +7526,7 @@ if (!__Pyx_RefNanny) {
  * 
  * cdef inline proc_string hash_sequence(seq):             # <<<<<<<<<<<<<<
  *     cdef proc_string s_proc
- *     s_proc.length = len(seq)
+ *     s_proc.length = <size_t>len(seq)
  */
 
   /*--- Wrapped vars code ---*/
@@ -11241,7 +11241,7 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
 #pragma GCC diagnostic pop
 #endif
     const int is_unsigned = neg_one > const_zero;
-    if (is_unsigned) {
+    if (CYTHON_CONDITION(is_unsigned)) {
         if (CYTHON_CONDITION(sizeof(long) < sizeof(long))) {
             return PyInt_FromLong((long) value);
         } else if (CYTHON_CONDITION(sizeof(long) <= sizeof(unsigned long))) {
