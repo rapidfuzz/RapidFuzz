@@ -2170,7 +2170,7 @@ static CYTHON_SMALL_CODE int __pyx_pymod_exec_cpp_utils(PyObject *__pyx_pyinit_m
   #elif CYTHON_COMPILING_IN_LIMITED_API
   __pyx_t_1 = PyModule_Create(&__pyx_moduledef); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (unlikely((PyState_AddModule(__pyx_t_1, &__pyx_moduledef) < 0))) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (unlikely(CYTHON_CONDITION(PyState_AddModule(__pyx_t_1, &__pyx_moduledef) < 0))) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   #else
   __pyx_m = PyModule_Create(&__pyx_moduledef);
@@ -2236,7 +2236,7 @@ if (!__Pyx_RefNanny) {
   {
     PyObject *modules = PyImport_GetModuleDict(); if (unlikely(!modules)) __PYX_ERR(0, 1, __pyx_L1_error)
     if (!PyDict_GetItemString(modules, "cpp_utils")) {
-      if (unlikely((PyDict_SetItemString(modules, "cpp_utils", __pyx_m) < 0))) __PYX_ERR(0, 1, __pyx_L1_error)
+      if (unlikely(CYTHON_CONDITION(PyDict_SetItemString(modules, "cpp_utils", __pyx_m) < 0))) __PYX_ERR(0, 1, __pyx_L1_error)
     }
   }
   #endif
@@ -4002,20 +4002,20 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
 #endif
     const int is_unsigned = neg_one > const_zero;
     if (is_unsigned) {
-        if (sizeof(long) < sizeof(long)) {
+        if (CYTHON_CONDITION(sizeof(long) < sizeof(long))) {
             return PyInt_FromLong((long) value);
-        } else if (sizeof(long) <= sizeof(unsigned long)) {
+        } else if (CYTHON_CONDITION(sizeof(long) <= sizeof(unsigned long))) {
             return PyLong_FromUnsignedLong((unsigned long) value);
 #ifdef HAVE_LONG_LONG
-        } else if (sizeof(long) <= sizeof(unsigned PY_LONG_LONG)) {
+        } else if (CYTHON_CONDITION(sizeof(long) <= sizeof(unsigned PY_LONG_LONG))) {
             return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
 #endif
         }
     } else {
-        if (sizeof(long) <= sizeof(long)) {
+        if (CYTHON_CONDITION(sizeof(long) <= sizeof(long))) {
             return PyInt_FromLong((long) value);
 #ifdef HAVE_LONG_LONG
-        } else if (sizeof(long) <= sizeof(PY_LONG_LONG)) {
+        } else if (CYTHON_CONDITION(sizeof(long) <= sizeof(PY_LONG_LONG))) {
             return PyLong_FromLongLong((PY_LONG_LONG) value);
 #endif
         }
@@ -4036,12 +4036,11 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
 #define __PYX__VERIFY_RETURN_INT(target_type, func_type, func_value, exc)\
     {\
         func_type value = func_value;\
-        if (sizeof(target_type) < sizeof(func_type)) {\
+        if (CYTHON_CONDITION(sizeof(target_type) < sizeof(func_type))) {\
             if (unlikely(value != (func_type) (target_type) value)) {\
-                func_type zero = 0;\
                 if (exc && unlikely(value == (func_type)-1 && PyErr_Occurred()))\
                     return (target_type) -1;\
-                if (is_unsigned && unlikely(CYTHON_CONDITION(value < zero)))\
+                if (is_unsigned && unlikely(CYTHON_CONDITION(value < 0)))\
                     goto raise_neg_overflow;\
                 else\
                     goto raise_overflow;\
@@ -4063,7 +4062,7 @@ static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *x) {
     const int is_unsigned = neg_one > const_zero;
 #if PY_MAJOR_VERSION < 3
     if (likely(PyInt_Check(x))) {
-        if ((sizeof(long) < sizeof(long))) {
+        if (CYTHON_CONDITION(sizeof(long) < sizeof(long))) {
             __PYX_VERIFY_RETURN_INT(long, long, PyInt_AS_LONG(x))
         } else {
             long val = PyInt_AS_LONG(x);
@@ -4082,28 +4081,28 @@ static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *x) {
                 case  0: return (long) 0;
                 case  1: __PYX_VERIFY_RETURN_INT(long, digit, digits[0])
                 case 2:
-                    if ((8 * sizeof(long) > 1 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 2 * PyLong_SHIFT)) {
+                    if (CYTHON_CONDITION(8 * sizeof(long) > 1 * PyLong_SHIFT)) {
+                        if (CYTHON_CONDITION(8 * sizeof(unsigned long) > 2 * PyLong_SHIFT)) {
                             __PYX_VERIFY_RETURN_INT(long, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(long) >= 2 * PyLong_SHIFT)) {
+                        } else if (CYTHON_CONDITION(8 * sizeof(long) >= 2 * PyLong_SHIFT)) {
                             return (long) (((((long)digits[1]) << PyLong_SHIFT) | (long)digits[0]));
                         }
                     }
                     break;
                 case 3:
-                    if ((8 * sizeof(long) > 2 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 3 * PyLong_SHIFT)) {
+                    if (CYTHON_CONDITION(8 * sizeof(long) > 2 * PyLong_SHIFT)) {
+                        if (CYTHON_CONDITION(8 * sizeof(unsigned long) > 3 * PyLong_SHIFT)) {
                             __PYX_VERIFY_RETURN_INT(long, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(long) >= 3 * PyLong_SHIFT)) {
+                        } else if (CYTHON_CONDITION(8 * sizeof(long) >= 3 * PyLong_SHIFT)) {
                             return (long) (((((((long)digits[2]) << PyLong_SHIFT) | (long)digits[1]) << PyLong_SHIFT) | (long)digits[0]));
                         }
                     }
                     break;
                 case 4:
-                    if ((8 * sizeof(long) > 3 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 4 * PyLong_SHIFT)) {
+                    if (CYTHON_CONDITION(8 * sizeof(long) > 3 * PyLong_SHIFT)) {
+                        if (CYTHON_CONDITION(8 * sizeof(unsigned long) > 4 * PyLong_SHIFT)) {
                             __PYX_VERIFY_RETURN_INT(long, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(long) >= 4 * PyLong_SHIFT)) {
+                        } else if (CYTHON_CONDITION(8 * sizeof(long) >= 4 * PyLong_SHIFT)) {
                             return (long) (((((((((long)digits[3]) << PyLong_SHIFT) | (long)digits[2]) << PyLong_SHIFT) | (long)digits[1]) << PyLong_SHIFT) | (long)digits[0]));
                         }
                     }
@@ -4123,10 +4122,10 @@ static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *x) {
                     goto raise_neg_overflow;
             }
 #endif
-            if ((sizeof(long) <= sizeof(unsigned long))) {
+            if (CYTHON_CONDITION(sizeof(long) <= sizeof(unsigned long))) {
                 __PYX_VERIFY_RETURN_INT_EXC(long, unsigned long, PyLong_AsUnsignedLong(x))
 #ifdef HAVE_LONG_LONG
-            } else if ((sizeof(long) <= sizeof(unsigned PY_LONG_LONG))) {
+            } else if (CYTHON_CONDITION(sizeof(long) <= sizeof(unsigned PY_LONG_LONG))) {
                 __PYX_VERIFY_RETURN_INT_EXC(long, unsigned PY_LONG_LONG, PyLong_AsUnsignedLongLong(x))
 #endif
             }
@@ -4138,65 +4137,65 @@ static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *x) {
                 case -1: __PYX_VERIFY_RETURN_INT(long, sdigit, (sdigit) (-(sdigit)digits[0]))
                 case  1: __PYX_VERIFY_RETURN_INT(long,  digit, +digits[0])
                 case -2:
-                    if ((8 * sizeof(long) - 1 > 1 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 2 * PyLong_SHIFT)) {
+                    if (CYTHON_CONDITION(8 * sizeof(long) - 1 > 1 * PyLong_SHIFT)) {
+                        if (CYTHON_CONDITION(8 * sizeof(unsigned long) > 2 * PyLong_SHIFT)) {
                             __PYX_VERIFY_RETURN_INT(long, long, -(long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(long) - 1 > 2 * PyLong_SHIFT)) {
+                        } else if (CYTHON_CONDITION(8 * sizeof(long) - 1 > 2 * PyLong_SHIFT)) {
                             return (long) (((long)-1)*(((((long)digits[1]) << PyLong_SHIFT) | (long)digits[0])));
                         }
                     }
                     break;
                 case 2:
-                    if ((8 * sizeof(long) > 1 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 2 * PyLong_SHIFT)) {
+                    if (CYTHON_CONDITION(8 * sizeof(long) > 1 * PyLong_SHIFT)) {
+                        if (CYTHON_CONDITION(8 * sizeof(unsigned long) > 2 * PyLong_SHIFT)) {
                             __PYX_VERIFY_RETURN_INT(long, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(long) - 1 > 2 * PyLong_SHIFT)) {
+                        } else if (CYTHON_CONDITION(8 * sizeof(long) - 1 > 2 * PyLong_SHIFT)) {
                             return (long) ((((((long)digits[1]) << PyLong_SHIFT) | (long)digits[0])));
                         }
                     }
                     break;
                 case -3:
-                    if ((8 * sizeof(long) - 1 > 2 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 3 * PyLong_SHIFT)) {
+                    if (CYTHON_CONDITION(8 * sizeof(long) - 1 > 2 * PyLong_SHIFT)) {
+                        if (CYTHON_CONDITION(8 * sizeof(unsigned long) > 3 * PyLong_SHIFT)) {
                             __PYX_VERIFY_RETURN_INT(long, long, -(long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(long) - 1 > 3 * PyLong_SHIFT)) {
+                        } else if (CYTHON_CONDITION(8 * sizeof(long) - 1 > 3 * PyLong_SHIFT)) {
                             return (long) (((long)-1)*(((((((long)digits[2]) << PyLong_SHIFT) | (long)digits[1]) << PyLong_SHIFT) | (long)digits[0])));
                         }
                     }
                     break;
                 case 3:
-                    if ((8 * sizeof(long) > 2 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 3 * PyLong_SHIFT)) {
+                    if (CYTHON_CONDITION(8 * sizeof(long) > 2 * PyLong_SHIFT)) {
+                        if (CYTHON_CONDITION(8 * sizeof(unsigned long) > 3 * PyLong_SHIFT)) {
                             __PYX_VERIFY_RETURN_INT(long, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(long) - 1 > 3 * PyLong_SHIFT)) {
+                        } else if (CYTHON_CONDITION(8 * sizeof(long) - 1 > 3 * PyLong_SHIFT)) {
                             return (long) ((((((((long)digits[2]) << PyLong_SHIFT) | (long)digits[1]) << PyLong_SHIFT) | (long)digits[0])));
                         }
                     }
                     break;
                 case -4:
-                    if ((8 * sizeof(long) - 1 > 3 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 4 * PyLong_SHIFT)) {
+                    if (CYTHON_CONDITION(8 * sizeof(long) - 1 > 3 * PyLong_SHIFT)) {
+                        if (CYTHON_CONDITION(8 * sizeof(unsigned long) > 4 * PyLong_SHIFT)) {
                             __PYX_VERIFY_RETURN_INT(long, long, -(long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(long) - 1 > 4 * PyLong_SHIFT)) {
+                        } else if (CYTHON_CONDITION(8 * sizeof(long) - 1 > 4 * PyLong_SHIFT)) {
                             return (long) (((long)-1)*(((((((((long)digits[3]) << PyLong_SHIFT) | (long)digits[2]) << PyLong_SHIFT) | (long)digits[1]) << PyLong_SHIFT) | (long)digits[0])));
                         }
                     }
                     break;
                 case 4:
-                    if ((8 * sizeof(long) > 3 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 4 * PyLong_SHIFT)) {
+                    if (CYTHON_CONDITION(8 * sizeof(long) > 3 * PyLong_SHIFT)) {
+                        if (CYTHON_CONDITION(8 * sizeof(unsigned long) > 4 * PyLong_SHIFT)) {
                             __PYX_VERIFY_RETURN_INT(long, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(long) - 1 > 4 * PyLong_SHIFT)) {
+                        } else if (CYTHON_CONDITION(8 * sizeof(long) - 1 > 4 * PyLong_SHIFT)) {
                             return (long) ((((((((((long)digits[3]) << PyLong_SHIFT) | (long)digits[2]) << PyLong_SHIFT) | (long)digits[1]) << PyLong_SHIFT) | (long)digits[0])));
                         }
                     }
                     break;
             }
 #endif
-            if ((sizeof(long) <= sizeof(long))) {
+            if (CYTHON_CONDITION(sizeof(long) <= sizeof(long))) {
                 __PYX_VERIFY_RETURN_INT_EXC(long, long, PyLong_AsLong(x))
 #ifdef HAVE_LONG_LONG
-            } else if ((sizeof(long) <= sizeof(PY_LONG_LONG))) {
+            } else if (CYTHON_CONDITION(sizeof(long) <= sizeof(PY_LONG_LONG))) {
                 __PYX_VERIFY_RETURN_INT_EXC(long, PY_LONG_LONG, PyLong_AsLongLong(x))
 #endif
             }
@@ -4259,7 +4258,7 @@ static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *x) {
     const int is_unsigned = neg_one > const_zero;
 #if PY_MAJOR_VERSION < 3
     if (likely(PyInt_Check(x))) {
-        if ((sizeof(int) < sizeof(long))) {
+        if (CYTHON_CONDITION(sizeof(int) < sizeof(long))) {
             __PYX_VERIFY_RETURN_INT(int, long, PyInt_AS_LONG(x))
         } else {
             long val = PyInt_AS_LONG(x);
@@ -4278,28 +4277,28 @@ static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *x) {
                 case  0: return (int) 0;
                 case  1: __PYX_VERIFY_RETURN_INT(int, digit, digits[0])
                 case 2:
-                    if ((8 * sizeof(int) > 1 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 2 * PyLong_SHIFT)) {
+                    if (CYTHON_CONDITION(8 * sizeof(int) > 1 * PyLong_SHIFT)) {
+                        if (CYTHON_CONDITION(8 * sizeof(unsigned long) > 2 * PyLong_SHIFT)) {
                             __PYX_VERIFY_RETURN_INT(int, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(int) >= 2 * PyLong_SHIFT)) {
+                        } else if (CYTHON_CONDITION(8 * sizeof(int) >= 2 * PyLong_SHIFT)) {
                             return (int) (((((int)digits[1]) << PyLong_SHIFT) | (int)digits[0]));
                         }
                     }
                     break;
                 case 3:
-                    if ((8 * sizeof(int) > 2 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 3 * PyLong_SHIFT)) {
+                    if (CYTHON_CONDITION(8 * sizeof(int) > 2 * PyLong_SHIFT)) {
+                        if (CYTHON_CONDITION(8 * sizeof(unsigned long) > 3 * PyLong_SHIFT)) {
                             __PYX_VERIFY_RETURN_INT(int, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(int) >= 3 * PyLong_SHIFT)) {
+                        } else if (CYTHON_CONDITION(8 * sizeof(int) >= 3 * PyLong_SHIFT)) {
                             return (int) (((((((int)digits[2]) << PyLong_SHIFT) | (int)digits[1]) << PyLong_SHIFT) | (int)digits[0]));
                         }
                     }
                     break;
                 case 4:
-                    if ((8 * sizeof(int) > 3 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 4 * PyLong_SHIFT)) {
+                    if (CYTHON_CONDITION(8 * sizeof(int) > 3 * PyLong_SHIFT)) {
+                        if (CYTHON_CONDITION(8 * sizeof(unsigned long) > 4 * PyLong_SHIFT)) {
                             __PYX_VERIFY_RETURN_INT(int, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(int) >= 4 * PyLong_SHIFT)) {
+                        } else if (CYTHON_CONDITION(8 * sizeof(int) >= 4 * PyLong_SHIFT)) {
                             return (int) (((((((((int)digits[3]) << PyLong_SHIFT) | (int)digits[2]) << PyLong_SHIFT) | (int)digits[1]) << PyLong_SHIFT) | (int)digits[0]));
                         }
                     }
@@ -4319,10 +4318,10 @@ static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *x) {
                     goto raise_neg_overflow;
             }
 #endif
-            if ((sizeof(int) <= sizeof(unsigned long))) {
+            if (CYTHON_CONDITION(sizeof(int) <= sizeof(unsigned long))) {
                 __PYX_VERIFY_RETURN_INT_EXC(int, unsigned long, PyLong_AsUnsignedLong(x))
 #ifdef HAVE_LONG_LONG
-            } else if ((sizeof(int) <= sizeof(unsigned PY_LONG_LONG))) {
+            } else if (CYTHON_CONDITION(sizeof(int) <= sizeof(unsigned PY_LONG_LONG))) {
                 __PYX_VERIFY_RETURN_INT_EXC(int, unsigned PY_LONG_LONG, PyLong_AsUnsignedLongLong(x))
 #endif
             }
@@ -4334,65 +4333,65 @@ static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *x) {
                 case -1: __PYX_VERIFY_RETURN_INT(int, sdigit, (sdigit) (-(sdigit)digits[0]))
                 case  1: __PYX_VERIFY_RETURN_INT(int,  digit, +digits[0])
                 case -2:
-                    if ((8 * sizeof(int) - 1 > 1 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 2 * PyLong_SHIFT)) {
+                    if (CYTHON_CONDITION(8 * sizeof(int) - 1 > 1 * PyLong_SHIFT)) {
+                        if (CYTHON_CONDITION(8 * sizeof(unsigned long) > 2 * PyLong_SHIFT)) {
                             __PYX_VERIFY_RETURN_INT(int, long, -(long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(int) - 1 > 2 * PyLong_SHIFT)) {
+                        } else if (CYTHON_CONDITION(8 * sizeof(int) - 1 > 2 * PyLong_SHIFT)) {
                             return (int) (((int)-1)*(((((int)digits[1]) << PyLong_SHIFT) | (int)digits[0])));
                         }
                     }
                     break;
                 case 2:
-                    if ((8 * sizeof(int) > 1 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 2 * PyLong_SHIFT)) {
+                    if (CYTHON_CONDITION(8 * sizeof(int) > 1 * PyLong_SHIFT)) {
+                        if (CYTHON_CONDITION(8 * sizeof(unsigned long) > 2 * PyLong_SHIFT)) {
                             __PYX_VERIFY_RETURN_INT(int, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(int) - 1 > 2 * PyLong_SHIFT)) {
+                        } else if (CYTHON_CONDITION(8 * sizeof(int) - 1 > 2 * PyLong_SHIFT)) {
                             return (int) ((((((int)digits[1]) << PyLong_SHIFT) | (int)digits[0])));
                         }
                     }
                     break;
                 case -3:
-                    if ((8 * sizeof(int) - 1 > 2 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 3 * PyLong_SHIFT)) {
+                    if (CYTHON_CONDITION(8 * sizeof(int) - 1 > 2 * PyLong_SHIFT)) {
+                        if (CYTHON_CONDITION(8 * sizeof(unsigned long) > 3 * PyLong_SHIFT)) {
                             __PYX_VERIFY_RETURN_INT(int, long, -(long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(int) - 1 > 3 * PyLong_SHIFT)) {
+                        } else if (CYTHON_CONDITION(8 * sizeof(int) - 1 > 3 * PyLong_SHIFT)) {
                             return (int) (((int)-1)*(((((((int)digits[2]) << PyLong_SHIFT) | (int)digits[1]) << PyLong_SHIFT) | (int)digits[0])));
                         }
                     }
                     break;
                 case 3:
-                    if ((8 * sizeof(int) > 2 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 3 * PyLong_SHIFT)) {
+                    if (CYTHON_CONDITION(8 * sizeof(int) > 2 * PyLong_SHIFT)) {
+                        if (CYTHON_CONDITION(8 * sizeof(unsigned long) > 3 * PyLong_SHIFT)) {
                             __PYX_VERIFY_RETURN_INT(int, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(int) - 1 > 3 * PyLong_SHIFT)) {
+                        } else if (CYTHON_CONDITION(8 * sizeof(int) - 1 > 3 * PyLong_SHIFT)) {
                             return (int) ((((((((int)digits[2]) << PyLong_SHIFT) | (int)digits[1]) << PyLong_SHIFT) | (int)digits[0])));
                         }
                     }
                     break;
                 case -4:
-                    if ((8 * sizeof(int) - 1 > 3 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 4 * PyLong_SHIFT)) {
+                    if (CYTHON_CONDITION(8 * sizeof(int) - 1 > 3 * PyLong_SHIFT)) {
+                        if (CYTHON_CONDITION(8 * sizeof(unsigned long) > 4 * PyLong_SHIFT)) {
                             __PYX_VERIFY_RETURN_INT(int, long, -(long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(int) - 1 > 4 * PyLong_SHIFT)) {
+                        } else if (CYTHON_CONDITION(8 * sizeof(int) - 1 > 4 * PyLong_SHIFT)) {
                             return (int) (((int)-1)*(((((((((int)digits[3]) << PyLong_SHIFT) | (int)digits[2]) << PyLong_SHIFT) | (int)digits[1]) << PyLong_SHIFT) | (int)digits[0])));
                         }
                     }
                     break;
                 case 4:
-                    if ((8 * sizeof(int) > 3 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 4 * PyLong_SHIFT)) {
+                    if (CYTHON_CONDITION(8 * sizeof(int) > 3 * PyLong_SHIFT)) {
+                        if (CYTHON_CONDITION(8 * sizeof(unsigned long) > 4 * PyLong_SHIFT)) {
                             __PYX_VERIFY_RETURN_INT(int, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(int) - 1 > 4 * PyLong_SHIFT)) {
+                        } else if (CYTHON_CONDITION(8 * sizeof(int) - 1 > 4 * PyLong_SHIFT)) {
                             return (int) ((((((((((int)digits[3]) << PyLong_SHIFT) | (int)digits[2]) << PyLong_SHIFT) | (int)digits[1]) << PyLong_SHIFT) | (int)digits[0])));
                         }
                     }
                     break;
             }
 #endif
-            if ((sizeof(int) <= sizeof(long))) {
+            if (CYTHON_CONDITION(sizeof(int) <= sizeof(long))) {
                 __PYX_VERIFY_RETURN_INT_EXC(int, long, PyLong_AsLong(x))
 #ifdef HAVE_LONG_LONG
-            } else if ((sizeof(int) <= sizeof(PY_LONG_LONG))) {
+            } else if (CYTHON_CONDITION(sizeof(int) <= sizeof(PY_LONG_LONG))) {
                 __PYX_VERIFY_RETURN_INT_EXC(int, PY_LONG_LONG, PyLong_AsLongLong(x))
 #endif
             }
@@ -4781,7 +4780,7 @@ static CYTHON_INLINE Py_ssize_t __Pyx_PyIndex_AsSsize_t(PyObject* b) {
   PyObject *x;
 #if PY_MAJOR_VERSION < 3
   if (likely(PyInt_CheckExact(b))) {
-    if (sizeof(Py_ssize_t) >= sizeof(long))
+    if (CYTHON_CONDITION(sizeof(Py_ssize_t) >= sizeof(long)))
         return PyInt_AS_LONG(b);
     else
         return PyInt_AsSsize_t(b);
@@ -4798,32 +4797,32 @@ static CYTHON_INLINE Py_ssize_t __Pyx_PyIndex_AsSsize_t(PyObject* b) {
     } else {
       switch (size) {
          case 2:
-           if (8 * sizeof(Py_ssize_t) > 2 * PyLong_SHIFT) {
+           if (CYTHON_CONDITION(8 * sizeof(Py_ssize_t) > 2 * PyLong_SHIFT)) {
              return (Py_ssize_t) (((((size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0]));
            }
            break;
          case -2:
-           if (8 * sizeof(Py_ssize_t) > 2 * PyLong_SHIFT) {
+           if (CYTHON_CONDITION(8 * sizeof(Py_ssize_t) > 2 * PyLong_SHIFT)) {
              return -(Py_ssize_t) (((((size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0]));
            }
            break;
          case 3:
-           if (8 * sizeof(Py_ssize_t) > 3 * PyLong_SHIFT) {
+           if (CYTHON_CONDITION(8 * sizeof(Py_ssize_t) > 3 * PyLong_SHIFT)) {
              return (Py_ssize_t) (((((((size_t)digits[2]) << PyLong_SHIFT) | (size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0]));
            }
            break;
          case -3:
-           if (8 * sizeof(Py_ssize_t) > 3 * PyLong_SHIFT) {
+           if (CYTHON_CONDITION(8 * sizeof(Py_ssize_t) > 3 * PyLong_SHIFT)) {
              return -(Py_ssize_t) (((((((size_t)digits[2]) << PyLong_SHIFT) | (size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0]));
            }
            break;
          case 4:
-           if (8 * sizeof(Py_ssize_t) > 4 * PyLong_SHIFT) {
+           if (CYTHON_CONDITION(8 * sizeof(Py_ssize_t) > 4 * PyLong_SHIFT)) {
              return (Py_ssize_t) (((((((((size_t)digits[3]) << PyLong_SHIFT) | (size_t)digits[2]) << PyLong_SHIFT) | (size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0]));
            }
            break;
          case -4:
-           if (8 * sizeof(Py_ssize_t) > 4 * PyLong_SHIFT) {
+           if (CYTHON_CONDITION(8 * sizeof(Py_ssize_t) > 4 * PyLong_SHIFT)) {
              return -(Py_ssize_t) (((((((((size_t)digits[3]) << PyLong_SHIFT) | (size_t)digits[2]) << PyLong_SHIFT) | (size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0]));
            }
            break;
@@ -4839,7 +4838,7 @@ static CYTHON_INLINE Py_ssize_t __Pyx_PyIndex_AsSsize_t(PyObject* b) {
   return ival;
 }
 static CYTHON_INLINE Py_hash_t __Pyx_PyIndex_AsHash_t(PyObject* o) {
-  if (sizeof(Py_hash_t) == sizeof(Py_ssize_t)) {
+  if (CYTHON_CONDITION(sizeof(Py_hash_t) == sizeof(Py_ssize_t))) {
     return (Py_hash_t) __Pyx_PyIndex_AsSsize_t(o);
 #if PY_MAJOR_VERSION < 3
   } else if (likely(PyInt_CheckExact(o))) {
