@@ -293,11 +293,8 @@
  * compiler warning C4127: conditional expression is constant
  */
 #ifndef CYTHON_CONDITION
-#if defined(_MSC_VER)
-  #define CYTHON_CONDITION(CONDITION) ((void)0, (CONDITION))
-#else
-  #define CYTHON_CONDITION(CONDITION) (CONDITION)
-#endif
+  int CYTHON_CONDITION_IMPL(int b) { return b; }
+  #define CYTHON_CONDITION(CONDITION) CYTHON_CONDITION_IMPL(CONDITION)
 #endif
 #ifndef CYTHON_RESTRICT
   #if defined(__GNUC__)

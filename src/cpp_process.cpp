@@ -293,11 +293,8 @@
  * compiler warning C4127: conditional expression is constant
  */
 #ifndef CYTHON_CONDITION
-#if defined(_MSC_VER)
-  #define CYTHON_CONDITION(CONDITION) ((void)0, (CONDITION))
-#else
-  #define CYTHON_CONDITION(CONDITION) (CONDITION)
-#endif
+  int CYTHON_CONDITION_IMPL(int b) { return b; }
+  #define CYTHON_CONDITION(CONDITION) CYTHON_CONDITION_IMPL(CONDITION)
 #endif
 #ifndef CYTHON_RESTRICT
   #if defined(__GNUC__)
@@ -1965,6 +1962,11 @@ static void __pyx_insert_code_object(int code_line, PyCodeObject* code_object);
 static void __Pyx_AddTraceback(const char *funcname, int c_line,
                                int py_line, const char *filename);
 
+/* ClangDiagnostics.proto */
+#if defined(__clang__)
+#define __Pyx_HAS_CLANG_DIAGNOSTIC
+#endif
+
 /* GCCDiagnostics.proto */
 #if defined(__GNUC__) && !defined(__clang__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
 #define __Pyx_HAS_GCC_DIAGNOSTIC
@@ -2010,11 +2012,6 @@ static void __Pyx_CppExn2PyErr() {
     PyErr_SetString(PyExc_RuntimeError, "Unknown exception");
   }
 }
-#endif
-
-/* ClangDiagnostics.proto */
-#if defined(__clang__)
-#define __Pyx_HAS_CLANG_DIAGNOSTIC
 #endif
 
 /* None.proto */
@@ -25467,7 +25464,7 @@ static CYTHON_INLINE size_t __Pyx_PyInt_As_size_t(PyObject *x) {
     } else
 #endif
     if (likely(PyLong_Check(x))) {
-        if (CYTHON_CONDITION(is_unsigned)) {
+        if (is_unsigned) {
 #if CYTHON_USE_PYLONG_INTERNALS
             const digit* digits = ((PyLongObject*)x)->ob_digit;
             switch (Py_SIZE(x)) {
@@ -25593,6 +25590,10 @@ static CYTHON_INLINE size_t __Pyx_PyInt_As_size_t(PyObject *x) {
 #endif
             }
         }
+#ifdef __Pyx_HAS_CLANG_DIAGNOSTIC
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
+#endif
         {
 #if (CYTHON_COMPILING_IN_PYPY || CYTHON_COMPILING_IN_LIMITED_API) && !defined(_PyLong_AsByteArray)
             PyErr_SetString(PyExc_RuntimeError,
@@ -25620,6 +25621,9 @@ static CYTHON_INLINE size_t __Pyx_PyInt_As_size_t(PyObject *x) {
 #endif
             return (size_t) -1;
         }
+#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
+#pragma clang diagnostic pop
+#endif
     } else {
         size_t val;
         PyObject *tmp = __Pyx_PyNumber_IntOrLong(x);
@@ -25723,7 +25727,7 @@ static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *x) {
     } else
 #endif
     if (likely(PyLong_Check(x))) {
-        if (CYTHON_CONDITION(is_unsigned)) {
+        if (is_unsigned) {
 #if CYTHON_USE_PYLONG_INTERNALS
             const digit* digits = ((PyLongObject*)x)->ob_digit;
             switch (Py_SIZE(x)) {
@@ -25849,6 +25853,10 @@ static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *x) {
 #endif
             }
         }
+#ifdef __Pyx_HAS_CLANG_DIAGNOSTIC
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
+#endif
         {
 #if (CYTHON_COMPILING_IN_PYPY || CYTHON_COMPILING_IN_LIMITED_API) && !defined(_PyLong_AsByteArray)
             PyErr_SetString(PyExc_RuntimeError,
@@ -25876,6 +25884,9 @@ static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *x) {
 #endif
             return (long) -1;
         }
+#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
+#pragma clang diagnostic pop
+#endif
     } else {
         long val;
         PyObject *tmp = __Pyx_PyNumber_IntOrLong(x);
@@ -25919,7 +25930,7 @@ static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *x) {
     } else
 #endif
     if (likely(PyLong_Check(x))) {
-        if (CYTHON_CONDITION(is_unsigned)) {
+        if (is_unsigned) {
 #if CYTHON_USE_PYLONG_INTERNALS
             const digit* digits = ((PyLongObject*)x)->ob_digit;
             switch (Py_SIZE(x)) {
@@ -26045,6 +26056,10 @@ static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *x) {
 #endif
             }
         }
+#ifdef __Pyx_HAS_CLANG_DIAGNOSTIC
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
+#endif
         {
 #if (CYTHON_COMPILING_IN_PYPY || CYTHON_COMPILING_IN_LIMITED_API) && !defined(_PyLong_AsByteArray)
             PyErr_SetString(PyExc_RuntimeError,
@@ -26072,6 +26087,9 @@ static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *x) {
 #endif
             return (int) -1;
         }
+#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
+#pragma clang diagnostic pop
+#endif
     } else {
         int val;
         PyObject *tmp = __Pyx_PyNumber_IntOrLong(x);
