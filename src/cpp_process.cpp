@@ -292,10 +292,12 @@
 /* This macro can be used to suppress the MSVC
  * compiler warning C4127: conditional expression is constant
  */
-#ifdef _MSC_VER
+#ifndef CYTHON_CONDITION
+#if defined(_MSC_VER)
   #define CYTHON_CONDITION(CONDITION) ((void)0, (CONDITION))
 #else
   #define CYTHON_CONDITION(CONDITION) (CONDITION)
+#endif
 #endif
 #ifndef CYTHON_RESTRICT
   #if defined(__GNUC__)
@@ -25424,7 +25426,7 @@ bad:
         if (CYTHON_CONDITION(sizeof(target_type) < sizeof(func_type))) {\
             if (unlikely(CYTHON_CONDITION(value != (func_type) (target_type) value))) {\
                 func_type zero = 0;\
-                if (exc && unlikely(value == (func_type)-1 && PyErr_Occurred()))\
+                if (CYTHON_CONDITION(exc) && unlikely(value == (func_type)-1 && PyErr_Occurred()))\
                     return (target_type) -1;\
                 if (CYTHON_CONDITION(is_unsigned && unlikely(value < zero)))\
                     goto raise_neg_overflow;\
