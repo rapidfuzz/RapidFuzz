@@ -4037,10 +4037,11 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
     {\
         func_type value = func_value;\
         if (CYTHON_CONDITION(sizeof(target_type) < sizeof(func_type))) {\
-            if (unlikely(value != (func_type) (target_type) value)) {\
+            if (unlikely(CYTHON_CONDITION(value != (func_type) (target_type) value))) {\
+                func_type zero = 0;\
                 if (exc && unlikely(value == (func_type)-1 && PyErr_Occurred()))\
                     return (target_type) -1;\
-                if (CYTHON_CONDITION(is_unsigned && unlikely(value < 0)))\
+                if (CYTHON_CONDITION(is_unsigned && unlikely(value < zero)))\
                     goto raise_neg_overflow;\
                 else\
                     goto raise_overflow;\
