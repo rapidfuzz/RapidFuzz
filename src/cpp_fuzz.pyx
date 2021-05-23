@@ -1,22 +1,41 @@
 # distutils: language=c++
 # cython: language_level=3
 # cython: binding=True
+
 from rapidfuzz.utils import default_process
 from cpp_common cimport proc_string, is_valid_string, convert_string, hash_array, hash_sequence
 from array import array
-from libc.stdlib cimport malloc, free
+from libcpp.utility cimport move
 
 cdef inline proc_string conv_sequence(seq) except *:
     if is_valid_string(seq):
-        return convert_string(seq)
+        return move(convert_string(seq))
     elif isinstance(seq, array):
-        return hash_array(seq)
+        return move(hash_array(seq))
     else:
-        return hash_sequence(seq)
+        return move(hash_sequence(seq))
 
 cdef extern from "cpp_scorer.hpp":
-    double ratio_no_process( proc_string, proc_string, double) nogil except +
-    double ratio_default_process( proc_string, proc_string, double) nogil except +
+    double ratio_no_process(                         proc_string, proc_string, double) nogil except +
+    double ratio_default_process(                    proc_string, proc_string, double) nogil except +
+    double partial_ratio_no_process(                 proc_string, proc_string, double) nogil except +
+    double partial_ratio_default_process(            proc_string, proc_string, double) nogil except +
+    double token_sort_ratio_no_process(              proc_string, proc_string, double) nogil except +
+    double token_sort_ratio_default_process(         proc_string, proc_string, double) nogil except +
+    double token_set_ratio_no_process(               proc_string, proc_string, double) nogil except +
+    double token_set_ratio_default_process(          proc_string, proc_string, double) nogil except +
+    double token_ratio_no_process(                   proc_string, proc_string, double) nogil except +
+    double token_ratio_default_process(              proc_string, proc_string, double) nogil except +
+    double partial_token_sort_ratio_no_process(      proc_string, proc_string, double) nogil except +
+    double partial_token_sort_ratio_default_process( proc_string, proc_string, double) nogil except +
+    double partial_token_set_ratio_no_process(       proc_string, proc_string, double) nogil except +
+    double partial_token_set_ratio_default_process(  proc_string, proc_string, double) nogil except +
+    double partial_token_ratio_no_process(           proc_string, proc_string, double) nogil except +
+    double partial_token_ratio_default_process(      proc_string, proc_string, double) nogil except +
+    double WRatio_no_process(                        proc_string, proc_string, double) nogil except +
+    double WRatio_default_process(                   proc_string, proc_string, double) nogil except +
+    double QRatio_no_process(                        proc_string, proc_string, double) nogil except +
+    double QRatio_default_process(                   proc_string, proc_string, double) nogil except +
 
 def ratio(s1, s2, processor=None, score_cutoff=None):
     """
@@ -59,36 +78,13 @@ def ratio(s1, s2, processor=None, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        string1 = conv_sequence(s1)
-        try:
-            string2 = conv_sequence(s2)
-            try:
-                return ratio_default_process(string1, string2, c_score_cutoff)
-            finally:
-                if string2.allocated:
-                    free(string2.data)
-        finally:
-            if string1.allocated:
-                free(string1.data)
+        return ratio_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    string1 = conv_sequence(s1)
-    try:
-        string2 = conv_sequence(s2)
-        try:
-            return ratio_no_process(string1, string2, c_score_cutoff)
-        finally:
-            if string2.allocated:
-                free(string2.data)
-    finally:
-        if string1.allocated:
-            free(string1.data)
+    return ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
-cdef extern from "cpp_scorer.hpp":
-    double partial_ratio_no_process( proc_string, proc_string, double) nogil except +
-    double partial_ratio_default_process( proc_string, proc_string, double) nogil except +
 
 def partial_ratio(s1, s2, processor=None, score_cutoff=None):
     """
@@ -129,36 +125,13 @@ def partial_ratio(s1, s2, processor=None, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        string1 = conv_sequence(s1)
-        try:
-            string2 = conv_sequence(s2)
-            try:
-                return partial_ratio_default_process(string1, string2, c_score_cutoff)
-            finally:
-                if string2.allocated:
-                    free(string2.data)
-        finally:
-            if string1.allocated:
-                free(string1.data)
+        return partial_ratio_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    string1 = conv_sequence(s1)
-    try:
-        string2 = conv_sequence(s2)
-        try:
-            return partial_ratio_no_process(string1, string2, c_score_cutoff)
-        finally:
-            if string2.allocated:
-                free(string2.data)
-    finally:
-        if string1.allocated:
-            free(string1.data)
+    return partial_ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
-cdef extern from "cpp_scorer.hpp":
-    double token_sort_ratio_no_process( proc_string, proc_string, double) nogil except +
-    double token_sort_ratio_default_process( proc_string, proc_string, double) nogil except +
 
 def token_sort_ratio(s1, s2, processor=True, score_cutoff=None):
     """
@@ -199,36 +172,13 @@ def token_sort_ratio(s1, s2, processor=True, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        string1 = conv_sequence(s1)
-        try:
-            string2 = conv_sequence(s2)
-            try:
-                return token_sort_ratio_default_process(string1, string2, c_score_cutoff)
-            finally:
-                if string2.allocated:
-                    free(string2.data)
-        finally:
-            if string1.allocated:
-                free(string1.data)
+        return token_sort_ratio_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    string1 = conv_sequence(s1)
-    try:
-        string2 = conv_sequence(s2)
-        try:
-            return token_sort_ratio_no_process(string1, string2, c_score_cutoff)
-        finally:
-            if string2.allocated:
-                free(string2.data)
-    finally:
-        if string1.allocated:
-            free(string1.data)
+    return token_sort_ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
-cdef extern from "cpp_scorer.hpp":
-    double token_set_ratio_no_process( proc_string, proc_string, double) nogil except +
-    double token_set_ratio_default_process( proc_string, proc_string, double) nogil except +
 
 def token_set_ratio(s1, s2, processor=True, score_cutoff=None):
     """
@@ -272,36 +222,13 @@ def token_set_ratio(s1, s2, processor=True, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        string1 = conv_sequence(s1)
-        try:
-            string2 = conv_sequence(s2)
-            try:
-                return token_set_ratio_default_process(string1, string2, c_score_cutoff)
-            finally:
-                if string2.allocated:
-                    free(string2.data)
-        finally:
-            if string1.allocated:
-                free(string1.data)
+        return token_set_ratio_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    string1 = conv_sequence(s1)
-    try:
-        string2 = conv_sequence(s2)
-        try:
-            return token_set_ratio_no_process(string1, string2, c_score_cutoff)
-        finally:
-            if string2.allocated:
-                free(string2.data)
-    finally:
-        if string1.allocated:
-            free(string1.data)
+    return token_set_ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
-cdef extern from "cpp_scorer.hpp":
-    double token_ratio_no_process( proc_string, proc_string, double) nogil except +
-    double token_ratio_default_process( proc_string, proc_string, double) nogil except +
 
 def token_ratio(s1, s2, processor=True, score_cutoff=None):
     """
@@ -338,36 +265,13 @@ def token_ratio(s1, s2, processor=True, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        string1 = conv_sequence(s1)
-        try:
-            string2 = conv_sequence(s2)
-            try:
-                return token_ratio_default_process(string1, string2, c_score_cutoff)
-            finally:
-                if string2.allocated:
-                    free(string2.data)
-        finally:
-            if string1.allocated:
-                free(string1.data)
+        return token_ratio_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    string1 = conv_sequence(s1)
-    try:
-        string2 = conv_sequence(s2)
-        try:
-            return token_ratio_no_process(string1, string2, c_score_cutoff)
-        finally:
-            if string2.allocated:
-                free(string2.data)
-    finally:
-        if string1.allocated:
-            free(string1.data)
+    return token_ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
-cdef extern from "cpp_scorer.hpp":
-    double partial_token_sort_ratio_no_process( proc_string, proc_string, double) nogil except +
-    double partial_token_sort_ratio_default_process( proc_string, proc_string, double) nogil except +
 
 def partial_token_sort_ratio(s1, s2, processor=True, score_cutoff=None):
     """
@@ -403,36 +307,13 @@ def partial_token_sort_ratio(s1, s2, processor=True, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        string1 = conv_sequence(s1)
-        try:
-            string2 = conv_sequence(s2)
-            try:
-                return partial_token_sort_ratio_default_process(string1, string2, c_score_cutoff)
-            finally:
-                if string2.allocated:
-                    free(string2.data)
-        finally:
-            if string1.allocated:
-                free(string1.data)
+        return partial_token_sort_ratio_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    string1 = conv_sequence(s1)
-    try:
-        string2 = conv_sequence(s2)
-        try:
-            return partial_token_sort_ratio_no_process(string1, string2, c_score_cutoff)
-        finally:
-            if string2.allocated:
-                free(string2.data)
-    finally:
-        if string1.allocated:
-            free(string1.data)
+    return partial_token_sort_ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
-cdef extern from "cpp_scorer.hpp":
-    double partial_token_set_ratio_no_process( proc_string, proc_string, double) nogil except +
-    double partial_token_set_ratio_default_process( proc_string, proc_string, double) nogil except +
 
 def partial_token_set_ratio(s1, s2, processor=True, score_cutoff=None):
     """
@@ -469,36 +350,13 @@ def partial_token_set_ratio(s1, s2, processor=True, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        string1 = conv_sequence(s1)
-        try:
-            string2 = conv_sequence(s2)
-            try:
-                return partial_token_set_ratio_default_process(string1, string2, c_score_cutoff)
-            finally:
-                if string2.allocated:
-                    free(string2.data)
-        finally:
-            if string1.allocated:
-                free(string1.data)
+        return partial_token_set_ratio_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    string1 = conv_sequence(s1)
-    try:
-        string2 = conv_sequence(s2)
-        try:
-            return partial_token_set_ratio_no_process(string1, string2, c_score_cutoff)
-        finally:
-            if string2.allocated:
-                free(string2.data)
-    finally:
-        if string1.allocated:
-            free(string1.data)
+    return partial_token_set_ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
-cdef extern from "cpp_scorer.hpp":
-    double partial_token_ratio_no_process( proc_string, proc_string, double) nogil except +
-    double partial_token_ratio_default_process( proc_string, proc_string, double) nogil except +
 
 def partial_token_ratio(s1, s2, processor=True, score_cutoff=None):
     """
@@ -535,36 +393,13 @@ def partial_token_ratio(s1, s2, processor=True, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        string1 = conv_sequence(s1)
-        try:
-            string2 = conv_sequence(s2)
-            try:
-                return partial_token_ratio_default_process(string1, string2, c_score_cutoff)
-            finally:
-                if string2.allocated:
-                    free(string2.data)
-        finally:
-            if string1.allocated:
-                free(string1.data)
+        return partial_token_ratio_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    string1 = conv_sequence(s1)
-    try:
-        string2 = conv_sequence(s2)
-        try:
-            return partial_token_ratio_no_process(string1, string2, c_score_cutoff)
-        finally:
-            if string2.allocated:
-                free(string2.data)
-    finally:
-        if string1.allocated:
-            free(string1.data)
+    return partial_token_ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
-cdef extern from "cpp_scorer.hpp":
-    double WRatio_no_process( proc_string, proc_string, double) nogil except +
-    double WRatio_default_process( proc_string, proc_string, double) nogil except +
 
 def WRatio(s1, s2, processor=True, score_cutoff=None):
     """
@@ -600,36 +435,13 @@ def WRatio(s1, s2, processor=True, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        string1 = conv_sequence(s1)
-        try:
-            string2 = conv_sequence(s2)
-            try:
-                return WRatio_default_process(string1, string2, c_score_cutoff)
-            finally:
-                if string2.allocated:
-                    free(string2.data)
-        finally:
-            if string1.allocated:
-                free(string1.data)
+        return WRatio_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    string1 = conv_sequence(s1)
-    try:
-        string2 = conv_sequence(s2)
-        try:
-            return WRatio_no_process(string1, string2, c_score_cutoff)
-        finally:
-            if string2.allocated:
-                free(string2.data)
-    finally:
-        if string1.allocated:
-            free(string1.data)
+    return WRatio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
-cdef extern from "cpp_scorer.hpp":
-    double QRatio_no_process( proc_string, proc_string, double) nogil except +
-    double QRatio_default_process( proc_string, proc_string, double) nogil except +
 
 def QRatio(s1, s2, processor=True, score_cutoff=None):
     """
@@ -668,29 +480,9 @@ def QRatio(s1, s2, processor=True, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        string1 = conv_sequence(s1)
-        try:
-            string2 = conv_sequence(s2)
-            try:
-                return QRatio_default_process(string1, string2, c_score_cutoff)
-            finally:
-                if string2.allocated:
-                    free(string2.data)
-        finally:
-            if string1.allocated:
-                free(string1.data)
+        return QRatio_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    string1 = conv_sequence(s1)
-    try:
-        string2 = conv_sequence(s2)
-        try:
-            return QRatio_no_process(string1, string2, c_score_cutoff)
-        finally:
-            if string2.allocated:
-                free(string2.data)
-    finally:
-        if string1.allocated:
-            free(string1.data)
+    return QRatio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)

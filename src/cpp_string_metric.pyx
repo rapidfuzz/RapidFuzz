@@ -2,24 +2,29 @@
 # cython: language_level=3
 # cython: binding=True
 
-
 from rapidfuzz.utils import default_process
-from cpp_common cimport proc_string, is_valid_string, convert_string, hash_array, hash_sequence#, conv_sequence
+from cpp_common cimport proc_string, is_valid_string, convert_string, hash_array, hash_sequence
 from array import array
-from libc.stdlib cimport malloc, free
+from libcpp.utility cimport move
 
 cdef inline proc_string conv_sequence(seq) except *:
     if is_valid_string(seq):
-        return convert_string(seq)
+        return move(convert_string(seq))
     elif isinstance(seq, array):
-        print("test")
-        return hash_array(seq)
+        return move(hash_array(seq))
     else:
-        return hash_sequence(seq)
+        return move(hash_sequence(seq))
 
 cdef extern from "cpp_scorer.hpp":
-    object levenshtein_no_process(                proc_string, proc_string, size_t, size_t, size_t, size_t) nogil except +
-    object levenshtein_default_process(           proc_string, proc_string, size_t, size_t, size_t, size_t) nogil except +
+    double normalized_levenshtein_no_process(      proc_string, proc_string, size_t, size_t, size_t, double) nogil except +
+    double normalized_levenshtein_default_process( proc_string, proc_string, size_t, size_t, size_t, double) nogil except +
+    double normalized_hamming_no_process(          proc_string, proc_string, double) nogil except +
+    double normalized_hamming_default_process(     proc_string, proc_string, double) nogil except +
+
+    object levenshtein_no_process(                 proc_string, proc_string, size_t, size_t, size_t, size_t) nogil except +
+    object levenshtein_default_process(            proc_string, proc_string, size_t, size_t, size_t, size_t) nogil except +
+    object hamming_no_process(                     proc_string, proc_string, size_t) nogil except +
+    object hamming_default_process(                proc_string, proc_string, size_t) nogil except +
 
 def levenshtein(s1, s2, weights=(1,1,1), processor=None, max=None):
     """
@@ -195,37 +200,13 @@ def levenshtein(s1, s2, weights=(1,1,1), processor=None, max=None):
     cdef size_t c_max = <size_t>-1 if max is None else max
 
     if processor is True or processor == default_process:
-        string1 = conv_sequence(s1)
-        try:
-            string2 = conv_sequence(s2)
-            try:
-                return levenshtein_default_process(string1, string2, insertion, deletion, substitution, c_max)
-            finally:
-                if string2.allocated:
-                    free(string2.data)
-        finally:
-            if string1.allocated:
-                free(string1.data)
+        return levenshtein_default_process(conv_sequence(s1), conv_sequence(s2), insertion, deletion, substitution, c_max)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    string1 = conv_sequence(s1)
-    try:
-        string2 = conv_sequence(s2)
-        try:
-            return levenshtein_no_process(string1, string2, insertion, deletion, substitution, c_max)
-        finally:
-            if string2.allocated:
-                free(string2.data)
-    finally:
-        if string1.allocated:
-            free(string1.data)
+    return levenshtein_no_process(conv_sequence(s1), conv_sequence(s2), insertion, deletion, substitution, c_max)
 
-
-cdef extern from "cpp_scorer.hpp":
-    double normalized_levenshtein_no_process(     proc_string, proc_string, size_t, size_t, size_t, double) nogil except +
-    double normalized_levenshtein_default_process(proc_string, proc_string, size_t, size_t, size_t, double) nogil except +
 
 def normalized_levenshtein(s1, s2, weights=(1,1,1), processor=None, score_cutoff=None):
     """
@@ -323,37 +304,13 @@ def normalized_levenshtein(s1, s2, weights=(1,1,1), processor=None, score_cutoff
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
 
     if processor is True or processor == default_process:
-        string1 = conv_sequence(s1)
-        try:
-            string2 = conv_sequence(s2)
-            try:
-                return normalized_levenshtein_default_process(string1, string2, insertion, deletion, substitution, c_score_cutoff)
-            finally:
-                if string2.allocated:
-                    free(string2.data)
-        finally:
-            if string1.allocated:
-                free(string1.data)
+        return normalized_levenshtein_default_process(conv_sequence(s1), conv_sequence(s2), insertion, deletion, substitution, c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    string1 = conv_sequence(s1)
-    try:
-        string2 = conv_sequence(s2)
-        try:
-            return normalized_levenshtein_no_process(string1, string2, insertion, deletion, substitution, c_score_cutoff)
-        finally:
-            if string2.allocated:
-                free(string2.data)
-    finally:
-        if string1.allocated:
-            free(string1.data)
+    return normalized_levenshtein_no_process(conv_sequence(s1), conv_sequence(s2), insertion, deletion, substitution, c_score_cutoff)
 
-
-cdef extern from "cpp_scorer.hpp":
-    object hamming_no_process( proc_string, proc_string, size_t) nogil except +
-    object hamming_default_process( proc_string, proc_string, size_t) nogil except +
 
 def hamming(s1, s2, processor=None, max=None):
     """
@@ -394,36 +351,13 @@ def hamming(s1, s2, processor=None, max=None):
         return 0
 
     if processor is True or processor == default_process:
-        string1 = conv_sequence(s1)
-        try:
-            string2 = conv_sequence(s2)
-            try:
-                return hamming_default_process(string1, string2, c_max)
-            finally:
-                if string2.allocated:
-                    free(string2.data)
-        finally:
-            if string1.allocated:
-                free(string1.data)
+        return hamming_default_process(conv_sequence(s1), conv_sequence(s2), c_max)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    string1 = conv_sequence(s1)
-    try:
-        string2 = conv_sequence(s2)
-        try:
-            return hamming_no_process(string1, string2, c_max)
-        finally:
-            if string2.allocated:
-                free(string2.data)
-    finally:
-        if string1.allocated:
-            free(string1.data)
+    return hamming_no_process(conv_sequence(s1), conv_sequence(s2), c_max)
 
-cdef extern from "cpp_scorer.hpp":
-    double normalized_hamming_no_process( proc_string, proc_string, double) nogil except +
-    double normalized_hamming_default_process( proc_string, proc_string, double) nogil except +
 
 def normalized_hamming(s1, s2, processor=None, score_cutoff=None):
     """
@@ -464,29 +398,9 @@ def normalized_hamming(s1, s2, processor=None, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        string1 = conv_sequence(s1)
-        try:
-            string2 = conv_sequence(s2)
-            try:
-                return normalized_hamming_default_process(string1, string2, c_score_cutoff)
-            finally:
-                if string2.allocated:
-                    free(string2.data)
-        finally:
-            if string1.allocated:
-                free(string1.data)
+        return normalized_hamming_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    string1 = conv_sequence(s1)
-    try:
-        string2 = conv_sequence(s2)
-        try:
-            return normalized_hamming_no_process(string1, string2, c_score_cutoff)
-        finally:
-            if string2.allocated:
-                free(string2.data)
-    finally:
-        if string1.allocated:
-            free(string1.data)
+    return normalized_hamming_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)

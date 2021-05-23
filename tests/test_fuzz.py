@@ -3,6 +3,7 @@
 
 import unittest
 import pytest
+from array import array
 
 from rapidfuzz import fuzz, utils
 
@@ -93,12 +94,21 @@ def test_empty_string(scorer):
 
 
 @pytest.mark.parametrize("scorer", scorers)
-def test_empty_string(scorer):
+def test_invalid_input(scorer):
     """
     when invalid types are passed to a scorer an exception should be thrown
     """
     with pytest.raises(TypeError):
         scorer(1, 1)
+
+@pytest.mark.parametrize("scorer", scorers)
+def test_array(scorer):
+    """
+    arrays should be supported and treated in a compatible way to strings
+    """
+    assert scorer(array('u', RatioTest.s3), array('u', RatioTest.s3))
+    assert scorer(RatioTest.s3,             array('u', RatioTest.s3))
+    assert scorer(array('u', RatioTest.s3), RatioTest.s3)
 
 @pytest.mark.parametrize("scorer", scorers)
 def test_none_string(scorer):

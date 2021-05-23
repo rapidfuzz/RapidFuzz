@@ -32,7 +32,45 @@ struct proc_string {
     uint8_t allocated;
     void* data;
     size_t length;
+
+    proc_string()
+      : kind(0), allocated(false), data(nullptr), length(0) {}
+    proc_string(uint8_t _kind, uint8_t _allocated, void* _data, size_t _length)
+      : kind(_kind), allocated(_allocated), data(_data), length(_length) {}
+
+    proc_string(const proc_string&) = delete;
+    proc_string& operator=(const proc_string&) = delete;
+
+    proc_string(proc_string&& other)
+     : kind(other.kind), allocated(other.allocated), data(other.data), length(other.length)
+    {
+        other.data = nullptr;
+        other.allocated = false;
+    }
+
+    proc_string& operator=(proc_string&& other) {
+        if (&other != this) {
+            if (allocated) {
+                free(data);
+            }
+            kind = other.kind;
+            allocated = other.allocated;
+            data = other.data;
+            length = other.length;
+
+            other.data = nullptr;
+            other.allocated = false;
+      }
+      return *this;
+    };
+
+    ~proc_string() {
+        if (allocated) {
+            free(data);
+        }
+    }
 };
+
 
 template <typename T>
 static inline rapidfuzz::basic_string_view<T> no_process(proc_string s)
@@ -43,7 +81,7 @@ static inline rapidfuzz::basic_string_view<T> no_process(proc_string s)
 template <typename T>
 static inline std::basic_string<T> default_process(proc_string s)
 {
-    return utils::default_process(no_process<T>(s));
+    return utils::default_process(no_process<T>(std::move(s)));
 }
 
 static inline PyObject* dist_to_long(std::size_t dist)
@@ -58,18 +96,8 @@ static inline PyObject* dist_to_long(std::size_t dist)
     X_ENUM(RAPIDFUZZ_UINT8,                       uint8_t  , (__VA_ARGS__)) \
     X_ENUM(RAPIDFUZZ_UINT16,                      uint16_t , (__VA_ARGS__)) \
     X_ENUM(RAPIDFUZZ_UINT32,                      uint32_t , (__VA_ARGS__)) \
-    X_ENUM(RAPIDFUZZ_HASH,                        Py_hash_t, (__VA_ARGS__)) \
-    X_ENUM(RAPIDFUZZ_CHAR,                        char     , (__VA_ARGS__)) \
-    X_ENUM(RAPIDFUZZ_UNSIGNED_CHAR,      unsigned char     , (__VA_ARGS__)) \
-    X_ENUM(RAPIDFUZZ_WCHAR,                       wchar_t  , (__VA_ARGS__)) \
-    X_ENUM(RAPIDFUZZ_SHORT,                       short    , (__VA_ARGS__)) \
-    X_ENUM(RAPIDFUZZ_UNSIGNED_SHORT,     unsigned short    , (__VA_ARGS__)) \
-    X_ENUM(RAPIDFUZZ_INT,                         int      , (__VA_ARGS__)) \
-    X_ENUM(RAPIDFUZZ_UNSIGNED_INT,       unsigned int      , (__VA_ARGS__)) \
-    X_ENUM(RAPIDFUZZ_LONG,                        long     , (__VA_ARGS__)) \
-    X_ENUM(RAPIDFUZZ_UNSIGNED_LONG,      unsigned long     , (__VA_ARGS__)) \
-    X_ENUM(RAPIDFUZZ_LONG_LONG,                   long long, (__VA_ARGS__)) \
-    X_ENUM(RAPIDFUZZ_UNSIGNED_LONG_LONG, unsigned long long, (__VA_ARGS__))
+    X_ENUM(RAPIDFUZZ_UINT64,                      uint64_t , (__VA_ARGS__)) \
+    X_ENUM(RAPIDFUZZ_INT64,                        int64_t , (__VA_ARGS__))
 
 
 enum RapidfuzzTypes {
@@ -133,12 +161,12 @@ static inline proc_string convert_string(PyObject* py_str)
       break;
     }
 
-    return {
+    return proc_string(
         static_cast<uint8_t>(kind),
         0,
         PyUnicode_DATA(py_str),
         static_cast<std::size_t>(PyUnicode_GET_LENGTH(py_str))
-    };
+    );
 }
 
 
@@ -155,14 +183,14 @@ static inline proc_string convert_string(PyObject* py_str)
 #define GET_PROCESSOR(RATIO_FUNC, PROCESSOR) PROCESSOR
 
 # define X_ENUM(KIND, TYPE, MSVC_TUPLE) \
-    case KIND: return GET_RATIO_FUNC MSVC_TUPLE  (s2, GET_PROCESSOR MSVC_TUPLE <TYPE>(s1), args...);
+    case KIND: return GET_RATIO_FUNC MSVC_TUPLE  (std::move(s2), GET_PROCESSOR MSVC_TUPLE <TYPE>(std::move(s1)), args...);
 
 /* generate <ratio_name>_impl_inner_<processor> functions which are used internally
  * for normalized distances
  */
 #define RATIO_IMPL_INNER(RATIO, RATIO_FUNC, PROCESSOR)                                             \
 template<typename Sentence, typename... Args>                                                      \
-double RATIO##_impl_inner_##PROCESSOR(proc_string s1, const Sentence& s2, Args... args)            \
+double RATIO##_impl_inner_##PROCESSOR(proc_string s1, const Sentence& s2, Args... args)     \
 {                                                                                                  \
     switch(s1.kind){                                                                               \
     LIST_OF_CASES(RATIO_FUNC, PROCESSOR)                                                           \
@@ -176,7 +204,7 @@ double RATIO##_impl_inner_##PROCESSOR(proc_string s1, const Sentence& s2, Args..
  */
 #define RATIO_IMPL(RATIO, RATIO_FUNC, PROCESSOR)                                             \
 template<typename... Args>                                                                   \
-double RATIO##_impl_##PROCESSOR(proc_string s1, proc_string s2, Args... args)                \
+double RATIO##_impl_##PROCESSOR(proc_string s1, proc_string s2, Args... args)  \
 {                                                                                            \
     switch(s1.kind){                                                                         \
     LIST_OF_CASES(RATIO##_impl_inner_##PROCESSOR, PROCESSOR)                                 \
@@ -196,7 +224,7 @@ RATIO_IMPL_INNER(RATIO, RATIO_FUNC, no_process)
  */
 #define DISTANCE_IMPL_INNER(RATIO, RATIO_FUNC, PROCESSOR)                                          \
 template<typename Sentence, typename... Args>                                                      \
-size_t RATIO##_impl_inner_##PROCESSOR(proc_string s1, const Sentence& s2, Args... args)            \
+size_t RATIO##_impl_inner_##PROCESSOR(proc_string s1, const Sentence& s2, Args... args)     \
 {                                                                                                  \
     switch(s1.kind){                                                                               \
     LIST_OF_CASES(RATIO_FUNC, PROCESSOR)                                                           \
@@ -210,7 +238,7 @@ size_t RATIO##_impl_inner_##PROCESSOR(proc_string s1, const Sentence& s2, Args..
  */
 #define DISTANCE_IMPL(RATIO, RATIO_FUNC, PROCESSOR)                                          \
 template<typename... Args>                                                                   \
-size_t RATIO##_impl_##PROCESSOR(proc_string s1, proc_string s2, Args... args)                \
+size_t RATIO##_impl_##PROCESSOR(proc_string s1, proc_string s2, Args... args)  \
 {                                                                                            \
     switch(s1.kind){                                                                         \
     LIST_OF_CASES(RATIO##_impl_inner_##PROCESSOR, PROCESSOR)                                 \
@@ -252,11 +280,11 @@ RATIO_IMPL_DEF(normalized_hamming,       string_metric::normalized_hamming)
 #define SIMPLE_RATIO_DEF(RATIO)                                                     \
 double RATIO##_no_process(proc_string s1, proc_string s2, double score_cutoff)      \
 {                                                                                   \
-    return RATIO##_impl_no_process(s1, s2, score_cutoff);                           \
+    return RATIO##_impl_no_process(std::move(s1), std::move(s2), score_cutoff);                           \
 }                                                                                   \
 double RATIO##_default_process(proc_string s1, proc_string s2, double score_cutoff) \
 {                                                                                   \
-    return RATIO##_impl_default_process(s1, s2, score_cutoff);                      \
+    return RATIO##_impl_default_process(std::move(s1), std::move(s2), score_cutoff);                      \
 }
 
 
@@ -266,11 +294,11 @@ double RATIO##_default_process(proc_string s1, proc_string s2, double score_cuto
 #define SIMPLE_DISTANCE_DEF(RATIO)                                            \
 PyObject* RATIO##_no_process(proc_string s1, proc_string s2, size_t max)      \
 {                                                                             \
-    size_t result = RATIO##_impl_no_process(s1, s2, max);                     \
-    return dist_to_long(result);                                              \
+    size_t result = RATIO##_impl_no_process(std::move(s1), std::move(s2), max); \
+    return dist_to_long(result);                                                \
 }                                                                             \
 PyObject* RATIO##_default_process(proc_string s1, proc_string s2, size_t max) \
 {                                                                             \
-    size_t result = RATIO##_impl_default_process(s1, s2, max);                \
+    size_t result = RATIO##_impl_default_process(std::move(s1), std::move(s2), max); \
     return dist_to_long(result);                                              \
 }
