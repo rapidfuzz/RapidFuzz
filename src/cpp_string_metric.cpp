@@ -1254,11 +1254,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg
 #define __Pyx_PyObject_Call(func, arg, kw) PyObject_Call(func, arg, kw)
 #endif
 
-/* WriteUnraisableException.proto */
-static void __Pyx_WriteUnraisable(const char *name, int clineno,
-                                  int lineno, const char *filename,
-                                  int full_traceback, int nogil);
-
 /* TupleAndListFromArray.proto */
 #if CYTHON_COMPILING_IN_CPYTHON
 static CYTHON_INLINE PyObject* __Pyx_PyList_FromArray(PyObject *const *src, Py_ssize_t n);
@@ -2143,7 +2138,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 /* "cpp_string_metric.pyx":11
  * from libc.stdlib cimport malloc, free
  * 
- * cdef inline proc_string conv_sequence(seq):             # <<<<<<<<<<<<<<
+ * cdef inline proc_string conv_sequence(seq) except *:             # <<<<<<<<<<<<<<
  *     if is_valid_string(seq):
  *         return convert_string(seq)
  */
@@ -2155,6 +2150,7 @@ static CYTHON_INLINE proc_string __pyx_f_17cpp_string_metric_conv_sequence(PyObj
   int __pyx_t_2;
   PyObject *__pyx_t_3 = NULL;
   int __pyx_t_4;
+  proc_string __pyx_t_5;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -2162,7 +2158,7 @@ static CYTHON_INLINE proc_string __pyx_f_17cpp_string_metric_conv_sequence(PyObj
 
   /* "cpp_string_metric.pyx":12
  * 
- * cdef inline proc_string conv_sequence(seq):
+ * cdef inline proc_string conv_sequence(seq) except *:
  *     if is_valid_string(seq):             # <<<<<<<<<<<<<<
  *         return convert_string(seq)
  *     elif isinstance(seq, array):
@@ -2177,7 +2173,7 @@ static CYTHON_INLINE proc_string __pyx_f_17cpp_string_metric_conv_sequence(PyObj
   if (__pyx_t_2) {
 
     /* "cpp_string_metric.pyx":13
- * cdef inline proc_string conv_sequence(seq):
+ * cdef inline proc_string conv_sequence(seq) except *:
  *     if is_valid_string(seq):
  *         return convert_string(seq)             # <<<<<<<<<<<<<<
  *     elif isinstance(seq, array):
@@ -2188,7 +2184,7 @@ static CYTHON_INLINE proc_string __pyx_f_17cpp_string_metric_conv_sequence(PyObj
 
     /* "cpp_string_metric.pyx":12
  * 
- * cdef inline proc_string conv_sequence(seq):
+ * cdef inline proc_string conv_sequence(seq) except *:
  *     if is_valid_string(seq):             # <<<<<<<<<<<<<<
  *         return convert_string(seq)
  *     elif isinstance(seq, array):
@@ -2227,7 +2223,8 @@ static CYTHON_INLINE proc_string __pyx_f_17cpp_string_metric_conv_sequence(PyObj
  *     else:
  *         return hash_sequence(seq)
  */
-    __pyx_r = __pyx_f_10cpp_common_hash_array(__pyx_v_seq);
+    __pyx_t_5 = __pyx_f_10cpp_common_hash_array(__pyx_v_seq); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 16, __pyx_L1_error)
+    __pyx_r = __pyx_t_5;
     goto __pyx_L0;
 
     /* "cpp_string_metric.pyx":14
@@ -2247,14 +2244,15 @@ static CYTHON_INLINE proc_string __pyx_f_17cpp_string_metric_conv_sequence(PyObj
  * cdef extern from "cpp_scorer.hpp":
  */
   /*else*/ {
-    __pyx_r = __pyx_f_10cpp_common_hash_sequence(__pyx_v_seq);
+    __pyx_t_5 = __pyx_f_10cpp_common_hash_sequence(__pyx_v_seq); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 18, __pyx_L1_error)
+    __pyx_r = __pyx_t_5;
     goto __pyx_L0;
   }
 
   /* "cpp_string_metric.pyx":11
  * from libc.stdlib cimport malloc, free
  * 
- * cdef inline proc_string conv_sequence(seq):             # <<<<<<<<<<<<<<
+ * cdef inline proc_string conv_sequence(seq) except *:             # <<<<<<<<<<<<<<
  *     if is_valid_string(seq):
  *         return convert_string(seq)
  */
@@ -2262,7 +2260,7 @@ static CYTHON_INLINE proc_string __pyx_f_17cpp_string_metric_conv_sequence(PyObj
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_WriteUnraisable("cpp_string_metric.conv_sequence", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __Pyx_AddTraceback("cpp_string_metric.conv_sequence", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_pretend_to_initialize(&__pyx_r);
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();
@@ -2429,18 +2427,19 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
   size_t __pyx_t_9;
   size_t __pyx_t_10;
   int __pyx_t_11;
-  int __pyx_t_12;
+  proc_string __pyx_t_12;
   int __pyx_t_13;
-  char const *__pyx_t_14;
-  PyObject *__pyx_t_15 = NULL;
+  int __pyx_t_14;
+  char const *__pyx_t_15;
   PyObject *__pyx_t_16 = NULL;
   PyObject *__pyx_t_17 = NULL;
   PyObject *__pyx_t_18 = NULL;
   PyObject *__pyx_t_19 = NULL;
   PyObject *__pyx_t_20 = NULL;
-  char const *__pyx_t_21;
+  PyObject *__pyx_t_21 = NULL;
   char const *__pyx_t_22;
   char const *__pyx_t_23;
+  char const *__pyx_t_24;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -2594,7 +2593,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
  *         try:
  *             string2 = conv_sequence(s2)
  */
-    __pyx_v_string1 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1);
+    __pyx_t_12 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 198, __pyx_L1_error)
+    __pyx_v_string1 = __pyx_t_12;
 
     /* "cpp_string_metric.pyx":199
  *     if processor is True or processor == default_process:
@@ -2612,7 +2612,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
  *             try:
  *                 return levenshtein_default_process(string1, string2, insertion, deletion, substitution, c_max)
  */
-      __pyx_v_string2 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2);
+      __pyx_t_12 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 200, __pyx_L10_error)
+      __pyx_v_string2 = __pyx_t_12;
 
       /* "cpp_string_metric.pyx":201
  *         try:
@@ -2656,20 +2657,20 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
         /*exception exit:*/{
           __Pyx_PyThreadState_declare
           __Pyx_PyThreadState_assign
-          __pyx_t_15 = 0; __pyx_t_16 = 0; __pyx_t_17 = 0; __pyx_t_18 = 0; __pyx_t_19 = 0; __pyx_t_20 = 0;
+          __pyx_t_16 = 0; __pyx_t_17 = 0; __pyx_t_18 = 0; __pyx_t_19 = 0; __pyx_t_20 = 0; __pyx_t_21 = 0;
           __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
           __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-          if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_18, &__pyx_t_19, &__pyx_t_20);
-          if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_15, &__pyx_t_16, &__pyx_t_17) < 0)) __Pyx_ErrFetch(&__pyx_t_15, &__pyx_t_16, &__pyx_t_17);
-          __Pyx_XGOTREF(__pyx_t_15);
+          if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_19, &__pyx_t_20, &__pyx_t_21);
+          if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_16, &__pyx_t_17, &__pyx_t_18) < 0)) __Pyx_ErrFetch(&__pyx_t_16, &__pyx_t_17, &__pyx_t_18);
           __Pyx_XGOTREF(__pyx_t_16);
           __Pyx_XGOTREF(__pyx_t_17);
           __Pyx_XGOTREF(__pyx_t_18);
           __Pyx_XGOTREF(__pyx_t_19);
           __Pyx_XGOTREF(__pyx_t_20);
-          __pyx_t_12 = __pyx_lineno; __pyx_t_13 = __pyx_clineno; __pyx_t_14 = __pyx_filename;
+          __Pyx_XGOTREF(__pyx_t_21);
+          __pyx_t_13 = __pyx_lineno; __pyx_t_14 = __pyx_clineno; __pyx_t_15 = __pyx_filename;
           {
             __pyx_t_2 = (__pyx_v_string2.allocated != 0);
             if (__pyx_t_2) {
@@ -2693,21 +2694,21 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
             }
           }
           if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) {
-            __Pyx_XGIVEREF(__pyx_t_18);
             __Pyx_XGIVEREF(__pyx_t_19);
             __Pyx_XGIVEREF(__pyx_t_20);
-            __Pyx_ExceptionReset(__pyx_t_18, __pyx_t_19, __pyx_t_20);
+            __Pyx_XGIVEREF(__pyx_t_21);
+            __Pyx_ExceptionReset(__pyx_t_19, __pyx_t_20, __pyx_t_21);
           }
-          __Pyx_XGIVEREF(__pyx_t_15);
           __Pyx_XGIVEREF(__pyx_t_16);
           __Pyx_XGIVEREF(__pyx_t_17);
-          __Pyx_ErrRestore(__pyx_t_15, __pyx_t_16, __pyx_t_17);
-          __pyx_t_15 = 0; __pyx_t_16 = 0; __pyx_t_17 = 0; __pyx_t_18 = 0; __pyx_t_19 = 0; __pyx_t_20 = 0;
-          __pyx_lineno = __pyx_t_12; __pyx_clineno = __pyx_t_13; __pyx_filename = __pyx_t_14;
+          __Pyx_XGIVEREF(__pyx_t_18);
+          __Pyx_ErrRestore(__pyx_t_16, __pyx_t_17, __pyx_t_18);
+          __pyx_t_16 = 0; __pyx_t_17 = 0; __pyx_t_18 = 0; __pyx_t_19 = 0; __pyx_t_20 = 0; __pyx_t_21 = 0;
+          __pyx_lineno = __pyx_t_13; __pyx_clineno = __pyx_t_14; __pyx_filename = __pyx_t_15;
           goto __pyx_L10_error;
         }
         __pyx_L12_return: {
-          __pyx_t_20 = __pyx_r;
+          __pyx_t_21 = __pyx_r;
           __pyx_r = 0;
           __pyx_t_2 = (__pyx_v_string2.allocated != 0);
           if (__pyx_t_2) {
@@ -2729,8 +2730,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
  *         finally:
  */
           }
-          __pyx_r = __pyx_t_20;
-          __pyx_t_20 = 0;
+          __pyx_r = __pyx_t_21;
+          __pyx_t_21 = 0;
           goto __pyx_L9_return;
         }
       }
@@ -2748,20 +2749,20 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
       /*exception exit:*/{
         __Pyx_PyThreadState_declare
         __Pyx_PyThreadState_assign
-        __pyx_t_20 = 0; __pyx_t_19 = 0; __pyx_t_18 = 0; __pyx_t_17 = 0; __pyx_t_16 = 0; __pyx_t_15 = 0;
+        __pyx_t_21 = 0; __pyx_t_20 = 0; __pyx_t_19 = 0; __pyx_t_18 = 0; __pyx_t_17 = 0; __pyx_t_16 = 0;
         __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
         __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
         __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-        if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_17, &__pyx_t_16, &__pyx_t_15);
-        if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_20, &__pyx_t_19, &__pyx_t_18) < 0)) __Pyx_ErrFetch(&__pyx_t_20, &__pyx_t_19, &__pyx_t_18);
+        if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_18, &__pyx_t_17, &__pyx_t_16);
+        if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_21, &__pyx_t_20, &__pyx_t_19) < 0)) __Pyx_ErrFetch(&__pyx_t_21, &__pyx_t_20, &__pyx_t_19);
+        __Pyx_XGOTREF(__pyx_t_21);
         __Pyx_XGOTREF(__pyx_t_20);
         __Pyx_XGOTREF(__pyx_t_19);
         __Pyx_XGOTREF(__pyx_t_18);
         __Pyx_XGOTREF(__pyx_t_17);
         __Pyx_XGOTREF(__pyx_t_16);
-        __Pyx_XGOTREF(__pyx_t_15);
-        __pyx_t_13 = __pyx_lineno; __pyx_t_12 = __pyx_clineno; __pyx_t_21 = __pyx_filename;
+        __pyx_t_14 = __pyx_lineno; __pyx_t_13 = __pyx_clineno; __pyx_t_22 = __pyx_filename;
         {
           __pyx_t_2 = (__pyx_v_string1.allocated != 0);
           if (__pyx_t_2) {
@@ -2785,21 +2786,21 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
           }
         }
         if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) {
+          __Pyx_XGIVEREF(__pyx_t_18);
           __Pyx_XGIVEREF(__pyx_t_17);
           __Pyx_XGIVEREF(__pyx_t_16);
-          __Pyx_XGIVEREF(__pyx_t_15);
-          __Pyx_ExceptionReset(__pyx_t_17, __pyx_t_16, __pyx_t_15);
+          __Pyx_ExceptionReset(__pyx_t_18, __pyx_t_17, __pyx_t_16);
         }
+        __Pyx_XGIVEREF(__pyx_t_21);
         __Pyx_XGIVEREF(__pyx_t_20);
         __Pyx_XGIVEREF(__pyx_t_19);
-        __Pyx_XGIVEREF(__pyx_t_18);
-        __Pyx_ErrRestore(__pyx_t_20, __pyx_t_19, __pyx_t_18);
-        __pyx_t_20 = 0; __pyx_t_19 = 0; __pyx_t_18 = 0; __pyx_t_17 = 0; __pyx_t_16 = 0; __pyx_t_15 = 0;
-        __pyx_lineno = __pyx_t_13; __pyx_clineno = __pyx_t_12; __pyx_filename = __pyx_t_21;
+        __Pyx_ErrRestore(__pyx_t_21, __pyx_t_20, __pyx_t_19);
+        __pyx_t_21 = 0; __pyx_t_20 = 0; __pyx_t_19 = 0; __pyx_t_18 = 0; __pyx_t_17 = 0; __pyx_t_16 = 0;
+        __pyx_lineno = __pyx_t_14; __pyx_clineno = __pyx_t_13; __pyx_filename = __pyx_t_22;
         goto __pyx_L1_error;
       }
       __pyx_L9_return: {
-        __pyx_t_15 = __pyx_r;
+        __pyx_t_16 = __pyx_r;
         __pyx_r = 0;
         __pyx_t_2 = (__pyx_v_string1.allocated != 0);
         if (__pyx_t_2) {
@@ -2821,8 +2822,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
  *     elif callable(processor):
  */
         }
-        __pyx_r = __pyx_t_15;
-        __pyx_t_15 = 0;
+        __pyx_r = __pyx_t_16;
+        __pyx_t_16 = 0;
         goto __pyx_L0;
       }
     }
@@ -2856,7 +2857,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
  */
     __Pyx_INCREF(__pyx_v_processor);
     __pyx_t_5 = __pyx_v_processor; __pyx_t_3 = NULL;
-    __pyx_t_12 = 0;
+    __pyx_t_13 = 0;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_5))) {
       __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_5);
       if (likely(__pyx_t_3)) {
@@ -2864,12 +2865,12 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
         __Pyx_INCREF(__pyx_t_3);
         __Pyx_INCREF(function);
         __Pyx_DECREF_SET(__pyx_t_5, function);
-        __pyx_t_12 = 1;
+        __pyx_t_13 = 1;
       }
     }
     {
       PyObject *__pyx_callargs[2] = {__pyx_t_3, __pyx_v_s1};
-      __pyx_t_4 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_12, 1+__pyx_t_12);
+      __pyx_t_4 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_13, 1+__pyx_t_13);
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 210, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
@@ -2887,7 +2888,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
  */
     __Pyx_INCREF(__pyx_v_processor);
     __pyx_t_5 = __pyx_v_processor; __pyx_t_3 = NULL;
-    __pyx_t_12 = 0;
+    __pyx_t_13 = 0;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_5))) {
       __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_5);
       if (likely(__pyx_t_3)) {
@@ -2895,12 +2896,12 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
         __Pyx_INCREF(__pyx_t_3);
         __Pyx_INCREF(function);
         __Pyx_DECREF_SET(__pyx_t_5, function);
-        __pyx_t_12 = 1;
+        __pyx_t_13 = 1;
       }
     }
     {
       PyObject *__pyx_callargs[2] = {__pyx_t_3, __pyx_v_s2};
-      __pyx_t_4 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_12, 1+__pyx_t_12);
+      __pyx_t_4 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_13, 1+__pyx_t_13);
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 211, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
@@ -2925,7 +2926,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
  *     try:
  *         string2 = conv_sequence(s2)
  */
-  __pyx_v_string1 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1);
+  __pyx_t_12 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 213, __pyx_L1_error)
+  __pyx_v_string1 = __pyx_t_12;
 
   /* "cpp_string_metric.pyx":214
  * 
@@ -2943,7 +2945,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
  *         try:
  *             return levenshtein_no_process(string1, string2, insertion, deletion, substitution, c_max)
  */
-    __pyx_v_string2 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2);
+    __pyx_t_12 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 215, __pyx_L24_error)
+    __pyx_v_string2 = __pyx_t_12;
 
     /* "cpp_string_metric.pyx":216
  *     try:
@@ -2987,20 +2990,20 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
       /*exception exit:*/{
         __Pyx_PyThreadState_declare
         __Pyx_PyThreadState_assign
-        __pyx_t_15 = 0; __pyx_t_16 = 0; __pyx_t_17 = 0; __pyx_t_18 = 0; __pyx_t_19 = 0; __pyx_t_20 = 0;
+        __pyx_t_16 = 0; __pyx_t_17 = 0; __pyx_t_18 = 0; __pyx_t_19 = 0; __pyx_t_20 = 0; __pyx_t_21 = 0;
         __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
         __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
         __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-        if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_18, &__pyx_t_19, &__pyx_t_20);
-        if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_15, &__pyx_t_16, &__pyx_t_17) < 0)) __Pyx_ErrFetch(&__pyx_t_15, &__pyx_t_16, &__pyx_t_17);
-        __Pyx_XGOTREF(__pyx_t_15);
+        if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_19, &__pyx_t_20, &__pyx_t_21);
+        if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_16, &__pyx_t_17, &__pyx_t_18) < 0)) __Pyx_ErrFetch(&__pyx_t_16, &__pyx_t_17, &__pyx_t_18);
         __Pyx_XGOTREF(__pyx_t_16);
         __Pyx_XGOTREF(__pyx_t_17);
         __Pyx_XGOTREF(__pyx_t_18);
         __Pyx_XGOTREF(__pyx_t_19);
         __Pyx_XGOTREF(__pyx_t_20);
-        __pyx_t_12 = __pyx_lineno; __pyx_t_13 = __pyx_clineno; __pyx_t_22 = __pyx_filename;
+        __Pyx_XGOTREF(__pyx_t_21);
+        __pyx_t_13 = __pyx_lineno; __pyx_t_14 = __pyx_clineno; __pyx_t_23 = __pyx_filename;
         {
           __pyx_t_11 = (__pyx_v_string2.allocated != 0);
           if (__pyx_t_11) {
@@ -3024,21 +3027,21 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
           }
         }
         if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) {
-          __Pyx_XGIVEREF(__pyx_t_18);
           __Pyx_XGIVEREF(__pyx_t_19);
           __Pyx_XGIVEREF(__pyx_t_20);
-          __Pyx_ExceptionReset(__pyx_t_18, __pyx_t_19, __pyx_t_20);
+          __Pyx_XGIVEREF(__pyx_t_21);
+          __Pyx_ExceptionReset(__pyx_t_19, __pyx_t_20, __pyx_t_21);
         }
-        __Pyx_XGIVEREF(__pyx_t_15);
         __Pyx_XGIVEREF(__pyx_t_16);
         __Pyx_XGIVEREF(__pyx_t_17);
-        __Pyx_ErrRestore(__pyx_t_15, __pyx_t_16, __pyx_t_17);
-        __pyx_t_15 = 0; __pyx_t_16 = 0; __pyx_t_17 = 0; __pyx_t_18 = 0; __pyx_t_19 = 0; __pyx_t_20 = 0;
-        __pyx_lineno = __pyx_t_12; __pyx_clineno = __pyx_t_13; __pyx_filename = __pyx_t_22;
+        __Pyx_XGIVEREF(__pyx_t_18);
+        __Pyx_ErrRestore(__pyx_t_16, __pyx_t_17, __pyx_t_18);
+        __pyx_t_16 = 0; __pyx_t_17 = 0; __pyx_t_18 = 0; __pyx_t_19 = 0; __pyx_t_20 = 0; __pyx_t_21 = 0;
+        __pyx_lineno = __pyx_t_13; __pyx_clineno = __pyx_t_14; __pyx_filename = __pyx_t_23;
         goto __pyx_L24_error;
       }
       __pyx_L26_return: {
-        __pyx_t_20 = __pyx_r;
+        __pyx_t_21 = __pyx_r;
         __pyx_r = 0;
         __pyx_t_11 = (__pyx_v_string2.allocated != 0);
         if (__pyx_t_11) {
@@ -3060,8 +3063,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
  *     finally:
  */
         }
-        __pyx_r = __pyx_t_20;
-        __pyx_t_20 = 0;
+        __pyx_r = __pyx_t_21;
+        __pyx_t_21 = 0;
         goto __pyx_L23_return;
       }
     }
@@ -3079,20 +3082,20 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
     /*exception exit:*/{
       __Pyx_PyThreadState_declare
       __Pyx_PyThreadState_assign
-      __pyx_t_20 = 0; __pyx_t_19 = 0; __pyx_t_18 = 0; __pyx_t_17 = 0; __pyx_t_16 = 0; __pyx_t_15 = 0;
+      __pyx_t_21 = 0; __pyx_t_20 = 0; __pyx_t_19 = 0; __pyx_t_18 = 0; __pyx_t_17 = 0; __pyx_t_16 = 0;
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-      if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_17, &__pyx_t_16, &__pyx_t_15);
-      if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_20, &__pyx_t_19, &__pyx_t_18) < 0)) __Pyx_ErrFetch(&__pyx_t_20, &__pyx_t_19, &__pyx_t_18);
+      if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_18, &__pyx_t_17, &__pyx_t_16);
+      if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_21, &__pyx_t_20, &__pyx_t_19) < 0)) __Pyx_ErrFetch(&__pyx_t_21, &__pyx_t_20, &__pyx_t_19);
+      __Pyx_XGOTREF(__pyx_t_21);
       __Pyx_XGOTREF(__pyx_t_20);
       __Pyx_XGOTREF(__pyx_t_19);
       __Pyx_XGOTREF(__pyx_t_18);
       __Pyx_XGOTREF(__pyx_t_17);
       __Pyx_XGOTREF(__pyx_t_16);
-      __Pyx_XGOTREF(__pyx_t_15);
-      __pyx_t_13 = __pyx_lineno; __pyx_t_12 = __pyx_clineno; __pyx_t_23 = __pyx_filename;
+      __pyx_t_14 = __pyx_lineno; __pyx_t_13 = __pyx_clineno; __pyx_t_24 = __pyx_filename;
       {
         __pyx_t_11 = (__pyx_v_string1.allocated != 0);
         if (__pyx_t_11) {
@@ -3116,21 +3119,21 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
         }
       }
       if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) {
+        __Pyx_XGIVEREF(__pyx_t_18);
         __Pyx_XGIVEREF(__pyx_t_17);
         __Pyx_XGIVEREF(__pyx_t_16);
-        __Pyx_XGIVEREF(__pyx_t_15);
-        __Pyx_ExceptionReset(__pyx_t_17, __pyx_t_16, __pyx_t_15);
+        __Pyx_ExceptionReset(__pyx_t_18, __pyx_t_17, __pyx_t_16);
       }
+      __Pyx_XGIVEREF(__pyx_t_21);
       __Pyx_XGIVEREF(__pyx_t_20);
       __Pyx_XGIVEREF(__pyx_t_19);
-      __Pyx_XGIVEREF(__pyx_t_18);
-      __Pyx_ErrRestore(__pyx_t_20, __pyx_t_19, __pyx_t_18);
-      __pyx_t_20 = 0; __pyx_t_19 = 0; __pyx_t_18 = 0; __pyx_t_17 = 0; __pyx_t_16 = 0; __pyx_t_15 = 0;
-      __pyx_lineno = __pyx_t_13; __pyx_clineno = __pyx_t_12; __pyx_filename = __pyx_t_23;
+      __Pyx_ErrRestore(__pyx_t_21, __pyx_t_20, __pyx_t_19);
+      __pyx_t_21 = 0; __pyx_t_20 = 0; __pyx_t_19 = 0; __pyx_t_18 = 0; __pyx_t_17 = 0; __pyx_t_16 = 0;
+      __pyx_lineno = __pyx_t_14; __pyx_clineno = __pyx_t_13; __pyx_filename = __pyx_t_24;
       goto __pyx_L1_error;
     }
     __pyx_L23_return: {
-      __pyx_t_15 = __pyx_r;
+      __pyx_t_16 = __pyx_r;
       __pyx_r = 0;
       __pyx_t_11 = (__pyx_v_string1.allocated != 0);
       if (__pyx_t_11) {
@@ -3152,8 +3155,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
  * 
  */
       }
-      __pyx_r = __pyx_t_15;
-      __pyx_t_15 = 0;
+      __pyx_r = __pyx_t_16;
+      __pyx_t_16 = 0;
       goto __pyx_L0;
     }
   }
@@ -3344,18 +3347,19 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
   size_t __pyx_t_11;
   double __pyx_t_12;
   double __pyx_t_13;
-  int __pyx_t_14;
+  proc_string __pyx_t_14;
   int __pyx_t_15;
-  char const *__pyx_t_16;
-  PyObject *__pyx_t_17 = NULL;
+  int __pyx_t_16;
+  char const *__pyx_t_17;
   PyObject *__pyx_t_18 = NULL;
   PyObject *__pyx_t_19 = NULL;
   PyObject *__pyx_t_20 = NULL;
   PyObject *__pyx_t_21 = NULL;
   PyObject *__pyx_t_22 = NULL;
-  char const *__pyx_t_23;
+  PyObject *__pyx_t_23 = NULL;
   char const *__pyx_t_24;
   char const *__pyx_t_25;
+  char const *__pyx_t_26;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -3550,7 +3554,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
  *         try:
  *             string2 = conv_sequence(s2)
  */
-    __pyx_v_string1 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1);
+    __pyx_t_14 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 326, __pyx_L1_error)
+    __pyx_v_string1 = __pyx_t_14;
 
     /* "cpp_string_metric.pyx":327
  *     if processor is True or processor == default_process:
@@ -3568,7 +3573,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
  *             try:
  *                 return normalized_levenshtein_default_process(string1, string2, insertion, deletion, substitution, c_score_cutoff)
  */
-      __pyx_v_string2 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2);
+      __pyx_t_14 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 328, __pyx_L13_error)
+      __pyx_v_string2 = __pyx_t_14;
 
       /* "cpp_string_metric.pyx":329
  *         try:
@@ -3612,20 +3618,20 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
         /*exception exit:*/{
           __Pyx_PyThreadState_declare
           __Pyx_PyThreadState_assign
-          __pyx_t_17 = 0; __pyx_t_18 = 0; __pyx_t_19 = 0; __pyx_t_20 = 0; __pyx_t_21 = 0; __pyx_t_22 = 0;
+          __pyx_t_18 = 0; __pyx_t_19 = 0; __pyx_t_20 = 0; __pyx_t_21 = 0; __pyx_t_22 = 0; __pyx_t_23 = 0;
           __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
           __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
           __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-          if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_20, &__pyx_t_21, &__pyx_t_22);
-          if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_17, &__pyx_t_18, &__pyx_t_19) < 0)) __Pyx_ErrFetch(&__pyx_t_17, &__pyx_t_18, &__pyx_t_19);
-          __Pyx_XGOTREF(__pyx_t_17);
+          if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_21, &__pyx_t_22, &__pyx_t_23);
+          if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_18, &__pyx_t_19, &__pyx_t_20) < 0)) __Pyx_ErrFetch(&__pyx_t_18, &__pyx_t_19, &__pyx_t_20);
           __Pyx_XGOTREF(__pyx_t_18);
           __Pyx_XGOTREF(__pyx_t_19);
           __Pyx_XGOTREF(__pyx_t_20);
           __Pyx_XGOTREF(__pyx_t_21);
           __Pyx_XGOTREF(__pyx_t_22);
-          __pyx_t_14 = __pyx_lineno; __pyx_t_15 = __pyx_clineno; __pyx_t_16 = __pyx_filename;
+          __Pyx_XGOTREF(__pyx_t_23);
+          __pyx_t_15 = __pyx_lineno; __pyx_t_16 = __pyx_clineno; __pyx_t_17 = __pyx_filename;
           {
             __pyx_t_2 = (__pyx_v_string2.allocated != 0);
             if (__pyx_t_2) {
@@ -3649,21 +3655,21 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
             }
           }
           if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) {
-            __Pyx_XGIVEREF(__pyx_t_20);
             __Pyx_XGIVEREF(__pyx_t_21);
             __Pyx_XGIVEREF(__pyx_t_22);
-            __Pyx_ExceptionReset(__pyx_t_20, __pyx_t_21, __pyx_t_22);
+            __Pyx_XGIVEREF(__pyx_t_23);
+            __Pyx_ExceptionReset(__pyx_t_21, __pyx_t_22, __pyx_t_23);
           }
-          __Pyx_XGIVEREF(__pyx_t_17);
           __Pyx_XGIVEREF(__pyx_t_18);
           __Pyx_XGIVEREF(__pyx_t_19);
-          __Pyx_ErrRestore(__pyx_t_17, __pyx_t_18, __pyx_t_19);
-          __pyx_t_17 = 0; __pyx_t_18 = 0; __pyx_t_19 = 0; __pyx_t_20 = 0; __pyx_t_21 = 0; __pyx_t_22 = 0;
-          __pyx_lineno = __pyx_t_14; __pyx_clineno = __pyx_t_15; __pyx_filename = __pyx_t_16;
+          __Pyx_XGIVEREF(__pyx_t_20);
+          __Pyx_ErrRestore(__pyx_t_18, __pyx_t_19, __pyx_t_20);
+          __pyx_t_18 = 0; __pyx_t_19 = 0; __pyx_t_20 = 0; __pyx_t_21 = 0; __pyx_t_22 = 0; __pyx_t_23 = 0;
+          __pyx_lineno = __pyx_t_15; __pyx_clineno = __pyx_t_16; __pyx_filename = __pyx_t_17;
           goto __pyx_L13_error;
         }
         __pyx_L15_return: {
-          __pyx_t_22 = __pyx_r;
+          __pyx_t_23 = __pyx_r;
           __pyx_r = 0;
           __pyx_t_2 = (__pyx_v_string2.allocated != 0);
           if (__pyx_t_2) {
@@ -3685,8 +3691,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
  *         finally:
  */
           }
-          __pyx_r = __pyx_t_22;
-          __pyx_t_22 = 0;
+          __pyx_r = __pyx_t_23;
+          __pyx_t_23 = 0;
           goto __pyx_L12_return;
         }
       }
@@ -3704,20 +3710,20 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
       /*exception exit:*/{
         __Pyx_PyThreadState_declare
         __Pyx_PyThreadState_assign
-        __pyx_t_22 = 0; __pyx_t_21 = 0; __pyx_t_20 = 0; __pyx_t_19 = 0; __pyx_t_18 = 0; __pyx_t_17 = 0;
+        __pyx_t_23 = 0; __pyx_t_22 = 0; __pyx_t_21 = 0; __pyx_t_20 = 0; __pyx_t_19 = 0; __pyx_t_18 = 0;
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
         __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
         __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
         __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-        if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_19, &__pyx_t_18, &__pyx_t_17);
-        if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_22, &__pyx_t_21, &__pyx_t_20) < 0)) __Pyx_ErrFetch(&__pyx_t_22, &__pyx_t_21, &__pyx_t_20);
+        if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_20, &__pyx_t_19, &__pyx_t_18);
+        if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_23, &__pyx_t_22, &__pyx_t_21) < 0)) __Pyx_ErrFetch(&__pyx_t_23, &__pyx_t_22, &__pyx_t_21);
+        __Pyx_XGOTREF(__pyx_t_23);
         __Pyx_XGOTREF(__pyx_t_22);
         __Pyx_XGOTREF(__pyx_t_21);
         __Pyx_XGOTREF(__pyx_t_20);
         __Pyx_XGOTREF(__pyx_t_19);
         __Pyx_XGOTREF(__pyx_t_18);
-        __Pyx_XGOTREF(__pyx_t_17);
-        __pyx_t_15 = __pyx_lineno; __pyx_t_14 = __pyx_clineno; __pyx_t_23 = __pyx_filename;
+        __pyx_t_16 = __pyx_lineno; __pyx_t_15 = __pyx_clineno; __pyx_t_24 = __pyx_filename;
         {
           __pyx_t_2 = (__pyx_v_string1.allocated != 0);
           if (__pyx_t_2) {
@@ -3741,21 +3747,21 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
           }
         }
         if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) {
+          __Pyx_XGIVEREF(__pyx_t_20);
           __Pyx_XGIVEREF(__pyx_t_19);
           __Pyx_XGIVEREF(__pyx_t_18);
-          __Pyx_XGIVEREF(__pyx_t_17);
-          __Pyx_ExceptionReset(__pyx_t_19, __pyx_t_18, __pyx_t_17);
+          __Pyx_ExceptionReset(__pyx_t_20, __pyx_t_19, __pyx_t_18);
         }
+        __Pyx_XGIVEREF(__pyx_t_23);
         __Pyx_XGIVEREF(__pyx_t_22);
         __Pyx_XGIVEREF(__pyx_t_21);
-        __Pyx_XGIVEREF(__pyx_t_20);
-        __Pyx_ErrRestore(__pyx_t_22, __pyx_t_21, __pyx_t_20);
-        __pyx_t_22 = 0; __pyx_t_21 = 0; __pyx_t_20 = 0; __pyx_t_19 = 0; __pyx_t_18 = 0; __pyx_t_17 = 0;
-        __pyx_lineno = __pyx_t_15; __pyx_clineno = __pyx_t_14; __pyx_filename = __pyx_t_23;
+        __Pyx_ErrRestore(__pyx_t_23, __pyx_t_22, __pyx_t_21);
+        __pyx_t_23 = 0; __pyx_t_22 = 0; __pyx_t_21 = 0; __pyx_t_20 = 0; __pyx_t_19 = 0; __pyx_t_18 = 0;
+        __pyx_lineno = __pyx_t_16; __pyx_clineno = __pyx_t_15; __pyx_filename = __pyx_t_24;
         goto __pyx_L1_error;
       }
       __pyx_L12_return: {
-        __pyx_t_17 = __pyx_r;
+        __pyx_t_18 = __pyx_r;
         __pyx_r = 0;
         __pyx_t_2 = (__pyx_v_string1.allocated != 0);
         if (__pyx_t_2) {
@@ -3777,8 +3783,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
  *     elif callable(processor):
  */
         }
-        __pyx_r = __pyx_t_17;
-        __pyx_t_17 = 0;
+        __pyx_r = __pyx_t_18;
+        __pyx_t_18 = 0;
         goto __pyx_L0;
       }
     }
@@ -3812,7 +3818,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
  */
     __Pyx_INCREF(__pyx_v_processor);
     __pyx_t_6 = __pyx_v_processor; __pyx_t_4 = NULL;
-    __pyx_t_14 = 0;
+    __pyx_t_15 = 0;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
       __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_6);
       if (likely(__pyx_t_4)) {
@@ -3820,12 +3826,12 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
         __Pyx_INCREF(__pyx_t_4);
         __Pyx_INCREF(function);
         __Pyx_DECREF_SET(__pyx_t_6, function);
-        __pyx_t_14 = 1;
+        __pyx_t_15 = 1;
       }
     }
     {
       PyObject *__pyx_callargs[2] = {__pyx_t_4, __pyx_v_s1};
-      __pyx_t_5 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_14, 1+__pyx_t_14);
+      __pyx_t_5 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_15, 1+__pyx_t_15);
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 338, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
@@ -3843,7 +3849,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
  */
     __Pyx_INCREF(__pyx_v_processor);
     __pyx_t_6 = __pyx_v_processor; __pyx_t_4 = NULL;
-    __pyx_t_14 = 0;
+    __pyx_t_15 = 0;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
       __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_6);
       if (likely(__pyx_t_4)) {
@@ -3851,12 +3857,12 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
         __Pyx_INCREF(__pyx_t_4);
         __Pyx_INCREF(function);
         __Pyx_DECREF_SET(__pyx_t_6, function);
-        __pyx_t_14 = 1;
+        __pyx_t_15 = 1;
       }
     }
     {
       PyObject *__pyx_callargs[2] = {__pyx_t_4, __pyx_v_s2};
-      __pyx_t_5 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_14, 1+__pyx_t_14);
+      __pyx_t_5 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_15, 1+__pyx_t_15);
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 339, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
@@ -3881,7 +3887,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
  *     try:
  *         string2 = conv_sequence(s2)
  */
-  __pyx_v_string1 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1);
+  __pyx_t_14 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 341, __pyx_L1_error)
+  __pyx_v_string1 = __pyx_t_14;
 
   /* "cpp_string_metric.pyx":342
  * 
@@ -3899,7 +3906,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
  *         try:
  *             return normalized_levenshtein_no_process(string1, string2, insertion, deletion, substitution, c_score_cutoff)
  */
-    __pyx_v_string2 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2);
+    __pyx_t_14 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 343, __pyx_L27_error)
+    __pyx_v_string2 = __pyx_t_14;
 
     /* "cpp_string_metric.pyx":344
  *     try:
@@ -3943,20 +3951,20 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
       /*exception exit:*/{
         __Pyx_PyThreadState_declare
         __Pyx_PyThreadState_assign
-        __pyx_t_17 = 0; __pyx_t_18 = 0; __pyx_t_19 = 0; __pyx_t_20 = 0; __pyx_t_21 = 0; __pyx_t_22 = 0;
+        __pyx_t_18 = 0; __pyx_t_19 = 0; __pyx_t_20 = 0; __pyx_t_21 = 0; __pyx_t_22 = 0; __pyx_t_23 = 0;
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
         __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
         __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
         __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-        if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_20, &__pyx_t_21, &__pyx_t_22);
-        if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_17, &__pyx_t_18, &__pyx_t_19) < 0)) __Pyx_ErrFetch(&__pyx_t_17, &__pyx_t_18, &__pyx_t_19);
-        __Pyx_XGOTREF(__pyx_t_17);
+        if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_21, &__pyx_t_22, &__pyx_t_23);
+        if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_18, &__pyx_t_19, &__pyx_t_20) < 0)) __Pyx_ErrFetch(&__pyx_t_18, &__pyx_t_19, &__pyx_t_20);
         __Pyx_XGOTREF(__pyx_t_18);
         __Pyx_XGOTREF(__pyx_t_19);
         __Pyx_XGOTREF(__pyx_t_20);
         __Pyx_XGOTREF(__pyx_t_21);
         __Pyx_XGOTREF(__pyx_t_22);
-        __pyx_t_14 = __pyx_lineno; __pyx_t_15 = __pyx_clineno; __pyx_t_24 = __pyx_filename;
+        __Pyx_XGOTREF(__pyx_t_23);
+        __pyx_t_15 = __pyx_lineno; __pyx_t_16 = __pyx_clineno; __pyx_t_25 = __pyx_filename;
         {
           __pyx_t_3 = (__pyx_v_string2.allocated != 0);
           if (__pyx_t_3) {
@@ -3980,21 +3988,21 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
           }
         }
         if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) {
-          __Pyx_XGIVEREF(__pyx_t_20);
           __Pyx_XGIVEREF(__pyx_t_21);
           __Pyx_XGIVEREF(__pyx_t_22);
-          __Pyx_ExceptionReset(__pyx_t_20, __pyx_t_21, __pyx_t_22);
+          __Pyx_XGIVEREF(__pyx_t_23);
+          __Pyx_ExceptionReset(__pyx_t_21, __pyx_t_22, __pyx_t_23);
         }
-        __Pyx_XGIVEREF(__pyx_t_17);
         __Pyx_XGIVEREF(__pyx_t_18);
         __Pyx_XGIVEREF(__pyx_t_19);
-        __Pyx_ErrRestore(__pyx_t_17, __pyx_t_18, __pyx_t_19);
-        __pyx_t_17 = 0; __pyx_t_18 = 0; __pyx_t_19 = 0; __pyx_t_20 = 0; __pyx_t_21 = 0; __pyx_t_22 = 0;
-        __pyx_lineno = __pyx_t_14; __pyx_clineno = __pyx_t_15; __pyx_filename = __pyx_t_24;
+        __Pyx_XGIVEREF(__pyx_t_20);
+        __Pyx_ErrRestore(__pyx_t_18, __pyx_t_19, __pyx_t_20);
+        __pyx_t_18 = 0; __pyx_t_19 = 0; __pyx_t_20 = 0; __pyx_t_21 = 0; __pyx_t_22 = 0; __pyx_t_23 = 0;
+        __pyx_lineno = __pyx_t_15; __pyx_clineno = __pyx_t_16; __pyx_filename = __pyx_t_25;
         goto __pyx_L27_error;
       }
       __pyx_L29_return: {
-        __pyx_t_22 = __pyx_r;
+        __pyx_t_23 = __pyx_r;
         __pyx_r = 0;
         __pyx_t_3 = (__pyx_v_string2.allocated != 0);
         if (__pyx_t_3) {
@@ -4016,8 +4024,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
  *     finally:
  */
         }
-        __pyx_r = __pyx_t_22;
-        __pyx_t_22 = 0;
+        __pyx_r = __pyx_t_23;
+        __pyx_t_23 = 0;
         goto __pyx_L26_return;
       }
     }
@@ -4035,20 +4043,20 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
     /*exception exit:*/{
       __Pyx_PyThreadState_declare
       __Pyx_PyThreadState_assign
-      __pyx_t_22 = 0; __pyx_t_21 = 0; __pyx_t_20 = 0; __pyx_t_19 = 0; __pyx_t_18 = 0; __pyx_t_17 = 0;
+      __pyx_t_23 = 0; __pyx_t_22 = 0; __pyx_t_21 = 0; __pyx_t_20 = 0; __pyx_t_19 = 0; __pyx_t_18 = 0;
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-      if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_19, &__pyx_t_18, &__pyx_t_17);
-      if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_22, &__pyx_t_21, &__pyx_t_20) < 0)) __Pyx_ErrFetch(&__pyx_t_22, &__pyx_t_21, &__pyx_t_20);
+      if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_20, &__pyx_t_19, &__pyx_t_18);
+      if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_23, &__pyx_t_22, &__pyx_t_21) < 0)) __Pyx_ErrFetch(&__pyx_t_23, &__pyx_t_22, &__pyx_t_21);
+      __Pyx_XGOTREF(__pyx_t_23);
       __Pyx_XGOTREF(__pyx_t_22);
       __Pyx_XGOTREF(__pyx_t_21);
       __Pyx_XGOTREF(__pyx_t_20);
       __Pyx_XGOTREF(__pyx_t_19);
       __Pyx_XGOTREF(__pyx_t_18);
-      __Pyx_XGOTREF(__pyx_t_17);
-      __pyx_t_15 = __pyx_lineno; __pyx_t_14 = __pyx_clineno; __pyx_t_25 = __pyx_filename;
+      __pyx_t_16 = __pyx_lineno; __pyx_t_15 = __pyx_clineno; __pyx_t_26 = __pyx_filename;
       {
         __pyx_t_3 = (__pyx_v_string1.allocated != 0);
         if (__pyx_t_3) {
@@ -4072,21 +4080,21 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
         }
       }
       if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) {
+        __Pyx_XGIVEREF(__pyx_t_20);
         __Pyx_XGIVEREF(__pyx_t_19);
         __Pyx_XGIVEREF(__pyx_t_18);
-        __Pyx_XGIVEREF(__pyx_t_17);
-        __Pyx_ExceptionReset(__pyx_t_19, __pyx_t_18, __pyx_t_17);
+        __Pyx_ExceptionReset(__pyx_t_20, __pyx_t_19, __pyx_t_18);
       }
+      __Pyx_XGIVEREF(__pyx_t_23);
       __Pyx_XGIVEREF(__pyx_t_22);
       __Pyx_XGIVEREF(__pyx_t_21);
-      __Pyx_XGIVEREF(__pyx_t_20);
-      __Pyx_ErrRestore(__pyx_t_22, __pyx_t_21, __pyx_t_20);
-      __pyx_t_22 = 0; __pyx_t_21 = 0; __pyx_t_20 = 0; __pyx_t_19 = 0; __pyx_t_18 = 0; __pyx_t_17 = 0;
-      __pyx_lineno = __pyx_t_15; __pyx_clineno = __pyx_t_14; __pyx_filename = __pyx_t_25;
+      __Pyx_ErrRestore(__pyx_t_23, __pyx_t_22, __pyx_t_21);
+      __pyx_t_23 = 0; __pyx_t_22 = 0; __pyx_t_21 = 0; __pyx_t_20 = 0; __pyx_t_19 = 0; __pyx_t_18 = 0;
+      __pyx_lineno = __pyx_t_16; __pyx_clineno = __pyx_t_15; __pyx_filename = __pyx_t_26;
       goto __pyx_L1_error;
     }
     __pyx_L26_return: {
-      __pyx_t_17 = __pyx_r;
+      __pyx_t_18 = __pyx_r;
       __pyx_r = 0;
       __pyx_t_3 = (__pyx_v_string1.allocated != 0);
       if (__pyx_t_3) {
@@ -4108,8 +4116,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
  * 
  */
       }
-      __pyx_r = __pyx_t_17;
-      __pyx_t_17 = 0;
+      __pyx_r = __pyx_t_18;
+      __pyx_t_18 = 0;
       goto __pyx_L0;
     }
   }
@@ -4277,19 +4285,20 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
   PyObject *__pyx_t_7 = NULL;
-  int __pyx_t_8;
+  proc_string __pyx_t_8;
   int __pyx_t_9;
-  char const *__pyx_t_10;
-  PyObject *__pyx_t_11 = NULL;
+  int __pyx_t_10;
+  char const *__pyx_t_11;
   PyObject *__pyx_t_12 = NULL;
   PyObject *__pyx_t_13 = NULL;
   PyObject *__pyx_t_14 = NULL;
   PyObject *__pyx_t_15 = NULL;
   PyObject *__pyx_t_16 = NULL;
-  char const *__pyx_t_17;
-  PyObject *__pyx_t_18 = NULL;
-  char const *__pyx_t_19;
+  PyObject *__pyx_t_17 = NULL;
+  char const *__pyx_t_18;
+  PyObject *__pyx_t_19 = NULL;
   char const *__pyx_t_20;
+  char const *__pyx_t_21;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -4385,7 +4394,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
  *         try:
  *             string2 = conv_sequence(s2)
  */
-    __pyx_v_string1 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1);
+    __pyx_t_8 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 397, __pyx_L1_error)
+    __pyx_v_string1 = __pyx_t_8;
 
     /* "cpp_string_metric.pyx":398
  *     if processor is True or processor == default_process:
@@ -4403,7 +4413,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
  *             try:
  *                 return hamming_default_process(string1, string2, c_max)
  */
-      __pyx_v_string2 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2);
+      __pyx_t_8 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 399, __pyx_L10_error)
+      __pyx_v_string2 = __pyx_t_8;
 
       /* "cpp_string_metric.pyx":400
  *         try:
@@ -4447,18 +4458,18 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
         /*exception exit:*/{
           __Pyx_PyThreadState_declare
           __Pyx_PyThreadState_assign
-          __pyx_t_11 = 0; __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0;
+          __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0; __pyx_t_17 = 0;
           __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
           __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-          if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_14, &__pyx_t_15, &__pyx_t_16);
-          if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_11, &__pyx_t_12, &__pyx_t_13) < 0)) __Pyx_ErrFetch(&__pyx_t_11, &__pyx_t_12, &__pyx_t_13);
-          __Pyx_XGOTREF(__pyx_t_11);
+          if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_15, &__pyx_t_16, &__pyx_t_17);
+          if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_12, &__pyx_t_13, &__pyx_t_14) < 0)) __Pyx_ErrFetch(&__pyx_t_12, &__pyx_t_13, &__pyx_t_14);
           __Pyx_XGOTREF(__pyx_t_12);
           __Pyx_XGOTREF(__pyx_t_13);
           __Pyx_XGOTREF(__pyx_t_14);
           __Pyx_XGOTREF(__pyx_t_15);
           __Pyx_XGOTREF(__pyx_t_16);
-          __pyx_t_8 = __pyx_lineno; __pyx_t_9 = __pyx_clineno; __pyx_t_10 = __pyx_filename;
+          __Pyx_XGOTREF(__pyx_t_17);
+          __pyx_t_9 = __pyx_lineno; __pyx_t_10 = __pyx_clineno; __pyx_t_11 = __pyx_filename;
           {
             __pyx_t_2 = (__pyx_v_string2.allocated != 0);
             if (__pyx_t_2) {
@@ -4482,21 +4493,21 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
             }
           }
           if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) {
-            __Pyx_XGIVEREF(__pyx_t_14);
             __Pyx_XGIVEREF(__pyx_t_15);
             __Pyx_XGIVEREF(__pyx_t_16);
-            __Pyx_ExceptionReset(__pyx_t_14, __pyx_t_15, __pyx_t_16);
+            __Pyx_XGIVEREF(__pyx_t_17);
+            __Pyx_ExceptionReset(__pyx_t_15, __pyx_t_16, __pyx_t_17);
           }
-          __Pyx_XGIVEREF(__pyx_t_11);
           __Pyx_XGIVEREF(__pyx_t_12);
           __Pyx_XGIVEREF(__pyx_t_13);
-          __Pyx_ErrRestore(__pyx_t_11, __pyx_t_12, __pyx_t_13);
-          __pyx_t_11 = 0; __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0;
-          __pyx_lineno = __pyx_t_8; __pyx_clineno = __pyx_t_9; __pyx_filename = __pyx_t_10;
+          __Pyx_XGIVEREF(__pyx_t_14);
+          __Pyx_ErrRestore(__pyx_t_12, __pyx_t_13, __pyx_t_14);
+          __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0; __pyx_t_17 = 0;
+          __pyx_lineno = __pyx_t_9; __pyx_clineno = __pyx_t_10; __pyx_filename = __pyx_t_11;
           goto __pyx_L10_error;
         }
         __pyx_L12_return: {
-          __pyx_t_16 = __pyx_r;
+          __pyx_t_17 = __pyx_r;
           __pyx_r = 0;
           __pyx_t_2 = (__pyx_v_string2.allocated != 0);
           if (__pyx_t_2) {
@@ -4518,8 +4529,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
  *         finally:
  */
           }
-          __pyx_r = __pyx_t_16;
-          __pyx_t_16 = 0;
+          __pyx_r = __pyx_t_17;
+          __pyx_t_17 = 0;
           goto __pyx_L9_return;
         }
       }
@@ -4537,18 +4548,18 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
       /*exception exit:*/{
         __Pyx_PyThreadState_declare
         __Pyx_PyThreadState_assign
-        __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0; __pyx_t_11 = 0;
+        __pyx_t_17 = 0; __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0;
         __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
         __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-        if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_13, &__pyx_t_12, &__pyx_t_11);
-        if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_16, &__pyx_t_15, &__pyx_t_14) < 0)) __Pyx_ErrFetch(&__pyx_t_16, &__pyx_t_15, &__pyx_t_14);
+        if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_14, &__pyx_t_13, &__pyx_t_12);
+        if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_17, &__pyx_t_16, &__pyx_t_15) < 0)) __Pyx_ErrFetch(&__pyx_t_17, &__pyx_t_16, &__pyx_t_15);
+        __Pyx_XGOTREF(__pyx_t_17);
         __Pyx_XGOTREF(__pyx_t_16);
         __Pyx_XGOTREF(__pyx_t_15);
         __Pyx_XGOTREF(__pyx_t_14);
         __Pyx_XGOTREF(__pyx_t_13);
         __Pyx_XGOTREF(__pyx_t_12);
-        __Pyx_XGOTREF(__pyx_t_11);
-        __pyx_t_9 = __pyx_lineno; __pyx_t_8 = __pyx_clineno; __pyx_t_17 = __pyx_filename;
+        __pyx_t_10 = __pyx_lineno; __pyx_t_9 = __pyx_clineno; __pyx_t_18 = __pyx_filename;
         {
           __pyx_t_2 = (__pyx_v_string1.allocated != 0);
           if (__pyx_t_2) {
@@ -4572,21 +4583,21 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
           }
         }
         if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) {
+          __Pyx_XGIVEREF(__pyx_t_14);
           __Pyx_XGIVEREF(__pyx_t_13);
           __Pyx_XGIVEREF(__pyx_t_12);
-          __Pyx_XGIVEREF(__pyx_t_11);
-          __Pyx_ExceptionReset(__pyx_t_13, __pyx_t_12, __pyx_t_11);
+          __Pyx_ExceptionReset(__pyx_t_14, __pyx_t_13, __pyx_t_12);
         }
+        __Pyx_XGIVEREF(__pyx_t_17);
         __Pyx_XGIVEREF(__pyx_t_16);
         __Pyx_XGIVEREF(__pyx_t_15);
-        __Pyx_XGIVEREF(__pyx_t_14);
-        __Pyx_ErrRestore(__pyx_t_16, __pyx_t_15, __pyx_t_14);
-        __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0; __pyx_t_11 = 0;
-        __pyx_lineno = __pyx_t_9; __pyx_clineno = __pyx_t_8; __pyx_filename = __pyx_t_17;
+        __Pyx_ErrRestore(__pyx_t_17, __pyx_t_16, __pyx_t_15);
+        __pyx_t_17 = 0; __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0;
+        __pyx_lineno = __pyx_t_10; __pyx_clineno = __pyx_t_9; __pyx_filename = __pyx_t_18;
         goto __pyx_L1_error;
       }
       __pyx_L9_return: {
-        __pyx_t_11 = __pyx_r;
+        __pyx_t_12 = __pyx_r;
         __pyx_r = 0;
         __pyx_t_2 = (__pyx_v_string1.allocated != 0);
         if (__pyx_t_2) {
@@ -4608,8 +4619,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
  *     elif callable(processor):
  */
         }
-        __pyx_r = __pyx_t_11;
-        __pyx_t_11 = 0;
+        __pyx_r = __pyx_t_12;
+        __pyx_t_12 = 0;
         goto __pyx_L0;
       }
     }
@@ -4642,22 +4653,22 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
  * 
  */
     __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_6 = __pyx_v_processor; __pyx_t_18 = NULL;
-    __pyx_t_8 = 0;
+    __pyx_t_6 = __pyx_v_processor; __pyx_t_19 = NULL;
+    __pyx_t_9 = 0;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
-      __pyx_t_18 = PyMethod_GET_SELF(__pyx_t_6);
-      if (likely(__pyx_t_18)) {
+      __pyx_t_19 = PyMethod_GET_SELF(__pyx_t_6);
+      if (likely(__pyx_t_19)) {
         PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
-        __Pyx_INCREF(__pyx_t_18);
+        __Pyx_INCREF(__pyx_t_19);
         __Pyx_INCREF(function);
         __Pyx_DECREF_SET(__pyx_t_6, function);
-        __pyx_t_8 = 1;
+        __pyx_t_9 = 1;
       }
     }
     {
-      PyObject *__pyx_callargs[2] = {__pyx_t_18, __pyx_v_s1};
-      __pyx_t_7 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_8, 1+__pyx_t_8);
-      __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
+      PyObject *__pyx_callargs[2] = {__pyx_t_19, __pyx_v_s1};
+      __pyx_t_7 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
+      __Pyx_XDECREF(__pyx_t_19); __pyx_t_19 = 0;
       if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 409, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -4673,22 +4684,22 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
  *     string1 = conv_sequence(s1)
  */
     __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_6 = __pyx_v_processor; __pyx_t_18 = NULL;
-    __pyx_t_8 = 0;
+    __pyx_t_6 = __pyx_v_processor; __pyx_t_19 = NULL;
+    __pyx_t_9 = 0;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
-      __pyx_t_18 = PyMethod_GET_SELF(__pyx_t_6);
-      if (likely(__pyx_t_18)) {
+      __pyx_t_19 = PyMethod_GET_SELF(__pyx_t_6);
+      if (likely(__pyx_t_19)) {
         PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
-        __Pyx_INCREF(__pyx_t_18);
+        __Pyx_INCREF(__pyx_t_19);
         __Pyx_INCREF(function);
         __Pyx_DECREF_SET(__pyx_t_6, function);
-        __pyx_t_8 = 1;
+        __pyx_t_9 = 1;
       }
     }
     {
-      PyObject *__pyx_callargs[2] = {__pyx_t_18, __pyx_v_s2};
-      __pyx_t_7 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_8, 1+__pyx_t_8);
-      __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
+      PyObject *__pyx_callargs[2] = {__pyx_t_19, __pyx_v_s2};
+      __pyx_t_7 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
+      __Pyx_XDECREF(__pyx_t_19); __pyx_t_19 = 0;
       if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 410, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -4712,7 +4723,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
  *     try:
  *         string2 = conv_sequence(s2)
  */
-  __pyx_v_string1 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1);
+  __pyx_t_8 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 412, __pyx_L1_error)
+  __pyx_v_string1 = __pyx_t_8;
 
   /* "cpp_string_metric.pyx":413
  * 
@@ -4730,7 +4742,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
  *         try:
  *             return hamming_no_process(string1, string2, c_max)
  */
-    __pyx_v_string2 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2);
+    __pyx_t_8 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 414, __pyx_L24_error)
+    __pyx_v_string2 = __pyx_t_8;
 
     /* "cpp_string_metric.pyx":415
  *     try:
@@ -4774,19 +4787,19 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
       /*exception exit:*/{
         __Pyx_PyThreadState_declare
         __Pyx_PyThreadState_assign
-        __pyx_t_11 = 0; __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0;
-        __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
+        __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0; __pyx_t_17 = 0;
+        __Pyx_XDECREF(__pyx_t_19); __pyx_t_19 = 0;
         __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
         __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-        if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_14, &__pyx_t_15, &__pyx_t_16);
-        if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_11, &__pyx_t_12, &__pyx_t_13) < 0)) __Pyx_ErrFetch(&__pyx_t_11, &__pyx_t_12, &__pyx_t_13);
-        __Pyx_XGOTREF(__pyx_t_11);
+        if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_15, &__pyx_t_16, &__pyx_t_17);
+        if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_12, &__pyx_t_13, &__pyx_t_14) < 0)) __Pyx_ErrFetch(&__pyx_t_12, &__pyx_t_13, &__pyx_t_14);
         __Pyx_XGOTREF(__pyx_t_12);
         __Pyx_XGOTREF(__pyx_t_13);
         __Pyx_XGOTREF(__pyx_t_14);
         __Pyx_XGOTREF(__pyx_t_15);
         __Pyx_XGOTREF(__pyx_t_16);
-        __pyx_t_8 = __pyx_lineno; __pyx_t_9 = __pyx_clineno; __pyx_t_19 = __pyx_filename;
+        __Pyx_XGOTREF(__pyx_t_17);
+        __pyx_t_9 = __pyx_lineno; __pyx_t_10 = __pyx_clineno; __pyx_t_20 = __pyx_filename;
         {
           __pyx_t_5 = (__pyx_v_string2.allocated != 0);
           if (__pyx_t_5) {
@@ -4810,21 +4823,21 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
           }
         }
         if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) {
-          __Pyx_XGIVEREF(__pyx_t_14);
           __Pyx_XGIVEREF(__pyx_t_15);
           __Pyx_XGIVEREF(__pyx_t_16);
-          __Pyx_ExceptionReset(__pyx_t_14, __pyx_t_15, __pyx_t_16);
+          __Pyx_XGIVEREF(__pyx_t_17);
+          __Pyx_ExceptionReset(__pyx_t_15, __pyx_t_16, __pyx_t_17);
         }
-        __Pyx_XGIVEREF(__pyx_t_11);
         __Pyx_XGIVEREF(__pyx_t_12);
         __Pyx_XGIVEREF(__pyx_t_13);
-        __Pyx_ErrRestore(__pyx_t_11, __pyx_t_12, __pyx_t_13);
-        __pyx_t_11 = 0; __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0;
-        __pyx_lineno = __pyx_t_8; __pyx_clineno = __pyx_t_9; __pyx_filename = __pyx_t_19;
+        __Pyx_XGIVEREF(__pyx_t_14);
+        __Pyx_ErrRestore(__pyx_t_12, __pyx_t_13, __pyx_t_14);
+        __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0; __pyx_t_17 = 0;
+        __pyx_lineno = __pyx_t_9; __pyx_clineno = __pyx_t_10; __pyx_filename = __pyx_t_20;
         goto __pyx_L24_error;
       }
       __pyx_L26_return: {
-        __pyx_t_16 = __pyx_r;
+        __pyx_t_17 = __pyx_r;
         __pyx_r = 0;
         __pyx_t_5 = (__pyx_v_string2.allocated != 0);
         if (__pyx_t_5) {
@@ -4846,8 +4859,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
  *     finally:
  */
         }
-        __pyx_r = __pyx_t_16;
-        __pyx_t_16 = 0;
+        __pyx_r = __pyx_t_17;
+        __pyx_t_17 = 0;
         goto __pyx_L23_return;
       }
     }
@@ -4865,19 +4878,19 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
     /*exception exit:*/{
       __Pyx_PyThreadState_declare
       __Pyx_PyThreadState_assign
-      __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0; __pyx_t_11 = 0;
-      __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
+      __pyx_t_17 = 0; __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0;
+      __Pyx_XDECREF(__pyx_t_19); __pyx_t_19 = 0;
       __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-      if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_13, &__pyx_t_12, &__pyx_t_11);
-      if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_16, &__pyx_t_15, &__pyx_t_14) < 0)) __Pyx_ErrFetch(&__pyx_t_16, &__pyx_t_15, &__pyx_t_14);
+      if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_14, &__pyx_t_13, &__pyx_t_12);
+      if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_17, &__pyx_t_16, &__pyx_t_15) < 0)) __Pyx_ErrFetch(&__pyx_t_17, &__pyx_t_16, &__pyx_t_15);
+      __Pyx_XGOTREF(__pyx_t_17);
       __Pyx_XGOTREF(__pyx_t_16);
       __Pyx_XGOTREF(__pyx_t_15);
       __Pyx_XGOTREF(__pyx_t_14);
       __Pyx_XGOTREF(__pyx_t_13);
       __Pyx_XGOTREF(__pyx_t_12);
-      __Pyx_XGOTREF(__pyx_t_11);
-      __pyx_t_9 = __pyx_lineno; __pyx_t_8 = __pyx_clineno; __pyx_t_20 = __pyx_filename;
+      __pyx_t_10 = __pyx_lineno; __pyx_t_9 = __pyx_clineno; __pyx_t_21 = __pyx_filename;
       {
         __pyx_t_5 = (__pyx_v_string1.allocated != 0);
         if (__pyx_t_5) {
@@ -4901,21 +4914,21 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
         }
       }
       if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) {
+        __Pyx_XGIVEREF(__pyx_t_14);
         __Pyx_XGIVEREF(__pyx_t_13);
         __Pyx_XGIVEREF(__pyx_t_12);
-        __Pyx_XGIVEREF(__pyx_t_11);
-        __Pyx_ExceptionReset(__pyx_t_13, __pyx_t_12, __pyx_t_11);
+        __Pyx_ExceptionReset(__pyx_t_14, __pyx_t_13, __pyx_t_12);
       }
+      __Pyx_XGIVEREF(__pyx_t_17);
       __Pyx_XGIVEREF(__pyx_t_16);
       __Pyx_XGIVEREF(__pyx_t_15);
-      __Pyx_XGIVEREF(__pyx_t_14);
-      __Pyx_ErrRestore(__pyx_t_16, __pyx_t_15, __pyx_t_14);
-      __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0; __pyx_t_11 = 0;
-      __pyx_lineno = __pyx_t_9; __pyx_clineno = __pyx_t_8; __pyx_filename = __pyx_t_20;
+      __Pyx_ErrRestore(__pyx_t_17, __pyx_t_16, __pyx_t_15);
+      __pyx_t_17 = 0; __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0;
+      __pyx_lineno = __pyx_t_10; __pyx_clineno = __pyx_t_9; __pyx_filename = __pyx_t_21;
       goto __pyx_L1_error;
     }
     __pyx_L23_return: {
-      __pyx_t_11 = __pyx_r;
+      __pyx_t_12 = __pyx_r;
       __pyx_r = 0;
       __pyx_t_5 = (__pyx_v_string1.allocated != 0);
       if (__pyx_t_5) {
@@ -4937,8 +4950,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
  * 
  */
       }
-      __pyx_r = __pyx_t_11;
-      __pyx_t_11 = 0;
+      __pyx_r = __pyx_t_12;
+      __pyx_t_12 = 0;
       goto __pyx_L0;
     }
   }
@@ -4955,7 +4968,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_6);
   __Pyx_XDECREF(__pyx_t_7);
-  __Pyx_XDECREF(__pyx_t_18);
+  __Pyx_XDECREF(__pyx_t_19);
   __Pyx_AddTraceback("cpp_string_metric.hamming", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -5105,19 +5118,20 @@ static PyObject *__pyx_pf_17cpp_string_metric_6normalized_hamming(CYTHON_UNUSED 
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
   PyObject *__pyx_t_7 = NULL;
-  int __pyx_t_8;
+  proc_string __pyx_t_8;
   int __pyx_t_9;
-  char const *__pyx_t_10;
-  PyObject *__pyx_t_11 = NULL;
+  int __pyx_t_10;
+  char const *__pyx_t_11;
   PyObject *__pyx_t_12 = NULL;
   PyObject *__pyx_t_13 = NULL;
   PyObject *__pyx_t_14 = NULL;
   PyObject *__pyx_t_15 = NULL;
   PyObject *__pyx_t_16 = NULL;
-  char const *__pyx_t_17;
-  PyObject *__pyx_t_18 = NULL;
-  char const *__pyx_t_19;
+  PyObject *__pyx_t_17 = NULL;
+  char const *__pyx_t_18;
+  PyObject *__pyx_t_19 = NULL;
   char const *__pyx_t_20;
+  char const *__pyx_t_21;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -5213,7 +5227,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_6normalized_hamming(CYTHON_UNUSED 
  *         try:
  *             string2 = conv_sequence(s2)
  */
-    __pyx_v_string1 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1);
+    __pyx_t_8 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 467, __pyx_L1_error)
+    __pyx_v_string1 = __pyx_t_8;
 
     /* "cpp_string_metric.pyx":468
  *     if processor is True or processor == default_process:
@@ -5231,7 +5246,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_6normalized_hamming(CYTHON_UNUSED 
  *             try:
  *                 return normalized_hamming_default_process(string1, string2, c_score_cutoff)
  */
-      __pyx_v_string2 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2);
+      __pyx_t_8 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 469, __pyx_L10_error)
+      __pyx_v_string2 = __pyx_t_8;
 
       /* "cpp_string_metric.pyx":470
  *         try:
@@ -5275,18 +5291,18 @@ static PyObject *__pyx_pf_17cpp_string_metric_6normalized_hamming(CYTHON_UNUSED 
         /*exception exit:*/{
           __Pyx_PyThreadState_declare
           __Pyx_PyThreadState_assign
-          __pyx_t_11 = 0; __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0;
+          __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0; __pyx_t_17 = 0;
           __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
           __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-          if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_14, &__pyx_t_15, &__pyx_t_16);
-          if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_11, &__pyx_t_12, &__pyx_t_13) < 0)) __Pyx_ErrFetch(&__pyx_t_11, &__pyx_t_12, &__pyx_t_13);
-          __Pyx_XGOTREF(__pyx_t_11);
+          if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_15, &__pyx_t_16, &__pyx_t_17);
+          if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_12, &__pyx_t_13, &__pyx_t_14) < 0)) __Pyx_ErrFetch(&__pyx_t_12, &__pyx_t_13, &__pyx_t_14);
           __Pyx_XGOTREF(__pyx_t_12);
           __Pyx_XGOTREF(__pyx_t_13);
           __Pyx_XGOTREF(__pyx_t_14);
           __Pyx_XGOTREF(__pyx_t_15);
           __Pyx_XGOTREF(__pyx_t_16);
-          __pyx_t_8 = __pyx_lineno; __pyx_t_9 = __pyx_clineno; __pyx_t_10 = __pyx_filename;
+          __Pyx_XGOTREF(__pyx_t_17);
+          __pyx_t_9 = __pyx_lineno; __pyx_t_10 = __pyx_clineno; __pyx_t_11 = __pyx_filename;
           {
             __pyx_t_2 = (__pyx_v_string2.allocated != 0);
             if (__pyx_t_2) {
@@ -5310,21 +5326,21 @@ static PyObject *__pyx_pf_17cpp_string_metric_6normalized_hamming(CYTHON_UNUSED 
             }
           }
           if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) {
-            __Pyx_XGIVEREF(__pyx_t_14);
             __Pyx_XGIVEREF(__pyx_t_15);
             __Pyx_XGIVEREF(__pyx_t_16);
-            __Pyx_ExceptionReset(__pyx_t_14, __pyx_t_15, __pyx_t_16);
+            __Pyx_XGIVEREF(__pyx_t_17);
+            __Pyx_ExceptionReset(__pyx_t_15, __pyx_t_16, __pyx_t_17);
           }
-          __Pyx_XGIVEREF(__pyx_t_11);
           __Pyx_XGIVEREF(__pyx_t_12);
           __Pyx_XGIVEREF(__pyx_t_13);
-          __Pyx_ErrRestore(__pyx_t_11, __pyx_t_12, __pyx_t_13);
-          __pyx_t_11 = 0; __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0;
-          __pyx_lineno = __pyx_t_8; __pyx_clineno = __pyx_t_9; __pyx_filename = __pyx_t_10;
+          __Pyx_XGIVEREF(__pyx_t_14);
+          __Pyx_ErrRestore(__pyx_t_12, __pyx_t_13, __pyx_t_14);
+          __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0; __pyx_t_17 = 0;
+          __pyx_lineno = __pyx_t_9; __pyx_clineno = __pyx_t_10; __pyx_filename = __pyx_t_11;
           goto __pyx_L10_error;
         }
         __pyx_L12_return: {
-          __pyx_t_16 = __pyx_r;
+          __pyx_t_17 = __pyx_r;
           __pyx_r = 0;
           __pyx_t_2 = (__pyx_v_string2.allocated != 0);
           if (__pyx_t_2) {
@@ -5346,8 +5362,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_6normalized_hamming(CYTHON_UNUSED 
  *         finally:
  */
           }
-          __pyx_r = __pyx_t_16;
-          __pyx_t_16 = 0;
+          __pyx_r = __pyx_t_17;
+          __pyx_t_17 = 0;
           goto __pyx_L9_return;
         }
       }
@@ -5365,18 +5381,18 @@ static PyObject *__pyx_pf_17cpp_string_metric_6normalized_hamming(CYTHON_UNUSED 
       /*exception exit:*/{
         __Pyx_PyThreadState_declare
         __Pyx_PyThreadState_assign
-        __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0; __pyx_t_11 = 0;
+        __pyx_t_17 = 0; __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0;
         __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
         __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-        if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_13, &__pyx_t_12, &__pyx_t_11);
-        if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_16, &__pyx_t_15, &__pyx_t_14) < 0)) __Pyx_ErrFetch(&__pyx_t_16, &__pyx_t_15, &__pyx_t_14);
+        if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_14, &__pyx_t_13, &__pyx_t_12);
+        if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_17, &__pyx_t_16, &__pyx_t_15) < 0)) __Pyx_ErrFetch(&__pyx_t_17, &__pyx_t_16, &__pyx_t_15);
+        __Pyx_XGOTREF(__pyx_t_17);
         __Pyx_XGOTREF(__pyx_t_16);
         __Pyx_XGOTREF(__pyx_t_15);
         __Pyx_XGOTREF(__pyx_t_14);
         __Pyx_XGOTREF(__pyx_t_13);
         __Pyx_XGOTREF(__pyx_t_12);
-        __Pyx_XGOTREF(__pyx_t_11);
-        __pyx_t_9 = __pyx_lineno; __pyx_t_8 = __pyx_clineno; __pyx_t_17 = __pyx_filename;
+        __pyx_t_10 = __pyx_lineno; __pyx_t_9 = __pyx_clineno; __pyx_t_18 = __pyx_filename;
         {
           __pyx_t_2 = (__pyx_v_string1.allocated != 0);
           if (__pyx_t_2) {
@@ -5400,21 +5416,21 @@ static PyObject *__pyx_pf_17cpp_string_metric_6normalized_hamming(CYTHON_UNUSED 
           }
         }
         if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) {
+          __Pyx_XGIVEREF(__pyx_t_14);
           __Pyx_XGIVEREF(__pyx_t_13);
           __Pyx_XGIVEREF(__pyx_t_12);
-          __Pyx_XGIVEREF(__pyx_t_11);
-          __Pyx_ExceptionReset(__pyx_t_13, __pyx_t_12, __pyx_t_11);
+          __Pyx_ExceptionReset(__pyx_t_14, __pyx_t_13, __pyx_t_12);
         }
+        __Pyx_XGIVEREF(__pyx_t_17);
         __Pyx_XGIVEREF(__pyx_t_16);
         __Pyx_XGIVEREF(__pyx_t_15);
-        __Pyx_XGIVEREF(__pyx_t_14);
-        __Pyx_ErrRestore(__pyx_t_16, __pyx_t_15, __pyx_t_14);
-        __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0; __pyx_t_11 = 0;
-        __pyx_lineno = __pyx_t_9; __pyx_clineno = __pyx_t_8; __pyx_filename = __pyx_t_17;
+        __Pyx_ErrRestore(__pyx_t_17, __pyx_t_16, __pyx_t_15);
+        __pyx_t_17 = 0; __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0;
+        __pyx_lineno = __pyx_t_10; __pyx_clineno = __pyx_t_9; __pyx_filename = __pyx_t_18;
         goto __pyx_L1_error;
       }
       __pyx_L9_return: {
-        __pyx_t_11 = __pyx_r;
+        __pyx_t_12 = __pyx_r;
         __pyx_r = 0;
         __pyx_t_2 = (__pyx_v_string1.allocated != 0);
         if (__pyx_t_2) {
@@ -5436,8 +5452,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_6normalized_hamming(CYTHON_UNUSED 
  *     elif callable(processor):
  */
         }
-        __pyx_r = __pyx_t_11;
-        __pyx_t_11 = 0;
+        __pyx_r = __pyx_t_12;
+        __pyx_t_12 = 0;
         goto __pyx_L0;
       }
     }
@@ -5470,22 +5486,22 @@ static PyObject *__pyx_pf_17cpp_string_metric_6normalized_hamming(CYTHON_UNUSED 
  * 
  */
     __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_6 = __pyx_v_processor; __pyx_t_18 = NULL;
-    __pyx_t_8 = 0;
+    __pyx_t_6 = __pyx_v_processor; __pyx_t_19 = NULL;
+    __pyx_t_9 = 0;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
-      __pyx_t_18 = PyMethod_GET_SELF(__pyx_t_6);
-      if (likely(__pyx_t_18)) {
+      __pyx_t_19 = PyMethod_GET_SELF(__pyx_t_6);
+      if (likely(__pyx_t_19)) {
         PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
-        __Pyx_INCREF(__pyx_t_18);
+        __Pyx_INCREF(__pyx_t_19);
         __Pyx_INCREF(function);
         __Pyx_DECREF_SET(__pyx_t_6, function);
-        __pyx_t_8 = 1;
+        __pyx_t_9 = 1;
       }
     }
     {
-      PyObject *__pyx_callargs[2] = {__pyx_t_18, __pyx_v_s1};
-      __pyx_t_7 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_8, 1+__pyx_t_8);
-      __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
+      PyObject *__pyx_callargs[2] = {__pyx_t_19, __pyx_v_s1};
+      __pyx_t_7 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
+      __Pyx_XDECREF(__pyx_t_19); __pyx_t_19 = 0;
       if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 479, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -5501,22 +5517,22 @@ static PyObject *__pyx_pf_17cpp_string_metric_6normalized_hamming(CYTHON_UNUSED 
  *     string1 = conv_sequence(s1)
  */
     __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_6 = __pyx_v_processor; __pyx_t_18 = NULL;
-    __pyx_t_8 = 0;
+    __pyx_t_6 = __pyx_v_processor; __pyx_t_19 = NULL;
+    __pyx_t_9 = 0;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
-      __pyx_t_18 = PyMethod_GET_SELF(__pyx_t_6);
-      if (likely(__pyx_t_18)) {
+      __pyx_t_19 = PyMethod_GET_SELF(__pyx_t_6);
+      if (likely(__pyx_t_19)) {
         PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
-        __Pyx_INCREF(__pyx_t_18);
+        __Pyx_INCREF(__pyx_t_19);
         __Pyx_INCREF(function);
         __Pyx_DECREF_SET(__pyx_t_6, function);
-        __pyx_t_8 = 1;
+        __pyx_t_9 = 1;
       }
     }
     {
-      PyObject *__pyx_callargs[2] = {__pyx_t_18, __pyx_v_s2};
-      __pyx_t_7 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_8, 1+__pyx_t_8);
-      __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
+      PyObject *__pyx_callargs[2] = {__pyx_t_19, __pyx_v_s2};
+      __pyx_t_7 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
+      __Pyx_XDECREF(__pyx_t_19); __pyx_t_19 = 0;
       if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 480, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -5540,7 +5556,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_6normalized_hamming(CYTHON_UNUSED 
  *     try:
  *         string2 = conv_sequence(s2)
  */
-  __pyx_v_string1 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1);
+  __pyx_t_8 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 482, __pyx_L1_error)
+  __pyx_v_string1 = __pyx_t_8;
 
   /* "cpp_string_metric.pyx":483
  * 
@@ -5558,7 +5575,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_6normalized_hamming(CYTHON_UNUSED 
  *         try:
  *             return normalized_hamming_no_process(string1, string2, c_score_cutoff)
  */
-    __pyx_v_string2 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2);
+    __pyx_t_8 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 484, __pyx_L24_error)
+    __pyx_v_string2 = __pyx_t_8;
 
     /* "cpp_string_metric.pyx":485
  *     try:
@@ -5602,19 +5620,19 @@ static PyObject *__pyx_pf_17cpp_string_metric_6normalized_hamming(CYTHON_UNUSED 
       /*exception exit:*/{
         __Pyx_PyThreadState_declare
         __Pyx_PyThreadState_assign
-        __pyx_t_11 = 0; __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0;
-        __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
+        __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0; __pyx_t_17 = 0;
+        __Pyx_XDECREF(__pyx_t_19); __pyx_t_19 = 0;
         __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
         __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-        if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_14, &__pyx_t_15, &__pyx_t_16);
-        if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_11, &__pyx_t_12, &__pyx_t_13) < 0)) __Pyx_ErrFetch(&__pyx_t_11, &__pyx_t_12, &__pyx_t_13);
-        __Pyx_XGOTREF(__pyx_t_11);
+        if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_15, &__pyx_t_16, &__pyx_t_17);
+        if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_12, &__pyx_t_13, &__pyx_t_14) < 0)) __Pyx_ErrFetch(&__pyx_t_12, &__pyx_t_13, &__pyx_t_14);
         __Pyx_XGOTREF(__pyx_t_12);
         __Pyx_XGOTREF(__pyx_t_13);
         __Pyx_XGOTREF(__pyx_t_14);
         __Pyx_XGOTREF(__pyx_t_15);
         __Pyx_XGOTREF(__pyx_t_16);
-        __pyx_t_8 = __pyx_lineno; __pyx_t_9 = __pyx_clineno; __pyx_t_19 = __pyx_filename;
+        __Pyx_XGOTREF(__pyx_t_17);
+        __pyx_t_9 = __pyx_lineno; __pyx_t_10 = __pyx_clineno; __pyx_t_20 = __pyx_filename;
         {
           __pyx_t_5 = (__pyx_v_string2.allocated != 0);
           if (__pyx_t_5) {
@@ -5638,21 +5656,21 @@ static PyObject *__pyx_pf_17cpp_string_metric_6normalized_hamming(CYTHON_UNUSED 
           }
         }
         if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) {
-          __Pyx_XGIVEREF(__pyx_t_14);
           __Pyx_XGIVEREF(__pyx_t_15);
           __Pyx_XGIVEREF(__pyx_t_16);
-          __Pyx_ExceptionReset(__pyx_t_14, __pyx_t_15, __pyx_t_16);
+          __Pyx_XGIVEREF(__pyx_t_17);
+          __Pyx_ExceptionReset(__pyx_t_15, __pyx_t_16, __pyx_t_17);
         }
-        __Pyx_XGIVEREF(__pyx_t_11);
         __Pyx_XGIVEREF(__pyx_t_12);
         __Pyx_XGIVEREF(__pyx_t_13);
-        __Pyx_ErrRestore(__pyx_t_11, __pyx_t_12, __pyx_t_13);
-        __pyx_t_11 = 0; __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0;
-        __pyx_lineno = __pyx_t_8; __pyx_clineno = __pyx_t_9; __pyx_filename = __pyx_t_19;
+        __Pyx_XGIVEREF(__pyx_t_14);
+        __Pyx_ErrRestore(__pyx_t_12, __pyx_t_13, __pyx_t_14);
+        __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0; __pyx_t_17 = 0;
+        __pyx_lineno = __pyx_t_9; __pyx_clineno = __pyx_t_10; __pyx_filename = __pyx_t_20;
         goto __pyx_L24_error;
       }
       __pyx_L26_return: {
-        __pyx_t_16 = __pyx_r;
+        __pyx_t_17 = __pyx_r;
         __pyx_r = 0;
         __pyx_t_5 = (__pyx_v_string2.allocated != 0);
         if (__pyx_t_5) {
@@ -5674,8 +5692,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_6normalized_hamming(CYTHON_UNUSED 
  *     finally:
  */
         }
-        __pyx_r = __pyx_t_16;
-        __pyx_t_16 = 0;
+        __pyx_r = __pyx_t_17;
+        __pyx_t_17 = 0;
         goto __pyx_L23_return;
       }
     }
@@ -5692,19 +5710,19 @@ static PyObject *__pyx_pf_17cpp_string_metric_6normalized_hamming(CYTHON_UNUSED 
     /*exception exit:*/{
       __Pyx_PyThreadState_declare
       __Pyx_PyThreadState_assign
-      __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0; __pyx_t_11 = 0;
-      __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
+      __pyx_t_17 = 0; __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0;
+      __Pyx_XDECREF(__pyx_t_19); __pyx_t_19 = 0;
       __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-      if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_13, &__pyx_t_12, &__pyx_t_11);
-      if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_16, &__pyx_t_15, &__pyx_t_14) < 0)) __Pyx_ErrFetch(&__pyx_t_16, &__pyx_t_15, &__pyx_t_14);
+      if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) __Pyx_ExceptionSwap(&__pyx_t_14, &__pyx_t_13, &__pyx_t_12);
+      if (CYTHON_CONDITION(PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_17, &__pyx_t_16, &__pyx_t_15) < 0)) __Pyx_ErrFetch(&__pyx_t_17, &__pyx_t_16, &__pyx_t_15);
+      __Pyx_XGOTREF(__pyx_t_17);
       __Pyx_XGOTREF(__pyx_t_16);
       __Pyx_XGOTREF(__pyx_t_15);
       __Pyx_XGOTREF(__pyx_t_14);
       __Pyx_XGOTREF(__pyx_t_13);
       __Pyx_XGOTREF(__pyx_t_12);
-      __Pyx_XGOTREF(__pyx_t_11);
-      __pyx_t_9 = __pyx_lineno; __pyx_t_8 = __pyx_clineno; __pyx_t_20 = __pyx_filename;
+      __pyx_t_10 = __pyx_lineno; __pyx_t_9 = __pyx_clineno; __pyx_t_21 = __pyx_filename;
       {
         __pyx_t_5 = (__pyx_v_string1.allocated != 0);
         if (__pyx_t_5) {
@@ -5725,21 +5743,21 @@ static PyObject *__pyx_pf_17cpp_string_metric_6normalized_hamming(CYTHON_UNUSED 
         }
       }
       if (CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) {
+        __Pyx_XGIVEREF(__pyx_t_14);
         __Pyx_XGIVEREF(__pyx_t_13);
         __Pyx_XGIVEREF(__pyx_t_12);
-        __Pyx_XGIVEREF(__pyx_t_11);
-        __Pyx_ExceptionReset(__pyx_t_13, __pyx_t_12, __pyx_t_11);
+        __Pyx_ExceptionReset(__pyx_t_14, __pyx_t_13, __pyx_t_12);
       }
+      __Pyx_XGIVEREF(__pyx_t_17);
       __Pyx_XGIVEREF(__pyx_t_16);
       __Pyx_XGIVEREF(__pyx_t_15);
-      __Pyx_XGIVEREF(__pyx_t_14);
-      __Pyx_ErrRestore(__pyx_t_16, __pyx_t_15, __pyx_t_14);
-      __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0; __pyx_t_11 = 0;
-      __pyx_lineno = __pyx_t_9; __pyx_clineno = __pyx_t_8; __pyx_filename = __pyx_t_20;
+      __Pyx_ErrRestore(__pyx_t_17, __pyx_t_16, __pyx_t_15);
+      __pyx_t_17 = 0; __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_13 = 0; __pyx_t_12 = 0;
+      __pyx_lineno = __pyx_t_10; __pyx_clineno = __pyx_t_9; __pyx_filename = __pyx_t_21;
       goto __pyx_L1_error;
     }
     __pyx_L23_return: {
-      __pyx_t_11 = __pyx_r;
+      __pyx_t_12 = __pyx_r;
       __pyx_r = 0;
       __pyx_t_5 = (__pyx_v_string1.allocated != 0);
       if (__pyx_t_5) {
@@ -5758,8 +5776,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_6normalized_hamming(CYTHON_UNUSED 
  *             free(string1.data)
  */
       }
-      __pyx_r = __pyx_t_11;
-      __pyx_t_11 = 0;
+      __pyx_r = __pyx_t_12;
+      __pyx_t_12 = 0;
       goto __pyx_L0;
     }
   }
@@ -5776,7 +5794,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_6normalized_hamming(CYTHON_UNUSED 
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_6);
   __Pyx_XDECREF(__pyx_t_7);
-  __Pyx_XDECREF(__pyx_t_18);
+  __Pyx_XDECREF(__pyx_t_19);
   __Pyx_AddTraceback("cpp_string_metric.normalized_hamming", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -5790,7 +5808,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_6normalized_hamming(CYTHON_UNUSED 
 /* "cpp_common.pxd":30
  * 
  * 
- * cdef inline proc_string hash_array(arr):             # <<<<<<<<<<<<<<
+ * cdef inline proc_string hash_array(arr) except *:             # <<<<<<<<<<<<<<
  *     # TODO on Cpython this does not require any copies
  *     cdef proc_string s_proc
  */
@@ -6455,7 +6473,7 @@ static CYTHON_INLINE proc_string __pyx_f_10cpp_common_hash_array(PyObject *__pyx
   /* "cpp_common.pxd":30
  * 
  * 
- * cdef inline proc_string hash_array(arr):             # <<<<<<<<<<<<<<
+ * cdef inline proc_string hash_array(arr) except *:             # <<<<<<<<<<<<<<
  *     # TODO on Cpython this does not require any copies
  *     cdef proc_string s_proc
  */
@@ -6465,7 +6483,7 @@ static CYTHON_INLINE proc_string __pyx_f_10cpp_common_hash_array(PyObject *__pyx
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_4);
   __Pyx_XDECREF(__pyx_t_5);
-  __Pyx_WriteUnraisable("cpp_common.hash_array", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __Pyx_AddTraceback("cpp_common.hash_array", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_pretend_to_initialize(&__pyx_r);
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_e);
@@ -6476,7 +6494,7 @@ static CYTHON_INLINE proc_string __pyx_f_10cpp_common_hash_array(PyObject *__pyx
 /* "cpp_common.pxd":83
  * 
  * 
- * cdef inline proc_string hash_sequence(seq):             # <<<<<<<<<<<<<<
+ * cdef inline proc_string hash_sequence(seq) except *:             # <<<<<<<<<<<<<<
  *     cdef proc_string s_proc
  *     s_proc.length = <size_t>len(seq)
  */
@@ -6518,7 +6536,7 @@ static CYTHON_INLINE proc_string __pyx_f_10cpp_common_hash_sequence(PyObject *__
   __Pyx_RefNannySetupContext("hash_sequence", 0);
 
   /* "cpp_common.pxd":85
- * cdef inline proc_string hash_sequence(seq):
+ * cdef inline proc_string hash_sequence(seq) except *:
  *     cdef proc_string s_proc
  *     s_proc.length = <size_t>len(seq)             # <<<<<<<<<<<<<<
  * 
@@ -6814,7 +6832,7 @@ static CYTHON_INLINE proc_string __pyx_f_10cpp_common_hash_sequence(PyObject *__
   /* "cpp_common.pxd":83
  * 
  * 
- * cdef inline proc_string hash_sequence(seq):             # <<<<<<<<<<<<<<
+ * cdef inline proc_string hash_sequence(seq) except *:             # <<<<<<<<<<<<<<
  *     cdef proc_string s_proc
  *     s_proc.length = <size_t>len(seq)
  */
@@ -6824,7 +6842,7 @@ static CYTHON_INLINE proc_string __pyx_f_10cpp_common_hash_sequence(PyObject *__
   __Pyx_XDECREF(__pyx_t_9);
   __Pyx_XDECREF(__pyx_t_15);
   __Pyx_XDECREF(__pyx_t_16);
-  __Pyx_WriteUnraisable("cpp_common.hash_sequence", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __Pyx_AddTraceback("cpp_common.hash_sequence", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_pretend_to_initialize(&__pyx_r);
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_elem);
@@ -7526,7 +7544,7 @@ if (!__Pyx_RefNanny) {
   /* "cpp_common.pxd":83
  * 
  * 
- * cdef inline proc_string hash_sequence(seq):             # <<<<<<<<<<<<<<
+ * cdef inline proc_string hash_sequence(seq) except *:             # <<<<<<<<<<<<<<
  *     cdef proc_string s_proc
  *     s_proc.length = <size_t>len(seq)
  */
@@ -7767,52 +7785,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg
     return result;
 }
 #endif
-
-/* WriteUnraisableException */
-static void __Pyx_WriteUnraisable(const char *name, int clineno,
-                                  int lineno, const char *filename,
-                                  int full_traceback, int nogil) {
-    PyObject *old_exc, *old_val, *old_tb;
-    PyObject *ctx;
-    __Pyx_PyThreadState_declare
-#ifdef WITH_THREAD
-    PyGILState_STATE state;
-    if (nogil)
-        state = PyGILState_Ensure();
-#ifdef _MSC_VER
-    else state = (PyGILState_STATE)-1;
-#endif
-#endif
-    CYTHON_UNUSED_VAR(clineno);
-    CYTHON_UNUSED_VAR(lineno);
-    CYTHON_UNUSED_VAR(filename);
-    CYTHON_MAYBE_UNUSED_VAR(nogil);
-    __Pyx_PyThreadState_assign
-    __Pyx_ErrFetch(&old_exc, &old_val, &old_tb);
-    if (full_traceback) {
-        Py_XINCREF(old_exc);
-        Py_XINCREF(old_val);
-        Py_XINCREF(old_tb);
-        __Pyx_ErrRestore(old_exc, old_val, old_tb);
-        PyErr_PrintEx(1);
-    }
-    #if PY_MAJOR_VERSION < 3
-    ctx = PyString_FromString(name);
-    #else
-    ctx = PyUnicode_FromString(name);
-    #endif
-    __Pyx_ErrRestore(old_exc, old_val, old_tb);
-    if (!ctx) {
-        PyErr_WriteUnraisable(Py_None);
-    } else {
-        PyErr_WriteUnraisable(ctx);
-        Py_DECREF(ctx);
-    }
-#ifdef WITH_THREAD
-    if (nogil)
-        PyGILState_Release(state);
-#endif
-}
 
 /* TupleAndListFromArray */
 #if CYTHON_COMPILING_IN_CPYTHON

@@ -24640,7 +24640,7 @@ static int __Pyx_patch_abc(void) {
     static int abc_patched = 0;
     if (CYTHON_REGISTER_ABCS && !abc_patched) {
         PyObject *module;
-        module = PyImport_ImportModule((CYTHON_CONDITION(PY_MAJOR_VERSION >= 3) ? "collections.abc" : "collections"));
+        module = PyImport_ImportModule((CYTHON_CONDITION(PY_MAJOR_VERSION >= 3)) ? "collections.abc" : "collections");
         if (unlikely(!module)) {
             PyErr_WriteUnraisable(NULL);
             if (unlikely(PyErr_WarnEx(PyExc_RuntimeWarning,

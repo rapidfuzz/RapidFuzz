@@ -27,7 +27,7 @@ cdef extern from "cpp_common.hpp":
     int RAPIDFUZZ_UNSIGNED_LONG_LONG
 
 
-cdef inline proc_string hash_array(arr):
+cdef inline proc_string hash_array(arr) except *:
     # TODO on Cpython this does not require any copies
     cdef proc_string s_proc
     cdef Py_UCS4 typecode = <Py_UCS4>arr.typecode
@@ -80,7 +80,7 @@ cdef inline proc_string hash_array(arr):
     return s_proc
 
 
-cdef inline proc_string hash_sequence(seq):
+cdef inline proc_string hash_sequence(seq) except *:
     cdef proc_string s_proc
     s_proc.length = <size_t>len(seq)
 

@@ -8,7 +8,7 @@ from cpp_common cimport proc_string, is_valid_string, convert_string, hash_array
 from array import array
 from libc.stdlib cimport malloc, free
 
-cdef inline proc_string conv_sequence(seq):
+cdef inline proc_string conv_sequence(seq) except *:
     if is_valid_string(seq):
         return convert_string(seq)
     elif isinstance(seq, array):

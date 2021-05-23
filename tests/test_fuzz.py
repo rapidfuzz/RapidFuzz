@@ -93,6 +93,14 @@ def test_empty_string(scorer):
 
 
 @pytest.mark.parametrize("scorer", scorers)
+def test_empty_string(scorer):
+    """
+    when invalid types are passed to a scorer an exception should be thrown
+    """
+    with pytest.raises(TypeError):
+        scorer(1, 1)
+
+@pytest.mark.parametrize("scorer", scorers)
 def test_none_string(scorer):
     """
     when None is passed to a scorer the result should always be 0
