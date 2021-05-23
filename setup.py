@@ -15,12 +15,12 @@ class BuildExt(build_ext):
         ],
         'unix': ['-O3', '-std=c++11',
             '-Wextra', '-Wall', '-Wconversion', '-g0',
-            '-Wno-deprecated-declarations',
+            #'-Wno-deprecated-declarations',
             # the xcode implementation used in the CI has a bug, which causes
             # this to be thrown even when it is ignored using brackets around the statement
-            '-Wno-unreachable-code',
+            #'-Wno-unreachable-code',
             # this caused issues on the conda forge build
-            '-Wno-unused-command-line-argument'
+            #'-Wno-unused-command-line-argument'
             ],
     }
     l_opts = {
@@ -49,7 +49,7 @@ class BuildExt(build_ext):
 
 ext_modules = [
     Extension(
-        name='rapidfuzz.cpp_process',
+       name='rapidfuzz.cpp_process',
         sources=[
             'src/cpp_process.cpp',
             'src/rapidfuzz-cpp/rapidfuzz/details/unicode.cpp'

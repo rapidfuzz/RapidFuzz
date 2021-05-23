@@ -3,35 +3,41 @@
 # cython: binding=True
 
 from rapidfuzz.utils import default_process
+from cpp_common cimport proc_string, is_valid_string, convert_string, hash_array, hash_sequence
+from array import array
+from libcpp.utility cimport move
 
-cdef extern from "cpp_common.hpp":
-    void validate_string(object py_str, const char* err) except +
+cdef inline proc_string conv_sequence(seq) except *:
+    if is_valid_string(seq):
+        return move(convert_string(seq))
+    elif isinstance(seq, array):
+        return move(hash_array(seq))
+    else:
+        return move(hash_sequence(seq))
 
-cdef extern from "cpp_fuzz.hpp":
-    double ratio_impl(                   object, object, double) nogil except +
-    double partial_ratio_impl(           object, object, double) nogil except +
-    double token_sort_ratio_impl(        object, object, double) nogil except +
-    double token_set_ratio_impl(         object, object, double) nogil except +
-    double token_ratio_impl(             object, object, double) nogil except +
-    double partial_token_sort_ratio_impl(object, object, double) nogil except +
-    double partial_token_set_ratio_impl( object, object, double) nogil except +
-    double partial_token_ratio_impl(     object, object, double) nogil except +
-    double WRatio_impl(                  object, object, double) nogil except +
-    double QRatio_impl(                  object, object, double) nogil except +
+cdef extern from "cpp_scorer.hpp":
+    double ratio_no_process(                         proc_string, proc_string, double) nogil except +
+    double ratio_default_process(                    proc_string, proc_string, double) nogil except +
+    double partial_ratio_no_process(                 proc_string, proc_string, double) nogil except +
+    double partial_ratio_default_process(            proc_string, proc_string, double) nogil except +
+    double token_sort_ratio_no_process(              proc_string, proc_string, double) nogil except +
+    double token_sort_ratio_default_process(         proc_string, proc_string, double) nogil except +
+    double token_set_ratio_no_process(               proc_string, proc_string, double) nogil except +
+    double token_set_ratio_default_process(          proc_string, proc_string, double) nogil except +
+    double token_ratio_no_process(                   proc_string, proc_string, double) nogil except +
+    double token_ratio_default_process(              proc_string, proc_string, double) nogil except +
+    double partial_token_sort_ratio_no_process(      proc_string, proc_string, double) nogil except +
+    double partial_token_sort_ratio_default_process( proc_string, proc_string, double) nogil except +
+    double partial_token_set_ratio_no_process(       proc_string, proc_string, double) nogil except +
+    double partial_token_set_ratio_default_process(  proc_string, proc_string, double) nogil except +
+    double partial_token_ratio_no_process(           proc_string, proc_string, double) nogil except +
+    double partial_token_ratio_default_process(      proc_string, proc_string, double) nogil except +
+    double WRatio_no_process(                        proc_string, proc_string, double) nogil except +
+    double WRatio_default_process(                   proc_string, proc_string, double) nogil except +
+    double QRatio_no_process(                        proc_string, proc_string, double) nogil except +
+    double QRatio_default_process(                   proc_string, proc_string, double) nogil except +
 
-    double ratio_impl_default_process(                   object, object, double) nogil except +
-    double partial_ratio_impl_default_process(           object, object, double) nogil except +
-    double token_sort_ratio_impl_default_process(        object, object, double) nogil except +
-    double token_set_ratio_impl_default_process(         object, object, double) nogil except +
-    double token_ratio_impl_default_process(             object, object, double) nogil except +
-    double partial_token_sort_ratio_impl_default_process(object, object, double) nogil except +
-    double partial_token_set_ratio_impl_default_process( object, object, double) nogil except +
-    double partial_token_ratio_impl_default_process(     object, object, double) nogil except +
-    double WRatio_impl_default_process(                  object, object, double) nogil except +
-    double QRatio_impl_default_process(                  object, object, double) nogil except +
-
-
-def ratio(s1, s2, processor=False, double score_cutoff=0.0):
+def ratio(s1, s2, processor=None, score_cutoff=None):
     """
     calculates a simple ratio between two strings. This is a simple wrapper
     for string_metric.normalized_levenshtein using the weights:
@@ -54,12 +60,11 @@ def ratio(s1, s2, processor=False, double score_cutoff=0.0):
 
     Returns
     -------
-    ratio : float
-        ratio distance between s1 and s2 as a float between 0 and 100
+    similarity : float
+        similarity between s1 and s2 as a float between 0 and 100
 
     Notes
     -----
-
     .. image:: img/ratio.svg
 
     Examples
@@ -67,22 +72,21 @@ def ratio(s1, s2, processor=False, double score_cutoff=0.0):
     >>> fuzz.ratio("this is a test", "this is a test!")
     96.55171966552734
     """
+    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+
     if s1 is None or s2 is None:
         return 0
 
     if processor is True or processor == default_process:
-        return ratio_impl_default_process(s1, s2, score_cutoff)
+        return ratio_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return ratio_impl(s1, s2, score_cutoff)
+    return ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
 
-def partial_ratio(s1, s2, processor=False, double score_cutoff=0.0):
+def partial_ratio(s1, s2, processor=None, score_cutoff=None):
     """
     calculates the fuzz.ratio of the optimal string alignment
 
@@ -103,12 +107,11 @@ def partial_ratio(s1, s2, processor=False, double score_cutoff=0.0):
 
     Returns
     -------
-    ratio : float
-        ratio distance between s1 and s2 as a float between 0 and 100
+    similarity : float
+        similarity between s1 and s2 as a float between 0 and 100
 
     Notes
     -----
-
     .. image:: img/partial_ratio.svg
 
     Examples
@@ -116,22 +119,21 @@ def partial_ratio(s1, s2, processor=False, double score_cutoff=0.0):
     >>> fuzz.partial_ratio("this is a test", "this is a test!")
     100.0
     """
+    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+
     if s1 is None or s2 is None:
         return 0
 
     if processor is True or processor == default_process:
-        return partial_ratio_impl_default_process(s1, s2, score_cutoff)
+        return partial_ratio_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return partial_ratio_impl(s1, s2, score_cutoff)
+    return partial_ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
 
-def token_sort_ratio(s1, s2, processor=True, double score_cutoff=0.0):
+def token_sort_ratio(s1, s2, processor=True, score_cutoff=None):
     """
     sorts the words in the strings and calculates the fuzz.ratio between them
 
@@ -152,12 +154,11 @@ def token_sort_ratio(s1, s2, processor=True, double score_cutoff=0.0):
 
     Returns
     -------
-    ratio : float
-        ratio distance between s1 and s2 as a float between 0 and 100
+    similarity : float
+        similarity between s1 and s2 as a float between 0 and 100
 
     Notes
     -----
-
     .. image:: img/token_sort_ratio.svg
 
     Examples
@@ -165,22 +166,21 @@ def token_sort_ratio(s1, s2, processor=True, double score_cutoff=0.0):
     >>> fuzz.token_sort_ratio("fuzzy wuzzy was a bear", "wuzzy fuzzy was a bear")
     100.0
     """
+    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+
     if s1 is None or s2 is None:
         return 0
 
     if processor is True or processor == default_process:
-        return token_sort_ratio_impl_default_process(s1, s2, score_cutoff)
+        return token_sort_ratio_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return token_sort_ratio_impl(s1, s2, score_cutoff)
+    return token_sort_ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
 
-def token_set_ratio(s1, s2, processor=True, double score_cutoff=0.0):
+def token_set_ratio(s1, s2, processor=True, score_cutoff=None):
     """
     Compares the words in the strings based on unique and common words between them
     using fuzz.ratio
@@ -202,12 +202,11 @@ def token_set_ratio(s1, s2, processor=True, double score_cutoff=0.0):
 
     Returns
     -------
-    ratio : float
-        ratio distance between s1 and s2 as a float between 0 and 100
+    similarity : float
+        similarity between s1 and s2 as a float between 0 and 100
 
     Notes
     -----
-
     .. image:: img/token_set_ratio.svg
 
     Examples
@@ -217,22 +216,21 @@ def token_set_ratio(s1, s2, processor=True, double score_cutoff=0.0):
     >>> fuzz.token_set_ratio("fuzzy was a bear", "fuzzy fuzzy was a bear")
     100.0
     """
+    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+
     if s1 is None or s2 is None:
         return 0
 
     if processor is True or processor == default_process:
-        return token_set_ratio_impl_default_process(s1, s2, score_cutoff)
+        return token_set_ratio_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return token_set_ratio_impl(s1, s2, score_cutoff)
+    return token_set_ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
 
-def token_ratio(s1, s2, processor=True, double score_cutoff=0.0):
+def token_ratio(s1, s2, processor=True, score_cutoff=None):
     """
     Helper method that returns the maximum of fuzz.token_set_ratio and fuzz.token_sort_ratio
     (faster than manually executing the two functions)
@@ -254,30 +252,28 @@ def token_ratio(s1, s2, processor=True, double score_cutoff=0.0):
 
     Returns
     -------
-    ratio : float
-        ratio distance between s1 and s2 as a float between 0 and 100
+    similarity : float
+        similarity between s1 and s2 as a float between 0 and 100
 
     Notes
     -----
-
     .. image:: img/token_ratio.svg
     """
+    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+
     if s1 is None or s2 is None:
         return 0
 
     if processor is True or processor == default_process:
-        return token_ratio_impl_default_process(s1, s2, score_cutoff)
+        return token_ratio_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return token_ratio_impl(s1, s2, score_cutoff)
+    return token_ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
 
-def partial_token_sort_ratio(s1, s2, processor=True, double score_cutoff=0.0):
+def partial_token_sort_ratio(s1, s2, processor=True, score_cutoff=None):
     """
     sorts the words in the strings and calculates the fuzz.partial_ratio between them
 
@@ -298,30 +294,28 @@ def partial_token_sort_ratio(s1, s2, processor=True, double score_cutoff=0.0):
 
     Returns
     -------
-    ratio : float
-        ratio distance between s1 and s2 as a float between 0 and 100
+    similarity : float
+        similarity between s1 and s2 as a float between 0 and 100
 
     Notes
     -----
-
     .. image:: img/partial_token_sort_ratio.svg
     """
+    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+
     if s1 is None or s2 is None:
         return 0
 
     if processor is True or processor == default_process:
-        return partial_token_sort_ratio_impl_default_process(s1, s2, score_cutoff)
+        return partial_token_sort_ratio_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return partial_token_sort_ratio_impl(s1, s2, score_cutoff)
+    return partial_token_sort_ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
 
-def partial_token_set_ratio(s1, s2, processor=True, double score_cutoff=0.0):
+def partial_token_set_ratio(s1, s2, processor=True, score_cutoff=None):
     """
     Compares the words in the strings based on unique and common words between them
     using fuzz.partial_ratio
@@ -343,30 +337,28 @@ def partial_token_set_ratio(s1, s2, processor=True, double score_cutoff=0.0):
 
     Returns
     -------
-    ratio : float
-        ratio distance between s1 and s2 as a float between 0 and 100
+    similarity : float
+        similarity between s1 and s2 as a float between 0 and 100
 
     Notes
     -----
-
     .. image:: img/partial_token_set_ratio.svg
     """
+    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+
     if s1 is None or s2 is None:
         return 0
 
     if processor is True or processor == default_process:
-        return partial_token_set_ratio_impl_default_process(s1, s2, score_cutoff)
+        return partial_token_set_ratio_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return partial_token_set_ratio_impl(s1, s2, score_cutoff)
+    return partial_token_set_ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
 
-def partial_token_ratio(s1, s2, processor=True, double score_cutoff=0.0):
+def partial_token_ratio(s1, s2, processor=True, score_cutoff=None):
     """
     Helper method that returns the maximum of fuzz.partial_token_set_ratio and
     fuzz.partial_token_sort_ratio (faster than manually executing the two functions)
@@ -388,30 +380,28 @@ def partial_token_ratio(s1, s2, processor=True, double score_cutoff=0.0):
 
     Returns
     -------
-    ratio : float
-        ratio distance between s1 and s2 as a float between 0 and 100
+    similarity : float
+        similarity between s1 and s2 as a float between 0 and 100
 
     Notes
     -----
-
     .. image:: img/partial_token_ratio.svg
     """
+    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+
     if s1 is None or s2 is None:
         return 0
 
     if processor is True or processor == default_process:
-        return partial_token_ratio_impl_default_process(s1, s2, score_cutoff)
+        return partial_token_ratio_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return partial_token_ratio_impl(s1, s2, score_cutoff)
+    return partial_token_ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
 
-def WRatio(s1, s2, processor=True, double score_cutoff=0.0):
+def WRatio(s1, s2, processor=True, score_cutoff=None):
     """
     Calculates a weighted ratio based on the other ratio algorithms
 
@@ -432,30 +422,28 @@ def WRatio(s1, s2, processor=True, double score_cutoff=0.0):
 
     Returns
     -------
-    ratio : float
-        ratio distance between s1 and s2 as a float between 0 and 100
+    similarity : float
+        similarity between s1 and s2 as a float between 0 and 100
 
     Notes
     -----
-
     .. image:: img/WRatio.svg
     """
+    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+
     if s1 is None or s2 is None:
         return 0
 
     if processor is True or processor == default_process:
-        return WRatio_impl_default_process(s1, s2, score_cutoff)
+        return WRatio_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return WRatio_impl(s1, s2, score_cutoff)
+    return WRatio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
 
-def QRatio(s1, s2, processor=True, double score_cutoff=0.0):
+def QRatio(s1, s2, processor=True, score_cutoff=None):
     """
     Calculates a quick ratio between two strings using fuzz.ratio.
     The only difference to fuzz.ratio is, that this preprocesses
@@ -478,24 +466,23 @@ def QRatio(s1, s2, processor=True, double score_cutoff=0.0):
 
     Returns
     -------
-    ratio : float
-        ratio distance between s1 and s2 as a float between 0 and 100
+    similarity : float
+        similarity between s1 and s2 as a float between 0 and 100
 
     Examples
     --------
-    >>> fuzz.QRatio("this is a test", "this is a test!")
+    >>> fuzz.QRatio("this is a test", "THIS is a test!")
     100.0
     """
+    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+
     if s1 is None or s2 is None:
         return 0
 
     if processor is True or processor == default_process:
-        return QRatio_impl_default_process(s1, s2, score_cutoff)
+        return QRatio_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    validate_string(s1, "s1 must be a String")
-    validate_string(s2, "s2 must be a String")
-
-    return QRatio_impl(s1, s2, score_cutoff)
+    return QRatio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)

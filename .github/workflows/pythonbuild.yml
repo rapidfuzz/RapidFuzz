@@ -20,6 +20,7 @@ jobs:
       CIBW_BUILD: ${{matrix.python_tag}}
       CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_COMMAND: pytest {package}/tests
+      CIBW_BUILD_VERBOSITY: 3
 
     steps:
       - uses: actions/checkout@v2
@@ -42,6 +43,7 @@ jobs:
     env:
       CIBW_BUILD: "cp39-*"
       CIBW_ARCHS_MACOS: "universal2 arm64"
+      CIBW_BUILD_VERBOSITY: 3
 
     steps:
       - uses: actions/checkout@v2
@@ -72,6 +74,7 @@ jobs:
       CIBW_TEST_SKIP: "*-manylinux_{aarch64,ppc64le,s390x}"
       CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_COMMAND: pytest {package}/tests
+      CIBW_BUILD_VERBOSITY: 3
 
     steps:
       - uses: actions/checkout@v2
@@ -105,6 +108,7 @@ jobs:
       # https://foss.heptapod.net/pypy/pypy/-/issues/3413 is released
       # CIBW_TEST_REQUIRES: pytest hypothesis pandas
       # CIBW_TEST_COMMAND: pytest {package}/tests
+      CIBW_BUILD_VERBOSITY: 3
 
     steps:
       - uses: actions/checkout@v2
