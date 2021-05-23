@@ -58,8 +58,8 @@ struct ExtractDistanceComp
     }
 };
 
-typedef double (*scorer_func) (void* context, PyObject* str, double score_cutoff);
-typedef std::size_t (*distance_func) (void* context, PyObject* str, std::size_t max);
+typedef double (*scorer_func) (void* context, proc_string str, double score_cutoff);
+typedef std::size_t (*distance_func) (void* context, proc_string str, std::size_t max);
 typedef void (*context_deinit) (void* context);
 
 struct scorer_context {
@@ -82,9 +82,8 @@ static void cached_deinit(void* context)
 
 template<typename CachedScorer>
 static inline double cached_scorer_func_default_process(
-    void* context, PyObject* py_str, double score_cutoff)
+    void* context, proc_string str, double score_cutoff)
 {
-    proc_string str = convert_string(py_str);
     CachedScorer* ratio = (CachedScorer*)context;
 
     switch(str.kind){
@@ -97,9 +96,8 @@ static inline double cached_scorer_func_default_process(
 }
 
 template<typename CachedScorer>
-static inline double cached_scorer_func(void* context, PyObject* py_str, double score_cutoff)
+static inline double cached_scorer_func(void* context, proc_string str, double score_cutoff)
 {
-    proc_string str = convert_string(py_str);
     CachedScorer* ratio = (CachedScorer*)context;
 
     switch(str.kind){
@@ -112,7 +110,7 @@ static inline double cached_scorer_func(void* context, PyObject* py_str, double 
 }
 
 template<template <typename> class CachedScorer, typename CharT, typename ...Args>
-static inline scorer_context get_scorer_context(const proc_string& str, int def_process, Args... args)
+static inline scorer_context get_scorer_context(proc_string str, int def_process, Args... args)
 {
     using Sentence = rapidfuzz::basic_string_view<CharT>;
     scorer_context context;
@@ -128,11 +126,8 @@ static inline scorer_context get_scorer_context(const proc_string& str, int def_
 }
 
 template<template <typename> class CachedScorer, typename ...Args>
-static inline scorer_context cached_scorer_init(PyObject* py_str, int def_process, Args... args)
+static inline scorer_context cached_scorer_init(proc_string str, int def_process, Args... args)
 {
-    validate_string(py_str, "query must be a String");
-    proc_string str = convert_string(py_str);
-
     switch(str.kind){
 # define X_ENUM(KIND, TYPE, ...) case KIND: return get_scorer_context<CachedScorer, TYPE>(str, def_process, args...);
         LIST_OF_CASES()
@@ -143,69 +138,69 @@ static inline scorer_context cached_scorer_init(PyObject* py_str, int def_proces
 }
 
 /* fuzz */
-static scorer_context cached_ratio_init(PyObject* py_str, int def_process)
+static scorer_context cached_ratio_init(proc_string str, int def_process)
 {
-    return cached_scorer_init<fuzz::CachedRatio>(py_str, def_process);
+    return cached_scorer_init<fuzz::CachedRatio>(str, def_process);
 }
 
-static scorer_context cached_partial_ratio_init(PyObject* py_str, int def_process)
+static scorer_context cached_partial_ratio_init(proc_string str, int def_process)
 {
-    return cached_scorer_init<fuzz::CachedPartialRatio>(py_str, def_process);
+    return cached_scorer_init<fuzz::CachedPartialRatio>(str, def_process);
 }
 
-static scorer_context cached_token_sort_ratio_init(PyObject* py_str, int def_process)
+static scorer_context cached_token_sort_ratio_init(proc_string str, int def_process)
 {
-    return cached_scorer_init<fuzz::CachedTokenSortRatio>(py_str, def_process);
+    return cached_scorer_init<fuzz::CachedTokenSortRatio>(str, def_process);
 }
 
-static scorer_context cached_token_set_ratio_init(PyObject* py_str, int def_process)
+static scorer_context cached_token_set_ratio_init(proc_string str, int def_process)
 {
-    return cached_scorer_init<fuzz::CachedTokenSetRatio>(py_str, def_process);
+    return cached_scorer_init<fuzz::CachedTokenSetRatio>(str, def_process);
 }
 
-static scorer_context cached_token_ratio_init(PyObject* py_str, int def_process)
+static scorer_context cached_token_ratio_init(proc_string str, int def_process)
 {
-    return cached_scorer_init<fuzz::CachedTokenRatio>(py_str, def_process);
+    return cached_scorer_init<fuzz::CachedTokenRatio>(str, def_process);
 }
 
-static scorer_context cached_partial_token_sort_ratio_init(PyObject* py_str, int def_process)
+static scorer_context cached_partial_token_sort_ratio_init(proc_string str, int def_process)
 {
-    return cached_scorer_init<fuzz::CachedPartialTokenSortRatio>(py_str, def_process);
+    return cached_scorer_init<fuzz::CachedPartialTokenSortRatio>(str, def_process);
 }
 
-static scorer_context cached_partial_token_set_ratio_init(PyObject* py_str, int def_process)
+static scorer_context cached_partial_token_set_ratio_init(proc_string str, int def_process)
 {
-    return cached_scorer_init<fuzz::CachedPartialTokenSetRatio>(py_str, def_process);
+    return cached_scorer_init<fuzz::CachedPartialTokenSetRatio>(str, def_process);
 }
 
-static scorer_context cached_partial_token_ratio_init(PyObject* py_str, int def_process)
+static scorer_context cached_partial_token_ratio_init(proc_string str, int def_process)
 {
-    return cached_scorer_init<fuzz::CachedPartialTokenRatio>(py_str, def_process);
+    return cached_scorer_init<fuzz::CachedPartialTokenRatio>(str, def_process);
 }
 
-static scorer_context cached_WRatio_init(PyObject* py_str, int def_process)
+static scorer_context cached_WRatio_init(proc_string str, int def_process)
 {
-    return cached_scorer_init<fuzz::CachedWRatio>(py_str, def_process);
+    return cached_scorer_init<fuzz::CachedWRatio>(str, def_process);
 }
 
-static scorer_context cached_QRatio_init(PyObject* py_str, int def_process)
+static scorer_context cached_QRatio_init(proc_string str, int def_process)
 {
-    return cached_scorer_init<fuzz::CachedQRatio>(py_str, def_process);
+    return cached_scorer_init<fuzz::CachedQRatio>(str, def_process);
 }
 
 /* string_metric */
 
-static scorer_context cached_normalized_levenshtein_init(PyObject* py_str, int def_process,
+static scorer_context cached_normalized_levenshtein_init(proc_string str, int def_process,
   size_t insertion, size_t deletion, size_t substitution)
 {
     rapidfuzz::LevenshteinWeightTable weights = {insertion, deletion, substitution};
     return cached_scorer_init<string_metric::CachedNormalizedLevenshtein>(
-        py_str, def_process, weights);
+        str, def_process, weights);
 }
 
-static scorer_context cached_normalized_hamming_init(PyObject* py_str, int def_process)
+static scorer_context cached_normalized_hamming_init(proc_string str, int def_process)
 {
-    return cached_scorer_init<string_metric::CachedNormalizedHamming>(py_str, def_process);
+    return cached_scorer_init<string_metric::CachedNormalizedHamming>(str, def_process);
 }
 
 
@@ -216,9 +211,8 @@ static scorer_context cached_normalized_hamming_init(PyObject* py_str, int def_p
 
 template<typename CachedDistance>
 static inline std::size_t cached_distance_func_default_process(
-    void* context, PyObject* py_str, std::size_t max)
+    void* context, proc_string str, std::size_t max)
 {
-    proc_string str = convert_string(py_str);
     CachedDistance* distance = (CachedDistance*)context;
 
     switch(str.kind){
@@ -231,9 +225,8 @@ static inline std::size_t cached_distance_func_default_process(
 }
 
 template<typename CachedDistance>
-static inline std::size_t cached_distance_func(void* context, PyObject* py_str, std::size_t max)
+static inline std::size_t cached_distance_func(void* context, proc_string str, std::size_t max)
 {
-    proc_string str = convert_string(py_str);
     CachedDistance* distance = (CachedDistance*)context;
 
     switch(str.kind){
@@ -262,11 +255,8 @@ static inline distance_context get_distance_context(const proc_string& str, int 
 }
 
 template<template <typename> class CachedDistance, typename ...Args>
-static inline distance_context cached_distance_init(PyObject* py_str, int def_process, Args... args)
+static inline distance_context cached_distance_init(proc_string str, int def_process, Args... args)
 {
-    validate_string(py_str, "query must be a String");
-    proc_string str = convert_string(py_str);
-
     switch(str.kind){
 # define X_ENUM(KIND, TYPE, ...) case KIND: return get_distance_context<CachedDistance, TYPE>(str, def_process, args...);
         LIST_OF_CASES()
@@ -278,15 +268,15 @@ static inline distance_context cached_distance_init(PyObject* py_str, int def_pr
 
 /* string_metric */
 
-static distance_context cached_levenshtein_init(PyObject* py_str, int def_process,
+static distance_context cached_levenshtein_init(proc_string str, int def_process,
   size_t insertion, size_t deletion, size_t substitution)
 {
     rapidfuzz::LevenshteinWeightTable weights = {insertion, deletion, substitution};
     return cached_distance_init<string_metric::CachedLevenshtein>(
-        py_str, def_process, weights);
+        str, def_process, weights);
 }
 
-static distance_context cached_hamming_init(PyObject* py_str, int def_process)
+static distance_context cached_hamming_init(proc_string str, int def_process)
 {
-    return cached_distance_init<string_metric::CachedHamming>(py_str, def_process);
+    return cached_distance_init<string_metric::CachedHamming>(str, def_process);
 }
