@@ -832,7 +832,7 @@ static CYTHON_INLINE float __PYX_NAN() {
 #include "typeinfo"
 #include <vector>
 #include <utility>
-
+#pragma message "CPLUS PLUS: " __cplusplus
     #if __cplusplus > 199711L
     #include <type_traits>
 
