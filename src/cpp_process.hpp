@@ -58,8 +58,8 @@ struct ExtractDistanceComp
     }
 };
 
-typedef double (*scorer_func) (void* context, proc_string str, double score_cutoff);
-typedef std::size_t (*distance_func) (void* context, proc_string str, std::size_t max);
+typedef double (*scorer_func) (void* context, const proc_string& str, double score_cutoff);
+typedef std::size_t (*distance_func) (void* context, const proc_string& str, std::size_t max);
 typedef void (*context_deinit) (void* context);
 
 struct CachedScorerContext {
@@ -102,8 +102,8 @@ struct CachedScorerContext {
         }  
     }
 
-    double ratio(proc_string str, double score_cutoff) {
-        return scorer(context, std::move(str), score_cutoff);
+    double ratio(const proc_string& str, double score_cutoff) {
+        return scorer(context, str, score_cutoff);
     }
 };
 
@@ -147,8 +147,8 @@ struct CachedDistanceContext {
         }  
     }
 
-    std::size_t ratio(proc_string str, std::size_t max) {
-        return scorer(context, std::move(str), max);
+    std::size_t ratio(const proc_string& str, std::size_t max) {
+        return scorer(context, str, max);
     }
 };
 
@@ -160,12 +160,12 @@ static void cached_deinit(void* context)
 
 template<typename CachedScorer>
 static inline double cached_scorer_func_default_process(
-    void* context, proc_string str, double score_cutoff)
+    void* context, const proc_string& str, double score_cutoff)
 {
     CachedScorer* ratio = (CachedScorer*)context;
 
     switch(str.kind){
-# define X_ENUM(KIND, TYPE, ...) case KIND: return ratio->ratio(default_process<TYPE>(std::move(str)), score_cutoff);
+# define X_ENUM(KIND, TYPE, ...) case KIND: return ratio->ratio(default_process<TYPE>(str), score_cutoff);
         LIST_OF_CASES()
 # undef X_ENUM
     default:
@@ -174,12 +174,12 @@ static inline double cached_scorer_func_default_process(
 }
 
 template<typename CachedScorer>
-static inline double cached_scorer_func(void* context, proc_string str, double score_cutoff)
+static inline double cached_scorer_func(void* context, const proc_string& str, double score_cutoff)
 {
     CachedScorer* ratio = (CachedScorer*)context;
 
     switch(str.kind){
-# define X_ENUM(KIND, TYPE, ...) case KIND: return ratio->ratio(no_process<TYPE>(std::move(str)), score_cutoff);
+# define X_ENUM(KIND, TYPE, ...) case KIND: return ratio->ratio(no_process<TYPE>(str), score_cutoff);
         LIST_OF_CASES()
 # undef X_ENUM
     default:
@@ -188,7 +188,7 @@ static inline double cached_scorer_func(void* context, proc_string str, double s
 }
 
 template<template <typename> class CachedScorer, typename CharT, typename ...Args>
-static inline CachedScorerContext get_CachedScorerContext(proc_string str, int def_process, Args... args)
+static inline CachedScorerContext get_CachedScorerContext(const proc_string& str, int def_process, Args... args)
 {
     using Sentence = rapidfuzz::basic_string_view<CharT>;
     CachedScorerContext context;
@@ -204,10 +204,10 @@ static inline CachedScorerContext get_CachedScorerContext(proc_string str, int d
 }
 
 template<template <typename> class CachedScorer, typename ...Args>
-static inline CachedScorerContext cached_scorer_init(proc_string str, int def_process, Args... args)
+static inline CachedScorerContext cached_scorer_init(const proc_string& str, int def_process, Args... args)
 {
     switch(str.kind){
-# define X_ENUM(KIND, TYPE, ...) case KIND: return get_CachedScorerContext<CachedScorer, TYPE>(std::move(str), def_process, args...);
+# define X_ENUM(KIND, TYPE, ...) case KIND: return get_CachedScorerContext<CachedScorer, TYPE>(str, def_process, args...);
         LIST_OF_CASES()
 # undef X_ENUM
     default:
@@ -216,69 +216,69 @@ static inline CachedScorerContext cached_scorer_init(proc_string str, int def_pr
 }
 
 /* fuzz */
-static CachedScorerContext cached_ratio_init(proc_string str, int def_process)
+static CachedScorerContext cached_ratio_init(const proc_string& str, int def_process)
 {
-    return cached_scorer_init<fuzz::CachedRatio>(std::move(str), def_process);
+    return cached_scorer_init<fuzz::CachedRatio>(str, def_process);
 }
 
-static CachedScorerContext cached_partial_ratio_init(proc_string str, int def_process)
+static CachedScorerContext cached_partial_ratio_init(const proc_string& str, int def_process)
 {
-    return cached_scorer_init<fuzz::CachedPartialRatio>(std::move(str), def_process);
+    return cached_scorer_init<fuzz::CachedPartialRatio>(str, def_process);
 }
 
-static CachedScorerContext cached_token_sort_ratio_init(proc_string str, int def_process)
+static CachedScorerContext cached_token_sort_ratio_init(const proc_string& str, int def_process)
 {
-    return cached_scorer_init<fuzz::CachedTokenSortRatio>(std::move(str), def_process);
+    return cached_scorer_init<fuzz::CachedTokenSortRatio>(str, def_process);
 }
 
-static CachedScorerContext cached_token_set_ratio_init(proc_string str, int def_process)
+static CachedScorerContext cached_token_set_ratio_init(const proc_string& str, int def_process)
 {
-    return cached_scorer_init<fuzz::CachedTokenSetRatio>(std::move(str), def_process);
+    return cached_scorer_init<fuzz::CachedTokenSetRatio>(str, def_process);
 }
 
-static CachedScorerContext cached_token_ratio_init(proc_string str, int def_process)
+static CachedScorerContext cached_token_ratio_init(const proc_string& str, int def_process)
 {
-    return cached_scorer_init<fuzz::CachedTokenRatio>(std::move(str), def_process);
+    return cached_scorer_init<fuzz::CachedTokenRatio>(str, def_process);
 }
 
-static CachedScorerContext cached_partial_token_sort_ratio_init(proc_string str, int def_process)
+static CachedScorerContext cached_partial_token_sort_ratio_init(const proc_string& str, int def_process)
 {
-    return cached_scorer_init<fuzz::CachedPartialTokenSortRatio>(std::move(str), def_process);
+    return cached_scorer_init<fuzz::CachedPartialTokenSortRatio>(str, def_process);
 }
 
-static CachedScorerContext cached_partial_token_set_ratio_init(proc_string str, int def_process)
+static CachedScorerContext cached_partial_token_set_ratio_init(const proc_string& str, int def_process)
 {
-    return cached_scorer_init<fuzz::CachedPartialTokenSetRatio>(std::move(str), def_process);
+    return cached_scorer_init<fuzz::CachedPartialTokenSetRatio>(str, def_process);
 }
 
-static CachedScorerContext cached_partial_token_ratio_init(proc_string str, int def_process)
+static CachedScorerContext cached_partial_token_ratio_init(const proc_string& str, int def_process)
 {
-    return cached_scorer_init<fuzz::CachedPartialTokenRatio>(std::move(str), def_process);
+    return cached_scorer_init<fuzz::CachedPartialTokenRatio>(str, def_process);
 }
 
-static CachedScorerContext cached_WRatio_init(proc_string str, int def_process)
+static CachedScorerContext cached_WRatio_init(const proc_string& str, int def_process)
 {
-    return cached_scorer_init<fuzz::CachedWRatio>(std::move(str), def_process);
+    return cached_scorer_init<fuzz::CachedWRatio>(str, def_process);
 }
 
-static CachedScorerContext cached_QRatio_init(proc_string str, int def_process)
+static CachedScorerContext cached_QRatio_init(const proc_string& str, int def_process)
 {
-    return cached_scorer_init<fuzz::CachedQRatio>(std::move(str), def_process);
+    return cached_scorer_init<fuzz::CachedQRatio>(str, def_process);
 }
 
 /* string_metric */
 
-static CachedScorerContext cached_normalized_levenshtein_init(proc_string str, int def_process,
+static CachedScorerContext cached_normalized_levenshtein_init(const proc_string& str, int def_process,
   size_t insertion, size_t deletion, size_t substitution)
 {
     rapidfuzz::LevenshteinWeightTable weights = {insertion, deletion, substitution};
     return cached_scorer_init<string_metric::CachedNormalizedLevenshtein>(
-        std::move(str), def_process, weights);
+        str, def_process, weights);
 }
 
-static CachedScorerContext cached_normalized_hamming_init(proc_string str, int def_process)
+static CachedScorerContext cached_normalized_hamming_init(const proc_string& str, int def_process)
 {
-    return cached_scorer_init<string_metric::CachedNormalizedHamming>(std::move(str), def_process);
+    return cached_scorer_init<string_metric::CachedNormalizedHamming>(str, def_process);
 }
 
 
@@ -289,12 +289,12 @@ static CachedScorerContext cached_normalized_hamming_init(proc_string str, int d
 
 template<typename CachedDistance>
 static inline std::size_t cached_distance_func_default_process(
-    void* context, proc_string str, std::size_t max)
+    void* context, const proc_string& str, std::size_t max)
 {
     CachedDistance* distance = (CachedDistance*)context;
 
     switch(str.kind){
-# define X_ENUM(KIND, TYPE, ...) case KIND: return distance->distance(default_process<TYPE>(std::move(str)), max);
+# define X_ENUM(KIND, TYPE, ...) case KIND: return distance->distance(default_process<TYPE>(str), max);
         LIST_OF_CASES()
 # undef X_ENUM
     default:
@@ -303,12 +303,12 @@ static inline std::size_t cached_distance_func_default_process(
 }
 
 template<typename CachedDistance>
-static inline std::size_t cached_distance_func(void* context, proc_string str, std::size_t max)
+static inline std::size_t cached_distance_func(void* context, const proc_string& str, std::size_t max)
 {
     CachedDistance* distance = (CachedDistance*)context;
 
     switch(str.kind){
-# define X_ENUM(KIND, TYPE, ...) case KIND: return distance->distance(no_process<TYPE>(std::move(str)), max);
+# define X_ENUM(KIND, TYPE, ...) case KIND: return distance->distance(no_process<TYPE>(str), max);
         LIST_OF_CASES()
 # undef X_ENUM
     default:
@@ -333,10 +333,10 @@ static inline CachedDistanceContext get_CachedDistanceContext(const proc_string&
 }
 
 template<template <typename> class CachedDistance, typename ...Args>
-static inline CachedDistanceContext cached_distance_init(proc_string str, int def_process, Args... args)
+static inline CachedDistanceContext cached_distance_init(const proc_string& str, int def_process, Args... args)
 {
     switch(str.kind){
-# define X_ENUM(KIND, TYPE, ...) case KIND: return get_CachedDistanceContext<CachedDistance, TYPE>(std::move(str), def_process, args...);
+# define X_ENUM(KIND, TYPE, ...) case KIND: return get_CachedDistanceContext<CachedDistance, TYPE>(str, def_process, args...);
         LIST_OF_CASES()
 # undef X_ENUM
     default:
@@ -346,15 +346,15 @@ static inline CachedDistanceContext cached_distance_init(proc_string str, int de
 
 /* string_metric */
 
-static CachedDistanceContext cached_levenshtein_init(proc_string str, int def_process,
+static CachedDistanceContext cached_levenshtein_init(const proc_string& str, int def_process,
   size_t insertion, size_t deletion, size_t substitution)
 {
     rapidfuzz::LevenshteinWeightTable weights = {insertion, deletion, substitution};
     return cached_distance_init<string_metric::CachedLevenshtein>(
-        std::move(str), def_process, weights);
+        str, def_process, weights);
 }
 
-static CachedDistanceContext cached_hamming_init(proc_string str, int def_process)
+static CachedDistanceContext cached_hamming_init(const proc_string& str, int def_process)
 {
-    return cached_distance_init<string_metric::CachedHamming>(std::move(str), def_process);
+    return cached_distance_init<string_metric::CachedHamming>(str, def_process);
 }

@@ -2221,7 +2221,7 @@ static CYTHON_INLINE proc_string __pyx_f_17cpp_string_metric_conv_sequence(PyObj
 }
 
 /* "cpp_string_metric.pyx":29
- *     object hamming_default_process(                proc_string, proc_string, size_t) nogil except +
+ *     object hamming_default_process(                const proc_string&, const proc_string&, size_t) nogil except +
  * 
  * def levenshtein(s1, s2, weights=(1,1,1), processor=None, max=None):             # <<<<<<<<<<<<<<
  *     """
@@ -2538,7 +2538,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
     __pyx_t_12 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 203, __pyx_L1_error)
     __pyx_t_13 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 203, __pyx_L1_error)
     try {
-      __pyx_t_4 = levenshtein_default_process(__PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_12), __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_13), __pyx_v_insertion, __pyx_v_deletion, __pyx_v_substitution, __pyx_v_c_max);
+      __pyx_t_4 = levenshtein_default_process(__pyx_t_12, __pyx_t_13, __pyx_v_insertion, __pyx_v_deletion, __pyx_v_substitution, __pyx_v_c_max);
       if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 203, __pyx_L1_error)
     } catch(...) {
       __Pyx_CppExn2PyErr();
@@ -2651,7 +2651,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
   __pyx_t_13 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 208, __pyx_L1_error)
   __pyx_t_12 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 208, __pyx_L1_error)
   try {
-    __pyx_t_4 = levenshtein_no_process(__PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_13), __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_12), __pyx_v_insertion, __pyx_v_deletion, __pyx_v_substitution, __pyx_v_c_max);
+    __pyx_t_4 = levenshtein_no_process(__pyx_t_13, __pyx_t_12, __pyx_v_insertion, __pyx_v_deletion, __pyx_v_substitution, __pyx_v_c_max);
     if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 208, __pyx_L1_error)
   } catch(...) {
     __Pyx_CppExn2PyErr();
@@ -2663,7 +2663,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
   goto __pyx_L0;
 
   /* "cpp_string_metric.pyx":29
- *     object hamming_default_process(                proc_string, proc_string, size_t) nogil except +
+ *     object hamming_default_process(                const proc_string&, const proc_string&, size_t) nogil except +
  * 
  * def levenshtein(s1, s2, weights=(1,1,1), processor=None, max=None):             # <<<<<<<<<<<<<<
  *     """
@@ -3047,7 +3047,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
     __pyx_t_14 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 307, __pyx_L1_error)
     __pyx_t_15 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 307, __pyx_L1_error)
     try {
-      __pyx_t_12 = normalized_levenshtein_default_process(__PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_14), __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_15), __pyx_v_insertion, __pyx_v_deletion, __pyx_v_substitution, __pyx_v_c_score_cutoff);
+      __pyx_t_12 = normalized_levenshtein_default_process(__pyx_t_14, __pyx_t_15, __pyx_v_insertion, __pyx_v_deletion, __pyx_v_substitution, __pyx_v_c_score_cutoff);
     } catch(...) {
       __Pyx_CppExn2PyErr();
       __PYX_ERR(0, 307, __pyx_L1_error)
@@ -3160,7 +3160,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_2normalized_levenshtein(CYTHON_UNU
   __pyx_t_15 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 312, __pyx_L1_error)
   __pyx_t_14 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 312, __pyx_L1_error)
   try {
-    __pyx_t_12 = normalized_levenshtein_no_process(__PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_15), __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_14), __pyx_v_insertion, __pyx_v_deletion, __pyx_v_substitution, __pyx_v_c_score_cutoff);
+    __pyx_t_12 = normalized_levenshtein_no_process(__pyx_t_15, __pyx_t_14, __pyx_v_insertion, __pyx_v_deletion, __pyx_v_substitution, __pyx_v_c_score_cutoff);
   } catch(...) {
     __Pyx_CppExn2PyErr();
     __PYX_ERR(0, 312, __pyx_L1_error)
@@ -3435,7 +3435,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
     __pyx_t_8 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 354, __pyx_L1_error)
     __pyx_t_9 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 354, __pyx_L1_error)
     try {
-      __pyx_t_7 = hamming_default_process(__PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_8), __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_9), __pyx_v_c_max);
+      __pyx_t_7 = hamming_default_process(__pyx_t_8, __pyx_t_9, __pyx_v_c_max);
       if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 354, __pyx_L1_error)
     } catch(...) {
       __Pyx_CppExn2PyErr();
@@ -3548,7 +3548,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_4hamming(CYTHON_UNUSED PyObject *_
   __pyx_t_9 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 359, __pyx_L1_error)
   __pyx_t_8 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 359, __pyx_L1_error)
   try {
-    __pyx_t_7 = hamming_no_process(__PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_9), __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_8), __pyx_v_c_max);
+    __pyx_t_7 = hamming_no_process(__pyx_t_9, __pyx_t_8, __pyx_v_c_max);
     if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 359, __pyx_L1_error)
   } catch(...) {
     __Pyx_CppExn2PyErr();
@@ -3822,7 +3822,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_6normalized_hamming(CYTHON_UNUSED 
     __pyx_t_8 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 401, __pyx_L1_error)
     __pyx_t_9 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 401, __pyx_L1_error)
     try {
-      __pyx_t_1 = normalized_hamming_default_process(__PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_8), __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_9), __pyx_v_c_score_cutoff);
+      __pyx_t_1 = normalized_hamming_default_process(__pyx_t_8, __pyx_t_9, __pyx_v_c_score_cutoff);
     } catch(...) {
       __Pyx_CppExn2PyErr();
       __PYX_ERR(0, 401, __pyx_L1_error)
@@ -3933,7 +3933,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_6normalized_hamming(CYTHON_UNUSED 
   __pyx_t_9 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 406, __pyx_L1_error)
   __pyx_t_8 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 406, __pyx_L1_error)
   try {
-    __pyx_t_1 = normalized_hamming_no_process(__PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_9), __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_8), __pyx_v_c_score_cutoff);
+    __pyx_t_1 = normalized_hamming_no_process(__pyx_t_9, __pyx_t_8, __pyx_v_c_score_cutoff);
   } catch(...) {
     __Pyx_CppExn2PyErr();
     __PYX_ERR(0, 406, __pyx_L1_error)
@@ -5067,7 +5067,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
   /* "cpp_string_metric.pyx":29
- *     object hamming_default_process(                proc_string, proc_string, size_t) nogil except +
+ *     object hamming_default_process(                const proc_string&, const proc_string&, size_t) nogil except +
  * 
  * def levenshtein(s1, s2, weights=(1,1,1), processor=None, max=None):             # <<<<<<<<<<<<<<
  *     """
@@ -5562,7 +5562,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "cpp_string_metric.pyx":29
- *     object hamming_default_process(                proc_string, proc_string, size_t) nogil except +
+ *     object hamming_default_process(                const proc_string&, const proc_string&, size_t) nogil except +
  * 
  * def levenshtein(s1, s2, weights=(1,1,1), processor=None, max=None):             # <<<<<<<<<<<<<<
  *     """

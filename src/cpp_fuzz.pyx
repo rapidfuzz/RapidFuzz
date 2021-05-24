@@ -16,26 +16,26 @@ cdef inline proc_string conv_sequence(seq) except *:
         return move(hash_sequence(seq))
 
 cdef extern from "cpp_scorer.hpp":
-    double ratio_no_process(                         proc_string, proc_string, double) nogil except +
-    double ratio_default_process(                    proc_string, proc_string, double) nogil except +
-    double partial_ratio_no_process(                 proc_string, proc_string, double) nogil except +
-    double partial_ratio_default_process(            proc_string, proc_string, double) nogil except +
-    double token_sort_ratio_no_process(              proc_string, proc_string, double) nogil except +
-    double token_sort_ratio_default_process(         proc_string, proc_string, double) nogil except +
-    double token_set_ratio_no_process(               proc_string, proc_string, double) nogil except +
-    double token_set_ratio_default_process(          proc_string, proc_string, double) nogil except +
-    double token_ratio_no_process(                   proc_string, proc_string, double) nogil except +
-    double token_ratio_default_process(              proc_string, proc_string, double) nogil except +
-    double partial_token_sort_ratio_no_process(      proc_string, proc_string, double) nogil except +
-    double partial_token_sort_ratio_default_process( proc_string, proc_string, double) nogil except +
-    double partial_token_set_ratio_no_process(       proc_string, proc_string, double) nogil except +
-    double partial_token_set_ratio_default_process(  proc_string, proc_string, double) nogil except +
-    double partial_token_ratio_no_process(           proc_string, proc_string, double) nogil except +
-    double partial_token_ratio_default_process(      proc_string, proc_string, double) nogil except +
-    double WRatio_no_process(                        proc_string, proc_string, double) nogil except +
-    double WRatio_default_process(                   proc_string, proc_string, double) nogil except +
-    double QRatio_no_process(                        proc_string, proc_string, double) nogil except +
-    double QRatio_default_process(                   proc_string, proc_string, double) nogil except +
+    double ratio_no_process(                         const proc_string&, const proc_string&, double) nogil except +
+    double ratio_default_process(                    const proc_string&, const proc_string&, double) nogil except +
+    double partial_ratio_no_process(                 const proc_string&, const proc_string&, double) nogil except +
+    double partial_ratio_default_process(            const proc_string&, const proc_string&, double) nogil except +
+    double token_sort_ratio_no_process(              const proc_string&, const proc_string&, double) nogil except +
+    double token_sort_ratio_default_process(         const proc_string&, const proc_string&, double) nogil except +
+    double token_set_ratio_no_process(               const proc_string&, const proc_string&, double) nogil except +
+    double token_set_ratio_default_process(          const proc_string&, const proc_string&, double) nogil except +
+    double token_ratio_no_process(                   const proc_string&, const proc_string&, double) nogil except +
+    double token_ratio_default_process(              const proc_string&, const proc_string&, double) nogil except +
+    double partial_token_sort_ratio_no_process(      const proc_string&, const proc_string&, double) nogil except +
+    double partial_token_sort_ratio_default_process( const proc_string&, const proc_string&, double) nogil except +
+    double partial_token_set_ratio_no_process(       const proc_string&, const proc_string&, double) nogil except +
+    double partial_token_set_ratio_default_process(  const proc_string&, const proc_string&, double) nogil except +
+    double partial_token_ratio_no_process(           const proc_string&, const proc_string&, double) nogil except +
+    double partial_token_ratio_default_process(      const proc_string&, const proc_string&, double) nogil except +
+    double WRatio_no_process(                        const proc_string&, const proc_string&, double) nogil except +
+    double WRatio_default_process(                   const proc_string&, const proc_string&, double) nogil except +
+    double QRatio_no_process(                        const proc_string&, const proc_string&, double) nogil except +
+    double QRatio_default_process(                   const proc_string&, const proc_string&, double) nogil except +
 
 def ratio(s1, s2, processor=None, score_cutoff=None):
     """

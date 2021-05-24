@@ -16,15 +16,15 @@ cdef inline proc_string conv_sequence(seq) except *:
         return move(hash_sequence(seq))
 
 cdef extern from "cpp_scorer.hpp":
-    double normalized_levenshtein_no_process(      proc_string, proc_string, size_t, size_t, size_t, double) nogil except +
-    double normalized_levenshtein_default_process( proc_string, proc_string, size_t, size_t, size_t, double) nogil except +
-    double normalized_hamming_no_process(          proc_string, proc_string, double) nogil except +
-    double normalized_hamming_default_process(     proc_string, proc_string, double) nogil except +
+    double normalized_levenshtein_no_process(      const proc_string&, const proc_string&, size_t, size_t, size_t, double) nogil except +
+    double normalized_levenshtein_default_process( const proc_string&, const proc_string&, size_t, size_t, size_t, double) nogil except +
+    double normalized_hamming_no_process(          const proc_string&, const proc_string&, double) nogil except +
+    double normalized_hamming_default_process(     const proc_string&, const proc_string&, double) nogil except +
 
-    object levenshtein_no_process(                 proc_string, proc_string, size_t, size_t, size_t, size_t) nogil except +
-    object levenshtein_default_process(            proc_string, proc_string, size_t, size_t, size_t, size_t) nogil except +
-    object hamming_no_process(                     proc_string, proc_string, size_t) nogil except +
-    object hamming_default_process(                proc_string, proc_string, size_t) nogil except +
+    object levenshtein_no_process(                 const proc_string&, const proc_string&, size_t, size_t, size_t, size_t) nogil except +
+    object levenshtein_default_process(            const proc_string&, const proc_string&, size_t, size_t, size_t, size_t) nogil except +
+    object hamming_no_process(                     const proc_string&, const proc_string&, size_t) nogil except +
+    object hamming_default_process(                const proc_string&, const proc_string&, size_t) nogil except +
 
 def levenshtein(s1, s2, weights=(1,1,1), processor=None, max=None):
     """

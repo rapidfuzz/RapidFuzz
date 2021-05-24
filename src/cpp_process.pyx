@@ -51,31 +51,31 @@ cdef inline proc_string conv_sequence(seq) except *:
 cdef extern from "cpp_process.hpp":
     cdef cppclass CachedScorerContext:
         CachedScorerContext()
-        double ratio(proc_string, double) except +
+        double ratio(const proc_string&, double) except +
 
     cdef cppclass CachedDistanceContext:
         CachedDistanceContext()
-        size_t ratio(proc_string, size_t) except +
+        size_t ratio(const proc_string&, size_t) except +
 
     # normalized distances
     # fuzz
-    CachedScorerContext cached_ratio_init(                   proc_string, int) except +
-    CachedScorerContext cached_partial_ratio_init(           proc_string, int) except +
-    CachedScorerContext cached_token_sort_ratio_init(        proc_string, int) except +
-    CachedScorerContext cached_token_set_ratio_init(         proc_string, int) except +
-    CachedScorerContext cached_token_ratio_init(             proc_string, int) except +
-    CachedScorerContext cached_partial_token_sort_ratio_init(proc_string, int) except +
-    CachedScorerContext cached_partial_token_set_ratio_init( proc_string, int) except +
-    CachedScorerContext cached_partial_token_ratio_init(     proc_string, int) except +
-    CachedScorerContext cached_WRatio_init(                  proc_string, int) except +
-    CachedScorerContext cached_QRatio_init(                  proc_string, int) except +
+    CachedScorerContext cached_ratio_init(                   const proc_string&, int) except +
+    CachedScorerContext cached_partial_ratio_init(           const proc_string&, int) except +
+    CachedScorerContext cached_token_sort_ratio_init(        const proc_string&, int) except +
+    CachedScorerContext cached_token_set_ratio_init(         const proc_string&, int) except +
+    CachedScorerContext cached_token_ratio_init(             const proc_string&, int) except +
+    CachedScorerContext cached_partial_token_sort_ratio_init(const proc_string&, int) except +
+    CachedScorerContext cached_partial_token_set_ratio_init( const proc_string&, int) except +
+    CachedScorerContext cached_partial_token_ratio_init(     const proc_string&, int) except +
+    CachedScorerContext cached_WRatio_init(                  const proc_string&, int) except +
+    CachedScorerContext cached_QRatio_init(                  const proc_string&, int) except +
     # string_metric
-    CachedScorerContext cached_normalized_levenshtein_init(proc_string, int, size_t, size_t, size_t) except +
-    CachedScorerContext cached_normalized_hamming_init(    proc_string, int) except +
+    CachedScorerContext cached_normalized_levenshtein_init(const proc_string&, int, size_t, size_t, size_t) except +
+    CachedScorerContext cached_normalized_hamming_init(    const proc_string&, int) except +
 
     # distances
-    CachedDistanceContext cached_levenshtein_init(proc_string, int, size_t, size_t, size_t) except +
-    CachedDistanceContext cached_hamming_init(    proc_string, int) except +
+    CachedDistanceContext cached_levenshtein_init(const proc_string&, int, size_t, size_t, size_t) except +
+    CachedDistanceContext cached_hamming_init(    const proc_string&, int) except +
 
 
     ctypedef struct ExtractScorerComp:
@@ -105,15 +105,15 @@ cdef extern from "cpp_process.hpp":
         PyObject* key
 
 
-cdef inline CachedScorerContext CachedNormalizedLevenshteinInit(proc_string query, int def_process, dict kwargs):
+cdef inline CachedScorerContext CachedNormalizedLevenshteinInit(const proc_string& query, int def_process, dict kwargs):
     cdef size_t insertion, deletion, substitution
     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
-    return move(cached_normalized_levenshtein_init(move(query), def_process, insertion, deletion, substitution))
+    return move(cached_normalized_levenshtein_init(query, def_process, insertion, deletion, substitution))
 
-cdef inline CachedDistanceContext CachedLevenshteinInit(proc_string query, int def_process, dict kwargs):
+cdef inline CachedDistanceContext CachedLevenshteinInit(const proc_string& query, int def_process, dict kwargs):
     cdef size_t insertion, deletion, substitution
     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
-    return move(cached_levenshtein_init(move(query), def_process, insertion, deletion, substitution))
+    return move(cached_levenshtein_init(query, def_process, insertion, deletion, substitution))
 
 cdef inline int IsIntegratedScorer(object scorer):
     return (
@@ -137,43 +137,43 @@ cdef inline int IsIntegratedDistance(object scorer):
         scorer is hamming
     )
 
-cdef inline CachedScorerContext CachedScorerInit(object scorer, proc_string query, int def_process, dict kwargs):
+cdef inline CachedScorerContext CachedScorerInit(object scorer, const proc_string& query, int def_process, dict kwargs):
     cdef CachedScorerContext context
 
     if scorer is ratio:
-        context = cached_ratio_init(move(query), def_process)
+        context = cached_ratio_init(query, def_process)
     elif scorer is partial_ratio:
-        context = cached_partial_ratio_init(move(query), def_process)
+        context = cached_partial_ratio_init(query, def_process)
     elif scorer is token_sort_ratio:
-        context = cached_token_sort_ratio_init(move(query), def_process)
+        context = cached_token_sort_ratio_init(query, def_process)
     elif scorer is token_set_ratio:
-        context = cached_token_set_ratio_init(move(query), def_process)
+        context = cached_token_set_ratio_init(query, def_process)
     elif scorer is token_ratio:
-        context = cached_token_ratio_init(move(query), def_process)
+        context = cached_token_ratio_init(query, def_process)
     elif scorer is partial_token_sort_ratio:
-        context = cached_partial_token_sort_ratio_init(move(query), def_process)
+        context = cached_partial_token_sort_ratio_init(query, def_process)
     elif scorer is partial_token_set_ratio:
-        context = cached_partial_token_set_ratio_init(move(query), def_process)
+        context = cached_partial_token_set_ratio_init(query, def_process)
     elif scorer is partial_token_ratio:
-        context = cached_partial_token_ratio_init(move(query), def_process)
+        context = cached_partial_token_ratio_init(query, def_process)
     elif scorer is WRatio:
-        context = cached_WRatio_init(move(query), def_process)
+        context = cached_WRatio_init(query, def_process)
     elif scorer is QRatio:
-        context = cached_QRatio_init(move(query), def_process)
+        context = cached_QRatio_init(query, def_process)
     elif scorer is normalized_levenshtein:
-        context = CachedNormalizedLevenshteinInit(move(query), def_process, kwargs)
+        context = CachedNormalizedLevenshteinInit(query, def_process, kwargs)
     elif scorer is normalized_hamming:
-        context = cached_normalized_hamming_init(move(query), def_process)
+        context = cached_normalized_hamming_init(query, def_process)
 
     return move(context)
 
-cdef inline CachedDistanceContext CachedDistanceInit(object scorer, proc_string query, int def_process, dict kwargs):
+cdef inline CachedDistanceContext CachedDistanceInit(object scorer, const proc_string& query, int def_process, dict kwargs):
     cdef CachedDistanceContext context
 
     if scorer is levenshtein:
-        context = CachedLevenshteinInit(move(query), def_process, kwargs)
+        context = CachedLevenshteinInit(query, def_process, kwargs)
     elif scorer is hamming:
-        context = cached_hamming_init(move(query), def_process)
+        context = cached_hamming_init(query, def_process)
 
     return move(context)
 
@@ -603,7 +603,8 @@ def extractOne(query, choices, scorer=WRatio, processor=default_process, score_c
     if IsIntegratedScorer(scorer):
         # directly use the C++ implementation if possible
         # normalized distance implemented in C++
-        ScorerContext = CachedScorerInit(scorer, conv_sequence(query), def_process, kwargs)
+        query_context = conv_sequence(query)
+        ScorerContext = CachedScorerInit(scorer, query_context, def_process, kwargs)
         if score_cutoff is not None:
             c_score_cutoff = score_cutoff
         if c_score_cutoff < 0 or c_score_cutoff > 100:
@@ -616,7 +617,8 @@ def extractOne(query, choices, scorer=WRatio, processor=default_process, score_c
     
     if IsIntegratedDistance(scorer):
         # distance implemented in C++
-        DistanceContext = CachedDistanceInit(scorer, conv_sequence(query), def_process, kwargs)
+        query_context = conv_sequence(query)
+        DistanceContext = CachedDistanceInit(scorer, query_context, def_process, kwargs)
         if score_cutoff is not None and score_cutoff != -1:
             c_max = score_cutoff
 
@@ -1023,7 +1025,8 @@ def extract(query, choices, scorer=WRatio, processor=default_process, limit=5, s
 
     if IsIntegratedScorer(scorer):
         # directly use the C++ implementation if possible
-        ScorerContext = CachedScorerInit(scorer, conv_sequence(query), def_process, kwargs)
+        query_context = conv_sequence(query)
+        ScorerContext = CachedScorerInit(scorer, query_context, def_process, kwargs)
         if score_cutoff is not None:
             c_score_cutoff = score_cutoff
         if c_score_cutoff < 0 or c_score_cutoff > 100:
@@ -1036,7 +1039,8 @@ def extract(query, choices, scorer=WRatio, processor=default_process, limit=5, s
 
     if IsIntegratedDistance(scorer):
         # distance implemented in C++
-        DistanceContext = CachedDistanceInit(scorer, conv_sequence(query), def_process, kwargs)
+        query_context = conv_sequence(query)
+        DistanceContext = CachedDistanceInit(scorer, query_context, def_process, kwargs)
         if score_cutoff is not None and score_cutoff != -1:
             c_max = score_cutoff
 
@@ -1324,7 +1328,8 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
 
     if IsIntegratedScorer(scorer):
         # normalized distance implemented in C++
-        ScorerContext = CachedScorerInit(scorer, conv_sequence(query), def_process, kwargs)
+        query_context = conv_sequence(query)
+        ScorerContext = CachedScorerInit(scorer, query_context, def_process, kwargs)
         if score_cutoff is not None:
             c_score_cutoff = score_cutoff
         if c_score_cutoff < 0 or c_score_cutoff > 100:
@@ -1339,7 +1344,8 @@ def extract_iter(query, choices, scorer=WRatio, processor=default_process, score
 
     if IsIntegratedDistance(scorer):
         # distance implemented in C++
-        DistanceContext = CachedDistanceInit(scorer, conv_sequence(query), def_process, kwargs)
+        query_context = conv_sequence(query)
+        DistanceContext = CachedDistanceInit(scorer, query_context, def_process, kwargs)
         if score_cutoff is not None and score_cutoff != -1:
             c_max = score_cutoff
 
