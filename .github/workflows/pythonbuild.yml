@@ -46,7 +46,7 @@ jobs:
       CIBW_BUILD: ${{matrix.python_tag}}
       CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_COMMAND: pytest {package}/tests
-      CIBW_BEFORE_ALL: CC=/usr/local/opt/llvm/bin/clang++ CXX=/usr/local/opt/llvm/bin/clang++
+      CIBW_BEFORE_ALL: export CC=/usr/local/opt/llvm/bin/clang++ CXX=/usr/local/opt/llvm/bin/clang++
 
     steps:
       - uses: actions/checkout@v2
