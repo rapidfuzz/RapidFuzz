@@ -46,6 +46,7 @@ jobs:
       CIBW_BUILD: ${{matrix.python_tag}}
       CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_COMMAND: pytest {package}/tests
+      CIBW_BEFORE_ALL: CC=/usr/local/opt/llvm/bin/clang++ CXX=/usr/local/opt/llvm/bin/clang++
 
     steps:
       - uses: actions/checkout@v2
@@ -53,10 +54,10 @@ jobs:
           submodules: 'true'
 
       - name: install build tools
-        run: brew install pcre openssl nasm automake libtool snappy ninja meson cmake
+        run: brew install pcre openssl nasm automake libtool snappy ninja meson cmake llvm
 
-      - name: build and install libomp
-        run: bash build_utils/build_libomp.sh
+      #- name: build and install libomp
+      #  run: bash build_utils/build_libomp.sh
 
       - name: Build wheels
         uses: joerick/cibuildwheel@v1.10.0
