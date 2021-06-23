@@ -28,7 +28,7 @@ jobs:
           submodules: 'true'
 
       - name: Build wheels
-        uses: joerick/cibuildwheel@v1.10.0
+        uses: pypa/cibuildwheel@v1.12.0
         with:
           output-dir: wheelhouse
 
@@ -51,7 +51,7 @@ jobs:
           submodules: 'true'
 
       - name: Build wheels
-        uses: joerick/cibuildwheel@v1.10.0
+        uses: pypa/cibuildwheel@v1.12.0
         with:
           output-dir: wheelhouse
 
@@ -85,7 +85,7 @@ jobs:
         name: Set up QEMU
 
       - name: Build wheel
-        uses: joerick/cibuildwheel@v1.10.0
+        uses: pypa/cibuildwheel@v1.12.0
         with:
           output-dir: wheelhouse
 
@@ -116,7 +116,7 @@ jobs:
           submodules: 'true'
 
       - name: Build wheels
-        uses: joerick/cibuildwheel@v1.10.0
+        uses: pypa/cibuildwheel@v1.12.0
         with:
           output-dir: wheelhouse
 
