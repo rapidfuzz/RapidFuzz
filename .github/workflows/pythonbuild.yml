@@ -53,7 +53,7 @@ jobs:
           submodules: 'true'
 
       - name: install build tools
-        run: brew install libopenmp
+        run: brew install libomp
 
       - name: Build wheels
         uses: joerick/cibuildwheel@v1.10.0
