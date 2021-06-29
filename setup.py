@@ -90,5 +90,6 @@ ext_modules = [
 if __name__ == "__main__":
     setup(
         cmdclass={'build_ext': BuildExt},
-        ext_modules = ext_modules
+        ext_modules = ext_modules,
+        package_data = {"rapidfuzz": ["*.pyi", "py.typed"]}
     )
