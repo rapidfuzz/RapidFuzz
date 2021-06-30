@@ -71,6 +71,7 @@ jobs:
     env:
       CIBW_BUILD: "cp39-*"
       CIBW_ARCHS_MACOS: "universal2 arm64"
+      CIBW_BEFORE_BUILD_MACOS: brew install libomp
 
     steps:
       - uses: actions/checkout@v2
