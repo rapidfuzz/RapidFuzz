@@ -71,7 +71,7 @@ jobs:
     env:
       CIBW_BUILD: "cp39-*"
       CIBW_ARCHS_MACOS: "universal2 arm64"
-      CIBW_BEFORE_BUILD_MACOS: export DYLD_LIBRARY_PATH=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
+      CIBW_ENVIRONMENT: "CFLAGS='-L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib' CXXFLAGS='-L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib'"
 
     steps:
       - uses: actions/checkout@v2
