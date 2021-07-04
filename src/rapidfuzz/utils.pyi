@@ -1,0 +1,3 @@
+from typing import Hashable, Sequence
+
+def default_process(sentence: Sequence[Hashable]) -> Sequence[Hashable]: ...
