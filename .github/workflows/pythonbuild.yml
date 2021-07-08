@@ -79,7 +79,7 @@ jobs:
           submodules: 'true'
 
       - name: install build tools
-        run: brew install libomp
+        run: arch -arm64 brew install libomp
 
       - name: Build wheels
         uses: joerick/cibuildwheel@v1.10.0
