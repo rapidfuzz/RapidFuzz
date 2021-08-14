@@ -52,8 +52,8 @@ RapidFuzz is a fast string matching library for Python and C++, which is using t
 
 FuzzyWuzzy relies on an incorrect implementation of `get_matching_blocks()` in python-Levenshtein (see [this issue](https://github.com/seatgeek/fuzzywuzzy/issues/79)). For RapidFuzz I decided to use:
 
-- The implementation of `difflib` for the optimal alignment
-- The Levenshtein distance for the normalized edit distance
+- The implementation of `get_matching_blocks()` from `difflib` for the optimal alignment
+- The Levenshtein distance (same as in `python-Levenshtein`) for the normalized edit distance
 
 To get the same results from FuzzyWuzzy (albeit at a large performance penalty), you can use
 ```python
