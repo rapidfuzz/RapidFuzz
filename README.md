@@ -48,6 +48,33 @@ RapidFuzz is a fast string matching library for Python and C++, which is using t
 1) It is MIT licensed so it can be used whichever License you might want to choose for your project, while you're forced to adopt the GPL license when using FuzzyWuzzy
 2) It is mostly written in C++ and on top of this comes with a lot of Algorithmic improvements to make string matching even faster, while still providing the same results. More details on these performance improvements in form of benchmarks can be found [here](#Benchmark)
 
+> ⚠️ **This library fixes `partial_ratio` from FuzzyWuzzy, so the results are different in some cases.**
+> 
+> FuzzyWuzzy relies on an incorrect implementation of `get_matching_blocks()` in python-Levenshtein (see [this issue](https://github.com/seatgeek/fuzzywuzzy/issues/79)). For RapidFuzz I decided to use:
+> 
+> - The implementation of `get_matching_blocks()` from `difflib` for the optimal alignment
+> - The Levenshtein distance (same as in `python-Levenshtein`) for the normalized edit distance
+> 
+> To get the same results from FuzzyWuzzy (albeit at a large performance penalty), you can use
+> ```python
+> import Levenshtein
+> from difflib import SequenceMatcher
+> 
+> class StringMatcher:
+>     def __init__(self, isjunk=None, seq1='', seq2=''):
+>         self._str1, self._str2 = seq1, seq2
+> 
+>     def get_matching_blocks(self):
+>         return SequenceMatcher(None, self._str1, self._str2, False).get_matching_blocks()
+> 
+>     def ratio(self):
+>         return Levenshtein.ratio(self._str1, self._str2)
+> 
+> from fuzzywuzzy import fuzz
+> fuzz.SequenceMatcher = StringMatcher
+> ```
+> 
+> This is a common question, for more details see my comments [here](https://github.com/seatgeek/fuzzywuzzy/issues/313#issuecomment-830795837), [here](https://github.com/maxbachmann/RapidFuzz/issues/112#issuecomment-877825963), and [here](https://github.com/maxbachmann/RapidFuzz/issues/30#issuecomment-898941299).
 
 
 ## Requirements
@@ -141,7 +168,6 @@ Here are some examples on the usage of processors in RapidFuzz:
 ```
 
 The full documentation of processors can be found [here](https://maxbachmann.github.io/RapidFuzz/process.html)
-
 
 ## Benchmark
 
