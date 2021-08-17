@@ -2,11 +2,19 @@ from libc.stdint cimport int64_t, uint8_t, uint16_t, uint32_t, uint64_t
 from libc.stdlib cimport malloc, free
 from libc.stddef cimport wchar_t
 from libcpp.utility cimport move
+from libcpp cimport bool
 
 cdef extern from "cpp_common.hpp":
+    ctypedef unsigned int RapidfuzzType
+    int RAPIDFUZZ_UINT8
+    int RAPIDFUZZ_UINT16
+    int RAPIDFUZZ_UINT32
+    int RAPIDFUZZ_UINT64
+    int RAPIDFUZZ_INT64
+
     cdef cppclass proc_string:
-        uint8_t kind
-        uint8_t allocated
+        RapidfuzzType kind
+        bool allocated
         void* data
         size_t length
 
@@ -15,13 +23,6 @@ cdef extern from "cpp_common.hpp":
     int is_valid_string(object py_str) except +
     proc_string convert_string(object py_str)
     void validate_string(object py_str, const char* err) except +
-
-    int RAPIDFUZZ_UINT8
-    int RAPIDFUZZ_UINT16
-    int RAPIDFUZZ_UINT32
-    int RAPIDFUZZ_UINT64
-    int RAPIDFUZZ_INT64
-
 
 cdef inline proc_string hash_array(arr) except *:
     # TODO on Cpython this does not require any copies

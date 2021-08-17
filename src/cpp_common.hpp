@@ -26,16 +26,29 @@ private:
     char const* m_error;
 };
 
+#define LIST_OF_CASES(...)   \
+    X_ENUM(RAPIDFUZZ_UINT8,                       uint8_t  , (__VA_ARGS__)) \
+    X_ENUM(RAPIDFUZZ_UINT16,                      uint16_t , (__VA_ARGS__)) \
+    X_ENUM(RAPIDFUZZ_UINT32,                      uint32_t , (__VA_ARGS__)) \
+    X_ENUM(RAPIDFUZZ_UINT64,                      uint64_t , (__VA_ARGS__)) \
+    X_ENUM(RAPIDFUZZ_INT64,                        int64_t , (__VA_ARGS__))
+
+
+enum RapidfuzzType {
+#       define X_ENUM(kind, type, MSVC_TUPLE) kind,
+        LIST_OF_CASES()
+#       undef X_ENUM
+};
+
 struct proc_string {
-    uint8_t kind;
-    /* flag to specify whether the string has to be freed */
-    uint8_t allocated;
+    RapidfuzzType kind;
+    bool allocated;
     void* data;
     size_t length;
 
     proc_string()
-      : kind(0), allocated(false), data(nullptr), length(0) {}
-    proc_string(uint8_t _kind, uint8_t _allocated, void* _data, size_t _length)
+      : kind((RapidfuzzType)0),  allocated(false), data(nullptr), length(0) {}
+    proc_string(RapidfuzzType _kind, uint8_t _allocated, void* _data, size_t _length)
       : kind(_kind), allocated(_allocated), data(_data), length(_length) {}
 
     proc_string(const proc_string&) = delete;
@@ -92,81 +105,78 @@ static inline PyObject* dist_to_long(std::size_t dist)
     return PyLong_FromSize_t(dist);
 }
 
-#define LIST_OF_CASES(...)   \
-    X_ENUM(RAPIDFUZZ_UINT8,                       uint8_t  , (__VA_ARGS__)) \
-    X_ENUM(RAPIDFUZZ_UINT16,                      uint16_t , (__VA_ARGS__)) \
-    X_ENUM(RAPIDFUZZ_UINT32,                      uint32_t , (__VA_ARGS__)) \
-    X_ENUM(RAPIDFUZZ_UINT64,                      uint64_t , (__VA_ARGS__)) \
-    X_ENUM(RAPIDFUZZ_INT64,                        int64_t , (__VA_ARGS__))
-
-
-enum RapidfuzzTypes {
-#       define X_ENUM(kind, type, MSVC_TUPLE) kind,
-        LIST_OF_CASES()
-#       undef X_ENUM
-};
-
-// this has to be separate from the string conversion, since it can not be called without
-// the GIL
 static inline bool is_valid_string(PyObject* py_str)
 {
-    if (!PyUnicode_Check(py_str)) {
-        return false;
+    bool is_string = false;
+
+    if (PyBytes_Check(py_str)) {
+        is_string = true;
+    }
+    else if (PyUnicode_Check(py_str)) {
+        // PEP 623 deprecates legacy strings and therefor
+        // deprecates e.g. PyUnicode_READY in Python 3.10
+#if PY_VERSION_HEX < PYTHON_VERSION(3, 10, 0)
+        if (PyUnicode_READY(py_str)) {
+          // cython will use the exception set by PyUnicode_READY
+          throw std::runtime_error("");
+        }
+#endif
+        is_string = true;
     }
 
-    // PEP 623 deprecates legacy strings and therefor
-    // deprecates e.g. PyUnicode_READY in Python 3.10
-#if PY_VERSION_HEX < PYTHON_VERSION(3, 10, 0)
-    if (PyUnicode_READY(py_str)) {
-      // cython will use the exception set by PyUnicode_READY
-      throw std::runtime_error("");
-    }
-#endif
-    return true;
+    return is_string;
 }
 
-// this has to be separate from the string conversion, since it can not be called without
-// the GIL
 static inline void validate_string(PyObject* py_str, const char* err)
 {
-    if (!PyUnicode_Check(py_str)) {
-        throw PythonTypeError(err);
+    if (PyBytes_Check(py_str)) {
+        return;
+    }
+    else if (PyUnicode_Check(py_str)) {
+        // PEP 623 deprecates legacy strings and therefor
+        // deprecates e.g. PyUnicode_READY in Python 3.10
+#if PY_VERSION_HEX < PYTHON_VERSION(3, 10, 0)
+        if (PyUnicode_READY(py_str)) {
+          // cython will use the exception set by PyUnicode_READY
+          throw std::runtime_error("");
+        }
+#endif
+        return;
     }
 
-    // PEP 623 deprecates legacy strings and therefor
-    // deprecates e.g. PyUnicode_READY in Python 3.10
-#if PY_VERSION_HEX < PYTHON_VERSION(3, 10, 0)
-    if (PyUnicode_READY(py_str)) {
-      // cython will use the exception set by PyUnicode_READY
-      throw std::runtime_error("");
-    }
-#endif
+    throw PythonTypeError(err);
 }
 
-// Right now this can be called without the GIL, since the used Python API
-// is implemented using macros, which directly access the PyObject both in
-// CPython and PyPy. If this changes the multiprocessing module needs to be updated
 static inline proc_string convert_string(PyObject* py_str)
 {
-    RapidfuzzTypes kind;
-    switch(PyUnicode_KIND(py_str)) {
-    case PyUnicode_1BYTE_KIND:
-      kind = RAPIDFUZZ_UINT8;
-      break;
-    case PyUnicode_2BYTE_KIND:
-      kind = RAPIDFUZZ_UINT16;
-      break;
-    default:
-      kind = RAPIDFUZZ_UINT32;
-      break;
+    if (PyBytes_Check(py_str)) {
+        return {
+            RAPIDFUZZ_UINT8,
+            false,
+            PyBytes_AS_STRING(py_str),
+            static_cast<std::size_t>(PyBytes_GET_SIZE(py_str))
+        };
+    } else {
+         RapidfuzzType kind;
+         switch(PyUnicode_KIND(py_str)) {
+         case PyUnicode_1BYTE_KIND:
+           kind = RAPIDFUZZ_UINT8;
+           break;
+         case PyUnicode_2BYTE_KIND:
+           kind = RAPIDFUZZ_UINT16;
+           break;
+         default:
+           kind = RAPIDFUZZ_UINT32;
+           break;
+         }
+     
+         return proc_string(
+             kind,
+             false,
+             PyUnicode_DATA(py_str),
+             static_cast<std::size_t>(PyUnicode_GET_LENGTH(py_str))
+         );
     }
-
-    return proc_string(
-        static_cast<uint8_t>(kind),
-        0,
-        PyUnicode_DATA(py_str),
-        static_cast<std::size_t>(PyUnicode_GET_LENGTH(py_str))
-    );
 }
 
 
@@ -194,8 +204,6 @@ double RATIO##_impl_inner_##PROCESSOR(const proc_string& s1, const Sentence& s2,
 {                                                                                                  \
     switch(s1.kind){                                                                               \
     LIST_OF_CASES(RATIO_FUNC, PROCESSOR)                                                           \
-    default:                                                                                       \
-       throw std::logic_error("Reached end of control flow in " #RATIO "_impl_inner_" #PROCESSOR); \
     }                                                                                              \
 }
 
@@ -208,8 +216,6 @@ double RATIO##_impl_##PROCESSOR(const proc_string& s1, const proc_string& s2, Ar
 {                                                                                            \
     switch(s1.kind){                                                                         \
     LIST_OF_CASES(RATIO##_impl_inner_##PROCESSOR, PROCESSOR)                                 \
-    default:                                                                                 \
-       throw std::logic_error("Reached end of control flow in " #RATIO "_impl_" #PROCESSOR); \
     }                                                                                        \
 }
 
@@ -228,8 +234,6 @@ size_t RATIO##_impl_inner_##PROCESSOR(const proc_string& s1, const Sentence& s2,
 {                                                                                                  \
     switch(s1.kind){                                                                               \
     LIST_OF_CASES(RATIO_FUNC, PROCESSOR)                                                           \
-    default:                                                                                       \
-       throw std::logic_error("Reached end of control flow in " #RATIO "_impl_inner_" #PROCESSOR); \
     }                                                                                              \
 }
 
@@ -242,8 +246,6 @@ size_t RATIO##_impl_##PROCESSOR(const proc_string& s1, const proc_string& s2, Ar
 {                                                                                            \
     switch(s1.kind){                                                                         \
     LIST_OF_CASES(RATIO##_impl_inner_##PROCESSOR, PROCESSOR)                                 \
-    default:                                                                                 \
-       throw std::logic_error("Reached end of control flow in " #RATIO "_impl_" #PROCESSOR); \
     }                                                                                        \
 }
 
