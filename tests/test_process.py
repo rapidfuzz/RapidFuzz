@@ -50,20 +50,43 @@ class ProcessTest(unittest.TestCase):
         query = "new york mets at atlanta braves"
         best = process.extractOne(query, self.baseball_strings)
         self.assertEqual(best[0], "braves vs mets")
+        best = process.extractOne(query, set(self.baseball_strings))
+        self.assertEqual(best[0], "braves vs mets")
+
+        best = process.extract(query, self.baseball_strings)[0]
+        self.assertEqual(best[0], "braves vs mets")
+        best = process.extract(query, set(self.baseball_strings))[0]
+        self.assertEqual(best[0], "braves vs mets")
 
     def testGetBestChoice2(self):
         query = "philadelphia phillies at atlanta braves"
         best = process.extractOne(query, self.baseball_strings)
+        self.assertEqual(best[0], self.baseball_strings[2])
+        best = process.extractOne(query, set(self.baseball_strings))
+        self.assertEqual(best[0], self.baseball_strings[2])
+
+        best = process.extract(query, self.baseball_strings)[0]
+        self.assertEqual(best[0], self.baseball_strings[2])
+        best = process.extract(query, set(self.baseball_strings))[0]
         self.assertEqual(best[0], self.baseball_strings[2])
 
     def testGetBestChoice3(self):
         query = "atlanta braves at philadelphia phillies"
         best = process.extractOne(query, self.baseball_strings)
         self.assertEqual(best[0], self.baseball_strings[2])
+        best = process.extractOne(query, set(self.baseball_strings))
+        self.assertEqual(best[0], self.baseball_strings[2])
+
+        best = process.extract(query, self.baseball_strings)[0]
+        self.assertEqual(best[0], self.baseball_strings[2])
+        best = process.extract(query, set(self.baseball_strings))[0]
+        self.assertEqual(best[0], self.baseball_strings[2])
 
     def testGetBestChoice4(self):
         query = "chicago cubs vs new york mets"
         best = process.extractOne(query, self.baseball_strings)
+        self.assertEqual(best[0], self.baseball_strings[0])
+        best = process.extractOne(query, set(self.baseball_strings))
         self.assertEqual(best[0], self.baseball_strings[0])
 
     def testWithProcessor(self):
@@ -120,8 +143,7 @@ class ProcessTest(unittest.TestCase):
         self.assertEqual(best[0], choices_mapping[1])
         best = process.extract(query, choices_mapping, scorer=fuzz.QRatio)[0]
         self.assertEqual(best[0], choices_mapping[1])
-
-
+        
     def testWithCutoff(self):
         choices = [
             "new york mets vs chicago cubs",

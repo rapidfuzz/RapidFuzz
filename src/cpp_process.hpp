@@ -8,6 +8,7 @@ struct DictElem {
 struct ListMatchScorerElem {
     double score;
     size_t index;
+    PyObject* choice;
 };
 
 struct DictMatchScorerElem {
@@ -20,6 +21,7 @@ struct DictMatchScorerElem {
 struct ListMatchDistanceElem {
     std::size_t distance;
     size_t index;
+    PyObject* choice;
 };
 
 struct DictMatchDistanceElem {

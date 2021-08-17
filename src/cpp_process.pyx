@@ -84,6 +84,7 @@ cdef extern from "cpp_process.hpp":
     ctypedef struct ListMatchScorerElem:
         double score
         size_t index
+        PyObject* choice
 
     ctypedef struct DictMatchScorerElem:
         double score
@@ -97,6 +98,7 @@ cdef extern from "cpp_process.hpp":
     ctypedef struct ListMatchDistanceElem:
         size_t distance
         size_t index
+        PyObject* choice
 
     ctypedef struct DictMatchDistanceElem:
         size_t distance
@@ -779,45 +781,53 @@ cdef inline extract_list(CachedScorerContext context, choices, processor, size_t
     results.reserve(<size_t>len(choices))
     cdef list result_list
 
-    if processor is not None:
-        for i, choice in enumerate(choices):
-            if choice is None:
-                continue
+    try:
+        if processor is not None:
+            for i, choice in enumerate(choices):
+                if choice is None:
+                    continue
+    
+                proc_choice = processor(choice)
+                if proc_choice is None:
+                    continue
+    
+                score = context.ratio(conv_sequence(proc_choice), score_cutoff)
+    
+                if score >= score_cutoff:
+                    Py_INCREF(choice)
+                    results.push_back(ListMatchScorerElem(score, i, <PyObject*>choice))
+        else:
+            for i, choice in enumerate(choices):
+                if choice is None:
+                    continue
+    
+                score = context.ratio(conv_sequence(choice), score_cutoff)
+    
+                if score >= score_cutoff:
+                    Py_INCREF(choice)
+                    results.push_back(ListMatchScorerElem(score, i, <PyObject*>choice))
+    
+        # due to score_cutoff not always completely filled
+        if limit > results.size():
+            limit = results.size()
+    
+        if limit >= results.size():
+            algorithm.sort(results.begin(), results.end(), ExtractScorerComp())
+        else:
+            algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractScorerComp())
+            results.resize(limit)
+    
+        # copy elements into Python List
+        result_list = PyList_New(<Py_ssize_t>limit)
+        for i in range(limit):
+            result_item = (<object>results[i].choice, results[i].score, results[i].index)
+            Py_INCREF(result_item)
+            PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
 
-            proc_choice = processor(choice)
-            if proc_choice is None:
-                continue
-
-            score = context.ratio(conv_sequence(proc_choice), score_cutoff)
-
-            if score >= score_cutoff:
-                results.push_back(ListMatchScorerElem(score, i))
-    else:
-        for i, choice in enumerate(choices):
-            if choice is None:
-                continue
-
-            score = context.ratio(conv_sequence(choice), score_cutoff)
-
-            if score >= score_cutoff:
-                results.push_back(ListMatchScorerElem(score, i))
-
-    # due to score_cutoff not always completely filled
-    if limit > results.size():
-        limit = results.size()
-
-    if limit >= results.size():
-        algorithm.sort(results.begin(), results.end(), ExtractScorerComp())
-    else:
-        algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractScorerComp())
-        results.resize(limit)
-
-    # copy elements into Python List
-    result_list = PyList_New(<Py_ssize_t>limit)
-    for i in range(limit):
-        result_item = (choices[results[i].index], results[i].score, results[i].index)
-        Py_INCREF(result_item)
-        PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
+    finally:
+        # decref all reference counts
+        for item in results:
+            Py_DECREF(<object>item.choice)
 
     return result_list
 
@@ -830,45 +840,53 @@ cdef inline extract_distance_list(CachedDistanceContext context, choices, proces
     results.reserve(<size_t>len(choices))
     cdef list result_list
 
-    if processor is not None:
-        for i, choice in enumerate(choices):
-            if choice is None:
-                continue
+    try:
+        if processor is not None:
+            for i, choice in enumerate(choices):
+                if choice is None:
+                    continue
+    
+                proc_choice = processor(choice)
+                if proc_choice is None:
+                    continue
+    
+                distance = context.ratio(conv_sequence(proc_choice), max_)
+    
+                if distance <= max_:
+                    Py_INCREF(choice)
+                    results.push_back(ListMatchDistanceElem(distance, i, <PyObject*>choice))
+        else:
+            for i, choice in enumerate(choices):
+                if choice is None:
+                    continue
+    
+                distance = context.ratio(conv_sequence(choice), max_)
+    
+                if distance <= max_:
+                    Py_INCREF(choice)
+                    results.push_back(ListMatchDistanceElem(distance, i, <PyObject*>choice))
+    
+        # due to max_ not always completely filled
+        if limit > results.size():
+            limit = results.size()
+    
+        if limit >= results.size():
+            algorithm.sort(results.begin(), results.end(), ExtractDistanceComp())
+        else:
+            algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractDistanceComp())
+            results.resize(limit)
+    
+        # copy elements into Python List
+        result_list = PyList_New(<Py_ssize_t>limit)
+        for i in range(limit):
+            result_item = (<object>results[i].choice, results[i].distance, results[i].index)
+            Py_INCREF(result_item)
+            PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
 
-            proc_choice = processor(choice)
-            if proc_choice is None:
-                continue
-
-            distance = context.ratio(conv_sequence(proc_choice), max_)
-
-            if distance <= max_:
-                results.push_back(ListMatchDistanceElem(distance, i))
-    else:
-        for i, choice in enumerate(choices):
-            if choice is None:
-                continue
-
-            distance = context.ratio(conv_sequence(choice), max_)
-
-            if distance <= max_:
-                results.push_back(ListMatchDistanceElem(distance, i))
-
-    # due to max_ not always completely filled
-    if limit > results.size():
-        limit = results.size()
-
-    if limit >= results.size():
-        algorithm.sort(results.begin(), results.end(), ExtractDistanceComp())
-    else:
-        algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractDistanceComp())
-        results.resize(limit)
-
-    # copy elements into Python List
-    result_list = PyList_New(<Py_ssize_t>limit)
-    for i in range(limit):
-        result_item = (choices[results[i].index], results[i].distance, results[i].index)
-        Py_INCREF(result_item)
-        PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
+    finally:
+        # decref all reference counts
+        for item in results:
+            Py_DECREF(<object>item.choice)
 
     return result_list
 
