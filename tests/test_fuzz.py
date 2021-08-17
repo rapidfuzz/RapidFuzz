@@ -85,12 +85,28 @@ class RatioTest(unittest.TestCase):
     def testIssue90(self):
         self.assertAlmostEqual(fuzz.partial_ratio("ax b", "a b a c b"), 75.0, places=4)
 
-@pytest.mark.parametrize("scorer", scorers)
-def test_empty_string(scorer):
+def test_empty_string():
     """
-    when both strings are empty this is a perfect match
+    when both strings are empty this is either a perfect match or no match
+    See https://github.com/maxbachmann/RapidFuzz/issues/110
     """
-    assert scorer("", "") == 100
+    # perfect match
+    assert fuzz.ratio("", "") == 100
+    assert fuzz.partial_ratio("", "") == 100
+    assert fuzz.token_sort_ratio("", "") == 100
+    assert fuzz.partial_token_sort_ratio("", "") == 100
+    assert fuzz.token_ratio("", "") == 100
+    assert fuzz.partial_token_ratio("", "") == 100
+
+    # no match
+    assert fuzz.WRatio("", "") == 0
+    assert fuzz.QRatio("", "") == 0
+    assert fuzz.token_set_ratio("", "") == 0
+    assert fuzz.partial_token_set_ratio("", "") == 0
+
+    # perfect match when no words
+    assert fuzz.token_set_ratio("    ", "    ") == 0
+    assert fuzz.partial_token_set_ratio("    ", "    ") == 0
 
 
 @pytest.mark.parametrize("scorer", scorers)
