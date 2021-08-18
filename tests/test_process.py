@@ -188,9 +188,13 @@ class ProcessTest(unittest.TestCase):
         """
         best = process.extractOne("test", [None, "tes"])
         self.assertEqual(best[2], 1)
+        best = process.extractOne(None, [None, "tes"])
+        self.assertEqual(best, None)
 
-        best = process.extract("test", [None, "tes"], limit=1)
+        best = process.extract("test", [None, "tes"])
         self.assertEqual(best[0][2], 1)
+        best = process.extract(None, [None, "tes"])
+        self.assertEqual(best, [])
 
     def testResultOrder(self):
         """

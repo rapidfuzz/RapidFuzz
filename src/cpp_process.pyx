@@ -1017,7 +1017,7 @@ def extract(query, choices, scorer=WRatio, processor=default_process, limit=5, s
     cdef size_t c_max = <size_t>-1
 
     if query is None:
-        return None
+        return []
 
     if limit is None or limit > len(choices):
         limit = len(choices)

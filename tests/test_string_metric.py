@@ -16,6 +16,21 @@ def test_empty_string():
     assert string_metric.levenshtein("", "", (1,1,5)) == 0
     assert string_metric.levenshtein("", "", (3,7,5)) == 0
 
+def test_cross_type_matching():
+    """
+    strings should always be interpreted in the same way
+    """
+    assert string_metric.levenshtein("aaaa", "aaaa") == 0
+    assert string_metric.levenshtein("aaaa", ["a", "a", "a", "a"]) == 0
+    assert string_metric.levenshtein("aaaa", [ord("a"), ord("a"), "a", "a"]) == 0
+
+def test_word_error_rate():
+    """
+    it should be possible to use levenshtein to implement a word error rate
+    """
+    assert string_metric.levenshtein(["aaaaa", "bbbb"], ["aaaaa", "bbbb"]) == 0
+    assert string_metric.levenshtein(["aaaaa", "bbbb"], ["aaaaa", "cccc"]) == 1
+
 def test_simple_unicode_tests():
     """
     some very simple tests using unicode with scorers
