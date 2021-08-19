@@ -13,6 +13,7 @@ SIMPLE_RATIO_DEF(QRatio)
 
 SIMPLE_DISTANCE_DEF(hamming)
 SIMPLE_RATIO_DEF(normalized_hamming)
+SIMPLE_RATIO_DEF(jaro_similarity)
 
 PyObject* levenshtein_no_process(const proc_string& s1, const proc_string& s2,
     size_t insertion, size_t deletion, size_t substitution, size_t max)
@@ -46,4 +47,16 @@ double normalized_levenshtein_default_process(const proc_string& s1, const proc_
     rapidfuzz::LevenshteinWeightTable weights = {insertion, deletion, substitution};
 
     return normalized_levenshtein_impl_default_process(s1, s2, weights, score_cutoff);
+}
+
+double jaro_winkler_similarity_no_process(const proc_string& s1, const proc_string& s2,
+    double prefix_weight, double score_cutoff)
+{
+    return jaro_winkler_similarity_impl_no_process(s1, s2, prefix_weight, score_cutoff);
+}
+
+double jaro_winkler_similarity_default_process(const proc_string& s1, const proc_string& s2,
+    double prefix_weight, double score_cutoff)
+{
+    return jaro_winkler_similarity_impl_default_process(s1, s2, prefix_weight, score_cutoff);
 }

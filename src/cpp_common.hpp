@@ -273,6 +273,8 @@ DISTANCE_IMPL_DEF(levenshtein,           string_metric::levenshtein)
 RATIO_IMPL_DEF(normalized_levenshtein,   string_metric::normalized_levenshtein)
 DISTANCE_IMPL_DEF(hamming,               string_metric::hamming)
 RATIO_IMPL_DEF(normalized_hamming,       string_metric::normalized_hamming)
+RATIO_IMPL_DEF(jaro_winkler_similarity,  string_metric::jaro_winkler_similarity)
+RATIO_IMPL_DEF(jaro_similarity,          string_metric::jaro_similarity)
 
 # undef X_ENUM
 

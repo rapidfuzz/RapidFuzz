@@ -5,5 +5,7 @@ from rapidfuzz.cpp_string_metric import (
     levenshtein,
     normalized_levenshtein,
     hamming,
-    normalized_hamming
+    normalized_hamming,
+    jaro_similarity,
+    jaro_winkler_similarity
 )

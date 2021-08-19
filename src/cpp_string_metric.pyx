@@ -16,15 +16,19 @@ cdef inline proc_string conv_sequence(seq) except *:
         return move(hash_sequence(seq))
 
 cdef extern from "cpp_scorer.hpp":
-    double normalized_levenshtein_no_process(      const proc_string&, const proc_string&, size_t, size_t, size_t, double) nogil except +
-    double normalized_levenshtein_default_process( const proc_string&, const proc_string&, size_t, size_t, size_t, double) nogil except +
-    double normalized_hamming_no_process(          const proc_string&, const proc_string&, double) nogil except +
-    double normalized_hamming_default_process(     const proc_string&, const proc_string&, double) nogil except +
+    double normalized_levenshtein_no_process(       const proc_string&, const proc_string&, size_t, size_t, size_t, double) nogil except +
+    double normalized_levenshtein_default_process(  const proc_string&, const proc_string&, size_t, size_t, size_t, double) nogil except +
+    double normalized_hamming_no_process(           const proc_string&, const proc_string&, double) nogil except +
+    double normalized_hamming_default_process(      const proc_string&, const proc_string&, double) nogil except +
+    double jaro_similarity_no_process(              const proc_string&, const proc_string&, double) nogil except +
+    double jaro_similarity_default_process(         const proc_string&, const proc_string&, double) nogil except +
+    double jaro_winkler_similarity_no_process(      const proc_string&, const proc_string&, double, double) nogil except +
+    double jaro_winkler_similarity_default_process( const proc_string&, const proc_string&, double, double) nogil except +
 
-    object levenshtein_no_process(                 const proc_string&, const proc_string&, size_t, size_t, size_t, size_t) nogil except +
-    object levenshtein_default_process(            const proc_string&, const proc_string&, size_t, size_t, size_t, size_t) nogil except +
-    object hamming_no_process(                     const proc_string&, const proc_string&, size_t) nogil except +
-    object hamming_default_process(                const proc_string&, const proc_string&, size_t) nogil except +
+    object levenshtein_no_process(                  const proc_string&, const proc_string&, size_t, size_t, size_t, size_t) nogil except +
+    object levenshtein_default_process(             const proc_string&, const proc_string&, size_t, size_t, size_t, size_t) nogil except +
+    object hamming_no_process(                      const proc_string&, const proc_string&, size_t) nogil except +
+    object hamming_default_process(                 const proc_string&, const proc_string&, size_t) nogil except +
 
 def levenshtein(s1, s2, weights=(1,1,1), processor=None, max=None):
     """
@@ -404,3 +408,83 @@ def normalized_hamming(s1, s2, processor=None, score_cutoff=None):
         s2 = processor(s2)
 
     return normalized_hamming_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
+
+
+def jaro_similarity(s1, s2, processor=None, score_cutoff=None):
+    """
+    Calculates the jaro similarity
+
+    Parameters
+    ----------
+    s1 : str
+        First string to compare.
+    s2 : str
+        Second string to compare.
+    processor: bool or callable, optional
+        Optional callable that is used to preprocess the strings before
+        comparing them. When processor is True ``utils.default_process``
+        is used. Default is None, which deactivates this behaviour.
+    score_cutoff : float, optional
+        Optional argument for a score threshold as a float between 0 and 100.
+        For ratio < score_cutoff 0 is returned instead. Default is 0,
+        which deactivates this behaviour.
+
+    Returns
+    -------
+    similarity : float
+        similarity between s1 and s2 as a float between 0 and 100
+
+    """
+    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+
+    if s1 is None or s2 is None:
+        return 0
+
+    if processor is True or processor == default_process:
+        return jaro_similarity_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
+    elif callable(processor):
+        s1 = processor(s1)
+        s2 = processor(s2)
+
+    return jaro_similarity_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
+
+
+def jaro_winkler_similarity(s1, s2, double prefix_weight=0.1, processor=None, score_cutoff=None):
+    """
+    Calculates the jaro winkler similarity
+
+    Parameters
+    ----------
+    s1 : str
+        First string to compare.
+    s2 : str
+        Second string to compare.
+    prefix_weight : float, optional
+        weight used for the common prefix of the two strings. Default is 0.1.
+    processor: bool or callable, optional
+        Optional callable that is used to preprocess the strings before
+        comparing them. When processor is True ``utils.default_process``
+        is used. Default is None, which deactivates this behaviour.
+    score_cutoff : float, optional
+        Optional argument for a score threshold as a float between 0 and 100.
+        For ratio < score_cutoff 0 is returned instead. Default is 0,
+        which deactivates this behaviour.
+
+    Returns
+    -------
+    similarity : float
+        similarity between s1 and s2 as a float between 0 and 100
+
+    """
+    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+
+    if s1 is None or s2 is None:
+        return 0
+
+    if processor is True or processor == default_process:
+        return jaro_winkler_similarity_default_process(conv_sequence(s1), conv_sequence(s2), prefix_weight, c_score_cutoff)
+    elif callable(processor):
+        s1 = processor(s1)
+        s2 = processor(s2)
+
+    return jaro_winkler_similarity_no_process(conv_sequence(s1), conv_sequence(s2), prefix_weight, c_score_cutoff)

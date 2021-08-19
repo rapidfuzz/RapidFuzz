@@ -8,7 +8,9 @@ from rapidfuzz.string_metric import (
     levenshtein,
     normalized_levenshtein,
     hamming,
-    normalized_hamming
+    normalized_hamming,
+    jaro_similarity,
+    jaro_winkler_similarity,
 )
 
 from rapidfuzz.fuzz import (
@@ -70,8 +72,10 @@ cdef extern from "cpp_process.hpp":
     CachedScorerContext cached_WRatio_init(                  const proc_string&, int) except +
     CachedScorerContext cached_QRatio_init(                  const proc_string&, int) except +
     # string_metric
-    CachedScorerContext cached_normalized_levenshtein_init(const proc_string&, int, size_t, size_t, size_t) except +
-    CachedScorerContext cached_normalized_hamming_init(    const proc_string&, int) except +
+    CachedScorerContext cached_normalized_levenshtein_init(  const proc_string&, int, size_t, size_t, size_t) except +
+    CachedScorerContext cached_normalized_hamming_init(      const proc_string&, int) except +
+    CachedScorerContext cached_jaro_winkler_similarity_init( const proc_string&, int, double) except +
+    CachedScorerContext cached_jaro_similarity_init(         const proc_string&, int) except +
 
     # distances
     CachedDistanceContext cached_levenshtein_init(const proc_string&, int, size_t, size_t, size_t) except +
@@ -117,6 +121,11 @@ cdef inline CachedDistanceContext CachedLevenshteinInit(const proc_string& query
     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
     return move(cached_levenshtein_init(query, def_process, insertion, deletion, substitution))
 
+cdef inline CachedScorerContext CachedJaroWinklerSimilarityInit(const proc_string& query, int def_process, dict kwargs):
+    cdef double prefix_weight
+    prefix_weight = kwargs.get("prefix_weight", 0.1)
+    return move(cached_jaro_winkler_similarity_init(query, def_process, prefix_weight))
+
 cdef inline int IsIntegratedScorer(object scorer):
     return (
         scorer is ratio or
@@ -130,7 +139,9 @@ cdef inline int IsIntegratedScorer(object scorer):
         scorer is WRatio or
         scorer is QRatio or
         scorer is normalized_levenshtein or
-        scorer is normalized_hamming
+        scorer is normalized_hamming or
+        scorer is jaro_similarity or
+        scorer is jaro_winkler_similarity
     )
 
 cdef inline int IsIntegratedDistance(object scorer):
@@ -166,6 +177,10 @@ cdef inline CachedScorerContext CachedScorerInit(object scorer, const proc_strin
         context = CachedNormalizedLevenshteinInit(query, def_process, kwargs)
     elif scorer is normalized_hamming:
         context = cached_normalized_hamming_init(query, def_process)
+    elif scorer is jaro_similarity:
+        context = cached_jaro_similarity_init(query, def_process)
+    elif scorer is jaro_winkler_similarity:
+        context = CachedJaroWinklerSimilarityInit(query, def_process, kwargs)
 
     return move(context)
 

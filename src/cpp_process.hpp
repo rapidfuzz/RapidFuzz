@@ -283,6 +283,15 @@ static CachedScorerContext cached_normalized_hamming_init(const proc_string& str
     return cached_scorer_init<string_metric::CachedNormalizedHamming>(str, def_process);
 }
 
+static CachedScorerContext cached_jaro_winkler_similarity_init(const proc_string& str, int def_process, double prefix_weight)
+{
+    return cached_scorer_init<string_metric::CachedJaroWinklerSimilarity>(str, def_process, prefix_weight);
+}
+
+static CachedScorerContext cached_jaro_similarity_init(const proc_string& str, int def_process)
+{
+    return cached_scorer_init<string_metric::CachedJaroSimilarity>(str, def_process);
+}
 
 
 /*************************************************
