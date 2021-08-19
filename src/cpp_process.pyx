@@ -470,7 +470,7 @@ cdef inline py_extractOne_list(query, choices, scorer, processor, double score_c
     return (result_choice, result_score, result_index) if result_choice is not None else None
 
 
-def extractOne(query, choices, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):
+def extractOne(query, choices, *, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):
     """
     Find the best match in a list of choices. When multiple elements have the same similarity,
     the first element is returned.
@@ -964,7 +964,7 @@ cdef inline py_extract_list(query, choices, scorer, processor, size_t limit, dou
     return heapq.nlargest(limit, result_list, key=lambda i: i[1])
 
 
-def extract(query, choices, scorer=WRatio, processor=default_process, limit=5, score_cutoff=None, **kwargs):
+def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5, score_cutoff=None, **kwargs):
     """
     Find the best matches in a list of choices. The list is sorted by the similarity.
     When multiple choices have the same similarity, they are sorted by their index
@@ -1092,7 +1092,7 @@ def extract(query, choices, scorer=WRatio, processor=default_process, limit=5, s
         return py_extract_list(query, choices, scorer, processor, limit, c_score_cutoff, kwargs)
 
 
-def extract_iter(query, choices, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):
+def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):
     """
     Find the best match in a list of choices
 

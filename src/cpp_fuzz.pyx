@@ -37,7 +37,7 @@ cdef extern from "cpp_scorer.hpp":
     double QRatio_no_process(                        const proc_string&, const proc_string&, double) nogil except +
     double QRatio_default_process(                   const proc_string&, const proc_string&, double) nogil except +
 
-def ratio(s1, s2, processor=None, score_cutoff=None):
+def ratio(s1, s2, *, processor=None, score_cutoff=None):
     """
     calculates a simple ratio between two strings. This is a simple wrapper
     for string_metric.normalized_levenshtein using the weights:
@@ -86,7 +86,7 @@ def ratio(s1, s2, processor=None, score_cutoff=None):
     return ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
 
-def partial_ratio(s1, s2, processor=None, score_cutoff=None):
+def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
     """
     calculates the fuzz.ratio of the optimal string alignment
 
@@ -133,7 +133,7 @@ def partial_ratio(s1, s2, processor=None, score_cutoff=None):
     return partial_ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
 
-def token_sort_ratio(s1, s2, processor=True, score_cutoff=None):
+def token_sort_ratio(s1, s2, *, processor=True, score_cutoff=None):
     """
     sorts the words in the strings and calculates the fuzz.ratio between them
 
@@ -180,7 +180,7 @@ def token_sort_ratio(s1, s2, processor=True, score_cutoff=None):
     return token_sort_ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
 
-def token_set_ratio(s1, s2, processor=True, score_cutoff=None):
+def token_set_ratio(s1, s2, *, processor=True, score_cutoff=None):
     """
     Compares the words in the strings based on unique and common words between them
     using fuzz.ratio
@@ -230,7 +230,7 @@ def token_set_ratio(s1, s2, processor=True, score_cutoff=None):
     return token_set_ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
 
-def token_ratio(s1, s2, processor=True, score_cutoff=None):
+def token_ratio(s1, s2, *, processor=True, score_cutoff=None):
     """
     Helper method that returns the maximum of fuzz.token_set_ratio and fuzz.token_sort_ratio
     (faster than manually executing the two functions)
@@ -273,7 +273,7 @@ def token_ratio(s1, s2, processor=True, score_cutoff=None):
     return token_ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
 
-def partial_token_sort_ratio(s1, s2, processor=True, score_cutoff=None):
+def partial_token_sort_ratio(s1, s2, *, processor=True, score_cutoff=None):
     """
     sorts the words in the strings and calculates the fuzz.partial_ratio between them
 
@@ -315,7 +315,7 @@ def partial_token_sort_ratio(s1, s2, processor=True, score_cutoff=None):
     return partial_token_sort_ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
 
-def partial_token_set_ratio(s1, s2, processor=True, score_cutoff=None):
+def partial_token_set_ratio(s1, s2, *, processor=True, score_cutoff=None):
     """
     Compares the words in the strings based on unique and common words between them
     using fuzz.partial_ratio
@@ -358,7 +358,7 @@ def partial_token_set_ratio(s1, s2, processor=True, score_cutoff=None):
     return partial_token_set_ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
 
-def partial_token_ratio(s1, s2, processor=True, score_cutoff=None):
+def partial_token_ratio(s1, s2, *, processor=True, score_cutoff=None):
     """
     Helper method that returns the maximum of fuzz.partial_token_set_ratio and
     fuzz.partial_token_sort_ratio (faster than manually executing the two functions)
@@ -401,7 +401,7 @@ def partial_token_ratio(s1, s2, processor=True, score_cutoff=None):
     return partial_token_ratio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
 
-def WRatio(s1, s2, processor=True, score_cutoff=None):
+def WRatio(s1, s2, *, processor=True, score_cutoff=None):
     """
     Calculates a weighted ratio based on the other ratio algorithms
 
@@ -443,7 +443,7 @@ def WRatio(s1, s2, processor=True, score_cutoff=None):
     return WRatio_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
 
-def QRatio(s1, s2, processor=True, score_cutoff=None):
+def QRatio(s1, s2, *, processor=True, score_cutoff=None):
     """
     Calculates a quick ratio between two strings using fuzz.ratio.
     The only difference to fuzz.ratio is, that this preprocesses

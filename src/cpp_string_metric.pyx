@@ -30,7 +30,7 @@ cdef extern from "cpp_scorer.hpp":
     object hamming_no_process(                      const proc_string&, const proc_string&, size_t) nogil except +
     object hamming_default_process(                 const proc_string&, const proc_string&, size_t) nogil except +
 
-def levenshtein(s1, s2, weights=(1,1,1), processor=None, max=None):
+def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
     """
     Calculates the minimum number of insertions, deletions, and substitutions
     required to change one sequence into the other according to Levenshtein with custom
@@ -212,7 +212,7 @@ def levenshtein(s1, s2, weights=(1,1,1), processor=None, max=None):
     return levenshtein_no_process(conv_sequence(s1), conv_sequence(s2), insertion, deletion, substitution, c_max)
 
 
-def normalized_levenshtein(s1, s2, weights=(1,1,1), processor=None, score_cutoff=None):
+def normalized_levenshtein(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
     """
     Calculates a normalized levenshtein distance using custom
     costs for insertion, deletion and substitution.
@@ -316,7 +316,7 @@ def normalized_levenshtein(s1, s2, weights=(1,1,1), processor=None, score_cutoff
     return normalized_levenshtein_no_process(conv_sequence(s1), conv_sequence(s2), insertion, deletion, substitution, c_score_cutoff)
 
 
-def hamming(s1, s2, processor=None, max=None):
+def hamming(s1, s2, *, processor=None, max=None):
     """
     Calculates the Hamming distance between two strings.
     The hamming distance is defined as the number of positions 
@@ -363,7 +363,7 @@ def hamming(s1, s2, processor=None, max=None):
     return hamming_no_process(conv_sequence(s1), conv_sequence(s2), c_max)
 
 
-def normalized_hamming(s1, s2, processor=None, score_cutoff=None):
+def normalized_hamming(s1, s2, *, processor=None, score_cutoff=None):
     """
     Calculates a normalized hamming distance
 
@@ -410,7 +410,7 @@ def normalized_hamming(s1, s2, processor=None, score_cutoff=None):
     return normalized_hamming_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
 
-def jaro_similarity(s1, s2, processor=None, score_cutoff=None):
+def jaro_similarity(s1, s2, *, processor=None, score_cutoff=None):
     """
     Calculates the jaro similarity
 
@@ -449,7 +449,7 @@ def jaro_similarity(s1, s2, processor=None, score_cutoff=None):
     return jaro_similarity_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
 
 
-def jaro_winkler_similarity(s1, s2, double prefix_weight=0.1, processor=None, score_cutoff=None):
+def jaro_winkler_similarity(s1, s2, *, double prefix_weight=0.1, processor=None, score_cutoff=None):
     """
     Calculates the jaro winkler similarity
 

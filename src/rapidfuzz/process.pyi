@@ -9,7 +9,7 @@ ResultType = TypeVar("ResultType", int, float)
 @overload
 def extractOne(
     query: _StringType,
-    choices: Iterable[_StringType],
+    choices: Iterable[_StringType], *,
     scorer: Callable[..., ResultType] = WRatio,
     processor: Optional[bool] = None,
     score_cutoff: Optional[ResultType] = None,
@@ -19,7 +19,7 @@ def extractOne(
 @overload
 def extractOne(
     query: _StringType,
-    choices: Mapping[Any, _StringType],
+    choices: Mapping[Any, _StringType], *,
     scorer: Callable[..., ResultType] = WRatio,
     processor: Optional[bool] = None,
     score_cutoff: Optional[ResultType] = None,
@@ -29,7 +29,7 @@ def extractOne(
 @overload
 def extractOne(
     query: S1,
-    choices: Iterable[S2],
+    choices: Iterable[S2], *,
     scorer: Callable[..., ResultType] = WRatio,
     processor: Callable[[Union[S1, S2]], _StringType] = None,
     score_cutoff: Optional[ResultType] = None,
@@ -39,7 +39,7 @@ def extractOne(
 @overload
 def extractOne(
     query: S1,
-    choices: Mapping[Any, S2],
+    choices: Mapping[Any, S2], *,
     scorer: Callable[..., ResultType] = WRatio,
     processor: Callable[[Union[S1, S2]], _StringType] = None,
     score_cutoff: Optional[ResultType] = None,
@@ -49,7 +49,7 @@ def extractOne(
 @overload
 def extract(
     query: _StringType,
-    choices: Iterable[_StringType],
+    choices: Iterable[_StringType], *,
     scorer: Callable[..., ResultType] = WRatio,
     processor: Optional[bool] = None,
     limit: Optional[int] = ...,
@@ -61,7 +61,7 @@ def extract(
 @overload
 def extract(
     query: _StringType,
-    choices: Mapping[Any, _StringType],
+    choices: Mapping[Any, _StringType], *,
     scorer: Callable[..., ResultType] = WRatio,
     processor: Optional[bool] = None,
     limit: Optional[int] = ...,
@@ -72,7 +72,7 @@ def extract(
 @overload
 def extract(
     query: S1,
-    choices: Iterable[S2],
+    choices: Iterable[S2], *,
     scorer: Callable[..., ResultType] = WRatio,
     processor: Callable[[Union[S1, S2]], _StringType] = None,
     limit: Optional[int] = ...,
@@ -83,7 +83,7 @@ def extract(
 @overload
 def extract(
     query: S1,
-    choices: Mapping[Any, S2],
+    choices: Mapping[Any, S2], *,
     scorer: Callable[..., ResultType] = WRatio,
     processor: Callable[[Union[S1, S2]], _StringType] = None,
     score_cutoff: Optional[ResultType] = None,
@@ -94,7 +94,7 @@ def extract(
 @overload
 def extract_iter(
     query: _StringType,
-    choices: Iterable[_StringType],
+    choices: Iterable[_StringType], *,
     scorer: Callable[..., ResultType] = WRatio,
     processor: Optional[bool] = None,
     score_cutoff: Optional[ResultType] = None,
@@ -104,7 +104,7 @@ def extract_iter(
 @overload
 def extract_iter(
     query: _StringType,
-    choices: Mapping[Any, _StringType],
+    choices: Mapping[Any, _StringType], *,
     scorer: Callable[..., ResultType] = WRatio,
     processor: Optional[bool] = None,
     score_cutoff: Optional[ResultType] = None,
@@ -114,7 +114,7 @@ def extract_iter(
 @overload
 def extract_iter(
     query: S1,
-    choices: Iterable[S2],
+    choices: Iterable[S2], *,
     scorer: Callable[..., ResultType] = WRatio,
     processor: Callable[[Union[S1, S2]], _StringType] = None,
     score_cutoff: Optional[ResultType] = None,
@@ -124,7 +124,7 @@ def extract_iter(
 @overload
 def extract_iter(
     query: S1,
-    choices: Mapping[Any, S2],
+    choices: Mapping[Any, S2], *,
     scorer: Callable[..., ResultType] = WRatio,
     processor: Callable[[Union[S1, S2]], _StringType] = None,
     score_cutoff: Optional[ResultType] = None,
