@@ -4308,7 +4308,7 @@ PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_17cpp_string_metric_10jaro_winkler_similarity, "\n    Calculates the jaro winkler similarity\n\n    Parameters\n    ----------\n    s1 : str\n        First string to compare.\n    s2 : str\n        Second string to compare.\n    prefix_weight : float, optional\n        weight used for the common prefix of the two strings. Default is 0.1.\n    processor: bool or callable, optional\n        Optional callable that is used to preprocess the strings before\n        comparing them. When processor is True ``utils.default_process``\n        is used. Default is None, which deactivates this behaviour.\n    score_cutoff : float, optional\n        Optional argument for a score threshold as a float between 0 and 100.\n        For ratio < score_cutoff 0 is returned instead. Default is 0,\n        which deactivates this behaviour.\n\n    Returns\n    -------\n    similarity : float\n        similarity between s1 and s2 as a float between 0 and 100\n\n    ");
+PyDoc_STRVAR(__pyx_doc_17cpp_string_metric_10jaro_winkler_similarity, "\n    Calculates the jaro winkler similarity\n\n    Parameters\n    ----------\n    s1 : str\n        First string to compare.\n    s2 : str\n        Second string to compare.\n    prefix_weight : float, optional\n        Weight used for the common prefix of the two strings.\n        Has to be between 0 and 0.25. Default is 0.1.\n    processor: bool or callable, optional\n        Optional callable that is used to preprocess the strings before\n        comparing them. When processor is True ``utils.default_process``\n        is used. Default is None, which deactivates this behaviour.\n    score_cutoff : float, optional\n        Optional argument for a score threshold as a float between 0 and 100.\n        For ratio < score_cutoff 0 is returned instead. Default is 0,\n        which deactivates this behaviour.\n\n    Returns\n    -------\n    similarity : float\n        similarity between s1 and s2 as a float between 0 and 100\n\n    Raises\n    ------\n    ValueError\n        If prefix_weight is invalid\n    ");
 static PyMethodDef __pyx_mdef_17cpp_string_metric_11jaro_winkler_similarity = {"jaro_winkler_similarity", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_17cpp_string_metric_11jaro_winkler_similarity, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_17cpp_string_metric_10jaro_winkler_similarity};
 static PyObject *__pyx_pw_17cpp_string_metric_11jaro_winkler_similarity(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
@@ -4430,8 +4430,8 @@ static PyObject *__pyx_pf_17cpp_string_metric_10jaro_winkler_similarity(CYTHON_U
   __Pyx_INCREF(__pyx_v_s1);
   __Pyx_INCREF(__pyx_v_s2);
 
-  /* "cpp_string_metric.pyx":479
- * 
+  /* "cpp_string_metric.pyx":484
+ *         If prefix_weight is invalid
  *     """
  *     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff             # <<<<<<<<<<<<<<
  * 
@@ -4441,12 +4441,12 @@ static PyObject *__pyx_pf_17cpp_string_metric_10jaro_winkler_similarity(CYTHON_U
   if ((__pyx_t_2 != 0)) {
     __pyx_t_1 = 0.0;
   } else {
-    __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 479, __pyx_L1_error)
+    __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 484, __pyx_L1_error)
     __pyx_t_1 = __pyx_t_3;
   }
   __pyx_v_c_score_cutoff = __pyx_t_1;
 
-  /* "cpp_string_metric.pyx":481
+  /* "cpp_string_metric.pyx":486
  *     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
  * 
  *     if s1 is None or s2 is None:             # <<<<<<<<<<<<<<
@@ -4466,7 +4466,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_10jaro_winkler_similarity(CYTHON_U
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_2) {
 
-    /* "cpp_string_metric.pyx":482
+    /* "cpp_string_metric.pyx":487
  * 
  *     if s1 is None or s2 is None:
  *         return 0             # <<<<<<<<<<<<<<
@@ -4478,7 +4478,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_10jaro_winkler_similarity(CYTHON_U
     __pyx_r = __pyx_int_0;
     goto __pyx_L0;
 
-    /* "cpp_string_metric.pyx":481
+    /* "cpp_string_metric.pyx":486
  *     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
  * 
  *     if s1 is None or s2 is None:             # <<<<<<<<<<<<<<
@@ -4487,7 +4487,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_10jaro_winkler_similarity(CYTHON_U
  */
   }
 
-  /* "cpp_string_metric.pyx":484
+  /* "cpp_string_metric.pyx":489
  *         return 0
  * 
  *     if processor is True or processor == default_process:             # <<<<<<<<<<<<<<
@@ -4501,17 +4501,17 @@ static PyObject *__pyx_pf_17cpp_string_metric_10jaro_winkler_similarity(CYTHON_U
     __pyx_t_2 = __pyx_t_5;
     goto __pyx_L7_bool_binop_done;
   }
-  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_default_process); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 484, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_default_process); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 489, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_7 = PyObject_RichCompare(__pyx_v_processor, __pyx_t_6, Py_EQ); __Pyx_XGOTREF(__pyx_t_7); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 484, __pyx_L1_error)
+  __pyx_t_7 = PyObject_RichCompare(__pyx_v_processor, __pyx_t_6, Py_EQ); __Pyx_XGOTREF(__pyx_t_7); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 489, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 484, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 489, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __pyx_t_2 = __pyx_t_5;
   __pyx_L7_bool_binop_done:;
   if (__pyx_t_2) {
 
-    /* "cpp_string_metric.pyx":485
+    /* "cpp_string_metric.pyx":490
  * 
  *     if processor is True or processor == default_process:
  *         return jaro_winkler_similarity_default_process(conv_sequence(s1), conv_sequence(s2), prefix_weight, c_score_cutoff)             # <<<<<<<<<<<<<<
@@ -4519,21 +4519,21 @@ static PyObject *__pyx_pf_17cpp_string_metric_10jaro_winkler_similarity(CYTHON_U
  *         s1 = processor(s1)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_8 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 485, __pyx_L1_error)
-    __pyx_t_9 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 485, __pyx_L1_error)
+    __pyx_t_8 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 490, __pyx_L1_error)
+    __pyx_t_9 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 490, __pyx_L1_error)
     try {
       __pyx_t_1 = jaro_winkler_similarity_default_process(__pyx_t_8, __pyx_t_9, __pyx_v_prefix_weight, __pyx_v_c_score_cutoff);
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 485, __pyx_L1_error)
+      __PYX_ERR(0, 490, __pyx_L1_error)
     }
-    __pyx_t_7 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 485, __pyx_L1_error)
+    __pyx_t_7 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 490, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __pyx_r = __pyx_t_7;
     __pyx_t_7 = 0;
     goto __pyx_L0;
 
-    /* "cpp_string_metric.pyx":484
+    /* "cpp_string_metric.pyx":489
  *         return 0
  * 
  *     if processor is True or processor == default_process:             # <<<<<<<<<<<<<<
@@ -4542,18 +4542,18 @@ static PyObject *__pyx_pf_17cpp_string_metric_10jaro_winkler_similarity(CYTHON_U
  */
   }
 
-  /* "cpp_string_metric.pyx":486
+  /* "cpp_string_metric.pyx":491
  *     if processor is True or processor == default_process:
  *         return jaro_winkler_similarity_default_process(conv_sequence(s1), conv_sequence(s2), prefix_weight, c_score_cutoff)
  *     elif callable(processor):             # <<<<<<<<<<<<<<
  *         s1 = processor(s1)
  *         s2 = processor(s2)
  */
-  __pyx_t_2 = __Pyx_PyCallable_Check(__pyx_v_processor); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 486, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyCallable_Check(__pyx_v_processor); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 491, __pyx_L1_error)
   __pyx_t_5 = (__pyx_t_2 != 0);
   if (__pyx_t_5) {
 
-    /* "cpp_string_metric.pyx":487
+    /* "cpp_string_metric.pyx":492
  *         return jaro_winkler_similarity_default_process(conv_sequence(s1), conv_sequence(s2), prefix_weight, c_score_cutoff)
  *     elif callable(processor):
  *         s1 = processor(s1)             # <<<<<<<<<<<<<<
@@ -4577,14 +4577,14 @@ static PyObject *__pyx_pf_17cpp_string_metric_10jaro_winkler_similarity(CYTHON_U
       PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_s1};
       __pyx_t_7 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_11, 1+__pyx_t_11);
       __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 487, __pyx_L1_error)
+      if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 492, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     }
     __Pyx_DECREF_SET(__pyx_v_s1, __pyx_t_7);
     __pyx_t_7 = 0;
 
-    /* "cpp_string_metric.pyx":488
+    /* "cpp_string_metric.pyx":493
  *     elif callable(processor):
  *         s1 = processor(s1)
  *         s2 = processor(s2)             # <<<<<<<<<<<<<<
@@ -4608,14 +4608,14 @@ static PyObject *__pyx_pf_17cpp_string_metric_10jaro_winkler_similarity(CYTHON_U
       PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_s2};
       __pyx_t_7 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_11, 1+__pyx_t_11);
       __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 488, __pyx_L1_error)
+      if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 493, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     }
     __Pyx_DECREF_SET(__pyx_v_s2, __pyx_t_7);
     __pyx_t_7 = 0;
 
-    /* "cpp_string_metric.pyx":486
+    /* "cpp_string_metric.pyx":491
  *     if processor is True or processor == default_process:
  *         return jaro_winkler_similarity_default_process(conv_sequence(s1), conv_sequence(s2), prefix_weight, c_score_cutoff)
  *     elif callable(processor):             # <<<<<<<<<<<<<<
@@ -4624,21 +4624,21 @@ static PyObject *__pyx_pf_17cpp_string_metric_10jaro_winkler_similarity(CYTHON_U
  */
   }
 
-  /* "cpp_string_metric.pyx":490
+  /* "cpp_string_metric.pyx":495
  *         s2 = processor(s2)
  * 
  *     return jaro_winkler_similarity_no_process(conv_sequence(s1), conv_sequence(s2), prefix_weight, c_score_cutoff)             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_9 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 490, __pyx_L1_error)
-  __pyx_t_8 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 490, __pyx_L1_error)
+  __pyx_t_9 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 495, __pyx_L1_error)
+  __pyx_t_8 = __pyx_f_17cpp_string_metric_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 495, __pyx_L1_error)
   try {
     __pyx_t_1 = jaro_winkler_similarity_no_process(__pyx_t_9, __pyx_t_8, __pyx_v_prefix_weight, __pyx_v_c_score_cutoff);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 490, __pyx_L1_error)
+    __PYX_ERR(0, 495, __pyx_L1_error)
   }
-  __pyx_t_7 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 490, __pyx_L1_error)
+  __pyx_t_7 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 495, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __pyx_r = __pyx_t_7;
   __pyx_t_7 = 0;

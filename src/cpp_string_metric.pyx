@@ -460,7 +460,8 @@ def jaro_winkler_similarity(s1, s2, *, double prefix_weight=0.1, processor=None,
     s2 : str
         Second string to compare.
     prefix_weight : float, optional
-        weight used for the common prefix of the two strings. Default is 0.1.
+        Weight used for the common prefix of the two strings.
+        Has to be between 0 and 0.25. Default is 0.1.
     processor: bool or callable, optional
         Optional callable that is used to preprocess the strings before
         comparing them. When processor is True ``utils.default_process``
@@ -475,6 +476,10 @@ def jaro_winkler_similarity(s1, s2, *, double prefix_weight=0.1, processor=None,
     similarity : float
         similarity between s1 and s2 as a float between 0 and 100
 
+    Raises
+    ------
+    ValueError
+        If prefix_weight is invalid
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
 
