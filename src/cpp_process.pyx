@@ -30,11 +30,9 @@ from libcpp.vector cimport vector
 from libcpp cimport algorithm
 from libcpp.utility cimport move
 
-from cpython.list cimport PyList_New
-from cpython.list cimport PyList_SET_ITEM
+from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.object cimport PyObject
-from cpython.ref cimport Py_INCREF
-from cpython.ref cimport Py_DECREF
+from cpython.ref cimport Py_INCREF, Py_DECREF
 
 from cpp_common cimport proc_string, is_valid_string, convert_string, hash_array, hash_sequence
 

@@ -6,6 +6,9 @@ from rapidfuzz.utils import default_process
 from cpp_common cimport proc_string, is_valid_string, convert_string, hash_array, hash_sequence
 from array import array
 from libcpp.utility cimport move
+from libcpp.vector cimport vector
+from cpython.list cimport PyList_New, PyList_SET_ITEM
+from cpython.ref cimport Py_INCREF
 
 cdef inline proc_string conv_sequence(seq) except *:
     if is_valid_string(seq):
@@ -14,6 +17,18 @@ cdef inline proc_string conv_sequence(seq) except *:
         return move(hash_array(seq))
     else:
         return move(hash_sequence(seq))
+
+cdef extern from "cpp_scorer.hpp" namespace "rapidfuzz" nogil:
+    cpdef enum class LevenshteinEditType:
+        None    = 0,
+        Replace = 1,
+        Insert  = 2,
+        Delete  = 3
+
+    ctypedef struct LevenshteinEditOp:
+        LevenshteinEditType type
+        size_t src_pos
+        size_t dest_pos
 
 cdef extern from "cpp_scorer.hpp":
     double normalized_levenshtein_no_process(       const proc_string&, const proc_string&, size_t, size_t, size_t, double) nogil except +
@@ -29,6 +44,9 @@ cdef extern from "cpp_scorer.hpp":
     object levenshtein_default_process(             const proc_string&, const proc_string&, size_t, size_t, size_t, size_t) nogil except +
     object hamming_no_process(                      const proc_string&, const proc_string&, size_t) nogil except +
     object hamming_default_process(                 const proc_string&, const proc_string&, size_t) nogil except +
+
+    vector[LevenshteinEditOp] levenshtein_editops_no_process(     const proc_string& s1, const proc_string& s2) nogil except +
+    vector[LevenshteinEditOp] levenshtein_editops_default_process(const proc_string& s1, const proc_string& s2) nogil except +
 
 def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
     """
@@ -211,6 +229,71 @@ def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
 
     return levenshtein_no_process(conv_sequence(s1), conv_sequence(s2), insertion, deletion, substitution, c_max)
 
+cdef str levenshtein_edit_type_to_str(LevenshteinEditType edit_type):
+    if edit_type == LevenshteinEditType.Insert:
+        return "insert"
+    elif edit_type == LevenshteinEditType.Delete:
+        return "delete"
+    # possibly requires no-op in the future as well
+    else:
+        return "replace"
+
+cdef list levenshtein_editops_to_list(vector[LevenshteinEditOp] ops):
+    cdef size_t op_count = ops.size()
+    cdef list result_list = PyList_New(<Py_ssize_t>op_count)
+    for i in range(op_count):
+        result_item = (levenshtein_edit_type_to_str(ops[i].type), ops[i].src_pos, ops[i].dest_pos)
+        Py_INCREF(result_item)
+        PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
+
+    return result_list
+
+def levenshtein_editops(s1, s2, *, processor=None):
+    """
+    Return list of 3-tuples describing how to turn s1 into s2.
+    Each tuple is of the form (tag, src_pos, dest_pos).
+
+    The tags are strings, with these meanings:
+    'replace':  s1[src_pos] should be replaced by s2[dest_pos]
+    'delete':   s1[src_pos] should be deleted.
+    'insert':   s2[dest_pos] should be inserted at s1[src_pos].
+
+    Parameters
+    ----------
+    s1 : str
+        First string to compare.
+    s2 : str
+        Second string to compare.
+    processor: bool or callable, optional
+        Optional callable that is used to preprocess the strings before
+        comparing them. When processor is True ``utils.default_process``
+        is used. Default is None, which deactivates this behaviour.
+
+    Returns
+    -------
+    editops : list[]
+        edit operations required to turn s1 into s2
+
+    Examples
+    --------
+    >>> from rapidfuzz.string_metric import levenshtein_editops
+    >>> for tag, src_pos, dest_pos in levenshtein_editops("qabxcd", "abycdf"):
+    ...    print(("%7s s1[%d] s2[%d]" % (tag, src_pos, dest_pos)))
+     delete s1[1] s2[0]
+    replace s1[4] s2[3]
+     insert s1[6] s2[6]
+    """
+    if processor is True or processor == default_process:
+        return levenshtein_editops_to_list(
+            levenshtein_editops_default_process(conv_sequence(s1), conv_sequence(s2))
+        )
+    elif callable(processor):
+        s1 = processor(s1)
+        s2 = processor(s2)
+
+    return levenshtein_editops_to_list(
+        levenshtein_editops_no_process(conv_sequence(s1), conv_sequence(s2))
+    )
 
 def normalized_levenshtein(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
     """

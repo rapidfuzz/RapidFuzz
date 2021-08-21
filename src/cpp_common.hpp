@@ -205,6 +205,7 @@ double RATIO##_impl_inner_##PROCESSOR(const proc_string& s1, const Sentence& s2,
     switch(s1.kind){                                                                               \
     LIST_OF_CASES(RATIO_FUNC, PROCESSOR)                                                           \
     }                                                                                              \
+    assert(false); /* silence any warnings about missing return value */                           \
 }
 
 /* generate <ratio_name>_impl_<processor> functions which are used internally
@@ -217,6 +218,7 @@ double RATIO##_impl_##PROCESSOR(const proc_string& s1, const proc_string& s2, Ar
     switch(s1.kind){                                                                         \
     LIST_OF_CASES(RATIO##_impl_inner_##PROCESSOR, PROCESSOR)                                 \
     }                                                                                        \
+    assert(false); /* silence any warnings about missing return value */                     \
 }
 
 #define RATIO_IMPL_DEF(RATIO, RATIO_FUNC)            \
@@ -235,6 +237,7 @@ size_t RATIO##_impl_inner_##PROCESSOR(const proc_string& s1, const Sentence& s2,
     switch(s1.kind){                                                                               \
     LIST_OF_CASES(RATIO_FUNC, PROCESSOR)                                                           \
     }                                                                                              \
+    assert(false); /* silence any warnings about missing return value */                           \
 }
 
 /* generate <ratio_name>_impl_<processor> functions which are used internally
@@ -247,6 +250,7 @@ size_t RATIO##_impl_##PROCESSOR(const proc_string& s1, const proc_string& s2, Ar
     switch(s1.kind){                                                                         \
     LIST_OF_CASES(RATIO##_impl_inner_##PROCESSOR, PROCESSOR)                                 \
     }                                                                                        \
+    assert(false); /* silence any warnings about missing return value */                     \
 }
 
 #define DISTANCE_IMPL_DEF(RATIO, RATIO_FUNC)            \

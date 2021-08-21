@@ -51,6 +51,14 @@ def test_simple_unicode_tests():
     assert string_metric.levenshtein(s1, s1, weights=(1,1,5)) == 0
     assert string_metric.levenshtein(s1, s1, weights=(3,7,5)) == 0
 
+def test_levenshtein_editops():
+    """
+    basic test for levenshtein_editops
+    """
+    assert string_metric.levenshtein_editops("qabxcd", "abycdf") == [
+        ("delete", 1, 0), ("replace", 4, 3), ("insert", 6, 6)
+    ]
+
 def test_help():
     """
     test that all help texts can be printed without throwing an exception,
@@ -58,8 +66,11 @@ def test_help():
     """
     help(string_metric.levenshtein)
     help(string_metric.normalized_levenshtein)
+    help(string_metric.levenshtein_editops)
     help(string_metric.hamming)
     help(string_metric.normalized_hamming)
+    help(string_metric.jaro_similarity)
+    help(string_metric.jaro_winkler_similarity)
 
 if __name__ == '__main__':
     unittest.main()

@@ -10,8 +10,8 @@ Submission context
 Got a question or problem?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-For quick questions there's no need to open an issue as you can reach us on
-`gitter.im <https://gitter.im/maxbachmann/rapidfuzz>`__.
+For questions you can reach us using
+`github discussions <https://github.com/maxbachmann/RapidFuzz/discussions>`__.
 
 Found a bug?
 ^^^^^^^^^^^^

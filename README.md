@@ -20,10 +20,6 @@
     <img src="https://img.shields.io/pypi/pyversions/rapidfuzz"
          alt="Python versions">
   </a><br/>
-  <a href="https://gitter.im/rapidfuzz/community">
-    <img src="https://badges.gitter.im/rapidfuzz/community.svg"
-         alt="Gitter chat">
-  </a>
   <a href="https://maxbachmann.github.io/RapidFuzz">
     <img src="https://img.shields.io/badge/-documentation-blue"
          alt="Documentation">

@@ -4,6 +4,7 @@
 from rapidfuzz.cpp_string_metric import (
     levenshtein,
     normalized_levenshtein,
+    levenshtein_editops,
     hamming,
     normalized_hamming,
     jaro_similarity,

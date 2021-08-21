@@ -60,3 +60,44 @@ double jaro_winkler_similarity_default_process(const proc_string& s1, const proc
 {
     return jaro_winkler_similarity_impl_default_process(s1, s2, prefix_weight, score_cutoff);
 }
+
+# define X_ENUM(KIND, TYPE, MSVC_TUPLE) \
+    case KIND: return GET_RATIO_FUNC MSVC_TUPLE  (s2, GET_PROCESSOR MSVC_TUPLE <TYPE>(s1));
+
+template<typename Sentence>
+std::vector<rapidfuzz::LevenshteinEditOp>
+levenshtein_editops_inner_no_process(const proc_string& s1, const Sentence& s2)
+{
+    switch(s1.kind){
+    LIST_OF_CASES(string_metric::levenshtein_editops, no_process)
+    }
+    assert(false); /* silence any warnings about missing return value */   
+}
+
+std::vector<rapidfuzz::LevenshteinEditOp>
+levenshtein_editops_no_process(const proc_string& s1, const proc_string& s2)
+{
+    switch(s1.kind){
+    LIST_OF_CASES(levenshtein_editops_inner_no_process, no_process)
+    }
+    assert(false); /* silence any warnings about missing return value */
+}
+
+template<typename Sentence>
+std::vector<rapidfuzz::LevenshteinEditOp>
+levenshtein_editops_inner_default_process(const proc_string& s1, const Sentence& s2)
+{
+    switch(s1.kind){
+    LIST_OF_CASES(string_metric::levenshtein_editops, default_process)
+    }          
+}
+
+std::vector<rapidfuzz::LevenshteinEditOp>
+levenshtein_editops_default_process(const proc_string& s1, const proc_string& s2)
+{
+    switch(s1.kind){
+    LIST_OF_CASES(levenshtein_editops_inner_default_process, default_process)
+    }          
+}
+
+# undef X_ENUM

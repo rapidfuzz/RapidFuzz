@@ -102,9 +102,18 @@ PROCESSORS = [
 
 @given(s1=st.text(), s2=st.text())
 @settings(max_examples=500, deadline=None)
+def test_levenshtein_editops(s1, s2):
+    """
+    test levenshtein_editops. Currently this only tests, so there are no exceptions.
+    """
+    string_metric.levenshtein_editops(s1, s2)
+
+
+@given(s1=st.text(), s2=st.text())
+@settings(max_examples=500, deadline=None)
 def test_partial_ratio(s1, s2):
     """
-    test partial_ratio. Currently this only tests, so there are no exceptions
+    test partial_ratio. Currently this only tests, so there are no exceptions.
     In the future this should validate the implementation. However the current implementation
     is not completely optimal in some edge cases
     """
