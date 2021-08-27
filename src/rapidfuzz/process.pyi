@@ -2,6 +2,7 @@ from typing import Any, Mapping, Tuple, Callable, Hashable, Sequence, Iterable, 
 from rapidfuzz.fuzz import WRatio
 
 _StringType = Sequence[Hashable]
+_AnyStringType = TypeVar("_AnyStringType", bound=_StringType)
 S1 = TypeVar("S1")
 S2 = TypeVar("S2")
 ResultType = TypeVar("ResultType", int, float)
@@ -9,22 +10,22 @@ ResultType = TypeVar("ResultType", int, float)
 @overload
 def extractOne(
     query: _StringType,
-    choices: Iterable[_StringType], *,
+    choices: Iterable[_AnyStringType], *,
     scorer: Callable[..., ResultType] = WRatio,
     processor: Optional[bool] = None,
     score_cutoff: Optional[ResultType] = None,
     **kwargs: Any
-) -> Tuple[_StringType, ResultType, int]: ...
+) -> Tuple[_AnyStringType, ResultType, int]: ...
 
 @overload
 def extractOne(
     query: _StringType,
-    choices: Mapping[Any, _StringType], *,
+    choices: Mapping[Any, _AnyStringType], *,
     scorer: Callable[..., ResultType] = WRatio,
     processor: Optional[bool] = None,
     score_cutoff: Optional[ResultType] = None,
     **kwargs: Any
-) -> Tuple[_StringType, ResultType, Any]: ...
+) -> Tuple[_AnyStringType, ResultType, Any]: ...
 
 @overload
 def extractOne(
@@ -49,25 +50,25 @@ def extractOne(
 @overload
 def extract(
     query: _StringType,
-    choices: Iterable[_StringType], *,
+    choices: Iterable[_AnyStringType], *,
     scorer: Callable[..., ResultType] = WRatio,
     processor: Optional[bool] = None,
     limit: Optional[int] = ...,
     score_cutoff: Optional[ResultType] = None,
     **kwargs: Any
-) -> List[Tuple[_StringType, ResultType, int]]: ...
+) -> List[Tuple[_AnyStringType, ResultType, int]]: ...
 
 
 @overload
 def extract(
     query: _StringType,
-    choices: Mapping[Any, _StringType], *,
+    choices: Mapping[Any, _AnyStringType], *,
     scorer: Callable[..., ResultType] = WRatio,
     processor: Optional[bool] = None,
     limit: Optional[int] = ...,
     score_cutoff: Optional[ResultType] = None,
     **kwargs: Any
-) -> List[Tuple[_StringType, ResultType, Any]]: ...
+) -> List[Tuple[_AnyStringType, ResultType, Any]]: ...
 
 @overload
 def extract(
@@ -94,22 +95,22 @@ def extract(
 @overload
 def extract_iter(
     query: _StringType,
-    choices: Iterable[_StringType], *,
+    choices: Iterable[_AnyStringType], *,
     scorer: Callable[..., ResultType] = WRatio,
     processor: Optional[bool] = None,
     score_cutoff: Optional[ResultType] = None,
     **kwargs: Any
-) -> Generator[Tuple[_StringType, ResultType, int], None, None]: ...
+) -> Generator[Tuple[_AnyStringType, ResultType, int], None, None]: ...
 
 @overload
 def extract_iter(
     query: _StringType,
-    choices: Mapping[Any, _StringType], *,
+    choices: Mapping[Any, _AnyStringType], *,
     scorer: Callable[..., ResultType] = WRatio,
     processor: Optional[bool] = None,
     score_cutoff: Optional[ResultType] = None,
     **kwargs: Any
-) -> Generator[Tuple[_StringType, ResultType, Any], None, None]: ...
+) -> Generator[Tuple[_AnyStringType, ResultType, Any], None, None]: ...
 
 @overload
 def extract_iter(
@@ -130,4 +131,3 @@ def extract_iter(
     score_cutoff: Optional[ResultType] = None,
     **kwargs: Any
 ) -> Generator[Tuple[S2, ResultType, Any], None, None]: ...
-
