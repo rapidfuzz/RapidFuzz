@@ -1,4 +1,4 @@
-from typing import Any, Mapping, Tuple, Callable, Hashable, Sequence, Iterable, Optional, Union, overload, TypeVar, List, Generator
+from typing import Any, Collection, Mapping, Tuple, Callable, Hashable, Sequence, Iterable, Optional, Union, overload, TypeVar, List, Generator
 from rapidfuzz.fuzz import WRatio
 
 _StringType = Sequence[Hashable]
@@ -50,7 +50,7 @@ def extractOne(
 @overload
 def extract(
     query: _StringType,
-    choices: Iterable[_AnyStringType], *,
+    choices: Collection[_AnyStringType], *,
     scorer: Callable[..., ResultType] = WRatio,
     processor: Optional[bool] = None,
     limit: Optional[int] = ...,
@@ -73,7 +73,7 @@ def extract(
 @overload
 def extract(
     query: S1,
-    choices: Iterable[S2], *,
+    choices: Collection[S2], *,
     scorer: Callable[..., ResultType] = WRatio,
     processor: Callable[[Union[S1, S2]], _StringType] = None,
     limit: Optional[int] = ...,
