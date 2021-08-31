@@ -1,6 +1,5 @@
 # distutils: language=c++
-# cython: language_level=3
-# cython: binding=True
+# cython: language_level=3, binding=True, linetrace=True
 
 cdef extern from "cpp_common.hpp":
     void validate_string(object py_str, const char* err) except +

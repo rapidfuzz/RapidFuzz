@@ -9,6 +9,9 @@ dist/
 *.o
 *.out
 test.py
+src/*.html
+.coverage
+coverage.xml
 
 # Sphinx documentation
 site/

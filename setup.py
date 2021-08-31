@@ -1,17 +1,25 @@
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 import sys
+import os
+
+# use with export RAPIDFUZZ_TRACE=1
+RAPIDFUZZ_TRACE = os.environ.get("RAPIDFUZZ_TRACE", False)
 
 class BuildExt(build_ext):
     """A custom build extension for adding compiler-specific options."""
     c_opts = {
-        'msvc': ['/EHsc', '/O2', '/std:c++11', '/W4', '/DNDEBUG'],
+        'msvc': ['/EHsc', '/O2', '/W4', '/DNDEBUG'],
         'unix': ['-O3', '-std=c++11', '-Wextra', '-Wall', '-Wconversion', '-g0', '-DNDEBUG'],
     }
     l_opts = {
         'msvc': [],
         'unix': [],
     }
+
+    if RAPIDFUZZ_TRACE:
+        c_opts['msvc'].append("/DCYTHON_TRACE_NOGIL=1")
+        c_opts['unix'].append("-DCYTHON_TRACE_NOGIL=1")
 
     if sys.platform == 'darwin':
         darwin_opts = ['-stdlib=libc++', '-mmacosx-version-min=10.9']

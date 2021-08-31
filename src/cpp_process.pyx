@@ -1,6 +1,5 @@
 # distutils: language=c++
-# cython: language_level=3
-# cython: binding=True
+# cython: language_level=3, binding=True, linetrace=True
 
 from rapidfuzz.utils import default_process
 
@@ -385,20 +384,23 @@ cdef inline extractOne_distance_list(CachedDistanceContext context, choices, pro
     return (result_choice, result_distance, result_index) if result_choice is not None else None
 
 
-cdef inline py_extractOne_dict(query, choices, scorer, processor, score_cutoff, kwargs):
+cdef inline py_extractOne_dict(query, choices, scorer, processor, double score_cutoff, dict kwargs):
     result_score = -1
     result_choice = None
     result_key = None
+
+    kwargs["processor"] = None
+    kwargs["score_cutoff"] = score_cutoff
 
     if processor is not None:
         for choice_key, choice in choices.items():
             if choice is None:
                 continue
 
-            score = scorer(query, processor(choice),
-                processor=None, score_cutoff=score_cutoff, **kwargs)
+            score = scorer(query, processor(choice), **kwargs)
 
             if score >= score_cutoff and score > result_score:
+                kwargs["score_cutoff"] = score_cutoff
                 score_cutoff = score
                 result_score = score
                 result_choice = choice
@@ -411,10 +413,10 @@ cdef inline py_extractOne_dict(query, choices, scorer, processor, score_cutoff, 
             if choice is None:
                 continue
 
-            score = scorer(query, choice,
-                processor=None, score_cutoff=score_cutoff, **kwargs)
+            score = scorer(query, choice, **kwargs)
 
             if score >= score_cutoff and score > result_score:
+                kwargs["score_cutoff"] = score_cutoff
                 score_cutoff = score
                 result_score = score
                 result_choice = choice
@@ -426,21 +428,24 @@ cdef inline py_extractOne_dict(query, choices, scorer, processor, score_cutoff, 
     return (result_choice, result_score, result_key) if result_choice is not None else None
 
 
-cdef inline py_extractOne_list(query, choices, scorer, processor, double score_cutoff, kwargs):
+cdef inline py_extractOne_list(query, choices, scorer, processor, double score_cutoff, dict kwargs):
     cdef size_t result_index = 0
     cdef size_t i
     result_score = -1
     result_choice = None
+
+    kwargs["processor"] = None
+    kwargs["score_cutoff"] = score_cutoff
 
     if processor is not None:
         for i, choice in enumerate(choices):
             if choice is None:
                 continue
 
-            score = scorer(query, processor(choice),
-                processor=None, score_cutoff=score_cutoff, **kwargs)
+            score = scorer(query, processor(choice), **kwargs)
 
             if score >= score_cutoff and score > result_score:
+                kwargs["score_cutoff"] = score_cutoff
                 score_cutoff = score
                 result_score = score
                 result_choice = choice
@@ -453,10 +458,10 @@ cdef inline py_extractOne_list(query, choices, scorer, processor, double score_c
             if choice is None:
                 continue
 
-            score = scorer(query, choice,
-                processor=None, score_cutoff=score_cutoff, **kwargs)
+            score = scorer(query, choice, **kwargs)
 
             if score >= score_cutoff and score > result_score:
+                kwargs["score_cutoff"] = score_cutoff
                 score_cutoff = score
                 result_score = score
                 result_choice = choice
@@ -903,19 +908,22 @@ cdef inline extract_distance_list(CachedDistanceContext context, choices, proces
 
     return result_list
 
-cdef inline py_extract_dict(query, choices, scorer, processor, size_t limit, double score_cutoff, kwargs):
+cdef inline py_extract_dict(query, choices, scorer, processor, size_t limit, double score_cutoff, dict kwargs):
     cdef object score = None
     # todo working directly with a list is relatively slow
     # also it is not very memory efficient to allocate space for all elements even when only
     # a part is used. This should be optimised in the future
     cdef list result_list = []
 
+    kwargs["processor"] = None
+    kwargs["score_cutoff"] = score_cutoff
+
     if processor is not None:
         for choice_key, choice in choices.items():
             if choice is None:
                 continue
 
-            score = scorer(query, processor(choice), score_cutoff, **kwargs)
+            score = scorer(query, processor(choice), **kwargs)
 
             if score >= score_cutoff:
                 result_list.append((choice, score, choice_key))
@@ -924,7 +932,7 @@ cdef inline py_extract_dict(query, choices, scorer, processor, size_t limit, dou
             if choice is None:
                 continue
 
-            score = scorer(query, choice, score_cutoff, **kwargs)
+            score = scorer(query, choice, **kwargs)
 
             if score >= score_cutoff:
                 result_list.append((choice, score, choice_key))
@@ -932,7 +940,7 @@ cdef inline py_extract_dict(query, choices, scorer, processor, size_t limit, dou
     return heapq.nlargest(limit, result_list, key=lambda i: i[1])
 
 
-cdef inline py_extract_list(query, choices, scorer, processor, size_t limit, double score_cutoff, kwargs):
+cdef inline py_extract_list(query, choices, scorer, processor, size_t limit, double score_cutoff, dict kwargs):
     cdef object score = None
     # todo working directly with a list is relatively slow
     # also it is not very memory efficient to allocate space for all elements even when only
@@ -940,12 +948,15 @@ cdef inline py_extract_list(query, choices, scorer, processor, size_t limit, dou
     cdef list result_list = []
     cdef size_t i
 
+    kwargs["processor"] = None
+    kwargs["score_cutoff"] = score_cutoff
+
     if processor is not None:
         for i, choice in enumerate(choices):
             if choice is None:
                 continue
 
-            score = scorer(query, processor(choice), score_cutoff, **kwargs)
+            score = scorer(query, processor(choice), **kwargs)
 
             if score >= score_cutoff:
                 result_list.append((choice, score, i))
@@ -954,7 +965,7 @@ cdef inline py_extract_list(query, choices, scorer, processor, size_t limit, dou
             if choice is None:
                 continue
 
-            score = scorer(query, choice, i, **kwargs)
+            score = scorer(query, choice, **kwargs)
 
             if score >= score_cutoff:
                 result_list.append((choice, score, i))
@@ -1284,13 +1295,15 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
           - scorer = python function
         """
 
+        kwargs["processor"] = None
+        kwargs["score_cutoff"] = c_score_cutoff
+
         if processor is not None:
             for choice_key, choice in choices.items():
                 if choice is None:
                     continue
 
-                score = scorer(query, processor(choice),
-                    processor=None, score_cutoff=c_score_cutoff, **kwargs)
+                score = scorer(query, processor(choice), **kwargs)
 
                 if score >= c_score_cutoff:
                     yield (choice, score, choice_key)
@@ -1299,8 +1312,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
                 if choice is None:
                     continue
 
-                score = scorer(query, choice,
-                    processor=None, score_cutoff=c_score_cutoff, **kwargs)
+                score = scorer(query, choice, **kwargs)
 
                 if score >= c_score_cutoff:
                     yield (choice, score, choice_key)
@@ -1313,13 +1325,15 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         """
         cdef size_t i
 
+        kwargs["processor"] = None
+        kwargs["score_cutoff"] = c_score_cutoff
+
         if processor is not None:
             for i, choice in enumerate(choices):
                 if choice is None:
                     continue
 
-                score = scorer(query, processor(choice),
-                    processor=None, score_cutoff=c_score_cutoff, **kwargs)
+                score = scorer(query, processor(choice), **kwargs)
 
                 if score >= c_score_cutoff:
                     yield(choice, score, i)
@@ -1328,8 +1342,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
                 if choice is None:
                     continue
 
-                score = scorer(query, choice,
-                    processor=None, score_cutoff=c_score_cutoff, **kwargs)
+                score = scorer(query, choice, **kwargs)
 
                 if score >= c_score_cutoff:
                     yield(choice, score, i)
