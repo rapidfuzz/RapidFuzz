@@ -45,6 +45,6 @@ repository which might be useful when you want to work on it:
 
 .. code-block:: sh
 
-   git clone https://github.com/maxbachmann/rapidfuzz.git
+   git clone --recursive https://github.com/maxbachmann/rapidfuzz.git
    cd rapidfuzz
    pip install .
