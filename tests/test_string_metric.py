@@ -55,6 +55,8 @@ def test_levenshtein_editops():
     """
     basic test for levenshtein_editops
     """
+    assert string_metric.levenshtein_editops("0", "") == [("delete", 1, 0)]
+    assert string_metric.levenshtein_editops("", "0") == [("insert", 0, 1)]
     assert string_metric.levenshtein_editops("qabxcd", "abycdf") == [
         ("delete", 1, 0), ("replace", 4, 3), ("insert", 6, 6)
     ]
