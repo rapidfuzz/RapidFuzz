@@ -38,9 +38,7 @@ cdef extern from "cpp_scorer.hpp":
 
 def ratio(s1, s2, *, processor=None, score_cutoff=None):
     """
-    calculates a simple ratio between two strings. This is a simple wrapper
-    for string_metric.normalized_levenshtein using the weights:
-    - weights = (1, 1, 2)
+    Calculates the normalized InDel distance.
 
     Parameters
     ----------
@@ -61,6 +59,10 @@ def ratio(s1, s2, *, processor=None, score_cutoff=None):
     -------
     similarity : float
         similarity between s1 and s2 as a float between 0 and 100
+
+    See Also
+    --------
+    rapidfuzz.string_metric.normalized_levenshtein : Normalized levenshtein distance
 
     Notes
     -----
@@ -87,7 +89,8 @@ def ratio(s1, s2, *, processor=None, score_cutoff=None):
 
 def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
     """
-    calculates the fuzz.ratio of the optimal string alignment
+    Searches for the optimal alignment of the shorter string in the
+    longer string and returns the fuzz.ratio for this alignment.
 
     Parameters
     ----------
@@ -111,7 +114,39 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
 
     Notes
     -----
-    .. image:: img/partial_ratio.svg
+    Depending on the length of the needle (shorter string) different
+    implementations are used to improve the performance.
+
+    short needle (length ≤ 64):
+        When using a short needle length the fuzz.ratio is calculated for all
+        alignments that could result in an optimal alignment. It is
+        guaranteed to find the optimal alignment. For short needles this is very
+        fast, since for them fuzz.ratio runs in ``O(N)`` time. This results in a worst
+        case performance of ``O(NM)``.
+    
+    .. image:: img/partial_ratio_short_needle.svg
+
+    long needle (length > 64):
+        For long needles a similar implementation to FuzzyWuzzy is used.
+        This implementation only considers alignments which start at one
+        of the longest common substrings. This results in a worst case performance
+        of ``O(N[N/64]M)``. However usually most of the alignments can be skipped.
+        The following Python code shows the concept:
+
+        .. code-block:: python
+
+            blocks = SequenceMatcher(None, needle, longer, False).get_matching_blocks()
+            score = 0
+            for block in blocks:
+                long_start = block[1] - block[0] if (block[1] - block[0]) > 0 else 0
+                long_end = long_start + len(shorter)
+                long_substr = longer[long_start:long_end]
+                score = max(score, fuzz.ratio(needle, long_substr))
+
+        This is a lot faster than checking all possible alignments. However it
+        only finds one of the best alignments and not necessarily the optimal one.
+
+    .. image:: img/partial_ratio_long_needle.svg
 
     Examples
     --------
@@ -134,7 +169,7 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
 
 def token_sort_ratio(s1, s2, *, processor=True, score_cutoff=None):
     """
-    sorts the words in the strings and calculates the fuzz.ratio between them
+    Sorts the words in the strings and calculates the fuzz.ratio between them
 
     Parameters
     ----------

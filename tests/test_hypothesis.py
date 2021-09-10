@@ -64,6 +64,21 @@ def normalize_distance(dist, s1, s2, weights=(1, 1, 1)):
 
     return 100 - 100 * dist / max_dist if max_dist else 100
 
+def partial_ratio_short_needle(s1, s2):
+    if not s1 and not s2:
+        return 100
+
+    if not s1 or not s2:
+        return 0
+
+    if len(s1) > len(s2):
+        return partial_ratio_short_needle(s2, s1)
+    parts = [s2[max(0, i) : min(len(s2), i+len(s1))] for i in range(-len(s1), len(s2))]
+    res = 0
+    for part in parts:
+        res = max(res, fuzz.ratio(s1, part))
+    return res
+
 def extractOne_scorer(s1, s2, scorer, processor=None, **kwargs):
     return process.extractOne(s1, [s2], processor=processor, scorer=scorer, **kwargs)[1]
 
@@ -108,17 +123,21 @@ def test_levenshtein_editops(s1, s2):
     """
     string_metric.levenshtein_editops(s1, s2)
 
-
-@given(s1=st.text(), s2=st.text())
+@given(s1=st.text(max_size=64), s2=st.text())
 @settings(max_examples=500, deadline=None)
-def test_partial_ratio(s1, s2):
+def test_partial_ratio_short_needle(s1, s2):
     """
-    test partial_ratio. Currently this only tests, so there are no exceptions.
-    In the future this should validate the implementation. However the current implementation
-    is not completely optimal in some edge cases
+    test partial_ratio for short needles (needle <= 64)
+    """
+    assert isclose(fuzz.partial_ratio(s1, s2), partial_ratio_short_needle(s1, s2))
+
+@given(s1=st.text(min_size=64), s2=st.text(min_size=64))
+@settings(max_examples=500, deadline=None)
+def test_partial_ratio_long_needle(s1, s2):
+    """
+    test partial_ratio. Currently for long needles this only tests, so there are no exceptionss
     """
     fuzz.partial_ratio(s1, s2)
-
 
 @given(s1=st.text(), s2=st.text())
 @settings(max_examples=500, deadline=None)
@@ -137,7 +156,7 @@ def test_partial_token_ratio(s1, s2):
     assert fuzz.partial_token_ratio(s1, s2) == max(fuzz.partial_token_sort_ratio(s1, s2), fuzz.partial_token_set_ratio(s1, s2))
 
 
-@given(s1=st.text(min_size=0, max_size=64), s2=st.text(min_size=0, max_size=64))
+@given(s1=st.text(max_size=64), s2=st.text(max_size=64))
 @settings(max_examples=500, deadline=None)
 def test_levenshtein_word(s1, s2):
     """

@@ -40,38 +40,11 @@
 ---
 
 ## Description
-RapidFuzz is a fast string matching library for Python and C++, which is using the string similarity calculations from [FuzzyWuzzy](https://github.com/seatgeek/fuzzywuzzy). However there are two aspects that set RapidFuzz apart from FuzzyWuzzy:
+RapidFuzz is a fast string matching library for Python and C++, which is using the string similarity calculations from [FuzzyWuzzy](https://github.com/seatgeek/fuzzywuzzy). However there are a couple of aspects that set RapidFuzz apart from FuzzyWuzzy:
 1) It is MIT licensed so it can be used whichever License you might want to choose for your project, while you're forced to adopt the GPL license when using FuzzyWuzzy
-2) It is mostly written in C++ and on top of this comes with a lot of Algorithmic improvements to make string matching even faster, while still providing the same results. More details on these performance improvements in form of benchmarks can be found [here](#Benchmark)
-
-> ⚠️ **This library fixes `partial_ratio` from FuzzyWuzzy, so the results are different in some cases.**
-> 
-> FuzzyWuzzy relies on an incorrect implementation of `get_matching_blocks()` in python-Levenshtein (see [this issue](https://github.com/seatgeek/fuzzywuzzy/issues/79)). For RapidFuzz I decided to use:
-> 
-> - The implementation of `get_matching_blocks()` from `difflib` for the optimal alignment
-> - The Levenshtein distance (same as in `python-Levenshtein`) for the normalized edit distance
-> 
-> To get the same results from FuzzyWuzzy (albeit at a large performance penalty), you can use
-> ```python
-> import Levenshtein
-> from difflib import SequenceMatcher
-> 
-> class StringMatcher:
->     def __init__(self, isjunk=None, seq1='', seq2=''):
->         self._str1, self._str2 = seq1, seq2
-> 
->     def get_matching_blocks(self):
->         return SequenceMatcher(None, self._str1, self._str2, False).get_matching_blocks()
-> 
->     def ratio(self):
->         return Levenshtein.ratio(self._str1, self._str2)
-> 
-> from fuzzywuzzy import fuzz
-> fuzz.SequenceMatcher = StringMatcher
-> ```
-> 
-> This is a common question, for more details see my comments [here](https://github.com/seatgeek/fuzzywuzzy/issues/313#issuecomment-830795837), [here](https://github.com/maxbachmann/RapidFuzz/issues/112#issuecomment-877825963), and [here](https://github.com/maxbachmann/RapidFuzz/issues/30#issuecomment-898941299).
-
+2) It provides many string_metrics like hamming or jaro_winkler, which are not included in FuzzyWuzzy
+3) It is mostly written in C++ and on top of this comes with a lot of Algorithmic improvements to make string matching even faster, while still providing the same results. For detailed benchmarks check the [documentation](https://maxbachmann.github.io/RapidFuzz/fuzz.html)
+4) Fixes multiple bugs in the `partial_ratio` implementation
 
 ## Requirements
 

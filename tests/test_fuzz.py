@@ -83,7 +83,7 @@ class RatioTest(unittest.TestCase):
         self.assertEqual(fuzz.partial_ratio("physics 2 vid", "study physics physics 2 video"), 100)
 
     def testIssue90(self):
-        self.assertAlmostEqual(fuzz.partial_ratio("ax b", "a b a c b"), 75.0, places=4)
+        self.assertAlmostEqual(fuzz.partial_ratio("ax b", "a b a c b"), 85.71428, places=4)
 
 def test_empty_string():
     """
