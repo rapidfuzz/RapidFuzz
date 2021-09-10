@@ -2,6 +2,7 @@ from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 import sys
 import os
+import numpy as np
 
 # use with export RAPIDFUZZ_TRACE=1
 RAPIDFUZZ_TRACE = os.environ.get("RAPIDFUZZ_TRACE", False)
@@ -46,7 +47,7 @@ ext_modules = [
             'src/cpp_process.cpp',
             'src/rapidfuzz-cpp/rapidfuzz/details/unicode.cpp'
         ],
-        include_dirs=["src/rapidfuzz-cpp/"],
+        include_dirs=["src/rapidfuzz-cpp/", np.get_include()],
         language='c++',
     ),
     Extension(

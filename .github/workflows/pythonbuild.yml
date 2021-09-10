@@ -101,7 +101,8 @@ jobs:
       fail-fast: false
       matrix:
         python_tag: [ "pp36-*", "pp37-*"]
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # numpy ships no wheels for pypy on mac os
+        os: [ubuntu-latest, windows-latest]
     env:
       CIBW_BUILD: ${{matrix.python_tag}}
       # activate tests when the fix for

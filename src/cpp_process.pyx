@@ -28,16 +28,21 @@ from rapidfuzz.fuzz import (
 from libcpp.vector cimport vector
 from libcpp cimport algorithm
 from libcpp.utility cimport move
+from libc.stdint cimport uint8_t, int32_t
+from libc.math cimport floor
 
 from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.object cimport PyObject
 from cpython.ref cimport Py_INCREF, Py_DECREF
 
-from cpp_common cimport proc_string, is_valid_string, convert_string, hash_array, hash_sequence
+from cpp_common cimport proc_string, is_valid_string, convert_string, hash_array, hash_sequence, default_process_func
 
 import heapq
 from array import array
 
+import numpy as np
+cimport numpy as np
+cimport cython
 
 cdef inline proc_string conv_sequence(seq) except *:
     if is_valid_string(seq):
@@ -50,15 +55,15 @@ cdef inline proc_string conv_sequence(seq) except *:
 cdef extern from "cpp_process.hpp":
     cdef cppclass CachedScorerContext:
         CachedScorerContext()
-        double ratio(const proc_string&, double) except +
+        double ratio(const proc_string&, double) nogil except +
 
     cdef cppclass CachedDistanceContext:
         CachedDistanceContext()
-        size_t ratio(const proc_string&, size_t) except +
+        size_t ratio(const proc_string&, size_t) nogil except +
 
     # normalized distances
     # fuzz
-    CachedScorerContext cached_ratio_init(                   const proc_string&, int) except +
+    CachedScorerContext cached_ratio_init(                   const proc_string&, int) nogil except +
     CachedScorerContext cached_partial_ratio_init(           const proc_string&, int) except +
     CachedScorerContext cached_token_sort_ratio_init(        const proc_string&, int) except +
     CachedScorerContext cached_token_set_ratio_init(         const proc_string&, int) except +
@@ -226,7 +231,7 @@ cdef inline extractOne_dict(CachedScorerContext context, choices, processor, dou
         for choice_key, choice in choices.items():
             if choice is None:
                 continue
-            
+
             score = context.ratio(conv_sequence(choice), score_cutoff)
 
             if score >= score_cutoff and score > result_score:
@@ -400,8 +405,8 @@ cdef inline py_extractOne_dict(query, choices, scorer, processor, double score_c
             score = scorer(query, processor(choice), **kwargs)
 
             if score >= score_cutoff and score > result_score:
-                kwargs["score_cutoff"] = score_cutoff
                 score_cutoff = score
+                kwargs["score_cutoff"] = score
                 result_score = score
                 result_choice = choice
                 result_key = choice_key
@@ -416,8 +421,8 @@ cdef inline py_extractOne_dict(query, choices, scorer, processor, double score_c
             score = scorer(query, choice, **kwargs)
 
             if score >= score_cutoff and score > result_score:
-                kwargs["score_cutoff"] = score_cutoff
                 score_cutoff = score
+                kwargs["score_cutoff"] = score
                 result_score = score
                 result_choice = choice
                 result_key = choice_key
@@ -445,8 +450,8 @@ cdef inline py_extractOne_list(query, choices, scorer, processor, double score_c
             score = scorer(query, processor(choice), **kwargs)
 
             if score >= score_cutoff and score > result_score:
-                kwargs["score_cutoff"] = score_cutoff
                 score_cutoff = score
+                kwargs["score_cutoff"] = score
                 result_score = score
                 result_choice = choice
                 result_index = i
@@ -461,8 +466,8 @@ cdef inline py_extractOne_list(query, choices, scorer, processor, double score_c
             score = scorer(query, choice, **kwargs)
 
             if score >= score_cutoff and score > result_score:
-                kwargs["score_cutoff"] = score_cutoff
                 score_cutoff = score
+                kwargs["score_cutoff"] = score
                 result_score = score
                 result_choice = choice
                 result_index = i
@@ -480,9 +485,9 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
 
     Parameters
     ----------
-    query : str
+    query : Sequence[Hashable]
         string we want to find
-    choices : Iterable
+    choices : Iterable[Sequence[Hashable]] | Mapping[Sequence[Hashable]]
         list of all strings the query should be compared with or dict with a mapping
         {<result>: <string to compare>}
     scorer : Callable, optional
@@ -506,7 +511,7 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
 
     Returns
     -------
-    Tuple[str, Any, Any]
+    Tuple[Sequence[Hashable], Any, Any]
         Returns the best match in form of a Tuple with 3 elements. The values stored in the
         tuple depend on the types of the input arguments.
 
@@ -634,7 +639,7 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
             return extractOne_dict(move(ScorerContext), choices, processor, c_score_cutoff)
         else:
             return extractOne_list(move(ScorerContext), choices, processor, c_score_cutoff)
-    
+
     if IsIntegratedDistance(scorer):
         # distance implemented in C++
         query_context = conv_sequence(query)
@@ -804,13 +809,13 @@ cdef inline extract_list(CachedScorerContext context, choices, processor, size_t
             for i, choice in enumerate(choices):
                 if choice is None:
                     continue
-    
+
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
-    
+
                 score = context.ratio(conv_sequence(proc_choice), score_cutoff)
-    
+
                 if score >= score_cutoff:
                     Py_INCREF(choice)
                     results.push_back(ListMatchScorerElem(score, i, <PyObject*>choice))
@@ -818,23 +823,23 @@ cdef inline extract_list(CachedScorerContext context, choices, processor, size_t
             for i, choice in enumerate(choices):
                 if choice is None:
                     continue
-    
+
                 score = context.ratio(conv_sequence(choice), score_cutoff)
-    
+
                 if score >= score_cutoff:
                     Py_INCREF(choice)
                     results.push_back(ListMatchScorerElem(score, i, <PyObject*>choice))
-    
+
         # due to score_cutoff not always completely filled
         if limit > results.size():
             limit = results.size()
-    
+
         if limit >= results.size():
             algorithm.sort(results.begin(), results.end(), ExtractScorerComp())
         else:
             algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractScorerComp())
             results.resize(limit)
-    
+
         # copy elements into Python List
         result_list = PyList_New(<Py_ssize_t>limit)
         for i in range(limit):
@@ -863,13 +868,13 @@ cdef inline extract_distance_list(CachedDistanceContext context, choices, proces
             for i, choice in enumerate(choices):
                 if choice is None:
                     continue
-    
+
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
-    
+
                 distance = context.ratio(conv_sequence(proc_choice), max_)
-    
+
                 if distance <= max_:
                     Py_INCREF(choice)
                     results.push_back(ListMatchDistanceElem(distance, i, <PyObject*>choice))
@@ -877,23 +882,23 @@ cdef inline extract_distance_list(CachedDistanceContext context, choices, proces
             for i, choice in enumerate(choices):
                 if choice is None:
                     continue
-    
+
                 distance = context.ratio(conv_sequence(choice), max_)
-    
+
                 if distance <= max_:
                     Py_INCREF(choice)
                     results.push_back(ListMatchDistanceElem(distance, i, <PyObject*>choice))
-    
+
         # due to max_ not always completely filled
         if limit > results.size():
             limit = results.size()
-    
+
         if limit >= results.size():
             algorithm.sort(results.begin(), results.end(), ExtractDistanceComp())
         else:
             algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractDistanceComp())
             results.resize(limit)
-    
+
         # copy elements into Python List
         result_list = PyList_New(<Py_ssize_t>limit)
         for i in range(limit):
@@ -980,9 +985,9 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
 
     Parameters
     ----------
-    query : str
+    query : Sequence[Hashable]
         string we want to find
-    choices : Iterable
+    choices : Collection[Sequence[Hashable]] | Mapping[Sequence[Hashable]]
         list of all strings the query should be compared with or dict with a mapping
         {<result>: <string to compare>}
     scorer : Callable, optional
@@ -1008,7 +1013,7 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
 
     Returns
     -------
-    List[Tuple[str, Any, Any]]
+    List[Tuple[Sequence[Hashable], Any, Any]]
         The return type is always a List of Tuples with 3 elements. However the values stored in the
         tuple depend on the types of the input arguments.
 
@@ -1107,9 +1112,9 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
 
     Parameters
     ----------
-    query : str
+    query : Sequence[Hashable]
         string we want to find
-    choices : Iterable
+    choices : Iterable[Sequence[Hashable]] | Mapping[Sequence[Hashable]]
         list of all strings the query should be compared with or dict with a mapping
         {<result>: <string to compare>}
     scorer : Callable, optional
@@ -1133,7 +1138,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
 
     Yields
     -------
-    Tuple[str, Any, Any]
+    Tuple[Sequence[Hashable], Any, Any]
         Yields similarity between the query and each choice in form of a Tuple with 3 elements.
         The values stored in the tuple depend on the types of the input arguments.
 
@@ -1408,3 +1413,325 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         yield from py_extract_iter_dict()
     else:
         yield from py_extract_iter_list()
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef inline cdist_two_lists_similarity(
+    const vector[proc_string]& queries,
+    const vector[proc_string]& choices,
+    scorer, score_cutoff, dict kwargs
+):
+    cdef size_t queries_len = queries.size()
+    cdef size_t choices_len = choices.size()
+    cdef size_t i, j
+    cdef double c_score_cutoff = 0
+    cdef np.ndarray[np.uint8_t, ndim=2] matrix = np.empty((queries_len, choices_len), dtype=np.uint8)
+
+    if score_cutoff is not None:
+        c_score_cutoff = score_cutoff
+    if c_score_cutoff < 0 or c_score_cutoff > 100:
+        raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
+
+    c_score_cutoff = floor(c_score_cutoff)
+
+    for i in range(queries_len):
+        ScorerContext = CachedScorerInit(scorer, queries[i], 0, kwargs)
+        for j in range(choices_len):
+            matrix[i, j] = <uint8_t>floor(ScorerContext.ratio(choices[j], c_score_cutoff))
+
+    return matrix
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef inline cdist_two_lists_distance(
+    const vector[proc_string]& queries, const vector[proc_string]& choices,
+    scorer, score_cutoff, dict kwargs
+):
+    cdef size_t queries_len = queries.size()
+    cdef size_t choices_len = choices.size()
+    cdef size_t i, j
+    cdef size_t c_max = <size_t>-1
+    cdef np.ndarray[np.int32_t, ndim=2] matrix = np.empty((queries_len, choices_len), dtype=np.int32)
+
+    if score_cutoff is not None and score_cutoff != -1:
+        c_max = score_cutoff
+
+    for i in range(queries_len):
+        DistanceContext = CachedDistanceInit(scorer, queries[i], 0, kwargs)
+        for j in range(choices_len):
+            matrix[i, j] = <int32_t>DistanceContext.ratio(choices[j], c_max)
+
+    return matrix
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef inline py_cdist_two_lists(
+    const vector[PyObject*]& queries, const vector[PyObject*]& choices,
+    scorer, score_cutoff, dict kwargs
+):
+    cdef size_t queries_len = queries.size()
+    cdef size_t choices_len = choices.size()
+    cdef size_t i, j
+    cdef double c_score_cutoff = 0
+    cdef np.ndarray[np.uint8_t, ndim=2] matrix = np.empty((queries_len, choices_len), dtype=np.uint8)
+
+    if score_cutoff is not None:
+        c_score_cutoff = score_cutoff
+    if c_score_cutoff < 0 or c_score_cutoff > 100:
+        raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
+
+    c_score_cutoff = floor(c_score_cutoff)
+
+    kwargs["processor"] = None
+    kwargs["score_cutoff"] = c_score_cutoff
+
+    for i in range(queries_len):
+        for j in range(choices_len):
+            matrix[i, j] = <uint8_t>floor(
+                <double>scorer(<object>queries[i], <object>choices[j],**kwargs))
+
+    return matrix
+
+cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dict kwargs):
+    cdef vector[proc_string] proc_queries
+    cdef vector[proc_string] proc_choices
+    cdef vector[PyObject*] proc_py_queries
+    cdef vector[PyObject*] proc_py_choices
+    cdef size_t queries_len = <size_t>len(queries)
+    cdef size_t choices_len = <size_t>len(choices)
+
+    try:
+        if IsIntegratedScorer(scorer) or IsIntegratedDistance(scorer):
+            proc_queries.reserve(queries_len)
+            proc_choices.reserve(choices_len)
+
+            # processor None/False
+            if not processor:
+                for query in queries:
+                    proc_queries.push_back(move(conv_sequence(query)))
+
+                for choice in choices:
+                    proc_choices.push_back(move(conv_sequence(choice)))
+            # processor has to be called through python
+            elif processor is not default_process and callable(processor):
+                proc_py_queries.reserve(queries_len)
+                for query in queries:
+                    proc_query = processor(query)
+                    Py_INCREF(proc_query)
+                    proc_py_queries.push_back(<PyObject*>proc_query)
+                    proc_queries.push_back(move(conv_sequence(proc_query)))
+
+                proc_py_choices.reserve(choices_len)
+                for choice in choices:
+                    proc_choice = processor(choice)
+                    Py_INCREF(proc_choice)
+                    proc_py_choices.push_back(<PyObject*>proc_choice)
+                    proc_choices.push_back(move(conv_sequence(proc_choice)))
+
+            # processor is True / default_process
+            else:
+                for query in queries:
+                    proc_queries.push_back(
+                        move(default_process_func(move(conv_sequence(query))))
+                    )
+
+                for choice in choices:
+                    proc_choices.push_back(
+                        move(default_process_func(move(conv_sequence(choice))))
+                    )
+
+            if IsIntegratedScorer(scorer):
+                return cdist_two_lists_similarity(proc_queries, proc_choices, scorer, score_cutoff, kwargs)
+
+            if IsIntegratedDistance(scorer):
+                return cdist_two_lists_distance(proc_queries, proc_choices, scorer, score_cutoff, kwargs)
+
+        else:
+            proc_py_queries.reserve(queries_len)
+            proc_py_choices.reserve(choices_len)
+
+            # processor None/False
+            if not processor:
+                for query in queries:
+                    Py_INCREF(query)
+                    proc_py_queries.push_back(<PyObject*>query)
+
+                for choice in choices:
+                    Py_INCREF(choice)
+                    proc_py_choices.push_back(<PyObject*>choice)
+            # processor has to be called through python
+            else:
+                if not callable(processor):
+                    processor = default_process
+
+                for query in queries:
+                    proc_query = processor(query)
+                    Py_INCREF(proc_query)
+                    proc_py_queries.push_back(<PyObject*>proc_query)
+
+                for choice in choices:
+                    proc_choice = processor(choice)
+                    Py_INCREF(proc_choice)
+                    proc_py_choices.push_back(<PyObject*>proc_choice)
+
+            return py_cdist_two_lists(proc_py_queries, proc_py_choices, scorer, score_cutoff, kwargs)
+
+    finally:
+        # decref all reference counts
+        for item in proc_py_queries:
+            Py_DECREF(<object>item)
+
+        for item in proc_py_choices:
+            Py_DECREF(<object>item)
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef inline cdist_single_list_similarity(
+    const vector[proc_string]& queries, scorer, score_cutoff, dict kwargs
+):
+    cdef size_t queries_len = queries.size()
+    cdef size_t i, j
+    cdef double c_score_cutoff = 0
+    cdef np.ndarray[np.uint8_t, ndim=2] matrix = np.empty((queries_len, queries_len), dtype=np.uint8)
+
+    if score_cutoff is not None:
+        c_score_cutoff = score_cutoff
+    if c_score_cutoff < 0 or c_score_cutoff > 100:
+        raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
+
+    c_score_cutoff = floor(c_score_cutoff)
+
+    for i in range(queries_len):
+        matrix[i, i] = 100
+        ScorerContext = CachedScorerInit(scorer, queries[i], 0, kwargs)
+        for j in range(i + 1, queries_len):
+            score = <uint8_t>floor(ScorerContext.ratio(queries[j], c_score_cutoff))
+            matrix[i, j] = score
+            matrix[j, i] = score
+
+    return matrix
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef inline cdist_single_list_distance(
+    const vector[proc_string]& queries, scorer, score_cutoff, dict kwargs
+):
+    cdef size_t queries_len = queries.size()
+    cdef size_t i, j
+    cdef size_t c_max = <size_t>-1
+    cdef np.ndarray[np.int32_t, ndim=2] matrix = np.empty((queries_len, queries_len), dtype=np.int32)
+
+    if score_cutoff is not None and score_cutoff != -1:
+        c_max = score_cutoff
+
+    for i in range(queries_len):
+        matrix[i, i] = 0
+        DistanceContext = CachedDistanceInit(scorer, queries[i], 0, kwargs)
+        for j in range(i + 1, queries_len):
+            score = <int32_t>DistanceContext.ratio(queries[j], c_max)
+            matrix[i, j] = score
+            matrix[j, i] = score
+
+    return matrix
+
+cdef cdist_single_list(queries, scorer, processor, score_cutoff, dict kwargs):
+    cdef size_t queries_len = <size_t>len(queries)
+
+    cdef vector[proc_string] proc_queries
+    cdef vector[PyObject*] proc_py_queries
+
+    try:
+        if IsIntegratedScorer(scorer) or IsIntegratedDistance(scorer):
+            proc_queries.reserve(queries_len)
+
+            # processor None/False
+            if not processor:
+                for query in queries:
+                    proc_queries.push_back(move(conv_sequence(query)))
+            # processor has to be called through python
+            elif processor is not default_process and callable(processor):
+                proc_py_queries.reserve(queries_len)
+                for query in queries:
+                    proc_query = processor(query)
+                    Py_INCREF(proc_query)
+                    proc_py_queries.push_back(<PyObject*>proc_query)
+                    proc_queries.push_back(move(conv_sequence(proc_query)))
+
+            # processor is True / default_process
+            else:
+                for query in queries:
+                    proc_queries.push_back(
+                        move(default_process_func(move(conv_sequence(query))))
+                    )
+
+            if IsIntegratedScorer(scorer):
+                return cdist_single_list_similarity(proc_queries, scorer, score_cutoff, kwargs)
+
+            if IsIntegratedDistance(scorer):
+                return cdist_single_list_distance(proc_queries, scorer, score_cutoff, kwargs)
+
+        else:
+            proc_py_queries.reserve(queries_len)
+
+            # processor None/False
+            if not processor:
+                for query in queries:
+                    Py_INCREF(query)
+                    proc_py_queries.push_back(<PyObject*>query)
+            # processor has to be called through python
+            else:
+                if not callable(processor):
+                    processor = default_process
+
+                for query in queries:
+                    proc_query = processor(query)
+                    Py_INCREF(proc_query)
+                    proc_py_queries.push_back(<PyObject*>proc_query)
+
+            # scorer(a, b) might not be equal to scorer(b, a)
+            return py_cdist_two_lists(proc_py_queries, proc_py_queries, scorer, score_cutoff, kwargs)
+
+    finally:
+        # decref all reference counts
+        for item in proc_py_queries:
+            Py_DECREF(<object>item)
+
+def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, **kwargs):
+    """
+    Compute distance/similarity between each pair of the two collections of inputs.
+
+    Parameters
+    ----------
+    queries : Collection[Sequence[Hashable]]
+        list of all strings the queries
+    choices : Collection[Sequence[Hashable]]
+        list of all strings the query should be compared
+    scorer : Callable, optional
+        Optional callable that is used to calculate the matching score between
+        the query and each choice. This can be any of the scorers included in RapidFuzz
+        (both scorers that calculate the edit distance or the normalized edit distance).
+        Custom functions are not supported so far!
+        fuzz.ratio is used by default.
+    processor : Callable, optional
+        Optional callable that is used to preprocess the strings before
+        comparing them. When processor is True ``utils.default_process``
+        is used. Default is None, which deactivates this behaviour.
+    score_cutoff : Any, optional
+        Optional argument for a score threshold. When an edit distance is used this represents the maximum
+        edit distance and matches with a `distance <= score_cutoff` are inserted as -1. When a
+        normalized edit distance is used this represents the minimal similarity
+        and matches with a `similarity >= score_cutoff` are inserted as 0.
+        Default is None, which deactivates this behaviour.
+    **kwargs : Any, optional
+        any other named parameters are passed to the scorer. This can be used to pass
+        e.g. weights to string_metric.levenshtein
+
+    Returns
+    -------
+    List[Tuple[Sequence[Hashable], Any, Any]]
+    """
+    if queries is choices:
+        return cdist_single_list(queries, scorer, processor, score_cutoff, kwargs)
+    else:
+        return cdist_two_lists(queries, choices, scorer, processor, score_cutoff, kwargs)

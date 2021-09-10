@@ -1,6 +1,10 @@
 process module
 ==============
 
+cdist
+----------
+.. autofunction:: rapidfuzz.process.cdist
+
 extract
 -------
 .. autofunction:: rapidfuzz.process.extract

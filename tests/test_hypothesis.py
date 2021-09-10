@@ -9,6 +9,7 @@ import pytest
 from rapidfuzz import fuzz, process, utils, string_metric
 import random
 from math import isclose
+import numpy as np
 
 def levenshtein(s1, s2, weights=(1, 1, 1)):
     """
@@ -78,6 +79,24 @@ def partial_ratio_short_needle(s1, s2):
     for part in parts:
         res = max(res, fuzz.ratio(s1, part))
     return res
+
+def cdist_scorer(queries, choices, scorer):
+    matrix = np.zeros((len(queries), len(choices)), dtype=np.uint8)
+
+    for i, query in enumerate(queries):
+        for j, choice in enumerate(choices):
+            matrix[i, j] = scorer(query, choice)
+
+    return matrix
+
+def cdist_distance(queries, choices, scorer):
+    matrix = np.zeros((len(queries), len(choices)), dtype=np.int32)
+
+    for i, query in enumerate(queries):
+        for j, choice in enumerate(choices):
+            matrix[i, j] = scorer(query, choice)
+
+    return matrix
 
 def extractOne_scorer(s1, s2, scorer, processor=None, **kwargs):
     return process.extractOne(s1, [s2], processor=processor, scorer=scorer, **kwargs)[1]
@@ -294,3 +313,19 @@ def test_only_identical_strings_extracted(scorer, processor, choices):
 
     for match in matches:
         assert processor(query) == processor(match[0])
+
+
+@given(queries=st.lists(st.text(), min_size=1), choices=st.lists(st.text(), min_size=1))
+@settings(max_examples=500, deadline=5000)
+def test_cdist(queries, choices):
+    """
+    Test that cdist returns correct results
+    """
+
+    reference_matrix = cdist_distance(queries, choices, scorer=string_metric.levenshtein)
+    matrix = process.cdist(queries, choices, scorer=string_metric.levenshtein)
+    assert (matrix == reference_matrix).all()
+
+    reference_matrix = cdist_distance(queries, queries, scorer=string_metric.levenshtein)
+    matrix = process.cdist(queries, queries, scorer=string_metric.levenshtein)
+    assert (matrix == reference_matrix).all() 

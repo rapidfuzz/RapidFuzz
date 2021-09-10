@@ -42,9 +42,9 @@ def ratio(s1, s2, *, processor=None, score_cutoff=None):
 
     Parameters
     ----------
-    s1 : str
+    s1 : Sequence[Hashable]
         First string to compare.
-    s2 : str
+    s2 : Sequence[Hashable]
         Second string to compare.
     processor: bool or callable, optional
         Optional callable that is used to preprocess the strings before
@@ -94,9 +94,9 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
 
     Parameters
     ----------
-    s1 : str
+    s1 : Sequence[Hashable]
         First string to compare.
-    s2 : str
+    s2 : Sequence[Hashable]
         Second string to compare.
     processor: bool or callable, optional
         Optional callable that is used to preprocess the strings before
@@ -173,9 +173,9 @@ def token_sort_ratio(s1, s2, *, processor=True, score_cutoff=None):
 
     Parameters
     ----------
-    s1 : str
+    s1 : Sequence[Hashable]
         First string to compare.
-    s2 : str
+    s2 : Sequence[Hashable]
         Second string to compare.
     processor: bool or callable, optional
         Optional callable that is used to preprocess the strings before
@@ -221,9 +221,9 @@ def token_set_ratio(s1, s2, *, processor=True, score_cutoff=None):
 
     Parameters
     ----------
-    s1 : str
+    s1 : Sequence[Hashable]
         First string to compare.
-    s2 : str
+    s2 : Sequence[Hashable]
         Second string to compare.
     processor: bool or callable, optional
         Optional callable that is used to preprocess the strings before
@@ -271,9 +271,9 @@ def token_ratio(s1, s2, *, processor=True, score_cutoff=None):
 
     Parameters
     ----------
-    s1 : str
+    s1 : Sequence[Hashable]
         First string to compare.
-    s2 : str
+    s2 : Sequence[Hashable]
         Second string to compare.
     processor: bool or callable, optional
         Optional callable that is used to preprocess the strings before
@@ -313,9 +313,9 @@ def partial_token_sort_ratio(s1, s2, *, processor=True, score_cutoff=None):
 
     Parameters
     ----------
-    s1 : str
+    s1 : Sequence[Hashable]
         First string to compare.
-    s2 : str
+    s2 : Sequence[Hashable]
         Second string to compare.
     processor: bool or callable, optional
         Optional callable that is used to preprocess the strings before
@@ -356,9 +356,9 @@ def partial_token_set_ratio(s1, s2, *, processor=True, score_cutoff=None):
 
     Parameters
     ----------
-    s1 : str
+    s1 : Sequence[Hashable]
         First string to compare.
-    s2 : str
+    s2 : Sequence[Hashable]
         Second string to compare.
     processor: bool or callable, optional
         Optional callable that is used to preprocess the strings before
@@ -399,9 +399,9 @@ def partial_token_ratio(s1, s2, *, processor=True, score_cutoff=None):
 
     Parameters
     ----------
-    s1 : str
+    s1 : Sequence[Hashable]
         First string to compare.
-    s2 : str
+    s2 : Sequence[Hashable]
         Second string to compare.
     processor: bool or callable, optional
         Optional callable that is used to preprocess the strings before
@@ -441,9 +441,9 @@ def WRatio(s1, s2, *, processor=True, score_cutoff=None):
 
     Parameters
     ----------
-    s1 : str
+    s1 : Sequence[Hashable]
         First string to compare.
-    s2 : str
+    s2 : Sequence[Hashable]
         Second string to compare.
     processor: bool or callable, optional
         Optional callable that is used to preprocess the strings before
@@ -485,9 +485,9 @@ def QRatio(s1, s2, *, processor=True, score_cutoff=None):
 
     Parameters
     ----------
-    s1 : str
+    s1 : Sequence[Hashable]
         First string to compare.
-    s2 : str
+    s2 : Sequence[Hashable]
         Second string to compare.
     processor: bool or callable, optional
         Optional callable that is used to preprocess the strings before

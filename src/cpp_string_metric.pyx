@@ -55,9 +55,9 @@ def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
 
     Parameters
     ----------
-    s1 : str
+    s1 : Sequence[Hashable]
         First string to compare.
-    s2 : str
+    s2 : Sequence[Hashable]
         Second string to compare.
     weights : Tuple[int, int, int] or None, optional
         The weights for the three operations in the form
@@ -259,9 +259,9 @@ def levenshtein_editops(s1, s2, *, processor=None):
 
     Parameters
     ----------
-    s1 : str
+    s1 : Sequence[Hashable]
         First string to compare.
-    s2 : str
+    s2 : Sequence[Hashable]
         Second string to compare.
     processor: bool or callable, optional
         Optional callable that is used to preprocess the strings before
@@ -301,9 +301,9 @@ def normalized_levenshtein(s1, s2, *, weights=(1,1,1), processor=None, score_cut
 
     Parameters
     ----------
-    s1 : str
+    s1 : Sequence[Hashable]
         First string to compare.
-    s2 : str
+    s2 : Sequence[Hashable]
         Second string to compare.
     weights : Tuple[int, int, int] or None, optional
         The weights for the three operations in the form
@@ -407,9 +407,9 @@ def hamming(s1, s2, *, processor=None, max=None):
 
     Parameters
     ----------
-    s1 : str
+    s1 : Sequence[Hashable]
         First string to compare.
-    s2 : str
+    s2 : Sequence[Hashable]
         Second string to compare.
     processor: bool or callable, optional
         Optional callable that is used to preprocess the strings before
@@ -451,9 +451,9 @@ def normalized_hamming(s1, s2, *, processor=None, score_cutoff=None):
 
     Parameters
     ----------
-    s1 : str
+    s1 : Sequence[Hashable]
         First string to compare.
-    s2 : str
+    s2 : Sequence[Hashable]
         Second string to compare.
     processor: bool or callable, optional
         Optional callable that is used to preprocess the strings before
@@ -498,9 +498,9 @@ def jaro_similarity(s1, s2, *, processor=None, score_cutoff=None):
 
     Parameters
     ----------
-    s1 : str
+    s1 : Sequence[Hashable]
         First string to compare.
-    s2 : str
+    s2 : Sequence[Hashable]
         Second string to compare.
     processor: bool or callable, optional
         Optional callable that is used to preprocess the strings before
@@ -537,9 +537,9 @@ def jaro_winkler_similarity(s1, s2, *, double prefix_weight=0.1, processor=None,
 
     Parameters
     ----------
-    s1 : str
+    s1 : Sequence[Hashable]
         First string to compare.
-    s2 : str
+    s2 : Sequence[Hashable]
         Second string to compare.
     prefix_weight : float, optional
         Weight used for the common prefix of the two strings.

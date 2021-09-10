@@ -204,8 +204,9 @@ double RATIO##_impl_inner_##PROCESSOR(const proc_string& s1, const Sentence& s2,
 {                                                                                                  \
     switch(s1.kind){                                                                               \
     LIST_OF_CASES(RATIO_FUNC, PROCESSOR)                                                           \
+    default:                                                                                       \
+       throw std::logic_error("Reached end of control flow in " #RATIO "_impl_inner_" #PROCESSOR); \
     }                                                                                              \
-    assert(false); /* silence any warnings about missing return value */                           \
 }
 
 /* generate <ratio_name>_impl_<processor> functions which are used internally
@@ -217,8 +218,9 @@ double RATIO##_impl_##PROCESSOR(const proc_string& s1, const proc_string& s2, Ar
 {                                                                                            \
     switch(s1.kind){                                                                         \
     LIST_OF_CASES(RATIO##_impl_inner_##PROCESSOR, PROCESSOR)                                 \
+    default:                                                                                 \
+       throw std::logic_error("Reached end of control flow in " #RATIO "_impl_" #PROCESSOR); \
     }                                                                                        \
-    assert(false); /* silence any warnings about missing return value */                     \
 }
 
 #define RATIO_IMPL_DEF(RATIO, RATIO_FUNC)            \
@@ -236,8 +238,9 @@ size_t RATIO##_impl_inner_##PROCESSOR(const proc_string& s1, const Sentence& s2,
 {                                                                                                  \
     switch(s1.kind){                                                                               \
     LIST_OF_CASES(RATIO_FUNC, PROCESSOR)                                                           \
+    default:                                                                                       \
+       throw std::logic_error("Reached end of control flow in " #RATIO "_impl_inner_" #PROCESSOR); \
     }                                                                                              \
-    assert(false); /* silence any warnings about missing return value */                           \
 }
 
 /* generate <ratio_name>_impl_<processor> functions which are used internally
@@ -249,8 +252,9 @@ size_t RATIO##_impl_##PROCESSOR(const proc_string& s1, const proc_string& s2, Ar
 {                                                                                            \
     switch(s1.kind){                                                                         \
     LIST_OF_CASES(RATIO##_impl_inner_##PROCESSOR, PROCESSOR)                                 \
+    default:                                                                                 \
+       throw std::logic_error("Reached end of control flow in " #RATIO "_impl_" #PROCESSOR); \
     }                                                                                        \
-    assert(false); /* silence any warnings about missing return value */                     \
 }
 
 #define DISTANCE_IMPL_DEF(RATIO, RATIO_FUNC)            \
@@ -309,4 +313,37 @@ PyObject* RATIO##_default_process(const proc_string& s1, const proc_string& s2, 
 {                                                                             \
     size_t result = RATIO##_impl_default_process(s1, s2, max); \
     return dist_to_long(result);                                              \
+}
+
+
+template <typename CharT>
+proc_string default_process_func_impl(proc_string sentence) {
+    CharT* str = static_cast<CharT*>(sentence.data);
+    if (!sentence.allocated)
+    {
+      CharT* temp_str = (CharT*)malloc(sentence.length * sizeof(CharT));
+      if (temp_str == NULL)
+      {
+          throw std::bad_alloc();
+      }
+      std::copy(str, str + sentence.length, temp_str);
+      str = temp_str;
+    }
+
+    sentence.allocated = true;
+    sentence.data = str;
+    sentence.kind = sentence.kind;
+    sentence.length = utils::default_process(str, sentence.length);
+
+    return sentence;
+}
+
+proc_string default_process_func(proc_string sentence) {
+    switch (sentence.kind) {
+    # define X_ENUM(KIND, TYPE, MSVC_TUPLE) case KIND: return default_process_func_impl<TYPE>(std::move(sentence));
+    LIST_OF_CASES()
+    default:
+       throw std::logic_error("Reached end of control flow in default_process_func");
+    # undef X_ENUM
+    }
 }

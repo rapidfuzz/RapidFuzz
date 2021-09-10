@@ -23,6 +23,7 @@ cdef extern from "cpp_common.hpp":
     int is_valid_string(object py_str) except +
     proc_string convert_string(object py_str)
     void validate_string(object py_str, const char* err) except +
+    proc_string default_process_func(proc_string sentence) except +
 
 cdef inline proc_string hash_array(arr) except *:
     # TODO on Cpython this does not require any copies
