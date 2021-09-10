@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python_tag: ["cp37-*", "cp38-*", "cp39-*", "cp310-*"]
+        python_tag: ["cp37-*", "cp38-*", "cp39-*"]
         os: [windows-latest, macos-latest]
     env:
       CIBW_BUILD: ${{matrix.python_tag}}
@@ -43,7 +43,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python_tag: ["cp38-*", "cp39-*", "cp310-*"]
+        python_tag: ["cp38-*", "cp39-*"]
     env:
       CIBW_BUILD: ${{matrix.python_tag}}
       CIBW_ARCHS_MACOS: "universal2 arm64"
@@ -71,7 +71,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: [auto, aarch64, ppc64le, s390x]
-        python_tag: [ "cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*"]
+        python_tag: [ "cp36-*", "cp37-*", "cp38-*", "cp39-*"]
     env:
       CIBW_ARCHS_LINUX: ${{matrix.arch}}
       CIBW_BUILD: ${{matrix.python_tag}}
