@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python_tag: [ "cp35-*", "cp36-*", "cp37-*", "cp38-*", "cp39-*"]
+        python_tag: ["cp37-*", "cp38-*", "cp39-*", "cp310-*"]
         os: [windows-latest, macos-latest]
     env:
       CIBW_BUILD: ${{matrix.python_tag}}
@@ -28,7 +28,7 @@ jobs:
           submodules: 'true'
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v1.12.0
+        uses: pypa/cibuildwheel@v2.1.1
         with:
           output-dir: wheelhouse
 
@@ -38,10 +38,14 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_wheels_apple_silicon:
-    name: Build wheel on macos-latest/universal2+arm64/cp39-*
+    name: Build wheel on macos-latest/universal2+arm64/${{matrix.python_tag}}
     runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python_tag: ["cp38-*", "cp39-*", "cp310-*"]
     env:
-      CIBW_BUILD: "cp39-*"
+      CIBW_BUILD: ${{matrix.python_tag}}
       CIBW_ARCHS_MACOS: "universal2 arm64"
       CIBW_BUILD_VERBOSITY: 3
 
@@ -51,7 +55,7 @@ jobs:
           submodules: 'true'
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v1.12.0
+        uses: pypa/cibuildwheel@v2.1.1
         with:
           output-dir: wheelhouse
 
@@ -67,7 +71,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: [auto, aarch64, ppc64le, s390x]
-        python_tag: [ "cp35-*", "cp36-*", "cp37-*", "cp38-*", "cp39-*"]
+        python_tag: [ "cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*"]
     env:
       CIBW_ARCHS_LINUX: ${{matrix.arch}}
       CIBW_BUILD: ${{matrix.python_tag}}
@@ -85,7 +89,7 @@ jobs:
         name: Set up QEMU
 
       - name: Build wheel
-        uses: pypa/cibuildwheel@v1.12.0
+        uses: pypa/cibuildwheel@v2.1.1
         with:
           output-dir: wheelhouse
 
@@ -95,20 +99,19 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_wheels_pypy:
-    name: Build wheel on ${{ matrix.os }}/auto/${{matrix.python_tag}}
+    name: Build wheel on ${{ matrix.os }}/auto/pp37-*
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        python_tag: [ "pp36-*", "pp37-*"]
         # numpy ships no wheels for pypy on mac os
         os: [ubuntu-latest, windows-latest]
     env:
-      CIBW_BUILD: ${{matrix.python_tag}}
+      CIBW_BUILD: "pp37-*"
       # activate tests when the fix for
       # https://foss.heptapod.net/pypy/pypy/-/issues/3413 is released
-      # CIBW_TEST_REQUIRES: pytest hypothesis pandas
-      # CIBW_TEST_COMMAND: pytest {package}/tests
+      CIBW_TEST_REQUIRES: pytest hypothesis pandas
+      CIBW_TEST_COMMAND: pytest {package}/tests
       CIBW_BUILD_VERBOSITY: 3
 
     steps:
@@ -117,7 +120,7 @@ jobs:
           submodules: 'true'
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v1.12.0
+        uses: pypa/cibuildwheel@v2.1.1
         with:
           output-dir: wheelhouse
 

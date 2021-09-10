@@ -70,8 +70,9 @@ levenshtein_editops_inner_no_process(const proc_string& s1, const Sentence& s2)
 {
     switch(s1.kind){
     LIST_OF_CASES(string_metric::levenshtein_editops, no_process)
+    default:
+       throw std::logic_error("Reached end of control flow in levenshtein_editops_inner_no_process");
     }
-    assert(false); /* silence any warnings about missing return value */   
 }
 
 std::vector<rapidfuzz::LevenshteinEditOp>
@@ -79,8 +80,9 @@ levenshtein_editops_no_process(const proc_string& s1, const proc_string& s2)
 {
     switch(s1.kind){
     LIST_OF_CASES(levenshtein_editops_inner_no_process, no_process)
+    default:
+       throw std::logic_error("Reached end of control flow in levenshtein_editops_no_process");
     }
-    assert(false); /* silence any warnings about missing return value */
 }
 
 template<typename Sentence>
@@ -89,6 +91,8 @@ levenshtein_editops_inner_default_process(const proc_string& s1, const Sentence&
 {
     switch(s1.kind){
     LIST_OF_CASES(string_metric::levenshtein_editops, default_process)
+    default:
+       throw std::logic_error("Reached end of control flow in levenshtein_editops_inner_default_process");
     }          
 }
 
@@ -97,6 +101,8 @@ levenshtein_editops_default_process(const proc_string& s1, const proc_string& s2
 {
     switch(s1.kind){
     LIST_OF_CASES(levenshtein_editops_inner_default_process, default_process)
+    default:
+       throw std::logic_error("Reached end of control flow in levenshtein_editops_default_process");
     }          
 }
 
