@@ -4,6 +4,7 @@
 import unittest
 import pytest
 from array import array
+import sys
 
 from rapidfuzz import fuzz, utils
 
@@ -122,9 +123,10 @@ def test_array(scorer):
     """
     arrays should be supported and treated in a compatible way to strings
     """
-    assert scorer(array('u', RatioTest.s3), array('u', RatioTest.s3))
-    assert scorer(RatioTest.s3,             array('u', RatioTest.s3))
-    assert scorer(array('u', RatioTest.s3), RatioTest.s3)
+    if sys.version_info[0] > 2:
+        assert scorer(array('u', RatioTest.s3), array('u', RatioTest.s3))
+        assert scorer(RatioTest.s3,             array('u', RatioTest.s3))
+        assert scorer(array('u', RatioTest.s3), RatioTest.s3)
 
 @pytest.mark.parametrize("scorer", scorers)
 def test_none_string(scorer):

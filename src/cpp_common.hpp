@@ -26,12 +26,20 @@ private:
     char const* m_error;
 };
 
+#if PY_VERSION_HEX > PYTHON_VERSION(3, 0, 0)
 #define LIST_OF_CASES(...)   \
     X_ENUM(RAPIDFUZZ_UINT8,                       uint8_t  , (__VA_ARGS__)) \
     X_ENUM(RAPIDFUZZ_UINT16,                      uint16_t , (__VA_ARGS__)) \
     X_ENUM(RAPIDFUZZ_UINT32,                      uint32_t , (__VA_ARGS__)) \
     X_ENUM(RAPIDFUZZ_UINT64,                      uint64_t , (__VA_ARGS__)) \
     X_ENUM(RAPIDFUZZ_INT64,                        int64_t , (__VA_ARGS__))
+#else /* Python2 */
+#define LIST_OF_CASES(...)   \
+    X_ENUM(RAPIDFUZZ_CHAR,                             char  , (__VA_ARGS__)) \
+    X_ENUM(RAPIDFUZZ_UNICODE,                     Py_UNICODE , (__VA_ARGS__)) \
+    X_ENUM(RAPIDFUZZ_UINT64,                        uint64_t , (__VA_ARGS__)) \
+    X_ENUM(RAPIDFUZZ_INT64,                          int64_t , (__VA_ARGS__))
+#endif
 
 
 enum RapidfuzzType {
@@ -109,6 +117,7 @@ static inline bool is_valid_string(PyObject* py_str)
 {
     bool is_string = false;
 
+#if PY_VERSION_HEX > PYTHON_VERSION(3, 0, 0)
     if (PyBytes_Check(py_str)) {
         is_string = true;
     }
@@ -123,12 +132,21 @@ static inline bool is_valid_string(PyObject* py_str)
 #endif
         is_string = true;
     }
+#else /* Python2 */
+    if (PyObject_TypeCheck(py_str, &PyString_Type)) {
+        is_string = true;
+    }
+    else if (PyObject_TypeCheck(py_str, &PyUnicode_Type)) {
+        is_string = true;
+    }
+#endif
 
     return is_string;
 }
 
 static inline void validate_string(PyObject* py_str, const char* err)
 {
+#if PY_VERSION_HEX > PYTHON_VERSION(3, 0, 0)
     if (PyBytes_Check(py_str)) {
         return;
     }
@@ -143,12 +161,21 @@ static inline void validate_string(PyObject* py_str, const char* err)
 #endif
         return;
     }
+#else /* Python2 */
+    if (PyObject_TypeCheck(py_str, &PyString_Type)) {
+        return;
+    }
+    else if (PyObject_TypeCheck(py_str, &PyUnicode_Type)) {
+        return;
+    }
+#endif
 
     throw PythonTypeError(err);
 }
 
 static inline proc_string convert_string(PyObject* py_str)
 {
+#if PY_VERSION_HEX > PYTHON_VERSION(3, 0, 0)
     if (PyBytes_Check(py_str)) {
         return {
             RAPIDFUZZ_UINT8,
@@ -157,26 +184,47 @@ static inline proc_string convert_string(PyObject* py_str)
             static_cast<std::size_t>(PyBytes_GET_SIZE(py_str))
         };
     } else {
-         RapidfuzzType kind;
-         switch(PyUnicode_KIND(py_str)) {
-         case PyUnicode_1BYTE_KIND:
+        RapidfuzzType kind;
+        switch(PyUnicode_KIND(py_str)) {
+        case PyUnicode_1BYTE_KIND:
            kind = RAPIDFUZZ_UINT8;
            break;
-         case PyUnicode_2BYTE_KIND:
+        case PyUnicode_2BYTE_KIND:
            kind = RAPIDFUZZ_UINT16;
            break;
-         default:
+        default:
            kind = RAPIDFUZZ_UINT32;
            break;
-         }
+        }
      
-         return proc_string(
-             kind,
-             false,
-             PyUnicode_DATA(py_str),
-             static_cast<std::size_t>(PyUnicode_GET_LENGTH(py_str))
-         );
+        return proc_string(
+            kind,
+            false,
+            PyUnicode_DATA(py_str),
+            static_cast<std::size_t>(PyUnicode_GET_LENGTH(py_str))
+        );
     }
+#else /* Python2 */
+    if (PyObject_TypeCheck(py_str, &PyString_Type)) {
+        return {
+            RAPIDFUZZ_CHAR,
+            false,
+            PyString_AS_STRING(py_str),
+            static_cast<std::size_t>(PyString_GET_SIZE(py_str))
+        };
+    }
+    else if (PyObject_TypeCheck(py_str, &PyUnicode_Type)) {
+        return {
+            RAPIDFUZZ_UNICODE,
+            false,
+            PyUnicode_AS_UNICODE(py_str),
+            static_cast<std::size_t>(PyUnicode_GET_SIZE(py_str))
+        };
+    }
+    else {
+        throw PythonTypeError("choice must be a String, Unicode or None");
+    }
+#endif
 }
 
 
@@ -314,7 +362,6 @@ PyObject* RATIO##_default_process(const proc_string& s1, const proc_string& s2, 
     size_t result = RATIO##_impl_default_process(s1, s2, max); \
     return dist_to_long(result);                                              \
 }
-
 
 template <typename CharT>
 proc_string default_process_func_impl(proc_string sentence) {
