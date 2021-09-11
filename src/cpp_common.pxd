@@ -6,9 +6,6 @@ from libcpp cimport bool
 
 cdef extern from "cpp_common.hpp":
     ctypedef unsigned int RapidfuzzType
-    int RAPIDFUZZ_UINT8
-    int RAPIDFUZZ_UINT16
-    int RAPIDFUZZ_UINT32
     int RAPIDFUZZ_UINT64
     int RAPIDFUZZ_INT64
 

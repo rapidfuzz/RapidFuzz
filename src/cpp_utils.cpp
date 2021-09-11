@@ -2543,6 +2543,14 @@ if (!__Pyx_RefNanny) {
 /* #### Code section: cleanup_globals ### */
 /* #### Code section: cleanup_module ### */
 /* #### Code section: main_method ### */
+/* #### Code section: utility_code_pragmas ### */
+#if _MSC_VER
+#pragma warning( push )
+#pragma warning( disable : 4127 )
+#endif
+
+
+
 /* #### Code section: utility_code_def ### */
 
 /* --- Runtime support code --- */
@@ -5336,6 +5344,13 @@ static CYTHON_INLINE PyObject * __Pyx_PyBool_FromLong(long b) {
 static CYTHON_INLINE PyObject * __Pyx_PyInt_FromSize_t(size_t ival) {
     return PyInt_FromSize_t(ival);
 }
+
+
+/* #### Code section: utility_code_pragmas_end ### */
+#if _MSV_VER
+#pragma warning( pop )
+#endif
+
 
 
 /* #### Code section: end ### */

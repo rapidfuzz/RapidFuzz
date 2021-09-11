@@ -8,8 +8,10 @@ import pytest
 
 from rapidfuzz import fuzz, process, utils, string_metric
 import random
-from math import isclose
 import numpy as np
+
+def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
+    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
 def levenshtein(s1, s2, weights=(1, 1, 1)):
     """
@@ -63,7 +65,7 @@ def normalize_distance(dist, s1, s2, weights=(1, 1, 1)):
             len(s1) * substitute + (len(s2) - len(s1)) * insert
         ])
 
-    return 100 - 100 * dist / max_dist if max_dist else 100
+    return 100 - 100 * float(dist) / float(max_dist) if max_dist else 100
 
 def partial_ratio_short_needle(s1, s2):
     if not s1 and not s2:
