@@ -153,13 +153,13 @@ def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
         The time complexity of this algorithm is ``O(N)``.
 
       - If the length of the shorter string is ≤ 64 after removing the common affix
-        the BitPAl algorithm is used, which calculates the Levenshtein distance in
+        Hyyrös' lcs algorithm is used, which calculates the InDel distance in
         parallel. The algorithm is described by [4]_ and is extended with support
         for UTF32 in this implementation. The time complexity of this
         algorithm is ``O(N)``.
 
       - If the length of the shorter string is ≥ 64 after removing the common affix
-        a blockwise implementation of the BitPAl algorithm is used, which calculates
+        a blockwise implementation of the Hyyrös' lcs algorithm is used, which calculates
         the Levenshtein distance in parallel (64 characters at a time).
         The algorithm is described by [4]_. The time complexity of this
         algorithm is ``O([N/64]M)``.
@@ -188,10 +188,8 @@ def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
     .. [3] Myers, Gene. "A fast bit-vector algorithm for approximate
            string matching based on dynamic programming."
            Journal of the ACM (JACM) 46.3 (1999): 395-415.
-    .. [4] Loving, Joshua & Hernández, Yözen & Benson, Gary.
-           "BitPAl: A Bit-Parallel, General Integer-Scoring Sequence
-           Alignment Algorithm. Bioinformatics"
-           Bioinformatics, Volume 30 (2014): 3166–3173
+    .. [4] Hyyrö, Heikki. "Bit-Parallel LCS-length Computation Revisited"
+           Proc. 15th Australasian Workshop on Combinatorial Algorithms (AWOCA 2004). 
 
     Examples
     --------
