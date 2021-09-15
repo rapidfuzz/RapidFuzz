@@ -1,4 +1,7 @@
 src/cpp_process.cpp linguist-vendored
+src/cpp_process_cdist.cpp linguist-vendored
 src/cpp_fuzz.cpp linguist-vendored
 src/cpp_string_metric.cpp linguist-vendored
 src/cpp_utils.cpp linguist-vendored
+bench/results/* linguist-vendored
+docs/img/* linguist-vendored

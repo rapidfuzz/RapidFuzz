@@ -1,6 +1,17 @@
 import pandas as pd
 import numpy as np
-from benchmark import benchmark
+import timeit
+
+def benchmark(name, func, setup, lengths, count):
+    print(f"starting {name}")
+    start = timeit.default_timer()
+    results = []
+    for length in lengths:
+        test = timeit.Timer(func, setup=setup.format(length, count))
+        results.append(min(test.timeit(number=1) for _ in range(7)) / count)
+    stop = timeit.default_timer()
+    print(f"finished {name}, Runtime: ", stop - start)
+    return results
 
 setup ="""
 from rapidfuzz import fuzz as rfuzz
@@ -14,7 +25,7 @@ b_list = [''.join(random.choice(characters) for _ in range({0})) for _ in range(
 """
 
 lengths = list(range(0,512,2))
-count = 1000
+count = 4000
 
 time_rapidfuzz = benchmark("rapidfuzz",
         '[rfuzz.partial_ratio(a, b) for b in b_list]',

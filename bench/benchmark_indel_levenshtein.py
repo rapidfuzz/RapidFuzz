@@ -26,10 +26,10 @@ b_list = [''.join(random.choice(characters) for _ in range({0})) for _ in range(
 """
 
 lengths = list(range(1,512,2))
-count = 1000
+count = 3000
 
 time_rapidfuzz = benchmark("rapidfuzz",
-        '[string_metric.levenshtein(a, b, (1,1,2)) for b in b_list]',
+        '[string_metric.levenshtein(a, b, weights=(1,1,2)) for b in b_list]',
         setup, lengths, count)
 
 # this gets very slow, so only benchmark it for smaller values

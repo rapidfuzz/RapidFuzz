@@ -47,6 +47,15 @@ ext_modules = [
             'src/cpp_process.cpp',
             'src/rapidfuzz-cpp/rapidfuzz/details/unicode.cpp'
         ],
+        include_dirs=["src/rapidfuzz-cpp/"],
+        language='c++',
+    ),
+    Extension(
+       name='rapidfuzz.cpp_process_cdist',
+        sources=[
+            'src/cpp_process_cdist.cpp',
+            'src/rapidfuzz-cpp/rapidfuzz/details/unicode.cpp'
+        ],
         include_dirs=["src/rapidfuzz-cpp/", np.get_include()],
         language='c++',
     ),
