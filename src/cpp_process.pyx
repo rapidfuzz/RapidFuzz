@@ -109,20 +109,20 @@ cdef extern from "cpp_process.hpp":
         PyObject* key
 
 
-cdef inline CachedScorerContext CachedNormalizedLevenshteinInit(const proc_string& query, int def_process, dict kwargs):
+cdef inline CachedScorerContext CachedNormalizedLevenshteinInit(const proc_string& query, dict kwargs):
     cdef size_t insertion, deletion, substitution
     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
-    return move(cached_normalized_levenshtein_init(query, def_process, insertion, deletion, substitution))
+    return move(cached_normalized_levenshtein_init(query, 0, insertion, deletion, substitution))
 
-cdef inline CachedDistanceContext CachedLevenshteinInit(const proc_string& query, int def_process, dict kwargs):
+cdef inline CachedDistanceContext CachedLevenshteinInit(const proc_string& query, dict kwargs):
     cdef size_t insertion, deletion, substitution
     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
-    return move(cached_levenshtein_init(query, def_process, insertion, deletion, substitution))
+    return move(cached_levenshtein_init(query, 0, insertion, deletion, substitution))
 
-cdef inline CachedScorerContext CachedJaroWinklerSimilarityInit(const proc_string& query, int def_process, dict kwargs):
+cdef inline CachedScorerContext CachedJaroWinklerSimilarityInit(const proc_string& query, dict kwargs):
     cdef double prefix_weight
     prefix_weight = kwargs.get("prefix_weight", 0.1)
-    return move(cached_jaro_winkler_similarity_init(query, def_process, prefix_weight))
+    return move(cached_jaro_winkler_similarity_init(query, 0, prefix_weight))
 
 cdef inline int IsIntegratedScorer(object scorer):
     return (
@@ -148,47 +148,47 @@ cdef inline int IsIntegratedDistance(object scorer):
         scorer is hamming
     )
 
-cdef inline CachedScorerContext CachedScorerInit(object scorer, const proc_string& query, int def_process, dict kwargs):
+cdef inline CachedScorerContext CachedScorerInit(object scorer, const proc_string& query, dict kwargs):
     cdef CachedScorerContext context
 
     if scorer is ratio:
-        context = cached_ratio_init(query, def_process)
+        context = cached_ratio_init(query, 0)
     elif scorer is partial_ratio:
-        context = cached_partial_ratio_init(query, def_process)
+        context = cached_partial_ratio_init(query, 0)
     elif scorer is token_sort_ratio:
-        context = cached_token_sort_ratio_init(query, def_process)
+        context = cached_token_sort_ratio_init(query, 0)
     elif scorer is token_set_ratio:
-        context = cached_token_set_ratio_init(query, def_process)
+        context = cached_token_set_ratio_init(query, 0)
     elif scorer is token_ratio:
-        context = cached_token_ratio_init(query, def_process)
+        context = cached_token_ratio_init(query, 0)
     elif scorer is partial_token_sort_ratio:
-        context = cached_partial_token_sort_ratio_init(query, def_process)
+        context = cached_partial_token_sort_ratio_init(query, 0)
     elif scorer is partial_token_set_ratio:
-        context = cached_partial_token_set_ratio_init(query, def_process)
+        context = cached_partial_token_set_ratio_init(query, 0)
     elif scorer is partial_token_ratio:
-        context = cached_partial_token_ratio_init(query, def_process)
+        context = cached_partial_token_ratio_init(query, 0)
     elif scorer is WRatio:
-        context = cached_WRatio_init(query, def_process)
+        context = cached_WRatio_init(query, 0)
     elif scorer is QRatio:
-        context = cached_QRatio_init(query, def_process)
+        context = cached_QRatio_init(query, 0)
     elif scorer is normalized_levenshtein:
-        context = CachedNormalizedLevenshteinInit(query, def_process, kwargs)
+        context = CachedNormalizedLevenshteinInit(query, kwargs)
     elif scorer is normalized_hamming:
-        context = cached_normalized_hamming_init(query, def_process)
+        context = cached_normalized_hamming_init(query, 0)
     elif scorer is jaro_similarity:
-        context = cached_jaro_similarity_init(query, def_process)
+        context = cached_jaro_similarity_init(query, 0)
     elif scorer is jaro_winkler_similarity:
-        context = CachedJaroWinklerSimilarityInit(query, def_process, kwargs)
+        context = CachedJaroWinklerSimilarityInit(query, kwargs)
 
     return move(context)
 
-cdef inline CachedDistanceContext CachedDistanceInit(object scorer, const proc_string& query, int def_process, dict kwargs):
+cdef inline CachedDistanceContext CachedDistanceInit(object scorer, const proc_string& query, dict kwargs):
     cdef CachedDistanceContext context
 
     if scorer is levenshtein:
-        context = CachedLevenshteinInit(query, def_process, kwargs)
+        context = CachedLevenshteinInit(query, kwargs)
     elif scorer is hamming:
-        context = cached_hamming_init(query, def_process)
+        context = cached_hamming_init(query, 0)
 
     return move(context)
 
@@ -202,14 +202,20 @@ cdef inline extractOne_dict(CachedScorerContext context, choices, processor, dou
     cdef double score
     # use -1 as score, so even a score of 0 in the first iteration is higher
     cdef double result_score = -1
+    cdef int def_process = 0
     result_choice = None
     result_key = None
+
+    if processor is default_process:
+        def_process = 1
 
     for choice_key, choice in choices.items():
         if choice is None:
             continue
 
-        if processor is not None:
+        if def_process:
+            score = context.ratio(default_process_func(move(conv_sequence(choice))), score_cutoff)
+        elif processor is not None:
             proc_choice = processor(choice)
             if proc_choice is None:
                 continue
@@ -237,14 +243,20 @@ cdef inline extractOne_distance_dict(CachedDistanceContext context, choices, pro
     """
     cdef size_t distance
     cdef size_t result_distance = <size_t>-1
+    cdef int def_process = 0
     result_choice = None
     result_key = None
+
+    if processor is default_process:
+        def_process = 1
 
     for choice_key, choice in choices.items():
         if choice is None:
             continue
 
-        if processor is not None:
+        if def_process:
+            distance = context.ratio(default_process_func(move(conv_sequence(choice))), max_)
+        elif processor is not None:
             proc_choice = processor(choice)
             if proc_choice is None:
                 continue
@@ -275,13 +287,19 @@ cdef inline extractOne_list(CachedScorerContext context, choices, processor, dou
     cdef double result_score = -1
     cdef size_t i
     cdef size_t result_index = 0
+    cdef int def_process = 0
     result_choice = None
+
+    if processor is default_process:
+        def_process = 1
 
     for i, choice in enumerate(choices):
         if choice is None:
             continue
 
-        if processor is not None:
+        if def_process:
+            score = context.ratio(default_process_func(move(conv_sequence(choice))), score_cutoff)
+        elif processor is not None:
             proc_choice = processor(choice)
             if proc_choice is None:
                 continue
@@ -311,13 +329,19 @@ cdef inline extractOne_distance_list(CachedDistanceContext context, choices, pro
     cdef size_t result_distance = <size_t>-1
     cdef size_t i
     cdef size_t result_index = 0
+    cdef int def_process = 0
     result_choice = None
+
+    if processor is default_process:
+        def_process = 1
 
     for i, choice in enumerate(choices):
         if choice is None:
             continue
 
-        if processor is not None:
+        if def_process:
+            distance = context.ratio(default_process_func(move(conv_sequence(choice))), max_)
+        elif processor is not None:
             proc_choice = processor(choice)
             if proc_choice is None:
                 continue
@@ -516,8 +540,6 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
     None
 
     """
-
-    cdef int def_process = 0
     cdef CachedScorerContext ScorerContext
     cdef CachedDistanceContext DistanceContext
     cdef double c_score_cutoff = 0.0
@@ -526,30 +548,21 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
     if query is None:
         return None
 
-    # preprocess the query
-    if processor is default_process:
-        def_process = 1
-        # since this call is only performed once it is not very expensive to
-        # make it in Python
-        query = processor(query)
+    if not processor:
         processor = None
-    elif callable(processor):
+
+    # preprocess the query
+    if callable(processor):
         query = processor(query)
     elif processor:
-        def_process = 1
-        # since this call is only performed once it is not very expensive to
-        # make it in Python
         query = default_process(query)
-        processor = None
-    # query might be e.g. False
-    else:
-        processor = None
+        processor = default_process  
 
     if IsIntegratedScorer(scorer):
         # directly use the C++ implementation if possible
         # normalized distance implemented in C++
         query_context = conv_sequence(query)
-        ScorerContext = CachedScorerInit(scorer, query_context, def_process, kwargs)
+        ScorerContext = CachedScorerInit(scorer, query_context, kwargs)
         if score_cutoff is not None:
             c_score_cutoff = score_cutoff
         if c_score_cutoff < 0 or c_score_cutoff > 100:
@@ -563,7 +576,7 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
     if IsIntegratedDistance(scorer):
         # distance implemented in C++
         query_context = conv_sequence(query)
-        DistanceContext = CachedDistanceInit(scorer, query_context, def_process, kwargs)
+        DistanceContext = CachedDistanceInit(scorer, query_context, kwargs)
         if score_cutoff is not None and score_cutoff != -1:
             c_max = score_cutoff
 
@@ -588,13 +601,19 @@ cdef inline extract_dict(CachedScorerContext context, choices, processor, size_t
     cdef vector[DictMatchScorerElem] results
     results.reserve(<size_t>len(choices))
     cdef list result_list
+    cdef int def_process = 0
+
+    if processor is default_process:
+        def_process = 1
 
     try:
         for i, (choice_key, choice) in enumerate(choices.items()):
             if choice is None:
                 continue
 
-            if processor is not None:
+            if def_process:
+                score = context.ratio(default_process_func(move(conv_sequence(choice))), score_cutoff)
+            elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
@@ -642,13 +661,19 @@ cdef inline extract_distance_dict(CachedDistanceContext context, choices, proces
     cdef vector[DictMatchDistanceElem] results
     results.reserve(<size_t>len(choices))
     cdef list result_list
+    cdef int def_process = 0
+
+    if processor is default_process:
+        def_process = 1
 
     try:
         for i, (choice_key, choice) in enumerate(choices.items()):
             if choice is None:
                 continue
 
-            if processor is not None:
+            if def_process:
+                distance = context.ratio(default_process_func(move(conv_sequence(choice))), max_)
+            elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
@@ -697,13 +722,19 @@ cdef inline extract_list(CachedScorerContext context, choices, processor, size_t
     cdef vector[ListMatchScorerElem] results
     results.reserve(<size_t>len(choices))
     cdef list result_list
+    cdef int def_process = 0
+
+    if processor is default_process:
+        def_process = 1
 
     try:
         for i, choice in enumerate(choices):
             if choice is None:
                 continue
 
-            if processor is not None:
+            if def_process:
+                score = context.ratio(default_process_func(move(conv_sequence(choice))), score_cutoff)
+            elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
@@ -748,13 +779,19 @@ cdef inline extract_distance_list(CachedDistanceContext context, choices, proces
     cdef vector[ListMatchDistanceElem] results
     results.reserve(<size_t>len(choices))
     cdef list result_list
+    cdef int def_process = 0
+
+    if processor is default_process:
+        def_process = 1
 
     try:
         for i, choice in enumerate(choices):
             if choice is None:
                 continue
 
-            if processor is not None:
+            if def_process:
+                distance = context.ratio(default_process_func(move(conv_sequence(choice))), max_)
+            elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
@@ -903,11 +940,11 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
         has the `highest similarity`/`smallest distance`.
 
     """
-    cdef int def_process = 0
     cdef CachedScorerContext ScorerContext
     cdef CachedDistanceContext DistanceContext
     cdef double c_score_cutoff = 0.0
     cdef size_t c_max = <size_t>-1
+    cdef int def_process = 0
 
     if query is None:
         return []
@@ -915,29 +952,20 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
     if limit is None or limit > len(choices):
         limit = len(choices)
 
-    # preprocess the query
-    if processor is default_process:
-        def_process = 1
-        # since this call is only performed once it is not very expensive to
-        # make it in Python
-        query = processor(query)
+    if not processor:
         processor = None
-    elif callable(processor):
+
+    # preprocess the query
+    if callable(processor):
         query = processor(query)
     elif processor:
-        def_process = 1
-        # since this call is only performed once it is not very expensive to
-        # make it in Python
         query = default_process(query)
-        processor = None
-    # query might be e.g. False
-    else:
-        processor = None
+        processor = default_process  
 
     if IsIntegratedScorer(scorer):
         # directly use the C++ implementation if possible
         query_context = conv_sequence(query)
-        ScorerContext = CachedScorerInit(scorer, query_context, def_process, kwargs)
+        ScorerContext = CachedScorerInit(scorer, query_context, kwargs)
         if score_cutoff is not None:
             c_score_cutoff = score_cutoff
         if c_score_cutoff < 0 or c_score_cutoff > 100:
@@ -951,7 +979,7 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
     if IsIntegratedDistance(scorer):
         # distance implemented in C++
         query_context = conv_sequence(query)
-        DistanceContext = CachedDistanceInit(scorer, query_context, def_process, kwargs)
+        DistanceContext = CachedDistanceInit(scorer, query_context, kwargs)
         if score_cutoff is not None and score_cutoff != -1:
             c_max = score_cutoff
 
@@ -1025,7 +1053,6 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
           * The `key of choice` when choices is a mapping like a dict, or a pandas Series
 
     """
-    cdef int def_process = 0
     cdef CachedScorerContext ScorerContext
     cdef CachedDistanceContext DistanceContext
     cdef double c_score_cutoff = 0.0
@@ -1043,7 +1070,9 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
             if choice is None:
                 continue
 
-            if processor is not None:
+            if def_process:
+                score = ScorerContext.ratio(default_process_func(move(conv_sequence(choice))), c_score_cutoff)
+            elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
@@ -1068,7 +1097,9 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
             if choice is None:
                 continue
 
-            if processor is not None:
+            if def_process:
+                score = ScorerContext.ratio(default_process_func(move(conv_sequence(choice))), c_score_cutoff)
+            elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
@@ -1092,7 +1123,9 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
             if choice is None:
                 continue
 
-            if processor is not None:
+            if def_process:
+                distance = DistanceContext.ratio(default_process_func(move(conv_sequence(choice))), c_max)
+            elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
@@ -1117,7 +1150,9 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
             if choice is None:
                 continue
 
-            if processor is not None:
+            if def_process:
+                distance = DistanceContext.ratio(default_process_func(move(conv_sequence(choice))), c_max)
+            elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
@@ -1178,29 +1213,23 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         # finish generator
         return
 
-    # preprocess the query
-    if processor is default_process:
-        def_process = 1
-        # since this call is only performed once it is not very expensive to
-        # make it in Python
-        query = processor(query)
+    if not processor:
         processor = None
-    elif callable(processor):
+
+    # preprocess the query
+    if callable(processor):
         query = processor(query)
     elif processor:
-        def_process = 1
-        # since this call is only performed once it is not very expensive to
-        # make it in Python
         query = default_process(query)
-        processor = None
-    # query might be e.g. False
-    else:
-        processor = None
+        processor = default_process  
+
+    if processor is default_process:
+        def_process = 1
 
     if IsIntegratedScorer(scorer):
         # normalized distance implemented in C++
         query_context = conv_sequence(query)
-        ScorerContext = CachedScorerInit(scorer, query_context, def_process, kwargs)
+        ScorerContext = CachedScorerInit(scorer, query_context, kwargs)
         if score_cutoff is not None:
             c_score_cutoff = score_cutoff
         if c_score_cutoff < 0 or c_score_cutoff > 100:
@@ -1216,7 +1245,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
     if IsIntegratedDistance(scorer):
         # distance implemented in C++
         query_context = conv_sequence(query)
-        DistanceContext = CachedDistanceInit(scorer, query_context, def_process, kwargs)
+        DistanceContext = CachedDistanceInit(scorer, query_context, kwargs)
         if score_cutoff is not None and score_cutoff != -1:
             c_max = score_cutoff
 
