@@ -32,10 +32,12 @@ from libc.math cimport floor
 
 from cpython.object cimport PyObject
 from cpython.ref cimport Py_INCREF, Py_DECREF
+from cython.operator cimport dereference
 
 from cpp_common cimport proc_string, is_valid_string, convert_string, hash_array, hash_sequence, default_process_func
 
 from array import array
+from libc.stdlib cimport malloc, free
 
 import numpy as np
 cimport numpy as np
@@ -51,6 +53,12 @@ cdef inline proc_string conv_sequence(seq) except *:
     else:
         return move(hash_sequence(seq))
 
+cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
+    cdef struct LevenshteinWeightTable:
+        size_t insert_cost
+        size_t delete_cost
+        size_t replace_cost
+
 cdef extern from "cpp_process.hpp":
     cdef cppclass CachedScorerContext:
         CachedScorerContext()
@@ -60,43 +68,106 @@ cdef extern from "cpp_process.hpp":
         CachedDistanceContext()
         size_t ratio(const proc_string&, size_t) nogil except +
 
+    ctypedef void (*context_deinit) (void* context)
+
+    cdef cppclass KwargsContext:
+        KwargsContext()
+
+        void* context
+        context_deinit deinit
+
+    ctypedef KwargsContext (*kwargs_context_init)(dict kwargs) except *
+    ctypedef CachedDistanceContext (*distance_context_init)(const KwargsContext& kwargs, const proc_string& str) nogil except +
+    ctypedef CachedScorerContext (*scorer_context_init)(const KwargsContext& kwargs, const proc_string& str) nogil except +
+
+    cdef struct DistanceFunctionTable:
+        kwargs_context_init kwargs_init
+        distance_context_init init
+
+    cdef struct ScorerFunctionTable:
+        kwargs_context_init kwargs_init
+        scorer_context_init init
+
     # normalized distances
     # fuzz
-    CachedScorerContext cached_ratio_init(                   const proc_string&, int) nogil except +
-    CachedScorerContext cached_partial_ratio_init(           const proc_string&, int) except +
-    CachedScorerContext cached_token_sort_ratio_init(        const proc_string&, int) except +
-    CachedScorerContext cached_token_set_ratio_init(         const proc_string&, int) except +
-    CachedScorerContext cached_token_ratio_init(             const proc_string&, int) except +
-    CachedScorerContext cached_partial_token_sort_ratio_init(const proc_string&, int) except +
-    CachedScorerContext cached_partial_token_set_ratio_init( const proc_string&, int) except +
-    CachedScorerContext cached_partial_token_ratio_init(     const proc_string&, int) except +
-    CachedScorerContext cached_WRatio_init(                  const proc_string&, int) except +
-    CachedScorerContext cached_QRatio_init(                  const proc_string&, int) except +
+    ScorerFunctionTable CreateRatioFunctionTable() nogil except +
+    ScorerFunctionTable CreatePartialRatioFunctionTable() nogil except +
+    ScorerFunctionTable CreateTokenSortRatioFunctionTable() nogil except +
+    ScorerFunctionTable CreateTokenSetRatioFunctionTable() nogil except +
+    ScorerFunctionTable CreateTokenRatioFunctionTable() nogil except +
+    ScorerFunctionTable CreatePartialTokenSortRatioFunctionTable() nogil except +
+    ScorerFunctionTable CreatePartialTokenSetRatioFunctionTable() nogil except +
+    ScorerFunctionTable CreatePartialTokenRatioFunctionTable() nogil except +
+    ScorerFunctionTable CreateWRatioFunctionTable() nogil except +
+    ScorerFunctionTable CreateQRatioFunctionTable() nogil except +
+
     # string_metric
-    CachedScorerContext cached_normalized_levenshtein_init(  const proc_string&, int, size_t, size_t, size_t) except +
-    CachedScorerContext cached_normalized_hamming_init(      const proc_string&, int) except +
-    CachedScorerContext cached_jaro_winkler_similarity_init( const proc_string&, int, double) except +
-    CachedScorerContext cached_jaro_similarity_init(         const proc_string&, int) except +
+
+    CachedScorerContext cached_jaro_winkler_similarity_init(const KwargsContext& kwargs, const proc_string& str) nogil except +
+    CachedScorerContext cached_normalized_levenshtein_init(const KwargsContext& kwargs, const proc_string& str) nogil except +
+    ScorerFunctionTable CreateNormalizedHammingFunctionTable()
+    ScorerFunctionTable CreateJaroSimilarityFunctionTable()
 
     # distances
-    CachedDistanceContext cached_levenshtein_init(const proc_string&, int, size_t, size_t, size_t) except +
-    CachedDistanceContext cached_hamming_init(    const proc_string&, int) except +
+    DistanceFunctionTable CreateHammingFunctionTable()
+    CachedDistanceContext cached_levenshtein_init(const KwargsContext& kwargs, const proc_string& str) nogil except +
+
+cdef extern from "cpp_process_cdist.hpp":
+    object cdist_single_list_distance_impl(const KwargsContext&, distance_context_init, const vector[proc_string]&, size_t) except +
+    object cdist_single_list_similarity_impl(const KwargsContext&, scorer_context_init, const vector[proc_string]&, double) except +
+    object cdist_two_lists_distance_impl(const KwargsContext&, distance_context_init, const vector[proc_string]&, const vector[proc_string]&, size_t) except +
+    object cdist_two_lists_similarity_impl(const KwargsContext&, scorer_context_init, const vector[proc_string]&, const vector[proc_string]&, double) except +
 
 
-cdef inline CachedScorerContext CachedNormalizedLevenshteinInit(const proc_string& query, int def_process, dict kwargs):
+cdef KwargsContext LevenshteinKwargsInit(dict kwargs) except *:
+    cdef KwargsContext context
+    cdef LevenshteinWeightTable* weights
     cdef size_t insertion, deletion, substitution
-    insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
-    return move(cached_normalized_levenshtein_init(query, def_process, insertion, deletion, substitution))
+    weights = <LevenshteinWeightTable*>malloc(sizeof(LevenshteinWeightTable))
+    
+    if (NULL == weights):
+        raise MemoryError
 
-cdef inline CachedDistanceContext CachedLevenshteinInit(const proc_string& query, int def_process, dict kwargs):
-    cdef size_t insertion, deletion, substitution
     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
-    return move(cached_levenshtein_init(query, def_process, insertion, deletion, substitution))
+    dereference(weights).insert_cost = insertion
+    dereference(weights).delete_cost = deletion
+    dereference(weights).replace_cost = substitution
+    context.context = weights
+    context.deinit = free
 
-cdef inline CachedScorerContext CachedJaroWinklerSimilarityInit(const proc_string& query, int def_process, dict kwargs):
-    cdef double prefix_weight
-    prefix_weight = kwargs.get("prefix_weight", 0.1)
-    return move(cached_jaro_winkler_similarity_init(query, def_process, prefix_weight))
+    return move(context)
+
+cdef inline ScorerFunctionTable CreateNormalizedLevenshteinFunctionTable():
+    cdef ScorerFunctionTable table
+    table.kwargs_init = &LevenshteinKwargsInit
+    table.init = cached_normalized_levenshtein_init
+    return table
+
+cdef inline DistanceFunctionTable CreateLevenshteinFunctionTable():
+    cdef DistanceFunctionTable table
+    table.kwargs_init = &LevenshteinKwargsInit
+    table.init = cached_levenshtein_init
+    return table
+
+cdef KwargsContext JaroWinklerKwargsInit(dict kwargs) except *:
+    cdef KwargsContext context
+    cdef double* prefix_weight
+    prefix_weight = <double*>malloc(sizeof(double))
+    
+    if (NULL == prefix_weight):
+        raise MemoryError
+
+    prefix_weight[0] = kwargs.get("prefix_weight", 0.1)
+    context.context = prefix_weight
+    context.deinit = free
+
+    return move(context)
+
+cdef inline ScorerFunctionTable CreateJaroWinklerSimilarityFunctionTable():
+    cdef ScorerFunctionTable table
+    table.kwargs_init = &JaroWinklerKwargsInit
+    table.init = cached_jaro_winkler_similarity_init
+    return table
 
 cdef inline int IsIntegratedScorer(object scorer):
     return (
@@ -122,98 +193,84 @@ cdef inline int IsIntegratedDistance(object scorer):
         scorer is hamming
     )
 
-cdef inline CachedScorerContext CachedScorerInit(object scorer, const proc_string& query, int def_process, dict kwargs):
-    cdef CachedScorerContext context
+cdef inline ScorerFunctionTable CachedScorerInit(object scorer):
+    cdef ScorerFunctionTable context
 
     if scorer is ratio:
-        context = cached_ratio_init(query, def_process)
+        context = CreateRatioFunctionTable()
     elif scorer is partial_ratio:
-        context = cached_partial_ratio_init(query, def_process)
+        context = CreatePartialRatioFunctionTable()
     elif scorer is token_sort_ratio:
-        context = cached_token_sort_ratio_init(query, def_process)
+        context = CreateTokenSortRatioFunctionTable()
     elif scorer is token_set_ratio:
-        context = cached_token_set_ratio_init(query, def_process)
+        context = CreateTokenSetRatioFunctionTable()
     elif scorer is token_ratio:
-        context = cached_token_ratio_init(query, def_process)
+        context = CreateTokenRatioFunctionTable()
     elif scorer is partial_token_sort_ratio:
-        context = cached_partial_token_sort_ratio_init(query, def_process)
+        context = CreatePartialTokenSortRatioFunctionTable()
     elif scorer is partial_token_set_ratio:
-        context = cached_partial_token_set_ratio_init(query, def_process)
+        context = CreatePartialTokenSetRatioFunctionTable()
     elif scorer is partial_token_ratio:
-        context = cached_partial_token_ratio_init(query, def_process)
+        context = CreatePartialTokenRatioFunctionTable()
     elif scorer is WRatio:
-        context = cached_WRatio_init(query, def_process)
+        context = CreateWRatioFunctionTable()
     elif scorer is QRatio:
-        context = cached_QRatio_init(query, def_process)
+        context = CreateQRatioFunctionTable()
     elif scorer is normalized_levenshtein:
-        context = CachedNormalizedLevenshteinInit(query, def_process, kwargs)
+        context = CreateNormalizedLevenshteinFunctionTable()
     elif scorer is normalized_hamming:
-        context = cached_normalized_hamming_init(query, def_process)
+        context = CreateNormalizedHammingFunctionTable()
     elif scorer is jaro_similarity:
-        context = cached_jaro_similarity_init(query, def_process)
+        context = CreateJaroSimilarityFunctionTable()
     elif scorer is jaro_winkler_similarity:
-        context = CachedJaroWinklerSimilarityInit(query, def_process, kwargs)
+        context = CreateJaroWinklerSimilarityFunctionTable()
 
     return move(context)
 
-cdef inline CachedDistanceContext CachedDistanceInit(object scorer, const proc_string& query, int def_process, dict kwargs):
-    cdef CachedDistanceContext context
+cdef inline DistanceFunctionTable CachedDistanceInit(object scorer):
+    cdef DistanceFunctionTable table
 
     if scorer is levenshtein:
-        context = CachedLevenshteinInit(query, def_process, kwargs)
+        table = CreateLevenshteinFunctionTable()
     elif scorer is hamming:
-        context = cached_hamming_init(query, def_process)
+        table = CreateHammingFunctionTable()
 
-    return move(context)
+    return table
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
 cdef inline cdist_two_lists_similarity(
     const vector[proc_string]& queries,
     const vector[proc_string]& choices,
     scorer, score_cutoff, dict kwargs
 ):
-    cdef size_t queries_len = queries.size()
-    cdef size_t choices_len = choices.size()
-    cdef size_t i, j
     cdef double c_score_cutoff = 0
-    cdef np.ndarray[np.uint8_t, ndim=2] matrix = np.empty((queries_len, choices_len), dtype=np.uint8)
+    cdef ScorerFunctionTable table = CachedScorerInit(scorer)
+    cdef KwargsContext kwargs_context
+
+    if (NULL != table.kwargs_init):
+        kwargs_context = table.kwargs_init(kwargs)
 
     if score_cutoff is not None:
         c_score_cutoff = score_cutoff
     if c_score_cutoff < 0 or c_score_cutoff > 100:
         raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
 
-    c_score_cutoff = floor(c_score_cutoff)
+    return cdist_two_lists_similarity_impl(kwargs_context, table.init, queries, choices, c_score_cutoff)
 
-    for i in range(queries_len):
-        ScorerContext = CachedScorerInit(scorer, queries[i], 0, kwargs)
-        for j in range(choices_len):
-            matrix[i, j] = <uint8_t>floor(ScorerContext.ratio(choices[j], c_score_cutoff))
-
-    return matrix
-
-@cython.boundscheck(False)
-@cython.wraparound(False)
 cdef inline cdist_two_lists_distance(
     const vector[proc_string]& queries, const vector[proc_string]& choices,
     scorer, score_cutoff, dict kwargs
 ):
-    cdef size_t queries_len = queries.size()
-    cdef size_t choices_len = choices.size()
-    cdef size_t i, j
     cdef size_t c_max = <size_t>-1
-    cdef np.ndarray[np.int32_t, ndim=2] matrix = np.empty((queries_len, choices_len), dtype=np.int32)
+    cdef DistanceFunctionTable table = CachedDistanceInit(scorer)
+    cdef KwargsContext kwargs_context
+
+    if (NULL != table.kwargs_init):
+        kwargs_context = table.kwargs_init(kwargs)
 
     if score_cutoff is not None and score_cutoff != -1:
         c_max = score_cutoff
 
-    for i in range(queries_len):
-        DistanceContext = CachedDistanceInit(scorer, queries[i], 0, kwargs)
-        for j in range(choices_len):
-            matrix[i, j] = <int32_t>DistanceContext.ratio(choices[j], c_max)
-
-    return matrix
+    return cdist_two_lists_distance_impl(kwargs_context, table.init, queries, choices, c_max)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -291,9 +348,10 @@ cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dict kwa
                     proc_choices.push_back(
                         move(default_process_func(move(conv_sequence(choice))))
                     )
-
+            
             if IsIntegratedScorer(scorer):
                 return cdist_two_lists_similarity(proc_queries, proc_choices, scorer, score_cutoff, kwargs)
+            
 
             if IsIntegratedDistance(scorer):
                 return cdist_two_lists_distance(proc_queries, proc_choices, scorer, score_cutoff, kwargs)
@@ -336,55 +394,38 @@ cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dict kwa
         for item in proc_py_choices:
             Py_DECREF(<object>item)
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
 cdef inline cdist_single_list_similarity(
     const vector[proc_string]& queries, scorer, score_cutoff, dict kwargs
 ):
-    cdef size_t queries_len = queries.size()
-    cdef size_t i, j
     cdef double c_score_cutoff = 0
-    cdef np.ndarray[np.uint8_t, ndim=2] matrix = np.empty((queries_len, queries_len), dtype=np.uint8)
+    cdef ScorerFunctionTable table = CachedScorerInit(scorer)
+    cdef KwargsContext kwargs_context
+
+    if (NULL != table.kwargs_init):
+        kwargs_context = table.kwargs_init(kwargs)
 
     if score_cutoff is not None:
         c_score_cutoff = score_cutoff
     if c_score_cutoff < 0 or c_score_cutoff > 100:
         raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
 
-    c_score_cutoff = floor(c_score_cutoff)
+    return cdist_single_list_similarity_impl(kwargs_context, table.init, queries, c_score_cutoff)
 
-    for i in range(queries_len):
-        matrix[i, i] = 100
-        ScorerContext = CachedScorerInit(scorer, queries[i], 0, kwargs)
-        for j in range(i + 1, queries_len):
-            score = <uint8_t>floor(ScorerContext.ratio(queries[j], c_score_cutoff))
-            matrix[i, j] = score
-            matrix[j, i] = score
-
-    return matrix
-
-@cython.boundscheck(False)
-@cython.wraparound(False)
 cdef inline cdist_single_list_distance(
     const vector[proc_string]& queries, scorer, score_cutoff, dict kwargs
 ):
-    cdef size_t queries_len = queries.size()
-    cdef size_t i, j
     cdef size_t c_max = <size_t>-1
-    cdef np.ndarray[np.int32_t, ndim=2] matrix = np.empty((queries_len, queries_len), dtype=np.int32)
+    cdef DistanceFunctionTable table = CachedDistanceInit(scorer)
+    cdef KwargsContext kwargs_context
+
+    if (NULL != table.kwargs_init):
+        kwargs_context = table.kwargs_init(kwargs)
 
     if score_cutoff is not None and score_cutoff != -1:
         c_max = score_cutoff
 
-    for i in range(queries_len):
-        matrix[i, i] = 0
-        DistanceContext = CachedDistanceInit(scorer, queries[i], 0, kwargs)
-        for j in range(i + 1, queries_len):
-            score = <int32_t>DistanceContext.ratio(queries[j], c_max)
-            matrix[i, j] = score
-            matrix[j, i] = score
+    return cdist_single_list_distance_impl(kwargs_context, table.init, queries, c_max)
 
-    return matrix
 
 cdef cdist_single_list(queries, scorer, processor, score_cutoff, dict kwargs):
     cdef size_t queries_len = <size_t>len(queries)
@@ -415,10 +456,10 @@ cdef cdist_single_list(queries, scorer, processor, score_cutoff, dict kwargs):
                     proc_queries.push_back(
                         move(default_process_func(move(conv_sequence(query))))
                     )
-
+            
             if IsIntegratedScorer(scorer):
                 return cdist_single_list_similarity(proc_queries, scorer, score_cutoff, kwargs)
-
+            
             if IsIntegratedDistance(scorer):
                 return cdist_single_list_distance(proc_queries, scorer, score_cutoff, kwargs)
 

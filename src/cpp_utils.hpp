@@ -1,3 +1,4 @@
+#pragma once
 #include "cpp_common.hpp"
 
 PyObject* default_process_impl(PyObject* sentence) {
