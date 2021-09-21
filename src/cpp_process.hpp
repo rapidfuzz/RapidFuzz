@@ -253,11 +253,6 @@ static inline CachedScorerContext scorer_init(const proc_string& str, Args... ar
 }
 
 /* fuzz */
-static CachedScorerContext cached_jaro_similarity_init(const KwargsContext&, const proc_string& str)
-{
-    return scorer_init<string_metric::CachedJaroSimilarity>(str);
-}
-
 static ScorerFunctionTable CreateRatioFunctionTable()
 {
     return {

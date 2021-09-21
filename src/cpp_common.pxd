@@ -7,7 +7,6 @@ from libcpp cimport bool
 cdef extern from "cpp_common.hpp":
     ctypedef unsigned int RapidfuzzType
     int RAPIDFUZZ_UINT64
-    int RAPIDFUZZ_INT64
 
     cdef cppclass proc_string:
         RapidfuzzType kind
@@ -60,7 +59,7 @@ cdef inline proc_string hash_array(arr) except *:
             for i in range(s_proc.length):
                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
         else: # float/double are hashed
-            s_proc.kind = RAPIDFUZZ_INT64
+            s_proc.kind = RAPIDFUZZ_UINT64
             for i in range(s_proc.length):
                 (<uint64_t*>s_proc.data)[i] = <uint64_t>hash(arr[i])
     except Exception as e:
@@ -82,7 +81,7 @@ cdef inline proc_string hash_sequence(seq) except *:
         raise MemoryError
 
     try:
-        s_proc.kind = RAPIDFUZZ_INT64
+        s_proc.kind = RAPIDFUZZ_UINT64
         for i in range(s_proc.length):
             elem = seq[i]
             # this is required so e.g. a list of char can be compared to a string

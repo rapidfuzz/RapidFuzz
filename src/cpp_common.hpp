@@ -31,14 +31,12 @@ private:
     X_ENUM(RAPIDFUZZ_UINT8,                       uint8_t  , (__VA_ARGS__)) \
     X_ENUM(RAPIDFUZZ_UINT16,                      uint16_t , (__VA_ARGS__)) \
     X_ENUM(RAPIDFUZZ_UINT32,                      uint32_t , (__VA_ARGS__)) \
-    X_ENUM(RAPIDFUZZ_UINT64,                      uint64_t , (__VA_ARGS__)) \
-    X_ENUM(RAPIDFUZZ_INT64,                        int64_t , (__VA_ARGS__))
+    X_ENUM(RAPIDFUZZ_UINT64,                      uint64_t , (__VA_ARGS__))
 #else /* Python2 */
 #define LIST_OF_CASES(...)   \
     X_ENUM(RAPIDFUZZ_CHAR,                             char  , (__VA_ARGS__)) \
     X_ENUM(RAPIDFUZZ_UNICODE,                     Py_UNICODE , (__VA_ARGS__)) \
-    X_ENUM(RAPIDFUZZ_UINT64,                        uint64_t , (__VA_ARGS__)) \
-    X_ENUM(RAPIDFUZZ_INT64,                          int64_t , (__VA_ARGS__))
+    X_ENUM(RAPIDFUZZ_UINT64,                        uint64_t , (__VA_ARGS__))
 #endif
 
 
