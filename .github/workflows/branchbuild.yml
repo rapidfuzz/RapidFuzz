@@ -29,7 +29,7 @@ jobs:
       
       - name: build
         run: |
-          pip install build; python3 -m build --sdist
+          pip install build; python -m build --sdist
           # test whether tarball contains all files required for compiling
           pip install dist/rapidfuzz-*.tar.gz
 
