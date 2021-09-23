@@ -1,3 +1,4 @@
+#pragma once
 #include "cpp_common.hpp"
 
 SIMPLE_RATIO_DEF(ratio)

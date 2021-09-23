@@ -1,3 +1,4 @@
+#pragma once
 #include "cpp_common.hpp"
 
 struct DictElem {
@@ -154,29 +155,67 @@ struct CachedDistanceContext {
     }
 };
 
+struct KwargsContext {
+    void* context;
+    context_deinit deinit;
+
+    KwargsContext()
+      : context(nullptr), deinit(nullptr) {}
+    KwargsContext(void* _context, context_deinit _deinit)
+      : context(_context), deinit(_deinit) {}
+
+    KwargsContext(const KwargsContext&) = delete;
+    KwargsContext& operator=(const KwargsContext&) = delete;
+
+    KwargsContext(KwargsContext&& other)
+      : context(other.context), deinit(other.deinit)
+    {
+        other.context = nullptr;
+    }
+
+    KwargsContext& operator=(KwargsContext&& other) {
+        if (&other != this) {
+            if (deinit && context) {
+                deinit(context);
+            }
+
+            context = other.context;
+            deinit = other.deinit;
+
+            other.context = nullptr;
+        }
+        return *this;
+    };
+
+    ~KwargsContext() {
+        if (deinit && context) {
+            deinit(context);
+        }  
+    }
+};
+
 template <typename CachedScorer>
 static void cached_deinit(void* context)
 {
     delete (CachedScorer*)context;
 }
 
-template<typename CachedScorer>
-static inline double cached_scorer_func_default_process(
-    void* context, const proc_string& str, double score_cutoff)
-{
-    CachedScorer* ratio = (CachedScorer*)context;
+typedef KwargsContext (*kwargs_context_init)(PyObject* kwds);
+typedef CachedDistanceContext (*distance_context_init)(const KwargsContext& kwargs, const proc_string& str);
+typedef CachedScorerContext (*scorer_context_init)(const KwargsContext& kwargs, const proc_string& str);
 
-    switch(str.kind){
-# define X_ENUM(KIND, TYPE, ...) case KIND: return ratio->ratio(default_process<TYPE>(str), score_cutoff);
-        LIST_OF_CASES()
-# undef X_ENUM
-    default:
-       throw std::logic_error("Reached end of control flow in cached_scorer_func_default_process");
-    }
-}
+struct ScorerFunctionTable {
+    kwargs_context_init kwargs_init;
+    scorer_context_init init;
+};
+
+struct DistanceFunctionTable {
+    kwargs_context_init kwargs_init;
+    distance_context_init init;
+};
 
 template<typename CachedScorer>
-static inline double cached_scorer_func(void* context, const proc_string& str, double score_cutoff)
+static inline double scorer_func_wrapper(void* context, const proc_string& str, double score_cutoff)
 {
     CachedScorer* ratio = (CachedScorer*)context;
 
@@ -185,136 +224,174 @@ static inline double cached_scorer_func(void* context, const proc_string& str, d
         LIST_OF_CASES()
 # undef X_ENUM
     default:
-       throw std::logic_error("Reached end of control flow in cached_scorer_func");
+       throw std::logic_error("Reached end of control flow in scorer_func");
     }
 }
 
 template<template <typename> class CachedScorer, typename CharT, typename ...Args>
-static inline CachedScorerContext get_CachedScorerContext(const proc_string& str, int def_process, Args... args)
+static inline CachedScorerContext get_ScorerContext(const proc_string& str, Args... args)
 {
     using Sentence = rapidfuzz::basic_string_view<CharT>;
     CachedScorerContext context;
     context.context = (void*) new CachedScorer<Sentence>(Sentence((CharT*)str.data, str.length), args...);
 
-    if (def_process) {
-        context.scorer = cached_scorer_func_default_process<CachedScorer<Sentence>>;
-    } else {
-        context.scorer = cached_scorer_func<CachedScorer<Sentence>>;
-    }
+    context.scorer = scorer_func_wrapper<CachedScorer<Sentence>>;
     context.deinit = cached_deinit<CachedScorer<Sentence>>;
     return context;
 }
 
 template<template <typename> class CachedScorer, typename ...Args>
-static inline CachedScorerContext cached_scorer_init(const proc_string& str, int def_process, Args... args)
+static inline CachedScorerContext scorer_init(const proc_string& str, Args... args)
 {
     switch(str.kind){
-# define X_ENUM(KIND, TYPE, ...) case KIND: return get_CachedScorerContext<CachedScorer, TYPE>(str, def_process, args...);
+# define X_ENUM(KIND, TYPE, ...) case KIND: return get_ScorerContext<CachedScorer, TYPE>(str, args...);
         LIST_OF_CASES()
 # undef X_ENUM
     default:
-       throw std::logic_error("Reached end of control flow in cached_scorer_init");
+       throw std::logic_error("Reached end of control flow in scorer_init");
     }
 }
 
 /* fuzz */
-static CachedScorerContext cached_ratio_init(const proc_string& str, int def_process)
+static ScorerFunctionTable CreateRatioFunctionTable()
 {
-    return cached_scorer_init<fuzz::CachedRatio>(str, def_process);
+    return {
+        nullptr,
+        [](const KwargsContext&, const proc_string& str) {
+            return scorer_init<fuzz::CachedRatio>(str);
+        }
+    };
 }
 
-static CachedScorerContext cached_partial_ratio_init(const proc_string& str, int def_process)
+static ScorerFunctionTable CreatePartialRatioFunctionTable()
 {
-    return cached_scorer_init<fuzz::CachedPartialRatio>(str, def_process);
+    return {
+        nullptr,
+        [](const KwargsContext&, const proc_string& str) {
+            return scorer_init<fuzz::CachedPartialRatio>(str);
+        }
+    };
 }
 
-static CachedScorerContext cached_token_sort_ratio_init(const proc_string& str, int def_process)
+static ScorerFunctionTable CreateTokenSortRatioFunctionTable()
 {
-    return cached_scorer_init<fuzz::CachedTokenSortRatio>(str, def_process);
+    return {
+        nullptr,
+        [](const KwargsContext&, const proc_string& str) {
+            return scorer_init<fuzz::CachedTokenSortRatio>(str);
+        }
+    };
 }
 
-static CachedScorerContext cached_token_set_ratio_init(const proc_string& str, int def_process)
+static ScorerFunctionTable CreateTokenSetRatioFunctionTable()
 {
-    return cached_scorer_init<fuzz::CachedTokenSetRatio>(str, def_process);
+    return {
+        nullptr,
+        [](const KwargsContext&, const proc_string& str) {
+            return scorer_init<fuzz::CachedTokenSetRatio>(str);
+        }
+    };
 }
 
-static CachedScorerContext cached_token_ratio_init(const proc_string& str, int def_process)
+static ScorerFunctionTable CreateTokenRatioFunctionTable()
 {
-    return cached_scorer_init<fuzz::CachedTokenRatio>(str, def_process);
+    return {
+        nullptr,
+        [](const KwargsContext&, const proc_string& str) {
+            return scorer_init<fuzz::CachedTokenRatio>(str);
+        }
+    };
 }
 
-static CachedScorerContext cached_partial_token_sort_ratio_init(const proc_string& str, int def_process)
+static ScorerFunctionTable CreatePartialTokenSortRatioFunctionTable()
 {
-    return cached_scorer_init<fuzz::CachedPartialTokenSortRatio>(str, def_process);
+    return {
+        nullptr,
+        [](const KwargsContext&, const proc_string& str) {
+            return scorer_init<fuzz::CachedPartialTokenSortRatio>(str);
+        }
+    };
 }
 
-static CachedScorerContext cached_partial_token_set_ratio_init(const proc_string& str, int def_process)
+static ScorerFunctionTable CreatePartialTokenSetRatioFunctionTable()
 {
-    return cached_scorer_init<fuzz::CachedPartialTokenSetRatio>(str, def_process);
+    return {
+        nullptr,
+        [](const KwargsContext&, const proc_string& str) {
+            return scorer_init<fuzz::CachedPartialTokenSetRatio>(str);
+        }
+    };
 }
 
-static CachedScorerContext cached_partial_token_ratio_init(const proc_string& str, int def_process)
+static ScorerFunctionTable CreatePartialTokenRatioFunctionTable()
 {
-    return cached_scorer_init<fuzz::CachedPartialTokenRatio>(str, def_process);
+    return {
+        nullptr,
+        [](const KwargsContext&, const proc_string& str) {
+            return scorer_init<fuzz::CachedPartialTokenRatio>(str);
+        }
+    };
 }
 
-static CachedScorerContext cached_WRatio_init(const proc_string& str, int def_process)
+static ScorerFunctionTable CreateWRatioFunctionTable()
 {
-    return cached_scorer_init<fuzz::CachedWRatio>(str, def_process);
+    return {
+        nullptr,
+        [](const KwargsContext&, const proc_string& str) {
+            return scorer_init<fuzz::CachedWRatio>(str);
+        }
+    };
 }
 
-static CachedScorerContext cached_QRatio_init(const proc_string& str, int def_process)
+static ScorerFunctionTable CreateQRatioFunctionTable()
 {
-    return cached_scorer_init<fuzz::CachedQRatio>(str, def_process);
+    return {
+        nullptr,
+        [](const KwargsContext&, const proc_string& str) {
+            return scorer_init<fuzz::CachedQRatio>(str);
+        }
+    };
 }
 
 /* string_metric */
-
-static CachedScorerContext cached_normalized_levenshtein_init(const proc_string& str, int def_process,
-  size_t insertion, size_t deletion, size_t substitution)
+static CachedScorerContext cached_normalized_levenshtein_init(const KwargsContext& kwargs, const proc_string& str)
 {
-    rapidfuzz::LevenshteinWeightTable weights = {insertion, deletion, substitution};
-    return cached_scorer_init<string_metric::CachedNormalizedLevenshtein>(
-        str, def_process, weights);
+    return scorer_init<string_metric::CachedNormalizedLevenshtein>(
+        str, *static_cast<rapidfuzz::LevenshteinWeightTable*>(kwargs.context));
 }
 
-static CachedScorerContext cached_normalized_hamming_init(const proc_string& str, int def_process)
+static ScorerFunctionTable CreateNormalizedHammingFunctionTable()
 {
-    return cached_scorer_init<string_metric::CachedNormalizedHamming>(str, def_process);
+    return {
+        nullptr,
+        [](const KwargsContext&, const proc_string& str) {
+            return scorer_init<string_metric::CachedNormalizedHamming>(str);
+        }
+    };
 }
 
-static CachedScorerContext cached_jaro_winkler_similarity_init(const proc_string& str, int def_process, double prefix_weight)
+static CachedScorerContext cached_jaro_winkler_similarity_init(const KwargsContext& kwargs, const proc_string& str)
 {
-    return cached_scorer_init<string_metric::CachedJaroWinklerSimilarity>(str, def_process, prefix_weight);
+    return scorer_init<string_metric::CachedJaroWinklerSimilarity>(
+        str, *static_cast<double*>(kwargs.context));
 }
 
-static CachedScorerContext cached_jaro_similarity_init(const proc_string& str, int def_process)
+static ScorerFunctionTable CreateJaroSimilarityFunctionTable()
 {
-    return cached_scorer_init<string_metric::CachedJaroSimilarity>(str, def_process);
+    return {
+        nullptr,
+        [](const KwargsContext&, const proc_string& str) {
+            return scorer_init<string_metric::CachedJaroSimilarity>(str);
+        }
+    };
 }
-
 
 /*************************************************
  *               cached distances
  *************************************************/
 
 template<typename CachedDistance>
-static inline std::size_t cached_distance_func_default_process(
-    void* context, const proc_string& str, std::size_t max)
-{
-    CachedDistance* distance = (CachedDistance*)context;
-
-    switch(str.kind){
-# define X_ENUM(KIND, TYPE, ...) case KIND: return distance->distance(default_process<TYPE>(str), max);
-        LIST_OF_CASES()
-# undef X_ENUM
-    default:
-       throw std::logic_error("Reached end of control flow in cached_distance_func_default_process");
-    }
-}
-
-template<typename CachedDistance>
-static inline std::size_t cached_distance_func(void* context, const proc_string& str, std::size_t max)
+static inline std::size_t distance_func_wrapper(void* context, const proc_string& str, std::size_t max)
 {
     CachedDistance* distance = (CachedDistance*)context;
 
@@ -328,44 +405,39 @@ static inline std::size_t cached_distance_func(void* context, const proc_string&
 }
 
 template<template <typename> class CachedDistance, typename CharT, typename ...Args>
-static inline CachedDistanceContext get_CachedDistanceContext(const proc_string& str, int def_process, Args... args)
+static inline CachedDistanceContext get_DistanceContext(const proc_string& str, Args... args)
 {
     using Sentence = rapidfuzz::basic_string_view<CharT>;
     CachedDistanceContext context;
     context.context = (void*) new CachedDistance<Sentence>(Sentence((CharT*)str.data, str.length), args...);
-
-    if (def_process) {
-        context.scorer = cached_distance_func_default_process<CachedDistance<Sentence>>;
-    } else {
-        context.scorer = cached_distance_func<CachedDistance<Sentence>>;
-    }
+    context.scorer = distance_func_wrapper<CachedDistance<Sentence>>;
     context.deinit = cached_deinit<CachedDistance<Sentence>>;
     return context;
 }
 
 template<template <typename> class CachedDistance, typename ...Args>
-static inline CachedDistanceContext cached_distance_init(const proc_string& str, int def_process, Args... args)
+static inline CachedDistanceContext distance_init(const proc_string& str, Args... args)
 {
     switch(str.kind){
-# define X_ENUM(KIND, TYPE, ...) case KIND: return get_CachedDistanceContext<CachedDistance, TYPE>(str, def_process, args...);
+# define X_ENUM(KIND, TYPE, ...) case KIND: return get_DistanceContext<CachedDistance, TYPE>(str, args...);
         LIST_OF_CASES()
 # undef X_ENUM
     default:
-       throw std::logic_error("Reached end of control flow in cached_distance_init");
+       throw std::logic_error("Reached end of control flow in distance_init");
     }
 }
 
-/* string_metric */
-
-static CachedDistanceContext cached_levenshtein_init(const proc_string& str, int def_process,
-  size_t insertion, size_t deletion, size_t substitution)
+static DistanceFunctionTable CreateHammingFunctionTable()
 {
-    rapidfuzz::LevenshteinWeightTable weights = {insertion, deletion, substitution};
-    return cached_distance_init<string_metric::CachedLevenshtein>(
-        str, def_process, weights);
+    return {
+        nullptr,
+        [](const KwargsContext&, const proc_string& str) {
+            return distance_init<string_metric::CachedHamming>(str);
+        }
+    };
 }
 
-static CachedDistanceContext cached_hamming_init(const proc_string& str, int def_process)
+static CachedDistanceContext cached_levenshtein_init(const KwargsContext& kwargs, const proc_string& str)
 {
-    return cached_distance_init<string_metric::CachedHamming>(str, def_process);
+    return distance_init<string_metric::CachedLevenshtein>(str, *static_cast<rapidfuzz::LevenshteinWeightTable*>(kwargs.context));
 }

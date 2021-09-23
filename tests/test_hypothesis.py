@@ -137,7 +137,7 @@ PROCESSORS = [
 ]
 
 @given(s1=st.text(), s2=st.text())
-@settings(max_examples=500, deadline=None)
+@settings(max_examples=50, deadline=1000)
 def test_levenshtein_editops(s1, s2):
     """
     test levenshtein_editops. Currently this only tests, so there are no exceptions.
@@ -145,23 +145,15 @@ def test_levenshtein_editops(s1, s2):
     string_metric.levenshtein_editops(s1, s2)
 
 @given(s1=st.text(max_size=64), s2=st.text())
-@settings(max_examples=500, deadline=None)
+@settings(max_examples=50, deadline=1000)
 def test_partial_ratio_short_needle(s1, s2):
     """
     test partial_ratio for short needles (needle <= 64)
     """
     assert isclose(fuzz.partial_ratio(s1, s2), partial_ratio_short_needle(s1, s2))
 
-@given(s1=st.text(min_size=64), s2=st.text(min_size=64))
-@settings(max_examples=500, deadline=None)
-def test_partial_ratio_long_needle(s1, s2):
-    """
-    test partial_ratio. Currently for long needles this only tests, so there are no exceptionss
-    """
-    fuzz.partial_ratio(s1, s2)
-
 @given(s1=st.text(), s2=st.text())
-@settings(max_examples=500, deadline=None)
+@settings(max_examples=50, deadline=1000)
 def test_token_ratio(s1, s2):
     """
     token_ratio should be max(token_sort_ratio, token_set_ratio)
@@ -169,7 +161,7 @@ def test_token_ratio(s1, s2):
     assert fuzz.token_ratio(s1, s2) == max(fuzz.token_sort_ratio(s1, s2), fuzz.token_set_ratio(s1, s2))
 
 @given(s1=st.text(), s2=st.text())
-@settings(max_examples=500, deadline=None)
+@settings(max_examples=50, deadline=1000)
 def test_partial_token_ratio(s1, s2):
     """
     partial_token_ratio should be max(partial_token_sort_ratio, partial_token_set_ratio)
@@ -178,7 +170,7 @@ def test_partial_token_ratio(s1, s2):
 
 
 @given(s1=st.text(max_size=64), s2=st.text(max_size=64))
-@settings(max_examples=500, deadline=None)
+@settings(max_examples=50, deadline=1000)
 def test_levenshtein_word(s1, s2):
     """
     Test short Levenshtein implementation against simple implementation
@@ -213,7 +205,7 @@ def test_levenshtein_word(s1, s2):
 
 
 @given(s1=st.text(min_size=65), s2=st.text(min_size=65))
-@settings(max_examples=500, deadline=None)
+@settings(max_examples=50, deadline=1000)
 def test_levenshtein_block(s1, s2):
     """
     Test blockwise Levenshtein implementation against simple implementation
@@ -247,7 +239,7 @@ def test_levenshtein_block(s1, s2):
     assert isclose(extract_iter_scorer(s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
 
 @given(s1=st.text(), s2=st.text())
-@settings(max_examples=500, deadline=None)
+@settings(max_examples=50, deadline=1000)
 def test_levenshtein_random(s1, s2):
     """
     Test mixed strings to test through all implementations of Levenshtein
@@ -281,7 +273,7 @@ def test_levenshtein_random(s1, s2):
     assert isclose(extract_iter_scorer(s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
 
 @given(sentence=st.text())
-@settings(max_examples=200)
+@settings(max_examples=50, deadline=1000)
 def test_multiple_processor_runs(sentence):
     """
     Test that running a preprocessor on a sentence
@@ -293,7 +285,7 @@ def test_multiple_processor_runs(sentence):
 
 @pytest.mark.parametrize('scorer,processor', list(product(FULL_SCORERS, PROCESSORS)))
 @given(choices=st.lists(st.text(), min_size=1))
-@settings(max_examples=20, deadline=5000)
+@settings(max_examples=50, deadline=1000)
 def test_only_identical_strings_extracted(scorer, processor, choices):
     """
     Test that only identical (post processing) strings score 100 on the test.
@@ -318,7 +310,7 @@ def test_only_identical_strings_extracted(scorer, processor, choices):
 
 
 @given(queries=st.lists(st.text(), min_size=1), choices=st.lists(st.text(), min_size=1))
-@settings(max_examples=500, deadline=5000)
+@settings(max_examples=50, deadline=1000)
 def test_cdist(queries, choices):
     """
     Test that cdist returns correct results
