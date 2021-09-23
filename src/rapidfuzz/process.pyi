@@ -1,5 +1,5 @@
 from typing import Any, Collection, Mapping, Tuple, Callable, Hashable, Sequence, Iterable, Optional, Union, overload, TypeVar, List, Generator
-from rapidfuzz.fuzz import WRatio
+from rapidfuzz.fuzz import WRatio, ratio
 
 _StringType = Sequence[Hashable]
 _AnyStringType = TypeVar("_AnyStringType", bound=_StringType)
@@ -131,3 +131,30 @@ def extract_iter(
     score_cutoff: Optional[ResultType] = None,
     **kwargs: Any
 ) -> Generator[Tuple[S2, ResultType, Any], None, None]: ...
+
+try:
+    import numpy as np
+    @overload
+    def cdist(
+        queries: Iterable[S1],
+        choices: Iterable[S2], *,
+        scorer: Callable[..., ResultType] = ratio,
+        processor: Optional[bool] = None,
+        score_cutoff: Optional[ResultType] = None,
+        dtype: Optional[np.dtype] = None,
+        **kwargs: Any
+    ) -> np.ndarray: ...
+    
+    @overload
+    def cdist(
+        queries: Iterable[S1],
+        choices: Iterable[S2], *,
+        scorer: Callable[..., ResultType] = ratio,
+        processor: Callable[[Union[S1, S2]], _StringType] = None,
+        score_cutoff: Optional[ResultType] = None,
+        dtype: Optional[np.dtype] = None,
+        **kwargs: Any
+    ) -> np.ndarray: ...
+
+except ImportError:
+    pass
