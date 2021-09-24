@@ -170,7 +170,7 @@ def test_partial_token_ratio(s1, s2):
 
 
 @given(s1=st.text(max_size=64), s2=st.text(max_size=64))
-@settings(max_examples=50, deadline=1000)
+@settings(max_examples=50, deadline=None)
 def test_levenshtein_word(s1, s2):
     """
     Test short Levenshtein implementation against simple implementation
@@ -205,7 +205,7 @@ def test_levenshtein_word(s1, s2):
 
 
 @given(s1=st.text(min_size=65), s2=st.text(min_size=65))
-@settings(max_examples=50, deadline=1000)
+@settings(max_examples=50, deadline=None)
 def test_levenshtein_block(s1, s2):
     """
     Test blockwise Levenshtein implementation against simple implementation
@@ -239,7 +239,7 @@ def test_levenshtein_block(s1, s2):
     assert isclose(extract_iter_scorer(s1, s2, string_metric.normalized_levenshtein, weights=(1,1,2)), reference_sim)
 
 @given(s1=st.text(), s2=st.text())
-@settings(max_examples=50, deadline=1000)
+@settings(max_examples=50, deadline=None)
 def test_levenshtein_random(s1, s2):
     """
     Test mixed strings to test through all implementations of Levenshtein
