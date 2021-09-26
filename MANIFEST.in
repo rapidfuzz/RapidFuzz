@@ -4,11 +4,16 @@ include LICENSE
 include pyproject.toml
 include src/rapidfuzz/*.pyi
 include src/rapidfuzz/py.typed
-recursive-include src/rapidfuzz-cpp/rapidfuzz *.hpp *.h *.txx *cpp
-exclude src/rapidfuzz-cpp/rapidfuzz/process.hpp
-exclude src/rapidfuzz-cpp/rapidfuzz/process.txx
-
-recursive-include extern/variant *
 include src/*.hpp
 include src/*.cpp
+
 include src/rapidfuzz-cpp/LICENSE
+recursive-include src/rapidfuzz-cpp/rapidfuzz *.hpp *.h *.txx *cpp
+
+include 3rd-party/taskflow/LICENSE
+include 3rd-party/taskflow/taskflow/algorithm/*
+include 3rd-party/taskflow/taskflow/core/*
+include 3rd-party/taskflow/taskflow/nstd/variant.hpp
+include 3rd-party/taskflow/taskflow/utility/*
+include 3rd-party/taskflow/taskflow/declarations.hpp
+include 3rd-party/taskflow/taskflow/taskflow.hpp

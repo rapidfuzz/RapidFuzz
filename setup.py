@@ -10,8 +10,8 @@ RAPIDFUZZ_TRACE = os.environ.get("RAPIDFUZZ_TRACE", False)
 class BuildExt(build_ext):
     """A custom build extension for adding compiler-specific options."""
     c_opts = {
-        'msvc': ['/EHsc', '/O2', '/W4', '/DNDEBUG'],
-        'unix': ['-O3', '-std=c++11', '-Wextra', '-Wall', '-Wconversion', '-g0', '-DNDEBUG'],
+        'msvc': ['/EHsc', '/std:c++14', '/O2', '/W4', '/DNDEBUG'],
+        'unix': ['-O3', '-std=c++14', '-Wextra', '-Wall', '-Wconversion', '-g0', '-DNDEBUG'],
     }
     l_opts = {
         'msvc': [],
@@ -26,6 +26,10 @@ class BuildExt(build_ext):
         darwin_opts = ['-stdlib=libc++', '-mmacosx-version-min=10.9']
         c_opts['unix'] += darwin_opts
         l_opts['unix'] += darwin_opts
+    else:
+        linux_opts = ['-pthread']
+        c_opts['unix'] += linux_opts
+        l_opts['unix'] += linux_opts
 
     def build_extensions(self):
         ct = self.compiler.compiler_type
@@ -56,7 +60,7 @@ ext_modules = [
             'src/cpp_process_cdist.cpp',
             'src/rapidfuzz-cpp/rapidfuzz/details/unicode.cpp'
         ],
-        include_dirs=["src/rapidfuzz-cpp/", np.get_include()],
+        include_dirs=["src/rapidfuzz-cpp/", "3rd-party/taskflow/", np.get_include()],
         language='c++',
     ),
     Extension(

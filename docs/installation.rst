@@ -41,7 +41,7 @@ from git
 --------
 
 RapidFuzz can be directly used from GitHub by cloning the
-repository which might be useful when you want to work on it:
+repository. This requires a C++14 capable compiler.
 
 .. code-block:: sh
 
