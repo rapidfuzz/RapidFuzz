@@ -55,6 +55,11 @@ static PyObject* cdist_single_list_distance_impl(
     npy_intp dims[] = {(npy_intp)rows, (npy_intp)cols};
     PyArrayObject* matrix = (PyArrayObject*)PyArray_SimpleNew(2, dims, dtype);
 
+    if (matrix == NULL)
+    {
+        return NULL;
+    }
+
 Py_BEGIN_ALLOW_THREADS
     for (size_t row = 0; row < rows; ++row)
     {
@@ -80,6 +85,11 @@ static PyObject* cdist_single_list_similarity_impl(
     std::size_t cols = queries.size();
     npy_intp dims[] = {(npy_intp)rows, (npy_intp)cols};
     PyArrayObject* matrix = (PyArrayObject*)PyArray_SimpleNew(2, dims, dtype);
+
+    if (matrix == NULL)
+    {
+        return NULL;
+    }
 
 Py_BEGIN_ALLOW_THREADS
     for (size_t row = 0; row < rows; ++row)
@@ -108,6 +118,11 @@ static PyObject* cdist_two_lists_distance_impl(
     npy_intp dims[] = {(npy_intp)rows, (npy_intp)cols};
     PyArrayObject* matrix = (PyArrayObject*)PyArray_SimpleNew(2, dims, dtype);
 
+    if (matrix == NULL)
+    {
+        return NULL;
+    }
+
 Py_BEGIN_ALLOW_THREADS
     for (size_t row = 0; row < rows; ++row)
     {
@@ -132,6 +147,11 @@ static PyObject* cdist_two_lists_similarity_impl(
 
     npy_intp dims[] = {(npy_intp)rows, (npy_intp)cols};
     PyArrayObject* matrix = (PyArrayObject*)PyArray_SimpleNew(2, dims, dtype);
+
+    if (matrix == NULL)
+    {
+        return NULL;
+    }
 
 Py_BEGIN_ALLOW_THREADS
     for (size_t row = 0; row < rows; ++row)
