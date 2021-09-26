@@ -113,10 +113,10 @@ cdef extern from "cpp_process.hpp":
     CachedDistanceContext cached_levenshtein_init(const KwargsContext& kwargs, const proc_string& str) nogil except +
 
 cdef extern from "cpp_process_cdist.hpp":
-    object cdist_single_list_distance_impl(const KwargsContext&, distance_context_init, const vector[proc_string]&, int, size_t) except +
-    object cdist_single_list_similarity_impl(const KwargsContext&, scorer_context_init, const vector[proc_string]&, int, double) except +
-    object cdist_two_lists_distance_impl(const KwargsContext&, distance_context_init, const vector[proc_string]&, const vector[proc_string]&, int, size_t) except +
-    object cdist_two_lists_similarity_impl(const KwargsContext&, scorer_context_init, const vector[proc_string]&, const vector[proc_string]&, int, double) except +
+    object cdist_single_list_distance_impl(const KwargsContext&, distance_context_init, const vector[proc_string]&, int, int, size_t) except +
+    object cdist_single_list_similarity_impl(const KwargsContext&, scorer_context_init, const vector[proc_string]&, int, int, double) except +
+    object cdist_two_lists_distance_impl(const KwargsContext&, distance_context_init, const vector[proc_string]&, const vector[proc_string]&, int, int, size_t) except +
+    object cdist_two_lists_similarity_impl(const KwargsContext&, scorer_context_init, const vector[proc_string]&, const vector[proc_string]&, int, int, double) except +
     void set_score_similarity(np.PyArrayObject*, int, np.npy_intp, np.npy_intp, double)
 
 cdef KwargsContext LevenshteinKwargsInit(dict kwargs) except *:
@@ -124,7 +124,7 @@ cdef KwargsContext LevenshteinKwargsInit(dict kwargs) except *:
     cdef LevenshteinWeightTable* weights
     cdef size_t insertion, deletion, substitution
     weights = <LevenshteinWeightTable*>malloc(sizeof(LevenshteinWeightTable))
-    
+
     if (NULL == weights):
         raise MemoryError
 
@@ -153,7 +153,7 @@ cdef KwargsContext JaroWinklerKwargsInit(dict kwargs) except *:
     cdef KwargsContext context
     cdef double* prefix_weight
     prefix_weight = <double*>malloc(sizeof(double))
-    
+
     if (NULL == prefix_weight):
         raise MemoryError
 
@@ -244,7 +244,7 @@ cdef int dtype_to_type_num_similarity(dtype) except -1:
         return np.NPY_FLOAT32
     if dtype is np.float64:
         return np.NPY_FLOAT64
-    
+
     raise TypeError("invalid dtype (use np.uint8, np.float32 or np.float64)")
 
 cdef int dtype_to_type_num_distance(dtype) except -1:
@@ -256,18 +256,19 @@ cdef int dtype_to_type_num_distance(dtype) except -1:
         return np.NPY_INT16
     if dtype is np.int64:
         return np.NPY_INT64
-    
+
     raise TypeError("invalid dtype (use np.int8, np.int16, np.int32 or np.int64)")
 
 cdef inline cdist_two_lists_similarity(
     const vector[proc_string]& queries,
     const vector[proc_string]& choices,
-    scorer, score_cutoff, dtype, dict kwargs
+    scorer, score_cutoff, dtype, workers, dict kwargs
 ):
     cdef double c_score_cutoff = 0
     cdef ScorerFunctionTable table = CachedScorerInit(scorer)
     cdef KwargsContext kwargs_context
     cdef int c_dtype = dtype_to_type_num_similarity(dtype)
+    cdef int c_workers = workers
 
     if (NULL != table.kwargs_init):
         kwargs_context = table.kwargs_init(kwargs)
@@ -277,16 +278,17 @@ cdef inline cdist_two_lists_similarity(
     if c_score_cutoff < 0 or c_score_cutoff > 100:
         raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
 
-    return cdist_two_lists_similarity_impl(kwargs_context, table.init, queries, choices, c_dtype, c_score_cutoff)
+    return cdist_two_lists_similarity_impl(kwargs_context, table.init, queries, choices, c_dtype, c_workers, c_score_cutoff)
 
 cdef inline cdist_two_lists_distance(
     const vector[proc_string]& queries, const vector[proc_string]& choices,
-    scorer, score_cutoff, dtype, dict kwargs
+    scorer, score_cutoff, dtype, workers, dict kwargs
 ):
     cdef size_t c_max = <size_t>-1
     cdef DistanceFunctionTable table = CachedDistanceInit(scorer)
     cdef KwargsContext kwargs_context
     cdef int c_dtype = dtype_to_type_num_distance(dtype)
+    cdef int c_workers = workers
 
     if (NULL != table.kwargs_init):
         kwargs_context = table.kwargs_init(kwargs)
@@ -294,7 +296,7 @@ cdef inline cdist_two_lists_distance(
     if score_cutoff is not None and score_cutoff != -1:
         c_max = score_cutoff
 
-    return cdist_two_lists_distance_impl(kwargs_context, table.init, queries, choices, c_dtype, c_max)
+    return cdist_two_lists_distance_impl(kwargs_context, table.init, queries, choices, c_dtype, c_workers, c_max)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -327,7 +329,7 @@ cdef inline py_cdist_two_lists(
 
     return matrix
 
-cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, dict kwargs):
+cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, workers, dict kwargs):
     cdef vector[proc_string] proc_queries
     cdef vector[proc_string] proc_choices
     cdef vector[PyObject*] proc_py_queries
@@ -374,13 +376,13 @@ cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, d
                     proc_choices.push_back(
                         move(default_process_func(move(conv_sequence(choice))))
                     )
-            
+       
             if IsIntegratedScorer(scorer):
-                return cdist_two_lists_similarity(proc_queries, proc_choices, scorer, score_cutoff, dtype, kwargs)
-            
+                return cdist_two_lists_similarity(proc_queries, proc_choices, scorer, score_cutoff, dtype, workers, kwargs)
+       
 
             if IsIntegratedDistance(scorer):
-                return cdist_two_lists_distance(proc_queries, proc_choices, scorer, score_cutoff, dtype, kwargs)
+                return cdist_two_lists_distance(proc_queries, proc_choices, scorer, score_cutoff, dtype, workers, kwargs)
 
         else:
             proc_py_queries.reserve(queries_len)
@@ -421,12 +423,13 @@ cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, d
             Py_DECREF(<object>item)
 
 cdef inline cdist_single_list_similarity(
-    const vector[proc_string]& queries, scorer, score_cutoff, dtype, dict kwargs
+    const vector[proc_string]& queries, scorer, score_cutoff, dtype, workers, dict kwargs
 ):
     cdef double c_score_cutoff = 0
     cdef ScorerFunctionTable table = CachedScorerInit(scorer)
     cdef KwargsContext kwargs_context
     cdef int c_dtype = dtype_to_type_num_similarity(dtype)
+    cdef int c_workers = workers
 
     if (NULL != table.kwargs_init):
         kwargs_context = table.kwargs_init(kwargs)
@@ -436,15 +439,16 @@ cdef inline cdist_single_list_similarity(
     if c_score_cutoff < 0 or c_score_cutoff > 100:
         raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
 
-    return cdist_single_list_similarity_impl(kwargs_context, table.init, queries, c_dtype, c_score_cutoff)
+    return cdist_single_list_similarity_impl(kwargs_context, table.init, queries, c_dtype, c_workers, c_score_cutoff)
 
 cdef inline cdist_single_list_distance(
-    const vector[proc_string]& queries, scorer, score_cutoff, dtype, dict kwargs
+    const vector[proc_string]& queries, scorer, score_cutoff, dtype, workers, dict kwargs
 ):
     cdef size_t c_max = <size_t>-1
     cdef DistanceFunctionTable table = CachedDistanceInit(scorer)
     cdef KwargsContext kwargs_context
     cdef int c_dtype = dtype_to_type_num_distance(dtype)
+    cdef int c_workers = workers
 
     if (NULL != table.kwargs_init):
         kwargs_context = table.kwargs_init(kwargs)
@@ -452,10 +456,10 @@ cdef inline cdist_single_list_distance(
     if score_cutoff is not None and score_cutoff != -1:
         c_max = score_cutoff
 
-    return cdist_single_list_distance_impl(kwargs_context, table.init, queries, c_dtype, c_max)
+    return cdist_single_list_distance_impl(kwargs_context, table.init, queries, c_dtype, c_workers, c_max)
 
 
-cdef cdist_single_list(queries, scorer, processor, score_cutoff, dtype, dict kwargs):
+cdef cdist_single_list(queries, scorer, processor, score_cutoff, dtype, workers, dict kwargs):
     cdef size_t queries_len = <size_t>len(queries)
 
     cdef vector[proc_string] proc_queries
@@ -484,12 +488,12 @@ cdef cdist_single_list(queries, scorer, processor, score_cutoff, dtype, dict kwa
                     proc_queries.push_back(
                         move(default_process_func(move(conv_sequence(query))))
                     )
-            
+       
             if IsIntegratedScorer(scorer):
-                return cdist_single_list_similarity(proc_queries, scorer, score_cutoff, dtype, kwargs)
-            
+                return cdist_single_list_similarity(proc_queries, scorer, score_cutoff, dtype, workers, kwargs)
+       
             if IsIntegratedDistance(scorer):
-                return cdist_single_list_distance(proc_queries, scorer, score_cutoff, dtype, kwargs)
+                return cdist_single_list_distance(proc_queries, scorer, score_cutoff, dtype, workers, kwargs)
 
         else:
             proc_py_queries.reserve(queries_len)
@@ -517,7 +521,7 @@ cdef cdist_single_list(queries, scorer, processor, score_cutoff, dtype, dict kwa
         for item in proc_py_queries:
             Py_DECREF(<object>item)
 
-def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, dtype=None, **kwargs):
+def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, dtype=None, workers=1, **kwargs):
     """
     Compute distance/similarity between each pair of the two collections of inputs.
 
@@ -549,6 +553,11 @@ def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, 
         - similarity: np.uint8, np.float32, np.float64
         - distance: np.int8, np.int16, np.int32, np.int64
         If not given, then the type will be np.uint8 for similarities and np.int32 for distances.
+    workers : int, optional
+        The calculation is subdivided into workers sections and evaluated in parallel.
+        Supply -1 to use all available CPU cores.
+        This argument is only available for scorers which are part of rapidfuzz. For custom
+        scorers this has not effect.
     **kwargs : Any, optional
         any other named parameters are passed to the scorer. This can be used to pass
         e.g. weights to string_metric.levenshtein
@@ -560,6 +569,6 @@ def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, 
         of the two collections of inputs.
     """
     if queries is choices:
-        return cdist_single_list(queries, scorer, processor, score_cutoff, dtype, kwargs)
+        return cdist_single_list(queries, scorer, processor, score_cutoff, dtype, workers, kwargs)
     else:
-        return cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, kwargs)
+        return cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, workers, kwargs)
