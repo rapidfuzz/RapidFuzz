@@ -86,6 +86,11 @@ class RatioTest(unittest.TestCase):
     def testIssue90(self):
         self.assertAlmostEqual(fuzz.partial_ratio("ax b", "a b a c b"), 85.71428, places=4)
 
+    def testIssue138(self):
+        str1 = 'a'*65
+        str2 = 'a' + chr(256) + 'a'*63
+        self.assertAlmostEqual(fuzz.partial_ratio(str1, str2), 98.46153, places=4)
+
 def test_empty_string():
     """
     when both strings are empty this is either a perfect match or no match
