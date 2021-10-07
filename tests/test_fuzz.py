@@ -21,6 +21,9 @@ scorers = [
     fuzz.QRatio
 ]
 
+if sys.version_info < (3,0,0):
+    chr = unichr
+
 class RatioTest(unittest.TestCase):
     s1 = "new york mets"
     s1a = "new york mets"
@@ -87,8 +90,8 @@ class RatioTest(unittest.TestCase):
         self.assertAlmostEqual(fuzz.partial_ratio("ax b", "a b a c b"), 85.71428, places=4)
 
     def testIssue138(self):
-        str1 = 'a'*65
-        str2 = 'a' + chr(256) + 'a'*63
+        str1 = u'a'*65
+        str2 = u'a' + chr(256) + u'a'*63
         self.assertAlmostEqual(fuzz.partial_ratio(str1, str2), 98.46153, places=4)
 
 def test_empty_string():
