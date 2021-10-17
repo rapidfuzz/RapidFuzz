@@ -11,7 +11,7 @@ jobs:
     runs-on: "ubuntu-latest"
     strategy:
       matrix:
-        python-version: ["2.7", "3.5", "3.9"]
+        python-version: ["2.7", "3.5", "3.9", "3.10"]
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
