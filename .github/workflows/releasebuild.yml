@@ -82,7 +82,36 @@ jobs:
       fail-fast: false
       matrix:
         python_tag: ["cp37-*", "cp38-*", "cp39-*", "cp310-*"]
-        os: [windows-latest, macos-latest]
+        os: [windows-latest]
+    env:
+      CIBW_BUILD: ${{matrix.python_tag}}
+      CIBW_TEST_REQUIRES: pytest hypothesis pandas
+      CIBW_TEST_COMMAND: pytest {package}/tests
+      CIBW_BUILD_VERBOSITY: 3
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.1.1
+        with:
+          output-dir: wheelhouse
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v2
+        with:
+          path: ./wheelhouse/*.whl
+
+  build_wheels:
+    name: Build wheel on ${{ matrix.os }}/auto/${{matrix.python_tag}}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python_tag: ["cp37-*", "cp38-*", "cp39-*"]
+        os: [macos-latest]
     env:
       CIBW_BUILD: ${{matrix.python_tag}}
       CIBW_TEST_REQUIRES: pytest hypothesis pandas
@@ -110,7 +139,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python_tag: ["cp38-*", "cp39-*", "cp310-*"]
+        python_tag: ["cp38-*", "cp39-*"]
     env:
       CIBW_BUILD: ${{matrix.python_tag}}
       CIBW_ARCHS_MACOS: "universal2 arm64"
