@@ -75,7 +75,7 @@ jobs:
         with:
           path: ./wheelhouse/*.whl
 
-  build_wheels:
+  build_wheels_windows:
     name: Build wheel on ${{ matrix.os }}/auto/${{matrix.python_tag}}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -104,7 +104,7 @@ jobs:
         with:
           path: ./wheelhouse/*.whl
 
-  build_wheels:
+  build_wheels_macos:
     name: Build wheel on ${{ matrix.os }}/auto/${{matrix.python_tag}}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -251,7 +251,7 @@ jobs:
 
   deploy-wheels:
     if: github.event_name == 'release' && github.event.action == 'published'
-    needs: [build_legacy, build_windows_27_legacy, build_wheels, build_wheels_apple_silicon, build_wheels_manylinux, build_wheels_pypy, build_sdist]
+    needs: [build_legacy, build_windows_27_legacy, build_wheels_windows, build_wheels_macos, build_wheels_apple_silicon, build_wheels_manylinux, build_wheels_pypy, build_sdist]
     name: deploy wheels to pypi
     runs-on: ubuntu-18.04
 
