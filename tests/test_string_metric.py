@@ -57,10 +57,15 @@ def test_levenshtein_editops():
     """
     basic test for levenshtein_editops
     """
-    assert string_metric.levenshtein_editops("0", "") == [("delete", 1, 0)]
-    assert string_metric.levenshtein_editops("", "0") == [("insert", 0, 1)]
+    assert string_metric.levenshtein_editops("0", "") == [("delete", 0, 0)]
+    assert string_metric.levenshtein_editops("", "0") == [("insert", 0, 0)]
     assert string_metric.levenshtein_editops("qabxcd", "abycdf") == [
-        ("delete", 1, 0), ("replace", 4, 3), ("insert", 6, 6)
+        ("delete", 0, 0), ("replace", 3, 2), ("insert", 6, 5)
+    ]
+    assert string_metric.levenshtein_editops("Lorem ipsum.", "XYZLorem ABC iPsum") == [
+        ("insert", 0, 0), ("insert", 0, 1), ("insert", 0, 2), ("insert", 5, 8),
+        ("insert", 5, 9), ("insert", 5, 10), ("insert", 5, 11), ("replace", 7, 14),
+        ("delete", 11, 18)
     ]
 
 def test_help():
