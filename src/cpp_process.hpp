@@ -217,23 +217,16 @@ struct DistanceFunctionTable {
 template<typename CachedScorer>
 static inline double scorer_func_wrapper(void* context, const proc_string& str, double score_cutoff)
 {
-    CachedScorer* ratio = (CachedScorer*)context;
-
-    switch(str.kind){
-# define X_ENUM(KIND, TYPE, ...) case KIND: return ratio->ratio(no_process<TYPE>(str), score_cutoff);
-        LIST_OF_CASES()
-# undef X_ENUM
-    default:
-       throw std::logic_error("Reached end of control flow in scorer_func");
-    }
+    return visit(str, [&](auto s){
+        return ((CachedScorer*)context)->ratio(s, score_cutoff);
+    });
 }
 
-template<template <typename> class CachedScorer, typename CharT, typename ...Args>
-static inline CachedScorerContext get_ScorerContext(const proc_string& str, Args... args)
+template<template <typename> class CachedScorer, typename Sentence, typename ...Args>
+static inline CachedScorerContext get_ScorerContext(Sentence str, Args... args)
 {
-    using Sentence = rapidfuzz::basic_string_view<CharT>;
     CachedScorerContext context;
-    context.context = (void*) new CachedScorer<Sentence>(Sentence((CharT*)str.data, str.length), args...);
+    context.context = (void*) new CachedScorer<Sentence>(str, args...);
 
     context.scorer = scorer_func_wrapper<CachedScorer<Sentence>>;
     context.deinit = cached_deinit<CachedScorer<Sentence>>;
@@ -243,13 +236,9 @@ static inline CachedScorerContext get_ScorerContext(const proc_string& str, Args
 template<template <typename> class CachedScorer, typename ...Args>
 static inline CachedScorerContext scorer_init(const proc_string& str, Args... args)
 {
-    switch(str.kind){
-# define X_ENUM(KIND, TYPE, ...) case KIND: return get_ScorerContext<CachedScorer, TYPE>(str, args...);
-        LIST_OF_CASES()
-# undef X_ENUM
-    default:
-       throw std::logic_error("Reached end of control flow in scorer_init");
-    }
+    return visit(str, [&](auto s){
+        return get_ScorerContext<CachedScorer>(s, args...);
+    });
 }
 
 /* fuzz */
@@ -393,23 +382,16 @@ static ScorerFunctionTable CreateJaroSimilarityFunctionTable()
 template<typename CachedDistance>
 static inline std::size_t distance_func_wrapper(void* context, const proc_string& str, std::size_t max)
 {
-    CachedDistance* distance = (CachedDistance*)context;
-
-    switch(str.kind){
-# define X_ENUM(KIND, TYPE, ...) case KIND: return distance->distance(no_process<TYPE>(str), max);
-        LIST_OF_CASES()
-# undef X_ENUM
-    default:
-       throw std::logic_error("Reached end of control flow in cached_distance_func");
-    }
+    return visit(str, [&](auto s){
+        return ((CachedDistance*)context)->distance(s, max);
+    });
 }
 
-template<template <typename> class CachedDistance, typename CharT, typename ...Args>
-static inline CachedDistanceContext get_DistanceContext(const proc_string& str, Args... args)
+template<template <typename> class CachedDistance, typename Sentence, typename ...Args>
+static inline CachedDistanceContext get_DistanceContext(Sentence str, Args... args)
 {
-    using Sentence = rapidfuzz::basic_string_view<CharT>;
     CachedDistanceContext context;
-    context.context = (void*) new CachedDistance<Sentence>(Sentence((CharT*)str.data, str.length), args...);
+    context.context = (void*) new CachedDistance<Sentence>(str, args...);
     context.scorer = distance_func_wrapper<CachedDistance<Sentence>>;
     context.deinit = cached_deinit<CachedDistance<Sentence>>;
     return context;
@@ -418,13 +400,9 @@ static inline CachedDistanceContext get_DistanceContext(const proc_string& str, 
 template<template <typename> class CachedDistance, typename ...Args>
 static inline CachedDistanceContext distance_init(const proc_string& str, Args... args)
 {
-    switch(str.kind){
-# define X_ENUM(KIND, TYPE, ...) case KIND: return get_DistanceContext<CachedDistance, TYPE>(str, args...);
-        LIST_OF_CASES()
-# undef X_ENUM
-    default:
-       throw std::logic_error("Reached end of control flow in distance_init");
-    }
+    return visit(str, [&](auto s){
+        return get_DistanceContext<CachedDistance>(s, args...);
+    });
 }
 
 static DistanceFunctionTable CreateHammingFunctionTable()
