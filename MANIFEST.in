@@ -6,6 +6,7 @@ include src/rapidfuzz/*.pyi
 include src/rapidfuzz/py.typed
 include src/*.hpp
 include src/*.cpp
+include capi/*h
 
 include src/rapidfuzz-cpp/LICENSE
 recursive-include src/rapidfuzz-cpp/rapidfuzz *.hpp *.h *.txx *cpp

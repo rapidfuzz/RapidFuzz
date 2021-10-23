@@ -34,7 +34,7 @@ from cpython.object cimport PyObject
 from cpython.ref cimport Py_INCREF, Py_DECREF
 from cython.operator cimport dereference
 
-from cpp_common cimport proc_string, is_valid_string, convert_string, hash_array, hash_sequence, default_process_func
+from cpp_common cimport RfString, RfStringWrapper, is_valid_string, convert_string, hash_array, hash_sequence, default_process_func
 
 from array import array
 from libc.stdlib cimport malloc, free
@@ -45,7 +45,7 @@ cimport cython
 
 np.import_array()
 
-cdef inline proc_string conv_sequence(seq) except *:
+cdef inline RfString conv_sequence(seq) except *:
     if is_valid_string(seq):
         return move(convert_string(seq))
     elif isinstance(seq, array):
@@ -62,11 +62,11 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
 cdef extern from "cpp_process.hpp":
     cdef cppclass CachedScorerContext:
         CachedScorerContext()
-        double ratio(const proc_string&, double) nogil except +
+        double ratio(const RfString&, double) nogil except +
 
     cdef cppclass CachedDistanceContext:
         CachedDistanceContext()
-        size_t ratio(const proc_string&, size_t) nogil except +
+        size_t ratio(const RfString&, size_t) nogil except +
 
     ctypedef void (*context_deinit) (void* context)
 
@@ -77,8 +77,8 @@ cdef extern from "cpp_process.hpp":
         context_deinit deinit
 
     ctypedef KwargsContext (*kwargs_context_init)(dict kwargs) except *
-    ctypedef CachedDistanceContext (*distance_context_init)(const KwargsContext& kwargs, const proc_string& str) nogil except +
-    ctypedef CachedScorerContext (*scorer_context_init)(const KwargsContext& kwargs, const proc_string& str) nogil except +
+    ctypedef CachedDistanceContext (*distance_context_init)(const KwargsContext& kwargs, const RfString& str) nogil except +
+    ctypedef CachedScorerContext (*scorer_context_init)(const KwargsContext& kwargs, const RfString& str) nogil except +
 
     cdef struct DistanceFunctionTable:
         kwargs_context_init kwargs_init
@@ -103,20 +103,20 @@ cdef extern from "cpp_process.hpp":
 
     # string_metric
 
-    CachedScorerContext cached_jaro_winkler_similarity_init(const KwargsContext& kwargs, const proc_string& str) nogil except +
-    CachedScorerContext cached_normalized_levenshtein_init(const KwargsContext& kwargs, const proc_string& str) nogil except +
+    CachedScorerContext cached_jaro_winkler_similarity_init(const KwargsContext& kwargs, const RfString& str) nogil except +
+    CachedScorerContext cached_normalized_levenshtein_init(const KwargsContext& kwargs, const RfString& str) nogil except +
     ScorerFunctionTable CreateNormalizedHammingFunctionTable()
     ScorerFunctionTable CreateJaroSimilarityFunctionTable()
 
     # distances
     DistanceFunctionTable CreateHammingFunctionTable()
-    CachedDistanceContext cached_levenshtein_init(const KwargsContext& kwargs, const proc_string& str) nogil except +
+    CachedDistanceContext cached_levenshtein_init(const KwargsContext& kwargs, const RfString& str) nogil except +
 
 cdef extern from "cpp_process_cdist.hpp":
-    object cdist_single_list_distance_impl(const KwargsContext&, distance_context_init, const vector[proc_string]&, int, int, size_t) except +
-    object cdist_single_list_similarity_impl(const KwargsContext&, scorer_context_init, const vector[proc_string]&, int, int, double) except +
-    object cdist_two_lists_distance_impl(const KwargsContext&, distance_context_init, const vector[proc_string]&, const vector[proc_string]&, int, int, size_t) except +
-    object cdist_two_lists_similarity_impl(const KwargsContext&, scorer_context_init, const vector[proc_string]&, const vector[proc_string]&, int, int, double) except +
+    object cdist_single_list_distance_impl(const KwargsContext&, distance_context_init, const vector[RfStringWrapper]&, int, int, size_t) except +
+    object cdist_single_list_similarity_impl(const KwargsContext&, scorer_context_init, const vector[RfStringWrapper]&, int, int, double) except +
+    object cdist_two_lists_distance_impl(const KwargsContext&, distance_context_init, const vector[RfStringWrapper]&, const vector[RfStringWrapper]&, int, int, size_t) except +
+    object cdist_two_lists_similarity_impl(const KwargsContext&, scorer_context_init, const vector[RfStringWrapper]&, const vector[RfStringWrapper]&, int, int, double) except +
     void set_score_similarity(np.PyArrayObject*, int, np.npy_intp, np.npy_intp, double)
 
 cdef KwargsContext LevenshteinKwargsInit(dict kwargs) except *:
@@ -260,8 +260,8 @@ cdef int dtype_to_type_num_distance(dtype) except -1:
     raise TypeError("invalid dtype (use np.int8, np.int16, np.int32 or np.int64)")
 
 cdef inline cdist_two_lists_similarity(
-    const vector[proc_string]& queries,
-    const vector[proc_string]& choices,
+    const vector[RfStringWrapper]& queries,
+    const vector[RfStringWrapper]& choices,
     scorer, score_cutoff, dtype, workers, dict kwargs
 ):
     cdef double c_score_cutoff = 0
@@ -281,7 +281,7 @@ cdef inline cdist_two_lists_similarity(
     return cdist_two_lists_similarity_impl(kwargs_context, table.init, queries, choices, c_dtype, c_workers, c_score_cutoff)
 
 cdef inline cdist_two_lists_distance(
-    const vector[proc_string]& queries, const vector[proc_string]& choices,
+    const vector[RfStringWrapper]& queries, const vector[RfStringWrapper]& choices,
     scorer, score_cutoff, dtype, workers, dict kwargs
 ):
     cdef size_t c_max = <size_t>-1
@@ -330,8 +330,8 @@ cdef inline py_cdist_two_lists(
     return matrix
 
 cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, workers, dict kwargs):
-    cdef vector[proc_string] proc_queries
-    cdef vector[proc_string] proc_choices
+    cdef vector[RfStringWrapper] proc_queries
+    cdef vector[RfStringWrapper] proc_choices
     cdef vector[PyObject*] proc_py_queries
     cdef vector[PyObject*] proc_py_choices
     cdef size_t queries_len = <size_t>len(queries)
@@ -345,10 +345,10 @@ cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, w
             # processor None/False
             if not processor:
                 for query in queries:
-                    proc_queries.push_back(move(conv_sequence(query)))
+                    proc_queries.push_back(move(RfStringWrapper(conv_sequence(query))))
 
                 for choice in choices:
-                    proc_choices.push_back(move(conv_sequence(choice)))
+                    proc_choices.push_back(move(RfStringWrapper(conv_sequence(choice))))
             # processor has to be called through python
             elif processor is not default_process and callable(processor):
                 proc_py_queries.reserve(queries_len)
@@ -356,25 +356,25 @@ cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, w
                     proc_query = processor(query)
                     Py_INCREF(proc_query)
                     proc_py_queries.push_back(<PyObject*>proc_query)
-                    proc_queries.push_back(move(conv_sequence(proc_query)))
+                    proc_queries.push_back(move(RfStringWrapper(conv_sequence(proc_query))))
 
                 proc_py_choices.reserve(choices_len)
                 for choice in choices:
                     proc_choice = processor(choice)
                     Py_INCREF(proc_choice)
                     proc_py_choices.push_back(<PyObject*>proc_choice)
-                    proc_choices.push_back(move(conv_sequence(proc_choice)))
+                    proc_choices.push_back(move(RfStringWrapper(conv_sequence(proc_choice))))
 
             # processor is True / default_process
             else:
                 for query in queries:
                     proc_queries.push_back(
-                        move(default_process_func(move(conv_sequence(query))))
+                        move(RfStringWrapper(default_process_func(conv_sequence(query))))
                     )
 
                 for choice in choices:
                     proc_choices.push_back(
-                        move(default_process_func(move(conv_sequence(choice))))
+                        move(RfStringWrapper(default_process_func(conv_sequence(choice))))
                     )
        
             if IsIntegratedScorer(scorer):
@@ -423,7 +423,7 @@ cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, w
             Py_DECREF(<object>item)
 
 cdef inline cdist_single_list_similarity(
-    const vector[proc_string]& queries, scorer, score_cutoff, dtype, workers, dict kwargs
+    const vector[RfStringWrapper]& queries, scorer, score_cutoff, dtype, workers, dict kwargs
 ):
     cdef double c_score_cutoff = 0
     cdef ScorerFunctionTable table = CachedScorerInit(scorer)
@@ -442,7 +442,7 @@ cdef inline cdist_single_list_similarity(
     return cdist_single_list_similarity_impl(kwargs_context, table.init, queries, c_dtype, c_workers, c_score_cutoff)
 
 cdef inline cdist_single_list_distance(
-    const vector[proc_string]& queries, scorer, score_cutoff, dtype, workers, dict kwargs
+    const vector[RfStringWrapper]& queries, scorer, score_cutoff, dtype, workers, dict kwargs
 ):
     cdef size_t c_max = <size_t>-1
     cdef DistanceFunctionTable table = CachedDistanceInit(scorer)
@@ -462,7 +462,7 @@ cdef inline cdist_single_list_distance(
 cdef cdist_single_list(queries, scorer, processor, score_cutoff, dtype, workers, dict kwargs):
     cdef size_t queries_len = <size_t>len(queries)
 
-    cdef vector[proc_string] proc_queries
+    cdef vector[RfStringWrapper] proc_queries
     cdef vector[PyObject*] proc_py_queries
 
     try:
@@ -472,7 +472,7 @@ cdef cdist_single_list(queries, scorer, processor, score_cutoff, dtype, workers,
             # processor None/False
             if not processor:
                 for query in queries:
-                    proc_queries.push_back(move(conv_sequence(query)))
+                    proc_queries.push_back(move(RfStringWrapper(conv_sequence(query))))
             # processor has to be called through python
             elif processor is not default_process and callable(processor):
                 proc_py_queries.reserve(queries_len)
@@ -480,13 +480,13 @@ cdef cdist_single_list(queries, scorer, processor, score_cutoff, dtype, workers,
                     proc_query = processor(query)
                     Py_INCREF(proc_query)
                     proc_py_queries.push_back(<PyObject*>proc_query)
-                    proc_queries.push_back(move(conv_sequence(proc_query)))
+                    proc_queries.push_back(move(RfStringWrapper(conv_sequence(proc_query))))
 
             # processor is True / default_process
             else:
                 for query in queries:
                     proc_queries.push_back(
-                        move(default_process_func(move(conv_sequence(query))))
+                        move(RfStringWrapper(default_process_func(conv_sequence(query))))
                     )
        
             if IsIntegratedScorer(scorer):

@@ -61,8 +61,8 @@ struct ExtractDistanceComp
     }
 };
 
-typedef double (*scorer_func) (void* context, const proc_string& str, double score_cutoff);
-typedef std::size_t (*distance_func) (void* context, const proc_string& str, std::size_t max);
+typedef double (*scorer_func) (void* context, const RfString& str, double score_cutoff);
+typedef std::size_t (*distance_func) (void* context, const RfString& str, std::size_t max);
 typedef void (*context_deinit) (void* context);
 
 struct CachedScorerContext {
@@ -105,7 +105,7 @@ struct CachedScorerContext {
         }  
     }
 
-    double ratio(const proc_string& str, double score_cutoff) {
+    double ratio(const RfString& str, double score_cutoff) {
         return scorer(context, str, score_cutoff);
     }
 };
@@ -150,7 +150,7 @@ struct CachedDistanceContext {
         }  
     }
 
-    std::size_t ratio(const proc_string& str, std::size_t max) {
+    std::size_t ratio(const RfString& str, std::size_t max) {
         return scorer(context, str, max);
     }
 };
@@ -201,8 +201,8 @@ static void cached_deinit(void* context)
 }
 
 typedef KwargsContext (*kwargs_context_init)(PyObject* kwds);
-typedef CachedDistanceContext (*distance_context_init)(const KwargsContext& kwargs, const proc_string& str);
-typedef CachedScorerContext (*scorer_context_init)(const KwargsContext& kwargs, const proc_string& str);
+typedef CachedDistanceContext (*distance_context_init)(const KwargsContext& kwargs, const RfString& str);
+typedef CachedScorerContext (*scorer_context_init)(const KwargsContext& kwargs, const RfString& str);
 
 struct ScorerFunctionTable {
     kwargs_context_init kwargs_init;
@@ -215,7 +215,7 @@ struct DistanceFunctionTable {
 };
 
 template<typename CachedScorer>
-static inline double scorer_func_wrapper(void* context, const proc_string& str, double score_cutoff)
+static inline double scorer_func_wrapper(void* context, const RfString& str, double score_cutoff)
 {
     return visit(str, [&](auto s){
         return ((CachedScorer*)context)->ratio(s, score_cutoff);
@@ -234,7 +234,7 @@ static inline CachedScorerContext get_ScorerContext(Sentence str, Args... args)
 }
 
 template<template <typename> class CachedScorer, typename ...Args>
-static inline CachedScorerContext scorer_init(const proc_string& str, Args... args)
+static inline CachedScorerContext scorer_init(const RfString& str, Args... args)
 {
     return visit(str, [&](auto s){
         return get_ScorerContext<CachedScorer>(s, args...);
@@ -246,7 +246,7 @@ static ScorerFunctionTable CreateRatioFunctionTable()
 {
     return {
         nullptr,
-        [](const KwargsContext&, const proc_string& str) {
+        [](const KwargsContext&, const RfString& str) {
             return scorer_init<fuzz::CachedRatio>(str);
         }
     };
@@ -256,7 +256,7 @@ static ScorerFunctionTable CreatePartialRatioFunctionTable()
 {
     return {
         nullptr,
-        [](const KwargsContext&, const proc_string& str) {
+        [](const KwargsContext&, const RfString& str) {
             return scorer_init<fuzz::CachedPartialRatio>(str);
         }
     };
@@ -266,7 +266,7 @@ static ScorerFunctionTable CreateTokenSortRatioFunctionTable()
 {
     return {
         nullptr,
-        [](const KwargsContext&, const proc_string& str) {
+        [](const KwargsContext&, const RfString& str) {
             return scorer_init<fuzz::CachedTokenSortRatio>(str);
         }
     };
@@ -276,7 +276,7 @@ static ScorerFunctionTable CreateTokenSetRatioFunctionTable()
 {
     return {
         nullptr,
-        [](const KwargsContext&, const proc_string& str) {
+        [](const KwargsContext&, const RfString& str) {
             return scorer_init<fuzz::CachedTokenSetRatio>(str);
         }
     };
@@ -286,7 +286,7 @@ static ScorerFunctionTable CreateTokenRatioFunctionTable()
 {
     return {
         nullptr,
-        [](const KwargsContext&, const proc_string& str) {
+        [](const KwargsContext&, const RfString& str) {
             return scorer_init<fuzz::CachedTokenRatio>(str);
         }
     };
@@ -296,7 +296,7 @@ static ScorerFunctionTable CreatePartialTokenSortRatioFunctionTable()
 {
     return {
         nullptr,
-        [](const KwargsContext&, const proc_string& str) {
+        [](const KwargsContext&, const RfString& str) {
             return scorer_init<fuzz::CachedPartialTokenSortRatio>(str);
         }
     };
@@ -306,7 +306,7 @@ static ScorerFunctionTable CreatePartialTokenSetRatioFunctionTable()
 {
     return {
         nullptr,
-        [](const KwargsContext&, const proc_string& str) {
+        [](const KwargsContext&, const RfString& str) {
             return scorer_init<fuzz::CachedPartialTokenSetRatio>(str);
         }
     };
@@ -316,7 +316,7 @@ static ScorerFunctionTable CreatePartialTokenRatioFunctionTable()
 {
     return {
         nullptr,
-        [](const KwargsContext&, const proc_string& str) {
+        [](const KwargsContext&, const RfString& str) {
             return scorer_init<fuzz::CachedPartialTokenRatio>(str);
         }
     };
@@ -326,7 +326,7 @@ static ScorerFunctionTable CreateWRatioFunctionTable()
 {
     return {
         nullptr,
-        [](const KwargsContext&, const proc_string& str) {
+        [](const KwargsContext&, const RfString& str) {
             return scorer_init<fuzz::CachedWRatio>(str);
         }
     };
@@ -336,14 +336,14 @@ static ScorerFunctionTable CreateQRatioFunctionTable()
 {
     return {
         nullptr,
-        [](const KwargsContext&, const proc_string& str) {
+        [](const KwargsContext&, const RfString& str) {
             return scorer_init<fuzz::CachedQRatio>(str);
         }
     };
 }
 
 /* string_metric */
-static CachedScorerContext cached_normalized_levenshtein_init(const KwargsContext& kwargs, const proc_string& str)
+static CachedScorerContext cached_normalized_levenshtein_init(const KwargsContext& kwargs, const RfString& str)
 {
     return scorer_init<string_metric::CachedNormalizedLevenshtein>(
         str, *static_cast<rapidfuzz::LevenshteinWeightTable*>(kwargs.context));
@@ -353,13 +353,13 @@ static ScorerFunctionTable CreateNormalizedHammingFunctionTable()
 {
     return {
         nullptr,
-        [](const KwargsContext&, const proc_string& str) {
+        [](const KwargsContext&, const RfString& str) {
             return scorer_init<string_metric::CachedNormalizedHamming>(str);
         }
     };
 }
 
-static CachedScorerContext cached_jaro_winkler_similarity_init(const KwargsContext& kwargs, const proc_string& str)
+static CachedScorerContext cached_jaro_winkler_similarity_init(const KwargsContext& kwargs, const RfString& str)
 {
     return scorer_init<string_metric::CachedJaroWinklerSimilarity>(
         str, *static_cast<double*>(kwargs.context));
@@ -369,7 +369,7 @@ static ScorerFunctionTable CreateJaroSimilarityFunctionTable()
 {
     return {
         nullptr,
-        [](const KwargsContext&, const proc_string& str) {
+        [](const KwargsContext&, const RfString& str) {
             return scorer_init<string_metric::CachedJaroSimilarity>(str);
         }
     };
@@ -380,7 +380,7 @@ static ScorerFunctionTable CreateJaroSimilarityFunctionTable()
  *************************************************/
 
 template<typename CachedDistance>
-static inline std::size_t distance_func_wrapper(void* context, const proc_string& str, std::size_t max)
+static inline std::size_t distance_func_wrapper(void* context, const RfString& str, std::size_t max)
 {
     return visit(str, [&](auto s){
         return ((CachedDistance*)context)->distance(s, max);
@@ -398,7 +398,7 @@ static inline CachedDistanceContext get_DistanceContext(Sentence str, Args... ar
 }
 
 template<template <typename> class CachedDistance, typename ...Args>
-static inline CachedDistanceContext distance_init(const proc_string& str, Args... args)
+static inline CachedDistanceContext distance_init(const RfString& str, Args... args)
 {
     return visit(str, [&](auto s){
         return get_DistanceContext<CachedDistance>(s, args...);
@@ -409,13 +409,13 @@ static DistanceFunctionTable CreateHammingFunctionTable()
 {
     return {
         nullptr,
-        [](const KwargsContext&, const proc_string& str) {
+        [](const KwargsContext&, const RfString& str) {
             return distance_init<string_metric::CachedHamming>(str);
         }
     };
 }
 
-static CachedDistanceContext cached_levenshtein_init(const KwargsContext& kwargs, const proc_string& str)
+static CachedDistanceContext cached_levenshtein_init(const KwargsContext& kwargs, const RfString& str)
 {
     return distance_init<string_metric::CachedLevenshtein>(str, *static_cast<rapidfuzz::LevenshteinWeightTable*>(kwargs.context));
 }

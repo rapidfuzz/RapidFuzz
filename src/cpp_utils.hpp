@@ -2,7 +2,7 @@
 #include "cpp_common.hpp"
 
 PyObject* default_process_impl(PyObject* sentence) {
-    proc_string c_sentence = convert_string(sentence);
+    RfString c_sentence = convert_string(sentence);
 
     switch (c_sentence.kind) {
 #if PY_VERSION_HEX > PYTHON_VERSION(3, 0, 0)

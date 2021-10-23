@@ -2,14 +2,14 @@
 # cython: language_level=3, binding=True, linetrace=True
 
 from rapidfuzz.utils import default_process
-from cpp_common cimport proc_string, is_valid_string, convert_string, hash_array, hash_sequence
+from cpp_common cimport  RfString, RfStringWrapper, is_valid_string, convert_string, hash_array, hash_sequence
 from array import array
 from libcpp.utility cimport move
 from libcpp.vector cimport vector
 from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.ref cimport Py_INCREF
 
-cdef inline proc_string conv_sequence(seq) except *:
+cdef inline RfString conv_sequence(seq) except *:
     if is_valid_string(seq):
         return move(convert_string(seq))
     elif isinstance(seq, array):
@@ -30,22 +30,22 @@ cdef extern from "cpp_scorer.hpp" namespace "rapidfuzz" nogil:
         size_t dest_pos
 
 cdef extern from "cpp_scorer.hpp":
-    double normalized_levenshtein_no_process(       const proc_string&, const proc_string&, size_t, size_t, size_t, double) nogil except +
-    double normalized_levenshtein_default_process(  const proc_string&, const proc_string&, size_t, size_t, size_t, double) nogil except +
-    double normalized_hamming_no_process(           const proc_string&, const proc_string&, double) nogil except +
-    double normalized_hamming_default_process(      const proc_string&, const proc_string&, double) nogil except +
-    double jaro_similarity_no_process(              const proc_string&, const proc_string&, double) nogil except +
-    double jaro_similarity_default_process(         const proc_string&, const proc_string&, double) nogil except +
-    double jaro_winkler_similarity_no_process(      const proc_string&, const proc_string&, double, double) nogil except +
-    double jaro_winkler_similarity_default_process( const proc_string&, const proc_string&, double, double) nogil except +
+    double normalized_levenshtein_no_process(       const RfString&, const RfString&, size_t, size_t, size_t, double) nogil except +
+    double normalized_levenshtein_default_process(  const RfString&, const RfString&, size_t, size_t, size_t, double) nogil except +
+    double normalized_hamming_no_process(           const RfString&, const RfString&, double) nogil except +
+    double normalized_hamming_default_process(      const RfString&, const RfString&, double) nogil except +
+    double jaro_similarity_no_process(              const RfString&, const RfString&, double) nogil except +
+    double jaro_similarity_default_process(         const RfString&, const RfString&, double) nogil except +
+    double jaro_winkler_similarity_no_process(      const RfString&, const RfString&, double, double) nogil except +
+    double jaro_winkler_similarity_default_process( const RfString&, const RfString&, double, double) nogil except +
 
-    object levenshtein_no_process(                  const proc_string&, const proc_string&, size_t, size_t, size_t, size_t) nogil except +
-    object levenshtein_default_process(             const proc_string&, const proc_string&, size_t, size_t, size_t, size_t) nogil except +
-    object hamming_no_process(                      const proc_string&, const proc_string&, size_t) nogil except +
-    object hamming_default_process(                 const proc_string&, const proc_string&, size_t) nogil except +
+    object levenshtein_no_process(                  const RfString&, const RfString&, size_t, size_t, size_t, size_t) nogil except +
+    object levenshtein_default_process(             const RfString&, const RfString&, size_t, size_t, size_t, size_t) nogil except +
+    object hamming_no_process(                      const RfString&, const RfString&, size_t) nogil except +
+    object hamming_default_process(                 const RfString&, const RfString&, size_t) nogil except +
 
-    vector[LevenshteinEditOp] levenshtein_editops_no_process(     const proc_string& s1, const proc_string& s2) nogil except +
-    vector[LevenshteinEditOp] levenshtein_editops_default_process(const proc_string& s1, const proc_string& s2) nogil except +
+    vector[LevenshteinEditOp] levenshtein_editops_no_process(     const RfString& s1, const RfString& s2) nogil except +
+    vector[LevenshteinEditOp] levenshtein_editops_default_process(const RfString& s1, const RfString& s2) nogil except +
 
 def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
     """
@@ -219,12 +219,16 @@ def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
     cdef size_t c_max = <size_t>-1 if max is None else max
 
     if processor is True or processor == default_process:
-        return levenshtein_default_process(conv_sequence(s1), conv_sequence(s2), insertion, deletion, substitution, c_max)
+        s1_proc = RfStringWrapper(conv_sequence(s1))
+        s2_proc = RfStringWrapper(conv_sequence(s2))
+        return levenshtein_default_process(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_max)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    return levenshtein_no_process(conv_sequence(s1), conv_sequence(s2), insertion, deletion, substitution, c_max)
+    s1_proc = RfStringWrapper(conv_sequence(s1))
+    s2_proc = RfStringWrapper(conv_sequence(s2))
+    return levenshtein_no_process(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_max)
 
 cdef str levenshtein_edit_type_to_str(LevenshteinEditType edit_type):
     if edit_type == LevenshteinEditType.Insert:
@@ -281,15 +285,19 @@ def levenshtein_editops(s1, s2, *, processor=None):
      insert s1[6] s2[6]
     """
     if processor is True or processor == default_process:
+        s1_proc = RfStringWrapper(conv_sequence(s1))
+        s2_proc = RfStringWrapper(conv_sequence(s2))
         return levenshtein_editops_to_list(
-            levenshtein_editops_default_process(conv_sequence(s1), conv_sequence(s2))
+            levenshtein_editops_default_process(s1_proc.string, s2_proc.string)
         )
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
+    s1_proc = RfStringWrapper(conv_sequence(s1))
+    s2_proc = RfStringWrapper(conv_sequence(s2))
     return levenshtein_editops_to_list(
-        levenshtein_editops_no_process(conv_sequence(s1), conv_sequence(s2))
+        levenshtein_editops_no_process(s1_proc.string, s2_proc.string)
     )
 
 def normalized_levenshtein(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
@@ -388,12 +396,16 @@ def normalized_levenshtein(s1, s2, *, weights=(1,1,1), processor=None, score_cut
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
 
     if processor is True or processor == default_process:
-        return normalized_levenshtein_default_process(conv_sequence(s1), conv_sequence(s2), insertion, deletion, substitution, c_score_cutoff)
+        s1_proc = RfStringWrapper(conv_sequence(s1))
+        s2_proc = RfStringWrapper(conv_sequence(s2))
+        return normalized_levenshtein_default_process(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    return normalized_levenshtein_no_process(conv_sequence(s1), conv_sequence(s2), insertion, deletion, substitution, c_score_cutoff)
+    s1_proc = RfStringWrapper(conv_sequence(s1))
+    s2_proc = RfStringWrapper(conv_sequence(s2))
+    return normalized_levenshtein_no_process(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
 
 
 def hamming(s1, s2, *, processor=None, max=None):
@@ -435,12 +447,16 @@ def hamming(s1, s2, *, processor=None, max=None):
         return 0
 
     if processor is True or processor == default_process:
-        return hamming_default_process(conv_sequence(s1), conv_sequence(s2), c_max)
+        s1_proc = RfStringWrapper(conv_sequence(s1))
+        s2_proc = RfStringWrapper(conv_sequence(s2))
+        return hamming_default_process(s1_proc.string, s2_proc.string, c_max)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    return hamming_no_process(conv_sequence(s1), conv_sequence(s2), c_max)
+    s1_proc = RfStringWrapper(conv_sequence(s1))
+    s2_proc = RfStringWrapper(conv_sequence(s2))
+    return hamming_no_process(s1_proc.string, s2_proc.string, c_max)
 
 
 def normalized_hamming(s1, s2, *, processor=None, score_cutoff=None):
@@ -482,12 +498,16 @@ def normalized_hamming(s1, s2, *, processor=None, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        return normalized_hamming_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
+        s1_proc = RfStringWrapper(conv_sequence(s1))
+        s2_proc = RfStringWrapper(conv_sequence(s2))
+        return normalized_hamming_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    return normalized_hamming_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
+    s1_proc = RfStringWrapper(conv_sequence(s1))
+    s2_proc = RfStringWrapper(conv_sequence(s2))
+    return normalized_hamming_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
 def jaro_similarity(s1, s2, *, processor=None, score_cutoff=None):
@@ -521,12 +541,16 @@ def jaro_similarity(s1, s2, *, processor=None, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        return jaro_similarity_default_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
+        s1_proc = RfStringWrapper(conv_sequence(s1))
+        s2_proc = RfStringWrapper(conv_sequence(s2))
+        return jaro_similarity_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    return jaro_similarity_no_process(conv_sequence(s1), conv_sequence(s2), c_score_cutoff)
+    s1_proc = RfStringWrapper(conv_sequence(s1))
+    s2_proc = RfStringWrapper(conv_sequence(s2))
+    return jaro_similarity_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
 def jaro_winkler_similarity(s1, s2, *, double prefix_weight=0.1, processor=None, score_cutoff=None):
@@ -567,9 +591,13 @@ def jaro_winkler_similarity(s1, s2, *, double prefix_weight=0.1, processor=None,
         return 0
 
     if processor is True or processor == default_process:
-        return jaro_winkler_similarity_default_process(conv_sequence(s1), conv_sequence(s2), prefix_weight, c_score_cutoff)
+        s1_proc = RfStringWrapper(conv_sequence(s1))
+        s2_proc = RfStringWrapper(conv_sequence(s2))
+        return jaro_winkler_similarity_default_process(s1_proc.string, s2_proc.string, prefix_weight, c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    return jaro_winkler_similarity_no_process(conv_sequence(s1), conv_sequence(s2), prefix_weight, c_score_cutoff)
+    s1_proc = RfStringWrapper(conv_sequence(s1))
+    s2_proc = RfStringWrapper(conv_sequence(s2))
+    return jaro_winkler_similarity_no_process(s1_proc.string, s2_proc.string, prefix_weight, c_score_cutoff)

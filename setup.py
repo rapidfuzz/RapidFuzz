@@ -51,7 +51,7 @@ ext_modules = [
             'src/cpp_process.cpp',
             'src/rapidfuzz-cpp/rapidfuzz/details/unicode.cpp'
         ],
-        include_dirs=["src/rapidfuzz-cpp/"],
+        include_dirs=["src/rapidfuzz-cpp/", "capi/"],
         language='c++',
     ),
     Extension(
@@ -60,7 +60,7 @@ ext_modules = [
             'src/cpp_process_cdist.cpp',
             'src/rapidfuzz-cpp/rapidfuzz/details/unicode.cpp'
         ],
-        include_dirs=["src/rapidfuzz-cpp/", "3rd-party/taskflow/", np.get_include()],
+        include_dirs=["src/rapidfuzz-cpp/", "capi/", "3rd-party/taskflow/", np.get_include()],
         language='c++',
     ),
     Extension(
@@ -69,7 +69,7 @@ ext_modules = [
             'src/cpp_fuzz.cpp',
             'src/rapidfuzz-cpp/rapidfuzz/details/unicode.cpp'
         ],
-        include_dirs=["src/rapidfuzz-cpp/"],
+        include_dirs=["src/rapidfuzz-cpp/", "capi/"],
         language='c++',
     ),
     Extension(
@@ -78,7 +78,7 @@ ext_modules = [
             'src/cpp_string_metric.cpp',
             'src/rapidfuzz-cpp/rapidfuzz/details/unicode.cpp'
         ],
-        include_dirs=["src/rapidfuzz-cpp/"],
+        include_dirs=["src/rapidfuzz-cpp/", "capi/"],
         language='c++',
     ),
     Extension(
@@ -87,10 +87,11 @@ ext_modules = [
             'src/cpp_utils.cpp',
             'src/rapidfuzz-cpp/rapidfuzz/details/unicode.cpp'
         ],
-        include_dirs=["src/rapidfuzz-cpp/"],
+        include_dirs=["src/rapidfuzz-cpp/", "capi/"],
         language='c++',
     )
 ]
+
 
 
 if __name__ == "__main__":

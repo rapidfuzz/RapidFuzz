@@ -36,13 +36,13 @@ from cpython.object cimport PyObject
 from cpython.ref cimport Py_INCREF, Py_DECREF
 from cython.operator cimport dereference
 
-from cpp_common cimport proc_string, is_valid_string, convert_string, hash_array, hash_sequence, default_process_func
+from cpp_common cimport RfString, RfStringWrapper, is_valid_string, convert_string, hash_array, hash_sequence, default_process_func
 
 import heapq
 from array import array
 from libc.stdlib cimport malloc, free
 
-cdef inline proc_string conv_sequence(seq) except *:
+cdef inline RfString conv_sequence(seq) except *:
     if is_valid_string(seq):
         return move(convert_string(seq))
     elif isinstance(seq, array):
@@ -59,11 +59,11 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
 cdef extern from "cpp_process.hpp":
     cdef cppclass CachedScorerContext:
         CachedScorerContext()
-        double ratio(const proc_string&, double) nogil except +
+        double ratio(const RfString&, double) nogil except +
 
     cdef cppclass CachedDistanceContext:
         CachedDistanceContext()
-        size_t ratio(const proc_string&, size_t) nogil except +
+        size_t ratio(const RfString&, size_t) nogil except +
 
     ctypedef void (*context_deinit) (void* context)
 
@@ -74,8 +74,8 @@ cdef extern from "cpp_process.hpp":
         context_deinit deinit
 
     ctypedef KwargsContext (*kwargs_context_init)(dict kwargs) except *
-    ctypedef CachedDistanceContext (*distance_context_init)(const KwargsContext& kwargs, const proc_string& str) nogil except +
-    ctypedef CachedScorerContext (*scorer_context_init)(const KwargsContext& kwargs, const proc_string& str) nogil except +
+    ctypedef CachedDistanceContext (*distance_context_init)(const KwargsContext& kwargs, const RfString& str) nogil except +
+    ctypedef CachedScorerContext (*scorer_context_init)(const KwargsContext& kwargs, const RfString& str) nogil except +
 
     cdef struct DistanceFunctionTable:
         kwargs_context_init kwargs_init
@@ -100,14 +100,14 @@ cdef extern from "cpp_process.hpp":
 
     # string_metric
 
-    CachedScorerContext cached_jaro_winkler_similarity_init(const KwargsContext& kwargs, const proc_string& str) nogil except +
-    CachedScorerContext cached_normalized_levenshtein_init(const KwargsContext& kwargs, const proc_string& str) nogil except +
+    CachedScorerContext cached_jaro_winkler_similarity_init(const KwargsContext& kwargs, const RfString& str) nogil except +
+    CachedScorerContext cached_normalized_levenshtein_init(const KwargsContext& kwargs, const RfString& str) nogil except +
     ScorerFunctionTable CreateNormalizedHammingFunctionTable()
     ScorerFunctionTable CreateJaroSimilarityFunctionTable()
 
     # distances
     DistanceFunctionTable CreateHammingFunctionTable()
-    CachedDistanceContext cached_levenshtein_init(const KwargsContext& kwargs, const proc_string& str) nogil except +
+    CachedDistanceContext cached_levenshtein_init(const KwargsContext& kwargs, const RfString& str) nogil except +
 
     ctypedef struct ExtractScorerComp:
         pass
@@ -278,15 +278,18 @@ cdef inline extractOne_dict(CachedScorerContext context, choices, processor, dou
             continue
 
         if def_process:
-            score = context.ratio(default_process_func(move(conv_sequence(choice))), score_cutoff)
+            choice_proc = RfStringWrapper(default_process_func(conv_sequence(choice)))
+            score = context.ratio(choice_proc.string, score_cutoff)
         elif processor is not None:
             proc_choice = processor(choice)
             if proc_choice is None:
                 continue
 
-            score = context.ratio(conv_sequence(proc_choice), score_cutoff)
+            choice_proc = RfStringWrapper(conv_sequence(proc_choice))
+            score = context.ratio(choice_proc.string, score_cutoff)
         else:
-            score = context.ratio(conv_sequence(choice), score_cutoff)
+            choice_proc = RfStringWrapper(conv_sequence(choice))
+            score = context.ratio(choice_proc.string, score_cutoff)
 
         if score >= score_cutoff and score > result_score:
             result_score = score_cutoff = score
@@ -319,15 +322,18 @@ cdef inline extractOne_distance_dict(CachedDistanceContext context, choices, pro
             continue
 
         if def_process:
-            distance = context.ratio(default_process_func(move(conv_sequence(choice))), max_)
+            choice_proc = RfStringWrapper(default_process_func(conv_sequence(choice)))
+            distance = context.ratio(choice_proc.string, max_)
         elif processor is not None:
             proc_choice = processor(choice)
             if proc_choice is None:
                 continue
 
-            distance = context.ratio(conv_sequence(proc_choice), max_)
+            choice_proc = RfStringWrapper(conv_sequence(proc_choice))
+            distance = context.ratio(choice_proc.string, max_)
         else:
-            distance = context.ratio(conv_sequence(choice), max_)
+            choice_proc = RfStringWrapper(conv_sequence(choice))
+            distance = context.ratio(choice_proc.string, max_)
 
         if distance <= max_ and distance < result_distance:
             result_distance = max_ = distance
@@ -362,15 +368,18 @@ cdef inline extractOne_list(CachedScorerContext context, choices, processor, dou
             continue
 
         if def_process:
-            score = context.ratio(default_process_func(move(conv_sequence(choice))), score_cutoff)
+            choice_proc = RfStringWrapper(default_process_func(conv_sequence(choice)))
+            score = context.ratio(choice_proc.string, score_cutoff)
         elif processor is not None:
             proc_choice = processor(choice)
             if proc_choice is None:
                 continue
 
-            score = context.ratio(conv_sequence(proc_choice), score_cutoff)
+            choice_proc = RfStringWrapper(conv_sequence(proc_choice))
+            score = context.ratio(choice_proc.string, score_cutoff)
         else:
-            score = context.ratio(conv_sequence(choice), score_cutoff)
+            choice_proc = RfStringWrapper(conv_sequence(choice))
+            score = context.ratio(choice_proc.string, score_cutoff)
 
         if score >= score_cutoff and score > result_score:
             result_score = score_cutoff = score
@@ -404,15 +413,18 @@ cdef inline extractOne_distance_list(CachedDistanceContext context, choices, pro
             continue
 
         if def_process:
-            distance = context.ratio(default_process_func(move(conv_sequence(choice))), max_)
+            choice_proc = RfStringWrapper(default_process_func(conv_sequence(choice)))
+            distance = context.ratio(choice_proc.string, max_)
         elif processor is not None:
             proc_choice = processor(choice)
             if proc_choice is None:
                 continue
 
-            distance = context.ratio(conv_sequence(proc_choice), max_)
+            choice_proc = RfStringWrapper(conv_sequence(proc_choice))
+            distance = context.ratio(choice_proc.string, max_)
         else:
-            distance = context.ratio(conv_sequence(choice), max_)
+            choice_proc = RfStringWrapper(conv_sequence(choice))
+            distance = context.ratio(choice_proc.string, max_)
 
         if distance <= max_ and distance < result_distance:
             result_distance = max_ = distance
@@ -633,8 +645,8 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
         if (NULL != ScorerTable.kwargs_init):
             kwargs_context = ScorerTable.kwargs_init(kwargs)
 
-        query_context = conv_sequence(query)
-        ScorerContext = ScorerTable.init(kwargs_context, query_context)
+        query_context = RfStringWrapper(conv_sequence(query))
+        ScorerContext = ScorerTable.init(kwargs_context, query_context.string)
         if score_cutoff is not None:
             c_score_cutoff = score_cutoff
         if c_score_cutoff < 0 or c_score_cutoff > 100:
@@ -652,8 +664,8 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
         if (NULL != DistanceTable.kwargs_init):
             kwargs_context = DistanceTable.kwargs_init(kwargs)
 
-        query_context = conv_sequence(query)
-        DistanceContext = DistanceTable.init(kwargs_context, query_context)
+        query_context = RfStringWrapper(conv_sequence(query))
+        DistanceContext = DistanceTable.init(kwargs_context, query_context.string)
         if score_cutoff is not None and score_cutoff != -1:
             c_max = score_cutoff
 
@@ -689,15 +701,18 @@ cdef inline extract_dict(CachedScorerContext context, choices, processor, size_t
                 continue
 
             if def_process:
-                score = context.ratio(default_process_func(move(conv_sequence(choice))), score_cutoff)
+                choice_proc = RfStringWrapper(default_process_func(conv_sequence(choice)))
+                score = context.ratio(choice_proc.string, score_cutoff)
             elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
 
-                score = context.ratio(conv_sequence(proc_choice), score_cutoff)
+                choice_proc = RfStringWrapper(conv_sequence(proc_choice))
+                score = context.ratio(choice_proc.string, score_cutoff)
             else:
-                score = context.ratio(conv_sequence(choice), score_cutoff)
+                choice_proc = RfStringWrapper(conv_sequence(choice))
+                score = context.ratio(choice_proc.string, score_cutoff)
 
             if score >= score_cutoff:
                 # especially the key object might be created on the fly by e.g. pandas.Dataframe
@@ -749,15 +764,18 @@ cdef inline extract_distance_dict(CachedDistanceContext context, choices, proces
                 continue
 
             if def_process:
-                distance = context.ratio(default_process_func(move(conv_sequence(choice))), max_)
+                choice_proc = RfStringWrapper(default_process_func(conv_sequence(choice)))
+                distance = context.ratio(choice_proc.string, max_)
             elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
 
-                distance = context.ratio(conv_sequence(proc_choice), max_)
+                choice_proc = RfStringWrapper(conv_sequence(proc_choice))
+                distance = context.ratio(choice_proc.string, max_)
             else:
-                distance = context.ratio(conv_sequence(choice), max_)
+                choice_proc = RfStringWrapper(conv_sequence(choice))
+                distance = context.ratio(choice_proc.string, max_)
 
             if distance <= max_:
                 # especially the key object might be created on the fly by e.g. pandas.Dataframe
@@ -810,15 +828,18 @@ cdef inline extract_list(CachedScorerContext context, choices, processor, size_t
                 continue
 
             if def_process:
-                score = context.ratio(default_process_func(move(conv_sequence(choice))), score_cutoff)
+                choice_proc = RfStringWrapper(default_process_func(conv_sequence(choice)))
+                score = context.ratio(choice_proc.string, score_cutoff)
             elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
                 
-                score = context.ratio(conv_sequence(proc_choice), score_cutoff)
+                choice_proc = RfStringWrapper(conv_sequence(proc_choice))
+                score = context.ratio(choice_proc.string, score_cutoff)
             else:
-                score = context.ratio(conv_sequence(choice), score_cutoff)
+                choice_proc = RfStringWrapper(conv_sequence(choice))
+                score = context.ratio(choice_proc.string, score_cutoff)
 
             if score >= score_cutoff:
                 Py_INCREF(choice)
@@ -867,15 +888,18 @@ cdef inline extract_distance_list(CachedDistanceContext context, choices, proces
                 continue
 
             if def_process:
-                distance = context.ratio(default_process_func(move(conv_sequence(choice))), max_)
+                choice_proc = RfStringWrapper(default_process_func(conv_sequence(choice)))
+                distance = context.ratio(choice_proc.string, max_)
             elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
 
-                distance = context.ratio(conv_sequence(proc_choice), max_)
+                choice_proc = RfStringWrapper(conv_sequence(proc_choice))
+                distance = context.ratio(choice_proc.string, max_)
             else:
-                distance = context.ratio(conv_sequence(choice), max_)
+                choice_proc = RfStringWrapper(conv_sequence(choice))
+                distance = context.ratio(choice_proc.string, max_)
 
             if distance <= max_:
                 Py_INCREF(choice)
@@ -1048,8 +1072,8 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
         if (NULL != ScorerTable.kwargs_init):
             kwargs_context = ScorerTable.kwargs_init(kwargs)
 
-        query_context = conv_sequence(query)
-        ScorerContext = ScorerTable.init(kwargs_context, query_context)
+        query_context = RfStringWrapper(conv_sequence(query))
+        ScorerContext = ScorerTable.init(kwargs_context, query_context.string)
         if score_cutoff is not None:
             c_score_cutoff = score_cutoff
         if c_score_cutoff < 0 or c_score_cutoff > 100:
@@ -1067,8 +1091,8 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
         if (NULL != DistanceTable.kwargs_init):
             kwargs_context = DistanceTable.kwargs_init(kwargs)
 
-        query_context = conv_sequence(query)
-        DistanceContext = DistanceTable.init(kwargs_context, query_context)
+        query_context = RfStringWrapper(conv_sequence(query))
+        DistanceContext = DistanceTable.init(kwargs_context, query_context.string)
         if score_cutoff is not None and score_cutoff != -1:
             c_max = score_cutoff
 
@@ -1162,15 +1186,18 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
                 continue
 
             if def_process:
-                score = ScorerContext.ratio(default_process_func(move(conv_sequence(choice))), c_score_cutoff)
+                choice_proc = RfStringWrapper(default_process_func(conv_sequence(choice)))
+                score = ScorerContext.ratio(choice_proc.string, c_score_cutoff)
             elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
 
-                score = ScorerContext.ratio(conv_sequence(proc_choice), c_score_cutoff)
+                choice_proc = RfStringWrapper(conv_sequence(proc_choice))
+                score = ScorerContext.ratio(choice_proc.string, c_score_cutoff)
             else:
-                score = ScorerContext.ratio(conv_sequence(choice), c_score_cutoff)
+                choice_proc = RfStringWrapper(conv_sequence(choice))
+                score = ScorerContext.ratio(choice_proc.string, c_score_cutoff)
 
             if score >= score_cutoff:
                 yield (choice, score, choice_key)
@@ -1189,15 +1216,18 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
                 continue
 
             if def_process:
-                score = ScorerContext.ratio(default_process_func(move(conv_sequence(choice))), c_score_cutoff)
+                choice_proc = RfStringWrapper(default_process_func(conv_sequence(choice)))
+                score = ScorerContext.ratio(choice_proc.string, c_score_cutoff)
             elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
 
-                score = ScorerContext.ratio(conv_sequence(proc_choice), c_score_cutoff)
+                choice_proc = RfStringWrapper(conv_sequence(proc_choice))
+                score = ScorerContext.ratio(choice_proc.string, c_score_cutoff)
             else:
-                score = ScorerContext.ratio(conv_sequence(choice), c_score_cutoff)
+                choice_proc = RfStringWrapper(conv_sequence(choice))
+                score = ScorerContext.ratio(choice_proc.string, c_score_cutoff)
 
             if score >= c_score_cutoff:
                 yield (choice, score, i)
@@ -1215,15 +1245,18 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
                 continue
 
             if def_process:
-                distance = DistanceContext.ratio(default_process_func(move(conv_sequence(choice))), c_max)
+                choice_proc = RfStringWrapper(default_process_func(conv_sequence(choice)))
+                distance = DistanceContext.ratio(choice_proc.string, c_max)
             elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
 
-                distance = DistanceContext.ratio(conv_sequence(proc_choice), c_max)
+                choice_proc = RfStringWrapper(conv_sequence(proc_choice))
+                distance = DistanceContext.ratio(choice_proc.string, c_max)
             else:
-                distance = DistanceContext.ratio(conv_sequence(choice), c_max)
+                choice_proc = RfStringWrapper(conv_sequence(choice))
+                distance = DistanceContext.ratio(choice_proc.string, c_max)
 
             if distance <= c_max:
                 yield (choice, distance, choice_key)
@@ -1242,15 +1275,18 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
                 continue
 
             if def_process:
-                distance = DistanceContext.ratio(default_process_func(move(conv_sequence(choice))), c_max)
+                choice_proc = RfStringWrapper(default_process_func(conv_sequence(choice)))
+                distance = DistanceContext.ratio(choice_proc.string, c_max)
             elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
 
-                distance = DistanceContext.ratio(conv_sequence(proc_choice), c_max)
+                choice_proc = RfStringWrapper(conv_sequence(proc_choice))
+                distance = DistanceContext.ratio(choice_proc.string, c_max)
             else:
-                distance = DistanceContext.ratio(conv_sequence(choice), c_max)
+                choice_proc = RfStringWrapper(conv_sequence(choice))
+                distance = DistanceContext.ratio(choice_proc.string, c_max)
 
             if distance <= c_max:
                 yield (choice, distance, i)
@@ -1324,8 +1360,8 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         if (NULL != ScorerTable.kwargs_init):
             kwargs_context = ScorerTable.kwargs_init(kwargs)
 
-        query_context = conv_sequence(query)
-        ScorerContext = ScorerTable.init(kwargs_context, query_context)
+        query_context = RfStringWrapper(conv_sequence(query))
+        ScorerContext = ScorerTable.init(kwargs_context, query_context.string)
         if score_cutoff is not None:
             c_score_cutoff = score_cutoff
         if c_score_cutoff < 0 or c_score_cutoff > 100:
@@ -1345,8 +1381,8 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         if (NULL != DistanceTable.kwargs_init):
             kwargs_context = DistanceTable.kwargs_init(kwargs)
 
-        query_context = conv_sequence(query)
-        DistanceContext = DistanceTable.init(kwargs_context, query_context)
+        query_context = RfStringWrapper(conv_sequence(query))
+        DistanceContext = DistanceTable.init(kwargs_context, query_context.string)
         if score_cutoff is not None and score_cutoff != -1:
             c_max = score_cutoff
 
