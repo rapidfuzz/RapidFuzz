@@ -4,15 +4,17 @@
 from rapidfuzz.utils import default_process
 from cpp_common cimport RfString, RfStringWrapper, is_valid_string, convert_string, hash_array, hash_sequence
 from array import array
-from libcpp.utility cimport move
+
+from rapidfuzz_capi cimport RfSimilarityFunctionTable
+from cpython.pycapsule cimport PyCapsule_New
 
 cdef inline RfString conv_sequence(seq) except *:
     if is_valid_string(seq):
-        return move(convert_string(seq))
+        return convert_string(seq)
     elif isinstance(seq, array):
-        return move(hash_array(seq))
+        return hash_array(seq)
     else:
-        return move(hash_sequence(seq))
+        return hash_sequence(seq)
 
 cdef extern from "cpp_scorer.hpp":
     double ratio_no_process(                         const RfString&, const RfString&, double) nogil except +
@@ -35,6 +37,17 @@ cdef extern from "cpp_scorer.hpp":
     double WRatio_default_process(                   const RfString&, const RfString&, double) nogil except +
     double QRatio_no_process(                        const RfString&, const RfString&, double) nogil except +
     double QRatio_default_process(                   const RfString&, const RfString&, double) nogil except +
+
+    RfSimilarityFunctionTable CreateRatioFunctionTable() except +
+    RfSimilarityFunctionTable CreatePartialRatioFunctionTable() except +
+    RfSimilarityFunctionTable CreateTokenSortRatioFunctionTable() except +
+    RfSimilarityFunctionTable CreateTokenSetRatioFunctionTable() except +
+    RfSimilarityFunctionTable CreateTokenRatioFunctionTable() except +
+    RfSimilarityFunctionTable CreatePartialTokenSortRatioFunctionTable() except +
+    RfSimilarityFunctionTable CreatePartialTokenSetRatioFunctionTable() except +
+    RfSimilarityFunctionTable CreatePartialTokenRatioFunctionTable() except +
+    RfSimilarityFunctionTable CreateWRatioFunctionTable() except +
+    RfSimilarityFunctionTable CreateQRatioFunctionTable() except +
 
 def ratio(s1, s2, *, processor=None, score_cutoff=None):
     """
@@ -78,7 +91,7 @@ def ratio(s1, s2, *, processor=None, score_cutoff=None):
     if s1 is None or s2 is None:
         return 0
     
-    if processor is True: #: #or processor == default_process:
+    if processor is True or processor == default_process:
         s1_proc = RfStringWrapper(conv_sequence(s1))
         s2_proc = RfStringWrapper(conv_sequence(s2))
         return ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
@@ -163,7 +176,7 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True: #or processor == default_process:
+    if processor is True or processor == default_process:
         s1_proc = RfStringWrapper(conv_sequence(s1))
         s2_proc = RfStringWrapper(conv_sequence(s2))
         return partial_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
@@ -214,7 +227,7 @@ def token_sort_ratio(s1, s2, *, processor=True, score_cutoff=None):
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True: #or processor == default_process:
+    if processor is True or processor == default_process:
         s1_proc = RfStringWrapper(conv_sequence(s1))
         s2_proc = RfStringWrapper(conv_sequence(s2))
         return token_sort_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
@@ -268,7 +281,7 @@ def token_set_ratio(s1, s2, *, processor=True, score_cutoff=None):
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True: #or processor == default_process:
+    if processor is True or processor == default_process:
         s1_proc = RfStringWrapper(conv_sequence(s1))
         s2_proc = RfStringWrapper(conv_sequence(s2))
         return token_set_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
@@ -315,7 +328,7 @@ def token_ratio(s1, s2, *, processor=True, score_cutoff=None):
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True: #or processor == default_process:
+    if processor is True or processor == default_process:
         s1_proc = RfStringWrapper(conv_sequence(s1))
         s2_proc = RfStringWrapper(conv_sequence(s2))
         return token_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
@@ -361,7 +374,7 @@ def partial_token_sort_ratio(s1, s2, *, processor=True, score_cutoff=None):
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True: #or processor == default_process:
+    if processor is True or processor == default_process:
         s1_proc = RfStringWrapper(conv_sequence(s1))
         s2_proc = RfStringWrapper(conv_sequence(s2))
         return partial_token_sort_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
@@ -408,7 +421,7 @@ def partial_token_set_ratio(s1, s2, *, processor=True, score_cutoff=None):
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True: #or processor == default_process:
+    if processor is True or processor == default_process:
         s1_proc = RfStringWrapper(conv_sequence(s1))
         s2_proc = RfStringWrapper(conv_sequence(s2))
         return partial_token_set_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
@@ -455,7 +468,7 @@ def partial_token_ratio(s1, s2, *, processor=True, score_cutoff=None):
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True: #or processor == default_process:
+    if processor is True or processor == default_process:
         s1_proc = RfStringWrapper(conv_sequence(s1))
         s2_proc = RfStringWrapper(conv_sequence(s2))
         return partial_token_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
@@ -501,7 +514,7 @@ def WRatio(s1, s2, *, processor=True, score_cutoff=None):
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True: #or processor == default_process:
+    if processor is True or processor == default_process:
         s1_proc = RfStringWrapper(conv_sequence(s1))
         s2_proc = RfStringWrapper(conv_sequence(s2))
         return WRatio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
@@ -550,7 +563,7 @@ def QRatio(s1, s2, *, processor=True, score_cutoff=None):
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True: #or processor == default_process:
+    if processor is True or processor == default_process:
         s1_proc = RfStringWrapper(conv_sequence(s1))
         s2_proc = RfStringWrapper(conv_sequence(s2))
         return QRatio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
@@ -561,3 +574,33 @@ def QRatio(s1, s2, *, processor=True, score_cutoff=None):
     s1_proc = RfStringWrapper(conv_sequence(s1))
     s2_proc = RfStringWrapper(conv_sequence(s2))
     return QRatio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+
+cdef RfSimilarityFunctionTable RatioContext = CreateRatioFunctionTable()
+ratio.__RapidFuzzScorer = PyCapsule_New(&RatioContext, "similarity", NULL)
+
+cdef RfSimilarityFunctionTable PartialRatioContext = CreatePartialRatioFunctionTable()
+partial_ratio.__RapidFuzzScorer = PyCapsule_New(&PartialRatioContext, "similarity", NULL)
+
+cdef RfSimilarityFunctionTable TokenSortRatioContext = CreateTokenSortRatioFunctionTable()
+token_sort_ratio.__RapidFuzzScorer = PyCapsule_New(&TokenSortRatioContext, "similarity", NULL)
+
+cdef RfSimilarityFunctionTable TokenSetRatioContext = CreateTokenSetRatioFunctionTable()
+token_set_ratio.__RapidFuzzScorer = PyCapsule_New(&TokenSetRatioContext, "similarity", NULL)
+
+cdef RfSimilarityFunctionTable TokenRatioContext = CreateTokenRatioFunctionTable()
+token_ratio.__RapidFuzzScorer = PyCapsule_New(&TokenRatioContext, "similarity", NULL)
+
+cdef RfSimilarityFunctionTable PartialTokenSortRatioContext = CreatePartialTokenSortRatioFunctionTable()
+partial_token_sort_ratio.__RapidFuzzScorer = PyCapsule_New(&PartialTokenSortRatioContext, "similarity", NULL)
+
+cdef RfSimilarityFunctionTable PartialTokenSetRatioContext = CreatePartialTokenSetRatioFunctionTable()
+partial_token_set_ratio.__RapidFuzzScorer = PyCapsule_New(&PartialTokenSetRatioContext, "similarity", NULL)
+
+cdef RfSimilarityFunctionTable PartialTokenRatioContext = CreatePartialTokenRatioFunctionTable()
+partial_token_ratio.__RapidFuzzScorer = PyCapsule_New(&PartialTokenRatioContext, "similarity", NULL)
+
+cdef RfSimilarityFunctionTable WRatioContext = CreateWRatioFunctionTable()
+WRatio.__RapidFuzzScorer = PyCapsule_New(&WRatioContext, "similarity", NULL)
+
+cdef RfSimilarityFunctionTable QRatioContext = CreateQRatioFunctionTable()
+QRatio.__RapidFuzzScorer = PyCapsule_New(&QRatioContext, "similarity", NULL)

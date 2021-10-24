@@ -96,7 +96,7 @@ void run_parallel(int workers, size_t rows, Func&& func)
 }
 
 static PyObject* cdist_single_list_distance_impl(
-    const KwargsContext& kwargs_context, distance_context_init init,
+    const RfKwargsContextWrapper& kwargs_context, RF_DistanceInit init,
     const std::vector<RfStringWrapper>& queries, int dtype, int workers, size_t max)
 {
     std::size_t rows = queries.size();
@@ -118,10 +118,10 @@ Py_BEGIN_ALLOW_THREADS
             for (; row < row_end; ++row)
             {
                 set_score_distance(matrix, dtype, row, row, 0);
-                CachedDistanceContext DistanceContext = init(kwargs_context, queries[row].string);
+                CachedDistanceContext DistanceContext(init(&kwargs_context.kwargs, &queries[row].string));
                 for (size_t col = row + 1; col < cols; ++col)
                 {
-                    size_t score = DistanceContext.ratio(queries[col].string, max);
+                    size_t score = DistanceContext.distance(&queries[col].string, max);
                     set_score_distance(matrix, dtype, row, col, score);
                     set_score_distance(matrix, dtype, col, row, score);
                 }
@@ -142,7 +142,7 @@ Py_END_ALLOW_THREADS
 }
 
 static PyObject* cdist_single_list_similarity_impl(
-    const KwargsContext& kwargs_context, scorer_context_init init,
+    const RfKwargsContextWrapper& kwargs_context, RF_SimilarityInit init,
     const std::vector<RfStringWrapper>& queries, int dtype, int workers, double score_cutoff)
 {
     std::size_t rows = queries.size();
@@ -164,10 +164,10 @@ Py_BEGIN_ALLOW_THREADS
             for (; row < row_end; ++row)
             {
                 set_score_similarity(matrix, dtype, row, row, 100);
-                CachedScorerContext ScorerContext = init(kwargs_context, queries[row].string);
+                CachedScorerContext ScorerContext(init(&kwargs_context.kwargs, &queries[row].string));
                 for (size_t col = row + 1; col < cols; ++col)
                 {
-                    double score = ScorerContext.ratio(queries[col].string, score_cutoff);
+                    double score = ScorerContext.similarity(&queries[col].string, score_cutoff);
                     set_score_similarity(matrix, dtype, row, col, score);
                     set_score_similarity(matrix, dtype, col, row, score);
                 }
@@ -188,7 +188,7 @@ Py_END_ALLOW_THREADS
 }
 
 static PyObject* cdist_two_lists_distance_impl(
-    const KwargsContext& kwargs_context, distance_context_init init,
+    const RfKwargsContextWrapper& kwargs_context, RF_DistanceInit init,
     const std::vector<RfStringWrapper>& queries, const std::vector<RfStringWrapper>& choices, int dtype, int workers, size_t max)
 {
     std::size_t rows = queries.size();
@@ -209,10 +209,10 @@ Py_BEGIN_ALLOW_THREADS
         run_parallel(workers, rows, [&] (std::size_t row, std::size_t row_end) {
             for (; row < row_end; ++row)
             {
-                CachedDistanceContext DistanceContext = init(kwargs_context, queries[row].string);
+                CachedDistanceContext DistanceContext(init(&kwargs_context.kwargs, &queries[row].string));
                 for (size_t col = 0; col < cols; ++col)
                 {
-                    size_t score = (int)DistanceContext.ratio(choices[col].string, max);
+                    size_t score = (int)DistanceContext.distance(&choices[col].string, max);
                     set_score_distance(matrix, dtype, row, col, score);
                 }
             }
@@ -232,7 +232,7 @@ Py_END_ALLOW_THREADS
 }
 
 static PyObject* cdist_two_lists_similarity_impl(
-    const KwargsContext& kwargs_context, scorer_context_init init,
+    const RfKwargsContextWrapper& kwargs_context, RF_SimilarityInit init,
     const std::vector<RfStringWrapper>& queries, const std::vector<RfStringWrapper>& choices, int dtype, int workers, double score_cutoff)
 {
     std::size_t rows = queries.size();
@@ -254,10 +254,10 @@ Py_BEGIN_ALLOW_THREADS
         run_parallel(workers, rows, [&] (std::size_t row, std::size_t row_end) {
             for (; row < row_end; ++row)
             {
-                CachedScorerContext ScorerContext = init(kwargs_context, queries[row].string);
+                CachedScorerContext ScorerContext(init(&kwargs_context.kwargs, &queries[row].string));
                 for (size_t col = 0; col < cols; ++col)
                 {
-                    double score = ScorerContext.ratio(choices[col].string, score_cutoff);
+                    double score = ScorerContext.similarity(&choices[col].string, score_cutoff);
                     set_score_similarity(matrix, dtype, row, col, score);
                 }
             }

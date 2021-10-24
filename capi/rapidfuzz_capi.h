@@ -41,9 +41,9 @@ typedef struct _RfKwargsContext {
     RF_KwargsContextDeinit deinit;
 } RfKwargsContext;
 
-typedef RfKwargsContext* (*RF_KwargsContextInit)(PyObject* kwargs);
+typedef RfKwargsContext (*RF_KwargsContextInit)(PyObject* kwargs);
 
-typedef double (*RF_SimilarityFunc) (struct _RfSimilarityContext* context, const RfString* str, double score_cutoff);
+typedef double (*RF_SimilarityFunc) (const struct _RfSimilarityContext* context, const RfString* str, double score_cutoff);
 typedef void (*RF_SimilarityContextDeinit) (struct _RfSimilarityContext* context);
 
 typedef struct _RfSimilarityContext {
@@ -52,14 +52,28 @@ typedef struct _RfSimilarityContext {
     RF_SimilarityContextDeinit deinit;
 } RfSimilarityContext;
 
-typedef RfSimilarityContext* (*RF_SimilarityInit) (const RfString* str, void* kwargs);
+typedef RfSimilarityContext (*RF_SimilarityInit) (const RfKwargsContext* kwargs, const RfString* str);
 
 typedef struct {
-    PyObject_HEAD
-
     RF_KwargsContextInit kwargs_init;
     RF_SimilarityInit similarity_init;
-} RfSimilarityCallback;
+} RfSimilarityFunctionTable;
+
+typedef double (*RF_DistanceFunc) (const struct _RfDistanceContext* context, const RfString* str, double score_cutoff);
+typedef void (*RF_DistanceContextDeinit) (struct _RfDistanceContext* context);
+
+typedef struct _RfDistanceContext {
+    void* context;
+    RF_DistanceFunc distance;
+    RF_DistanceContextDeinit deinit;
+} RfDistanceContext;
+
+typedef RfDistanceContext (*RF_DistanceInit) (const RfKwargsContext* kwargs, const RfString* str);
+
+typedef struct {
+    RF_KwargsContextInit kwargs_init;
+    RF_DistanceInit distance_init;
+} RfDistanceFunctionTable;
 
 #ifdef __cplusplus
 }

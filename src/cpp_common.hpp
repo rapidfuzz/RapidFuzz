@@ -85,6 +85,44 @@ struct RfStringWrapper {
     }
 };
 
+/* RAII Wrapper for RfKwargsContext */
+struct RfKwargsContextWrapper {
+    RfKwargsContext kwargs;
+
+    RfKwargsContextWrapper()
+        : kwargs({NULL, NULL}) {}
+
+    RfKwargsContextWrapper(RfKwargsContext kwargs_)
+        : kwargs(kwargs_) {}
+
+    RfKwargsContextWrapper(const RfKwargsContextWrapper&) = delete;
+    RfKwargsContextWrapper& operator=(const RfKwargsContextWrapper&) = delete;
+
+    RfKwargsContextWrapper(RfKwargsContextWrapper&& other)
+    {
+        kwargs = other.kwargs;
+        other.kwargs = {NULL, NULL};
+    }
+
+    RfKwargsContextWrapper& operator=(RfKwargsContextWrapper&& other)
+    {
+        if (&other != this) {
+            if (kwargs.deinit) {
+                kwargs.deinit(&kwargs);
+            }
+            kwargs = other.kwargs;
+            other.kwargs = {NULL, NULL};
+      }
+      return *this;
+    };
+
+    ~RfKwargsContextWrapper() {
+        if (kwargs.deinit) {
+            kwargs.deinit(&kwargs);
+        }
+    }
+};
+
 void default_string_deinit(RfString* string)
 {
     free(string->data);

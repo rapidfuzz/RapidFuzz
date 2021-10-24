@@ -1,6 +1,39 @@
 #pragma once
 #include "cpp_common.hpp"
 
+template <typename CachedScorer>
+static void cached_deinit(RfSimilarityContext* context)
+{
+    delete (CachedScorer*)context->context;
+}
+
+template<typename CachedScorer>
+static inline double similarity_func_wrapper(const RfSimilarityContext* context, const RfString* str, double score_cutoff)
+{
+    return visit(*str, [&](auto s){
+        return ((CachedScorer*)context->context)->ratio(s, score_cutoff);
+    });
+}
+
+template<template <typename> class CachedScorer, typename Sentence, typename ...Args>
+static inline RfSimilarityContext get_SimilarityContext(Sentence str, Args... args)
+{
+    RfSimilarityContext context;
+    context.context = (void*) new CachedScorer<Sentence>(str, args...);
+
+    context.similarity = similarity_func_wrapper<CachedScorer<Sentence>>;
+    context.deinit = cached_deinit<CachedScorer<Sentence>>;
+    return context;
+}
+
+template<template <typename> class CachedScorer, typename ...Args>
+static inline RfSimilarityContext similarity_init(const RfString* str, Args... args)
+{
+    return visit(*str, [&](auto s){
+        return get_SimilarityContext<CachedScorer>(s, args...);
+    });
+}
+
 /* ratio */
 
 double ratio_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
@@ -15,6 +48,15 @@ double ratio_default_process(const RfString& s1, const RfString& s2, double scor
         return fuzz::ratio(str1, str2, score_cutoff);
     });
 }
+static RfSimilarityFunctionTable CreateRatioFunctionTable()
+{
+    return {
+        nullptr,
+        [](const RfKwargsContext*, const RfString* str) {
+            return similarity_init<fuzz::CachedRatio>(str);
+        }
+    };
+}
 
 double partial_ratio_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
@@ -27,6 +69,15 @@ double partial_ratio_default_process(const RfString& s1, const RfString& s2, dou
     return visitor_default_process(s1, s2, [&](auto str1, auto str2) {
         return fuzz::partial_ratio(str1, str2, score_cutoff);
     });
+}
+static RfSimilarityFunctionTable CreatePartialRatioFunctionTable()
+{
+    return {
+        nullptr,
+        [](const RfKwargsContext*, const RfString* str) {
+            return similarity_init<fuzz::CachedPartialRatio>(str);
+        }
+    };
 }
 
 double token_sort_ratio_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
@@ -41,6 +92,15 @@ double token_sort_ratio_default_process(const RfString& s1, const RfString& s2, 
         return fuzz::token_sort_ratio(str1, str2, score_cutoff);
     });
 }
+static RfSimilarityFunctionTable CreateTokenSortRatioFunctionTable()
+{
+    return {
+        nullptr,
+        [](const RfKwargsContext*, const RfString* str) {
+            return similarity_init<fuzz::CachedTokenSortRatio>(str);
+        }
+    };
+}
 
 double token_set_ratio_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
@@ -53,6 +113,15 @@ double token_set_ratio_default_process(const RfString& s1, const RfString& s2, d
     return visitor_default_process(s1, s2, [&](auto str1, auto str2) {
         return fuzz::token_set_ratio(str1, str2, score_cutoff);
     });
+}
+static RfSimilarityFunctionTable CreateTokenSetRatioFunctionTable()
+{
+    return {
+        nullptr,
+        [](const RfKwargsContext*, const RfString* str) {
+            return similarity_init<fuzz::CachedTokenSetRatio>(str);
+        }
+    };
 }
 
 double token_ratio_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
@@ -67,6 +136,15 @@ double token_ratio_default_process(const RfString& s1, const RfString& s2, doubl
         return fuzz::token_ratio(str1, str2, score_cutoff);
     });
 }
+static RfSimilarityFunctionTable CreateTokenRatioFunctionTable()
+{
+    return {
+        nullptr,
+        [](const RfKwargsContext*, const RfString* str) {
+            return similarity_init<fuzz::CachedTokenRatio>(str);
+        }
+    };
+}
 
 double partial_token_sort_ratio_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
@@ -79,6 +157,15 @@ double partial_token_sort_ratio_default_process(const RfString& s1, const RfStri
     return visitor_default_process(s1, s2, [&](auto str1, auto str2) {
         return fuzz::partial_token_sort_ratio(str1, str2, score_cutoff);
     });
+}
+static RfSimilarityFunctionTable CreatePartialTokenSortRatioFunctionTable()
+{
+    return {
+        nullptr,
+        [](const RfKwargsContext*, const RfString* str) {
+            return similarity_init<fuzz::CachedPartialTokenSortRatio>(str);
+        }
+    };
 }
 
 double partial_token_set_ratio_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
@@ -93,6 +180,15 @@ double partial_token_set_ratio_default_process(const RfString& s1, const RfStrin
         return fuzz::partial_token_set_ratio(str1, str2, score_cutoff);
     });
 }
+static RfSimilarityFunctionTable CreatePartialTokenSetRatioFunctionTable()
+{
+    return {
+        nullptr,
+        [](const RfKwargsContext*, const RfString* str) {
+            return similarity_init<fuzz::CachedPartialTokenSetRatio>(str);
+        }
+    };
+}
 
 double partial_token_ratio_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
@@ -105,6 +201,15 @@ double partial_token_ratio_default_process(const RfString& s1, const RfString& s
     return visitor_default_process(s1, s2, [&](auto str1, auto str2) {
         return fuzz::partial_token_ratio(str1, str2, score_cutoff);
     });
+}
+static RfSimilarityFunctionTable CreatePartialTokenRatioFunctionTable()
+{
+    return {
+        nullptr,
+        [](const RfKwargsContext*, const RfString* str) {
+            return similarity_init<fuzz::CachedPartialTokenRatio>(str);
+        }
+    };
 }
 
 double WRatio_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
@@ -119,6 +224,15 @@ double WRatio_default_process(const RfString& s1, const RfString& s2, double sco
         return fuzz::WRatio(str1, str2, score_cutoff);
     });
 }
+static RfSimilarityFunctionTable CreateWRatioFunctionTable()
+{
+    return {
+        nullptr,
+        [](const RfKwargsContext*, const RfString* str) {
+            return similarity_init<fuzz::CachedWRatio>(str);
+        }
+    };
+}
 
 double QRatio_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
@@ -131,6 +245,15 @@ double QRatio_default_process(const RfString& s1, const RfString& s2, double sco
     return visitor_default_process(s1, s2, [&](auto str1, auto str2) {
         return fuzz::QRatio(str1, str2, score_cutoff);
     });
+}
+static RfSimilarityFunctionTable CreateQRatioFunctionTable()
+{
+    return {
+        nullptr,
+        [](const RfKwargsContext*, const RfString* str) {
+            return similarity_init<fuzz::CachedQRatio>(str);
+        }
+    };
 }
 
 /* string_metric */
