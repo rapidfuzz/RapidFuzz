@@ -166,7 +166,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [auto, aarch64, ppc64le, s390x]
+        # disable s390x and ppc64le wheels while they are not provided by numpy
+        # arch: [auto, aarch64, ppc64le, s390x]
+        arch: [auto, aarch64]
         python_tag: [ "cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*"]
     env:
       CIBW_ARCHS_LINUX: ${{matrix.arch}}
