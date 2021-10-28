@@ -118,7 +118,10 @@ Py_BEGIN_ALLOW_THREADS
             for (; row < row_end; ++row)
             {
                 set_score_distance(matrix, dtype, row, row, 0);
-                CachedDistanceContext DistanceContext(init(&kwargs_context.kwargs, &queries[row].string));
+                RfDistanceContext context;
+                PyErr2RuntimeExn(init(&context, &kwargs_context.kwargs, &queries[row].string));
+                CachedDistanceContext DistanceContext(context);
+
                 for (size_t col = row + 1; col < cols; ++col)
                 {
                     size_t score = DistanceContext.distance(&queries[col].string, max);
@@ -164,7 +167,10 @@ Py_BEGIN_ALLOW_THREADS
             for (; row < row_end; ++row)
             {
                 set_score_similarity(matrix, dtype, row, row, 100);
-                CachedScorerContext ScorerContext(init(&kwargs_context.kwargs, &queries[row].string));
+                RfSimilarityContext context;
+                PyErr2RuntimeExn(init(&context, &kwargs_context.kwargs, &queries[row].string));
+                CachedScorerContext ScorerContext(context);
+
                 for (size_t col = row + 1; col < cols; ++col)
                 {
                     double score = ScorerContext.similarity(&queries[col].string, score_cutoff);
@@ -209,10 +215,13 @@ Py_BEGIN_ALLOW_THREADS
         run_parallel(workers, rows, [&] (std::size_t row, std::size_t row_end) {
             for (; row < row_end; ++row)
             {
-                CachedDistanceContext DistanceContext(init(&kwargs_context.kwargs, &queries[row].string));
+                RfDistanceContext context;
+                PyErr2RuntimeExn(init(&context, &kwargs_context.kwargs, &queries[row].string));
+                CachedDistanceContext DistanceContext(context);
+
                 for (size_t col = 0; col < cols; ++col)
                 {
-                    size_t score = (int)DistanceContext.distance(&choices[col].string, max);
+                    size_t score = DistanceContext.distance(&choices[col].string, max);
                     set_score_distance(matrix, dtype, row, col, score);
                 }
             }
@@ -254,7 +263,10 @@ Py_BEGIN_ALLOW_THREADS
         run_parallel(workers, rows, [&] (std::size_t row, std::size_t row_end) {
             for (; row < row_end; ++row)
             {
-                CachedScorerContext ScorerContext(init(&kwargs_context.kwargs, &queries[row].string));
+                RfSimilarityContext context;
+                PyErr2RuntimeExn(init(&context, &kwargs_context.kwargs, &queries[row].string));
+                CachedScorerContext ScorerContext(context);
+
                 for (size_t col = 0; col < cols; ++col)
                 {
                     double score = ScorerContext.similarity(&choices[col].string, score_cutoff);

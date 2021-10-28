@@ -22,30 +22,30 @@ cdef extern from "rapidfuzz_capi.h":
     ctypedef RfKwargsContext (*RF_KwargsContextInit) (object kwargs)
 
     ctypedef struct RfSimilarityContext
-    ctypedef double (*RF_SimilarityFunc) (const RfSimilarityContext* context, const RfString* str, double score_cutoff)
-    ctypedef void (*RF_SimilarityContextDeinit) (RfSimilarityContext* deinit)
+    ctypedef int (*RF_SimilarityFunc) (double* similarity, const RfSimilarityContext* context, const RfString* str, double score_cutoff) nogil except -1
+    ctypedef void (*RF_SimilarityContextDeinit) (RfSimilarityContext* deinit) nogil
 
     ctypedef struct RfSimilarityContext:
         void* context
         RF_SimilarityFunc similarity
         RF_SimilarityContextDeinit deinit
 
-    ctypedef RfSimilarityContext (*RF_SimilarityInit) (const RfKwargsContext* kwargs, const RfString* str)
+    ctypedef int (*RF_SimilarityInit) (RfSimilarityContext* context, const RfKwargsContext* kwargs, const RfString* str) nogil except -1
 
     ctypedef struct RfSimilarityFunctionTable:
         RF_KwargsContextInit kwargs_init
         RF_SimilarityInit similarity_init
 
     ctypedef struct RfDistanceContext
-    ctypedef double (*RF_DistanceFunc) (const RfDistanceContext* context, const RfString* str, double score_cutoff)
-    ctypedef void (*RF_DistanceContextDeinit) (RfDistanceContext* deinit)
+    ctypedef int (*RF_DistanceFunc) (size_t* distance, const RfDistanceContext* context, const RfString* str, double score_cutoff)
+    ctypedef void (*RF_DistanceContextDeinit) (RfDistanceContext* deinit) nogil
 
     ctypedef struct RfDistanceContext:
         void* context
         RF_DistanceFunc distance
         RF_DistanceContextDeinit deinit
 
-    ctypedef RfDistanceContext (*RF_DistanceInit) (const RfKwargsContext* kwargs, const RfString* str)
+    ctypedef int (*RF_DistanceInit) (RfDistanceContext* context, const RfKwargsContext* kwargs, const RfString* str) nogil except -1
 
     ctypedef struct RfDistanceFunctionTable:
         RF_KwargsContextInit kwargs_init

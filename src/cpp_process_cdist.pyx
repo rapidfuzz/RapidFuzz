@@ -154,10 +154,8 @@ cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, w
     cdef size_t queries_len = <size_t>len(queries)
     cdef size_t choices_len = <size_t>len(choices)
 
-    cdef int valid_capsule = False
-    scorer_capsule = getattr(scorer, '__RapidFuzzScorer', None)
-    if scorer_capsule is not None:
-        valid_capsule = PyCapsule_IsValid(scorer_capsule, "similarity") or PyCapsule_IsValid(scorer_capsule, "distance")
+    cdef scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
+    cdef int valid_capsule = PyCapsule_IsValid(scorer_capsule, "similarity") or PyCapsule_IsValid(scorer_capsule, "distance")
 
     try:
         if valid_capsule:
@@ -290,10 +288,8 @@ cdef cdist_single_list(queries, scorer, processor, score_cutoff, dtype, workers,
     cdef vector[RfStringWrapper] proc_queries
     cdef vector[PyObject*] proc_py_queries
 
-    cdef int valid_capsule = False
-    scorer_capsule = getattr(scorer, '__RapidFuzzScorer', None)
-    if scorer_capsule is not None:
-        valid_capsule = PyCapsule_IsValid(scorer_capsule, "similarity") or PyCapsule_IsValid(scorer_capsule, "distance")
+    cdef scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
+    cdef int valid_capsule = PyCapsule_IsValid(scorer_capsule, "similarity") or PyCapsule_IsValid(scorer_capsule, "distance")
 
     try:
         if valid_capsule:

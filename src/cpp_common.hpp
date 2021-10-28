@@ -28,25 +28,62 @@ private:
     char const* m_error;
 };
 
+/* copy from cython */
+static inline void CppExn2PyErr() {
+  try {
+    if (PyErr_Occurred())
+      ; // let the latest Python exn pass through and ignore the current one
+    else
+      throw;
+  } catch (const std::bad_alloc& exn) {
+    PyErr_SetString(PyExc_MemoryError, exn.what());
+  } catch (const std::bad_cast& exn) {
+    PyErr_SetString(PyExc_TypeError, exn.what());
+  } catch (const std::bad_typeid& exn) {
+    PyErr_SetString(PyExc_TypeError, exn.what());
+  } catch (const std::domain_error& exn) {
+    PyErr_SetString(PyExc_ValueError, exn.what());
+  } catch (const std::invalid_argument& exn) {
+    PyErr_SetString(PyExc_ValueError, exn.what());
+  } catch (const std::ios_base::failure& exn) {
+    PyErr_SetString(PyExc_IOError, exn.what());
+  } catch (const std::out_of_range& exn) {
+    PyErr_SetString(PyExc_IndexError, exn.what());
+  } catch (const std::overflow_error& exn) {
+    PyErr_SetString(PyExc_OverflowError, exn.what());
+  } catch (const std::range_error& exn) {
+    PyErr_SetString(PyExc_ArithmeticError, exn.what());
+  } catch (const std::underflow_error& exn) {
+    PyErr_SetString(PyExc_ArithmeticError, exn.what());
+  } catch (const std::exception& exn) {
+    PyErr_SetString(PyExc_RuntimeError, exn.what());
+  }
+  catch (...)
+  {
+    PyErr_SetString(PyExc_RuntimeError, "Unknown exception");
+  }
+}
+
+static void PyErr2RuntimeExn(int err) {
+    if (err == -1)
+    {
+        // Python exceptions should be already set and will be retrieved by Cython
+        throw std::runtime_error("");
+    }
+}
+
 #if PY_VERSION_HEX > PYTHON_VERSION(3, 0, 0)
 #define LIST_OF_CASES()   \
-    X_ENUM(RAPIDFUZZ_UINT8,  uint8_t ) \
-    X_ENUM(RAPIDFUZZ_UINT16, uint16_t) \
-    X_ENUM(RAPIDFUZZ_UINT32, uint32_t) \
-    X_ENUM(RAPIDFUZZ_UINT64, uint64_t)
+    X_ENUM(RF_UINT8,  uint8_t ) \
+    X_ENUM(RF_UINT16, uint16_t) \
+    X_ENUM(RF_UINT32, uint32_t) \
+    X_ENUM(RF_UINT64, uint64_t)
 #else /* Python2 */
 #define LIST_OF_CASES()   \
-    X_ENUM(RAPIDFUZZ_CHAR,    char      ) \
-    X_ENUM(RAPIDFUZZ_UNICODE, Py_UNICODE) \
-    X_ENUM(RAPIDFUZZ_UINT64,  uint64_t  )
+    X_ENUM(RF_CHAR,    char      ) \
+    X_ENUM(RF_UNICODE, Py_UNICODE) \
+    X_ENUM(RF_UINT64,  uint64_t  )
 #endif
-
-
-enum RapidfuzzType {
-# define X_ENUM(kind, type) kind,
-    LIST_OF_CASES()
-# undef X_ENUM
-};
 
 /* RAII Wrapper for RfString */
 struct RfStringWrapper {
