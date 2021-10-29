@@ -1,140 +1,329 @@
 #pragma once
 #include "cpp_common.hpp"
+#include <iostream>
+
+template <typename CachedScorer>
+static void similarity_deinit(RfSimilarityContext* context)
+{
+    delete (CachedScorer*)context->context;
+}
+
+template <typename CachedScorer>
+static void distance_deinit(RfDistanceContext* context)
+{
+    delete (CachedScorer*)context->context;
+}
+
+template<typename CachedScorer>
+static inline int similarity_func_wrapper(double* similarity, const RfSimilarityContext* context, const RfString* str, double score_cutoff)
+{
+    try {
+        *similarity = visit(*str, [&](auto s){
+            return ((CachedScorer*)context->context)->ratio(s, score_cutoff);
+        });
+    } catch(...) {
+      PyGILState_STATE gilstate_save = PyGILState_Ensure();
+      CppExn2PyErr();
+      PyGILState_Release(gilstate_save);
+      return -1;
+    }
+    return 0;
+}
+
+template<typename CachedDistance>
+static inline int distance_func_wrapper(size_t* distance, const RfDistanceContext* context, const RfString* str, size_t max)
+{
+    try {
+        *distance = visit(*str, [&](auto s){
+            return ((CachedDistance*)context->context)->distance(s, max);
+        });
+    } catch(...) {
+      PyGILState_STATE gilstate_save = PyGILState_Ensure();
+      CppExn2PyErr();
+      PyGILState_Release(gilstate_save);
+      return -1;
+    }
+    return 0;
+}
+
+template<template <typename> class CachedScorer, typename Sentence, typename ...Args>
+static inline RfSimilarityContext get_SimilarityContext(Sentence str, Args... args)
+{
+    RfSimilarityContext context;
+    context.context = (void*) new CachedScorer<Sentence>(str, args...);
+
+    context.similarity = similarity_func_wrapper<CachedScorer<Sentence>>;
+    context.deinit = similarity_deinit<CachedScorer<Sentence>>;
+    return context;
+}
+
+template<template <typename> class CachedDistance, typename Sentence, typename ...Args>
+static inline RfDistanceContext get_DistanceContext(Sentence str, Args... args)
+{
+    RfDistanceContext context;
+    context.context = (void*) new CachedDistance<Sentence>(str, args...);
+
+    context.distance = distance_func_wrapper<CachedDistance<Sentence>>;
+    context.deinit = distance_deinit<CachedDistance<Sentence>>;
+    return context;
+}
+
+template<template <typename> class CachedScorer, typename ...Args>
+static inline int similarity_init(RfSimilarityContext* context, const RfString* str, Args... args)
+{
+    try {
+        *context = visit(*str, [&](auto s){
+            return get_SimilarityContext<CachedScorer>(s, args...);
+        });
+    } catch(...) {
+      PyGILState_STATE gilstate_save = PyGILState_Ensure();
+      CppExn2PyErr();
+      PyGILState_Release(gilstate_save);
+      return -1;
+    }
+    return 0;
+}
+
+template<template <typename> class CachedDistance, typename ...Args>
+static inline int distance_init(RfDistanceContext* context, const RfString* str, Args... args)
+{
+    try {
+        *context = visit(*str, [&](auto s){
+            return get_DistanceContext<CachedDistance>(s, args...);
+        });
+    } catch(...) {
+      PyGILState_STATE gilstate_save = PyGILState_Ensure();
+      CppExn2PyErr();
+      PyGILState_Release(gilstate_save);
+      return -1;
+    }
+    return 0;
+}
 
 /* ratio */
 
-double ratio_no_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double ratio_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor(s1, s2, [&](auto str1, auto str2) {
         return fuzz::ratio(str1, str2, score_cutoff);
     });
 }
-double ratio_default_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double ratio_default_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor_default_process(s1, s2, [&](auto str1, auto str2) {
         return fuzz::ratio(str1, str2, score_cutoff);
     });
 }
+static inline RfSimilarityFunctionTable CreateRatioFunctionTable()
+{
+    return {
+        nullptr,
+        [](RfSimilarityContext* context, const RfKwargsContext*, const RfString* str) {
+            return similarity_init<fuzz::CachedRatio>(context, str);
+        }
+    };
+}
 
-double partial_ratio_no_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double partial_ratio_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor(s1, s2, [&](auto str1, auto str2) {
         return fuzz::partial_ratio(str1, str2, score_cutoff);
     });
 }
-double partial_ratio_default_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double partial_ratio_default_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor_default_process(s1, s2, [&](auto str1, auto str2) {
         return fuzz::partial_ratio(str1, str2, score_cutoff);
     });
 }
+static inline RfSimilarityFunctionTable CreatePartialRatioFunctionTable()
+{
+    return {
+        nullptr,
+        [](RfSimilarityContext* context, const RfKwargsContext*, const RfString* str) {
+            return similarity_init<fuzz::CachedPartialRatio>(context, str);
+        }
+    };
+}
 
-double token_sort_ratio_no_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double token_sort_ratio_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor(s1, s2, [&](auto str1, auto str2) {
         return fuzz::token_sort_ratio(str1, str2, score_cutoff);
     });
 }
-double token_sort_ratio_default_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double token_sort_ratio_default_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor_default_process(s1, s2, [&](auto str1, auto str2) {
         return fuzz::token_sort_ratio(str1, str2, score_cutoff);
     });
 }
+static inline RfSimilarityFunctionTable CreateTokenSortRatioFunctionTable()
+{
+    return {
+        nullptr,
+        [](RfSimilarityContext* context, const RfKwargsContext*, const RfString* str) {
+            return similarity_init<fuzz::CachedTokenSortRatio>(context, str);
+        }
+    };
+}
 
-double token_set_ratio_no_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double token_set_ratio_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor(s1, s2, [&](auto str1, auto str2) {
         return fuzz::token_set_ratio(str1, str2, score_cutoff);
     });
 }
-double token_set_ratio_default_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double token_set_ratio_default_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor_default_process(s1, s2, [&](auto str1, auto str2) {
         return fuzz::token_set_ratio(str1, str2, score_cutoff);
     });
 }
+static inline RfSimilarityFunctionTable CreateTokenSetRatioFunctionTable()
+{
+    return {
+        nullptr,
+        [](RfSimilarityContext* context, const RfKwargsContext*, const RfString* str) {
+            return similarity_init<fuzz::CachedTokenSetRatio>(context, str);
+        }
+    };
+}
 
-double token_ratio_no_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double token_ratio_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor(s1, s2, [&](auto str1, auto str2) {
         return fuzz::token_ratio(str1, str2, score_cutoff);
     });
 }
-double token_ratio_default_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double token_ratio_default_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor_default_process(s1, s2, [&](auto str1, auto str2) {
         return fuzz::token_ratio(str1, str2, score_cutoff);
     });
 }
+static inline RfSimilarityFunctionTable CreateTokenRatioFunctionTable()
+{
+    return {
+        nullptr,
+        [](RfSimilarityContext* context, const RfKwargsContext*, const RfString* str) {
+            return similarity_init<fuzz::CachedTokenRatio>(context, str);
+        }
+    };
+}
 
-double partial_token_sort_ratio_no_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double partial_token_sort_ratio_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor(s1, s2, [&](auto str1, auto str2) {
         return fuzz::partial_token_sort_ratio(str1, str2, score_cutoff);
     });
 }
-double partial_token_sort_ratio_default_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double partial_token_sort_ratio_default_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor_default_process(s1, s2, [&](auto str1, auto str2) {
         return fuzz::partial_token_sort_ratio(str1, str2, score_cutoff);
     });
 }
+static inline RfSimilarityFunctionTable CreatePartialTokenSortRatioFunctionTable()
+{
+    return {
+        nullptr,
+        [](RfSimilarityContext* context, const RfKwargsContext*, const RfString* str) {
+            return similarity_init<fuzz::CachedPartialTokenSortRatio>(context, str);
+        }
+    };
+}
 
-double partial_token_set_ratio_no_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double partial_token_set_ratio_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor(s1, s2, [&](auto str1, auto str2) {
         return fuzz::partial_token_set_ratio(str1, str2, score_cutoff);
     });
 }
-double partial_token_set_ratio_default_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double partial_token_set_ratio_default_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor_default_process(s1, s2, [&](auto str1, auto str2) {
         return fuzz::partial_token_set_ratio(str1, str2, score_cutoff);
     });
 }
+static inline RfSimilarityFunctionTable CreatePartialTokenSetRatioFunctionTable()
+{
+    return {
+        nullptr,
+        [](RfSimilarityContext* context, const RfKwargsContext*, const RfString* str) {
+            return similarity_init<fuzz::CachedPartialTokenSetRatio>(context, str);
+        }
+    };
+}
 
-double partial_token_ratio_no_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double partial_token_ratio_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor(s1, s2, [&](auto str1, auto str2) {
         return fuzz::partial_token_ratio(str1, str2, score_cutoff);
     });
 }
-double partial_token_ratio_default_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double partial_token_ratio_default_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor_default_process(s1, s2, [&](auto str1, auto str2) {
         return fuzz::partial_token_ratio(str1, str2, score_cutoff);
     });
 }
+static inline RfSimilarityFunctionTable CreatePartialTokenRatioFunctionTable()
+{
+    return {
+        nullptr,
+        [](RfSimilarityContext* context, const RfKwargsContext*, const RfString* str) {
+            return similarity_init<fuzz::CachedPartialTokenRatio>(context, str);
+        }
+    };
+}
 
-double WRatio_no_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double WRatio_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor(s1, s2, [&](auto str1, auto str2) {
         return fuzz::WRatio(str1, str2, score_cutoff);
     });
 }
-double WRatio_default_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double WRatio_default_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor_default_process(s1, s2, [&](auto str1, auto str2) {
         return fuzz::WRatio(str1, str2, score_cutoff);
     });
 }
+static inline RfSimilarityFunctionTable CreateWRatioFunctionTable()
+{
+    return {
+        nullptr,
+        [](RfSimilarityContext* context, const RfKwargsContext*, const RfString* str) {
+            return similarity_init<fuzz::CachedWRatio>(context, str);
+        }
+    };
+}
 
-double QRatio_no_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double QRatio_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor(s1, s2, [&](auto str1, auto str2) {
         return fuzz::QRatio(str1, str2, score_cutoff);
     });
 }
-double QRatio_default_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double QRatio_default_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor_default_process(s1, s2, [&](auto str1, auto str2) {
         return fuzz::QRatio(str1, str2, score_cutoff);
     });
+}
+static inline RfSimilarityFunctionTable CreateQRatioFunctionTable()
+{
+    return {
+        nullptr,
+        [](RfSimilarityContext* context, const RfKwargsContext*, const RfString* str) {
+            return similarity_init<fuzz::CachedQRatio>(context, str);
+        }
+    };
 }
 
 /* string_metric */
-PyObject* levenshtein_no_process(const proc_string& s1, const proc_string& s2,
+static inline PyObject* levenshtein_no_process(const RfString& s1, const RfString& s2,
     size_t insertion, size_t deletion, size_t substitution, size_t max)
 {
     size_t result = visitor(s1, s2, [&](auto str1, auto str2) {
@@ -142,7 +331,7 @@ PyObject* levenshtein_no_process(const proc_string& s1, const proc_string& s2,
     });
     return dist_to_long(result);
 }
-PyObject* levenshtein_default_process(const proc_string& s1, const proc_string& s2,
+static inline PyObject* levenshtein_default_process(const RfString& s1, const RfString& s2,
     size_t insertion, size_t deletion, size_t substitution, size_t max)
 {
     size_t result = visitor_default_process(s1, s2, [&](auto str1, auto str2) {
@@ -150,88 +339,131 @@ PyObject* levenshtein_default_process(const proc_string& s1, const proc_string& 
     });
     return dist_to_long(result);
 }
+static inline int LevenshteinInit(RfDistanceContext* context, const RfKwargsContext* kwargs, const RfString* str)
+{
+    return distance_init<string_metric::CachedLevenshtein>(
+        context, str, *(rapidfuzz::LevenshteinWeightTable*)(kwargs->context)
+    );
+}
 
-double normalized_levenshtein_no_process(const proc_string& s1, const proc_string& s2,
+static inline double normalized_levenshtein_no_process(const RfString& s1, const RfString& s2,
     size_t insertion, size_t deletion, size_t substitution, double score_cutoff)
 {
     return visitor(s1, s2, [&](auto str1, auto str2) {
         return string_metric::normalized_levenshtein(str1, str2, {insertion, deletion, substitution}, score_cutoff);
     });
 }
-double normalized_levenshtein_default_process(const proc_string& s1, const proc_string& s2,
+static inline double normalized_levenshtein_default_process(const RfString& s1, const RfString& s2,
     size_t insertion, size_t deletion, size_t substitution, double score_cutoff)
 {
     return visitor_default_process(s1, s2, [&](auto str1, auto str2) {
         return string_metric::normalized_levenshtein(str1, str2, {insertion, deletion, substitution}, score_cutoff);
     });
 }
+static inline int NormalizedLevenshteinInit(RfSimilarityContext* context, const RfKwargsContext* kwargs, const RfString* str)
+{
+    return similarity_init<string_metric::CachedNormalizedLevenshtein>(
+        context, str, *(rapidfuzz::LevenshteinWeightTable*)(kwargs->context)
+    );
+}
 
-PyObject* hamming_no_process(const proc_string& s1, const proc_string& s2, size_t max)
+static inline PyObject* hamming_no_process(const RfString& s1, const RfString& s2, size_t max)
 {
     size_t result = visitor(s1, s2, [&](auto str1, auto str2) {
         return string_metric::hamming(str1, str2, max);
     });
     return dist_to_long(result);
 }
-PyObject* hamming_default_process(const proc_string& s1, const proc_string& s2, size_t max)
+static inline PyObject* hamming_default_process(const RfString& s1, const RfString& s2, size_t max)
 {
     size_t result = visitor_default_process(s1, s2, [&](auto str1, auto str2) {
         return string_metric::hamming(str1, str2, max);
     });
     return dist_to_long(result);
 }
+static inline RfDistanceFunctionTable CreateHammingFunctionTable()
+{
+    return {
+        nullptr,
+        [](RfDistanceContext* context, const RfKwargsContext*, const RfString* str) {
+            return distance_init<string_metric::CachedHamming>(context, str);
+        }
+    };
+}
 
-double normalized_hamming_no_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double normalized_hamming_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor(s1, s2, [&](auto str1, auto str2) {
         return string_metric::normalized_hamming(str1, str2, score_cutoff);
     });
 }
-double normalized_hamming_default_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double normalized_hamming_default_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor_default_process(s1, s2, [&](auto str1, auto str2) {
         return string_metric::normalized_hamming(str1, str2, score_cutoff);
     });
 }
+static inline RfSimilarityFunctionTable CreateNormalizedHammingFunctionTable()
+{
+    return {
+        nullptr,
+        [](RfSimilarityContext* context, const RfKwargsContext*, const RfString* str) {
+            return similarity_init<string_metric::CachedNormalizedHamming>(context, str);
+        }
+    };
+}
 
-double jaro_similarity_no_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double jaro_similarity_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor(s1, s2, [&](auto str1, auto str2) {
         return string_metric::jaro_similarity(str1, str2, score_cutoff);
     });
 }
-double jaro_similarity_default_process(const proc_string& s1, const proc_string& s2, double score_cutoff)
+static inline double jaro_similarity_default_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
     return visitor_default_process(s1, s2, [&](auto str1, auto str2) {
         return string_metric::jaro_similarity(str1, str2, score_cutoff);
     });
 }
+static inline RfSimilarityFunctionTable CreateJaroSimilarityFunctionTable()
+{
+    return {
+        nullptr,
+        [](RfSimilarityContext* context, const RfKwargsContext*, const RfString* str) {
+            return similarity_init<string_metric::CachedJaroSimilarity>(context, str);
+        }
+    };
+}
 
-double jaro_winkler_similarity_no_process(const proc_string& s1, const proc_string& s2,
+static inline double jaro_winkler_similarity_no_process(const RfString& s1, const RfString& s2,
     double prefix_weight, double score_cutoff)
 {
     return visitor(s1, s2, [&](auto str1, auto str2) {
         return string_metric::jaro_winkler_similarity(str1, str2, prefix_weight, score_cutoff);
     });
 }
-double jaro_winkler_similarity_default_process(const proc_string& s1, const proc_string& s2,
+static inline double jaro_winkler_similarity_default_process(const RfString& s1, const RfString& s2,
     double prefix_weight, double score_cutoff)
 {
     return visitor_default_process(s1, s2, [&](auto str1, auto str2) {
         return string_metric::jaro_winkler_similarity(str1, str2, prefix_weight, score_cutoff);
     });
 }
+static inline int JaroWinklerSimilarityInit(RfSimilarityContext* context, const RfKwargsContext* kwargs, const RfString* str)
+{
+    return similarity_init<string_metric::CachedJaroWinklerSimilarity>(context, str, *(double*)(kwargs->context));
+}
 
-std::vector<rapidfuzz::LevenshteinEditOp> levenshtein_editops_no_process(
-    const proc_string& s1, const proc_string& s2)
+static inline std::vector<rapidfuzz::LevenshteinEditOp> levenshtein_editops_no_process(
+    const RfString& s1, const RfString& s2)
 {
     return visitor(s1, s2, [](auto str1, auto str2) {
         return string_metric::levenshtein_editops(str1, str2);
     });
 }
 
-std::vector<rapidfuzz::LevenshteinEditOp> levenshtein_editops_default_process(
-    const proc_string& s1, const proc_string& s2)
+static inline std::vector<rapidfuzz::LevenshteinEditOp> levenshtein_editops_default_process(
+    const RfString& s1, const RfString& s2)
 {
     return visitor_default_process(s1, s2, [](auto str1, auto str2) {
         return string_metric::levenshtein_editops(str1, str2);

@@ -32,7 +32,6 @@ struct DictMatchDistanceElem {
     PyObject* key;
 };
 
-
 struct ExtractScorerComp
 {
     template<class T>
@@ -61,361 +60,86 @@ struct ExtractDistanceComp
     }
 };
 
-typedef double (*scorer_func) (void* context, const proc_string& str, double score_cutoff);
-typedef std::size_t (*distance_func) (void* context, const proc_string& str, std::size_t max);
-typedef void (*context_deinit) (void* context);
-
 struct CachedScorerContext {
-    void* context;
-    scorer_func scorer;
-    context_deinit deinit;
+    RfSimilarityContext context;
 
     CachedScorerContext()
-      : context(nullptr), scorer(nullptr), deinit(nullptr) {}
-    CachedScorerContext(void* _context, scorer_func _scorer, context_deinit _deinit)
-      : context(_context), scorer(_scorer), deinit(_deinit) {}
+      : context({nullptr, nullptr, nullptr}) {}
+    explicit CachedScorerContext(RfSimilarityContext context_)
+      : context(context_) {}
 
     CachedScorerContext(const CachedScorerContext&) = delete;
     CachedScorerContext& operator=(const CachedScorerContext&) = delete;
 
     CachedScorerContext(CachedScorerContext&& other)
-     : context(other.context), scorer(other.scorer), deinit(other.deinit)
+     : context(other.context)
     {
-        other.context = nullptr;
+        other.context = {nullptr, nullptr, nullptr};
     }
 
     CachedScorerContext& operator=(CachedScorerContext&& other) {
         if (&other != this) {
-            if (deinit && context) {
-                deinit(context);
+            if (context.deinit) {
+                context.deinit(&context);
             }
 
             context = other.context;
-            scorer = other.scorer;
-            deinit = other.deinit;
-
-            other.context = nullptr;
+            other.context = {nullptr, nullptr, nullptr};
       }
       return *this;
     };
 
     ~CachedScorerContext() {
-        if (deinit && context) {
-            deinit(context);
-        }  
+        if (context.deinit) {
+            context.deinit(&context);
+        }
     }
 
-    double ratio(const proc_string& str, double score_cutoff) {
-        return scorer(context, str, score_cutoff);
+    double similarity(const RfString* str, double score_cutoff) {
+        double sim;
+        PyErr2RuntimeExn(context.similarity(&sim, &context, str, score_cutoff));
+        return sim;
     }
 };
 
 struct CachedDistanceContext {
-    void* context;
-    distance_func scorer;
-    context_deinit deinit;
+    RfDistanceContext context;
 
     CachedDistanceContext()
-      : context(nullptr), scorer(nullptr), deinit(nullptr) {}
-    CachedDistanceContext(void* _context, distance_func _scorer, context_deinit _deinit)
-      : context(_context), scorer(_scorer), deinit(_deinit) {}
+      : context({nullptr, nullptr, nullptr}) {}
+    explicit CachedDistanceContext(RfDistanceContext context_)
+      : context(context_) {}
 
     CachedDistanceContext(const CachedDistanceContext&) = delete;
     CachedDistanceContext& operator=(const CachedDistanceContext&) = delete;
 
     CachedDistanceContext(CachedDistanceContext&& other)
-     : context(other.context), scorer(other.scorer), deinit(other.deinit)
+     : context(other.context)
     {
-        other.context = nullptr;
+        other.context = {nullptr, nullptr, nullptr};
     }
 
     CachedDistanceContext& operator=(CachedDistanceContext&& other) {
         if (&other != this) {
-            if (deinit && context) {
-                deinit(context);
+            if (context.deinit) {
+                context.deinit(&context);
             }
 
             context = other.context;
-            scorer = other.scorer;
-            deinit = other.deinit;
-
-            other.context = nullptr;
+            other.context = {nullptr, nullptr, nullptr};
       }
       return *this;
     };
 
     ~CachedDistanceContext() {
-        if (deinit && context) {
-            deinit(context);
-        }  
+        if (context.deinit) {
+            context.deinit(&context);
+        }
     }
 
-    std::size_t ratio(const proc_string& str, std::size_t max) {
-        return scorer(context, str, max);
+    size_t distance(const RfString* str, size_t max) {
+        size_t dist;
+        PyErr2RuntimeExn(context.distance(&dist, &context, str, max));
+        return dist;
     }
 };
-
-struct KwargsContext {
-    void* context;
-    context_deinit deinit;
-
-    KwargsContext()
-      : context(nullptr), deinit(nullptr) {}
-    KwargsContext(void* _context, context_deinit _deinit)
-      : context(_context), deinit(_deinit) {}
-
-    KwargsContext(const KwargsContext&) = delete;
-    KwargsContext& operator=(const KwargsContext&) = delete;
-
-    KwargsContext(KwargsContext&& other)
-      : context(other.context), deinit(other.deinit)
-    {
-        other.context = nullptr;
-    }
-
-    KwargsContext& operator=(KwargsContext&& other) {
-        if (&other != this) {
-            if (deinit && context) {
-                deinit(context);
-            }
-
-            context = other.context;
-            deinit = other.deinit;
-
-            other.context = nullptr;
-        }
-        return *this;
-    };
-
-    ~KwargsContext() {
-        if (deinit && context) {
-            deinit(context);
-        }  
-    }
-};
-
-template <typename CachedScorer>
-static void cached_deinit(void* context)
-{
-    delete (CachedScorer*)context;
-}
-
-typedef KwargsContext (*kwargs_context_init)(PyObject* kwds);
-typedef CachedDistanceContext (*distance_context_init)(const KwargsContext& kwargs, const proc_string& str);
-typedef CachedScorerContext (*scorer_context_init)(const KwargsContext& kwargs, const proc_string& str);
-
-struct ScorerFunctionTable {
-    kwargs_context_init kwargs_init;
-    scorer_context_init init;
-};
-
-struct DistanceFunctionTable {
-    kwargs_context_init kwargs_init;
-    distance_context_init init;
-};
-
-template<typename CachedScorer>
-static inline double scorer_func_wrapper(void* context, const proc_string& str, double score_cutoff)
-{
-    return visit(str, [&](auto s){
-        return ((CachedScorer*)context)->ratio(s, score_cutoff);
-    });
-}
-
-template<template <typename> class CachedScorer, typename Sentence, typename ...Args>
-static inline CachedScorerContext get_ScorerContext(Sentence str, Args... args)
-{
-    CachedScorerContext context;
-    context.context = (void*) new CachedScorer<Sentence>(str, args...);
-
-    context.scorer = scorer_func_wrapper<CachedScorer<Sentence>>;
-    context.deinit = cached_deinit<CachedScorer<Sentence>>;
-    return context;
-}
-
-template<template <typename> class CachedScorer, typename ...Args>
-static inline CachedScorerContext scorer_init(const proc_string& str, Args... args)
-{
-    return visit(str, [&](auto s){
-        return get_ScorerContext<CachedScorer>(s, args...);
-    });
-}
-
-/* fuzz */
-static ScorerFunctionTable CreateRatioFunctionTable()
-{
-    return {
-        nullptr,
-        [](const KwargsContext&, const proc_string& str) {
-            return scorer_init<fuzz::CachedRatio>(str);
-        }
-    };
-}
-
-static ScorerFunctionTable CreatePartialRatioFunctionTable()
-{
-    return {
-        nullptr,
-        [](const KwargsContext&, const proc_string& str) {
-            return scorer_init<fuzz::CachedPartialRatio>(str);
-        }
-    };
-}
-
-static ScorerFunctionTable CreateTokenSortRatioFunctionTable()
-{
-    return {
-        nullptr,
-        [](const KwargsContext&, const proc_string& str) {
-            return scorer_init<fuzz::CachedTokenSortRatio>(str);
-        }
-    };
-}
-
-static ScorerFunctionTable CreateTokenSetRatioFunctionTable()
-{
-    return {
-        nullptr,
-        [](const KwargsContext&, const proc_string& str) {
-            return scorer_init<fuzz::CachedTokenSetRatio>(str);
-        }
-    };
-}
-
-static ScorerFunctionTable CreateTokenRatioFunctionTable()
-{
-    return {
-        nullptr,
-        [](const KwargsContext&, const proc_string& str) {
-            return scorer_init<fuzz::CachedTokenRatio>(str);
-        }
-    };
-}
-
-static ScorerFunctionTable CreatePartialTokenSortRatioFunctionTable()
-{
-    return {
-        nullptr,
-        [](const KwargsContext&, const proc_string& str) {
-            return scorer_init<fuzz::CachedPartialTokenSortRatio>(str);
-        }
-    };
-}
-
-static ScorerFunctionTable CreatePartialTokenSetRatioFunctionTable()
-{
-    return {
-        nullptr,
-        [](const KwargsContext&, const proc_string& str) {
-            return scorer_init<fuzz::CachedPartialTokenSetRatio>(str);
-        }
-    };
-}
-
-static ScorerFunctionTable CreatePartialTokenRatioFunctionTable()
-{
-    return {
-        nullptr,
-        [](const KwargsContext&, const proc_string& str) {
-            return scorer_init<fuzz::CachedPartialTokenRatio>(str);
-        }
-    };
-}
-
-static ScorerFunctionTable CreateWRatioFunctionTable()
-{
-    return {
-        nullptr,
-        [](const KwargsContext&, const proc_string& str) {
-            return scorer_init<fuzz::CachedWRatio>(str);
-        }
-    };
-}
-
-static ScorerFunctionTable CreateQRatioFunctionTable()
-{
-    return {
-        nullptr,
-        [](const KwargsContext&, const proc_string& str) {
-            return scorer_init<fuzz::CachedQRatio>(str);
-        }
-    };
-}
-
-/* string_metric */
-static CachedScorerContext cached_normalized_levenshtein_init(const KwargsContext& kwargs, const proc_string& str)
-{
-    return scorer_init<string_metric::CachedNormalizedLevenshtein>(
-        str, *static_cast<rapidfuzz::LevenshteinWeightTable*>(kwargs.context));
-}
-
-static ScorerFunctionTable CreateNormalizedHammingFunctionTable()
-{
-    return {
-        nullptr,
-        [](const KwargsContext&, const proc_string& str) {
-            return scorer_init<string_metric::CachedNormalizedHamming>(str);
-        }
-    };
-}
-
-static CachedScorerContext cached_jaro_winkler_similarity_init(const KwargsContext& kwargs, const proc_string& str)
-{
-    return scorer_init<string_metric::CachedJaroWinklerSimilarity>(
-        str, *static_cast<double*>(kwargs.context));
-}
-
-static ScorerFunctionTable CreateJaroSimilarityFunctionTable()
-{
-    return {
-        nullptr,
-        [](const KwargsContext&, const proc_string& str) {
-            return scorer_init<string_metric::CachedJaroSimilarity>(str);
-        }
-    };
-}
-
-/*************************************************
- *               cached distances
- *************************************************/
-
-template<typename CachedDistance>
-static inline std::size_t distance_func_wrapper(void* context, const proc_string& str, std::size_t max)
-{
-    return visit(str, [&](auto s){
-        return ((CachedDistance*)context)->distance(s, max);
-    });
-}
-
-template<template <typename> class CachedDistance, typename Sentence, typename ...Args>
-static inline CachedDistanceContext get_DistanceContext(Sentence str, Args... args)
-{
-    CachedDistanceContext context;
-    context.context = (void*) new CachedDistance<Sentence>(str, args...);
-    context.scorer = distance_func_wrapper<CachedDistance<Sentence>>;
-    context.deinit = cached_deinit<CachedDistance<Sentence>>;
-    return context;
-}
-
-template<template <typename> class CachedDistance, typename ...Args>
-static inline CachedDistanceContext distance_init(const proc_string& str, Args... args)
-{
-    return visit(str, [&](auto s){
-        return get_DistanceContext<CachedDistance>(s, args...);
-    });
-}
-
-static DistanceFunctionTable CreateHammingFunctionTable()
-{
-    return {
-        nullptr,
-        [](const KwargsContext&, const proc_string& str) {
-            return distance_init<string_metric::CachedHamming>(str);
-        }
-    };
-}
-
-static CachedDistanceContext cached_levenshtein_init(const KwargsContext& kwargs, const proc_string& str)
-{
-    return distance_init<string_metric::CachedLevenshtein>(str, *static_cast<rapidfuzz::LevenshteinWeightTable*>(kwargs.context));
-}

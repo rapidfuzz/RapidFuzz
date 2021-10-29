@@ -5,7 +5,8 @@
 #include <rapidfuzz/utils.hpp>
 #include <rapidfuzz/string_metric.hpp>
 #include <exception>
-#include <iostream>
+
+#include "rapidfuzz_capi.h"
 
 #define PYTHON_VERSION(major, minor, micro) ((major << 24) | (minor << 16) | (micro << 8))
 
@@ -26,84 +27,157 @@ private:
     char const* m_error;
 };
 
+/* copy from cython */
+static inline void CppExn2PyErr() {
+  try {
+    if (PyErr_Occurred())
+      ; // let the latest Python exn pass through and ignore the current one
+    else
+      throw;
+  } catch (const std::bad_alloc& exn) {
+    PyErr_SetString(PyExc_MemoryError, exn.what());
+  } catch (const std::bad_cast& exn) {
+    PyErr_SetString(PyExc_TypeError, exn.what());
+  } catch (const std::bad_typeid& exn) {
+    PyErr_SetString(PyExc_TypeError, exn.what());
+  } catch (const std::domain_error& exn) {
+    PyErr_SetString(PyExc_ValueError, exn.what());
+  } catch (const std::invalid_argument& exn) {
+    PyErr_SetString(PyExc_ValueError, exn.what());
+  } catch (const std::ios_base::failure& exn) {
+    PyErr_SetString(PyExc_IOError, exn.what());
+  } catch (const std::out_of_range& exn) {
+    PyErr_SetString(PyExc_IndexError, exn.what());
+  } catch (const std::overflow_error& exn) {
+    PyErr_SetString(PyExc_OverflowError, exn.what());
+  } catch (const std::range_error& exn) {
+    PyErr_SetString(PyExc_ArithmeticError, exn.what());
+  } catch (const std::underflow_error& exn) {
+    PyErr_SetString(PyExc_ArithmeticError, exn.what());
+  } catch (const std::exception& exn) {
+    PyErr_SetString(PyExc_RuntimeError, exn.what());
+  }
+  catch (...)
+  {
+    PyErr_SetString(PyExc_RuntimeError, "Unknown exception");
+  }
+}
+
+static inline void PyErr2RuntimeExn(int err) {
+    if (err == -1)
+    {
+        // Python exceptions should be already set and will be retrieved by Cython
+        throw std::runtime_error("");
+    }
+}
+
 #if PY_VERSION_HEX > PYTHON_VERSION(3, 0, 0)
 #define LIST_OF_CASES()   \
-    X_ENUM(RAPIDFUZZ_UINT8,  uint8_t ) \
-    X_ENUM(RAPIDFUZZ_UINT16, uint16_t) \
-    X_ENUM(RAPIDFUZZ_UINT32, uint32_t) \
-    X_ENUM(RAPIDFUZZ_UINT64, uint64_t)
+    X_ENUM(RF_UINT8,  uint8_t ) \
+    X_ENUM(RF_UINT16, uint16_t) \
+    X_ENUM(RF_UINT32, uint32_t) \
+    X_ENUM(RF_UINT64, uint64_t)
 #else /* Python2 */
 #define LIST_OF_CASES()   \
-    X_ENUM(RAPIDFUZZ_CHAR,    char      ) \
-    X_ENUM(RAPIDFUZZ_UNICODE, Py_UNICODE) \
-    X_ENUM(RAPIDFUZZ_UINT64,  uint64_t  )
+    X_ENUM(RF_CHAR,    char      ) \
+    X_ENUM(RF_UNICODE, Py_UNICODE) \
+    X_ENUM(RF_UINT64,  uint64_t  )
 #endif
 
+/* RAII Wrapper for RfString */
+struct RfStringWrapper {
+    RfString string;
 
-enum RapidfuzzType {
-# define X_ENUM(kind, type) kind,
-    LIST_OF_CASES()
-# undef X_ENUM
-};
+    RfStringWrapper()
+        : string({(RfStringType)0, nullptr, 0, nullptr, nullptr}) {}
 
-struct proc_string {
-    RapidfuzzType kind;
-    bool allocated;
-    void* data;
-    size_t length;
+    RfStringWrapper(RfString string_)
+        : string(string_) {}
 
-    proc_string()
-      : kind((RapidfuzzType)0),  allocated(false), data(nullptr), length(0) {}
-    proc_string(RapidfuzzType _kind, uint8_t _allocated, void* _data, size_t _length)
-      : kind(_kind), allocated(_allocated), data(_data), length(_length) {}
+    RfStringWrapper(const RfStringWrapper&) = delete;
+    RfStringWrapper& operator=(const RfStringWrapper&) = delete;
 
-    proc_string(const proc_string&) = delete;
-    proc_string& operator=(const proc_string&) = delete;
-
-    proc_string(proc_string&& other)
-     : kind(other.kind), allocated(other.allocated), data(other.data), length(other.length)
+    RfStringWrapper(RfStringWrapper&& other)
     {
-        other.data = nullptr;
-        other.allocated = false;
+        string = other.string;
+        other.string = {(RfStringType)0, nullptr, 0, nullptr, nullptr};
     }
 
-    proc_string& operator=(proc_string&& other) {
+    RfStringWrapper& operator=(RfStringWrapper&& other) {
         if (&other != this) {
-            if (allocated) {
-                free(data);
+            if (string.deinit) {
+                string.deinit(&string);
             }
-            kind = other.kind;
-            allocated = other.allocated;
-            data = other.data;
-            length = other.length;
-
-            other.data = nullptr;
-            other.allocated = false;
+            string = other.string;
+            other.string = {(RfStringType)0, nullptr, 0, nullptr, nullptr};
       }
       return *this;
     };
 
-    ~proc_string() {
-        if (allocated) {
-            free(data);
+    ~RfStringWrapper() {
+        if (string.deinit) {
+            string.deinit(&string);
         }
     }
 };
 
+/* RAII Wrapper for RfKwargsContext */
+struct RfKwargsContextWrapper {
+    RfKwargsContext kwargs;
+
+    RfKwargsContextWrapper()
+        : kwargs({NULL, NULL}) {}
+
+    RfKwargsContextWrapper(RfKwargsContext kwargs_)
+        : kwargs(kwargs_) {}
+
+    RfKwargsContextWrapper(const RfKwargsContextWrapper&) = delete;
+    RfKwargsContextWrapper& operator=(const RfKwargsContextWrapper&) = delete;
+
+    RfKwargsContextWrapper(RfKwargsContextWrapper&& other)
+    {
+        kwargs = other.kwargs;
+        other.kwargs = {NULL, NULL};
+    }
+
+    RfKwargsContextWrapper& operator=(RfKwargsContextWrapper&& other)
+    {
+        if (&other != this) {
+            if (kwargs.deinit) {
+                kwargs.deinit(&kwargs);
+            }
+            kwargs = other.kwargs;
+            other.kwargs = {NULL, NULL};
+        }
+        return *this;
+    };
+
+    ~RfKwargsContextWrapper() {
+        if (kwargs.deinit) {
+            kwargs.deinit(&kwargs);
+        }
+    }
+};
+
+void default_string_deinit(RfString* string)
+{
+    free(string->data);
+}
+
 template <typename T>
-static inline rapidfuzz::basic_string_view<T> no_process(const proc_string& s)
+static inline rapidfuzz::basic_string_view<T> no_process(const RfString& s)
 {
     return rapidfuzz::basic_string_view<T>((T*)s.data, s.length);
 }
 
 template <typename T>
-static inline std::basic_string<T> default_process(const proc_string& s)
+static inline std::basic_string<T> default_process(const RfString& s)
 {
     return utils::default_process(no_process<T>(s));
 }
 
 template <typename Func, typename... Args>
-auto visit(const proc_string& str, Func&& f, Args&&... args)
+auto visit(const RfString& str, Func&& f, Args&&... args)
 {
     switch(str.kind){
 # define X_ENUM(kind, type) case kind: return f(no_process<type>(str), std::forward<Args>(args)...);
@@ -115,7 +189,7 @@ auto visit(const proc_string& str, Func&& f, Args&&... args)
 }
 
 template <typename Func, typename... Args>
-auto visit_default_process(const proc_string& str, Func&& f, Args&&... args)
+auto visit_default_process(const RfString& str, Func&& f, Args&&... args)
 {
     switch(str.kind){
 # define X_ENUM(kind, type) case kind: return f(default_process<type>(str), std::forward<Args>(args)...);
@@ -127,7 +201,7 @@ auto visit_default_process(const proc_string& str, Func&& f, Args&&... args)
 }
 
 template <typename Func, typename... Args>
-auto visitor(const proc_string& str1, const proc_string& str2, Func&& f, Args&&... args)
+auto visitor(const RfString& str1, const RfString& str2, Func&& f, Args&&... args)
 {
     return visit(str2,
         [&](auto str) {
@@ -138,7 +212,7 @@ auto visitor(const proc_string& str1, const proc_string& str2, Func&& f, Args&&.
 
 /* todo this should be refactored in the future since preprocessing does not really belong here */
 template <typename Func, typename... Args>
-auto visitor_default_process(const proc_string& str1, const proc_string& str2, Func&& f, Args&&... args)
+auto visitor_default_process(const RfString& str1, const RfString& str2, Func&& f, Args&&... args)
 {
     return visit_default_process(str2,
         [&](auto str) {
@@ -216,52 +290,56 @@ static inline void validate_string(PyObject* py_str, const char* err)
     throw PythonTypeError(err);
 }
 
-static inline proc_string convert_string(PyObject* py_str)
+static inline RfString convert_string(PyObject* py_str)
 {
 #if PY_VERSION_HEX > PYTHON_VERSION(3, 0, 0)
     if (PyBytes_Check(py_str)) {
         return {
-            RAPIDFUZZ_UINT8,
-            false,
+            RF_UINT8,
             PyBytes_AS_STRING(py_str),
-            static_cast<std::size_t>(PyBytes_GET_SIZE(py_str))
+            static_cast<std::size_t>(PyBytes_GET_SIZE(py_str)),
+            nullptr,
+            nullptr
         };
     } else {
-        RapidfuzzType kind;
+        RfStringType kind;
         switch(PyUnicode_KIND(py_str)) {
         case PyUnicode_1BYTE_KIND:
-           kind = RAPIDFUZZ_UINT8;
+           kind = RF_UINT8;
            break;
         case PyUnicode_2BYTE_KIND:
-           kind = RAPIDFUZZ_UINT16;
+           kind = RF_UINT16;
            break;
         default:
-           kind = RAPIDFUZZ_UINT32;
+           kind = RF_UINT32;
            break;
         }
      
-        return proc_string(
+        return {
             kind,
-            false,
             PyUnicode_DATA(py_str),
-            static_cast<std::size_t>(PyUnicode_GET_LENGTH(py_str))
-        );
+            static_cast<std::size_t>(PyUnicode_GET_LENGTH(py_str)),
+            nullptr,
+            nullptr
+        };
     }
 #else /* Python2 */
     if (PyObject_TypeCheck(py_str, &PyString_Type)) {
         return {
-            RAPIDFUZZ_CHAR,
-            false,
+            RF_CHAR,
             PyString_AS_STRING(py_str),
-            static_cast<std::size_t>(PyString_GET_SIZE(py_str))
+            static_cast<std::size_t>(PyString_GET_SIZE(py_str)),
+            nullptr,
+            nullptr
         };
     }
     else if (PyObject_TypeCheck(py_str, &PyUnicode_Type)) {
         return {
-            RAPIDFUZZ_UNICODE,
-            false,
+            RF_UNICODE,
             PyUnicode_AS_UNICODE(py_str),
-            static_cast<std::size_t>(PyUnicode_GET_SIZE(py_str))
+            static_cast<std::size_t>(PyUnicode_GET_SIZE(py_str)),
+            nullptr,
+            nullptr
         };
     }
     else {
@@ -271,9 +349,10 @@ static inline proc_string convert_string(PyObject* py_str)
 }
 
 template <typename CharT>
-proc_string default_process_func_impl(proc_string sentence) {
+RfString default_process_func_impl(RfString sentence) {
     CharT* str = static_cast<CharT*>(sentence.data);
-    if (!sentence.allocated)
+
+    if (!sentence.deinit)
     {
       CharT* temp_str = (CharT*)malloc(sentence.length * sizeof(CharT));
       if (temp_str == NULL)
@@ -284,7 +363,7 @@ proc_string default_process_func_impl(proc_string sentence) {
       str = temp_str;
     }
 
-    sentence.allocated = true;
+    sentence.deinit = default_string_deinit;
     sentence.data = str;
     sentence.kind = sentence.kind;
     sentence.length = utils::default_process(str, sentence.length);
@@ -292,7 +371,7 @@ proc_string default_process_func_impl(proc_string sentence) {
     return sentence;
 }
 
-proc_string default_process_func(proc_string sentence) {
+RfString default_process_func(RfString sentence) {
     switch (sentence.kind) {
     # define X_ENUM(KIND, TYPE) case KIND: return default_process_func_impl<TYPE>(std::move(sentence));
     LIST_OF_CASES()
