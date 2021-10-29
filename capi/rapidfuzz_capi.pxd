@@ -19,7 +19,7 @@ cdef extern from "rapidfuzz_capi.h":
         void* context
         RF_KwargsContextDeinit deinit
 
-    ctypedef RfKwargsContext (*RF_KwargsContextInit) (object kwargs)
+    ctypedef int (*RF_KwargsContextInit) (RfKwargsContext* context, dict kwargs) except -1
 
     ctypedef struct RfSimilarityContext
     ctypedef int (*RF_SimilarityFunc) (double* similarity, const RfSimilarityContext* context, const RfString* str, double score_cutoff) nogil except -1
@@ -37,7 +37,7 @@ cdef extern from "rapidfuzz_capi.h":
         RF_SimilarityInit similarity_init
 
     ctypedef struct RfDistanceContext
-    ctypedef int (*RF_DistanceFunc) (size_t* distance, const RfDistanceContext* context, const RfString* str, double score_cutoff)
+    ctypedef int (*RF_DistanceFunc) (size_t* distance, const RfDistanceContext* context, const RfString* str, size_t max)
     ctypedef void (*RF_DistanceContextDeinit) (RfDistanceContext* deinit) nogil
 
     ctypedef struct RfDistanceContext:

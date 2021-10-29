@@ -1,8 +1,15 @@
 #pragma once
 #include "cpp_common.hpp"
+#include <iostream>
 
 template <typename CachedScorer>
-static void cached_deinit(RfSimilarityContext* context)
+static void similarity_deinit(RfSimilarityContext* context)
+{
+    delete (CachedScorer*)context->context;
+}
+
+template <typename CachedScorer>
+static void distance_deinit(RfDistanceContext* context)
 {
     delete (CachedScorer*)context->context;
 }
@@ -23,6 +30,22 @@ static inline int similarity_func_wrapper(double* similarity, const RfSimilarity
     return 0;
 }
 
+template<typename CachedDistance>
+static inline int distance_func_wrapper(size_t* distance, const RfDistanceContext* context, const RfString* str, size_t max)
+{
+    try {
+        *distance = visit(*str, [&](auto s){
+            return ((CachedDistance*)context->context)->distance(s, max);
+        });
+    } catch(...) {
+      PyGILState_STATE gilstate_save = PyGILState_Ensure();
+      CppExn2PyErr();
+      PyGILState_Release(gilstate_save);
+      return -1;
+    }
+    return 0;
+}
+
 template<template <typename> class CachedScorer, typename Sentence, typename ...Args>
 static inline RfSimilarityContext get_SimilarityContext(Sentence str, Args... args)
 {
@@ -30,7 +53,18 @@ static inline RfSimilarityContext get_SimilarityContext(Sentence str, Args... ar
     context.context = (void*) new CachedScorer<Sentence>(str, args...);
 
     context.similarity = similarity_func_wrapper<CachedScorer<Sentence>>;
-    context.deinit = cached_deinit<CachedScorer<Sentence>>;
+    context.deinit = similarity_deinit<CachedScorer<Sentence>>;
+    return context;
+}
+
+template<template <typename> class CachedDistance, typename Sentence, typename ...Args>
+static inline RfDistanceContext get_DistanceContext(Sentence str, Args... args)
+{
+    RfDistanceContext context;
+    context.context = (void*) new CachedDistance<Sentence>(str, args...);
+
+    context.distance = distance_func_wrapper<CachedDistance<Sentence>>;
+    context.deinit = distance_deinit<CachedDistance<Sentence>>;
     return context;
 }
 
@@ -40,6 +74,22 @@ static inline int similarity_init(RfSimilarityContext* context, const RfString* 
     try {
         *context = visit(*str, [&](auto s){
             return get_SimilarityContext<CachedScorer>(s, args...);
+        });
+    } catch(...) {
+      PyGILState_STATE gilstate_save = PyGILState_Ensure();
+      CppExn2PyErr();
+      PyGILState_Release(gilstate_save);
+      return -1;
+    }
+    return 0;
+}
+
+template<template <typename> class CachedDistance, typename ...Args>
+static inline int distance_init(RfDistanceContext* context, const RfString* str, Args... args)
+{
+    try {
+        *context = visit(*str, [&](auto s){
+            return get_DistanceContext<CachedDistance>(s, args...);
         });
     } catch(...) {
       PyGILState_STATE gilstate_save = PyGILState_Ensure();
@@ -289,6 +339,12 @@ static inline PyObject* levenshtein_default_process(const RfString& s1, const Rf
     });
     return dist_to_long(result);
 }
+static inline int LevenshteinInit(RfDistanceContext* context, const RfKwargsContext* kwargs, const RfString* str)
+{
+    return distance_init<string_metric::CachedLevenshtein>(
+        context, str, *(rapidfuzz::LevenshteinWeightTable*)(kwargs->context)
+    );
+}
 
 static inline double normalized_levenshtein_no_process(const RfString& s1, const RfString& s2,
     size_t insertion, size_t deletion, size_t substitution, double score_cutoff)
@@ -303,6 +359,12 @@ static inline double normalized_levenshtein_default_process(const RfString& s1, 
     return visitor_default_process(s1, s2, [&](auto str1, auto str2) {
         return string_metric::normalized_levenshtein(str1, str2, {insertion, deletion, substitution}, score_cutoff);
     });
+}
+static inline int NormalizedLevenshteinInit(RfSimilarityContext* context, const RfKwargsContext* kwargs, const RfString* str)
+{
+    return similarity_init<string_metric::CachedNormalizedLevenshtein>(
+        context, str, *(rapidfuzz::LevenshteinWeightTable*)(kwargs->context)
+    );
 }
 
 static inline PyObject* hamming_no_process(const RfString& s1, const RfString& s2, size_t max)
@@ -319,6 +381,15 @@ static inline PyObject* hamming_default_process(const RfString& s1, const RfStri
     });
     return dist_to_long(result);
 }
+static inline RfDistanceFunctionTable CreateHammingFunctionTable()
+{
+    return {
+        nullptr,
+        [](RfDistanceContext* context, const RfKwargsContext*, const RfString* str) {
+            return distance_init<string_metric::CachedHamming>(context, str);
+        }
+    };
+}
 
 static inline double normalized_hamming_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
@@ -332,6 +403,15 @@ static inline double normalized_hamming_default_process(const RfString& s1, cons
         return string_metric::normalized_hamming(str1, str2, score_cutoff);
     });
 }
+static inline RfSimilarityFunctionTable CreateNormalizedHammingFunctionTable()
+{
+    return {
+        nullptr,
+        [](RfSimilarityContext* context, const RfKwargsContext*, const RfString* str) {
+            return similarity_init<string_metric::CachedNormalizedHamming>(context, str);
+        }
+    };
+}
 
 static inline double jaro_similarity_no_process(const RfString& s1, const RfString& s2, double score_cutoff)
 {
@@ -344,6 +424,15 @@ static inline double jaro_similarity_default_process(const RfString& s1, const R
     return visitor_default_process(s1, s2, [&](auto str1, auto str2) {
         return string_metric::jaro_similarity(str1, str2, score_cutoff);
     });
+}
+static inline RfSimilarityFunctionTable CreateJaroSimilarityFunctionTable()
+{
+    return {
+        nullptr,
+        [](RfSimilarityContext* context, const RfKwargsContext*, const RfString* str) {
+            return similarity_init<string_metric::CachedJaroSimilarity>(context, str);
+        }
+    };
 }
 
 static inline double jaro_winkler_similarity_no_process(const RfString& s1, const RfString& s2,
@@ -359,6 +448,10 @@ static inline double jaro_winkler_similarity_default_process(const RfString& s1,
     return visitor_default_process(s1, s2, [&](auto str1, auto str2) {
         return string_metric::jaro_winkler_similarity(str1, str2, prefix_weight, score_cutoff);
     });
+}
+static inline int JaroWinklerSimilarityInit(RfSimilarityContext* context, const RfKwargsContext* kwargs, const RfString* str)
+{
+    return similarity_init<string_metric::CachedJaroWinklerSimilarity>(context, str, *(double*)(kwargs->context));
 }
 
 static inline std::vector<rapidfuzz::LevenshteinEditOp> levenshtein_editops_no_process(

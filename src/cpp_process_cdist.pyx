@@ -29,7 +29,7 @@ from rapidfuzz_capi cimport (
     RF_DistanceInit, RF_SimilarityInit,
     RfKwargsContext
 )
-from cpython.pycapsule cimport PyCapsule_IsValid, PyCapsule_GetContext
+from cpython.pycapsule cimport PyCapsule_IsValid, PyCapsule_GetPointer
 
 np.import_array()
 
@@ -77,14 +77,14 @@ cdef inline cdist_two_lists_similarity(
 ):
     cdef double c_score_cutoff = 0
     cdef RfSimilarityFunctionTable table = dereference(
-        <RfSimilarityFunctionTable*>PyCapsule_GetContext(similarity_capsule)
+        <RfSimilarityFunctionTable*>PyCapsule_GetPointer(similarity_capsule, "similarity")
     )
-    cdef RfKwargsContextWrapper kwargs_context
+    cdef RfKwargsContextWrapper kwargs_context = RfKwargsContextWrapper()
     cdef int c_dtype = dtype_to_type_num_similarity(dtype)
     cdef int c_workers = workers
 
     if (NULL != table.kwargs_init):
-        kwargs_context = RfKwargsContextWrapper(table.kwargs_init(kwargs))
+        table.kwargs_init(&kwargs_context.kwargs, kwargs)
 
     if score_cutoff is not None:
         c_score_cutoff = score_cutoff
@@ -99,14 +99,14 @@ cdef inline cdist_two_lists_distance(
 ):
     cdef size_t c_max = <size_t>-1
     cdef RfDistanceFunctionTable table = dereference(
-        <RfDistanceFunctionTable*>PyCapsule_GetContext(distance_capsule)
+        <RfDistanceFunctionTable*>PyCapsule_GetPointer(distance_capsule, "distance")
     )
-    cdef RfKwargsContextWrapper kwargs_context
+    cdef RfKwargsContextWrapper kwargs_context = RfKwargsContextWrapper()
     cdef int c_dtype = dtype_to_type_num_distance(dtype)
     cdef int c_workers = workers
 
     if (NULL != table.kwargs_init):
-        kwargs_context = RfKwargsContextWrapper(table.kwargs_init(kwargs))
+        table.kwargs_init(&kwargs_context.kwargs, kwargs)
 
     if max_ is not None:
         if max_ < -1:
@@ -245,14 +245,14 @@ cdef inline cdist_single_list_similarity(
 ):
     cdef double c_score_cutoff = 0
     cdef RfSimilarityFunctionTable table = dereference(
-        <RfSimilarityFunctionTable*>PyCapsule_GetContext(similarity_capsule)
+        <RfSimilarityFunctionTable*>PyCapsule_GetPointer(similarity_capsule, "similarity")
     )
-    cdef RfKwargsContextWrapper kwargs_context
+    cdef RfKwargsContextWrapper kwargs_context = RfKwargsContextWrapper()
     cdef int c_dtype = dtype_to_type_num_similarity(dtype)
     cdef int c_workers = workers
 
     if (NULL != table.kwargs_init):
-        kwargs_context = RfKwargsContextWrapper(table.kwargs_init(kwargs))
+        table.kwargs_init(&kwargs_context.kwargs, kwargs)
 
     if score_cutoff is not None:
         c_score_cutoff = score_cutoff
@@ -266,14 +266,14 @@ cdef inline cdist_single_list_distance(
 ):
     cdef size_t c_max = <size_t>-1
     cdef RfDistanceFunctionTable table = dereference(
-        <RfDistanceFunctionTable*>PyCapsule_GetContext(distance_capsule)
+        <RfDistanceFunctionTable*>PyCapsule_GetPointer(distance_capsule, "distance")
     )
-    cdef RfKwargsContextWrapper kwargs_context
+    cdef RfKwargsContextWrapper kwargs_context = RfKwargsContextWrapper()
     cdef int c_dtype = dtype_to_type_num_distance(dtype)
     cdef int c_workers = workers
 
     if (NULL != table.kwargs_init):
-        kwargs_context = RfKwargsContextWrapper(table.kwargs_init(kwargs))
+        table.kwargs_init(&kwargs_context.kwargs, kwargs)
 
     if max_ is not None:
         if max_ < -1:
@@ -290,6 +290,7 @@ cdef cdist_single_list(queries, scorer, processor, score_cutoff, dtype, workers,
 
     cdef scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
     cdef int valid_capsule = PyCapsule_IsValid(scorer_capsule, "similarity") or PyCapsule_IsValid(scorer_capsule, "distance")
+    print(valid_capsule)
 
     try:
         if valid_capsule:

@@ -5,7 +5,6 @@
 #include <rapidfuzz/utils.hpp>
 #include <rapidfuzz/string_metric.hpp>
 #include <exception>
-#include <iostream>
 
 #include "rapidfuzz_capi.h"
 
@@ -64,7 +63,7 @@ static inline void CppExn2PyErr() {
   }
 }
 
-static void PyErr2RuntimeExn(int err) {
+static inline void PyErr2RuntimeExn(int err) {
     if (err == -1)
     {
         // Python exceptions should be already set and will be retrieved by Cython
@@ -149,8 +148,8 @@ struct RfKwargsContextWrapper {
             }
             kwargs = other.kwargs;
             other.kwargs = {NULL, NULL};
-      }
-      return *this;
+        }
+        return *this;
     };
 
     ~RfKwargsContextWrapper() {

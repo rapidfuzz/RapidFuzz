@@ -3198,7 +3198,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 /* #### Code section: module_code ### */
 
 /* "cpp_process.pyx":32
- * from cpython.pycapsule cimport PyCapsule_IsValid, PyCapsule_GetContext
+ * from cpython.pycapsule cimport PyCapsule_IsValid, PyCapsule_GetPointer
  * 
  * cdef inline RfString conv_sequence(seq) except *:             # <<<<<<<<<<<<<<
  *     if is_valid_string(seq):
@@ -3308,7 +3308,7 @@ static CYTHON_INLINE RfString __pyx_f_11cpp_process_conv_sequence(PyObject *__py
   }
 
   /* "cpp_process.pyx":32
- * from cpython.pycapsule cimport PyCapsule_IsValid, PyCapsule_GetContext
+ * from cpython.pycapsule cimport PyCapsule_IsValid, PyCapsule_GetPointer
  * 
  * cdef inline RfString conv_sequence(seq) except *:             # <<<<<<<<<<<<<<
  *     if is_valid_string(seq):
@@ -6648,7 +6648,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  *     """
  *     cdef double c_score_cutoff = 0.0             # <<<<<<<<<<<<<<
  *     cdef size_t c_max = <size_t>-1
- *     cdef RfKwargsContextWrapper kwargs_context
+ *     cdef RfKwargsContextWrapper kwargs_context = RfKwargsContextWrapper()
  */
   __Pyx_TraceLine(450,0,__PYX_ERR(0, 450, __pyx_L1_error))
   __pyx_v_c_score_cutoff = 0.0;
@@ -6657,11 +6657,21 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  *     """
  *     cdef double c_score_cutoff = 0.0
  *     cdef size_t c_max = <size_t>-1             # <<<<<<<<<<<<<<
- *     cdef RfKwargsContextWrapper kwargs_context
+ *     cdef RfKwargsContextWrapper kwargs_context = RfKwargsContextWrapper()
  *     cdef RfSimilarityContext similarity_context
  */
   __Pyx_TraceLine(451,0,__PYX_ERR(0, 451, __pyx_L1_error))
   __pyx_v_c_max = ((size_t)-1L);
+
+  /* "cpp_process.pyx":452
+ *     cdef double c_score_cutoff = 0.0
+ *     cdef size_t c_max = <size_t>-1
+ *     cdef RfKwargsContextWrapper kwargs_context = RfKwargsContextWrapper()             # <<<<<<<<<<<<<<
+ *     cdef RfSimilarityContext similarity_context
+ *     cdef RfDistanceContext distance_context
+ */
+  __Pyx_TraceLine(452,0,__PYX_ERR(0, 452, __pyx_L1_error))
+  __pyx_v_kwargs_context = RfKwargsContextWrapper();
 
   /* "cpp_process.pyx":456
  *     cdef RfDistanceContext distance_context
@@ -6867,7 +6877,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  *     scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
  *     if PyCapsule_IsValid(scorer_capsule, "similarity"):             # <<<<<<<<<<<<<<
  *         similarity_table = dereference(
- *             <RfSimilarityFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+ *             <RfSimilarityFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "similarity")
  */
   __Pyx_TraceLine(470,0,__PYX_ERR(0, 470, __pyx_L1_error))
   __pyx_t_2 = (PyCapsule_IsValid(__pyx_v_scorer_capsule, ((char const *)"similarity")) != 0);
@@ -6876,18 +6886,18 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
     /* "cpp_process.pyx":472
  *     if PyCapsule_IsValid(scorer_capsule, "similarity"):
  *         similarity_table = dereference(
- *             <RfSimilarityFunctionTable*>PyCapsule_GetContext(scorer_capsule)             # <<<<<<<<<<<<<<
+ *             <RfSimilarityFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "similarity")             # <<<<<<<<<<<<<<
  *         )
  * 
  */
     __Pyx_TraceLine(472,0,__PYX_ERR(0, 472, __pyx_L1_error))
-    __pyx_t_7 = PyCapsule_GetContext(__pyx_v_scorer_capsule); if (unlikely(__pyx_t_7 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 472, __pyx_L1_error)
+    __pyx_t_7 = PyCapsule_GetPointer(__pyx_v_scorer_capsule, ((char const *)"similarity")); if (unlikely(__pyx_t_7 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 472, __pyx_L1_error)
 
     /* "cpp_process.pyx":471
  *     scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
  *     if PyCapsule_IsValid(scorer_capsule, "similarity"):
  *         similarity_table = dereference(             # <<<<<<<<<<<<<<
- *             <RfSimilarityFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+ *             <RfSimilarityFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "similarity")
  *         )
  */
     __Pyx_TraceLine(471,0,__PYX_ERR(0, 471, __pyx_L1_error))
@@ -6897,7 +6907,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  *         )
  * 
  *         if (NULL != similarity_table.kwargs_init):             # <<<<<<<<<<<<<<
- *             kwargs_context = RfKwargsContextWrapper(similarity_table.kwargs_init(kwargs))
+ *             similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  */
     __Pyx_TraceLine(475,0,__PYX_ERR(0, 475, __pyx_L1_error))
@@ -6907,24 +6917,24 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
       /* "cpp_process.pyx":476
  * 
  *         if (NULL != similarity_table.kwargs_init):
- *             kwargs_context = RfKwargsContextWrapper(similarity_table.kwargs_init(kwargs))             # <<<<<<<<<<<<<<
+ *             similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)             # <<<<<<<<<<<<<<
  * 
  *         query_context = RfStringWrapper(conv_sequence(query))
  */
       __Pyx_TraceLine(476,0,__PYX_ERR(0, 476, __pyx_L1_error))
-      __pyx_v_kwargs_context = RfKwargsContextWrapper(__pyx_v_similarity_table.kwargs_init(__pyx_v_kwargs));
+      (void)(__pyx_v_similarity_table.kwargs_init((&__pyx_v_kwargs_context.kwargs), __pyx_v_kwargs));
 
       /* "cpp_process.pyx":475
  *         )
  * 
  *         if (NULL != similarity_table.kwargs_init):             # <<<<<<<<<<<<<<
- *             kwargs_context = RfKwargsContextWrapper(similarity_table.kwargs_init(kwargs))
+ *             similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  */
     }
 
     /* "cpp_process.pyx":478
- *             kwargs_context = RfKwargsContextWrapper(similarity_table.kwargs_init(kwargs))
+ *             similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  *         query_context = RfStringWrapper(conv_sequence(query))             # <<<<<<<<<<<<<<
  *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)
@@ -7086,7 +7096,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  *     scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
  *     if PyCapsule_IsValid(scorer_capsule, "similarity"):             # <<<<<<<<<<<<<<
  *         similarity_table = dereference(
- *             <RfSimilarityFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+ *             <RfSimilarityFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "similarity")
  */
   }
 
@@ -7095,7 +7105,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  * 
  *     if PyCapsule_IsValid(scorer_capsule, "distance"):             # <<<<<<<<<<<<<<
  *         distance_table = dereference(
- *             <RfDistanceFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+ *             <RfDistanceFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "distance")
  */
   __Pyx_TraceLine(491,0,__PYX_ERR(0, 491, __pyx_L1_error))
   __pyx_t_2 = (PyCapsule_IsValid(__pyx_v_scorer_capsule, ((char const *)"distance")) != 0);
@@ -7104,18 +7114,18 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
     /* "cpp_process.pyx":493
  *     if PyCapsule_IsValid(scorer_capsule, "distance"):
  *         distance_table = dereference(
- *             <RfDistanceFunctionTable*>PyCapsule_GetContext(scorer_capsule)             # <<<<<<<<<<<<<<
+ *             <RfDistanceFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "distance")             # <<<<<<<<<<<<<<
  *         )
  * 
  */
     __Pyx_TraceLine(493,0,__PYX_ERR(0, 493, __pyx_L1_error))
-    __pyx_t_7 = PyCapsule_GetContext(__pyx_v_scorer_capsule); if (unlikely(__pyx_t_7 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 493, __pyx_L1_error)
+    __pyx_t_7 = PyCapsule_GetPointer(__pyx_v_scorer_capsule, ((char const *)"distance")); if (unlikely(__pyx_t_7 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 493, __pyx_L1_error)
 
     /* "cpp_process.pyx":492
  * 
  *     if PyCapsule_IsValid(scorer_capsule, "distance"):
  *         distance_table = dereference(             # <<<<<<<<<<<<<<
- *             <RfDistanceFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+ *             <RfDistanceFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "distance")
  *         )
  */
     __Pyx_TraceLine(492,0,__PYX_ERR(0, 492, __pyx_L1_error))
@@ -7125,7 +7135,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  *         )
  * 
  *         if (NULL != distance_table.kwargs_init):             # <<<<<<<<<<<<<<
- *             kwargs_context = RfKwargsContextWrapper(distance_table.kwargs_init(kwargs))
+ *             distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  */
     __Pyx_TraceLine(496,0,__PYX_ERR(0, 496, __pyx_L1_error))
@@ -7135,24 +7145,24 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
       /* "cpp_process.pyx":497
  * 
  *         if (NULL != distance_table.kwargs_init):
- *             kwargs_context = RfKwargsContextWrapper(distance_table.kwargs_init(kwargs))             # <<<<<<<<<<<<<<
+ *             distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)             # <<<<<<<<<<<<<<
  * 
  *         query_context = RfStringWrapper(conv_sequence(query))
  */
       __Pyx_TraceLine(497,0,__PYX_ERR(0, 497, __pyx_L1_error))
-      __pyx_v_kwargs_context = RfKwargsContextWrapper(__pyx_v_distance_table.kwargs_init(__pyx_v_kwargs));
+      (void)(__pyx_v_distance_table.kwargs_init((&__pyx_v_kwargs_context.kwargs), __pyx_v_kwargs));
 
       /* "cpp_process.pyx":496
  *         )
  * 
  *         if (NULL != distance_table.kwargs_init):             # <<<<<<<<<<<<<<
- *             kwargs_context = RfKwargsContextWrapper(distance_table.kwargs_init(kwargs))
+ *             distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  */
     }
 
     /* "cpp_process.pyx":499
- *             kwargs_context = RfKwargsContextWrapper(distance_table.kwargs_init(kwargs))
+ *             distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  *         query_context = RfStringWrapper(conv_sequence(query))             # <<<<<<<<<<<<<<
  *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)
@@ -7283,7 +7293,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  * 
  *     if PyCapsule_IsValid(scorer_capsule, "distance"):             # <<<<<<<<<<<<<<
  *         distance_table = dereference(
- *             <RfDistanceFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+ *             <RfDistanceFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "distance")
  */
   }
 
@@ -11837,7 +11847,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  *     cdef double c_score_cutoff = 0.0
  *     cdef size_t c_max = <size_t>-1             # <<<<<<<<<<<<<<
  *     cdef int def_process = 0
- *     cdef RfKwargsContextWrapper kwargs_context
+ *     cdef RfKwargsContextWrapper kwargs_context = RfKwargsContextWrapper()
  */
   __Pyx_TraceLine(878,0,__PYX_ERR(0, 878, __pyx_L1_error))
   __pyx_v_c_max = ((size_t)-1L);
@@ -11846,11 +11856,21 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  *     cdef double c_score_cutoff = 0.0
  *     cdef size_t c_max = <size_t>-1
  *     cdef int def_process = 0             # <<<<<<<<<<<<<<
- *     cdef RfKwargsContextWrapper kwargs_context
+ *     cdef RfKwargsContextWrapper kwargs_context = RfKwargsContextWrapper()
  *     cdef RfSimilarityContext similarity_context
  */
   __Pyx_TraceLine(879,0,__PYX_ERR(0, 879, __pyx_L1_error))
   __pyx_v_def_process = 0;
+
+  /* "cpp_process.pyx":880
+ *     cdef size_t c_max = <size_t>-1
+ *     cdef int def_process = 0
+ *     cdef RfKwargsContextWrapper kwargs_context = RfKwargsContextWrapper()             # <<<<<<<<<<<<<<
+ *     cdef RfSimilarityContext similarity_context
+ *     cdef RfDistanceContext distance_context
+ */
+  __Pyx_TraceLine(880,0,__PYX_ERR(0, 880, __pyx_L1_error))
+  __pyx_v_kwargs_context = RfKwargsContextWrapper();
 
   /* "cpp_process.pyx":884
  *     cdef RfDistanceContext distance_context
@@ -12108,7 +12128,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  *     scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
  *     if PyCapsule_IsValid(scorer_capsule, "similarity"):             # <<<<<<<<<<<<<<
  *         similarity_table = dereference(
- *             <RfSimilarityFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+ *             <RfSimilarityFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "similarity")
  */
   __Pyx_TraceLine(901,0,__PYX_ERR(0, 901, __pyx_L1_error))
   __pyx_t_2 = (PyCapsule_IsValid(__pyx_v_scorer_capsule, ((char const *)"similarity")) != 0);
@@ -12117,18 +12137,18 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
     /* "cpp_process.pyx":903
  *     if PyCapsule_IsValid(scorer_capsule, "similarity"):
  *         similarity_table = dereference(
- *             <RfSimilarityFunctionTable*>PyCapsule_GetContext(scorer_capsule)             # <<<<<<<<<<<<<<
+ *             <RfSimilarityFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "similarity")             # <<<<<<<<<<<<<<
  *         )
  * 
  */
     __Pyx_TraceLine(903,0,__PYX_ERR(0, 903, __pyx_L1_error))
-    __pyx_t_9 = PyCapsule_GetContext(__pyx_v_scorer_capsule); if (unlikely(__pyx_t_9 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 903, __pyx_L1_error)
+    __pyx_t_9 = PyCapsule_GetPointer(__pyx_v_scorer_capsule, ((char const *)"similarity")); if (unlikely(__pyx_t_9 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 903, __pyx_L1_error)
 
     /* "cpp_process.pyx":902
  *     scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
  *     if PyCapsule_IsValid(scorer_capsule, "similarity"):
  *         similarity_table = dereference(             # <<<<<<<<<<<<<<
- *             <RfSimilarityFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+ *             <RfSimilarityFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "similarity")
  *         )
  */
     __Pyx_TraceLine(902,0,__PYX_ERR(0, 902, __pyx_L1_error))
@@ -12138,7 +12158,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  *         )
  * 
  *         if (NULL != similarity_table.kwargs_init):             # <<<<<<<<<<<<<<
- *             kwargs_context = RfKwargsContextWrapper(similarity_table.kwargs_init(kwargs))
+ *             similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  */
     __Pyx_TraceLine(906,0,__PYX_ERR(0, 906, __pyx_L1_error))
@@ -12148,24 +12168,24 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
       /* "cpp_process.pyx":907
  * 
  *         if (NULL != similarity_table.kwargs_init):
- *             kwargs_context = RfKwargsContextWrapper(similarity_table.kwargs_init(kwargs))             # <<<<<<<<<<<<<<
+ *             similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)             # <<<<<<<<<<<<<<
  * 
  *         query_context = RfStringWrapper(conv_sequence(query))
  */
       __Pyx_TraceLine(907,0,__PYX_ERR(0, 907, __pyx_L1_error))
-      __pyx_v_kwargs_context = RfKwargsContextWrapper(__pyx_v_similarity_table.kwargs_init(__pyx_v_kwargs));
+      (void)(__pyx_v_similarity_table.kwargs_init((&__pyx_v_kwargs_context.kwargs), __pyx_v_kwargs));
 
       /* "cpp_process.pyx":906
  *         )
  * 
  *         if (NULL != similarity_table.kwargs_init):             # <<<<<<<<<<<<<<
- *             kwargs_context = RfKwargsContextWrapper(similarity_table.kwargs_init(kwargs))
+ *             similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  */
     }
 
     /* "cpp_process.pyx":909
- *             kwargs_context = RfKwargsContextWrapper(similarity_table.kwargs_init(kwargs))
+ *             similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  *         query_context = RfStringWrapper(conv_sequence(query))             # <<<<<<<<<<<<<<
  *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)
@@ -12329,7 +12349,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  *     scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
  *     if PyCapsule_IsValid(scorer_capsule, "similarity"):             # <<<<<<<<<<<<<<
  *         similarity_table = dereference(
- *             <RfSimilarityFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+ *             <RfSimilarityFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "similarity")
  */
   }
 
@@ -12338,7 +12358,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  * 
  *     if PyCapsule_IsValid(scorer_capsule, "distance"):             # <<<<<<<<<<<<<<
  *         distance_table = dereference(
- *             <RfDistanceFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+ *             <RfDistanceFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "distance")
  */
   __Pyx_TraceLine(922,0,__PYX_ERR(0, 922, __pyx_L1_error))
   __pyx_t_2 = (PyCapsule_IsValid(__pyx_v_scorer_capsule, ((char const *)"distance")) != 0);
@@ -12347,18 +12367,18 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
     /* "cpp_process.pyx":924
  *     if PyCapsule_IsValid(scorer_capsule, "distance"):
  *         distance_table = dereference(
- *             <RfDistanceFunctionTable*>PyCapsule_GetContext(scorer_capsule)             # <<<<<<<<<<<<<<
+ *             <RfDistanceFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "distance")             # <<<<<<<<<<<<<<
  *         )
  * 
  */
     __Pyx_TraceLine(924,0,__PYX_ERR(0, 924, __pyx_L1_error))
-    __pyx_t_9 = PyCapsule_GetContext(__pyx_v_scorer_capsule); if (unlikely(__pyx_t_9 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 924, __pyx_L1_error)
+    __pyx_t_9 = PyCapsule_GetPointer(__pyx_v_scorer_capsule, ((char const *)"distance")); if (unlikely(__pyx_t_9 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 924, __pyx_L1_error)
 
     /* "cpp_process.pyx":923
  * 
  *     if PyCapsule_IsValid(scorer_capsule, "distance"):
  *         distance_table = dereference(             # <<<<<<<<<<<<<<
- *             <RfDistanceFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+ *             <RfDistanceFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "distance")
  *         )
  */
     __Pyx_TraceLine(923,0,__PYX_ERR(0, 923, __pyx_L1_error))
@@ -12368,7 +12388,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  *         )
  * 
  *         if (NULL != distance_table.kwargs_init):             # <<<<<<<<<<<<<<
- *             kwargs_context = RfKwargsContextWrapper(distance_table.kwargs_init(kwargs))
+ *             distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  */
     __Pyx_TraceLine(927,0,__PYX_ERR(0, 927, __pyx_L1_error))
@@ -12378,24 +12398,24 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
       /* "cpp_process.pyx":928
  * 
  *         if (NULL != distance_table.kwargs_init):
- *             kwargs_context = RfKwargsContextWrapper(distance_table.kwargs_init(kwargs))             # <<<<<<<<<<<<<<
+ *             distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)             # <<<<<<<<<<<<<<
  * 
  *         query_context = RfStringWrapper(conv_sequence(query))
  */
       __Pyx_TraceLine(928,0,__PYX_ERR(0, 928, __pyx_L1_error))
-      __pyx_v_kwargs_context = RfKwargsContextWrapper(__pyx_v_distance_table.kwargs_init(__pyx_v_kwargs));
+      (void)(__pyx_v_distance_table.kwargs_init((&__pyx_v_kwargs_context.kwargs), __pyx_v_kwargs));
 
       /* "cpp_process.pyx":927
  *         )
  * 
  *         if (NULL != distance_table.kwargs_init):             # <<<<<<<<<<<<<<
- *             kwargs_context = RfKwargsContextWrapper(distance_table.kwargs_init(kwargs))
+ *             distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  */
     }
 
     /* "cpp_process.pyx":930
- *             kwargs_context = RfKwargsContextWrapper(distance_table.kwargs_init(kwargs))
+ *             distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  *         query_context = RfStringWrapper(conv_sequence(query))             # <<<<<<<<<<<<<<
  *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)
@@ -12528,7 +12548,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  * 
  *     if PyCapsule_IsValid(scorer_capsule, "distance"):             # <<<<<<<<<<<<<<
  *         distance_table = dereference(
- *             <RfDistanceFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+ *             <RfDistanceFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "distance")
  */
   }
 
@@ -15679,7 +15699,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  *     """
  *     cdef double c_score_cutoff = 0.0             # <<<<<<<<<<<<<<
  *     cdef size_t c_max = <size_t>-1
- *     cdef RfKwargsContextWrapper kwargs_context
+ *     cdef RfKwargsContextWrapper kwargs_context = RfKwargsContextWrapper()
  */
   __Pyx_TraceLine(1005,0,__PYX_ERR(0, 1005, __pyx_L1_error))
   __pyx_cur_scope->__pyx_v_c_score_cutoff = 0.0;
@@ -15688,11 +15708,21 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  *     """
  *     cdef double c_score_cutoff = 0.0
  *     cdef size_t c_max = <size_t>-1             # <<<<<<<<<<<<<<
- *     cdef RfKwargsContextWrapper kwargs_context
+ *     cdef RfKwargsContextWrapper kwargs_context = RfKwargsContextWrapper()
  *     cdef RfSimilarityContext similarity_context
  */
   __Pyx_TraceLine(1006,0,__PYX_ERR(0, 1006, __pyx_L1_error))
   __pyx_cur_scope->__pyx_v_c_max = ((size_t)-1L);
+
+  /* "cpp_process.pyx":1007
+ *     cdef double c_score_cutoff = 0.0
+ *     cdef size_t c_max = <size_t>-1
+ *     cdef RfKwargsContextWrapper kwargs_context = RfKwargsContextWrapper()             # <<<<<<<<<<<<<<
+ *     cdef RfSimilarityContext similarity_context
+ *     cdef RfDistanceContext distance_context
+ */
+  __Pyx_TraceLine(1007,0,__PYX_ERR(0, 1007, __pyx_L1_error))
+  __pyx_cur_scope->__pyx_v_kwargs_context = RfKwargsContextWrapper();
 
   /* "cpp_process.pyx":1013
  *     cdef CachedDistanceContext DistanceContext
@@ -16034,7 +16064,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  *     scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
  *     if PyCapsule_IsValid(scorer_capsule, "similarity"):             # <<<<<<<<<<<<<<
  *         similarity_table = dereference(
- *             <RfSimilarityFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+ *             <RfSimilarityFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "similarity")
  */
   __Pyx_TraceLine(1194,0,__PYX_ERR(0, 1194, __pyx_L1_error))
   __pyx_t_2 = (PyCapsule_IsValid(__pyx_cur_scope->__pyx_v_scorer_capsule, ((char const *)"similarity")) != 0);
@@ -16043,18 +16073,18 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
     /* "cpp_process.pyx":1196
  *     if PyCapsule_IsValid(scorer_capsule, "similarity"):
  *         similarity_table = dereference(
- *             <RfSimilarityFunctionTable*>PyCapsule_GetContext(scorer_capsule)             # <<<<<<<<<<<<<<
+ *             <RfSimilarityFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "similarity")             # <<<<<<<<<<<<<<
  *         )
  * 
  */
     __Pyx_TraceLine(1196,0,__PYX_ERR(0, 1196, __pyx_L1_error))
-    __pyx_t_7 = PyCapsule_GetContext(__pyx_cur_scope->__pyx_v_scorer_capsule); if (unlikely(__pyx_t_7 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 1196, __pyx_L1_error)
+    __pyx_t_7 = PyCapsule_GetPointer(__pyx_cur_scope->__pyx_v_scorer_capsule, ((char const *)"similarity")); if (unlikely(__pyx_t_7 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 1196, __pyx_L1_error)
 
     /* "cpp_process.pyx":1195
  *     scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
  *     if PyCapsule_IsValid(scorer_capsule, "similarity"):
  *         similarity_table = dereference(             # <<<<<<<<<<<<<<
- *             <RfSimilarityFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+ *             <RfSimilarityFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "similarity")
  *         )
  */
     __Pyx_TraceLine(1195,0,__PYX_ERR(0, 1195, __pyx_L1_error))
@@ -16064,7 +16094,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  *         )
  * 
  *         if (NULL != similarity_table.kwargs_init):             # <<<<<<<<<<<<<<
- *             kwargs_context = RfKwargsContextWrapper(similarity_table.kwargs_init(kwargs))
+ *             similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  */
     __Pyx_TraceLine(1199,0,__PYX_ERR(0, 1199, __pyx_L1_error))
@@ -16074,27 +16104,27 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
       /* "cpp_process.pyx":1200
  * 
  *         if (NULL != similarity_table.kwargs_init):
- *             kwargs_context = RfKwargsContextWrapper(similarity_table.kwargs_init(kwargs))             # <<<<<<<<<<<<<<
+ *             similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)             # <<<<<<<<<<<<<<
  * 
  *         query_context = RfStringWrapper(conv_sequence(query))
  */
       __Pyx_TraceLine(1200,0,__PYX_ERR(0, 1200, __pyx_L1_error))
       __pyx_t_5 = __pyx_cur_scope->__pyx_v_kwargs;
       __Pyx_INCREF(__pyx_t_5);
-      __pyx_cur_scope->__pyx_v_kwargs_context = RfKwargsContextWrapper(__pyx_cur_scope->__pyx_v_similarity_table.kwargs_init(__pyx_t_5));
+      (void)(__pyx_cur_scope->__pyx_v_similarity_table.kwargs_init((&__pyx_cur_scope->__pyx_v_kwargs_context.kwargs), __pyx_t_5));
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
       /* "cpp_process.pyx":1199
  *         )
  * 
  *         if (NULL != similarity_table.kwargs_init):             # <<<<<<<<<<<<<<
- *             kwargs_context = RfKwargsContextWrapper(similarity_table.kwargs_init(kwargs))
+ *             similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  */
     }
 
     /* "cpp_process.pyx":1202
- *             kwargs_context = RfKwargsContextWrapper(similarity_table.kwargs_init(kwargs))
+ *             similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  *         query_context = RfStringWrapper(conv_sequence(query))             # <<<<<<<<<<<<<<
  *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)
@@ -16308,7 +16338,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  *     scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
  *     if PyCapsule_IsValid(scorer_capsule, "similarity"):             # <<<<<<<<<<<<<<
  *         similarity_table = dereference(
- *             <RfSimilarityFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+ *             <RfSimilarityFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "similarity")
  */
   }
 
@@ -16317,7 +16347,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  * 
  *     if PyCapsule_IsValid(scorer_capsule, "distance"):             # <<<<<<<<<<<<<<
  *         distance_table = dereference(
- *             <RfDistanceFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+ *             <RfDistanceFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "distance")
  */
   __Pyx_TraceLine(1217,0,__PYX_ERR(0, 1217, __pyx_L1_error))
   __pyx_t_2 = (PyCapsule_IsValid(__pyx_cur_scope->__pyx_v_scorer_capsule, ((char const *)"distance")) != 0);
@@ -16326,18 +16356,18 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
     /* "cpp_process.pyx":1219
  *     if PyCapsule_IsValid(scorer_capsule, "distance"):
  *         distance_table = dereference(
- *             <RfDistanceFunctionTable*>PyCapsule_GetContext(scorer_capsule)             # <<<<<<<<<<<<<<
+ *             <RfDistanceFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "distance")             # <<<<<<<<<<<<<<
  *         )
  * 
  */
     __Pyx_TraceLine(1219,0,__PYX_ERR(0, 1219, __pyx_L1_error))
-    __pyx_t_7 = PyCapsule_GetContext(__pyx_cur_scope->__pyx_v_scorer_capsule); if (unlikely(__pyx_t_7 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 1219, __pyx_L1_error)
+    __pyx_t_7 = PyCapsule_GetPointer(__pyx_cur_scope->__pyx_v_scorer_capsule, ((char const *)"distance")); if (unlikely(__pyx_t_7 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 1219, __pyx_L1_error)
 
     /* "cpp_process.pyx":1218
  * 
  *     if PyCapsule_IsValid(scorer_capsule, "distance"):
  *         distance_table = dereference(             # <<<<<<<<<<<<<<
- *             <RfDistanceFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+ *             <RfDistanceFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "distance")
  *         )
  */
     __Pyx_TraceLine(1218,0,__PYX_ERR(0, 1218, __pyx_L1_error))
@@ -16347,7 +16377,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  *         )
  * 
  *         if (NULL != distance_table.kwargs_init):             # <<<<<<<<<<<<<<
- *             kwargs_context = RfKwargsContextWrapper(distance_table.kwargs_init(kwargs))
+ *             distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  */
     __Pyx_TraceLine(1222,0,__PYX_ERR(0, 1222, __pyx_L1_error))
@@ -16357,27 +16387,27 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
       /* "cpp_process.pyx":1223
  * 
  *         if (NULL != distance_table.kwargs_init):
- *             kwargs_context = RfKwargsContextWrapper(distance_table.kwargs_init(kwargs))             # <<<<<<<<<<<<<<
+ *             distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)             # <<<<<<<<<<<<<<
  * 
  *         query_context = RfStringWrapper(conv_sequence(query))
  */
       __Pyx_TraceLine(1223,0,__PYX_ERR(0, 1223, __pyx_L1_error))
       __pyx_t_5 = __pyx_cur_scope->__pyx_v_kwargs;
       __Pyx_INCREF(__pyx_t_5);
-      __pyx_cur_scope->__pyx_v_kwargs_context = RfKwargsContextWrapper(__pyx_cur_scope->__pyx_v_distance_table.kwargs_init(__pyx_t_5));
+      (void)(__pyx_cur_scope->__pyx_v_distance_table.kwargs_init((&__pyx_cur_scope->__pyx_v_kwargs_context.kwargs), __pyx_t_5));
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
       /* "cpp_process.pyx":1222
  *         )
  * 
  *         if (NULL != distance_table.kwargs_init):             # <<<<<<<<<<<<<<
- *             kwargs_context = RfKwargsContextWrapper(distance_table.kwargs_init(kwargs))
+ *             distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  */
     }
 
     /* "cpp_process.pyx":1225
- *             kwargs_context = RfKwargsContextWrapper(distance_table.kwargs_init(kwargs))
+ *             distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  *         query_context = RfStringWrapper(conv_sequence(query))             # <<<<<<<<<<<<<<
  *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)
@@ -16560,7 +16590,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  * 
  *     if PyCapsule_IsValid(scorer_capsule, "distance"):             # <<<<<<<<<<<<<<
  *         distance_table = dereference(
- *             <RfDistanceFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+ *             <RfDistanceFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "distance")
  */
   }
 
@@ -19809,7 +19839,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "cpp_process.pyx":32
- * from cpython.pycapsule cimport PyCapsule_IsValid, PyCapsule_GetContext
+ * from cpython.pycapsule cimport PyCapsule_IsValid, PyCapsule_GetPointer
  * 
  * cdef inline RfString conv_sequence(seq) except *:             # <<<<<<<<<<<<<<
  *     if is_valid_string(seq):

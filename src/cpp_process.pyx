@@ -27,7 +27,7 @@ from rapidfuzz_capi cimport (
     RF_DistanceInit, RF_SimilarityInit,
     RfKwargsContext
 )
-from cpython.pycapsule cimport PyCapsule_IsValid, PyCapsule_GetContext
+from cpython.pycapsule cimport PyCapsule_IsValid, PyCapsule_GetPointer
 
 cdef inline RfString conv_sequence(seq) except *:
     if is_valid_string(seq):
@@ -449,7 +449,7 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
     """
     cdef double c_score_cutoff = 0.0
     cdef size_t c_max = <size_t>-1
-    cdef RfKwargsContextWrapper kwargs_context
+    cdef RfKwargsContextWrapper kwargs_context = RfKwargsContextWrapper()
     cdef RfSimilarityContext similarity_context
     cdef RfDistanceContext distance_context
 
@@ -469,11 +469,11 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
     scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
     if PyCapsule_IsValid(scorer_capsule, "similarity"):
         similarity_table = dereference(
-            <RfSimilarityFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+            <RfSimilarityFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "similarity")
         )
 
         if (NULL != similarity_table.kwargs_init):
-            kwargs_context = RfKwargsContextWrapper(similarity_table.kwargs_init(kwargs))
+            similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)
 
         query_context = RfStringWrapper(conv_sequence(query))
         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)
@@ -490,11 +490,11 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
 
     if PyCapsule_IsValid(scorer_capsule, "distance"):
         distance_table = dereference(
-            <RfDistanceFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+            <RfDistanceFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "distance")
         )
 
         if (NULL != distance_table.kwargs_init):
-            kwargs_context = RfKwargsContextWrapper(distance_table.kwargs_init(kwargs))
+            distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)
 
         query_context = RfStringWrapper(conv_sequence(query))
         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)
@@ -877,7 +877,7 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
     cdef double c_score_cutoff = 0.0
     cdef size_t c_max = <size_t>-1
     cdef int def_process = 0
-    cdef RfKwargsContextWrapper kwargs_context
+    cdef RfKwargsContextWrapper kwargs_context = RfKwargsContextWrapper()
     cdef RfSimilarityContext similarity_context
     cdef RfDistanceContext distance_context
 
@@ -900,11 +900,11 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
     scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
     if PyCapsule_IsValid(scorer_capsule, "similarity"):
         similarity_table = dereference(
-            <RfSimilarityFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+            <RfSimilarityFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "similarity")
         )
 
         if (NULL != similarity_table.kwargs_init):
-            kwargs_context = RfKwargsContextWrapper(similarity_table.kwargs_init(kwargs))
+            similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)
 
         query_context = RfStringWrapper(conv_sequence(query))
         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)
@@ -921,11 +921,11 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
 
     if PyCapsule_IsValid(scorer_capsule, "distance"):
         distance_table = dereference(
-            <RfDistanceFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+            <RfDistanceFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "distance")
         )
 
         if (NULL != distance_table.kwargs_init):
-            kwargs_context = RfKwargsContextWrapper(distance_table.kwargs_init(kwargs))
+            distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)
 
         query_context = RfStringWrapper(conv_sequence(query))
         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)
@@ -1004,7 +1004,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
     """
     cdef double c_score_cutoff = 0.0
     cdef size_t c_max = <size_t>-1
-    cdef RfKwargsContextWrapper kwargs_context
+    cdef RfKwargsContextWrapper kwargs_context = RfKwargsContextWrapper()
     cdef RfSimilarityContext similarity_context
     cdef RfDistanceContext distance_context
     cdef CachedScorerContext ScorerContext
@@ -1193,11 +1193,11 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
     scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
     if PyCapsule_IsValid(scorer_capsule, "similarity"):
         similarity_table = dereference(
-            <RfSimilarityFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+            <RfSimilarityFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "similarity")
         )
 
         if (NULL != similarity_table.kwargs_init):
-            kwargs_context = RfKwargsContextWrapper(similarity_table.kwargs_init(kwargs))
+            similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)
 
         query_context = RfStringWrapper(conv_sequence(query))
         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)
@@ -1216,11 +1216,11 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
 
     if PyCapsule_IsValid(scorer_capsule, "distance"):
         distance_table = dereference(
-            <RfDistanceFunctionTable*>PyCapsule_GetContext(scorer_capsule)
+            <RfDistanceFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "distance")
         )
 
         if (NULL != distance_table.kwargs_init):
-            kwargs_context = RfKwargsContextWrapper(distance_table.kwargs_init(kwargs))
+            distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)
 
         query_context = RfStringWrapper(conv_sequence(query))
         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)
