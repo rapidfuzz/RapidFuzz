@@ -14,6 +14,7 @@ from libcpp cimport bool
 from libcpp.utility cimport move
 from libcpp.vector cimport vector
 from libc.stdlib cimport malloc, free
+from libcpp cimport bool
 from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.ref cimport Py_INCREF
 from cpython.pycapsule cimport PyCapsule_New
@@ -213,7 +214,7 @@ def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
            string matching based on dynamic programming."
            Journal of the ACM (JACM) 46.3 (1999): 395-415.
     .. [4] Hyyrö, Heikki. "Bit-Parallel LCS-length Computation Revisited"
-           Proc. 15th Australasian Workshop on Combinatorial Algorithms (AWOCA 2004). 
+           Proc. 15th Australasian Workshop on Combinatorial Algorithms (AWOCA 2004).
 
     Examples
     --------
@@ -435,7 +436,7 @@ def normalized_levenshtein(s1, s2, *, weights=(1,1,1), processor=None, score_cut
 def hamming(s1, s2, *, processor=None, max=None):
     """
     Calculates the Hamming distance between two strings.
-    The hamming distance is defined as the number of positions 
+    The hamming distance is defined as the number of positions
     where the two strings differ. It describes the minimum
     amount of substitutions required to transform s1 into s2.
 

@@ -461,7 +461,7 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
         query = processor(query)
     elif processor:
         query = default_process(query)
-        processor = default_process  
+        processor = default_process
 
     scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
     if PyCapsule_IsValid(scorer_capsule, NULL):
@@ -883,7 +883,7 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
         query = processor(query)
     elif processor:
         query = default_process(query)
-        processor = default_process  
+        processor = default_process
 
     scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
     if PyCapsule_IsValid(scorer_capsule, NULL):
@@ -1164,7 +1164,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         query = processor(query)
     elif processor:
         query = default_process(query)
-        processor = default_process  
+        processor = default_process
 
     if processor is default_process:
         def_process = 1

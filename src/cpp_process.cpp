@@ -17674,7 +17674,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
  *     return s_proc
  * 
  * cdef inline RF_KwargsWrapper KwargsInit(RF_Scorer scorer, dict kwargs) except *:             # <<<<<<<<<<<<<<
- *     cdef RF_KwargsWrapper kwargs_context
+ *     cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()
  *     if (NULL != scorer.kwargs_init):
  */
 
@@ -17692,9 +17692,18 @@ static CYTHON_INLINE RF_KwargsWrapper __pyx_f_10cpp_common_KwargsInit(RF_Scorer 
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("KwargsInit", 0);
 
+  /* "cpp_common.pxd":106
+ * 
+ * cdef inline RF_KwargsWrapper KwargsInit(RF_Scorer scorer, dict kwargs) except *:
+ *     cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()             # <<<<<<<<<<<<<<
+ *     if (NULL != scorer.kwargs_init):
+ *         scorer.kwargs_init(&kwargs_context.kwargs, kwargs)
+ */
+  __pyx_v_kwargs_context = RF_KwargsWrapper();
+
   /* "cpp_common.pxd":107
  * cdef inline RF_KwargsWrapper KwargsInit(RF_Scorer scorer, dict kwargs) except *:
- *     cdef RF_KwargsWrapper kwargs_context
+ *     cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()
  *     if (NULL != scorer.kwargs_init):             # <<<<<<<<<<<<<<
  *         scorer.kwargs_init(&kwargs_context.kwargs, kwargs)
  *     elif len(kwargs):
@@ -17703,7 +17712,7 @@ static CYTHON_INLINE RF_KwargsWrapper __pyx_f_10cpp_common_KwargsInit(RF_Scorer 
   if (__pyx_t_1) {
 
     /* "cpp_common.pxd":108
- *     cdef RF_KwargsWrapper kwargs_context
+ *     cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()
  *     if (NULL != scorer.kwargs_init):
  *         scorer.kwargs_init(&kwargs_context.kwargs, kwargs)             # <<<<<<<<<<<<<<
  *     elif len(kwargs):
@@ -17713,7 +17722,7 @@ static CYTHON_INLINE RF_KwargsWrapper __pyx_f_10cpp_common_KwargsInit(RF_Scorer 
 
     /* "cpp_common.pxd":107
  * cdef inline RF_KwargsWrapper KwargsInit(RF_Scorer scorer, dict kwargs) except *:
- *     cdef RF_KwargsWrapper kwargs_context
+ *     cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()
  *     if (NULL != scorer.kwargs_init):             # <<<<<<<<<<<<<<
  *         scorer.kwargs_init(&kwargs_context.kwargs, kwargs)
  *     elif len(kwargs):
@@ -17789,7 +17798,7 @@ static CYTHON_INLINE RF_KwargsWrapper __pyx_f_10cpp_common_KwargsInit(RF_Scorer 
  *     return s_proc
  * 
  * cdef inline RF_KwargsWrapper KwargsInit(RF_Scorer scorer, dict kwargs) except *:             # <<<<<<<<<<<<<<
- *     cdef RF_KwargsWrapper kwargs_context
+ *     cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()
  *     if (NULL != scorer.kwargs_init):
  */
 

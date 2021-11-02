@@ -91,7 +91,7 @@ def ratio(s1, s2, *, processor=None, score_cutoff=None):
 
     if s1 is None or s2 is None:
         return 0
-    
+
     if processor is True or processor == default_process:
         s1_proc = RF_StringWrapper(conv_sequence(s1))
         s2_proc = RF_StringWrapper(conv_sequence(s2))
@@ -142,7 +142,7 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
         guaranteed to find the optimal alignment. For short needles this is very
         fast, since for them fuzz.ratio runs in ``O(N)`` time. This results in a worst
         case performance of ``O(NM)``.
-    
+
     .. image:: img/partial_ratio_short_needle.svg
 
     long needle (length > 64):

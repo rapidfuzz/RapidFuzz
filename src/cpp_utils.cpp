@@ -1928,7 +1928,7 @@ PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_9cpp_utils_default_process, "\n    This function preprocesses a string by:\n    - removing all non alphanumeric characters\n    - trimming whitespaces\n    - converting all characters to lower case\n    \n    Parameters\n    ----------\n    sentence : str\n        String to preprocess\n    \n    Returns\n    -------\n    processed_string : str\n        processed string\n    ");
+PyDoc_STRVAR(__pyx_doc_9cpp_utils_default_process, "\n    This function preprocesses a string by:\n    - removing all non alphanumeric characters\n    - trimming whitespaces\n    - converting all characters to lower case\n\n    Parameters\n    ----------\n    sentence : str\n        String to preprocess\n\n    Returns\n    -------\n    processed_string : str\n        processed string\n    ");
 static PyMethodDef __pyx_mdef_9cpp_utils_1default_process = {"default_process", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_9cpp_utils_1default_process, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_9cpp_utils_default_process};
 static PyObject *__pyx_pw_9cpp_utils_1default_process(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL

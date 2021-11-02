@@ -179,11 +179,11 @@ static inline std::basic_string<T> default_process(const RF_String& s)
 template <typename Func, typename... Args>
 auto visit(const RF_String& str, Func&& f, Args&&... args)
 {
-    switch(str.kind){
+    switch(str.kind) {
 # define X_ENUM(kind, type) case kind: return f(no_process<type>(str), std::forward<Args>(args)...);
     LIST_OF_CASES()
 # undef X_ENUM
-    default:                                           
+    default:
         throw std::logic_error("Invalid string type");
     }
 }
@@ -191,11 +191,11 @@ auto visit(const RF_String& str, Func&& f, Args&&... args)
 template <typename Func, typename... Args>
 auto visit_default_process(const RF_String& str, Func&& f, Args&&... args)
 {
-    switch(str.kind){
+    switch(str.kind) {
 # define X_ENUM(kind, type) case kind: return f(default_process<type>(str), std::forward<Args>(args)...);
     LIST_OF_CASES()
 # undef X_ENUM
-    default:                                           
+    default:
         throw std::logic_error("Invalid string type");
     }
 }
@@ -207,7 +207,7 @@ auto visitor(const RF_String& str1, const RF_String& str2, Func&& f, Args&&... a
         [&](auto str) {
             return visit(str1, std::forward<Func>(f), str, std::forward<Args>(args)...);
         }
-    ); 
+    );
 }
 
 /* todo this should be refactored in the future since preprocessing does not really belong here */
@@ -218,7 +218,7 @@ auto visitor_default_process(const RF_String& str1, const RF_String& str2, Func&
         [&](auto str) {
             return visit_default_process(str1, std::forward<Func>(f), str, std::forward<Args>(args)...);
         }
-    ); 
+    );
 }
 
 
@@ -314,7 +314,7 @@ static inline RF_String convert_string(PyObject* py_str)
            kind = RF_UINT32;
            break;
         }
-     
+
         return {
             nullptr,
             kind,

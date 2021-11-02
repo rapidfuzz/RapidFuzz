@@ -13,12 +13,12 @@ def default_process(sentence):
     - removing all non alphanumeric characters
     - trimming whitespaces
     - converting all characters to lower case
-    
+
     Parameters
     ----------
     sentence : str
         String to preprocess
-    
+
     Returns
     -------
     processed_string : str
