@@ -1,23 +1,25 @@
 # distutils: language=c++
 # cython: language_level=3, binding=True, linetrace=True
 
-from rapidfuzz.utils import default_process
-from cpp_common cimport  RfString, RfStringWrapper, is_valid_string, convert_string, hash_array, hash_sequence
 from array import array
+from rapidfuzz.utils import default_process
+
+from rapidfuzz_capi cimport (
+    RF_String, RF_Scorer, RF_Kwargs, RF_Distance, RF_Similarity,
+    RF_KwargsInit, RF_SIMILARITY, RF_DISTANCE
+)
+from cpp_common cimport RF_StringWrapper, is_valid_string, convert_string, hash_array, hash_sequence
+
+from libcpp cimport bool
 from libcpp.utility cimport move
 from libcpp.vector cimport vector
 from libc.stdlib cimport malloc, free
 from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.ref cimport Py_INCREF
-from cython.operator cimport dereference
-from rapidfuzz_capi cimport (
-    RfDistanceFunctionTable, RfSimilarityFunctionTable,
-    RfKwargsContext, RfDistanceContext, RfSimilarityContext,
-    RF_KwargsContextInit
-)
 from cpython.pycapsule cimport PyCapsule_New
+from cython.operator cimport dereference
 
-cdef inline RfString conv_sequence(seq) except *:
+cdef inline RF_String conv_sequence(seq) except *:
     if is_valid_string(seq):
         return move(convert_string(seq))
     elif isinstance(seq, array):
@@ -44,30 +46,30 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
         size_t replace_cost
 
 cdef extern from "cpp_scorer.hpp":
-    double normalized_levenshtein_no_process(       const RfString&, const RfString&, size_t, size_t, size_t, double) nogil except +
-    double normalized_levenshtein_default_process(  const RfString&, const RfString&, size_t, size_t, size_t, double) nogil except +
-    double normalized_hamming_no_process(           const RfString&, const RfString&, double) nogil except +
-    double normalized_hamming_default_process(      const RfString&, const RfString&, double) nogil except +
-    double jaro_similarity_no_process(              const RfString&, const RfString&, double) nogil except +
-    double jaro_similarity_default_process(         const RfString&, const RfString&, double) nogil except +
-    double jaro_winkler_similarity_no_process(      const RfString&, const RfString&, double, double) nogil except +
-    double jaro_winkler_similarity_default_process( const RfString&, const RfString&, double, double) nogil except +
+    double normalized_levenshtein_no_process(       const RF_String&, const RF_String&, size_t, size_t, size_t, double) nogil except +
+    double normalized_levenshtein_default_process(  const RF_String&, const RF_String&, size_t, size_t, size_t, double) nogil except +
+    double normalized_hamming_no_process(           const RF_String&, const RF_String&, double) nogil except +
+    double normalized_hamming_default_process(      const RF_String&, const RF_String&, double) nogil except +
+    double jaro_similarity_no_process(              const RF_String&, const RF_String&, double) nogil except +
+    double jaro_similarity_default_process(         const RF_String&, const RF_String&, double) nogil except +
+    double jaro_winkler_similarity_no_process(      const RF_String&, const RF_String&, double, double) nogil except +
+    double jaro_winkler_similarity_default_process( const RF_String&, const RF_String&, double, double) nogil except +
 
-    object levenshtein_no_process(                  const RfString&, const RfString&, size_t, size_t, size_t, size_t) nogil except +
-    object levenshtein_default_process(             const RfString&, const RfString&, size_t, size_t, size_t, size_t) nogil except +
-    object hamming_no_process(                      const RfString&, const RfString&, size_t) nogil except +
-    object hamming_default_process(                 const RfString&, const RfString&, size_t) nogil except +
+    object levenshtein_no_process(                  const RF_String&, const RF_String&, size_t, size_t, size_t, size_t) nogil except +
+    object levenshtein_default_process(             const RF_String&, const RF_String&, size_t, size_t, size_t, size_t) nogil except +
+    object hamming_no_process(                      const RF_String&, const RF_String&, size_t) nogil except +
+    object hamming_default_process(                 const RF_String&, const RF_String&, size_t) nogil except +
 
-    vector[LevenshteinEditOp] levenshtein_editops_no_process(     const RfString& s1, const RfString& s2) nogil except +
-    vector[LevenshteinEditOp] levenshtein_editops_default_process(const RfString& s1, const RfString& s2) nogil except +
+    vector[LevenshteinEditOp] levenshtein_editops_no_process(     const RF_String& s1, const RF_String& s2) nogil except +
+    vector[LevenshteinEditOp] levenshtein_editops_default_process(const RF_String& s1, const RF_String& s2) nogil except +
 
-    int LevenshteinInit(RfDistanceContext* context, const RfKwargsContext* kwargs, const RfString* str) nogil except -1
-    int NormalizedLevenshteinInit(RfSimilarityContext* context, const RfKwargsContext* kwargs, const RfString* str) nogil except -1
+    bool LevenshteinInit(RF_Distance* context, const RF_Kwargs* kwargs, size_t, const RF_String* str) nogil except False
+    bool NormalizedLevenshteinInit(RF_Similarity* context, const RF_Kwargs* kwargs, size_t, const RF_String* str) nogil except False
 
-    RfDistanceFunctionTable CreateHammingFunctionTable() except +
-    RfSimilarityFunctionTable CreateNormalizedHammingFunctionTable() except +
-    RfSimilarityFunctionTable CreateJaroSimilarityFunctionTable() except +
-    int JaroWinklerSimilarityInit(RfSimilarityContext* context, const RfKwargsContext* kwargs, const RfString* str) nogil except -1
+    RF_Scorer CreateHammingFunctionTable() except +
+    RF_Scorer CreateNormalizedHammingFunctionTable() except +
+    RF_Scorer CreateJaroSimilarityFunctionTable() except +
+    bool JaroWinklerSimilarityInit(RF_Similarity* context, const RF_Kwargs* kwargs, size_t, const RF_String* str) nogil except False
 
 def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
     """
@@ -241,15 +243,15 @@ def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
     cdef size_t c_max = <size_t>-1 if max is None else max
 
     if processor is True or processor == default_process:
-        s1_proc = RfStringWrapper(conv_sequence(s1))
-        s2_proc = RfStringWrapper(conv_sequence(s2))
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
         return levenshtein_default_process(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_max)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    s1_proc = RfStringWrapper(conv_sequence(s1))
-    s2_proc = RfStringWrapper(conv_sequence(s2))
+    s1_proc = RF_StringWrapper(conv_sequence(s1))
+    s2_proc = RF_StringWrapper(conv_sequence(s2))
     return levenshtein_no_process(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_max)
 
 cdef str levenshtein_edit_type_to_str(LevenshteinEditType edit_type):
@@ -307,8 +309,8 @@ def levenshtein_editops(s1, s2, *, processor=None):
      insert s1[6] s2[6]
     """
     if processor is True or processor == default_process:
-        s1_proc = RfStringWrapper(conv_sequence(s1))
-        s2_proc = RfStringWrapper(conv_sequence(s2))
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
         return levenshtein_editops_to_list(
             levenshtein_editops_default_process(s1_proc.string, s2_proc.string)
         )
@@ -316,8 +318,8 @@ def levenshtein_editops(s1, s2, *, processor=None):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    s1_proc = RfStringWrapper(conv_sequence(s1))
-    s2_proc = RfStringWrapper(conv_sequence(s2))
+    s1_proc = RF_StringWrapper(conv_sequence(s1))
+    s2_proc = RF_StringWrapper(conv_sequence(s2))
     return levenshtein_editops_to_list(
         levenshtein_editops_no_process(s1_proc.string, s2_proc.string)
     )
@@ -418,15 +420,15 @@ def normalized_levenshtein(s1, s2, *, weights=(1,1,1), processor=None, score_cut
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
 
     if processor is True or processor == default_process:
-        s1_proc = RfStringWrapper(conv_sequence(s1))
-        s2_proc = RfStringWrapper(conv_sequence(s2))
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
         return normalized_levenshtein_default_process(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    s1_proc = RfStringWrapper(conv_sequence(s1))
-    s2_proc = RfStringWrapper(conv_sequence(s2))
+    s1_proc = RF_StringWrapper(conv_sequence(s1))
+    s2_proc = RF_StringWrapper(conv_sequence(s2))
     return normalized_levenshtein_no_process(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
 
 
@@ -469,15 +471,15 @@ def hamming(s1, s2, *, processor=None, max=None):
         return 0
 
     if processor is True or processor == default_process:
-        s1_proc = RfStringWrapper(conv_sequence(s1))
-        s2_proc = RfStringWrapper(conv_sequence(s2))
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
         return hamming_default_process(s1_proc.string, s2_proc.string, c_max)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    s1_proc = RfStringWrapper(conv_sequence(s1))
-    s2_proc = RfStringWrapper(conv_sequence(s2))
+    s1_proc = RF_StringWrapper(conv_sequence(s1))
+    s2_proc = RF_StringWrapper(conv_sequence(s2))
     return hamming_no_process(s1_proc.string, s2_proc.string, c_max)
 
 
@@ -520,15 +522,15 @@ def normalized_hamming(s1, s2, *, processor=None, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        s1_proc = RfStringWrapper(conv_sequence(s1))
-        s2_proc = RfStringWrapper(conv_sequence(s2))
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
         return normalized_hamming_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    s1_proc = RfStringWrapper(conv_sequence(s1))
-    s2_proc = RfStringWrapper(conv_sequence(s2))
+    s1_proc = RF_StringWrapper(conv_sequence(s1))
+    s2_proc = RF_StringWrapper(conv_sequence(s2))
     return normalized_hamming_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
@@ -563,15 +565,15 @@ def jaro_similarity(s1, s2, *, processor=None, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        s1_proc = RfStringWrapper(conv_sequence(s1))
-        s2_proc = RfStringWrapper(conv_sequence(s2))
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
         return jaro_similarity_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    s1_proc = RfStringWrapper(conv_sequence(s1))
-    s2_proc = RfStringWrapper(conv_sequence(s2))
+    s1_proc = RF_StringWrapper(conv_sequence(s1))
+    s2_proc = RF_StringWrapper(conv_sequence(s2))
     return jaro_similarity_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
@@ -613,67 +615,70 @@ def jaro_winkler_similarity(s1, s2, *, double prefix_weight=0.1, processor=None,
         return 0
 
     if processor is True or processor == default_process:
-        s1_proc = RfStringWrapper(conv_sequence(s1))
-        s2_proc = RfStringWrapper(conv_sequence(s2))
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
         return jaro_winkler_similarity_default_process(s1_proc.string, s2_proc.string, prefix_weight, c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    s1_proc = RfStringWrapper(conv_sequence(s1))
-    s2_proc = RfStringWrapper(conv_sequence(s2))
+    s1_proc = RF_StringWrapper(conv_sequence(s1))
+    s2_proc = RF_StringWrapper(conv_sequence(s2))
     return jaro_winkler_similarity_no_process(s1_proc.string, s2_proc.string, prefix_weight, c_score_cutoff)
 
-cdef void KwargsDeinit(RfKwargsContext* context) nogil:
-    free(<void*>dereference(context).context)
+cdef void KwargsDeinit(RF_Kwargs* self):
+    free(<void*>dereference(self).context)
 
-cdef int LevenshteinKwargsInit(RfKwargsContext* context, dict kwargs) except -1:
+cdef bool LevenshteinKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     cdef size_t insertion, deletion, substitution
     cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>malloc(sizeof(LevenshteinWeightTable))
     
-    if weights == NULL:
+    if not weights:
         raise MemoryError
 
     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
     dereference(weights).insert_cost = insertion
     dereference(weights).delete_cost = deletion
     dereference(weights).replace_cost = substitution
-    dereference(context).context = weights
-    dereference(context).deinit = KwargsDeinit
+    dereference(self).context = weights
+    dereference(self).dtor = KwargsDeinit
     return 0
 
 
-cdef RfDistanceFunctionTable LevenshteinContext
+cdef RF_Scorer LevenshteinContext
+LevenshteinContext.scorer_type = RF_SIMILARITY
 LevenshteinContext.kwargs_init = LevenshteinKwargsInit
-LevenshteinContext.distance_init = LevenshteinInit
-levenshtein.__RapidFuzzScorer = PyCapsule_New(&LevenshteinContext, "distance", NULL)
+LevenshteinContext.scorer.distance_init = LevenshteinInit
+levenshtein.__RapidFuzzScorer = PyCapsule_New(&LevenshteinContext, NULL, NULL)
 
-cdef RfSimilarityFunctionTable NormalizedLevenshteinContext
+cdef RF_Scorer NormalizedLevenshteinContext
+NormalizedLevenshteinContext.scorer_type = RF_SIMILARITY
 NormalizedLevenshteinContext.kwargs_init = LevenshteinKwargsInit
-NormalizedLevenshteinContext.similarity_init = NormalizedLevenshteinInit
-normalized_levenshtein.__RapidFuzzScorer = PyCapsule_New(&NormalizedLevenshteinContext, "similarity", NULL)
+NormalizedLevenshteinContext.scorer.similarity_init = NormalizedLevenshteinInit
+normalized_levenshtein.__RapidFuzzScorer = PyCapsule_New(&NormalizedLevenshteinContext, NULL, NULL)
 
-cdef RfDistanceFunctionTable HammingContext = CreateHammingFunctionTable()
-hamming.__RapidFuzzScorer = PyCapsule_New(&HammingContext, "distance", NULL)
+cdef RF_Scorer HammingContext = CreateHammingFunctionTable()
+hamming.__RapidFuzzScorer = PyCapsule_New(&HammingContext, NULL, NULL)
 
-cdef RfSimilarityFunctionTable NormalizedHammingContext = CreateNormalizedHammingFunctionTable()
-normalized_hamming.__RapidFuzzScorer = PyCapsule_New(&NormalizedHammingContext, "similarity", NULL)
+cdef RF_Scorer NormalizedHammingContext = CreateNormalizedHammingFunctionTable()
+normalized_hamming.__RapidFuzzScorer = PyCapsule_New(&NormalizedHammingContext, NULL, NULL)
 
-cdef RfSimilarityFunctionTable JaroSimilarityContext = CreateJaroSimilarityFunctionTable()
-jaro_similarity.__RapidFuzzScorer = PyCapsule_New(&JaroSimilarityContext, "similarity", NULL)
+cdef RF_Scorer JaroSimilarityContext = CreateJaroSimilarityFunctionTable()
+jaro_similarity.__RapidFuzzScorer = PyCapsule_New(&JaroSimilarityContext, NULL, NULL)
 
-cdef int JaroWinklerKwargsInit(RfKwargsContext* context, dict kwargs) except -1:
+cdef bool JaroWinklerKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     cdef double* prefix_weight = <double*>malloc(sizeof(double))
     
-    if prefix_weight == NULL:
+    if not prefix_weight:
         raise MemoryError
 
     prefix_weight[0] = kwargs.get("prefix_weight", 0.1)
-    dereference(context).context = prefix_weight
-    dereference(context).deinit = KwargsDeinit
+    dereference(self).context = prefix_weight
+    dereference(self).dtor = KwargsDeinit
     return 0
 
-cdef RfSimilarityFunctionTable JaroWinklerSimilarityContext
+cdef RF_Scorer JaroWinklerSimilarityContext
+JaroWinklerSimilarityContext.scorer_type = RF_SIMILARITY
 JaroWinklerSimilarityContext.kwargs_init = JaroWinklerKwargsInit
-JaroWinklerSimilarityContext.similarity_init = JaroWinklerSimilarityInit
-jaro_winkler_similarity.__RapidFuzzScorer = PyCapsule_New(&JaroWinklerSimilarityContext, "similarity", NULL)
+JaroWinklerSimilarityContext.scorer.similarity_init = JaroWinklerSimilarityInit
+jaro_winkler_similarity.__RapidFuzzScorer = PyCapsule_New(&JaroWinklerSimilarityContext, NULL, NULL)
