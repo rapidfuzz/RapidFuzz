@@ -119,7 +119,7 @@ Py_BEGIN_ALLOW_THREADS
             {
                 set_score_distance(matrix, dtype, row, row, 0);
                 RF_Distance context;
-                PyErr2RuntimeExn(init(&context, &kwargs_context.kwargs, &queries[row].string));
+                PyErr2RuntimeExn(init(&context, &kwargs_context.kwargs, 1, &queries[row].string));
                 RF_DistanceWrapper DistanceContext(context);
 
                 for (size_t col = row + 1; col < cols; ++col)
@@ -168,7 +168,7 @@ Py_BEGIN_ALLOW_THREADS
             {
                 set_score_similarity(matrix, dtype, row, row, 100);
                 RF_Similarity context;
-                PyErr2RuntimeExn(init(&context, &kwargs_context.kwargs, &queries[row].string));
+                PyErr2RuntimeExn(init(&context, &kwargs_context.kwargs, 1, &queries[row].string));
                 RF_SimilarityWrapper ScorerContext(context);
 
                 for (size_t col = row + 1; col < cols; ++col)
@@ -216,7 +216,7 @@ Py_BEGIN_ALLOW_THREADS
             for (; row < row_end; ++row)
             {
                 RF_Distance context;
-                PyErr2RuntimeExn(init(&context, &kwargs_context.kwargs, &queries[row].string));
+                PyErr2RuntimeExn(init(&context, &kwargs_context.kwargs, 1, &queries[row].string));
                 RF_DistanceWrapper DistanceContext(context);
 
                 for (size_t col = 0; col < cols; ++col)
@@ -264,7 +264,7 @@ Py_BEGIN_ALLOW_THREADS
             for (; row < row_end; ++row)
             {
                 RF_Similarity context;
-                PyErr2RuntimeExn(init(&context, &kwargs_context.kwargs, &queries[row].string));
+                PyErr2RuntimeExn(init(&context, &kwargs_context.kwargs, 1, &queries[row].string));
                 RF_SimilarityWrapper ScorerContext(context);
 
                 for (size_t col = 0; col < cols; ++col)

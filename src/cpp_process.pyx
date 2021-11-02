@@ -473,7 +473,7 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
             similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)
 
         query_context = RF_StringWrapper(conv_sequence(query))
-        similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)
+        similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
         ScorerContext = RF_SimilarityWrapper(similarity_context)
         if score_cutoff is not None:
             c_score_cutoff = score_cutoff
@@ -494,7 +494,7 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
             distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)
 
         query_context = RF_StringWrapper(conv_sequence(query))
-        distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)
+        distance_table.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
         DistanceContext = RF_DistanceWrapper(distance_context)
         if score_cutoff is not None and score_cutoff != -1:
             c_max = score_cutoff
@@ -904,7 +904,7 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
             similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)
 
         query_context = RF_StringWrapper(conv_sequence(query))
-        similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)
+        similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
         ScorerContext = RF_SimilarityWrapper(similarity_context)
         if score_cutoff is not None:
             c_score_cutoff = score_cutoff
@@ -925,7 +925,7 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
             distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)
 
         query_context = RF_StringWrapper(conv_sequence(query))
-        distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)
+        distance_table.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
         DistanceContext = RF_DistanceWrapper(distance_context)
         if score_cutoff is not None and score_cutoff != -1:
             c_max = score_cutoff
@@ -1197,7 +1197,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
             similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)
 
         query_context = RF_StringWrapper(conv_sequence(query))
-        similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)
+        similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
         ScorerContext = RF_SimilarityWrapper(similarity_context)
         if score_cutoff is not None:
             c_score_cutoff = score_cutoff
@@ -1220,7 +1220,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
             distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)
 
         query_context = RF_StringWrapper(conv_sequence(query))
-        distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)
+        distance_table.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
         DistanceContext = RF_DistanceWrapper(distance_context)
         if score_cutoff is not None and score_cutoff != -1:
             c_max = score_cutoff

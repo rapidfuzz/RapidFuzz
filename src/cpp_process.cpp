@@ -6938,7 +6938,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  *             similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  *         query_context = RF_StringWrapper(conv_sequence(query))             # <<<<<<<<<<<<<<
- *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)
+ *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         ScorerContext = RF_SimilarityWrapper(similarity_context)
  */
     __Pyx_TraceLine(475,0,__PYX_ERR(0, 475, __pyx_L1_error))
@@ -6948,16 +6948,16 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
     /* "cpp_process.pyx":476
  * 
  *         query_context = RF_StringWrapper(conv_sequence(query))
- *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)             # <<<<<<<<<<<<<<
+ *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)             # <<<<<<<<<<<<<<
  *         ScorerContext = RF_SimilarityWrapper(similarity_context)
  *         if score_cutoff is not None:
  */
     __Pyx_TraceLine(476,0,__PYX_ERR(0, 476, __pyx_L1_error))
-    __pyx_t_8 = __pyx_v_similarity_table.similarity_init((&__pyx_v_similarity_context), (&__pyx_v_kwargs_context.kwargs), (&__pyx_v_query_context.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 476, __pyx_L1_error)
+    __pyx_t_8 = __pyx_v_similarity_table.similarity_init((&__pyx_v_similarity_context), (&__pyx_v_kwargs_context.kwargs), 1, (&__pyx_v_query_context.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 476, __pyx_L1_error)
 
     /* "cpp_process.pyx":477
  *         query_context = RF_StringWrapper(conv_sequence(query))
- *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)
+ *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         ScorerContext = RF_SimilarityWrapper(similarity_context)             # <<<<<<<<<<<<<<
  *         if score_cutoff is not None:
  *             c_score_cutoff = score_cutoff
@@ -6966,7 +6966,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
     __pyx_v_ScorerContext = RF_SimilarityWrapper(__pyx_v_similarity_context);
 
     /* "cpp_process.pyx":478
- *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)
+ *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         ScorerContext = RF_SimilarityWrapper(similarity_context)
  *         if score_cutoff is not None:             # <<<<<<<<<<<<<<
  *             c_score_cutoff = score_cutoff
@@ -6989,7 +6989,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
       __pyx_v_c_score_cutoff = __pyx_t_10;
 
       /* "cpp_process.pyx":478
- *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)
+ *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         ScorerContext = RF_SimilarityWrapper(similarity_context)
  *         if score_cutoff is not None:             # <<<<<<<<<<<<<<
  *             c_score_cutoff = score_cutoff
@@ -7166,7 +7166,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
  *             distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  *         query_context = RF_StringWrapper(conv_sequence(query))             # <<<<<<<<<<<<<<
- *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)
+ *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         DistanceContext = RF_DistanceWrapper(distance_context)
  */
     __Pyx_TraceLine(496,0,__PYX_ERR(0, 496, __pyx_L1_error))
@@ -7176,16 +7176,16 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
     /* "cpp_process.pyx":497
  * 
  *         query_context = RF_StringWrapper(conv_sequence(query))
- *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)             # <<<<<<<<<<<<<<
+ *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)             # <<<<<<<<<<<<<<
  *         DistanceContext = RF_DistanceWrapper(distance_context)
  *         if score_cutoff is not None and score_cutoff != -1:
  */
     __Pyx_TraceLine(497,0,__PYX_ERR(0, 497, __pyx_L1_error))
-    __pyx_t_8 = __pyx_v_distance_table.distance_init((&__pyx_v_distance_context), (&__pyx_v_kwargs_context.kwargs), (&__pyx_v_query_context.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 497, __pyx_L1_error)
+    __pyx_t_8 = __pyx_v_distance_table.distance_init((&__pyx_v_distance_context), (&__pyx_v_kwargs_context.kwargs), 1, (&__pyx_v_query_context.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 497, __pyx_L1_error)
 
     /* "cpp_process.pyx":498
  *         query_context = RF_StringWrapper(conv_sequence(query))
- *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)
+ *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         DistanceContext = RF_DistanceWrapper(distance_context)             # <<<<<<<<<<<<<<
  *         if score_cutoff is not None and score_cutoff != -1:
  *             c_max = score_cutoff
@@ -7194,7 +7194,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
     __pyx_v_DistanceContext = RF_DistanceWrapper(__pyx_v_distance_context);
 
     /* "cpp_process.pyx":499
- *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)
+ *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         DistanceContext = RF_DistanceWrapper(distance_context)
  *         if score_cutoff is not None and score_cutoff != -1:             # <<<<<<<<<<<<<<
  *             c_max = score_cutoff
@@ -7228,7 +7228,7 @@ static PyObject *__pyx_pf_11cpp_process_extractOne(CYTHON_UNUSED PyObject *__pyx
       __pyx_v_c_max = __pyx_t_12;
 
       /* "cpp_process.pyx":499
- *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)
+ *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         DistanceContext = RF_DistanceWrapper(distance_context)
  *         if score_cutoff is not None and score_cutoff != -1:             # <<<<<<<<<<<<<<
  *             c_max = score_cutoff
@@ -12190,7 +12190,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  *             similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  *         query_context = RF_StringWrapper(conv_sequence(query))             # <<<<<<<<<<<<<<
- *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)
+ *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         ScorerContext = RF_SimilarityWrapper(similarity_context)
  */
     __Pyx_TraceLine(906,0,__PYX_ERR(0, 906, __pyx_L1_error))
@@ -12200,16 +12200,16 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
     /* "cpp_process.pyx":907
  * 
  *         query_context = RF_StringWrapper(conv_sequence(query))
- *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)             # <<<<<<<<<<<<<<
+ *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)             # <<<<<<<<<<<<<<
  *         ScorerContext = RF_SimilarityWrapper(similarity_context)
  *         if score_cutoff is not None:
  */
     __Pyx_TraceLine(907,0,__PYX_ERR(0, 907, __pyx_L1_error))
-    __pyx_t_10 = __pyx_v_similarity_table.similarity_init((&__pyx_v_similarity_context), (&__pyx_v_kwargs_context.kwargs), (&__pyx_v_query_context.string)); if (unlikely(__pyx_t_10 == ((bool)0))) __PYX_ERR(0, 907, __pyx_L1_error)
+    __pyx_t_10 = __pyx_v_similarity_table.similarity_init((&__pyx_v_similarity_context), (&__pyx_v_kwargs_context.kwargs), 1, (&__pyx_v_query_context.string)); if (unlikely(__pyx_t_10 == ((bool)0))) __PYX_ERR(0, 907, __pyx_L1_error)
 
     /* "cpp_process.pyx":908
  *         query_context = RF_StringWrapper(conv_sequence(query))
- *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)
+ *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         ScorerContext = RF_SimilarityWrapper(similarity_context)             # <<<<<<<<<<<<<<
  *         if score_cutoff is not None:
  *             c_score_cutoff = score_cutoff
@@ -12218,7 +12218,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
     __pyx_v_ScorerContext = RF_SimilarityWrapper(__pyx_v_similarity_context);
 
     /* "cpp_process.pyx":909
- *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)
+ *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         ScorerContext = RF_SimilarityWrapper(similarity_context)
  *         if score_cutoff is not None:             # <<<<<<<<<<<<<<
  *             c_score_cutoff = score_cutoff
@@ -12241,7 +12241,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
       __pyx_v_c_score_cutoff = __pyx_t_12;
 
       /* "cpp_process.pyx":909
- *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)
+ *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         ScorerContext = RF_SimilarityWrapper(similarity_context)
  *         if score_cutoff is not None:             # <<<<<<<<<<<<<<
  *             c_score_cutoff = score_cutoff
@@ -12420,7 +12420,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
  *             distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  *         query_context = RF_StringWrapper(conv_sequence(query))             # <<<<<<<<<<<<<<
- *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)
+ *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         DistanceContext = RF_DistanceWrapper(distance_context)
  */
     __Pyx_TraceLine(927,0,__PYX_ERR(0, 927, __pyx_L1_error))
@@ -12430,16 +12430,16 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
     /* "cpp_process.pyx":928
  * 
  *         query_context = RF_StringWrapper(conv_sequence(query))
- *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)             # <<<<<<<<<<<<<<
+ *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)             # <<<<<<<<<<<<<<
  *         DistanceContext = RF_DistanceWrapper(distance_context)
  *         if score_cutoff is not None and score_cutoff != -1:
  */
     __Pyx_TraceLine(928,0,__PYX_ERR(0, 928, __pyx_L1_error))
-    __pyx_t_10 = __pyx_v_distance_table.distance_init((&__pyx_v_distance_context), (&__pyx_v_kwargs_context.kwargs), (&__pyx_v_query_context.string)); if (unlikely(__pyx_t_10 == ((bool)0))) __PYX_ERR(0, 928, __pyx_L1_error)
+    __pyx_t_10 = __pyx_v_distance_table.distance_init((&__pyx_v_distance_context), (&__pyx_v_kwargs_context.kwargs), 1, (&__pyx_v_query_context.string)); if (unlikely(__pyx_t_10 == ((bool)0))) __PYX_ERR(0, 928, __pyx_L1_error)
 
     /* "cpp_process.pyx":929
  *         query_context = RF_StringWrapper(conv_sequence(query))
- *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)
+ *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         DistanceContext = RF_DistanceWrapper(distance_context)             # <<<<<<<<<<<<<<
  *         if score_cutoff is not None and score_cutoff != -1:
  *             c_max = score_cutoff
@@ -12448,7 +12448,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
     __pyx_v_DistanceContext = RF_DistanceWrapper(__pyx_v_distance_context);
 
     /* "cpp_process.pyx":930
- *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)
+ *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         DistanceContext = RF_DistanceWrapper(distance_context)
  *         if score_cutoff is not None and score_cutoff != -1:             # <<<<<<<<<<<<<<
  *             c_max = score_cutoff
@@ -12482,7 +12482,7 @@ static PyObject *__pyx_pf_11cpp_process_2extract(CYTHON_UNUSED PyObject *__pyx_s
       __pyx_v_c_max = __pyx_t_13;
 
       /* "cpp_process.pyx":930
- *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)
+ *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         DistanceContext = RF_DistanceWrapper(distance_context)
  *         if score_cutoff is not None and score_cutoff != -1:             # <<<<<<<<<<<<<<
  *             c_max = score_cutoff
@@ -16130,7 +16130,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  *             similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  *         query_context = RF_StringWrapper(conv_sequence(query))             # <<<<<<<<<<<<<<
- *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)
+ *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         ScorerContext = RF_SimilarityWrapper(similarity_context)
  */
     __Pyx_TraceLine(1199,0,__PYX_ERR(0, 1199, __pyx_L1_error))
@@ -16143,16 +16143,16 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
     /* "cpp_process.pyx":1200
  * 
  *         query_context = RF_StringWrapper(conv_sequence(query))
- *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)             # <<<<<<<<<<<<<<
+ *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)             # <<<<<<<<<<<<<<
  *         ScorerContext = RF_SimilarityWrapper(similarity_context)
  *         if score_cutoff is not None:
  */
     __Pyx_TraceLine(1200,0,__PYX_ERR(0, 1200, __pyx_L1_error))
-    __pyx_t_8 = __pyx_cur_scope->__pyx_v_similarity_table.similarity_init((&__pyx_cur_scope->__pyx_v_similarity_context), (&__pyx_cur_scope->__pyx_v_kwargs_context.kwargs), (&__pyx_cur_scope->__pyx_v_query_context.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 1200, __pyx_L1_error)
+    __pyx_t_8 = __pyx_cur_scope->__pyx_v_similarity_table.similarity_init((&__pyx_cur_scope->__pyx_v_similarity_context), (&__pyx_cur_scope->__pyx_v_kwargs_context.kwargs), 1, (&__pyx_cur_scope->__pyx_v_query_context.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 1200, __pyx_L1_error)
 
     /* "cpp_process.pyx":1201
  *         query_context = RF_StringWrapper(conv_sequence(query))
- *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)
+ *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         ScorerContext = RF_SimilarityWrapper(similarity_context)             # <<<<<<<<<<<<<<
  *         if score_cutoff is not None:
  *             c_score_cutoff = score_cutoff
@@ -16161,7 +16161,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
     __pyx_cur_scope->__pyx_v_ScorerContext = RF_SimilarityWrapper(__pyx_cur_scope->__pyx_v_similarity_context);
 
     /* "cpp_process.pyx":1202
- *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)
+ *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         ScorerContext = RF_SimilarityWrapper(similarity_context)
  *         if score_cutoff is not None:             # <<<<<<<<<<<<<<
  *             c_score_cutoff = score_cutoff
@@ -16184,7 +16184,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
       __pyx_cur_scope->__pyx_v_c_score_cutoff = __pyx_t_10;
 
       /* "cpp_process.pyx":1202
- *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, &query_context.string)
+ *         similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         ScorerContext = RF_SimilarityWrapper(similarity_context)
  *         if score_cutoff is not None:             # <<<<<<<<<<<<<<
  *             c_score_cutoff = score_cutoff
@@ -16413,7 +16413,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
  *             distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)
  * 
  *         query_context = RF_StringWrapper(conv_sequence(query))             # <<<<<<<<<<<<<<
- *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)
+ *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         DistanceContext = RF_DistanceWrapper(distance_context)
  */
     __Pyx_TraceLine(1222,0,__PYX_ERR(0, 1222, __pyx_L1_error))
@@ -16426,16 +16426,16 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
     /* "cpp_process.pyx":1223
  * 
  *         query_context = RF_StringWrapper(conv_sequence(query))
- *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)             # <<<<<<<<<<<<<<
+ *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)             # <<<<<<<<<<<<<<
  *         DistanceContext = RF_DistanceWrapper(distance_context)
  *         if score_cutoff is not None and score_cutoff != -1:
  */
     __Pyx_TraceLine(1223,0,__PYX_ERR(0, 1223, __pyx_L1_error))
-    __pyx_t_8 = __pyx_cur_scope->__pyx_v_distance_table.distance_init((&__pyx_cur_scope->__pyx_v_distance_context), (&__pyx_cur_scope->__pyx_v_kwargs_context.kwargs), (&__pyx_cur_scope->__pyx_v_query_context.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 1223, __pyx_L1_error)
+    __pyx_t_8 = __pyx_cur_scope->__pyx_v_distance_table.distance_init((&__pyx_cur_scope->__pyx_v_distance_context), (&__pyx_cur_scope->__pyx_v_kwargs_context.kwargs), 1, (&__pyx_cur_scope->__pyx_v_query_context.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 1223, __pyx_L1_error)
 
     /* "cpp_process.pyx":1224
  *         query_context = RF_StringWrapper(conv_sequence(query))
- *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)
+ *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         DistanceContext = RF_DistanceWrapper(distance_context)             # <<<<<<<<<<<<<<
  *         if score_cutoff is not None and score_cutoff != -1:
  *             c_max = score_cutoff
@@ -16444,7 +16444,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
     __pyx_cur_scope->__pyx_v_DistanceContext = RF_DistanceWrapper(__pyx_cur_scope->__pyx_v_distance_context);
 
     /* "cpp_process.pyx":1225
- *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)
+ *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         DistanceContext = RF_DistanceWrapper(distance_context)
  *         if score_cutoff is not None and score_cutoff != -1:             # <<<<<<<<<<<<<<
  *             c_max = score_cutoff
@@ -16478,7 +16478,7 @@ static PyObject *__pyx_gb_11cpp_process_6generator(__pyx_CoroutineObject *__pyx_
       __pyx_cur_scope->__pyx_v_c_max = __pyx_t_12;
 
       /* "cpp_process.pyx":1225
- *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, &query_context.string)
+ *         distance_table.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
  *         DistanceContext = RF_DistanceWrapper(distance_context)
  *         if score_cutoff is not None and score_cutoff != -1:             # <<<<<<<<<<<<<<
  *             c_max = score_cutoff
@@ -17276,7 +17276,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  *         s_proc.data = NULL
  *         raise             # <<<<<<<<<<<<<<
  * 
- *     s_proc.deinit = default_string_deinit
+ *     s_proc.dtor = default_string_deinit
  */
         __Pyx_GIVEREF(__pyx_t_1);
         __Pyx_GIVEREF(__pyx_t_14);
@@ -17348,15 +17348,15 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
   /* "cpp_common.pxd":74
  *         raise
  * 
- *     s_proc.deinit = default_string_deinit             # <<<<<<<<<<<<<<
+ *     s_proc.dtor = default_string_deinit             # <<<<<<<<<<<<<<
  *     return s_proc
  * 
  */
-  __pyx_v_s_proc.deinit = default_string_deinit;
+  __pyx_v_s_proc.dtor = default_string_deinit;
 
   /* "cpp_common.pxd":75
  * 
- *     s_proc.deinit = default_string_deinit
+ *     s_proc.dtor = default_string_deinit
  *     return s_proc             # <<<<<<<<<<<<<<
  * 
  * 
@@ -17635,7 +17635,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
  *         s_proc.data = NULL
  *         raise             # <<<<<<<<<<<<<<
  * 
- *     s_proc.deinit = default_string_deinit
+ *     s_proc.dtor = default_string_deinit
  */
         __Pyx_GIVEREF(__pyx_t_9);
         __Pyx_GIVEREF(__pyx_t_15);
@@ -17707,14 +17707,14 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
   /* "cpp_common.pxd":101
  *         raise
  * 
- *     s_proc.deinit = default_string_deinit             # <<<<<<<<<<<<<<
+ *     s_proc.dtor = default_string_deinit             # <<<<<<<<<<<<<<
  *     return s_proc
  */
-  __pyx_v_s_proc.deinit = default_string_deinit;
+  __pyx_v_s_proc.dtor = default_string_deinit;
 
   /* "cpp_common.pxd":102
  * 
- *     s_proc.deinit = default_string_deinit
+ *     s_proc.dtor = default_string_deinit
  *     return s_proc             # <<<<<<<<<<<<<<
  */
   __pyx_r = __pyx_v_s_proc;

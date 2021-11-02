@@ -28,48 +28,87 @@ enum RF_StringType {
 typedef void (*RF_StringDeinit) (struct _RF_String* context);
 
 typedef struct _RF_String {
+    /**
+     * @brief destructor for RF_String
+     * 
+     * @param self pointer to RF_String instance to destruct
+     */
+    void (*dtor) (struct _RF_String* self);
+
+/* members */
     RF_StringType kind;
     void* data;
     size_t length;
     void* context;
-    RF_StringDeinit deinit;
 } RF_String;
 
-typedef void (*RF_KwargsDeinit) (struct _RF_Kwargs* context);
-
 typedef struct _RF_Kwargs {
+    void (*dtor) (struct _RF_Kwargs* self);
+
+/* members */
     void* context;
-    RF_KwargsDeinit deinit;
 } RF_Kwargs;
 
 typedef bool (*RF_KwargsInit)(RF_Kwargs* context, PyObject* kwargs);
 
-typedef bool (*RF_SimilarityFunc) (double* similarity, const struct _RF_Similarity* context, const RF_String* str, double score_cutoff);
-typedef void (*RF_SimilarityContextDeinit) (struct _RF_Similarity* context);
-
 typedef struct _RF_Similarity {
+    /**
+     * @brief destructor for RF_Similarity object
+     * 
+     * @param self pointer to RF_Similarity instance to destruct
+     */
+    void (*dtor) (struct _RF_Similarity* self);
+
+    /**
+     * @brief Calculate similarity between 0 and 100
+     * 
+     * @param[in] self pointer to RF_Distance instance
+     * @param[in] str string to calculate similarity with strings passed into `ctor`
+     * @param[in] score_cutoff argument for a score threshold between 0 and 100.
+     * When the similarity is < score_cutoff the similarity is 0.
+     * @param[out] similarity array of size `str_count` for results of the similarity calculation
+     * 
+     * @return true on success and false with a Python exception set on failure
+     */
+    bool (*similarity) (const struct _RF_Similarity* self, const RF_String* str, double score_cutoff, double* similarity);
+
+/* members */
     void* context;
-    RF_SimilarityFunc similarity;
-    RF_SimilarityContextDeinit deinit;
 } RF_Similarity;
 
-typedef bool (*RF_SimilarityInit) (RF_Similarity* context, const RF_Kwargs* kwargs, const RF_String* str);
+typedef bool (*RF_SimilarityInit) (RF_Similarity* context, const RF_Kwargs* kwargs, size_t str_count, const RF_String* strings);
 
 typedef struct {
     RF_KwargsInit kwargs_init;
     RF_SimilarityInit similarity_init;
 } RfSimilarityFunctionTable;
 
-typedef bool (*RF_DistanceFunc) (size_t* distance, const struct _RF_Distance* context, const RF_String* str, size_t max);
-typedef void (*RF_DistanceContextDeinit) (struct _RF_Distance* context);
-
 typedef struct _RF_Distance {
+    /**
+     * @brief Destructor for RF_Distance
+     * 
+     * @param self pointer to RF_Distance instance to destruct
+     */
+    void (*dtor) (struct _RF_Distance* self);
+
+    /**
+     * @brief Calculate edit distance
+     * 
+     * @param[in] self pointer to RF_Distance instance
+     * @param[in] str string to calculate distance with `strings` passed into `ctor`
+     * @param[in] max argument for a score threshold between 0 and 100.
+     * When the distance > max the distance is (size_t)-1.
+     * @param[out] distance array of size `str_count` for results of the distance calculation
+     * 
+     * @return true on success and false with a Python exception set on failure
+     */
+    bool (*distance) (const struct _RF_Distance* self, const RF_String* str, size_t max, size_t* distance);
+
+/* members */
     void* context;
-    RF_DistanceFunc distance;
-    RF_DistanceContextDeinit deinit;
 } RF_Distance;
 
-typedef bool (*RF_DistanceInit) (RF_Distance* context, const RF_Kwargs* kwargs, const RF_String* str);
+typedef bool (*RF_DistanceInit) (RF_Distance* context, const RF_Kwargs* kwargs, size_t str_count, const RF_String* strings);
 
 typedef struct {
     RF_KwargsInit kwargs_init;

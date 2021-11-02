@@ -89,7 +89,7 @@ struct RF_StringWrapper {
     RF_String string;
 
     RF_StringWrapper()
-        : string({(RF_StringType)0, nullptr, 0, nullptr, nullptr}) {}
+        : string({nullptr, (RF_StringType)0, nullptr, 0, nullptr}) {}
 
     RF_StringWrapper(RF_String string_)
         : string(string_) {}
@@ -100,23 +100,23 @@ struct RF_StringWrapper {
     RF_StringWrapper(RF_StringWrapper&& other)
     {
         string = other.string;
-        other.string = {(RF_StringType)0, nullptr, 0, nullptr, nullptr};
+        other.string = {nullptr, (RF_StringType)0, nullptr, 0, nullptr};
     }
 
     RF_StringWrapper& operator=(RF_StringWrapper&& other) {
         if (&other != this) {
-            if (string.deinit) {
-                string.deinit(&string);
+            if (string.dtor) {
+                string.dtor(&string);
             }
             string = other.string;
-            other.string = {(RF_StringType)0, nullptr, 0, nullptr, nullptr};
+            other.string = {nullptr, (RF_StringType)0, nullptr, 0, nullptr};
       }
       return *this;
     };
 
     ~RF_StringWrapper() {
-        if (string.deinit) {
-            string.deinit(&string);
+        if (string.dtor) {
+            string.dtor(&string);
         }
     }
 };
@@ -143,8 +143,8 @@ struct RF_KwargsWrapper {
     RF_KwargsWrapper& operator=(RF_KwargsWrapper&& other)
     {
         if (&other != this) {
-            if (kwargs.deinit) {
-                kwargs.deinit(&kwargs);
+            if (kwargs.dtor) {
+                kwargs.dtor(&kwargs);
             }
             kwargs = other.kwargs;
             other.kwargs = {NULL, NULL};
@@ -153,8 +153,8 @@ struct RF_KwargsWrapper {
     };
 
     ~RF_KwargsWrapper() {
-        if (kwargs.deinit) {
-            kwargs.deinit(&kwargs);
+        if (kwargs.dtor) {
+            kwargs.dtor(&kwargs);
         }
     }
 };
@@ -179,11 +179,11 @@ static inline std::basic_string<T> default_process(const RF_String& s)
 template <typename Func, typename... Args>
 auto visit(const RF_String& str, Func&& f, Args&&... args)
 {
-    switch(str.kind){
+    switch(str.kind) {
 # define X_ENUM(kind, type) case kind: return f(no_process<type>(str), std::forward<Args>(args)...);
     LIST_OF_CASES()
 # undef X_ENUM
-    default:                                           
+    default:
         throw std::logic_error("Invalid string type");
     }
 }
@@ -191,11 +191,11 @@ auto visit(const RF_String& str, Func&& f, Args&&... args)
 template <typename Func, typename... Args>
 auto visit_default_process(const RF_String& str, Func&& f, Args&&... args)
 {
-    switch(str.kind){
+    switch(str.kind) {
 # define X_ENUM(kind, type) case kind: return f(default_process<type>(str), std::forward<Args>(args)...);
     LIST_OF_CASES()
 # undef X_ENUM
-    default:                                           
+    default:
         throw std::logic_error("Invalid string type");
     }
 }
@@ -207,7 +207,7 @@ auto visitor(const RF_String& str1, const RF_String& str2, Func&& f, Args&&... a
         [&](auto str) {
             return visit(str1, std::forward<Func>(f), str, std::forward<Args>(args)...);
         }
-    ); 
+    );
 }
 
 /* todo this should be refactored in the future since preprocessing does not really belong here */
@@ -218,7 +218,7 @@ auto visitor_default_process(const RF_String& str1, const RF_String& str2, Func&
         [&](auto str) {
             return visit_default_process(str1, std::forward<Func>(f), str, std::forward<Args>(args)...);
         }
-    ); 
+    );
 }
 
 
@@ -295,10 +295,10 @@ static inline RF_String convert_string(PyObject* py_str)
 #if PY_VERSION_HEX > PYTHON_VERSION(3, 0, 0)
     if (PyBytes_Check(py_str)) {
         return {
+            nullptr,
             RF_UINT8,
             PyBytes_AS_STRING(py_str),
             static_cast<std::size_t>(PyBytes_GET_SIZE(py_str)),
-            nullptr,
             nullptr
         };
     } else {
@@ -314,31 +314,31 @@ static inline RF_String convert_string(PyObject* py_str)
            kind = RF_UINT32;
            break;
         }
-     
+
         return {
+            nullptr,
             kind,
             PyUnicode_DATA(py_str),
             static_cast<std::size_t>(PyUnicode_GET_LENGTH(py_str)),
-            nullptr,
             nullptr
         };
     }
 #else /* Python2 */
     if (PyObject_TypeCheck(py_str, &PyString_Type)) {
         return {
+            nullptr,
             RF_CHAR,
             PyString_AS_STRING(py_str),
             static_cast<std::size_t>(PyString_GET_SIZE(py_str)),
-            nullptr,
             nullptr
         };
     }
     else if (PyObject_TypeCheck(py_str, &PyUnicode_Type)) {
         return {
+            nullptr,
             RF_UNICODE,
             PyUnicode_AS_UNICODE(py_str),
             static_cast<std::size_t>(PyUnicode_GET_SIZE(py_str)),
-            nullptr,
             nullptr
         };
     }
@@ -352,7 +352,7 @@ template <typename CharT>
 RF_String default_process_func_impl(RF_String sentence) {
     CharT* str = static_cast<CharT*>(sentence.data);
 
-    if (!sentence.deinit)
+    if (!sentence.dtor)
     {
       CharT* temp_str = (CharT*)malloc(sentence.length * sizeof(CharT));
       if (temp_str == NULL)
@@ -363,7 +363,7 @@ RF_String default_process_func_impl(RF_String sentence) {
       str = temp_str;
     }
 
-    sentence.deinit = default_string_deinit;
+    sentence.dtor = default_string_deinit;
     sentence.data = str;
     sentence.kind = sentence.kind;
     sentence.length = utils::default_process(str, sentence.length);

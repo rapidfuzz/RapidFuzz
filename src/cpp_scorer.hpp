@@ -3,23 +3,23 @@
 #include <iostream>
 
 template <typename CachedScorer>
-static void similarity_deinit(RF_Similarity* context)
+static void similarity_deinit(RF_Similarity* self)
 {
-    delete (CachedScorer*)context->context;
+    delete (CachedScorer*)self->context;
 }
 
 template <typename CachedScorer>
-static void distance_deinit(RF_Distance* context)
+static void distance_deinit(RF_Distance* self)
 {
-    delete (CachedScorer*)context->context;
+    delete (CachedScorer*)self->context;
 }
 
 template<typename CachedScorer>
-static inline bool similarity_func_wrapper(double* similarity, const RF_Similarity* context, const RF_String* str, double score_cutoff)
+static inline bool similarity_func_wrapper(const RF_Similarity* self, const RF_String* str, double score_cutoff, double* similarity)
 {
     try {
         *similarity = visit(*str, [&](auto s){
-            return ((CachedScorer*)context->context)->ratio(s, score_cutoff);
+            return ((CachedScorer*)self->context)->ratio(s, score_cutoff);
         });
     } catch(...) {
       PyGILState_STATE gilstate_save = PyGILState_Ensure();
@@ -31,11 +31,11 @@ static inline bool similarity_func_wrapper(double* similarity, const RF_Similari
 }
 
 template<typename CachedDistance>
-static inline bool distance_func_wrapper(size_t* distance, const RF_Distance* context, const RF_String* str, size_t max)
+static inline bool distance_func_wrapper(const RF_Distance* self, const RF_String* str, size_t max, size_t* distance)
 {
     try {
         *distance = visit(*str, [&](auto s){
-            return ((CachedDistance*)context->context)->distance(s, max);
+            return ((CachedDistance*)self->context)->distance(s, max);
         });
     } catch(...) {
       PyGILState_STATE gilstate_save = PyGILState_Ensure();
@@ -53,7 +53,7 @@ static inline RF_Similarity get_SimilarityContext(Sentence str, Args... args)
     context.context = (void*) new CachedScorer<Sentence>(str, args...);
 
     context.similarity = similarity_func_wrapper<CachedScorer<Sentence>>;
-    context.deinit = similarity_deinit<CachedScorer<Sentence>>;
+    context.dtor = similarity_deinit<CachedScorer<Sentence>>;
     return context;
 }
 
@@ -64,15 +64,15 @@ static inline RF_Distance get_DistanceContext(Sentence str, Args... args)
     context.context = (void*) new CachedDistance<Sentence>(str, args...);
 
     context.distance = distance_func_wrapper<CachedDistance<Sentence>>;
-    context.deinit = distance_deinit<CachedDistance<Sentence>>;
+    context.dtor = distance_deinit<CachedDistance<Sentence>>;
     return context;
 }
 
 template<template <typename> class CachedScorer, typename ...Args>
-static inline bool similarity_init(RF_Similarity* context, const RF_String* str, Args... args)
+static inline bool similarity_init(RF_Similarity* self, const RF_String* str, Args... args)
 {
     try {
-        *context = visit(*str, [&](auto s){
+        *self = visit(*str, [&](auto s){
             return get_SimilarityContext<CachedScorer>(s, args...);
         });
     } catch(...) {
@@ -85,10 +85,10 @@ static inline bool similarity_init(RF_Similarity* context, const RF_String* str,
 }
 
 template<template <typename> class CachedDistance, typename ...Args>
-static inline bool distance_init(RF_Distance* context, const RF_String* str, Args... args)
+static inline bool distance_init(RF_Distance* self, const RF_String* str, Args... args)
 {
     try {
-        *context = visit(*str, [&](auto s){
+        *self = visit(*str, [&](auto s){
             return get_DistanceContext<CachedDistance>(s, args...);
         });
     } catch(...) {
@@ -118,8 +118,8 @@ static inline RfSimilarityFunctionTable CreateRatioFunctionTable()
 {
     return {
         nullptr,
-        [](RF_Similarity* context, const RF_Kwargs*, const RF_String* str) {
-            return similarity_init<fuzz::CachedRatio>(context, str);
+        [](RF_Similarity* self, const RF_Kwargs*, size_t, const RF_String* str) {
+            return similarity_init<fuzz::CachedRatio>(self, str);
         }
     };
 }
@@ -140,8 +140,8 @@ static inline RfSimilarityFunctionTable CreatePartialRatioFunctionTable()
 {
     return {
         nullptr,
-        [](RF_Similarity* context, const RF_Kwargs*, const RF_String* str) {
-            return similarity_init<fuzz::CachedPartialRatio>(context, str);
+        [](RF_Similarity* self, const RF_Kwargs*, size_t, const RF_String* str) {
+            return similarity_init<fuzz::CachedPartialRatio>(self, str);
         }
     };
 }
@@ -162,8 +162,8 @@ static inline RfSimilarityFunctionTable CreateTokenSortRatioFunctionTable()
 {
     return {
         nullptr,
-        [](RF_Similarity* context, const RF_Kwargs*, const RF_String* str) {
-            return similarity_init<fuzz::CachedTokenSortRatio>(context, str);
+        [](RF_Similarity* self, const RF_Kwargs*, size_t, const RF_String* str) {
+            return similarity_init<fuzz::CachedTokenSortRatio>(self, str);
         }
     };
 }
@@ -184,8 +184,8 @@ static inline RfSimilarityFunctionTable CreateTokenSetRatioFunctionTable()
 {
     return {
         nullptr,
-        [](RF_Similarity* context, const RF_Kwargs*, const RF_String* str) {
-            return similarity_init<fuzz::CachedTokenSetRatio>(context, str);
+        [](RF_Similarity* self, const RF_Kwargs*, size_t, const RF_String* str) {
+            return similarity_init<fuzz::CachedTokenSetRatio>(self, str);
         }
     };
 }
@@ -206,8 +206,8 @@ static inline RfSimilarityFunctionTable CreateTokenRatioFunctionTable()
 {
     return {
         nullptr,
-        [](RF_Similarity* context, const RF_Kwargs*, const RF_String* str) {
-            return similarity_init<fuzz::CachedTokenRatio>(context, str);
+        [](RF_Similarity* self, const RF_Kwargs*, size_t, const RF_String* str) {
+            return similarity_init<fuzz::CachedTokenRatio>(self, str);
         }
     };
 }
@@ -228,8 +228,8 @@ static inline RfSimilarityFunctionTable CreatePartialTokenSortRatioFunctionTable
 {
     return {
         nullptr,
-        [](RF_Similarity* context, const RF_Kwargs*, const RF_String* str) {
-            return similarity_init<fuzz::CachedPartialTokenSortRatio>(context, str);
+        [](RF_Similarity* self, const RF_Kwargs*, size_t, const RF_String* str) {
+            return similarity_init<fuzz::CachedPartialTokenSortRatio>(self, str);
         }
     };
 }
@@ -250,8 +250,8 @@ static inline RfSimilarityFunctionTable CreatePartialTokenSetRatioFunctionTable(
 {
     return {
         nullptr,
-        [](RF_Similarity* context, const RF_Kwargs*, const RF_String* str) {
-            return similarity_init<fuzz::CachedPartialTokenSetRatio>(context, str);
+        [](RF_Similarity* self, const RF_Kwargs*, size_t, const RF_String* str) {
+            return similarity_init<fuzz::CachedPartialTokenSetRatio>(self, str);
         }
     };
 }
@@ -272,8 +272,8 @@ static inline RfSimilarityFunctionTable CreatePartialTokenRatioFunctionTable()
 {
     return {
         nullptr,
-        [](RF_Similarity* context, const RF_Kwargs*, const RF_String* str) {
-            return similarity_init<fuzz::CachedPartialTokenRatio>(context, str);
+        [](RF_Similarity* self, const RF_Kwargs*, size_t, const RF_String* str) {
+            return similarity_init<fuzz::CachedPartialTokenRatio>(self, str);
         }
     };
 }
@@ -294,8 +294,8 @@ static inline RfSimilarityFunctionTable CreateWRatioFunctionTable()
 {
     return {
         nullptr,
-        [](RF_Similarity* context, const RF_Kwargs*, const RF_String* str) {
-            return similarity_init<fuzz::CachedWRatio>(context, str);
+        [](RF_Similarity* self, const RF_Kwargs*, size_t, const RF_String* str) {
+            return similarity_init<fuzz::CachedWRatio>(self, str);
         }
     };
 }
@@ -316,8 +316,8 @@ static inline RfSimilarityFunctionTable CreateQRatioFunctionTable()
 {
     return {
         nullptr,
-        [](RF_Similarity* context, const RF_Kwargs*, const RF_String* str) {
-            return similarity_init<fuzz::CachedQRatio>(context, str);
+        [](RF_Similarity* self, const RF_Kwargs*, size_t, const RF_String* str) {
+            return similarity_init<fuzz::CachedQRatio>(self, str);
         }
     };
 }
@@ -339,10 +339,10 @@ static inline PyObject* levenshtein_default_process(const RF_String& s1, const R
     });
     return dist_to_long(result);
 }
-static inline bool LevenshteinInit(RF_Distance* context, const RF_Kwargs* kwargs, const RF_String* str)
+static inline bool LevenshteinInit(RF_Distance* self, const RF_Kwargs* kwargs, size_t, const RF_String* str)
 {
     return distance_init<string_metric::CachedLevenshtein>(
-        context, str, *(rapidfuzz::LevenshteinWeightTable*)(kwargs->context)
+        self, str, *(rapidfuzz::LevenshteinWeightTable*)(kwargs->context)
     );
 }
 
@@ -360,10 +360,10 @@ static inline double normalized_levenshtein_default_process(const RF_String& s1,
         return string_metric::normalized_levenshtein(str1, str2, {insertion, deletion, substitution}, score_cutoff);
     });
 }
-static inline bool NormalizedLevenshteinInit(RF_Similarity* context, const RF_Kwargs* kwargs, const RF_String* str)
+static inline bool NormalizedLevenshteinInit(RF_Similarity* self, const RF_Kwargs* kwargs, size_t, const RF_String* str)
 {
     return similarity_init<string_metric::CachedNormalizedLevenshtein>(
-        context, str, *(rapidfuzz::LevenshteinWeightTable*)(kwargs->context)
+        self, str, *(rapidfuzz::LevenshteinWeightTable*)(kwargs->context)
     );
 }
 
@@ -385,8 +385,8 @@ static inline RfDistanceFunctionTable CreateHammingFunctionTable()
 {
     return {
         nullptr,
-        [](RF_Distance* context, const RF_Kwargs*, const RF_String* str) {
-            return distance_init<string_metric::CachedHamming>(context, str);
+        [](RF_Distance* self, const RF_Kwargs*, size_t, const RF_String* str) {
+            return distance_init<string_metric::CachedHamming>(self, str);
         }
     };
 }
@@ -407,8 +407,8 @@ static inline RfSimilarityFunctionTable CreateNormalizedHammingFunctionTable()
 {
     return {
         nullptr,
-        [](RF_Similarity* context, const RF_Kwargs*, const RF_String* str) {
-            return similarity_init<string_metric::CachedNormalizedHamming>(context, str);
+        [](RF_Similarity* self, const RF_Kwargs*, size_t, const RF_String* str) {
+            return similarity_init<string_metric::CachedNormalizedHamming>(self, str);
         }
     };
 }
@@ -429,8 +429,8 @@ static inline RfSimilarityFunctionTable CreateJaroSimilarityFunctionTable()
 {
     return {
         nullptr,
-        [](RF_Similarity* context, const RF_Kwargs*, const RF_String* str) {
-            return similarity_init<string_metric::CachedJaroSimilarity>(context, str);
+        [](RF_Similarity* self, const RF_Kwargs*, size_t, const RF_String* str) {
+            return similarity_init<string_metric::CachedJaroSimilarity>(self, str);
         }
     };
 }
@@ -449,9 +449,9 @@ static inline double jaro_winkler_similarity_default_process(const RF_String& s1
         return string_metric::jaro_winkler_similarity(str1, str2, prefix_weight, score_cutoff);
     });
 }
-static inline bool JaroWinklerSimilarityInit(RF_Similarity* context, const RF_Kwargs* kwargs, const RF_String* str)
+static inline bool JaroWinklerSimilarityInit(RF_Similarity* self, const RF_Kwargs* kwargs, size_t, const RF_String* str)
 {
-    return similarity_init<string_metric::CachedJaroWinklerSimilarity>(context, str, *(double*)(kwargs->context));
+    return similarity_init<string_metric::CachedJaroWinklerSimilarity>(self, str, *(double*)(kwargs->context));
 }
 
 static inline std::vector<rapidfuzz::LevenshteinEditOp> levenshtein_editops_no_process(

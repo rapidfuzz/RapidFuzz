@@ -3351,7 +3351,7 @@ static CYTHON_INLINE RF_String __pyx_f_17cpp_string_metric_conv_sequence(PyObjec
 }
 
 /* "cpp_string_metric.pyx":73
- *     bool JaroWinklerSimilarityInit(RF_Similarity* context, const RF_Kwargs* kwargs, const RF_String* str) nogil except False
+ *     bool JaroWinklerSimilarityInit(RF_Similarity* context, const RF_Kwargs* kwargs, size_t str_count, const RF_String* strings) nogil except False
  * 
  * def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):             # <<<<<<<<<<<<<<
  *     """
@@ -3820,7 +3820,7 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
   goto __pyx_L0;
 
   /* "cpp_string_metric.pyx":73
- *     bool JaroWinklerSimilarityInit(RF_Similarity* context, const RF_Kwargs* kwargs, const RF_String* str) nogil except False
+ *     bool JaroWinklerSimilarityInit(RF_Similarity* context, const RF_Kwargs* kwargs, size_t str_count, const RF_String* strings) nogil except False
  * 
  * def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):             # <<<<<<<<<<<<<<
  *     """
@@ -6978,7 +6978,7 @@ static bool __pyx_f_17cpp_string_metric_LevenshteinKwargsInit(RF_Kwargs *__pyx_v
  *     dereference(weights).delete_cost = deletion
  *     dereference(weights).replace_cost = substitution             # <<<<<<<<<<<<<<
  *     dereference(context).context = weights
- *     dereference(context).deinit = KwargsDeinit
+ *     dereference(context).dtor = KwargsDeinit
  */
   __Pyx_TraceLine(641,0,__PYX_ERR(0, 641, __pyx_L1_error))
   (*__pyx_v_weights).replace_cost = __pyx_v_substitution;
@@ -6987,7 +6987,7 @@ static bool __pyx_f_17cpp_string_metric_LevenshteinKwargsInit(RF_Kwargs *__pyx_v
  *     dereference(weights).delete_cost = deletion
  *     dereference(weights).replace_cost = substitution
  *     dereference(context).context = weights             # <<<<<<<<<<<<<<
- *     dereference(context).deinit = KwargsDeinit
+ *     dereference(context).dtor = KwargsDeinit
  *     return True
  */
   __Pyx_TraceLine(642,0,__PYX_ERR(0, 642, __pyx_L1_error))
@@ -6996,16 +6996,16 @@ static bool __pyx_f_17cpp_string_metric_LevenshteinKwargsInit(RF_Kwargs *__pyx_v
   /* "cpp_string_metric.pyx":643
  *     dereference(weights).replace_cost = substitution
  *     dereference(context).context = weights
- *     dereference(context).deinit = KwargsDeinit             # <<<<<<<<<<<<<<
+ *     dereference(context).dtor = KwargsDeinit             # <<<<<<<<<<<<<<
  *     return True
  * 
  */
   __Pyx_TraceLine(643,0,__PYX_ERR(0, 643, __pyx_L1_error))
-  (*__pyx_v_context).deinit = __pyx_f_17cpp_string_metric_KwargsDeinit;
+  (*__pyx_v_context).dtor = __pyx_f_17cpp_string_metric_KwargsDeinit;
 
   /* "cpp_string_metric.pyx":644
  *     dereference(context).context = weights
- *     dereference(context).deinit = KwargsDeinit
+ *     dereference(context).dtor = KwargsDeinit
  *     return True             # <<<<<<<<<<<<<<
  * 
  * 
@@ -7104,7 +7104,7 @@ static bool __pyx_f_17cpp_string_metric_JaroWinklerKwargsInit(RF_Kwargs *__pyx_v
  * 
  *     prefix_weight[0] = kwargs.get("prefix_weight", 0.1)             # <<<<<<<<<<<<<<
  *     dereference(context).context = prefix_weight
- *     dereference(context).deinit = KwargsDeinit
+ *     dereference(context).dtor = KwargsDeinit
  */
   __Pyx_TraceLine(672,0,__PYX_ERR(0, 672, __pyx_L1_error))
   if (unlikely(__pyx_v_kwargs == Py_None)) {
@@ -7121,7 +7121,7 @@ static bool __pyx_f_17cpp_string_metric_JaroWinklerKwargsInit(RF_Kwargs *__pyx_v
  * 
  *     prefix_weight[0] = kwargs.get("prefix_weight", 0.1)
  *     dereference(context).context = prefix_weight             # <<<<<<<<<<<<<<
- *     dereference(context).deinit = KwargsDeinit
+ *     dereference(context).dtor = KwargsDeinit
  *     return True
  */
   __Pyx_TraceLine(673,0,__PYX_ERR(0, 673, __pyx_L1_error))
@@ -7130,16 +7130,16 @@ static bool __pyx_f_17cpp_string_metric_JaroWinklerKwargsInit(RF_Kwargs *__pyx_v
   /* "cpp_string_metric.pyx":674
  *     prefix_weight[0] = kwargs.get("prefix_weight", 0.1)
  *     dereference(context).context = prefix_weight
- *     dereference(context).deinit = KwargsDeinit             # <<<<<<<<<<<<<<
+ *     dereference(context).dtor = KwargsDeinit             # <<<<<<<<<<<<<<
  *     return True
  * 
  */
   __Pyx_TraceLine(674,0,__PYX_ERR(0, 674, __pyx_L1_error))
-  (*__pyx_v_context).deinit = __pyx_f_17cpp_string_metric_KwargsDeinit;
+  (*__pyx_v_context).dtor = __pyx_f_17cpp_string_metric_KwargsDeinit;
 
   /* "cpp_string_metric.pyx":675
  *     dereference(context).context = prefix_weight
- *     dereference(context).deinit = KwargsDeinit
+ *     dereference(context).dtor = KwargsDeinit
  *     return True             # <<<<<<<<<<<<<<
  * 
  * cdef RfSimilarityFunctionTable JaroWinklerSimilarityContext
@@ -7696,7 +7696,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  *         s_proc.data = NULL
  *         raise             # <<<<<<<<<<<<<<
  * 
- *     s_proc.deinit = default_string_deinit
+ *     s_proc.dtor = default_string_deinit
  */
         __Pyx_GIVEREF(__pyx_t_1);
         __Pyx_GIVEREF(__pyx_t_14);
@@ -7768,15 +7768,15 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
   /* "cpp_common.pxd":74
  *         raise
  * 
- *     s_proc.deinit = default_string_deinit             # <<<<<<<<<<<<<<
+ *     s_proc.dtor = default_string_deinit             # <<<<<<<<<<<<<<
  *     return s_proc
  * 
  */
-  __pyx_v_s_proc.deinit = default_string_deinit;
+  __pyx_v_s_proc.dtor = default_string_deinit;
 
   /* "cpp_common.pxd":75
  * 
- *     s_proc.deinit = default_string_deinit
+ *     s_proc.dtor = default_string_deinit
  *     return s_proc             # <<<<<<<<<<<<<<
  * 
  * 
@@ -8055,7 +8055,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
  *         s_proc.data = NULL
  *         raise             # <<<<<<<<<<<<<<
  * 
- *     s_proc.deinit = default_string_deinit
+ *     s_proc.dtor = default_string_deinit
  */
         __Pyx_GIVEREF(__pyx_t_9);
         __Pyx_GIVEREF(__pyx_t_15);
@@ -8127,14 +8127,14 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
   /* "cpp_common.pxd":101
  *         raise
  * 
- *     s_proc.deinit = default_string_deinit             # <<<<<<<<<<<<<<
+ *     s_proc.dtor = default_string_deinit             # <<<<<<<<<<<<<<
  *     return s_proc
  */
-  __pyx_v_s_proc.deinit = default_string_deinit;
+  __pyx_v_s_proc.dtor = default_string_deinit;
 
   /* "cpp_common.pxd":102
  * 
- *     s_proc.deinit = default_string_deinit
+ *     s_proc.dtor = default_string_deinit
  *     return s_proc             # <<<<<<<<<<<<<<
  */
   __pyx_r = __pyx_v_s_proc;
@@ -10339,7 +10339,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
   /* "cpp_string_metric.pyx":73
- *     bool JaroWinklerSimilarityInit(RF_Similarity* context, const RF_Kwargs* kwargs, const RF_String* str) nogil except False
+ *     bool JaroWinklerSimilarityInit(RF_Similarity* context, const RF_Kwargs* kwargs, size_t str_count, const RF_String* strings) nogil except False
  * 
  * def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):             # <<<<<<<<<<<<<<
  *     """
@@ -11098,7 +11098,7 @@ if (!__Pyx_RefNanny) {
 
 
   /* "cpp_string_metric.pyx":73
- *     bool JaroWinklerSimilarityInit(RF_Similarity* context, const RF_Kwargs* kwargs, const RF_String* str) nogil except False
+ *     bool JaroWinklerSimilarityInit(RF_Similarity* context, const RF_Kwargs* kwargs, size_t str_count, const RF_String* strings) nogil except False
  * 
  * def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):             # <<<<<<<<<<<<<<
  *     """

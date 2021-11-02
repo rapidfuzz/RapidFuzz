@@ -71,7 +71,7 @@ cdef inline RF_String hash_array(arr) except *:
         s_proc.data = NULL
         raise
 
-    s_proc.deinit = default_string_deinit
+    s_proc.dtor = default_string_deinit
     return s_proc
 
 
@@ -98,5 +98,5 @@ cdef inline RF_String hash_sequence(seq) except *:
         s_proc.data = NULL
         raise
 
-    s_proc.deinit = default_string_deinit
+    s_proc.dtor = default_string_deinit
     return s_proc

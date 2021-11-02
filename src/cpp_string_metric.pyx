@@ -62,13 +62,13 @@ cdef extern from "cpp_scorer.hpp":
     vector[LevenshteinEditOp] levenshtein_editops_no_process(     const RF_String& s1, const RF_String& s2) nogil except +
     vector[LevenshteinEditOp] levenshtein_editops_default_process(const RF_String& s1, const RF_String& s2) nogil except +
 
-    bool LevenshteinInit(RF_Distance* context, const RF_Kwargs* kwargs, const RF_String* str) nogil except False
-    bool NormalizedLevenshteinInit(RF_Similarity* context, const RF_Kwargs* kwargs, const RF_String* str) nogil except False
+    bool LevenshteinInit(RF_Distance* context, const RF_Kwargs* kwargs, size_t str_count, const RF_String* strings) nogil except False
+    bool NormalizedLevenshteinInit(RF_Similarity* context, const RF_Kwargs* kwargs, size_t str_count, const RF_String* strings) nogil except False
 
     RfDistanceFunctionTable CreateHammingFunctionTable() except +
     RfSimilarityFunctionTable CreateNormalizedHammingFunctionTable() except +
     RfSimilarityFunctionTable CreateJaroSimilarityFunctionTable() except +
-    bool JaroWinklerSimilarityInit(RF_Similarity* context, const RF_Kwargs* kwargs, const RF_String* str) nogil except False
+    bool JaroWinklerSimilarityInit(RF_Similarity* context, const RF_Kwargs* kwargs, size_t str_count, const RF_String* strings) nogil except False
 
 def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
     """
@@ -640,7 +640,7 @@ cdef bool LevenshteinKwargsInit(RF_Kwargs* context, dict kwargs) except False:
     dereference(weights).delete_cost = deletion
     dereference(weights).replace_cost = substitution
     dereference(context).context = weights
-    dereference(context).deinit = KwargsDeinit
+    dereference(context).dtor = KwargsDeinit
     return True
 
 
@@ -671,7 +671,7 @@ cdef bool JaroWinklerKwargsInit(RF_Kwargs* context, dict kwargs) except False:
 
     prefix_weight[0] = kwargs.get("prefix_weight", 0.1)
     dereference(context).context = prefix_weight
-    dereference(context).deinit = KwargsDeinit
+    dereference(context).dtor = KwargsDeinit
     return True
 
 cdef RfSimilarityFunctionTable JaroWinklerSimilarityContext

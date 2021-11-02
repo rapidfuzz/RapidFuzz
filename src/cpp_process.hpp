@@ -79,8 +79,8 @@ struct RF_SimilarityWrapper {
 
     RF_SimilarityWrapper& operator=(RF_SimilarityWrapper&& other) {
         if (&other != this) {
-            if (context.deinit) {
-                context.deinit(&context);
+            if (context.dtor) {
+                context.dtor(&context);
             }
 
             context = other.context;
@@ -90,14 +90,14 @@ struct RF_SimilarityWrapper {
     };
 
     ~RF_SimilarityWrapper() {
-        if (context.deinit) {
-            context.deinit(&context);
+        if (context.dtor) {
+            context.dtor(&context);
         }
     }
 
     double similarity(const RF_String* str, double score_cutoff) {
         double sim;
-        PyErr2RuntimeExn(context.similarity(&sim, &context, str, score_cutoff));
+        PyErr2RuntimeExn(context.similarity(&context, str, score_cutoff, &sim));
         return sim;
     }
 };
@@ -121,8 +121,8 @@ struct RF_DistanceWrapper {
 
     RF_DistanceWrapper& operator=(RF_DistanceWrapper&& other) {
         if (&other != this) {
-            if (context.deinit) {
-                context.deinit(&context);
+            if (context.dtor) {
+                context.dtor(&context);
             }
 
             context = other.context;
@@ -132,14 +132,14 @@ struct RF_DistanceWrapper {
     };
 
     ~RF_DistanceWrapper() {
-        if (context.deinit) {
-            context.deinit(&context);
+        if (context.dtor) {
+            context.dtor(&context);
         }
     }
 
     size_t distance(const RF_String* str, size_t max) {
         size_t dist;
-        PyErr2RuntimeExn(context.distance(&dist, &context, str, max));
+        PyErr2RuntimeExn(context.distance(&context, str, max, &dist));
         return dist;
     }
 };
