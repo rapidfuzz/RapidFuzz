@@ -1911,8 +1911,8 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 /* Module declarations from "cpp_common" */
 #if !CYTHON_USE_MODULE_STATE
 #endif
-static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *); /*proto*/
-static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_sequence(PyObject *); /*proto*/
+static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *); /*proto*/
+static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *); /*proto*/
 
 /* Module declarations from "cpython.pycapsule" */
 #if !CYTHON_USE_MODULE_STATE
@@ -1931,7 +1931,7 @@ static RfSimilarityFunctionTable __pyx_v_8cpp_fuzz_PartialTokenSetRatioContext;
 static RfSimilarityFunctionTable __pyx_v_8cpp_fuzz_PartialTokenRatioContext;
 static RfSimilarityFunctionTable __pyx_v_8cpp_fuzz_WRatioContext;
 static RfSimilarityFunctionTable __pyx_v_8cpp_fuzz_QRatioContext;
-static CYTHON_INLINE RfString __pyx_f_8cpp_fuzz_conv_sequence(PyObject *); /*proto*/
+static CYTHON_INLINE RF_String __pyx_f_8cpp_fuzz_conv_sequence(PyObject *); /*proto*/
 /* #### Code section: typeinfo ### */
 /* #### Code section: before_global_var ### */
 #define __Pyx_MODULE_NAME "cpp_fuzz"
@@ -1986,7 +1986,7 @@ static const char __pyx_k_Sorts_the_words_in_the_strings[] = "\n    Sorts the wo
 static const char __pyx_k_Calculates_a_quick_ratio_betwee[] = "\n    Calculates a quick ratio between two strings using fuzz.ratio.\n    The only difference to fuzz.ratio is, that this preprocesses\n    the strings by default.\n\n    Parameters\n    ----------\n    s1 : Sequence[Hashable]\n        First string to compare.\n    s2 : Sequence[Hashable]\n        Second string to compare.\n    processor: bool or callable, optional\n        Optional callable that is used to preprocess the strings before\n        comparing them. When processor is True ``utils.default_process``\n        is used. Default is True.\n    score_cutoff : float, optional\n        Optional argument for a score threshold as a float between 0 and 100.\n        For ratio < score_cutoff 0 is returned instead. Default is 0,\n        which deactivates this behaviour.\n\n    Returns\n    -------\n    similarity : float\n        similarity between s1 and s2 as a float between 0 and 100\n\n    Examples\n    --------\n    >>> fuzz.QRatio(\"this is a test\", \"THIS is a test!\")\n    100.0\n    ";
 static const char __pyx_k_Calculates_the_normalized_InDel[] = "\n    Calculates the normalized InDel distance.\n\n    Parameters\n    ----------\n    s1 : Sequence[Hashable]\n        First string to compare.\n    s2 : Sequence[Hashable]\n        Second string to compare.\n    processor: bool or callable, optional\n        Optional callable that is used to preprocess the strings before\n        comparing them. When processor is True ``utils.default_process``\n        is used. Default is None, which deactivates this behaviour.\n    score_cutoff : float, optional\n        Optional argument for a score threshold as a float between 0 and 100.\n        For ratio < score_cutoff 0 is returned instead. Default is 0,\n        which deactivates this behaviour.\n\n    Returns\n    -------\n    similarity : float\n        similarity between s1 and s2 as a float between 0 and 100\n\n    See Also\n    --------\n    rapidfuzz.string_metric.normalized_levenshtein : Normalized levenshtein distance\n\n    Notes\n    -----\n    .. image:: img/ratio.svg\n\n    Examples\n    --------\n    >>> fuzz.ratio(\"this is a test\", \"this is a test!\")\n    96.55171966552734\n    ";
 static const char __pyx_k_Compares_the_words_in_the_strin[] = "\n    Compares the words in the strings based on unique and common words between them\n    using fuzz.ratio\n\n    Parameters\n    ----------\n    s1 : Sequence[Hashable]\n        First string to compare.\n    s2 : Sequence[Hashable]\n        Second string to compare.\n    processor: bool or callable, optional\n        Optional callable that is used to preprocess the strings before\n        comparing them. When processor is True ``utils.default_process``\n        is used. Default is True.\n    score_cutoff : float, optional\n        Optional argument for a score threshold as a float between 0 and 100.\n        For ratio < score_cutoff 0 is returned instead. Default is 0,\n        which deactivates this behaviour.\n\n    Returns\n    -------\n    similarity : float\n        similarity between s1 and s2 as a float between 0 and 100\n\n    Notes\n    -----\n    .. image:: img/token_set_ratio.svg\n\n    Examples\n    --------\n    >>> fuzz.token_sort_ratio(\"fuzzy was a bear\", \"fuzzy fuzzy was a bear\")\n    83.8709716796875\n    >>> fuzz.token_set_ratio(\"fuzzy was a bear\", \"fuzzy fuzzy was a bear\")\n    100.0\n    ";
-static const char __pyx_k_Searches_for_the_optimal_alignm[] = "\n    Searches for the optimal alignment of the shorter string in the\n    longer string and returns the fuzz.ratio for this alignment.\n\n    Parameters\n    ----------\n    s1 : Sequence[Hashable]\n        First string to compare.\n    s2 : Sequence[Hashable]\n        Second string to compare.\n    processor: bool or callable, optional\n        Optional callable that is used to preprocess the strings before\n        comparing them. When processor is True ``utils.default_process``\n        is used. Default is None, which deactivates this behaviour.\n    score_cutoff : float, optional\n        Optional argument for a score threshold as a float between 0 and 100.\n        For ratio < score_cutoff 0 is returned instead. Default is 0,\n        which deactivates this behaviour.\n\n    Returns\n    -------\n    similarity : float\n        similarity between s1 and s2 as a float between 0 and 100\n\n    Notes\n    -----\n    Depending on the length of the needle (shorter string) different\n    implementations are used to improve the performance.\n\n    short needle (length \342\211\244 64):\n        When using a short needle length the fuzz.ratio is calculated for all\n        alignments that could result in an optimal alignment. It is\n        guaranteed to find the optimal alignment. For short needles this is very\n        fast, since for them fuzz.ratio runs in ``O(N)`` time. This results in a worst\n        case performance of ``O(NM)``.\n    \n    .. image:: img/partial_ratio_short_needle.svg\n\n    long needle (length > 64):\n        For long needles a similar implementation to FuzzyWuzzy is used.\n        This implementation only considers alignments which start at one\n        of the longest common substrings. This results in a worst case performance\n        of ``O(N[N/64]M)``. However usually most of the alignments can be skipped.\n        The following Python code shows the concept:\n\n        .. code-block:: python\n\n            blocks = SequenceMatcher(None,"" needle, longer, False).get_matching_blocks()\n            score = 0\n            for block in blocks:\n                long_start = block[1] - block[0] if (block[1] - block[0]) > 0 else 0\n                long_end = long_start + len(shorter)\n                long_substr = longer[long_start:long_end]\n                score = max(score, fuzz.ratio(needle, long_substr))\n\n        This is a lot faster than checking all possible alignments. However it\n        only finds one of the best alignments and not necessarily the optimal one.\n\n    .. image:: img/partial_ratio_long_needle.svg\n\n    Examples\n    --------\n    >>> fuzz.partial_ratio(\"this is a test\", \"this is a test!\")\n    100.0\n    ";
+static const char __pyx_k_Searches_for_the_optimal_alignm[] = "\n    Searches for the optimal alignment of the shorter string in the\n    longer string and returns the fuzz.ratio for this alignment.\n\n    Parameters\n    ----------\n    s1 : Sequence[Hashable]\n        First string to compare.\n    s2 : Sequence[Hashable]\n        Second string to compare.\n    processor: bool or callable, optional\n        Optional callable that is used to preprocess the strings before\n        comparing them. When processor is True ``utils.default_process``\n        is used. Default is None, which deactivates this behaviour.\n    score_cutoff : float, optional\n        Optional argument for a score threshold as a float between 0 and 100.\n        For ratio < score_cutoff 0 is returned instead. Default is 0,\n        which deactivates this behaviour.\n\n    Returns\n    -------\n    similarity : float\n        similarity between s1 and s2 as a float between 0 and 100\n\n    Notes\n    -----\n    Depending on the length of the needle (shorter string) different\n    implementations are used to improve the performance.\n\n    short needle (length \342\211\244 64):\n        When using a short needle length the fuzz.ratio is calculated for all\n        alignments that could result in an optimal alignment. It is\n        guaranteed to find the optimal alignment. For short needles this is very\n        fast, since for them fuzz.ratio runs in ``O(N)`` time. This results in a worst\n        case performance of ``O(NM)``.\n\n    .. image:: img/partial_ratio_short_needle.svg\n\n    long needle (length > 64):\n        For long needles a similar implementation to FuzzyWuzzy is used.\n        This implementation only considers alignments which start at one\n        of the longest common substrings. This results in a worst case performance\n        of ``O(N[N/64]M)``. However usually most of the alignments can be skipped.\n        The following Python code shows the concept:\n\n        .. code-block:: python\n\n            blocks = SequenceMatcher(None, nee""dle, longer, False).get_matching_blocks()\n            score = 0\n            for block in blocks:\n                long_start = block[1] - block[0] if (block[1] - block[0]) > 0 else 0\n                long_end = long_start + len(shorter)\n                long_substr = longer[long_start:long_end]\n                score = max(score, fuzz.ratio(needle, long_substr))\n\n        This is a lot faster than checking all possible alignments. However it\n        only finds one of the best alignments and not necessarily the optimal one.\n\n    .. image:: img/partial_ratio_long_needle.svg\n\n    Examples\n    --------\n    >>> fuzz.partial_ratio(\"this is a test\", \"this is a test!\")\n    100.0\n    ";
 #if !CYTHON_USE_MODULE_STATE
 static PyObject *__pyx_kp_u_Calculates_a_quick_ratio_betwee;
 static PyObject *__pyx_kp_u_Calculates_the_normalized_InDel;
@@ -2421,20 +2421,20 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 /* "cpp_fuzz.pyx":11
  * from cpython.pycapsule cimport PyCapsule_New
  * 
- * cdef inline RfString conv_sequence(seq) except *:             # <<<<<<<<<<<<<<
+ * cdef inline RF_String conv_sequence(seq) except *:             # <<<<<<<<<<<<<<
  *     if is_valid_string(seq):
  *         return convert_string(seq)
  */
 
-static CYTHON_INLINE RfString __pyx_f_8cpp_fuzz_conv_sequence(PyObject *__pyx_v_seq) {
-  RfString __pyx_r;
+static CYTHON_INLINE RF_String __pyx_f_8cpp_fuzz_conv_sequence(PyObject *__pyx_v_seq) {
+  RF_String __pyx_r;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
   int __pyx_t_2;
   PyObject *__pyx_t_3 = NULL;
   int __pyx_t_4;
-  RfString __pyx_t_5;
+  RF_String __pyx_t_5;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -2443,7 +2443,7 @@ static CYTHON_INLINE RfString __pyx_f_8cpp_fuzz_conv_sequence(PyObject *__pyx_v_
 
   /* "cpp_fuzz.pyx":12
  * 
- * cdef inline RfString conv_sequence(seq) except *:
+ * cdef inline RF_String conv_sequence(seq) except *:
  *     if is_valid_string(seq):             # <<<<<<<<<<<<<<
  *         return convert_string(seq)
  *     elif isinstance(seq, array):
@@ -2459,7 +2459,7 @@ static CYTHON_INLINE RfString __pyx_f_8cpp_fuzz_conv_sequence(PyObject *__pyx_v_
   if (__pyx_t_2) {
 
     /* "cpp_fuzz.pyx":13
- * cdef inline RfString conv_sequence(seq) except *:
+ * cdef inline RF_String conv_sequence(seq) except *:
  *     if is_valid_string(seq):
  *         return convert_string(seq)             # <<<<<<<<<<<<<<
  *     elif isinstance(seq, array):
@@ -2471,7 +2471,7 @@ static CYTHON_INLINE RfString __pyx_f_8cpp_fuzz_conv_sequence(PyObject *__pyx_v_
 
     /* "cpp_fuzz.pyx":12
  * 
- * cdef inline RfString conv_sequence(seq) except *:
+ * cdef inline RF_String conv_sequence(seq) except *:
  *     if is_valid_string(seq):             # <<<<<<<<<<<<<<
  *         return convert_string(seq)
  *     elif isinstance(seq, array):
@@ -2531,7 +2531,7 @@ static CYTHON_INLINE RfString __pyx_f_8cpp_fuzz_conv_sequence(PyObject *__pyx_v_
   /* "cpp_fuzz.pyx":11
  * from cpython.pycapsule cimport PyCapsule_New
  * 
- * cdef inline RfString conv_sequence(seq) except *:             # <<<<<<<<<<<<<<
+ * cdef inline RF_String conv_sequence(seq) except *:             # <<<<<<<<<<<<<<
  *     if is_valid_string(seq):
  *         return convert_string(seq)
  */
@@ -2659,8 +2659,8 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 
 static PyObject *__pyx_pf_8cpp_fuzz_ratio(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_s1, PyObject *__pyx_v_s2, PyObject *__pyx_v_processor, PyObject *__pyx_v_score_cutoff) {
   double __pyx_v_c_score_cutoff;
-  RfStringWrapper __pyx_v_s1_proc;
-  RfStringWrapper __pyx_v_s2_proc;
+  RF_StringWrapper __pyx_v_s1_proc;
+  RF_StringWrapper __pyx_v_s2_proc;
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -2671,7 +2671,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_ratio(CYTHON_UNUSED PyObject *__pyx_self, Py
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
   PyObject *__pyx_t_7 = NULL;
-  RfString __pyx_t_8;
+  RF_String __pyx_t_8;
   PyObject *__pyx_t_9 = NULL;
   int __pyx_t_10;
   int __pyx_lineno = 0;
@@ -2747,8 +2747,8 @@ static PyObject *__pyx_pf_8cpp_fuzz_ratio(CYTHON_UNUSED PyObject *__pyx_self, Py
  *         return 0
  * 
  *     if processor is True or processor == default_process:             # <<<<<<<<<<<<<<
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  */
   __Pyx_TraceLine(94,0,__PYX_ERR(0, 94, __pyx_L1_error))
   __pyx_t_4 = (__pyx_v_processor == Py_True);
@@ -2771,28 +2771,28 @@ static PyObject *__pyx_pf_8cpp_fuzz_ratio(CYTHON_UNUSED PyObject *__pyx_self, Py
     /* "cpp_fuzz.pyx":95
  * 
  *     if processor is True or processor == default_process:
- *         s1_proc = RfStringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  */
     __Pyx_TraceLine(95,0,__PYX_ERR(0, 95, __pyx_L1_error))
     __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 95, __pyx_L1_error)
-    __pyx_v_s1_proc = RfStringWrapper(__pyx_t_8);
+    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_8);
 
     /* "cpp_fuzz.pyx":96
  *     if processor is True or processor == default_process:
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
  *         return ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):
  */
     __Pyx_TraceLine(96,0,__PYX_ERR(0, 96, __pyx_L1_error))
     __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L1_error)
-    __pyx_v_s2_proc = RfStringWrapper(__pyx_t_8);
+    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_8);
 
     /* "cpp_fuzz.pyx":97
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  *     elif callable(processor):
  *         s1 = processor(s1)
@@ -2815,13 +2815,13 @@ static PyObject *__pyx_pf_8cpp_fuzz_ratio(CYTHON_UNUSED PyObject *__pyx_self, Py
  *         return 0
  * 
  *     if processor is True or processor == default_process:             # <<<<<<<<<<<<<<
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  */
   }
 
   /* "cpp_fuzz.pyx":98
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):             # <<<<<<<<<<<<<<
  *         s1 = processor(s1)
@@ -2869,7 +2869,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_ratio(CYTHON_UNUSED PyObject *__pyx_self, Py
  *         s1 = processor(s1)
  *         s2 = processor(s2)             # <<<<<<<<<<<<<<
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
  */
     __Pyx_TraceLine(100,0,__PYX_ERR(0, 100, __pyx_L1_error))
     __Pyx_INCREF(__pyx_v_processor);
@@ -2897,7 +2897,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_ratio(CYTHON_UNUSED PyObject *__pyx_self, Py
     __pyx_t_7 = 0;
 
     /* "cpp_fuzz.pyx":98
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):             # <<<<<<<<<<<<<<
  *         s1 = processor(s1)
@@ -2908,27 +2908,27 @@ static PyObject *__pyx_pf_8cpp_fuzz_ratio(CYTHON_UNUSED PyObject *__pyx_self, Py
   /* "cpp_fuzz.pyx":102
  *         s2 = processor(s2)
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *     s2_proc = RfStringWrapper(conv_sequence(s2))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))
  * 
  */
   __Pyx_TraceLine(102,0,__PYX_ERR(0, 102, __pyx_L1_error))
   __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 102, __pyx_L1_error)
-  __pyx_v_s1_proc = RfStringWrapper(__pyx_t_8);
+  __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_8);
 
   /* "cpp_fuzz.pyx":103
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
- *     s2_proc = RfStringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
  * 
  *     return ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  */
   __Pyx_TraceLine(103,0,__PYX_ERR(0, 103, __pyx_L1_error))
   __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 103, __pyx_L1_error)
-  __pyx_v_s2_proc = RfStringWrapper(__pyx_t_8);
+  __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_8);
 
   /* "cpp_fuzz.pyx":105
- *     s2_proc = RfStringWrapper(conv_sequence(s2))
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))
  * 
  *     return ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  * 
@@ -2988,7 +2988,7 @@ PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_8cpp_fuzz_2partial_ratio, "\n    Searches for the optimal alignment of the shorter string in the\n    longer string and returns the fuzz.ratio for this alignment.\n\n    Parameters\n    ----------\n    s1 : Sequence[Hashable]\n        First string to compare.\n    s2 : Sequence[Hashable]\n        Second string to compare.\n    processor: bool or callable, optional\n        Optional callable that is used to preprocess the strings before\n        comparing them. When processor is True ``utils.default_process``\n        is used. Default is None, which deactivates this behaviour.\n    score_cutoff : float, optional\n        Optional argument for a score threshold as a float between 0 and 100.\n        For ratio < score_cutoff 0 is returned instead. Default is 0,\n        which deactivates this behaviour.\n\n    Returns\n    -------\n    similarity : float\n        similarity between s1 and s2 as a float between 0 and 100\n\n    Notes\n    -----\n    Depending on the length of the needle (shorter string) different\n    implementations are used to improve the performance.\n\n    short needle (length \342\211\244 64):\n        When using a short needle length the fuzz.ratio is calculated for all\n        alignments that could result in an optimal alignment. It is\n        guaranteed to find the optimal alignment. For short needles this is very\n        fast, since for them fuzz.ratio runs in ``O(N)`` time. This results in a worst\n        case performance of ``O(NM)``.\n    \n    .. image:: img/partial_ratio_short_needle.svg\n\n    long needle (length > 64):\n        For long needles a similar implementation to FuzzyWuzzy is used.\n        This implementation only considers alignments which start at one\n        of the longest common substrings. This results in a worst case performance\n        of ``O(N[N/64]M)``. However usually most of the alignments can be skipped.\n        The following Python code shows the concept:\n\n        .. code-block:: python\n\n            blocks = SequenceMatcher(None,"" needle, longer, False).get_matching_blocks()\n            score = 0\n            for block in blocks:\n                long_start = block[1] - block[0] if (block[1] - block[0]) > 0 else 0\n                long_end = long_start + len(shorter)\n                long_substr = longer[long_start:long_end]\n                score = max(score, fuzz.ratio(needle, long_substr))\n\n        This is a lot faster than checking all possible alignments. However it\n        only finds one of the best alignments and not necessarily the optimal one.\n\n    .. image:: img/partial_ratio_long_needle.svg\n\n    Examples\n    --------\n    >>> fuzz.partial_ratio(\"this is a test\", \"this is a test!\")\n    100.0\n    ");
+PyDoc_STRVAR(__pyx_doc_8cpp_fuzz_2partial_ratio, "\n    Searches for the optimal alignment of the shorter string in the\n    longer string and returns the fuzz.ratio for this alignment.\n\n    Parameters\n    ----------\n    s1 : Sequence[Hashable]\n        First string to compare.\n    s2 : Sequence[Hashable]\n        Second string to compare.\n    processor: bool or callable, optional\n        Optional callable that is used to preprocess the strings before\n        comparing them. When processor is True ``utils.default_process``\n        is used. Default is None, which deactivates this behaviour.\n    score_cutoff : float, optional\n        Optional argument for a score threshold as a float between 0 and 100.\n        For ratio < score_cutoff 0 is returned instead. Default is 0,\n        which deactivates this behaviour.\n\n    Returns\n    -------\n    similarity : float\n        similarity between s1 and s2 as a float between 0 and 100\n\n    Notes\n    -----\n    Depending on the length of the needle (shorter string) different\n    implementations are used to improve the performance.\n\n    short needle (length \342\211\244 64):\n        When using a short needle length the fuzz.ratio is calculated for all\n        alignments that could result in an optimal alignment. It is\n        guaranteed to find the optimal alignment. For short needles this is very\n        fast, since for them fuzz.ratio runs in ``O(N)`` time. This results in a worst\n        case performance of ``O(NM)``.\n\n    .. image:: img/partial_ratio_short_needle.svg\n\n    long needle (length > 64):\n        For long needles a similar implementation to FuzzyWuzzy is used.\n        This implementation only considers alignments which start at one\n        of the longest common substrings. This results in a worst case performance\n        of ``O(N[N/64]M)``. However usually most of the alignments can be skipped.\n        The following Python code shows the concept:\n\n        .. code-block:: python\n\n            blocks = SequenceMatcher(None, nee""dle, longer, False).get_matching_blocks()\n            score = 0\n            for block in blocks:\n                long_start = block[1] - block[0] if (block[1] - block[0]) > 0 else 0\n                long_end = long_start + len(shorter)\n                long_substr = longer[long_start:long_end]\n                score = max(score, fuzz.ratio(needle, long_substr))\n\n        This is a lot faster than checking all possible alignments. However it\n        only finds one of the best alignments and not necessarily the optimal one.\n\n    .. image:: img/partial_ratio_long_needle.svg\n\n    Examples\n    --------\n    >>> fuzz.partial_ratio(\"this is a test\", \"this is a test!\")\n    100.0\n    ");
 static PyMethodDef __pyx_mdef_8cpp_fuzz_3partial_ratio = {"partial_ratio", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_8cpp_fuzz_3partial_ratio, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_8cpp_fuzz_2partial_ratio};
 static PyObject *__pyx_pw_8cpp_fuzz_3partial_ratio(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
@@ -3084,8 +3084,8 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 
 static PyObject *__pyx_pf_8cpp_fuzz_2partial_ratio(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_s1, PyObject *__pyx_v_s2, PyObject *__pyx_v_processor, PyObject *__pyx_v_score_cutoff) {
   double __pyx_v_c_score_cutoff;
-  RfStringWrapper __pyx_v_s1_proc;
-  RfStringWrapper __pyx_v_s2_proc;
+  RF_StringWrapper __pyx_v_s1_proc;
+  RF_StringWrapper __pyx_v_s2_proc;
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -3096,7 +3096,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_2partial_ratio(CYTHON_UNUSED PyObject *__pyx
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
   PyObject *__pyx_t_7 = NULL;
-  RfString __pyx_t_8;
+  RF_String __pyx_t_8;
   PyObject *__pyx_t_9 = NULL;
   int __pyx_t_10;
   int __pyx_lineno = 0;
@@ -3172,8 +3172,8 @@ static PyObject *__pyx_pf_8cpp_fuzz_2partial_ratio(CYTHON_UNUSED PyObject *__pyx
  *         return 0
  * 
  *     if processor is True or processor == default_process:             # <<<<<<<<<<<<<<
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  */
   __Pyx_TraceLine(179,0,__PYX_ERR(0, 179, __pyx_L1_error))
   __pyx_t_4 = (__pyx_v_processor == Py_True);
@@ -3196,28 +3196,28 @@ static PyObject *__pyx_pf_8cpp_fuzz_2partial_ratio(CYTHON_UNUSED PyObject *__pyx
     /* "cpp_fuzz.pyx":180
  * 
  *     if processor is True or processor == default_process:
- *         s1_proc = RfStringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return partial_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  */
     __Pyx_TraceLine(180,0,__PYX_ERR(0, 180, __pyx_L1_error))
     __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 180, __pyx_L1_error)
-    __pyx_v_s1_proc = RfStringWrapper(__pyx_t_8);
+    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_8);
 
     /* "cpp_fuzz.pyx":181
  *     if processor is True or processor == default_process:
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
  *         return partial_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):
  */
     __Pyx_TraceLine(181,0,__PYX_ERR(0, 181, __pyx_L1_error))
     __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 181, __pyx_L1_error)
-    __pyx_v_s2_proc = RfStringWrapper(__pyx_t_8);
+    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_8);
 
     /* "cpp_fuzz.pyx":182
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return partial_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  *     elif callable(processor):
  *         s1 = processor(s1)
@@ -3240,13 +3240,13 @@ static PyObject *__pyx_pf_8cpp_fuzz_2partial_ratio(CYTHON_UNUSED PyObject *__pyx
  *         return 0
  * 
  *     if processor is True or processor == default_process:             # <<<<<<<<<<<<<<
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  */
   }
 
   /* "cpp_fuzz.pyx":183
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return partial_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):             # <<<<<<<<<<<<<<
  *         s1 = processor(s1)
@@ -3294,7 +3294,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_2partial_ratio(CYTHON_UNUSED PyObject *__pyx
  *         s1 = processor(s1)
  *         s2 = processor(s2)             # <<<<<<<<<<<<<<
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
  */
     __Pyx_TraceLine(185,0,__PYX_ERR(0, 185, __pyx_L1_error))
     __Pyx_INCREF(__pyx_v_processor);
@@ -3322,7 +3322,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_2partial_ratio(CYTHON_UNUSED PyObject *__pyx
     __pyx_t_7 = 0;
 
     /* "cpp_fuzz.pyx":183
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return partial_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):             # <<<<<<<<<<<<<<
  *         s1 = processor(s1)
@@ -3333,28 +3333,28 @@ static PyObject *__pyx_pf_8cpp_fuzz_2partial_ratio(CYTHON_UNUSED PyObject *__pyx
   /* "cpp_fuzz.pyx":187
  *         s2 = processor(s2)
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *     s2_proc = RfStringWrapper(conv_sequence(s2))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))
  *     return partial_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  */
   __Pyx_TraceLine(187,0,__PYX_ERR(0, 187, __pyx_L1_error))
   __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 187, __pyx_L1_error)
-  __pyx_v_s1_proc = RfStringWrapper(__pyx_t_8);
+  __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_8);
 
   /* "cpp_fuzz.pyx":188
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
- *     s2_proc = RfStringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
  *     return partial_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  * 
  */
   __Pyx_TraceLine(188,0,__PYX_ERR(0, 188, __pyx_L1_error))
   __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 188, __pyx_L1_error)
-  __pyx_v_s2_proc = RfStringWrapper(__pyx_t_8);
+  __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_8);
 
   /* "cpp_fuzz.pyx":189
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
- *     s2_proc = RfStringWrapper(conv_sequence(s2))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))
  *     return partial_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  * 
  * 
@@ -3509,8 +3509,8 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 
 static PyObject *__pyx_pf_8cpp_fuzz_4token_sort_ratio(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_s1, PyObject *__pyx_v_s2, PyObject *__pyx_v_processor, PyObject *__pyx_v_score_cutoff) {
   double __pyx_v_c_score_cutoff;
-  RfStringWrapper __pyx_v_s1_proc;
-  RfStringWrapper __pyx_v_s2_proc;
+  RF_StringWrapper __pyx_v_s1_proc;
+  RF_StringWrapper __pyx_v_s2_proc;
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -3521,7 +3521,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_4token_sort_ratio(CYTHON_UNUSED PyObject *__
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
   PyObject *__pyx_t_7 = NULL;
-  RfString __pyx_t_8;
+  RF_String __pyx_t_8;
   PyObject *__pyx_t_9 = NULL;
   int __pyx_t_10;
   int __pyx_lineno = 0;
@@ -3597,8 +3597,8 @@ static PyObject *__pyx_pf_8cpp_fuzz_4token_sort_ratio(CYTHON_UNUSED PyObject *__
  *         return 0
  * 
  *     if processor is True or processor == default_process:             # <<<<<<<<<<<<<<
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  */
   __Pyx_TraceLine(230,0,__PYX_ERR(0, 230, __pyx_L1_error))
   __pyx_t_4 = (__pyx_v_processor == Py_True);
@@ -3621,28 +3621,28 @@ static PyObject *__pyx_pf_8cpp_fuzz_4token_sort_ratio(CYTHON_UNUSED PyObject *__
     /* "cpp_fuzz.pyx":231
  * 
  *     if processor is True or processor == default_process:
- *         s1_proc = RfStringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return token_sort_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  */
     __Pyx_TraceLine(231,0,__PYX_ERR(0, 231, __pyx_L1_error))
     __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 231, __pyx_L1_error)
-    __pyx_v_s1_proc = RfStringWrapper(__pyx_t_8);
+    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_8);
 
     /* "cpp_fuzz.pyx":232
  *     if processor is True or processor == default_process:
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
  *         return token_sort_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):
  */
     __Pyx_TraceLine(232,0,__PYX_ERR(0, 232, __pyx_L1_error))
     __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 232, __pyx_L1_error)
-    __pyx_v_s2_proc = RfStringWrapper(__pyx_t_8);
+    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_8);
 
     /* "cpp_fuzz.pyx":233
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return token_sort_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  *     elif callable(processor):
  *         s1 = processor(s1)
@@ -3665,13 +3665,13 @@ static PyObject *__pyx_pf_8cpp_fuzz_4token_sort_ratio(CYTHON_UNUSED PyObject *__
  *         return 0
  * 
  *     if processor is True or processor == default_process:             # <<<<<<<<<<<<<<
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  */
   }
 
   /* "cpp_fuzz.pyx":234
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return token_sort_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):             # <<<<<<<<<<<<<<
  *         s1 = processor(s1)
@@ -3719,7 +3719,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_4token_sort_ratio(CYTHON_UNUSED PyObject *__
  *         s1 = processor(s1)
  *         s2 = processor(s2)             # <<<<<<<<<<<<<<
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
  */
     __Pyx_TraceLine(236,0,__PYX_ERR(0, 236, __pyx_L1_error))
     __Pyx_INCREF(__pyx_v_processor);
@@ -3747,7 +3747,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_4token_sort_ratio(CYTHON_UNUSED PyObject *__
     __pyx_t_7 = 0;
 
     /* "cpp_fuzz.pyx":234
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return token_sort_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):             # <<<<<<<<<<<<<<
  *         s1 = processor(s1)
@@ -3758,28 +3758,28 @@ static PyObject *__pyx_pf_8cpp_fuzz_4token_sort_ratio(CYTHON_UNUSED PyObject *__
   /* "cpp_fuzz.pyx":238
  *         s2 = processor(s2)
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *     s2_proc = RfStringWrapper(conv_sequence(s2))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))
  *     return token_sort_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  */
   __Pyx_TraceLine(238,0,__PYX_ERR(0, 238, __pyx_L1_error))
   __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 238, __pyx_L1_error)
-  __pyx_v_s1_proc = RfStringWrapper(__pyx_t_8);
+  __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_8);
 
   /* "cpp_fuzz.pyx":239
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
- *     s2_proc = RfStringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
  *     return token_sort_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  * 
  */
   __Pyx_TraceLine(239,0,__PYX_ERR(0, 239, __pyx_L1_error))
   __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 239, __pyx_L1_error)
-  __pyx_v_s2_proc = RfStringWrapper(__pyx_t_8);
+  __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_8);
 
   /* "cpp_fuzz.pyx":240
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
- *     s2_proc = RfStringWrapper(conv_sequence(s2))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))
  *     return token_sort_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  * 
  * 
@@ -3934,8 +3934,8 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 
 static PyObject *__pyx_pf_8cpp_fuzz_6token_set_ratio(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_s1, PyObject *__pyx_v_s2, PyObject *__pyx_v_processor, PyObject *__pyx_v_score_cutoff) {
   double __pyx_v_c_score_cutoff;
-  RfStringWrapper __pyx_v_s1_proc;
-  RfStringWrapper __pyx_v_s2_proc;
+  RF_StringWrapper __pyx_v_s1_proc;
+  RF_StringWrapper __pyx_v_s2_proc;
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -3946,7 +3946,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_6token_set_ratio(CYTHON_UNUSED PyObject *__p
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
   PyObject *__pyx_t_7 = NULL;
-  RfString __pyx_t_8;
+  RF_String __pyx_t_8;
   PyObject *__pyx_t_9 = NULL;
   int __pyx_t_10;
   int __pyx_lineno = 0;
@@ -4022,8 +4022,8 @@ static PyObject *__pyx_pf_8cpp_fuzz_6token_set_ratio(CYTHON_UNUSED PyObject *__p
  *         return 0
  * 
  *     if processor is True or processor == default_process:             # <<<<<<<<<<<<<<
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  */
   __Pyx_TraceLine(284,0,__PYX_ERR(0, 284, __pyx_L1_error))
   __pyx_t_4 = (__pyx_v_processor == Py_True);
@@ -4046,28 +4046,28 @@ static PyObject *__pyx_pf_8cpp_fuzz_6token_set_ratio(CYTHON_UNUSED PyObject *__p
     /* "cpp_fuzz.pyx":285
  * 
  *     if processor is True or processor == default_process:
- *         s1_proc = RfStringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return token_set_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  */
     __Pyx_TraceLine(285,0,__PYX_ERR(0, 285, __pyx_L1_error))
     __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 285, __pyx_L1_error)
-    __pyx_v_s1_proc = RfStringWrapper(__pyx_t_8);
+    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_8);
 
     /* "cpp_fuzz.pyx":286
  *     if processor is True or processor == default_process:
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
  *         return token_set_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):
  */
     __Pyx_TraceLine(286,0,__PYX_ERR(0, 286, __pyx_L1_error))
     __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 286, __pyx_L1_error)
-    __pyx_v_s2_proc = RfStringWrapper(__pyx_t_8);
+    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_8);
 
     /* "cpp_fuzz.pyx":287
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return token_set_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  *     elif callable(processor):
  *         s1 = processor(s1)
@@ -4090,13 +4090,13 @@ static PyObject *__pyx_pf_8cpp_fuzz_6token_set_ratio(CYTHON_UNUSED PyObject *__p
  *         return 0
  * 
  *     if processor is True or processor == default_process:             # <<<<<<<<<<<<<<
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  */
   }
 
   /* "cpp_fuzz.pyx":288
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return token_set_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):             # <<<<<<<<<<<<<<
  *         s1 = processor(s1)
@@ -4144,7 +4144,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_6token_set_ratio(CYTHON_UNUSED PyObject *__p
  *         s1 = processor(s1)
  *         s2 = processor(s2)             # <<<<<<<<<<<<<<
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
  */
     __Pyx_TraceLine(290,0,__PYX_ERR(0, 290, __pyx_L1_error))
     __Pyx_INCREF(__pyx_v_processor);
@@ -4172,7 +4172,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_6token_set_ratio(CYTHON_UNUSED PyObject *__p
     __pyx_t_7 = 0;
 
     /* "cpp_fuzz.pyx":288
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return token_set_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):             # <<<<<<<<<<<<<<
  *         s1 = processor(s1)
@@ -4183,28 +4183,28 @@ static PyObject *__pyx_pf_8cpp_fuzz_6token_set_ratio(CYTHON_UNUSED PyObject *__p
   /* "cpp_fuzz.pyx":292
  *         s2 = processor(s2)
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *     s2_proc = RfStringWrapper(conv_sequence(s2))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))
  *     return token_set_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  */
   __Pyx_TraceLine(292,0,__PYX_ERR(0, 292, __pyx_L1_error))
   __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 292, __pyx_L1_error)
-  __pyx_v_s1_proc = RfStringWrapper(__pyx_t_8);
+  __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_8);
 
   /* "cpp_fuzz.pyx":293
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
- *     s2_proc = RfStringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
  *     return token_set_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  * 
  */
   __Pyx_TraceLine(293,0,__PYX_ERR(0, 293, __pyx_L1_error))
   __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 293, __pyx_L1_error)
-  __pyx_v_s2_proc = RfStringWrapper(__pyx_t_8);
+  __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_8);
 
   /* "cpp_fuzz.pyx":294
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
- *     s2_proc = RfStringWrapper(conv_sequence(s2))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))
  *     return token_set_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  * 
  * 
@@ -4359,8 +4359,8 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 
 static PyObject *__pyx_pf_8cpp_fuzz_8token_ratio(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_s1, PyObject *__pyx_v_s2, PyObject *__pyx_v_processor, PyObject *__pyx_v_score_cutoff) {
   double __pyx_v_c_score_cutoff;
-  RfStringWrapper __pyx_v_s1_proc;
-  RfStringWrapper __pyx_v_s2_proc;
+  RF_StringWrapper __pyx_v_s1_proc;
+  RF_StringWrapper __pyx_v_s2_proc;
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -4371,7 +4371,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_8token_ratio(CYTHON_UNUSED PyObject *__pyx_s
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
   PyObject *__pyx_t_7 = NULL;
-  RfString __pyx_t_8;
+  RF_String __pyx_t_8;
   PyObject *__pyx_t_9 = NULL;
   int __pyx_t_10;
   int __pyx_lineno = 0;
@@ -4447,8 +4447,8 @@ static PyObject *__pyx_pf_8cpp_fuzz_8token_ratio(CYTHON_UNUSED PyObject *__pyx_s
  *         return 0
  * 
  *     if processor is True or processor == default_process:             # <<<<<<<<<<<<<<
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  */
   __Pyx_TraceLine(331,0,__PYX_ERR(0, 331, __pyx_L1_error))
   __pyx_t_4 = (__pyx_v_processor == Py_True);
@@ -4471,28 +4471,28 @@ static PyObject *__pyx_pf_8cpp_fuzz_8token_ratio(CYTHON_UNUSED PyObject *__pyx_s
     /* "cpp_fuzz.pyx":332
  * 
  *     if processor is True or processor == default_process:
- *         s1_proc = RfStringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return token_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  */
     __Pyx_TraceLine(332,0,__PYX_ERR(0, 332, __pyx_L1_error))
     __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 332, __pyx_L1_error)
-    __pyx_v_s1_proc = RfStringWrapper(__pyx_t_8);
+    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_8);
 
     /* "cpp_fuzz.pyx":333
  *     if processor is True or processor == default_process:
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
  *         return token_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):
  */
     __Pyx_TraceLine(333,0,__PYX_ERR(0, 333, __pyx_L1_error))
     __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 333, __pyx_L1_error)
-    __pyx_v_s2_proc = RfStringWrapper(__pyx_t_8);
+    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_8);
 
     /* "cpp_fuzz.pyx":334
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return token_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  *     elif callable(processor):
  *         s1 = processor(s1)
@@ -4515,13 +4515,13 @@ static PyObject *__pyx_pf_8cpp_fuzz_8token_ratio(CYTHON_UNUSED PyObject *__pyx_s
  *         return 0
  * 
  *     if processor is True or processor == default_process:             # <<<<<<<<<<<<<<
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  */
   }
 
   /* "cpp_fuzz.pyx":335
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return token_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):             # <<<<<<<<<<<<<<
  *         s1 = processor(s1)
@@ -4569,7 +4569,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_8token_ratio(CYTHON_UNUSED PyObject *__pyx_s
  *         s1 = processor(s1)
  *         s2 = processor(s2)             # <<<<<<<<<<<<<<
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
  */
     __Pyx_TraceLine(337,0,__PYX_ERR(0, 337, __pyx_L1_error))
     __Pyx_INCREF(__pyx_v_processor);
@@ -4597,7 +4597,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_8token_ratio(CYTHON_UNUSED PyObject *__pyx_s
     __pyx_t_7 = 0;
 
     /* "cpp_fuzz.pyx":335
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return token_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):             # <<<<<<<<<<<<<<
  *         s1 = processor(s1)
@@ -4608,28 +4608,28 @@ static PyObject *__pyx_pf_8cpp_fuzz_8token_ratio(CYTHON_UNUSED PyObject *__pyx_s
   /* "cpp_fuzz.pyx":339
  *         s2 = processor(s2)
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *     s2_proc = RfStringWrapper(conv_sequence(s2))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))
  *     return token_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  */
   __Pyx_TraceLine(339,0,__PYX_ERR(0, 339, __pyx_L1_error))
   __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 339, __pyx_L1_error)
-  __pyx_v_s1_proc = RfStringWrapper(__pyx_t_8);
+  __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_8);
 
   /* "cpp_fuzz.pyx":340
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
- *     s2_proc = RfStringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
  *     return token_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  * 
  */
   __Pyx_TraceLine(340,0,__PYX_ERR(0, 340, __pyx_L1_error))
   __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 340, __pyx_L1_error)
-  __pyx_v_s2_proc = RfStringWrapper(__pyx_t_8);
+  __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_8);
 
   /* "cpp_fuzz.pyx":341
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
- *     s2_proc = RfStringWrapper(conv_sequence(s2))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))
  *     return token_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  * 
  * 
@@ -4784,8 +4784,8 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 
 static PyObject *__pyx_pf_8cpp_fuzz_10partial_token_sort_ratio(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_s1, PyObject *__pyx_v_s2, PyObject *__pyx_v_processor, PyObject *__pyx_v_score_cutoff) {
   double __pyx_v_c_score_cutoff;
-  RfStringWrapper __pyx_v_s1_proc;
-  RfStringWrapper __pyx_v_s2_proc;
+  RF_StringWrapper __pyx_v_s1_proc;
+  RF_StringWrapper __pyx_v_s2_proc;
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -4796,7 +4796,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_10partial_token_sort_ratio(CYTHON_UNUSED PyO
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
   PyObject *__pyx_t_7 = NULL;
-  RfString __pyx_t_8;
+  RF_String __pyx_t_8;
   PyObject *__pyx_t_9 = NULL;
   int __pyx_t_10;
   int __pyx_lineno = 0;
@@ -4872,8 +4872,8 @@ static PyObject *__pyx_pf_8cpp_fuzz_10partial_token_sort_ratio(CYTHON_UNUSED PyO
  *         return 0
  * 
  *     if processor is True or processor == default_process:             # <<<<<<<<<<<<<<
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  */
   __Pyx_TraceLine(377,0,__PYX_ERR(0, 377, __pyx_L1_error))
   __pyx_t_4 = (__pyx_v_processor == Py_True);
@@ -4896,28 +4896,28 @@ static PyObject *__pyx_pf_8cpp_fuzz_10partial_token_sort_ratio(CYTHON_UNUSED PyO
     /* "cpp_fuzz.pyx":378
  * 
  *     if processor is True or processor == default_process:
- *         s1_proc = RfStringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return partial_token_sort_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  */
     __Pyx_TraceLine(378,0,__PYX_ERR(0, 378, __pyx_L1_error))
     __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 378, __pyx_L1_error)
-    __pyx_v_s1_proc = RfStringWrapper(__pyx_t_8);
+    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_8);
 
     /* "cpp_fuzz.pyx":379
  *     if processor is True or processor == default_process:
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
  *         return partial_token_sort_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):
  */
     __Pyx_TraceLine(379,0,__PYX_ERR(0, 379, __pyx_L1_error))
     __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 379, __pyx_L1_error)
-    __pyx_v_s2_proc = RfStringWrapper(__pyx_t_8);
+    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_8);
 
     /* "cpp_fuzz.pyx":380
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return partial_token_sort_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  *     elif callable(processor):
  *         s1 = processor(s1)
@@ -4940,13 +4940,13 @@ static PyObject *__pyx_pf_8cpp_fuzz_10partial_token_sort_ratio(CYTHON_UNUSED PyO
  *         return 0
  * 
  *     if processor is True or processor == default_process:             # <<<<<<<<<<<<<<
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  */
   }
 
   /* "cpp_fuzz.pyx":381
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return partial_token_sort_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):             # <<<<<<<<<<<<<<
  *         s1 = processor(s1)
@@ -4994,7 +4994,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_10partial_token_sort_ratio(CYTHON_UNUSED PyO
  *         s1 = processor(s1)
  *         s2 = processor(s2)             # <<<<<<<<<<<<<<
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
  */
     __Pyx_TraceLine(383,0,__PYX_ERR(0, 383, __pyx_L1_error))
     __Pyx_INCREF(__pyx_v_processor);
@@ -5022,7 +5022,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_10partial_token_sort_ratio(CYTHON_UNUSED PyO
     __pyx_t_7 = 0;
 
     /* "cpp_fuzz.pyx":381
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return partial_token_sort_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):             # <<<<<<<<<<<<<<
  *         s1 = processor(s1)
@@ -5033,28 +5033,28 @@ static PyObject *__pyx_pf_8cpp_fuzz_10partial_token_sort_ratio(CYTHON_UNUSED PyO
   /* "cpp_fuzz.pyx":385
  *         s2 = processor(s2)
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *     s2_proc = RfStringWrapper(conv_sequence(s2))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))
  *     return partial_token_sort_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  */
   __Pyx_TraceLine(385,0,__PYX_ERR(0, 385, __pyx_L1_error))
   __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 385, __pyx_L1_error)
-  __pyx_v_s1_proc = RfStringWrapper(__pyx_t_8);
+  __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_8);
 
   /* "cpp_fuzz.pyx":386
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
- *     s2_proc = RfStringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
  *     return partial_token_sort_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  * 
  */
   __Pyx_TraceLine(386,0,__PYX_ERR(0, 386, __pyx_L1_error))
   __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 386, __pyx_L1_error)
-  __pyx_v_s2_proc = RfStringWrapper(__pyx_t_8);
+  __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_8);
 
   /* "cpp_fuzz.pyx":387
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
- *     s2_proc = RfStringWrapper(conv_sequence(s2))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))
  *     return partial_token_sort_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  * 
  * 
@@ -5209,8 +5209,8 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 
 static PyObject *__pyx_pf_8cpp_fuzz_12partial_token_set_ratio(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_s1, PyObject *__pyx_v_s2, PyObject *__pyx_v_processor, PyObject *__pyx_v_score_cutoff) {
   double __pyx_v_c_score_cutoff;
-  RfStringWrapper __pyx_v_s1_proc;
-  RfStringWrapper __pyx_v_s2_proc;
+  RF_StringWrapper __pyx_v_s1_proc;
+  RF_StringWrapper __pyx_v_s2_proc;
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -5221,7 +5221,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_12partial_token_set_ratio(CYTHON_UNUSED PyOb
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
   PyObject *__pyx_t_7 = NULL;
-  RfString __pyx_t_8;
+  RF_String __pyx_t_8;
   PyObject *__pyx_t_9 = NULL;
   int __pyx_t_10;
   int __pyx_lineno = 0;
@@ -5297,8 +5297,8 @@ static PyObject *__pyx_pf_8cpp_fuzz_12partial_token_set_ratio(CYTHON_UNUSED PyOb
  *         return 0
  * 
  *     if processor is True or processor == default_process:             # <<<<<<<<<<<<<<
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  */
   __Pyx_TraceLine(424,0,__PYX_ERR(0, 424, __pyx_L1_error))
   __pyx_t_4 = (__pyx_v_processor == Py_True);
@@ -5321,28 +5321,28 @@ static PyObject *__pyx_pf_8cpp_fuzz_12partial_token_set_ratio(CYTHON_UNUSED PyOb
     /* "cpp_fuzz.pyx":425
  * 
  *     if processor is True or processor == default_process:
- *         s1_proc = RfStringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return partial_token_set_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  */
     __Pyx_TraceLine(425,0,__PYX_ERR(0, 425, __pyx_L1_error))
     __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 425, __pyx_L1_error)
-    __pyx_v_s1_proc = RfStringWrapper(__pyx_t_8);
+    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_8);
 
     /* "cpp_fuzz.pyx":426
  *     if processor is True or processor == default_process:
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
  *         return partial_token_set_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):
  */
     __Pyx_TraceLine(426,0,__PYX_ERR(0, 426, __pyx_L1_error))
     __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 426, __pyx_L1_error)
-    __pyx_v_s2_proc = RfStringWrapper(__pyx_t_8);
+    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_8);
 
     /* "cpp_fuzz.pyx":427
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return partial_token_set_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  *     elif callable(processor):
  *         s1 = processor(s1)
@@ -5365,13 +5365,13 @@ static PyObject *__pyx_pf_8cpp_fuzz_12partial_token_set_ratio(CYTHON_UNUSED PyOb
  *         return 0
  * 
  *     if processor is True or processor == default_process:             # <<<<<<<<<<<<<<
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  */
   }
 
   /* "cpp_fuzz.pyx":428
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return partial_token_set_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):             # <<<<<<<<<<<<<<
  *         s1 = processor(s1)
@@ -5419,7 +5419,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_12partial_token_set_ratio(CYTHON_UNUSED PyOb
  *         s1 = processor(s1)
  *         s2 = processor(s2)             # <<<<<<<<<<<<<<
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
  */
     __Pyx_TraceLine(430,0,__PYX_ERR(0, 430, __pyx_L1_error))
     __Pyx_INCREF(__pyx_v_processor);
@@ -5447,7 +5447,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_12partial_token_set_ratio(CYTHON_UNUSED PyOb
     __pyx_t_7 = 0;
 
     /* "cpp_fuzz.pyx":428
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return partial_token_set_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):             # <<<<<<<<<<<<<<
  *         s1 = processor(s1)
@@ -5458,28 +5458,28 @@ static PyObject *__pyx_pf_8cpp_fuzz_12partial_token_set_ratio(CYTHON_UNUSED PyOb
   /* "cpp_fuzz.pyx":432
  *         s2 = processor(s2)
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *     s2_proc = RfStringWrapper(conv_sequence(s2))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))
  *     return partial_token_set_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  */
   __Pyx_TraceLine(432,0,__PYX_ERR(0, 432, __pyx_L1_error))
   __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 432, __pyx_L1_error)
-  __pyx_v_s1_proc = RfStringWrapper(__pyx_t_8);
+  __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_8);
 
   /* "cpp_fuzz.pyx":433
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
- *     s2_proc = RfStringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
  *     return partial_token_set_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  * 
  */
   __Pyx_TraceLine(433,0,__PYX_ERR(0, 433, __pyx_L1_error))
   __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 433, __pyx_L1_error)
-  __pyx_v_s2_proc = RfStringWrapper(__pyx_t_8);
+  __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_8);
 
   /* "cpp_fuzz.pyx":434
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
- *     s2_proc = RfStringWrapper(conv_sequence(s2))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))
  *     return partial_token_set_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  * 
  * 
@@ -5634,8 +5634,8 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 
 static PyObject *__pyx_pf_8cpp_fuzz_14partial_token_ratio(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_s1, PyObject *__pyx_v_s2, PyObject *__pyx_v_processor, PyObject *__pyx_v_score_cutoff) {
   double __pyx_v_c_score_cutoff;
-  RfStringWrapper __pyx_v_s1_proc;
-  RfStringWrapper __pyx_v_s2_proc;
+  RF_StringWrapper __pyx_v_s1_proc;
+  RF_StringWrapper __pyx_v_s2_proc;
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -5646,7 +5646,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_14partial_token_ratio(CYTHON_UNUSED PyObject
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
   PyObject *__pyx_t_7 = NULL;
-  RfString __pyx_t_8;
+  RF_String __pyx_t_8;
   PyObject *__pyx_t_9 = NULL;
   int __pyx_t_10;
   int __pyx_lineno = 0;
@@ -5722,8 +5722,8 @@ static PyObject *__pyx_pf_8cpp_fuzz_14partial_token_ratio(CYTHON_UNUSED PyObject
  *         return 0
  * 
  *     if processor is True or processor == default_process:             # <<<<<<<<<<<<<<
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  */
   __Pyx_TraceLine(471,0,__PYX_ERR(0, 471, __pyx_L1_error))
   __pyx_t_4 = (__pyx_v_processor == Py_True);
@@ -5746,28 +5746,28 @@ static PyObject *__pyx_pf_8cpp_fuzz_14partial_token_ratio(CYTHON_UNUSED PyObject
     /* "cpp_fuzz.pyx":472
  * 
  *     if processor is True or processor == default_process:
- *         s1_proc = RfStringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return partial_token_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  */
     __Pyx_TraceLine(472,0,__PYX_ERR(0, 472, __pyx_L1_error))
     __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 472, __pyx_L1_error)
-    __pyx_v_s1_proc = RfStringWrapper(__pyx_t_8);
+    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_8);
 
     /* "cpp_fuzz.pyx":473
  *     if processor is True or processor == default_process:
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
  *         return partial_token_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):
  */
     __Pyx_TraceLine(473,0,__PYX_ERR(0, 473, __pyx_L1_error))
     __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 473, __pyx_L1_error)
-    __pyx_v_s2_proc = RfStringWrapper(__pyx_t_8);
+    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_8);
 
     /* "cpp_fuzz.pyx":474
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return partial_token_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  *     elif callable(processor):
  *         s1 = processor(s1)
@@ -5790,13 +5790,13 @@ static PyObject *__pyx_pf_8cpp_fuzz_14partial_token_ratio(CYTHON_UNUSED PyObject
  *         return 0
  * 
  *     if processor is True or processor == default_process:             # <<<<<<<<<<<<<<
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  */
   }
 
   /* "cpp_fuzz.pyx":475
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return partial_token_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):             # <<<<<<<<<<<<<<
  *         s1 = processor(s1)
@@ -5844,7 +5844,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_14partial_token_ratio(CYTHON_UNUSED PyObject
  *         s1 = processor(s1)
  *         s2 = processor(s2)             # <<<<<<<<<<<<<<
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
  */
     __Pyx_TraceLine(477,0,__PYX_ERR(0, 477, __pyx_L1_error))
     __Pyx_INCREF(__pyx_v_processor);
@@ -5872,7 +5872,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_14partial_token_ratio(CYTHON_UNUSED PyObject
     __pyx_t_7 = 0;
 
     /* "cpp_fuzz.pyx":475
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return partial_token_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):             # <<<<<<<<<<<<<<
  *         s1 = processor(s1)
@@ -5883,28 +5883,28 @@ static PyObject *__pyx_pf_8cpp_fuzz_14partial_token_ratio(CYTHON_UNUSED PyObject
   /* "cpp_fuzz.pyx":479
  *         s2 = processor(s2)
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *     s2_proc = RfStringWrapper(conv_sequence(s2))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))
  *     return partial_token_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  */
   __Pyx_TraceLine(479,0,__PYX_ERR(0, 479, __pyx_L1_error))
   __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 479, __pyx_L1_error)
-  __pyx_v_s1_proc = RfStringWrapper(__pyx_t_8);
+  __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_8);
 
   /* "cpp_fuzz.pyx":480
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
- *     s2_proc = RfStringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
  *     return partial_token_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  * 
  */
   __Pyx_TraceLine(480,0,__PYX_ERR(0, 480, __pyx_L1_error))
   __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 480, __pyx_L1_error)
-  __pyx_v_s2_proc = RfStringWrapper(__pyx_t_8);
+  __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_8);
 
   /* "cpp_fuzz.pyx":481
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
- *     s2_proc = RfStringWrapper(conv_sequence(s2))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))
  *     return partial_token_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  * 
  * 
@@ -6059,8 +6059,8 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 
 static PyObject *__pyx_pf_8cpp_fuzz_16WRatio(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_s1, PyObject *__pyx_v_s2, PyObject *__pyx_v_processor, PyObject *__pyx_v_score_cutoff) {
   double __pyx_v_c_score_cutoff;
-  RfStringWrapper __pyx_v_s1_proc;
-  RfStringWrapper __pyx_v_s2_proc;
+  RF_StringWrapper __pyx_v_s1_proc;
+  RF_StringWrapper __pyx_v_s2_proc;
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -6071,7 +6071,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_16WRatio(CYTHON_UNUSED PyObject *__pyx_self,
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
   PyObject *__pyx_t_7 = NULL;
-  RfString __pyx_t_8;
+  RF_String __pyx_t_8;
   PyObject *__pyx_t_9 = NULL;
   int __pyx_t_10;
   int __pyx_lineno = 0;
@@ -6147,8 +6147,8 @@ static PyObject *__pyx_pf_8cpp_fuzz_16WRatio(CYTHON_UNUSED PyObject *__pyx_self,
  *         return 0
  * 
  *     if processor is True or processor == default_process:             # <<<<<<<<<<<<<<
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  */
   __Pyx_TraceLine(517,0,__PYX_ERR(0, 517, __pyx_L1_error))
   __pyx_t_4 = (__pyx_v_processor == Py_True);
@@ -6171,28 +6171,28 @@ static PyObject *__pyx_pf_8cpp_fuzz_16WRatio(CYTHON_UNUSED PyObject *__pyx_self,
     /* "cpp_fuzz.pyx":518
  * 
  *     if processor is True or processor == default_process:
- *         s1_proc = RfStringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return WRatio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  */
     __Pyx_TraceLine(518,0,__PYX_ERR(0, 518, __pyx_L1_error))
     __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 518, __pyx_L1_error)
-    __pyx_v_s1_proc = RfStringWrapper(__pyx_t_8);
+    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_8);
 
     /* "cpp_fuzz.pyx":519
  *     if processor is True or processor == default_process:
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
  *         return WRatio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):
  */
     __Pyx_TraceLine(519,0,__PYX_ERR(0, 519, __pyx_L1_error))
     __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 519, __pyx_L1_error)
-    __pyx_v_s2_proc = RfStringWrapper(__pyx_t_8);
+    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_8);
 
     /* "cpp_fuzz.pyx":520
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return WRatio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  *     elif callable(processor):
  *         s1 = processor(s1)
@@ -6215,13 +6215,13 @@ static PyObject *__pyx_pf_8cpp_fuzz_16WRatio(CYTHON_UNUSED PyObject *__pyx_self,
  *         return 0
  * 
  *     if processor is True or processor == default_process:             # <<<<<<<<<<<<<<
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  */
   }
 
   /* "cpp_fuzz.pyx":521
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return WRatio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):             # <<<<<<<<<<<<<<
  *         s1 = processor(s1)
@@ -6269,7 +6269,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_16WRatio(CYTHON_UNUSED PyObject *__pyx_self,
  *         s1 = processor(s1)
  *         s2 = processor(s2)             # <<<<<<<<<<<<<<
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
  */
     __Pyx_TraceLine(523,0,__PYX_ERR(0, 523, __pyx_L1_error))
     __Pyx_INCREF(__pyx_v_processor);
@@ -6297,7 +6297,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_16WRatio(CYTHON_UNUSED PyObject *__pyx_self,
     __pyx_t_7 = 0;
 
     /* "cpp_fuzz.pyx":521
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return WRatio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):             # <<<<<<<<<<<<<<
  *         s1 = processor(s1)
@@ -6308,28 +6308,28 @@ static PyObject *__pyx_pf_8cpp_fuzz_16WRatio(CYTHON_UNUSED PyObject *__pyx_self,
   /* "cpp_fuzz.pyx":525
  *         s2 = processor(s2)
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *     s2_proc = RfStringWrapper(conv_sequence(s2))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))
  *     return WRatio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  */
   __Pyx_TraceLine(525,0,__PYX_ERR(0, 525, __pyx_L1_error))
   __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 525, __pyx_L1_error)
-  __pyx_v_s1_proc = RfStringWrapper(__pyx_t_8);
+  __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_8);
 
   /* "cpp_fuzz.pyx":526
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
- *     s2_proc = RfStringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
  *     return WRatio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  * 
  */
   __Pyx_TraceLine(526,0,__PYX_ERR(0, 526, __pyx_L1_error))
   __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 526, __pyx_L1_error)
-  __pyx_v_s2_proc = RfStringWrapper(__pyx_t_8);
+  __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_8);
 
   /* "cpp_fuzz.pyx":527
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
- *     s2_proc = RfStringWrapper(conv_sequence(s2))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))
  *     return WRatio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  * 
  * 
@@ -6484,8 +6484,8 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 
 static PyObject *__pyx_pf_8cpp_fuzz_18QRatio(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_s1, PyObject *__pyx_v_s2, PyObject *__pyx_v_processor, PyObject *__pyx_v_score_cutoff) {
   double __pyx_v_c_score_cutoff;
-  RfStringWrapper __pyx_v_s1_proc;
-  RfStringWrapper __pyx_v_s2_proc;
+  RF_StringWrapper __pyx_v_s1_proc;
+  RF_StringWrapper __pyx_v_s2_proc;
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -6496,7 +6496,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_18QRatio(CYTHON_UNUSED PyObject *__pyx_self,
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
   PyObject *__pyx_t_7 = NULL;
-  RfString __pyx_t_8;
+  RF_String __pyx_t_8;
   PyObject *__pyx_t_9 = NULL;
   int __pyx_t_10;
   int __pyx_lineno = 0;
@@ -6572,8 +6572,8 @@ static PyObject *__pyx_pf_8cpp_fuzz_18QRatio(CYTHON_UNUSED PyObject *__pyx_self,
  *         return 0
  * 
  *     if processor is True or processor == default_process:             # <<<<<<<<<<<<<<
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  */
   __Pyx_TraceLine(566,0,__PYX_ERR(0, 566, __pyx_L1_error))
   __pyx_t_4 = (__pyx_v_processor == Py_True);
@@ -6596,28 +6596,28 @@ static PyObject *__pyx_pf_8cpp_fuzz_18QRatio(CYTHON_UNUSED PyObject *__pyx_self,
     /* "cpp_fuzz.pyx":567
  * 
  *     if processor is True or processor == default_process:
- *         s1_proc = RfStringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return QRatio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  */
     __Pyx_TraceLine(567,0,__PYX_ERR(0, 567, __pyx_L1_error))
     __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 567, __pyx_L1_error)
-    __pyx_v_s1_proc = RfStringWrapper(__pyx_t_8);
+    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_8);
 
     /* "cpp_fuzz.pyx":568
  *     if processor is True or processor == default_process:
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
  *         return QRatio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):
  */
     __Pyx_TraceLine(568,0,__PYX_ERR(0, 568, __pyx_L1_error))
     __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 568, __pyx_L1_error)
-    __pyx_v_s2_proc = RfStringWrapper(__pyx_t_8);
+    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_8);
 
     /* "cpp_fuzz.pyx":569
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return QRatio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  *     elif callable(processor):
  *         s1 = processor(s1)
@@ -6640,13 +6640,13 @@ static PyObject *__pyx_pf_8cpp_fuzz_18QRatio(CYTHON_UNUSED PyObject *__pyx_self,
  *         return 0
  * 
  *     if processor is True or processor == default_process:             # <<<<<<<<<<<<<<
- *         s1_proc = RfStringWrapper(conv_sequence(s1))
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  */
   }
 
   /* "cpp_fuzz.pyx":570
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return QRatio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):             # <<<<<<<<<<<<<<
  *         s1 = processor(s1)
@@ -6694,7 +6694,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_18QRatio(CYTHON_UNUSED PyObject *__pyx_self,
  *         s1 = processor(s1)
  *         s2 = processor(s2)             # <<<<<<<<<<<<<<
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
  */
     __Pyx_TraceLine(572,0,__PYX_ERR(0, 572, __pyx_L1_error))
     __Pyx_INCREF(__pyx_v_processor);
@@ -6722,7 +6722,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_18QRatio(CYTHON_UNUSED PyObject *__pyx_self,
     __pyx_t_7 = 0;
 
     /* "cpp_fuzz.pyx":570
- *         s2_proc = RfStringWrapper(conv_sequence(s2))
+ *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  *         return QRatio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  *     elif callable(processor):             # <<<<<<<<<<<<<<
  *         s1 = processor(s1)
@@ -6733,28 +6733,28 @@ static PyObject *__pyx_pf_8cpp_fuzz_18QRatio(CYTHON_UNUSED PyObject *__pyx_self,
   /* "cpp_fuzz.pyx":574
  *         s2 = processor(s2)
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *     s2_proc = RfStringWrapper(conv_sequence(s2))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))
  *     return QRatio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  */
   __Pyx_TraceLine(574,0,__PYX_ERR(0, 574, __pyx_L1_error))
   __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 574, __pyx_L1_error)
-  __pyx_v_s1_proc = RfStringWrapper(__pyx_t_8);
+  __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_8);
 
   /* "cpp_fuzz.pyx":575
  * 
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
- *     s2_proc = RfStringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
  *     return QRatio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
  * 
  */
   __Pyx_TraceLine(575,0,__PYX_ERR(0, 575, __pyx_L1_error))
   __pyx_t_8 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 575, __pyx_L1_error)
-  __pyx_v_s2_proc = RfStringWrapper(__pyx_t_8);
+  __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_8);
 
   /* "cpp_fuzz.pyx":576
- *     s1_proc = RfStringWrapper(conv_sequence(s1))
- *     s2_proc = RfStringWrapper(conv_sequence(s2))
+ *     s1_proc = RF_StringWrapper(conv_sequence(s1))
+ *     s2_proc = RF_StringWrapper(conv_sequence(s2))
  *     return QRatio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  * 
  * cdef RfSimilarityFunctionTable RatioContext = CreateRatioFunctionTable()
@@ -6798,19 +6798,19 @@ static PyObject *__pyx_pf_8cpp_fuzz_18QRatio(CYTHON_UNUSED PyObject *__pyx_self,
 }
 
 /* "cpp_common.pxd":28
- *     RfString default_process_func(RfString sentence) except +
+ *     RF_String default_process_func(RF_String sentence) except +
  * 
- * cdef inline RfString hash_array(arr) except *:             # <<<<<<<<<<<<<<
+ * cdef inline RF_String hash_array(arr) except *:             # <<<<<<<<<<<<<<
  *     # TODO on Cpython this does not require any copies
- *     cdef RfString s_proc
+ *     cdef RF_String s_proc
  */
 
-static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_arr) {
-  RfString __pyx_v_s_proc;
+static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_arr) {
+  RF_String __pyx_v_s_proc;
   Py_UCS4 __pyx_v_typecode;
   size_t __pyx_v_i;
   CYTHON_UNUSED PyObject *__pyx_v_e = NULL;
-  RfString __pyx_r;
+  RF_String __pyx_r;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   Py_UCS4 __pyx_t_2;
@@ -6842,7 +6842,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
 
   /* "cpp_common.pxd":31
  *     # TODO on Cpython this does not require any copies
- *     cdef RfString s_proc
+ *     cdef RF_String s_proc
  *     cdef Py_UCS4 typecode = <Py_UCS4>arr.typecode             # <<<<<<<<<<<<<<
  *     s_proc.length = <size_t>len(arr)
  * 
@@ -6854,7 +6854,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
   __pyx_v_typecode = ((Py_UCS4)__pyx_t_2);
 
   /* "cpp_common.pxd":32
- *     cdef RfString s_proc
+ *     cdef RF_String s_proc
  *     cdef Py_UCS4 typecode = <Py_UCS4>arr.typecode
  *     s_proc.length = <size_t>len(arr)             # <<<<<<<<<<<<<<
  * 
@@ -6920,7 +6920,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
  *     try:
  *         # ignore signed/unsigned, since it is not relevant in any of the algorithms
  *         if typecode in {'b', 'B'}: # signed/unsigned char             # <<<<<<<<<<<<<<
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  */
       switch (__pyx_v_typecode) {
@@ -6930,7 +6930,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
         /* "cpp_common.pxd":42
  *         # ignore signed/unsigned, since it is not relevant in any of the algorithms
  *         if typecode in {'b', 'B'}: # signed/unsigned char
- *             s_proc.kind = RfStringType.RF_UINT64             # <<<<<<<<<<<<<<
+ *             s_proc.kind = RF_StringType.RF_UINT64             # <<<<<<<<<<<<<<
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  */
@@ -6938,7 +6938,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
 
         /* "cpp_common.pxd":43
  *         if typecode in {'b', 'B'}: # signed/unsigned char
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):             # <<<<<<<<<<<<<<
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode == 'u': # 'u' wchar_t
@@ -6949,11 +6949,11 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
           __pyx_v_i = __pyx_t_10;
 
           /* "cpp_common.pxd":44
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]             # <<<<<<<<<<<<<<
  *         elif typecode == 'u': # 'u' wchar_t
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  */
           __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 44, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_1);
@@ -6966,7 +6966,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
  *     try:
  *         # ignore signed/unsigned, since it is not relevant in any of the algorithms
  *         if typecode in {'b', 'B'}: # signed/unsigned char             # <<<<<<<<<<<<<<
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  */
         break;
@@ -6975,7 +6975,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
         /* "cpp_common.pxd":46
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode == 'u': # 'u' wchar_t
- *             s_proc.kind = RfStringType.RF_UINT64             # <<<<<<<<<<<<<<
+ *             s_proc.kind = RF_StringType.RF_UINT64             # <<<<<<<<<<<<<<
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t><Py_UCS4>arr[i]
  */
@@ -6983,7 +6983,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
 
         /* "cpp_common.pxd":47
  *         elif typecode == 'u': # 'u' wchar_t
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):             # <<<<<<<<<<<<<<
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t><Py_UCS4>arr[i]
  *         elif typecode in {'h', 'H'}: #  signed/unsigned short
@@ -6994,11 +6994,11 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
           __pyx_v_i = __pyx_t_10;
 
           /* "cpp_common.pxd":48
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t><Py_UCS4>arr[i]             # <<<<<<<<<<<<<<
  *         elif typecode in {'h', 'H'}: #  signed/unsigned short
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  */
           __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 48, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_1);
@@ -7011,7 +7011,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode == 'u': # 'u' wchar_t             # <<<<<<<<<<<<<<
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  */
         break;
@@ -7021,7 +7021,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t><Py_UCS4>arr[i]
  *         elif typecode in {'h', 'H'}: #  signed/unsigned short             # <<<<<<<<<<<<<<
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  */
         case 72:
@@ -7029,7 +7029,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
         /* "cpp_common.pxd":50
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t><Py_UCS4>arr[i]
  *         elif typecode in {'h', 'H'}: #  signed/unsigned short
- *             s_proc.kind = RfStringType.RF_UINT64             # <<<<<<<<<<<<<<
+ *             s_proc.kind = RF_StringType.RF_UINT64             # <<<<<<<<<<<<<<
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  */
@@ -7037,7 +7037,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
 
         /* "cpp_common.pxd":51
  *         elif typecode in {'h', 'H'}: #  signed/unsigned short
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):             # <<<<<<<<<<<<<<
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode in {'i', 'I'}: # signed/unsigned int
@@ -7048,11 +7048,11 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
           __pyx_v_i = __pyx_t_10;
 
           /* "cpp_common.pxd":52
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]             # <<<<<<<<<<<<<<
  *         elif typecode in {'i', 'I'}: # signed/unsigned int
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  */
           __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 52, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_1);
@@ -7065,7 +7065,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t><Py_UCS4>arr[i]
  *         elif typecode in {'h', 'H'}: #  signed/unsigned short             # <<<<<<<<<<<<<<
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  */
         break;
@@ -7075,7 +7075,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode in {'i', 'I'}: # signed/unsigned int             # <<<<<<<<<<<<<<
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  */
         case 73:
@@ -7083,7 +7083,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
         /* "cpp_common.pxd":54
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode in {'i', 'I'}: # signed/unsigned int
- *             s_proc.kind = RfStringType.RF_UINT64             # <<<<<<<<<<<<<<
+ *             s_proc.kind = RF_StringType.RF_UINT64             # <<<<<<<<<<<<<<
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  */
@@ -7091,7 +7091,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
 
         /* "cpp_common.pxd":55
  *         elif typecode in {'i', 'I'}: # signed/unsigned int
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):             # <<<<<<<<<<<<<<
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode in {'l', 'L'}: # signed/unsigned long
@@ -7102,11 +7102,11 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
           __pyx_v_i = __pyx_t_10;
 
           /* "cpp_common.pxd":56
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]             # <<<<<<<<<<<<<<
  *         elif typecode in {'l', 'L'}: # signed/unsigned long
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  */
           __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 56, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_1);
@@ -7119,7 +7119,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode in {'i', 'I'}: # signed/unsigned int             # <<<<<<<<<<<<<<
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  */
         break;
@@ -7129,7 +7129,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode in {'l', 'L'}: # signed/unsigned long             # <<<<<<<<<<<<<<
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  */
         case 76:
@@ -7137,7 +7137,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
         /* "cpp_common.pxd":58
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode in {'l', 'L'}: # signed/unsigned long
- *             s_proc.kind = RfStringType.RF_UINT64             # <<<<<<<<<<<<<<
+ *             s_proc.kind = RF_StringType.RF_UINT64             # <<<<<<<<<<<<<<
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  */
@@ -7145,7 +7145,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
 
         /* "cpp_common.pxd":59
  *         elif typecode in {'l', 'L'}: # signed/unsigned long
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):             # <<<<<<<<<<<<<<
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode in {'q', 'Q'}: # signed/unsigned long long
@@ -7156,11 +7156,11 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
           __pyx_v_i = __pyx_t_10;
 
           /* "cpp_common.pxd":60
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]             # <<<<<<<<<<<<<<
  *         elif typecode in {'q', 'Q'}: # signed/unsigned long long
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  */
           __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 60, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_1);
@@ -7173,7 +7173,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode in {'l', 'L'}: # signed/unsigned long             # <<<<<<<<<<<<<<
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  */
         break;
@@ -7183,7 +7183,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode in {'q', 'Q'}: # signed/unsigned long long             # <<<<<<<<<<<<<<
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  */
         case 81:
@@ -7191,7 +7191,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
         /* "cpp_common.pxd":62
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode in {'q', 'Q'}: # signed/unsigned long long
- *             s_proc.kind = RfStringType.RF_UINT64             # <<<<<<<<<<<<<<
+ *             s_proc.kind = RF_StringType.RF_UINT64             # <<<<<<<<<<<<<<
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  */
@@ -7199,7 +7199,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
 
         /* "cpp_common.pxd":63
  *         elif typecode in {'q', 'Q'}: # signed/unsigned long long
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):             # <<<<<<<<<<<<<<
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         else: # float/double are hashed
@@ -7210,11 +7210,11 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
           __pyx_v_i = __pyx_t_10;
 
           /* "cpp_common.pxd":64
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]             # <<<<<<<<<<<<<<
  *         else: # float/double are hashed
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  */
           __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 64, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_1);
@@ -7227,7 +7227,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode in {'q', 'Q'}: # signed/unsigned long long             # <<<<<<<<<<<<<<
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  */
         break;
@@ -7236,7 +7236,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
         /* "cpp_common.pxd":66
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         else: # float/double are hashed
- *             s_proc.kind = RfStringType.RF_UINT64             # <<<<<<<<<<<<<<
+ *             s_proc.kind = RF_StringType.RF_UINT64             # <<<<<<<<<<<<<<
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>hash(arr[i])
  */
@@ -7244,7 +7244,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
 
         /* "cpp_common.pxd":67
  *         else: # float/double are hashed
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):             # <<<<<<<<<<<<<<
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>hash(arr[i])
  *     except Exception as e:
@@ -7255,7 +7255,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
           __pyx_v_i = __pyx_t_10;
 
           /* "cpp_common.pxd":68
- *             s_proc.kind = RfStringType.RF_UINT64
+ *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>hash(arr[i])             # <<<<<<<<<<<<<<
  *     except Exception as e:
@@ -7415,11 +7415,11 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
   goto __pyx_L0;
 
   /* "cpp_common.pxd":28
- *     RfString default_process_func(RfString sentence) except +
+ *     RF_String default_process_func(RF_String sentence) except +
  * 
- * cdef inline RfString hash_array(arr) except *:             # <<<<<<<<<<<<<<
+ * cdef inline RF_String hash_array(arr) except *:             # <<<<<<<<<<<<<<
  *     # TODO on Cpython this does not require any copies
- *     cdef RfString s_proc
+ *     cdef RF_String s_proc
  */
 
   /* function exit code */
@@ -7438,17 +7438,17 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v_
 /* "cpp_common.pxd":78
  * 
  * 
- * cdef inline RfString hash_sequence(seq) except *:             # <<<<<<<<<<<<<<
- *     cdef RfString s_proc
+ * cdef inline RF_String hash_sequence(seq) except *:             # <<<<<<<<<<<<<<
+ *     cdef RF_String s_proc
  *     s_proc.length = <size_t>len(seq)
  */
 
-static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_sequence(PyObject *__pyx_v_seq) {
-  RfString __pyx_v_s_proc;
+static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__pyx_v_seq) {
+  RF_String __pyx_v_s_proc;
   size_t __pyx_v_i;
   PyObject *__pyx_v_elem = NULL;
   CYTHON_UNUSED PyObject *__pyx_v_e = NULL;
-  RfString __pyx_r;
+  RF_String __pyx_r;
   __Pyx_RefNannyDeclarations
   Py_ssize_t __pyx_t_1;
   int __pyx_t_2;
@@ -7480,8 +7480,8 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_sequence(PyObject *__pyx
   __Pyx_RefNannySetupContext("hash_sequence", 0);
 
   /* "cpp_common.pxd":80
- * cdef inline RfString hash_sequence(seq) except *:
- *     cdef RfString s_proc
+ * cdef inline RF_String hash_sequence(seq) except *:
+ *     cdef RF_String s_proc
  *     s_proc.length = <size_t>len(seq)             # <<<<<<<<<<<<<<
  * 
  *     s_proc.data = malloc(s_proc.length * sizeof(uint64_t))
@@ -7530,7 +7530,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_sequence(PyObject *__pyx
  *         raise MemoryError
  * 
  *     try:             # <<<<<<<<<<<<<<
- *         s_proc.kind = RfStringType.RF_UINT64
+ *         s_proc.kind = RF_StringType.RF_UINT64
  *         for i in range(s_proc.length):
  */
   {
@@ -7545,7 +7545,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_sequence(PyObject *__pyx
       /* "cpp_common.pxd":88
  * 
  *     try:
- *         s_proc.kind = RfStringType.RF_UINT64             # <<<<<<<<<<<<<<
+ *         s_proc.kind = RF_StringType.RF_UINT64             # <<<<<<<<<<<<<<
  *         for i in range(s_proc.length):
  *             elem = seq[i]
  */
@@ -7553,7 +7553,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_sequence(PyObject *__pyx
 
       /* "cpp_common.pxd":89
  *     try:
- *         s_proc.kind = RfStringType.RF_UINT64
+ *         s_proc.kind = RF_StringType.RF_UINT64
  *         for i in range(s_proc.length):             # <<<<<<<<<<<<<<
  *             elem = seq[i]
  *             # this is required so e.g. a list of char can be compared to a string
@@ -7564,7 +7564,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_sequence(PyObject *__pyx
         __pyx_v_i = __pyx_t_8;
 
         /* "cpp_common.pxd":90
- *         s_proc.kind = RfStringType.RF_UINT64
+ *         s_proc.kind = RF_StringType.RF_UINT64
  *         for i in range(s_proc.length):
  *             elem = seq[i]             # <<<<<<<<<<<<<<
  *             # this is required so e.g. a list of char can be compared to a string
@@ -7633,7 +7633,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_sequence(PyObject *__pyx
  *         raise MemoryError
  * 
  *     try:             # <<<<<<<<<<<<<<
- *         s_proc.kind = RfStringType.RF_UINT64
+ *         s_proc.kind = RF_StringType.RF_UINT64
  *         for i in range(s_proc.length):
  */
     }
@@ -7743,7 +7743,7 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_sequence(PyObject *__pyx
  *         raise MemoryError
  * 
  *     try:             # <<<<<<<<<<<<<<
- *         s_proc.kind = RfStringType.RF_UINT64
+ *         s_proc.kind = RF_StringType.RF_UINT64
  *         for i in range(s_proc.length):
  */
     __Pyx_XGIVEREF(__pyx_t_3);
@@ -7773,8 +7773,8 @@ static CYTHON_INLINE RfString __pyx_f_10cpp_common_hash_sequence(PyObject *__pyx
   /* "cpp_common.pxd":78
  * 
  * 
- * cdef inline RfString hash_sequence(seq) except *:             # <<<<<<<<<<<<<<
- *     cdef RfString s_proc
+ * cdef inline RF_String hash_sequence(seq) except *:             # <<<<<<<<<<<<<<
+ *     cdef RF_String s_proc
  *     s_proc.length = <size_t>len(seq)
  */
 
@@ -8439,7 +8439,7 @@ if (!__Pyx_RefNanny) {
  * # cython: language_level=3, binding=True, linetrace=True
  * 
  * from rapidfuzz.utils import default_process             # <<<<<<<<<<<<<<
- * from cpp_common cimport RfString, RfStringWrapper, is_valid_string, convert_string, hash_array, hash_sequence
+ * from cpp_common cimport RF_String, RF_StringWrapper, is_valid_string, convert_string, hash_array, hash_sequence
  * from array import array
  */
   __Pyx_TraceLine(4,0,__PYX_ERR(0, 4, __pyx_L1_error))
@@ -8459,7 +8459,7 @@ if (!__Pyx_RefNanny) {
 
   /* "cpp_fuzz.pyx":6
  * from rapidfuzz.utils import default_process
- * from cpp_common cimport RfString, RfStringWrapper, is_valid_string, convert_string, hash_array, hash_sequence
+ * from cpp_common cimport RF_String, RF_StringWrapper, is_valid_string, convert_string, hash_array, hash_sequence
  * from array import array             # <<<<<<<<<<<<<<
  * 
  * from rapidfuzz_capi cimport RfSimilarityFunctionTable
@@ -8482,7 +8482,7 @@ if (!__Pyx_RefNanny) {
   /* "cpp_fuzz.pyx":11
  * from cpython.pycapsule cimport PyCapsule_New
  * 
- * cdef inline RfString conv_sequence(seq) except *:             # <<<<<<<<<<<<<<
+ * cdef inline RF_String conv_sequence(seq) except *:             # <<<<<<<<<<<<<<
  *     if is_valid_string(seq):
  *         return convert_string(seq)
  */

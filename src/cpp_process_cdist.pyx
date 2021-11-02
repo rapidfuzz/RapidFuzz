@@ -13,7 +13,7 @@ from cpython.ref cimport Py_INCREF, Py_DECREF
 from cython.operator cimport dereference
 
 from cpp_common cimport (
-    RfString, RfStringWrapper, RfKwargsContextWrapper,
+    RF_String, RF_StringWrapper, RF_KwargsWrapper,
     is_valid_string, convert_string, hash_array, hash_sequence, default_process_func
 )
 
@@ -27,13 +27,13 @@ cimport cython
 from rapidfuzz_capi cimport (
     RfDistanceFunctionTable, RfSimilarityFunctionTable,
     RF_DistanceInit, RF_SimilarityInit,
-    RfKwargsContext
+    RF_Kwargs
 )
 from cpython.pycapsule cimport PyCapsule_IsValid, PyCapsule_GetPointer
 
 np.import_array()
 
-cdef inline RfString conv_sequence(seq) except *:
+cdef inline RF_String conv_sequence(seq) except *:
     if is_valid_string(seq):
         return move(convert_string(seq))
     elif isinstance(seq, array):
@@ -42,10 +42,10 @@ cdef inline RfString conv_sequence(seq) except *:
         return move(hash_sequence(seq))
 
 cdef extern from "cpp_process_cdist.hpp":
-    object cdist_single_list_distance_impl(  const RfKwargsContextWrapper&, RF_DistanceInit, const vector[RfStringWrapper]&, int, int, size_t) except +
-    object cdist_single_list_similarity_impl(const RfKwargsContextWrapper&, RF_SimilarityInit, const vector[RfStringWrapper]&, int, int, double) except +
-    object cdist_two_lists_distance_impl(    const RfKwargsContextWrapper&, RF_DistanceInit, const vector[RfStringWrapper]&, const vector[RfStringWrapper]&, int, int, size_t) except +
-    object cdist_two_lists_similarity_impl(  const RfKwargsContextWrapper&, RF_SimilarityInit, const vector[RfStringWrapper]&, const vector[RfStringWrapper]&, int, int, double) except +
+    object cdist_single_list_distance_impl(  const RF_KwargsWrapper&, RF_DistanceInit, const vector[RF_StringWrapper]&, int, int, size_t) except +
+    object cdist_single_list_similarity_impl(const RF_KwargsWrapper&, RF_SimilarityInit, const vector[RF_StringWrapper]&, int, int, double) except +
+    object cdist_two_lists_distance_impl(    const RF_KwargsWrapper&, RF_DistanceInit, const vector[RF_StringWrapper]&, const vector[RF_StringWrapper]&, int, int, size_t) except +
+    object cdist_two_lists_similarity_impl(  const RF_KwargsWrapper&, RF_SimilarityInit, const vector[RF_StringWrapper]&, const vector[RF_StringWrapper]&, int, int, double) except +
     void set_score_similarity(np.PyArrayObject*, int, np.npy_intp, np.npy_intp, double)
 
 cdef int dtype_to_type_num_similarity(dtype) except -1:
@@ -71,15 +71,15 @@ cdef int dtype_to_type_num_distance(dtype) except -1:
     raise TypeError("invalid dtype (use np.int8, np.int16, np.int32 or np.int64)")
 
 cdef inline cdist_two_lists_similarity(
-    const vector[RfStringWrapper]& queries,
-    const vector[RfStringWrapper]& choices,
+    const vector[RF_StringWrapper]& queries,
+    const vector[RF_StringWrapper]& choices,
     similarity_capsule, score_cutoff, dtype, workers, dict kwargs
 ):
     cdef double c_score_cutoff = 0
     cdef RfSimilarityFunctionTable table = dereference(
         <RfSimilarityFunctionTable*>PyCapsule_GetPointer(similarity_capsule, "similarity")
     )
-    cdef RfKwargsContextWrapper kwargs_context = RfKwargsContextWrapper()
+    cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()
     cdef int c_dtype = dtype_to_type_num_similarity(dtype)
     cdef int c_workers = workers
 
@@ -94,14 +94,14 @@ cdef inline cdist_two_lists_similarity(
     return cdist_two_lists_similarity_impl(kwargs_context, table.similarity_init, queries, choices, c_dtype, c_workers, c_score_cutoff)
 
 cdef inline cdist_two_lists_distance(
-    const vector[RfStringWrapper]& queries, const vector[RfStringWrapper]& choices,
+    const vector[RF_StringWrapper]& queries, const vector[RF_StringWrapper]& choices,
     distance_capsule, max_, dtype, workers, dict kwargs
 ):
     cdef size_t c_max = <size_t>-1
     cdef RfDistanceFunctionTable table = dereference(
         <RfDistanceFunctionTable*>PyCapsule_GetPointer(distance_capsule, "distance")
     )
-    cdef RfKwargsContextWrapper kwargs_context = RfKwargsContextWrapper()
+    cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()
     cdef int c_dtype = dtype_to_type_num_distance(dtype)
     cdef int c_workers = workers
 
@@ -147,8 +147,8 @@ cdef inline py_cdist_two_lists(
     return matrix
 
 cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, workers, dict kwargs):
-    cdef vector[RfStringWrapper] proc_queries
-    cdef vector[RfStringWrapper] proc_choices
+    cdef vector[RF_StringWrapper] proc_queries
+    cdef vector[RF_StringWrapper] proc_choices
     cdef vector[PyObject*] proc_py_queries
     cdef vector[PyObject*] proc_py_choices
     cdef size_t queries_len = <size_t>len(queries)
@@ -165,10 +165,10 @@ cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, w
             # processor None/False
             if not processor:
                 for query in queries:
-                    proc_queries.push_back(move(RfStringWrapper(conv_sequence(query))))
+                    proc_queries.push_back(move(RF_StringWrapper(conv_sequence(query))))
 
                 for choice in choices:
-                    proc_choices.push_back(move(RfStringWrapper(conv_sequence(choice))))
+                    proc_choices.push_back(move(RF_StringWrapper(conv_sequence(choice))))
             # processor has to be called through python
             elif processor is not default_process and callable(processor):
                 proc_py_queries.reserve(queries_len)
@@ -176,27 +176,27 @@ cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, w
                     proc_query = processor(query)
                     Py_INCREF(proc_query)
                     proc_py_queries.push_back(<PyObject*>proc_query)
-                    proc_queries.push_back(move(RfStringWrapper(conv_sequence(proc_query))))
+                    proc_queries.push_back(move(RF_StringWrapper(conv_sequence(proc_query))))
 
                 proc_py_choices.reserve(choices_len)
                 for choice in choices:
                     proc_choice = processor(choice)
                     Py_INCREF(proc_choice)
                     proc_py_choices.push_back(<PyObject*>proc_choice)
-                    proc_choices.push_back(move(RfStringWrapper(conv_sequence(proc_choice))))
+                    proc_choices.push_back(move(RF_StringWrapper(conv_sequence(proc_choice))))
 
             # processor is True / default_process
             else:
                 for query in queries:
                     proc_queries.push_back(
-                        move(RfStringWrapper(default_process_func(conv_sequence(query))))
+                        move(RF_StringWrapper(default_process_func(conv_sequence(query))))
                     )
 
                 for choice in choices:
                     proc_choices.push_back(
-                        move(RfStringWrapper(default_process_func(conv_sequence(choice))))
+                        move(RF_StringWrapper(default_process_func(conv_sequence(choice))))
                     )
-       
+
             if PyCapsule_IsValid(scorer_capsule, "similarity"):
                 return cdist_two_lists_similarity(proc_queries, proc_choices, scorer_capsule, score_cutoff, dtype, workers, kwargs)
             else:
@@ -241,13 +241,13 @@ cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, w
             Py_DECREF(<object>item)
 
 cdef inline cdist_single_list_similarity(
-    const vector[RfStringWrapper]& queries, similarity_capsule, score_cutoff, dtype, workers, dict kwargs
+    const vector[RF_StringWrapper]& queries, similarity_capsule, score_cutoff, dtype, workers, dict kwargs
 ):
     cdef double c_score_cutoff = 0
     cdef RfSimilarityFunctionTable table = dereference(
         <RfSimilarityFunctionTable*>PyCapsule_GetPointer(similarity_capsule, "similarity")
     )
-    cdef RfKwargsContextWrapper kwargs_context = RfKwargsContextWrapper()
+    cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()
     cdef int c_dtype = dtype_to_type_num_similarity(dtype)
     cdef int c_workers = workers
 
@@ -262,13 +262,13 @@ cdef inline cdist_single_list_similarity(
     return cdist_single_list_similarity_impl(kwargs_context, table.similarity_init, queries, c_dtype, c_workers, c_score_cutoff)
 
 cdef inline cdist_single_list_distance(
-    const vector[RfStringWrapper]& queries, distance_capsule, max_, dtype, workers, dict kwargs
+    const vector[RF_StringWrapper]& queries, distance_capsule, max_, dtype, workers, dict kwargs
 ):
     cdef size_t c_max = <size_t>-1
     cdef RfDistanceFunctionTable table = dereference(
         <RfDistanceFunctionTable*>PyCapsule_GetPointer(distance_capsule, "distance")
     )
-    cdef RfKwargsContextWrapper kwargs_context = RfKwargsContextWrapper()
+    cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()
     cdef int c_dtype = dtype_to_type_num_distance(dtype)
     cdef int c_workers = workers
 
@@ -285,7 +285,7 @@ cdef inline cdist_single_list_distance(
 cdef cdist_single_list(queries, scorer, processor, score_cutoff, dtype, workers, dict kwargs):
     cdef size_t queries_len = <size_t>len(queries)
 
-    cdef vector[RfStringWrapper] proc_queries
+    cdef vector[RF_StringWrapper] proc_queries
     cdef vector[PyObject*] proc_py_queries
 
     cdef scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
@@ -299,7 +299,7 @@ cdef cdist_single_list(queries, scorer, processor, score_cutoff, dtype, workers,
             # processor None/False
             if not processor:
                 for query in queries:
-                    proc_queries.push_back(move(RfStringWrapper(conv_sequence(query))))
+                    proc_queries.push_back(move(RF_StringWrapper(conv_sequence(query))))
             # processor has to be called through python
             elif processor is not default_process and callable(processor):
                 proc_py_queries.reserve(queries_len)
@@ -307,13 +307,13 @@ cdef cdist_single_list(queries, scorer, processor, score_cutoff, dtype, workers,
                     proc_query = processor(query)
                     Py_INCREF(proc_query)
                     proc_py_queries.push_back(<PyObject*>proc_query)
-                    proc_queries.push_back(move(RfStringWrapper(conv_sequence(proc_query))))
+                    proc_queries.push_back(move(RF_StringWrapper(conv_sequence(proc_query))))
 
             # processor is True / default_process
             else:
                 for query in queries:
                     proc_queries.push_back(
-                        move(RfStringWrapper(default_process_func(conv_sequence(query))))
+                        move(RF_StringWrapper(default_process_func(conv_sequence(query))))
                     )
 
             if PyCapsule_IsValid(scorer_capsule, "similarity"):

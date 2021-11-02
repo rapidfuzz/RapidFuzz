@@ -96,8 +96,8 @@ void run_parallel(int workers, size_t rows, Func&& func)
 }
 
 static PyObject* cdist_single_list_distance_impl(
-    const RfKwargsContextWrapper& kwargs_context, RF_DistanceInit init,
-    const std::vector<RfStringWrapper>& queries, int dtype, int workers, size_t max)
+    const RF_KwargsWrapper& kwargs_context, RF_DistanceInit init,
+    const std::vector<RF_StringWrapper>& queries, int dtype, int workers, size_t max)
 {
     std::size_t rows = queries.size();
     std::size_t cols = queries.size();
@@ -118,9 +118,9 @@ Py_BEGIN_ALLOW_THREADS
             for (; row < row_end; ++row)
             {
                 set_score_distance(matrix, dtype, row, row, 0);
-                RfDistanceContext context;
+                RF_Distance context;
                 PyErr2RuntimeExn(init(&context, &kwargs_context.kwargs, &queries[row].string));
-                CachedDistanceContext DistanceContext(context);
+                RF_DistanceWrapper DistanceContext(context);
 
                 for (size_t col = row + 1; col < cols; ++col)
                 {
@@ -145,8 +145,8 @@ Py_END_ALLOW_THREADS
 }
 
 static PyObject* cdist_single_list_similarity_impl(
-    const RfKwargsContextWrapper& kwargs_context, RF_SimilarityInit init,
-    const std::vector<RfStringWrapper>& queries, int dtype, int workers, double score_cutoff)
+    const RF_KwargsWrapper& kwargs_context, RF_SimilarityInit init,
+    const std::vector<RF_StringWrapper>& queries, int dtype, int workers, double score_cutoff)
 {
     std::size_t rows = queries.size();
     std::size_t cols = queries.size();
@@ -167,9 +167,9 @@ Py_BEGIN_ALLOW_THREADS
             for (; row < row_end; ++row)
             {
                 set_score_similarity(matrix, dtype, row, row, 100);
-                RfSimilarityContext context;
+                RF_Similarity context;
                 PyErr2RuntimeExn(init(&context, &kwargs_context.kwargs, &queries[row].string));
-                CachedScorerContext ScorerContext(context);
+                RF_SimilarityWrapper ScorerContext(context);
 
                 for (size_t col = row + 1; col < cols; ++col)
                 {
@@ -194,8 +194,8 @@ Py_END_ALLOW_THREADS
 }
 
 static PyObject* cdist_two_lists_distance_impl(
-    const RfKwargsContextWrapper& kwargs_context, RF_DistanceInit init,
-    const std::vector<RfStringWrapper>& queries, const std::vector<RfStringWrapper>& choices, int dtype, int workers, size_t max)
+    const RF_KwargsWrapper& kwargs_context, RF_DistanceInit init,
+    const std::vector<RF_StringWrapper>& queries, const std::vector<RF_StringWrapper>& choices, int dtype, int workers, size_t max)
 {
     std::size_t rows = queries.size();
     std::size_t cols = choices.size();
@@ -215,9 +215,9 @@ Py_BEGIN_ALLOW_THREADS
         run_parallel(workers, rows, [&] (std::size_t row, std::size_t row_end) {
             for (; row < row_end; ++row)
             {
-                RfDistanceContext context;
+                RF_Distance context;
                 PyErr2RuntimeExn(init(&context, &kwargs_context.kwargs, &queries[row].string));
-                CachedDistanceContext DistanceContext(context);
+                RF_DistanceWrapper DistanceContext(context);
 
                 for (size_t col = 0; col < cols; ++col)
                 {
@@ -241,8 +241,8 @@ Py_END_ALLOW_THREADS
 }
 
 static PyObject* cdist_two_lists_similarity_impl(
-    const RfKwargsContextWrapper& kwargs_context, RF_SimilarityInit init,
-    const std::vector<RfStringWrapper>& queries, const std::vector<RfStringWrapper>& choices, int dtype, int workers, double score_cutoff)
+    const RF_KwargsWrapper& kwargs_context, RF_SimilarityInit init,
+    const std::vector<RF_StringWrapper>& queries, const std::vector<RF_StringWrapper>& choices, int dtype, int workers, double score_cutoff)
 {
     std::size_t rows = queries.size();
     std::size_t cols = choices.size();
@@ -263,9 +263,9 @@ Py_BEGIN_ALLOW_THREADS
         run_parallel(workers, rows, [&] (std::size_t row, std::size_t row_end) {
             for (; row < row_end; ++row)
             {
-                RfSimilarityContext context;
+                RF_Similarity context;
                 PyErr2RuntimeExn(init(&context, &kwargs_context.kwargs, &queries[row].string));
-                CachedScorerContext ScorerContext(context);
+                RF_SimilarityWrapper ScorerContext(context);
 
                 for (size_t col = 0; col < cols; ++col)
                 {

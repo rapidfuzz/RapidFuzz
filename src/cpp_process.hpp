@@ -60,24 +60,24 @@ struct ExtractDistanceComp
     }
 };
 
-struct CachedScorerContext {
-    RfSimilarityContext context;
+struct RF_SimilarityWrapper {
+    RF_Similarity context;
 
-    CachedScorerContext()
+    RF_SimilarityWrapper()
       : context({nullptr, nullptr, nullptr}) {}
-    explicit CachedScorerContext(RfSimilarityContext context_)
+    explicit RF_SimilarityWrapper(RF_Similarity context_)
       : context(context_) {}
 
-    CachedScorerContext(const CachedScorerContext&) = delete;
-    CachedScorerContext& operator=(const CachedScorerContext&) = delete;
+    RF_SimilarityWrapper(const RF_SimilarityWrapper&) = delete;
+    RF_SimilarityWrapper& operator=(const RF_SimilarityWrapper&) = delete;
 
-    CachedScorerContext(CachedScorerContext&& other)
+    RF_SimilarityWrapper(RF_SimilarityWrapper&& other)
      : context(other.context)
     {
         other.context = {nullptr, nullptr, nullptr};
     }
 
-    CachedScorerContext& operator=(CachedScorerContext&& other) {
+    RF_SimilarityWrapper& operator=(RF_SimilarityWrapper&& other) {
         if (&other != this) {
             if (context.deinit) {
                 context.deinit(&context);
@@ -89,37 +89,37 @@ struct CachedScorerContext {
       return *this;
     };
 
-    ~CachedScorerContext() {
+    ~RF_SimilarityWrapper() {
         if (context.deinit) {
             context.deinit(&context);
         }
     }
 
-    double similarity(const RfString* str, double score_cutoff) {
+    double similarity(const RF_String* str, double score_cutoff) {
         double sim;
         PyErr2RuntimeExn(context.similarity(&sim, &context, str, score_cutoff));
         return sim;
     }
 };
 
-struct CachedDistanceContext {
-    RfDistanceContext context;
+struct RF_DistanceWrapper {
+    RF_Distance context;
 
-    CachedDistanceContext()
+    RF_DistanceWrapper()
       : context({nullptr, nullptr, nullptr}) {}
-    explicit CachedDistanceContext(RfDistanceContext context_)
+    explicit RF_DistanceWrapper(RF_Distance context_)
       : context(context_) {}
 
-    CachedDistanceContext(const CachedDistanceContext&) = delete;
-    CachedDistanceContext& operator=(const CachedDistanceContext&) = delete;
+    RF_DistanceWrapper(const RF_DistanceWrapper&) = delete;
+    RF_DistanceWrapper& operator=(const RF_DistanceWrapper&) = delete;
 
-    CachedDistanceContext(CachedDistanceContext&& other)
+    RF_DistanceWrapper(RF_DistanceWrapper&& other)
      : context(other.context)
     {
         other.context = {nullptr, nullptr, nullptr};
     }
 
-    CachedDistanceContext& operator=(CachedDistanceContext&& other) {
+    RF_DistanceWrapper& operator=(RF_DistanceWrapper&& other) {
         if (&other != this) {
             if (context.deinit) {
                 context.deinit(&context);
@@ -131,13 +131,13 @@ struct CachedDistanceContext {
       return *this;
     };
 
-    ~CachedDistanceContext() {
+    ~RF_DistanceWrapper() {
         if (context.deinit) {
             context.deinit(&context);
         }
     }
 
-    size_t distance(const RfString* str, size_t max) {
+    size_t distance(const RF_String* str, size_t max) {
         size_t dist;
         PyErr2RuntimeExn(context.distance(&dist, &context, str, max));
         return dist;

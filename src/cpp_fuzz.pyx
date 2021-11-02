@@ -2,13 +2,13 @@
 # cython: language_level=3, binding=True, linetrace=True
 
 from rapidfuzz.utils import default_process
-from cpp_common cimport RfString, RfStringWrapper, is_valid_string, convert_string, hash_array, hash_sequence
+from cpp_common cimport RF_String, RF_StringWrapper, is_valid_string, convert_string, hash_array, hash_sequence
 from array import array
 
 from rapidfuzz_capi cimport RfSimilarityFunctionTable
 from cpython.pycapsule cimport PyCapsule_New
 
-cdef inline RfString conv_sequence(seq) except *:
+cdef inline RF_String conv_sequence(seq) except *:
     if is_valid_string(seq):
         return convert_string(seq)
     elif isinstance(seq, array):
@@ -17,26 +17,26 @@ cdef inline RfString conv_sequence(seq) except *:
         return hash_sequence(seq)
 
 cdef extern from "cpp_scorer.hpp":
-    double ratio_no_process(                         const RfString&, const RfString&, double) nogil except +
-    double ratio_default_process(                    const RfString&, const RfString&, double) nogil except +
-    double partial_ratio_no_process(                 const RfString&, const RfString&, double) nogil except +
-    double partial_ratio_default_process(            const RfString&, const RfString&, double) nogil except +
-    double token_sort_ratio_no_process(              const RfString&, const RfString&, double) nogil except +
-    double token_sort_ratio_default_process(         const RfString&, const RfString&, double) nogil except +
-    double token_set_ratio_no_process(               const RfString&, const RfString&, double) nogil except +
-    double token_set_ratio_default_process(          const RfString&, const RfString&, double) nogil except +
-    double token_ratio_no_process(                   const RfString&, const RfString&, double) nogil except +
-    double token_ratio_default_process(              const RfString&, const RfString&, double) nogil except +
-    double partial_token_sort_ratio_no_process(      const RfString&, const RfString&, double) nogil except +
-    double partial_token_sort_ratio_default_process( const RfString&, const RfString&, double) nogil except +
-    double partial_token_set_ratio_no_process(       const RfString&, const RfString&, double) nogil except +
-    double partial_token_set_ratio_default_process(  const RfString&, const RfString&, double) nogil except +
-    double partial_token_ratio_no_process(           const RfString&, const RfString&, double) nogil except +
-    double partial_token_ratio_default_process(      const RfString&, const RfString&, double) nogil except +
-    double WRatio_no_process(                        const RfString&, const RfString&, double) nogil except +
-    double WRatio_default_process(                   const RfString&, const RfString&, double) nogil except +
-    double QRatio_no_process(                        const RfString&, const RfString&, double) nogil except +
-    double QRatio_default_process(                   const RfString&, const RfString&, double) nogil except +
+    double ratio_no_process(                         const RF_String&, const RF_String&, double) nogil except +
+    double ratio_default_process(                    const RF_String&, const RF_String&, double) nogil except +
+    double partial_ratio_no_process(                 const RF_String&, const RF_String&, double) nogil except +
+    double partial_ratio_default_process(            const RF_String&, const RF_String&, double) nogil except +
+    double token_sort_ratio_no_process(              const RF_String&, const RF_String&, double) nogil except +
+    double token_sort_ratio_default_process(         const RF_String&, const RF_String&, double) nogil except +
+    double token_set_ratio_no_process(               const RF_String&, const RF_String&, double) nogil except +
+    double token_set_ratio_default_process(          const RF_String&, const RF_String&, double) nogil except +
+    double token_ratio_no_process(                   const RF_String&, const RF_String&, double) nogil except +
+    double token_ratio_default_process(              const RF_String&, const RF_String&, double) nogil except +
+    double partial_token_sort_ratio_no_process(      const RF_String&, const RF_String&, double) nogil except +
+    double partial_token_sort_ratio_default_process( const RF_String&, const RF_String&, double) nogil except +
+    double partial_token_set_ratio_no_process(       const RF_String&, const RF_String&, double) nogil except +
+    double partial_token_set_ratio_default_process(  const RF_String&, const RF_String&, double) nogil except +
+    double partial_token_ratio_no_process(           const RF_String&, const RF_String&, double) nogil except +
+    double partial_token_ratio_default_process(      const RF_String&, const RF_String&, double) nogil except +
+    double WRatio_no_process(                        const RF_String&, const RF_String&, double) nogil except +
+    double WRatio_default_process(                   const RF_String&, const RF_String&, double) nogil except +
+    double QRatio_no_process(                        const RF_String&, const RF_String&, double) nogil except +
+    double QRatio_default_process(                   const RF_String&, const RF_String&, double) nogil except +
 
     RfSimilarityFunctionTable CreateRatioFunctionTable() except +
     RfSimilarityFunctionTable CreatePartialRatioFunctionTable() except +
@@ -90,17 +90,17 @@ def ratio(s1, s2, *, processor=None, score_cutoff=None):
 
     if s1 is None or s2 is None:
         return 0
-    
+
     if processor is True or processor == default_process:
-        s1_proc = RfStringWrapper(conv_sequence(s1))
-        s2_proc = RfStringWrapper(conv_sequence(s2))
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
         return ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    s1_proc = RfStringWrapper(conv_sequence(s1))
-    s2_proc = RfStringWrapper(conv_sequence(s2))
+    s1_proc = RF_StringWrapper(conv_sequence(s1))
+    s2_proc = RF_StringWrapper(conv_sequence(s2))
 
     return ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
 
@@ -141,7 +141,7 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
         guaranteed to find the optimal alignment. For short needles this is very
         fast, since for them fuzz.ratio runs in ``O(N)`` time. This results in a worst
         case performance of ``O(NM)``.
-    
+
     .. image:: img/partial_ratio_short_needle.svg
 
     long needle (length > 64):
@@ -177,15 +177,15 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        s1_proc = RfStringWrapper(conv_sequence(s1))
-        s2_proc = RfStringWrapper(conv_sequence(s2))
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
         return partial_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    s1_proc = RfStringWrapper(conv_sequence(s1))
-    s2_proc = RfStringWrapper(conv_sequence(s2))
+    s1_proc = RF_StringWrapper(conv_sequence(s1))
+    s2_proc = RF_StringWrapper(conv_sequence(s2))
     return partial_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
@@ -228,15 +228,15 @@ def token_sort_ratio(s1, s2, *, processor=True, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        s1_proc = RfStringWrapper(conv_sequence(s1))
-        s2_proc = RfStringWrapper(conv_sequence(s2))
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
         return token_sort_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    s1_proc = RfStringWrapper(conv_sequence(s1))
-    s2_proc = RfStringWrapper(conv_sequence(s2))
+    s1_proc = RF_StringWrapper(conv_sequence(s1))
+    s2_proc = RF_StringWrapper(conv_sequence(s2))
     return token_sort_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
@@ -282,15 +282,15 @@ def token_set_ratio(s1, s2, *, processor=True, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        s1_proc = RfStringWrapper(conv_sequence(s1))
-        s2_proc = RfStringWrapper(conv_sequence(s2))
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
         return token_set_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    s1_proc = RfStringWrapper(conv_sequence(s1))
-    s2_proc = RfStringWrapper(conv_sequence(s2))
+    s1_proc = RF_StringWrapper(conv_sequence(s1))
+    s2_proc = RF_StringWrapper(conv_sequence(s2))
     return token_set_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
@@ -329,15 +329,15 @@ def token_ratio(s1, s2, *, processor=True, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        s1_proc = RfStringWrapper(conv_sequence(s1))
-        s2_proc = RfStringWrapper(conv_sequence(s2))
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
         return token_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    s1_proc = RfStringWrapper(conv_sequence(s1))
-    s2_proc = RfStringWrapper(conv_sequence(s2))
+    s1_proc = RF_StringWrapper(conv_sequence(s1))
+    s2_proc = RF_StringWrapper(conv_sequence(s2))
     return token_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
@@ -375,15 +375,15 @@ def partial_token_sort_ratio(s1, s2, *, processor=True, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        s1_proc = RfStringWrapper(conv_sequence(s1))
-        s2_proc = RfStringWrapper(conv_sequence(s2))
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
         return partial_token_sort_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    s1_proc = RfStringWrapper(conv_sequence(s1))
-    s2_proc = RfStringWrapper(conv_sequence(s2))
+    s1_proc = RF_StringWrapper(conv_sequence(s1))
+    s2_proc = RF_StringWrapper(conv_sequence(s2))
     return partial_token_sort_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
@@ -422,15 +422,15 @@ def partial_token_set_ratio(s1, s2, *, processor=True, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        s1_proc = RfStringWrapper(conv_sequence(s1))
-        s2_proc = RfStringWrapper(conv_sequence(s2))
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
         return partial_token_set_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    s1_proc = RfStringWrapper(conv_sequence(s1))
-    s2_proc = RfStringWrapper(conv_sequence(s2))
+    s1_proc = RF_StringWrapper(conv_sequence(s1))
+    s2_proc = RF_StringWrapper(conv_sequence(s2))
     return partial_token_set_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
@@ -469,15 +469,15 @@ def partial_token_ratio(s1, s2, *, processor=True, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        s1_proc = RfStringWrapper(conv_sequence(s1))
-        s2_proc = RfStringWrapper(conv_sequence(s2))
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
         return partial_token_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    s1_proc = RfStringWrapper(conv_sequence(s1))
-    s2_proc = RfStringWrapper(conv_sequence(s2))
+    s1_proc = RF_StringWrapper(conv_sequence(s1))
+    s2_proc = RF_StringWrapper(conv_sequence(s2))
     return partial_token_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
@@ -515,15 +515,15 @@ def WRatio(s1, s2, *, processor=True, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        s1_proc = RfStringWrapper(conv_sequence(s1))
-        s2_proc = RfStringWrapper(conv_sequence(s2))
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
         return WRatio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    s1_proc = RfStringWrapper(conv_sequence(s1))
-    s2_proc = RfStringWrapper(conv_sequence(s2))
+    s1_proc = RF_StringWrapper(conv_sequence(s1))
+    s2_proc = RF_StringWrapper(conv_sequence(s2))
     return WRatio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
@@ -564,15 +564,15 @@ def QRatio(s1, s2, *, processor=True, score_cutoff=None):
         return 0
 
     if processor is True or processor == default_process:
-        s1_proc = RfStringWrapper(conv_sequence(s1))
-        s2_proc = RfStringWrapper(conv_sequence(s2))
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
         return QRatio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    s1_proc = RfStringWrapper(conv_sequence(s1))
-    s2_proc = RfStringWrapper(conv_sequence(s2))
+    s1_proc = RF_StringWrapper(conv_sequence(s1))
+    s2_proc = RF_StringWrapper(conv_sequence(s2))
     return QRatio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 cdef RfSimilarityFunctionTable RatioContext = CreateRatioFunctionTable()

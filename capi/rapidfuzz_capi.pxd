@@ -1,52 +1,54 @@
+from libcpp cimport bool
+
 cdef extern from "rapidfuzz_capi.h":
-    cdef enum RfStringType:
+    cdef enum RF_StringType:
         RF_UINT64
     
-    ctypedef struct RfString
-    ctypedef void (*RF_StringDeinit) (RfString* context)
+    ctypedef struct RF_String
+    ctypedef void (*RF_StringDeinit) (RF_String* context)
 
-    ctypedef struct RfString:
-        RfStringType kind
+    ctypedef struct RF_String:
+        RF_StringType kind
         void* data
         size_t length
         void* context
         RF_StringDeinit deinit
 
-    ctypedef struct RfKwargsContext
-    ctypedef void (*RF_KwargsContextDeinit) (RfKwargsContext* context)
+    ctypedef struct RF_Kwargs
+    ctypedef void (*RF_KwargsDeinit) (RF_Kwargs* context)
 
-    ctypedef struct RfKwargsContext:
+    ctypedef struct RF_Kwargs:
         void* context
-        RF_KwargsContextDeinit deinit
+        RF_KwargsDeinit deinit
 
-    ctypedef int (*RF_KwargsContextInit) (RfKwargsContext* context, dict kwargs) except -1
+    ctypedef bool (*RF_KwargsInit) (RF_Kwargs* context, dict kwargs) except False
 
-    ctypedef struct RfSimilarityContext
-    ctypedef int (*RF_SimilarityFunc) (double* similarity, const RfSimilarityContext* context, const RfString* str, double score_cutoff) nogil except -1
-    ctypedef void (*RF_SimilarityContextDeinit) (RfSimilarityContext* deinit) nogil
+    ctypedef struct RF_Similarity
+    ctypedef bool (*RF_SimilarityFunc) (double* similarity, const RF_Similarity* context, const RF_String* str, double score_cutoff) nogil except False
+    ctypedef void (*RF_SimilarityContextDeinit) (RF_Similarity* deinit) nogil
 
-    ctypedef struct RfSimilarityContext:
+    ctypedef struct RF_Similarity:
         void* context
         RF_SimilarityFunc similarity
         RF_SimilarityContextDeinit deinit
 
-    ctypedef int (*RF_SimilarityInit) (RfSimilarityContext* context, const RfKwargsContext* kwargs, const RfString* str) nogil except -1
+    ctypedef bool (*RF_SimilarityInit) (RF_Similarity* context, const RF_Kwargs* kwargs, const RF_String* str) nogil except False
 
     ctypedef struct RfSimilarityFunctionTable:
-        RF_KwargsContextInit kwargs_init
+        RF_KwargsInit kwargs_init
         RF_SimilarityInit similarity_init
 
-    ctypedef struct RfDistanceContext
-    ctypedef int (*RF_DistanceFunc) (size_t* distance, const RfDistanceContext* context, const RfString* str, size_t max)
-    ctypedef void (*RF_DistanceContextDeinit) (RfDistanceContext* deinit) nogil
+    ctypedef struct RF_Distance
+    ctypedef bool (*RF_DistanceFunc) (size_t* distance, const RF_Distance* context, const RF_String* str, size_t max)
+    ctypedef void (*RF_DistanceContextDeinit) (RF_Distance* deinit) nogil
 
-    ctypedef struct RfDistanceContext:
+    ctypedef struct RF_Distance:
         void* context
         RF_DistanceFunc distance
         RF_DistanceContextDeinit deinit
 
-    ctypedef int (*RF_DistanceInit) (RfDistanceContext* context, const RfKwargsContext* kwargs, const RfString* str) nogil except -1
+    ctypedef bool (*RF_DistanceInit) (RF_Distance* context, const RF_Kwargs* kwargs, const RF_String* str) nogil except False
 
     ctypedef struct RfDistanceFunctionTable:
-        RF_KwargsContextInit kwargs_init
+        RF_KwargsInit kwargs_init
         RF_DistanceInit distance_init
