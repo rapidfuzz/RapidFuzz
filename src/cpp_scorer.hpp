@@ -484,5 +484,5 @@ static inline std::vector<rapidfuzz::LevenshteinEditOp> levenshtein_editops_defa
 {
     return visitor_default_process(s1, s2, [](auto str1, auto str2) {
         return string_metric::levenshtein_editops(str1, str2);
-    });     
+    });
 }

@@ -63,7 +63,7 @@ void run_parallel(int workers, size_t rows, Func&& func)
         workers = std::thread::hardware_concurrency();
     }
 
-    std::exception_ptr exception = nullptr;   
+    std::exception_ptr exception = nullptr;
     std::atomic<int> exceptions_occured{0};
     tf::Executor executor(workers);
     tf::Taskflow taskflow;

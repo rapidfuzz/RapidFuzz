@@ -633,7 +633,7 @@ cdef void KwargsDeinit(RF_Kwargs* self):
 cdef bool LevenshteinKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     cdef size_t insertion, deletion, substitution
     cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>malloc(sizeof(LevenshteinWeightTable))
-    
+
     if not weights:
         raise MemoryError
 
@@ -669,7 +669,7 @@ jaro_similarity.__RapidFuzzScorer = PyCapsule_New(&JaroSimilarityContext, NULL, 
 
 cdef bool JaroWinklerKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     cdef double* prefix_weight = <double*>malloc(sizeof(double))
-    
+
     if not prefix_weight:
         raise MemoryError
 

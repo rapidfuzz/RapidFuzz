@@ -9,13 +9,13 @@ from rapidfuzz_capi cimport RF_Scorer, RF_StringType, RF_String, RF_Kwargs
 cdef extern from "cpp_common.hpp":
     cdef cppclass RF_StringWrapper:
         RF_String string
-        
+
         RF_StringWrapper()
         RF_StringWrapper(RF_String)
-    
+
     cdef cppclass RF_KwargsWrapper:
         RF_Kwargs kwargs
-        
+
         RF_KwargsWrapper()
         RF_KwargsWrapper(RF_Kwargs)
 

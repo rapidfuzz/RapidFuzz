@@ -73,7 +73,7 @@ cdef extern from "cpp_process.hpp":
         size_t index
         PyObject* choice
         PyObject* key
-    
+
     cdef cppclass RF_SimilarityWrapper:
         RF_SimilarityWrapper()
         RF_SimilarityWrapper(RF_Similarity)
@@ -654,7 +654,7 @@ cdef inline extract_list(RF_SimilarityWrapper context, choices, processor, size_
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
-                
+
                 choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
                 score = context.similarity(&choice_proc.string, score_cutoff)
             else:

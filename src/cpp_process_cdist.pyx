@@ -187,7 +187,7 @@ cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, w
                     proc_choices.push_back(
                         move(RF_StringWrapper(default_process_func(conv_sequence(choice))))
                     )
-       
+
             if scorer_context.scorer_type == RF_SIMILARITY:
                 return cdist_two_lists_similarity(proc_queries, proc_choices, dereference(scorer_context), score_cutoff, dtype, workers, kwargs)
             else:
