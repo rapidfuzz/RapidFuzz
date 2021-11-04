@@ -7026,7 +7026,7 @@ static bool __pyx_f_17cpp_string_metric_LevenshteinKwargsInit(RF_Kwargs *__pyx_v
  *     dereference(weights).replace_cost = substitution
  *     dereference(self).context = weights             # <<<<<<<<<<<<<<
  *     dereference(self).dtor = KwargsDeinit
- *     return 0
+ *     return True
  */
   __Pyx_TraceLine(644,0,__PYX_ERR(0, 644, __pyx_L1_error))
   (*__pyx_v_self).context = __pyx_v_weights;
@@ -7035,7 +7035,7 @@ static bool __pyx_f_17cpp_string_metric_LevenshteinKwargsInit(RF_Kwargs *__pyx_v
  *     dereference(weights).replace_cost = substitution
  *     dereference(self).context = weights
  *     dereference(self).dtor = KwargsDeinit             # <<<<<<<<<<<<<<
- *     return 0
+ *     return True
  * 
  */
   __Pyx_TraceLine(645,0,__PYX_ERR(0, 645, __pyx_L1_error))
@@ -7044,12 +7044,12 @@ static bool __pyx_f_17cpp_string_metric_LevenshteinKwargsInit(RF_Kwargs *__pyx_v
   /* "cpp_string_metric.pyx":646
  *     dereference(self).context = weights
  *     dereference(self).dtor = KwargsDeinit
- *     return 0             # <<<<<<<<<<<<<<
+ *     return True             # <<<<<<<<<<<<<<
  * 
  * 
  */
   __Pyx_TraceLine(646,0,__PYX_ERR(0, 646, __pyx_L1_error))
-  __pyx_r = 0;
+  __pyx_r = 1;
   goto __pyx_L0;
 
   /* "cpp_string_metric.pyx":633
@@ -7160,7 +7160,7 @@ static bool __pyx_f_17cpp_string_metric_JaroWinklerKwargsInit(RF_Kwargs *__pyx_v
  *     prefix_weight[0] = kwargs.get("prefix_weight", 0.1)
  *     dereference(self).context = prefix_weight             # <<<<<<<<<<<<<<
  *     dereference(self).dtor = KwargsDeinit
- *     return 0
+ *     return True
  */
   __Pyx_TraceLine(677,0,__PYX_ERR(0, 677, __pyx_L1_error))
   (*__pyx_v_self).context = __pyx_v_prefix_weight;
@@ -7169,7 +7169,7 @@ static bool __pyx_f_17cpp_string_metric_JaroWinklerKwargsInit(RF_Kwargs *__pyx_v
  *     prefix_weight[0] = kwargs.get("prefix_weight", 0.1)
  *     dereference(self).context = prefix_weight
  *     dereference(self).dtor = KwargsDeinit             # <<<<<<<<<<<<<<
- *     return 0
+ *     return True
  * 
  */
   __Pyx_TraceLine(678,0,__PYX_ERR(0, 678, __pyx_L1_error))
@@ -7178,12 +7178,12 @@ static bool __pyx_f_17cpp_string_metric_JaroWinklerKwargsInit(RF_Kwargs *__pyx_v
   /* "cpp_string_metric.pyx":679
  *     dereference(self).context = prefix_weight
  *     dereference(self).dtor = KwargsDeinit
- *     return 0             # <<<<<<<<<<<<<<
+ *     return True             # <<<<<<<<<<<<<<
  * 
  * cdef RF_Scorer JaroWinklerSimilarityContext
  */
   __Pyx_TraceLine(679,0,__PYX_ERR(0, 679, __pyx_L1_error))
-  __pyx_r = 0;
+  __pyx_r = 1;
   goto __pyx_L0;
 
   /* "cpp_string_metric.pyx":670
@@ -11476,16 +11476,16 @@ if (!__Pyx_RefNanny) {
   /* "cpp_string_metric.pyx":650
  * 
  * cdef RF_Scorer LevenshteinContext
- * LevenshteinContext.scorer_type = RF_SIMILARITY             # <<<<<<<<<<<<<<
+ * LevenshteinContext.scorer_type = RF_DISTANCE             # <<<<<<<<<<<<<<
  * LevenshteinContext.kwargs_init = LevenshteinKwargsInit
  * LevenshteinContext.scorer.distance_init = LevenshteinInit
  */
   __Pyx_TraceLine(650,0,__PYX_ERR(0, 650, __pyx_L1_error))
-  __pyx_v_17cpp_string_metric_LevenshteinContext.scorer_type = RF_SIMILARITY;
+  __pyx_v_17cpp_string_metric_LevenshteinContext.scorer_type = RF_DISTANCE;
 
   /* "cpp_string_metric.pyx":651
  * cdef RF_Scorer LevenshteinContext
- * LevenshteinContext.scorer_type = RF_SIMILARITY
+ * LevenshteinContext.scorer_type = RF_DISTANCE
  * LevenshteinContext.kwargs_init = LevenshteinKwargsInit             # <<<<<<<<<<<<<<
  * LevenshteinContext.scorer.distance_init = LevenshteinInit
  * levenshtein.__RapidFuzzScorer = PyCapsule_New(&LevenshteinContext, NULL, NULL)
@@ -11494,7 +11494,7 @@ if (!__Pyx_RefNanny) {
   __pyx_v_17cpp_string_metric_LevenshteinContext.kwargs_init = __pyx_f_17cpp_string_metric_LevenshteinKwargsInit;
 
   /* "cpp_string_metric.pyx":652
- * LevenshteinContext.scorer_type = RF_SIMILARITY
+ * LevenshteinContext.scorer_type = RF_DISTANCE
  * LevenshteinContext.kwargs_init = LevenshteinKwargsInit
  * LevenshteinContext.scorer.distance_init = LevenshteinInit             # <<<<<<<<<<<<<<
  * levenshtein.__RapidFuzzScorer = PyCapsule_New(&LevenshteinContext, NULL, NULL)

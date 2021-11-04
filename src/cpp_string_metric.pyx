@@ -643,11 +643,11 @@ cdef bool LevenshteinKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     dereference(weights).replace_cost = substitution
     dereference(self).context = weights
     dereference(self).dtor = KwargsDeinit
-    return 0
+    return True
 
 
 cdef RF_Scorer LevenshteinContext
-LevenshteinContext.scorer_type = RF_SIMILARITY
+LevenshteinContext.scorer_type = RF_DISTANCE
 LevenshteinContext.kwargs_init = LevenshteinKwargsInit
 LevenshteinContext.scorer.distance_init = LevenshteinInit
 levenshtein.__RapidFuzzScorer = PyCapsule_New(&LevenshteinContext, NULL, NULL)
@@ -676,7 +676,7 @@ cdef bool JaroWinklerKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     prefix_weight[0] = kwargs.get("prefix_weight", 0.1)
     dereference(self).context = prefix_weight
     dereference(self).dtor = KwargsDeinit
-    return 0
+    return True
 
 cdef RF_Scorer JaroWinklerSimilarityContext
 JaroWinklerSimilarityContext.scorer_type = RF_SIMILARITY
