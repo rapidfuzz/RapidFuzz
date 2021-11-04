@@ -2,23 +2,24 @@ from libc.stdint cimport uint64_t
 from libc.stdlib cimport malloc, free
 from libc.stddef cimport wchar_t
 from libcpp cimport bool
+from libcpp.utility cimport move
 
-from rapidfuzz_capi cimport RF_StringType, RF_String, RF_Kwargs
+from rapidfuzz_capi cimport RF_Scorer, RF_StringType, RF_String, RF_Kwargs
 
 cdef extern from "cpp_common.hpp":
     cdef cppclass RF_StringWrapper:
         RF_String string
-        
+
         RF_StringWrapper()
         RF_StringWrapper(RF_String)
-    
+
     cdef cppclass RF_KwargsWrapper:
         RF_Kwargs kwargs
-        
+
         RF_KwargsWrapper()
         RF_KwargsWrapper(RF_Kwargs)
 
-    void default_string_deinit(RF_String* string)
+    void default_string_deinit(RF_String* string) nogil
 
     int is_valid_string(object py_str) except +
     RF_String convert_string(object py_str)
@@ -100,3 +101,12 @@ cdef inline RF_String hash_sequence(seq) except *:
 
     s_proc.dtor = default_string_deinit
     return s_proc
+
+cdef inline RF_KwargsWrapper KwargsInit(RF_Scorer scorer, dict kwargs) except *:
+    cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()
+    if (NULL != scorer.kwargs_init):
+        scorer.kwargs_init(&kwargs_context.kwargs, kwargs)
+    elif len(kwargs):
+        raise TypeError("Got unexpected keyword arguments: ", ", ".join(kwargs.keys()))
+
+    return move(kwargs_context)

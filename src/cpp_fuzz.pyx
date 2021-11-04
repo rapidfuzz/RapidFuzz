@@ -1,11 +1,12 @@
 # distutils: language=c++
 # cython: language_level=3, binding=True, linetrace=True
 
-from rapidfuzz.utils import default_process
-from cpp_common cimport RF_String, RF_StringWrapper, is_valid_string, convert_string, hash_array, hash_sequence
 from array import array
+from rapidfuzz.utils import default_process
 
-from rapidfuzz_capi cimport RfSimilarityFunctionTable
+from rapidfuzz_capi cimport RF_String, RF_Scorer
+from cpp_common cimport RF_StringWrapper, is_valid_string, convert_string, hash_array, hash_sequence
+
 from cpython.pycapsule cimport PyCapsule_New
 
 cdef inline RF_String conv_sequence(seq) except *:
@@ -38,16 +39,16 @@ cdef extern from "cpp_scorer.hpp":
     double QRatio_no_process(                        const RF_String&, const RF_String&, double) nogil except +
     double QRatio_default_process(                   const RF_String&, const RF_String&, double) nogil except +
 
-    RfSimilarityFunctionTable CreateRatioFunctionTable() except +
-    RfSimilarityFunctionTable CreatePartialRatioFunctionTable() except +
-    RfSimilarityFunctionTable CreateTokenSortRatioFunctionTable() except +
-    RfSimilarityFunctionTable CreateTokenSetRatioFunctionTable() except +
-    RfSimilarityFunctionTable CreateTokenRatioFunctionTable() except +
-    RfSimilarityFunctionTable CreatePartialTokenSortRatioFunctionTable() except +
-    RfSimilarityFunctionTable CreatePartialTokenSetRatioFunctionTable() except +
-    RfSimilarityFunctionTable CreatePartialTokenRatioFunctionTable() except +
-    RfSimilarityFunctionTable CreateWRatioFunctionTable() except +
-    RfSimilarityFunctionTable CreateQRatioFunctionTable() except +
+    RF_Scorer CreateRatioFunctionTable() except +
+    RF_Scorer CreatePartialRatioFunctionTable() except +
+    RF_Scorer CreateTokenSortRatioFunctionTable() except +
+    RF_Scorer CreateTokenSetRatioFunctionTable() except +
+    RF_Scorer CreateTokenRatioFunctionTable() except +
+    RF_Scorer CreatePartialTokenSortRatioFunctionTable() except +
+    RF_Scorer CreatePartialTokenSetRatioFunctionTable() except +
+    RF_Scorer CreatePartialTokenRatioFunctionTable() except +
+    RF_Scorer CreateWRatioFunctionTable() except +
+    RF_Scorer CreateQRatioFunctionTable() except +
 
 def ratio(s1, s2, *, processor=None, score_cutoff=None):
     """
@@ -575,32 +576,32 @@ def QRatio(s1, s2, *, processor=True, score_cutoff=None):
     s2_proc = RF_StringWrapper(conv_sequence(s2))
     return QRatio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
 
-cdef RfSimilarityFunctionTable RatioContext = CreateRatioFunctionTable()
-ratio.__RapidFuzzScorer = PyCapsule_New(&RatioContext, "similarity", NULL)
+cdef RF_Scorer RatioContext = CreateRatioFunctionTable()
+ratio.__RapidFuzzScorer = PyCapsule_New(&RatioContext, NULL, NULL)
 
-cdef RfSimilarityFunctionTable PartialRatioContext = CreatePartialRatioFunctionTable()
-partial_ratio.__RapidFuzzScorer = PyCapsule_New(&PartialRatioContext, "similarity", NULL)
+cdef RF_Scorer PartialRatioContext = CreatePartialRatioFunctionTable()
+partial_ratio.__RapidFuzzScorer = PyCapsule_New(&PartialRatioContext, NULL, NULL)
 
-cdef RfSimilarityFunctionTable TokenSortRatioContext = CreateTokenSortRatioFunctionTable()
-token_sort_ratio.__RapidFuzzScorer = PyCapsule_New(&TokenSortRatioContext, "similarity", NULL)
+cdef RF_Scorer TokenSortRatioContext = CreateTokenSortRatioFunctionTable()
+token_sort_ratio.__RapidFuzzScorer = PyCapsule_New(&TokenSortRatioContext, NULL, NULL)
 
-cdef RfSimilarityFunctionTable TokenSetRatioContext = CreateTokenSetRatioFunctionTable()
-token_set_ratio.__RapidFuzzScorer = PyCapsule_New(&TokenSetRatioContext, "similarity", NULL)
+cdef RF_Scorer TokenSetRatioContext = CreateTokenSetRatioFunctionTable()
+token_set_ratio.__RapidFuzzScorer = PyCapsule_New(&TokenSetRatioContext, NULL, NULL)
 
-cdef RfSimilarityFunctionTable TokenRatioContext = CreateTokenRatioFunctionTable()
-token_ratio.__RapidFuzzScorer = PyCapsule_New(&TokenRatioContext, "similarity", NULL)
+cdef RF_Scorer TokenRatioContext = CreateTokenRatioFunctionTable()
+token_ratio.__RapidFuzzScorer = PyCapsule_New(&TokenRatioContext, NULL, NULL)
 
-cdef RfSimilarityFunctionTable PartialTokenSortRatioContext = CreatePartialTokenSortRatioFunctionTable()
-partial_token_sort_ratio.__RapidFuzzScorer = PyCapsule_New(&PartialTokenSortRatioContext, "similarity", NULL)
+cdef RF_Scorer PartialTokenSortRatioContext = CreatePartialTokenSortRatioFunctionTable()
+partial_token_sort_ratio.__RapidFuzzScorer = PyCapsule_New(&PartialTokenSortRatioContext, NULL, NULL)
 
-cdef RfSimilarityFunctionTable PartialTokenSetRatioContext = CreatePartialTokenSetRatioFunctionTable()
-partial_token_set_ratio.__RapidFuzzScorer = PyCapsule_New(&PartialTokenSetRatioContext, "similarity", NULL)
+cdef RF_Scorer PartialTokenSetRatioContext = CreatePartialTokenSetRatioFunctionTable()
+partial_token_set_ratio.__RapidFuzzScorer = PyCapsule_New(&PartialTokenSetRatioContext, NULL, NULL)
 
-cdef RfSimilarityFunctionTable PartialTokenRatioContext = CreatePartialTokenRatioFunctionTable()
-partial_token_ratio.__RapidFuzzScorer = PyCapsule_New(&PartialTokenRatioContext, "similarity", NULL)
+cdef RF_Scorer PartialTokenRatioContext = CreatePartialTokenRatioFunctionTable()
+partial_token_ratio.__RapidFuzzScorer = PyCapsule_New(&PartialTokenRatioContext, NULL, NULL)
 
-cdef RfSimilarityFunctionTable WRatioContext = CreateWRatioFunctionTable()
-WRatio.__RapidFuzzScorer = PyCapsule_New(&WRatioContext, "similarity", NULL)
+cdef RF_Scorer WRatioContext = CreateWRatioFunctionTable()
+WRatio.__RapidFuzzScorer = PyCapsule_New(&WRatioContext, NULL, NULL)
 
-cdef RfSimilarityFunctionTable QRatioContext = CreateQRatioFunctionTable()
-QRatio.__RapidFuzzScorer = PyCapsule_New(&QRatioContext, "similarity", NULL)
+cdef RF_Scorer QRatioContext = CreateQRatioFunctionTable()
+QRatio.__RapidFuzzScorer = PyCapsule_New(&QRatioContext, NULL, NULL)

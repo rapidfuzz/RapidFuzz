@@ -13,19 +13,22 @@ extern "C" {
 #define RF_PYTHON_VERSION(major, minor, micro) ((major << 24) | (minor << 16) | (micro << 8))
 
 enum RF_StringType {
-#if PY_VERSION_HEX > RF_PYTHON_VERSION(3, 0, 0)
+#if PY_VERSION_HEX < RF_PYTHON_VERSION(3, 0, 0)
+    RF_CHAR,    /* char */
+    RF_UNICODE, /* Py_UNICODE */
+    RF_UINT64   /* uint64_t */
+#else /* Python3 */
     RF_UINT8,  /* uint8_t */
     RF_UINT16, /* uint16_t */
     RF_UINT32, /* uint32_t */
     RF_UINT64  /* uint64_t */
-#else /* Python2 */
-    RF_CHAR,    /* char */
-    RF_UNICODE, /* Py_UNICODE */
-    RF_UINT64   /* uint64_t */
 #endif
 };
 
-typedef void (*RF_StringDeinit) (struct _RF_String* context);
+enum RF_ScorerType {
+    RF_DISTANCE,
+    RF_SIMILARITY
+};
 
 typedef struct _RF_String {
     /**
@@ -43,13 +46,26 @@ typedef struct _RF_String {
 } RF_String;
 
 typedef struct _RF_Kwargs {
+    /**
+     * @brief destructor for RF_Kwargs
+     * 
+     * @param self pointer to RF_Kwargs instance to destruct
+     */
     void (*dtor) (struct _RF_Kwargs* self);
 
 /* members */
-    void* context;
+    void* context; 
 } RF_Kwargs;
 
-typedef bool (*RF_KwargsInit)(RF_Kwargs* context, PyObject* kwargs);
+/**
+ * @brief construct RF_Kwargs
+ * 
+ * @param[out] self constructed RF_Kwargs instance
+ * @param[in] kwargs Python dictionary holding keyword arguments
+ * 
+ * @return true on success and false with a Python exception set on failure
+ */
+typedef bool (*RF_KwargsInit) (RF_Kwargs* self, PyObject* kwargs);
 
 typedef struct _RF_Similarity {
     /**
@@ -76,12 +92,17 @@ typedef struct _RF_Similarity {
     void* context;
 } RF_Similarity;
 
-typedef bool (*RF_SimilarityInit) (RF_Similarity* context, const RF_Kwargs* kwargs, size_t str_count, const RF_String* strings);
-
-typedef struct {
-    RF_KwargsInit kwargs_init;
-    RF_SimilarityInit similarity_init;
-} RfSimilarityFunctionTable;
+/**
+ * @brief construct RF_Similarity
+ * 
+ * @param[out] self constructed RF_Similarity instance
+ * @param[in] kwargs keyword arguments for additional parameters
+ * @param[in] str_count size of the strings array
+ * @param[in] strings array of strings to compare in distance function
+ * 
+ * @return true on success and false with a Python exception set on failure
+ */
+typedef bool (*RF_SimilarityInit) (RF_Similarity* self, const RF_Kwargs* kwargs, size_t str_count, const RF_String* strings);
 
 typedef struct _RF_Distance {
     /**
@@ -108,12 +129,26 @@ typedef struct _RF_Distance {
     void* context;
 } RF_Distance;
 
-typedef bool (*RF_DistanceInit) (RF_Distance* context, const RF_Kwargs* kwargs, size_t str_count, const RF_String* strings);
+/**
+ * @brief construct RF_Distance
+ * 
+ * @param[out] self constructed RF_Distance instance
+ * @param[in] kwargs keyword arguments for additional parameters
+ * @param[in] str_count size of the strings array
+ * @param[in] strings array of strings to compare in distance function
+ * 
+ * @return true on success and false with a Python exception set on failure
+ */
+typedef bool (*RF_DistanceInit) (RF_Distance* self, const RF_Kwargs* kwargs, size_t str_count, const RF_String* strings);
 
 typedef struct {
+    RF_ScorerType scorer_type;
     RF_KwargsInit kwargs_init;
-    RF_DistanceInit distance_init;
-} RfDistanceFunctionTable;
+    union {
+        RF_DistanceInit distance_init;
+        RF_SimilarityInit similarity_init;
+    } scorer;
+} RF_Scorer;
 
 #ifdef __cplusplus
 }

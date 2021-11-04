@@ -1,22 +1,24 @@
 # distutils: language=c++
 # cython: language_level=3, binding=True, linetrace=True
 
-from rapidfuzz.utils import default_process
-from cpp_common cimport  RF_String, RF_StringWrapper, is_valid_string, convert_string, hash_array, hash_sequence
 from array import array
+from rapidfuzz.utils import default_process
+
+from rapidfuzz_capi cimport (
+    RF_String, RF_Scorer, RF_Kwargs, RF_Distance, RF_Similarity,
+    RF_KwargsInit, RF_SIMILARITY, RF_DISTANCE
+)
+from cpp_common cimport RF_StringWrapper, is_valid_string, convert_string, hash_array, hash_sequence
+
+from libcpp cimport bool
 from libcpp.utility cimport move
 from libcpp.vector cimport vector
 from libc.stdlib cimport malloc, free
 from libcpp cimport bool
 from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.ref cimport Py_INCREF
-from cython.operator cimport dereference
-from rapidfuzz_capi cimport (
-    RfDistanceFunctionTable, RfSimilarityFunctionTable,
-    RF_Kwargs, RF_Distance, RF_Similarity,
-    RF_KwargsInit
-)
 from cpython.pycapsule cimport PyCapsule_New
+from cython.operator cimport dereference
 
 cdef inline RF_String conv_sequence(seq) except *:
     if is_valid_string(seq):
@@ -62,13 +64,13 @@ cdef extern from "cpp_scorer.hpp":
     vector[LevenshteinEditOp] levenshtein_editops_no_process(     const RF_String& s1, const RF_String& s2) nogil except +
     vector[LevenshteinEditOp] levenshtein_editops_default_process(const RF_String& s1, const RF_String& s2) nogil except +
 
-    bool LevenshteinInit(RF_Distance* context, const RF_Kwargs* kwargs, size_t str_count, const RF_String* strings) nogil except False
-    bool NormalizedLevenshteinInit(RF_Similarity* context, const RF_Kwargs* kwargs, size_t str_count, const RF_String* strings) nogil except False
+    bool LevenshteinInit(RF_Distance* context, const RF_Kwargs* kwargs, size_t, const RF_String* str) nogil except False
+    bool NormalizedLevenshteinInit(RF_Similarity* context, const RF_Kwargs* kwargs, size_t, const RF_String* str) nogil except False
 
-    RfDistanceFunctionTable CreateHammingFunctionTable() except +
-    RfSimilarityFunctionTable CreateNormalizedHammingFunctionTable() except +
-    RfSimilarityFunctionTable CreateJaroSimilarityFunctionTable() except +
-    bool JaroWinklerSimilarityInit(RF_Similarity* context, const RF_Kwargs* kwargs, size_t str_count, const RF_String* strings) nogil except False
+    RF_Scorer CreateHammingFunctionTable() except +
+    RF_Scorer CreateNormalizedHammingFunctionTable() except +
+    RF_Scorer CreateJaroSimilarityFunctionTable() except +
+    bool JaroWinklerSimilarityInit(RF_Similarity* context, const RF_Kwargs* kwargs, size_t, const RF_String* str) nogil except False
 
 def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
     """
@@ -625,56 +627,59 @@ def jaro_winkler_similarity(s1, s2, *, double prefix_weight=0.1, processor=None,
     s2_proc = RF_StringWrapper(conv_sequence(s2))
     return jaro_winkler_similarity_no_process(s1_proc.string, s2_proc.string, prefix_weight, c_score_cutoff)
 
-cdef void KwargsDeinit(RF_Kwargs* context) nogil:
-    free(<void*>dereference(context).context)
+cdef void KwargsDeinit(RF_Kwargs* self):
+    free(<void*>dereference(self).context)
 
-cdef bool LevenshteinKwargsInit(RF_Kwargs* context, dict kwargs) except False:
+cdef bool LevenshteinKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     cdef size_t insertion, deletion, substitution
     cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>malloc(sizeof(LevenshteinWeightTable))
 
-    if weights == NULL:
+    if not weights:
         raise MemoryError
 
     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
     dereference(weights).insert_cost = insertion
     dereference(weights).delete_cost = deletion
     dereference(weights).replace_cost = substitution
-    dereference(context).context = weights
-    dereference(context).dtor = KwargsDeinit
+    dereference(self).context = weights
+    dereference(self).dtor = KwargsDeinit
     return True
 
 
-cdef RfDistanceFunctionTable LevenshteinContext
+cdef RF_Scorer LevenshteinContext
+LevenshteinContext.scorer_type = RF_DISTANCE
 LevenshteinContext.kwargs_init = LevenshteinKwargsInit
-LevenshteinContext.distance_init = LevenshteinInit
-levenshtein.__RapidFuzzScorer = PyCapsule_New(&LevenshteinContext, "distance", NULL)
+LevenshteinContext.scorer.distance_init = LevenshteinInit
+levenshtein.__RapidFuzzScorer = PyCapsule_New(&LevenshteinContext, NULL, NULL)
 
-cdef RfSimilarityFunctionTable NormalizedLevenshteinContext
+cdef RF_Scorer NormalizedLevenshteinContext
+NormalizedLevenshteinContext.scorer_type = RF_SIMILARITY
 NormalizedLevenshteinContext.kwargs_init = LevenshteinKwargsInit
-NormalizedLevenshteinContext.similarity_init = NormalizedLevenshteinInit
-normalized_levenshtein.__RapidFuzzScorer = PyCapsule_New(&NormalizedLevenshteinContext, "similarity", NULL)
+NormalizedLevenshteinContext.scorer.similarity_init = NormalizedLevenshteinInit
+normalized_levenshtein.__RapidFuzzScorer = PyCapsule_New(&NormalizedLevenshteinContext, NULL, NULL)
 
-cdef RfDistanceFunctionTable HammingContext = CreateHammingFunctionTable()
-hamming.__RapidFuzzScorer = PyCapsule_New(&HammingContext, "distance", NULL)
+cdef RF_Scorer HammingContext = CreateHammingFunctionTable()
+hamming.__RapidFuzzScorer = PyCapsule_New(&HammingContext, NULL, NULL)
 
-cdef RfSimilarityFunctionTable NormalizedHammingContext = CreateNormalizedHammingFunctionTable()
-normalized_hamming.__RapidFuzzScorer = PyCapsule_New(&NormalizedHammingContext, "similarity", NULL)
+cdef RF_Scorer NormalizedHammingContext = CreateNormalizedHammingFunctionTable()
+normalized_hamming.__RapidFuzzScorer = PyCapsule_New(&NormalizedHammingContext, NULL, NULL)
 
-cdef RfSimilarityFunctionTable JaroSimilarityContext = CreateJaroSimilarityFunctionTable()
-jaro_similarity.__RapidFuzzScorer = PyCapsule_New(&JaroSimilarityContext, "similarity", NULL)
+cdef RF_Scorer JaroSimilarityContext = CreateJaroSimilarityFunctionTable()
+jaro_similarity.__RapidFuzzScorer = PyCapsule_New(&JaroSimilarityContext, NULL, NULL)
 
-cdef bool JaroWinklerKwargsInit(RF_Kwargs* context, dict kwargs) except False:
+cdef bool JaroWinklerKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     cdef double* prefix_weight = <double*>malloc(sizeof(double))
 
-    if prefix_weight == NULL:
+    if not prefix_weight:
         raise MemoryError
 
     prefix_weight[0] = kwargs.get("prefix_weight", 0.1)
-    dereference(context).context = prefix_weight
-    dereference(context).dtor = KwargsDeinit
+    dereference(self).context = prefix_weight
+    dereference(self).dtor = KwargsDeinit
     return True
 
-cdef RfSimilarityFunctionTable JaroWinklerSimilarityContext
+cdef RF_Scorer JaroWinklerSimilarityContext
+JaroWinklerSimilarityContext.scorer_type = RF_SIMILARITY
 JaroWinklerSimilarityContext.kwargs_init = JaroWinklerKwargsInit
-JaroWinklerSimilarityContext.similarity_init = JaroWinklerSimilarityInit
-jaro_winkler_similarity.__RapidFuzzScorer = PyCapsule_New(&JaroWinklerSimilarityContext, "similarity", NULL)
+JaroWinklerSimilarityContext.scorer.similarity_init = JaroWinklerSimilarityInit
+jaro_winkler_similarity.__RapidFuzzScorer = PyCapsule_New(&JaroWinklerSimilarityContext, NULL, NULL)

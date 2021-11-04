@@ -16,7 +16,7 @@ from cpython.ref cimport Py_INCREF, Py_DECREF
 from cython.operator cimport dereference
 
 from cpp_common cimport (
-    RF_String, RF_StringWrapper, RF_KwargsWrapper,
+    RF_StringWrapper, RF_KwargsWrapper, KwargsInit,
     is_valid_string, convert_string, hash_array, hash_sequence, default_process_func
 )
 
@@ -25,10 +25,9 @@ from array import array
 from libc.stdlib cimport malloc, free
 
 from rapidfuzz_capi cimport (
-    RF_Distance, RF_Similarity,
-    RfDistanceFunctionTable, RfSimilarityFunctionTable,
+    RF_String, RF_Distance, RF_Similarity, RF_Scorer,
     RF_DistanceInit, RF_SimilarityInit,
-    RF_Kwargs
+    RF_SIMILARITY, RF_DISTANCE
 )
 from cpython.pycapsule cimport PyCapsule_IsValid, PyCapsule_GetPointer
 
@@ -446,9 +445,10 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
     """
     cdef double c_score_cutoff = 0.0
     cdef size_t c_max = <size_t>-1
-    cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()
+    cdef RF_KwargsWrapper kwargs_context
     cdef RF_Similarity similarity_context
     cdef RF_Distance distance_context
+    cdef RF_Scorer* scorer_context = NULL
 
     if query is None:
         return None
@@ -464,16 +464,13 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
         processor = default_process
 
     scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
-    if PyCapsule_IsValid(scorer_capsule, "similarity"):
-        similarity_table = dereference(
-            <RfSimilarityFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "similarity")
-        )
+    if PyCapsule_IsValid(scorer_capsule, NULL):
+        scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
+        kwargs_context = KwargsInit(dereference(scorer_context), kwargs)
 
-        if (NULL != similarity_table.kwargs_init):
-            similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)
-
+    if scorer_context and scorer_context.scorer_type == RF_SIMILARITY:
         query_context = RF_StringWrapper(conv_sequence(query))
-        similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
+        scorer_context.scorer.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
         ScorerContext = RF_SimilarityWrapper(similarity_context)
         if score_cutoff is not None:
             c_score_cutoff = score_cutoff
@@ -485,16 +482,9 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
         else:
             return extractOne_list(move(ScorerContext), choices, processor, c_score_cutoff)
 
-    if PyCapsule_IsValid(scorer_capsule, "distance"):
-        distance_table = dereference(
-            <RfDistanceFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "distance")
-        )
-
-        if (NULL != distance_table.kwargs_init):
-            distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)
-
+    if scorer_context and scorer_context.scorer_type == RF_DISTANCE:
         query_context = RF_StringWrapper(conv_sequence(query))
-        distance_table.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
+        scorer_context.scorer.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
         DistanceContext = RF_DistanceWrapper(distance_context)
         if score_cutoff is not None and score_cutoff != -1:
             c_max = score_cutoff
@@ -874,9 +864,10 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
     cdef double c_score_cutoff = 0.0
     cdef size_t c_max = <size_t>-1
     cdef int def_process = 0
-    cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()
+    cdef RF_KwargsWrapper kwargs_context
     cdef RF_Similarity similarity_context
     cdef RF_Distance distance_context
+    cdef RF_Scorer* scorer_context = NULL
 
     if query is None:
         return []
@@ -895,16 +886,13 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
         processor = default_process
 
     scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
-    if PyCapsule_IsValid(scorer_capsule, "similarity"):
-        similarity_table = dereference(
-            <RfSimilarityFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "similarity")
-        )
+    if PyCapsule_IsValid(scorer_capsule, NULL):
+        scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
+        kwargs_context = KwargsInit(dereference(scorer_context), kwargs)
 
-        if (NULL != similarity_table.kwargs_init):
-            similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)
-
+    if scorer_context and scorer_context.scorer_type == RF_SIMILARITY:
         query_context = RF_StringWrapper(conv_sequence(query))
-        similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
+        scorer_context.scorer.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
         ScorerContext = RF_SimilarityWrapper(similarity_context)
         if score_cutoff is not None:
             c_score_cutoff = score_cutoff
@@ -916,16 +904,9 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
         else:
             return extract_list(move(ScorerContext), choices, processor, limit, c_score_cutoff)
 
-    if PyCapsule_IsValid(scorer_capsule, "distance"):
-        distance_table = dereference(
-            <RfDistanceFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "distance")
-        )
-
-        if (NULL != distance_table.kwargs_init):
-            distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)
-
+    if scorer_context and scorer_context.scorer_type == RF_DISTANCE:
         query_context = RF_StringWrapper(conv_sequence(query))
-        distance_table.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
+        scorer_context.scorer.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
         DistanceContext = RF_DistanceWrapper(distance_context)
         if score_cutoff is not None and score_cutoff != -1:
             c_max = score_cutoff
@@ -1001,11 +982,12 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
     """
     cdef double c_score_cutoff = 0.0
     cdef size_t c_max = <size_t>-1
-    cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()
-    cdef RF_Similarity similarity_context
-    cdef RF_Distance distance_context
+    cdef RF_KwargsWrapper kwargs_context
     cdef RF_SimilarityWrapper ScorerContext
     cdef RF_DistanceWrapper DistanceContext
+    cdef RF_Similarity similarity_context
+    cdef RF_Distance distance_context
+    cdef RF_Scorer* scorer_context = NULL
 
     def extract_iter_dict():
         """
@@ -1188,16 +1170,13 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         def_process = 1
 
     scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
-    if PyCapsule_IsValid(scorer_capsule, "similarity"):
-        similarity_table = dereference(
-            <RfSimilarityFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "similarity")
-        )
+    if PyCapsule_IsValid(scorer_capsule, NULL):
+        scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
+        kwargs_context = KwargsInit(dereference(scorer_context), kwargs)
 
-        if (NULL != similarity_table.kwargs_init):
-            similarity_table.kwargs_init(&kwargs_context.kwargs, kwargs)
-
+    if scorer_context and scorer_context.scorer_type == RF_SIMILARITY:
         query_context = RF_StringWrapper(conv_sequence(query))
-        similarity_table.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
+        scorer_context.scorer.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
         ScorerContext = RF_SimilarityWrapper(similarity_context)
         if score_cutoff is not None:
             c_score_cutoff = score_cutoff
@@ -1211,16 +1190,9 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         # finish generator
         return
 
-    if PyCapsule_IsValid(scorer_capsule, "distance"):
-        distance_table = dereference(
-            <RfDistanceFunctionTable*>PyCapsule_GetPointer(scorer_capsule, "distance")
-        )
-
-        if (NULL != distance_table.kwargs_init):
-            distance_table.kwargs_init(&kwargs_context.kwargs, kwargs)
-
+    if scorer_context and scorer_context.scorer_type == RF_DISTANCE:
         query_context = RF_StringWrapper(conv_sequence(query))
-        distance_table.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
+        scorer_context.scorer.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
         DistanceContext = RF_DistanceWrapper(distance_context)
         if score_cutoff is not None and score_cutoff != -1:
             c_max = score_cutoff

@@ -6,6 +6,7 @@ from rapidfuzz.utils import default_process
 
 from libcpp.vector cimport vector
 from libcpp.utility cimport move
+from libcpp cimport bool
 from libc.math cimport floor
 
 from cpython.object cimport PyObject
@@ -13,7 +14,7 @@ from cpython.ref cimport Py_INCREF, Py_DECREF
 from cython.operator cimport dereference
 
 from cpp_common cimport (
-    RF_String, RF_StringWrapper, RF_KwargsWrapper,
+    RF_StringWrapper, RF_KwargsWrapper, KwargsInit,
     is_valid_string, convert_string, hash_array, hash_sequence, default_process_func
 )
 
@@ -25,9 +26,8 @@ cimport numpy as np
 cimport cython
 
 from rapidfuzz_capi cimport (
-    RfDistanceFunctionTable, RfSimilarityFunctionTable,
-    RF_DistanceInit, RF_SimilarityInit,
-    RF_Kwargs
+    RF_Kwargs, RF_String, RF_Scorer, RF_DistanceInit, RF_SimilarityInit,
+    RF_SIMILARITY, RF_DISTANCE
 )
 from cpython.pycapsule cimport PyCapsule_IsValid, PyCapsule_GetPointer
 
@@ -73,47 +73,35 @@ cdef int dtype_to_type_num_distance(dtype) except -1:
 cdef inline cdist_two_lists_similarity(
     const vector[RF_StringWrapper]& queries,
     const vector[RF_StringWrapper]& choices,
-    similarity_capsule, score_cutoff, dtype, workers, dict kwargs
+    RF_Scorer scorer, score_cutoff, dtype, workers, dict kwargs
 ):
     cdef double c_score_cutoff = 0
-    cdef RfSimilarityFunctionTable table = dereference(
-        <RfSimilarityFunctionTable*>PyCapsule_GetPointer(similarity_capsule, "similarity")
-    )
-    cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()
+    cdef RF_KwargsWrapper kwargs_context = KwargsInit(scorer, kwargs)
     cdef int c_dtype = dtype_to_type_num_similarity(dtype)
     cdef int c_workers = workers
-
-    if (NULL != table.kwargs_init):
-        table.kwargs_init(&kwargs_context.kwargs, kwargs)
 
     if score_cutoff is not None:
         c_score_cutoff = score_cutoff
     if c_score_cutoff < 0 or c_score_cutoff > 100:
         raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
 
-    return cdist_two_lists_similarity_impl(kwargs_context, table.similarity_init, queries, choices, c_dtype, c_workers, c_score_cutoff)
+    return cdist_two_lists_similarity_impl(kwargs_context, scorer.scorer.similarity_init, queries, choices, c_dtype, c_workers, c_score_cutoff)
 
 cdef inline cdist_two_lists_distance(
     const vector[RF_StringWrapper]& queries, const vector[RF_StringWrapper]& choices,
-    distance_capsule, max_, dtype, workers, dict kwargs
+    RF_Scorer scorer, max_, dtype, workers, dict kwargs
 ):
     cdef size_t c_max = <size_t>-1
-    cdef RfDistanceFunctionTable table = dereference(
-        <RfDistanceFunctionTable*>PyCapsule_GetPointer(distance_capsule, "distance")
-    )
-    cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()
+    cdef RF_KwargsWrapper kwargs_context = KwargsInit(scorer, kwargs)
     cdef int c_dtype = dtype_to_type_num_distance(dtype)
     cdef int c_workers = workers
-
-    if (NULL != table.kwargs_init):
-        table.kwargs_init(&kwargs_context.kwargs, kwargs)
 
     if max_ is not None:
         if max_ < -1:
             raise TypeError("max has to be >= -1")
         c_max = max_
 
-    return cdist_two_lists_distance_impl(kwargs_context, table.distance_init, queries, choices, c_dtype, c_workers, c_max)
+    return cdist_two_lists_distance_impl(kwargs_context, scorer.scorer.distance_init, queries, choices, c_dtype, c_workers, c_max)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -153,12 +141,15 @@ cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, w
     cdef vector[PyObject*] proc_py_choices
     cdef size_t queries_len = <size_t>len(queries)
     cdef size_t choices_len = <size_t>len(choices)
+    cdef RF_Scorer* scorer_context
 
     cdef scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
-    cdef int valid_capsule = PyCapsule_IsValid(scorer_capsule, "similarity") or PyCapsule_IsValid(scorer_capsule, "distance")
+    scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
+    if PyCapsule_IsValid(scorer_capsule, NULL):
+        scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
 
     try:
-        if valid_capsule:
+        if scorer_context:
             proc_queries.reserve(queries_len)
             proc_choices.reserve(choices_len)
 
@@ -197,10 +188,10 @@ cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, w
                         move(RF_StringWrapper(default_process_func(conv_sequence(choice))))
                     )
 
-            if PyCapsule_IsValid(scorer_capsule, "similarity"):
-                return cdist_two_lists_similarity(proc_queries, proc_choices, scorer_capsule, score_cutoff, dtype, workers, kwargs)
+            if scorer_context.scorer_type == RF_SIMILARITY:
+                return cdist_two_lists_similarity(proc_queries, proc_choices, dereference(scorer_context), score_cutoff, dtype, workers, kwargs)
             else:
-                return cdist_two_lists_distance(proc_queries, proc_choices, scorer_capsule, score_cutoff, dtype, workers, kwargs)
+                return cdist_two_lists_distance(proc_queries, proc_choices, dereference(scorer_context), score_cutoff, dtype, workers, kwargs)
 
         else:
             proc_py_queries.reserve(queries_len)
@@ -241,59 +232,49 @@ cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, w
             Py_DECREF(<object>item)
 
 cdef inline cdist_single_list_similarity(
-    const vector[RF_StringWrapper]& queries, similarity_capsule, score_cutoff, dtype, workers, dict kwargs
+    const vector[RF_StringWrapper]& queries, RF_Scorer scorer, score_cutoff, dtype, workers, dict kwargs
 ):
     cdef double c_score_cutoff = 0
-    cdef RfSimilarityFunctionTable table = dereference(
-        <RfSimilarityFunctionTable*>PyCapsule_GetPointer(similarity_capsule, "similarity")
-    )
-    cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()
+    cdef RF_KwargsWrapper kwargs_context = KwargsInit(scorer, kwargs)
     cdef int c_dtype = dtype_to_type_num_similarity(dtype)
     cdef int c_workers = workers
-
-    if (NULL != table.kwargs_init):
-        table.kwargs_init(&kwargs_context.kwargs, kwargs)
 
     if score_cutoff is not None:
         c_score_cutoff = score_cutoff
     if c_score_cutoff < 0 or c_score_cutoff > 100:
         raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
 
-    return cdist_single_list_similarity_impl(kwargs_context, table.similarity_init, queries, c_dtype, c_workers, c_score_cutoff)
+    return cdist_single_list_similarity_impl(kwargs_context, scorer.scorer.similarity_init, queries, c_dtype, c_workers, c_score_cutoff)
 
 cdef inline cdist_single_list_distance(
-    const vector[RF_StringWrapper]& queries, distance_capsule, max_, dtype, workers, dict kwargs
+    const vector[RF_StringWrapper]& queries, RF_Scorer scorer, max_, dtype, workers, dict kwargs
 ):
     cdef size_t c_max = <size_t>-1
-    cdef RfDistanceFunctionTable table = dereference(
-        <RfDistanceFunctionTable*>PyCapsule_GetPointer(distance_capsule, "distance")
-    )
-    cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()
+    cdef RF_KwargsWrapper kwargs_context = KwargsInit(scorer, kwargs)
     cdef int c_dtype = dtype_to_type_num_distance(dtype)
     cdef int c_workers = workers
-
-    if (NULL != table.kwargs_init):
-        table.kwargs_init(&kwargs_context.kwargs, kwargs)
 
     if max_ is not None:
         if max_ < -1:
             raise TypeError("max has to be >= -1")
         c_max = max_
 
-    return cdist_single_list_distance_impl(kwargs_context, table.distance_init, queries, c_dtype, c_workers, c_max)
+    return cdist_single_list_distance_impl(kwargs_context, scorer.scorer.distance_init, queries, c_dtype, c_workers, c_max)
 
 cdef cdist_single_list(queries, scorer, processor, score_cutoff, dtype, workers, dict kwargs):
     cdef size_t queries_len = <size_t>len(queries)
 
     cdef vector[RF_StringWrapper] proc_queries
     cdef vector[PyObject*] proc_py_queries
+    cdef RF_Scorer* scorer_context
 
     cdef scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
-    cdef int valid_capsule = PyCapsule_IsValid(scorer_capsule, "similarity") or PyCapsule_IsValid(scorer_capsule, "distance")
-    print(valid_capsule)
+    scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
+    if PyCapsule_IsValid(scorer_capsule, NULL):
+        scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
 
     try:
-        if valid_capsule:
+        if scorer_context:
             proc_queries.reserve(queries_len)
 
             # processor None/False
@@ -316,10 +297,10 @@ cdef cdist_single_list(queries, scorer, processor, score_cutoff, dtype, workers,
                         move(RF_StringWrapper(default_process_func(conv_sequence(query))))
                     )
 
-            if PyCapsule_IsValid(scorer_capsule, "similarity"):
-                return cdist_single_list_similarity(proc_queries, scorer_capsule, score_cutoff, dtype, workers, kwargs)
+            if scorer_context.scorer_type == RF_SIMILARITY:
+                return cdist_single_list_similarity(proc_queries, dereference(scorer_context), score_cutoff, dtype, workers, kwargs)
             else:
-                return cdist_single_list_distance(proc_queries, scorer_capsule, score_cutoff, dtype, workers, kwargs)
+                return cdist_single_list_distance(proc_queries, dereference(scorer_context), score_cutoff, dtype, workers, kwargs)
         else:
             proc_py_queries.reserve(queries_len)
 
