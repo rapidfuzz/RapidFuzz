@@ -16,6 +16,8 @@ cdef extern from "rapidfuzz_capi.h":
         size_t length
         void* context
 
+    ctypedef bool (*RF_Preprocess) (object obj, RF_String* str) except False
+
     ctypedef struct RF_Kwargs:
         void (*dtor) (RF_Kwargs* self)
 
@@ -41,7 +43,7 @@ cdef extern from "rapidfuzz_capi.h":
 
     ctypedef union _RF_Scorer_union:
         RF_DistanceInit distance_init
-        RF_SimilarityInit similarity_init    
+        RF_SimilarityInit similarity_init
 
     ctypedef struct RF_Scorer:
         RF_ScorerType scorer_type

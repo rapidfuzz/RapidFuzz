@@ -5,7 +5,7 @@ from array import array
 from rapidfuzz.utils import default_process
 
 from rapidfuzz_capi cimport (
-    RF_String, RF_Scorer, RF_Kwargs, RF_Distance, RF_Similarity,
+    RF_String, RF_Scorer, RF_Kwargs, RF_Distance, RF_Similarity, RF_Preprocess,
     RF_KwargsInit, RF_SIMILARITY, RF_DISTANCE
 )
 from cpp_common cimport RF_StringWrapper, is_valid_string, convert_string, hash_array, hash_sequence
@@ -14,10 +14,9 @@ from libcpp cimport bool
 from libcpp.utility cimport move
 from libcpp.vector cimport vector
 from libc.stdlib cimport malloc, free
-from libcpp cimport bool
 from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.ref cimport Py_INCREF
-from cpython.pycapsule cimport PyCapsule_New
+from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
 from cython.operator cimport dereference
 
 cdef inline RF_String conv_sequence(seq) except *:
@@ -47,22 +46,15 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
         size_t replace_cost
 
 cdef extern from "cpp_scorer.hpp":
-    double normalized_levenshtein_no_process(       const RF_String&, const RF_String&, size_t, size_t, size_t, double) nogil except +
-    double normalized_levenshtein_default_process(  const RF_String&, const RF_String&, size_t, size_t, size_t, double) nogil except +
-    double normalized_hamming_no_process(           const RF_String&, const RF_String&, double) nogil except +
-    double normalized_hamming_default_process(      const RF_String&, const RF_String&, double) nogil except +
-    double jaro_similarity_no_process(              const RF_String&, const RF_String&, double) nogil except +
-    double jaro_similarity_default_process(         const RF_String&, const RF_String&, double) nogil except +
-    double jaro_winkler_similarity_no_process(      const RF_String&, const RF_String&, double, double) nogil except +
-    double jaro_winkler_similarity_default_process( const RF_String&, const RF_String&, double, double) nogil except +
+    double normalized_levenshtein_func( const RF_String&, const RF_String&, size_t, size_t, size_t, double) nogil except +
+    double normalized_hamming_func(     const RF_String&, const RF_String&, double) nogil except +
+    double jaro_similarity_func(        const RF_String&, const RF_String&, double) nogil except +
+    double jaro_winkler_similarity_func(const RF_String&, const RF_String&, double, double) nogil except +
 
-    object levenshtein_no_process(                  const RF_String&, const RF_String&, size_t, size_t, size_t, size_t) nogil except +
-    object levenshtein_default_process(             const RF_String&, const RF_String&, size_t, size_t, size_t, size_t) nogil except +
-    object hamming_no_process(                      const RF_String&, const RF_String&, size_t) nogil except +
-    object hamming_default_process(                 const RF_String&, const RF_String&, size_t) nogil except +
+    object levenshtein_func(const RF_String&, const RF_String&, size_t, size_t, size_t, size_t) nogil except +
+    object hamming_func(    const RF_String&, const RF_String&, size_t) nogil except +
 
-    vector[LevenshteinEditOp] levenshtein_editops_no_process(     const RF_String& s1, const RF_String& s2) nogil except +
-    vector[LevenshteinEditOp] levenshtein_editops_default_process(const RF_String& s1, const RF_String& s2) nogil except +
+    vector[LevenshteinEditOp] levenshtein_editops_func(const RF_String& s1, const RF_String& s2) nogil except +
 
     bool LevenshteinInit(RF_Distance* context, const RF_Kwargs* kwargs, size_t, const RF_String* str) nogil except False
     bool NormalizedLevenshteinInit(RF_Similarity* context, const RF_Kwargs* kwargs, size_t, const RF_String* str) nogil except False
@@ -88,10 +80,9 @@ def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
         The weights for the three operations in the form
         (insertion, deletion, substitution). Default is (1, 1, 1),
         which gives all three operations a weight of 1.
-    processor: bool or callable, optional
+    processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. When processor is True ``utils.default_process``
-        is used. Default is None, which deactivates this behaviour.
+        comparing them. Default is None, which deactivates this behaviour.
     max : int or None, optional
         Maximum distance between s1 and s2, that is
         considered as a result. If the distance is bigger than max,
@@ -236,6 +227,7 @@ def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
     >>> levenshtein("lewenstein", "levenshtein", weights=(1,1,2))
     3
     """
+    cdef RF_StringWrapper s1_proc, s2_proc
     cdef size_t insertion, deletion, substitution
     insertion = deletion = substitution = 1
     if weights is not None:
@@ -243,17 +235,24 @@ def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
 
     cdef size_t c_max = <size_t>-1 if max is None else max
 
-    if processor is True or processor == default_process:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-        return levenshtein_default_process(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_max)
+    if processor is True:
+        processor = default_process
+
+    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+    if PyCapsule_IsValid(processor_capsule, NULL):
+        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+        preprocess_func(s1, &s1_proc.string)
+        preprocess_func(s2, &s2_proc.string)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
+    else:
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
 
-    s1_proc = RF_StringWrapper(conv_sequence(s1))
-    s2_proc = RF_StringWrapper(conv_sequence(s2))
-    return levenshtein_no_process(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_max)
+    return levenshtein_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_max)
 
 cdef str levenshtein_edit_type_to_str(LevenshteinEditType edit_type):
     if edit_type == LevenshteinEditType.Insert:
@@ -290,10 +289,9 @@ def levenshtein_editops(s1, s2, *, processor=None):
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
-    processor: bool or callable, optional
+    processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. When processor is True ``utils.default_process``
-        is used. Default is None, which deactivates this behaviour.
+        comparing them. Default is None, which deactivates this behaviour.
 
     Returns
     -------
@@ -309,20 +307,26 @@ def levenshtein_editops(s1, s2, *, processor=None):
     replace s1[4] s2[3]
      insert s1[6] s2[6]
     """
-    if processor is True or processor == default_process:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-        return levenshtein_editops_to_list(
-            levenshtein_editops_default_process(s1_proc.string, s2_proc.string)
-        )
+    cdef RF_StringWrapper s1_proc, s2_proc
+    if processor is True:
+        processor = default_process
+
+    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+    if PyCapsule_IsValid(processor_capsule, NULL):
+        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+        preprocess_func(s1, &s1_proc.string)
+        preprocess_func(s2, &s2_proc.string)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
+    else:
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
 
-    s1_proc = RF_StringWrapper(conv_sequence(s1))
-    s2_proc = RF_StringWrapper(conv_sequence(s2))
     return levenshtein_editops_to_list(
-        levenshtein_editops_no_process(s1_proc.string, s2_proc.string)
+        levenshtein_editops_func(s1_proc.string, s2_proc.string)
     )
 
 def normalized_levenshtein(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
@@ -340,10 +344,9 @@ def normalized_levenshtein(s1, s2, *, weights=(1,1,1), processor=None, score_cut
         The weights for the three operations in the form
         (insertion, deletion, substitution). Default is (1, 1, 1),
         which gives all three operations a weight of 1.
-    processor: bool or callable, optional
+    processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. When processor is True ``utils.default_process``
-        is used. Default is None, which deactivates this behaviour.
+        comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
@@ -410,6 +413,7 @@ def normalized_levenshtein(s1, s2, *, weights=(1,1,1), processor=None, score_cut
     >>> normalized_levenshtein(["lewenstein"], ["levenshtein"], processor=lambda s: s[0])
     81.81818181818181
     """
+    cdef RF_StringWrapper s1_proc, s2_proc
     if s1 is None or s2 is None:
         return 0
 
@@ -420,17 +424,24 @@ def normalized_levenshtein(s1, s2, *, weights=(1,1,1), processor=None, score_cut
 
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
 
-    if processor is True or processor == default_process:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-        return normalized_levenshtein_default_process(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
+    if processor is True:
+        processor = default_process
+
+    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+    if PyCapsule_IsValid(processor_capsule, NULL):
+        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+        preprocess_func(s1, &s1_proc.string)
+        preprocess_func(s2, &s2_proc.string)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
+    else:
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
 
-    s1_proc = RF_StringWrapper(conv_sequence(s1))
-    s2_proc = RF_StringWrapper(conv_sequence(s2))
-    return normalized_levenshtein_no_process(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
+    return normalized_levenshtein_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
 
 
 def hamming(s1, s2, *, processor=None, max=None):
@@ -446,10 +457,9 @@ def hamming(s1, s2, *, processor=None, max=None):
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
-    processor: bool or callable, optional
+    processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. When processor is True ``utils.default_process``
-        is used. Default is None, which deactivates this behaviour.
+        comparing them. Default is None, which deactivates this behaviour.
     max : int or None, optional
         Maximum distance between s1 and s2, that is
         considered as a result. If the distance is bigger than max,
@@ -467,21 +477,29 @@ def hamming(s1, s2, *, processor=None, max=None):
         If s1 and s2 have a different length
     """
     cdef size_t c_max = <size_t>-1 if max is None else max
+    cdef RF_StringWrapper s1_proc, s2_proc
 
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True or processor == default_process:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-        return hamming_default_process(s1_proc.string, s2_proc.string, c_max)
+    if processor is True:
+        processor = default_process
+
+    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+    if PyCapsule_IsValid(processor_capsule, NULL):
+        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+        preprocess_func(s1, &s1_proc.string)
+        preprocess_func(s2, &s2_proc.string)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
+    else:
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
 
-    s1_proc = RF_StringWrapper(conv_sequence(s1))
-    s2_proc = RF_StringWrapper(conv_sequence(s2))
-    return hamming_no_process(s1_proc.string, s2_proc.string, c_max)
+    return hamming_func(s1_proc.string, s2_proc.string, c_max)
 
 
 def normalized_hamming(s1, s2, *, processor=None, score_cutoff=None):
@@ -494,10 +512,9 @@ def normalized_hamming(s1, s2, *, processor=None, score_cutoff=None):
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
-    processor: bool or callable, optional
+    processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. When processor is True ``utils.default_process``
-        is used. Default is None, which deactivates this behaviour.
+        comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
@@ -518,21 +535,29 @@ def normalized_hamming(s1, s2, *, processor=None, score_cutoff=None):
     hamming : Hamming distance
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+    cdef RF_StringWrapper s1_proc, s2_proc
 
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True or processor == default_process:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-        return normalized_hamming_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+    if processor is True:
+        processor = default_process
+
+    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+    if PyCapsule_IsValid(processor_capsule, NULL):
+        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+        preprocess_func(s1, &s1_proc.string)
+        preprocess_func(s2, &s2_proc.string)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
+    else:
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
 
-    s1_proc = RF_StringWrapper(conv_sequence(s1))
-    s2_proc = RF_StringWrapper(conv_sequence(s2))
-    return normalized_hamming_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+    return normalized_hamming_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
 def jaro_similarity(s1, s2, *, processor=None, score_cutoff=None):
@@ -545,10 +570,9 @@ def jaro_similarity(s1, s2, *, processor=None, score_cutoff=None):
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
-    processor: bool or callable, optional
+    processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. When processor is True ``utils.default_process``
-        is used. Default is None, which deactivates this behaviour.
+        comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
@@ -561,21 +585,29 @@ def jaro_similarity(s1, s2, *, processor=None, score_cutoff=None):
 
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+    cdef RF_StringWrapper s1_proc, s2_proc
 
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True or processor == default_process:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-        return jaro_similarity_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+    if processor is True:
+        processor = default_process
+
+    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+    if PyCapsule_IsValid(processor_capsule, NULL):
+        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+        preprocess_func(s1, &s1_proc.string)
+        preprocess_func(s2, &s2_proc.string)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
+    else:
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
 
-    s1_proc = RF_StringWrapper(conv_sequence(s1))
-    s2_proc = RF_StringWrapper(conv_sequence(s2))
-    return jaro_similarity_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+    return jaro_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
 def jaro_winkler_similarity(s1, s2, *, double prefix_weight=0.1, processor=None, score_cutoff=None):
@@ -591,10 +623,9 @@ def jaro_winkler_similarity(s1, s2, *, double prefix_weight=0.1, processor=None,
     prefix_weight : float, optional
         Weight used for the common prefix of the two strings.
         Has to be between 0 and 0.25. Default is 0.1.
-    processor: bool or callable, optional
+    processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. When processor is True ``utils.default_process``
-        is used. Default is None, which deactivates this behaviour.
+        comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
@@ -611,21 +642,29 @@ def jaro_winkler_similarity(s1, s2, *, double prefix_weight=0.1, processor=None,
         If prefix_weight is invalid
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+    cdef RF_StringWrapper s1_proc, s2_proc
 
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True or processor == default_process:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-        return jaro_winkler_similarity_default_process(s1_proc.string, s2_proc.string, prefix_weight, c_score_cutoff)
+    if processor is True:
+        processor = default_process
+
+    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+    if PyCapsule_IsValid(processor_capsule, NULL):
+        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+        preprocess_func(s1, &s1_proc.string)
+        preprocess_func(s2, &s2_proc.string)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
+    else:
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
 
-    s1_proc = RF_StringWrapper(conv_sequence(s1))
-    s2_proc = RF_StringWrapper(conv_sequence(s2))
-    return jaro_winkler_similarity_no_process(s1_proc.string, s2_proc.string, prefix_weight, c_score_cutoff)
+    return jaro_winkler_similarity_func(s1_proc.string, s2_proc.string, prefix_weight, c_score_cutoff)
 
 cdef void KwargsDeinit(RF_Kwargs* self):
     free(<void*>dereference(self).context)
@@ -650,22 +689,22 @@ cdef RF_Scorer LevenshteinContext
 LevenshteinContext.scorer_type = RF_DISTANCE
 LevenshteinContext.kwargs_init = LevenshteinKwargsInit
 LevenshteinContext.scorer.distance_init = LevenshteinInit
-levenshtein.__RapidFuzzScorer = PyCapsule_New(&LevenshteinContext, NULL, NULL)
+levenshtein._RF_Scorer = PyCapsule_New(&LevenshteinContext, NULL, NULL)
 
 cdef RF_Scorer NormalizedLevenshteinContext
 NormalizedLevenshteinContext.scorer_type = RF_SIMILARITY
 NormalizedLevenshteinContext.kwargs_init = LevenshteinKwargsInit
 NormalizedLevenshteinContext.scorer.similarity_init = NormalizedLevenshteinInit
-normalized_levenshtein.__RapidFuzzScorer = PyCapsule_New(&NormalizedLevenshteinContext, NULL, NULL)
+normalized_levenshtein._RF_Scorer = PyCapsule_New(&NormalizedLevenshteinContext, NULL, NULL)
 
 cdef RF_Scorer HammingContext = CreateHammingFunctionTable()
-hamming.__RapidFuzzScorer = PyCapsule_New(&HammingContext, NULL, NULL)
+hamming._RF_Scorer = PyCapsule_New(&HammingContext, NULL, NULL)
 
 cdef RF_Scorer NormalizedHammingContext = CreateNormalizedHammingFunctionTable()
-normalized_hamming.__RapidFuzzScorer = PyCapsule_New(&NormalizedHammingContext, NULL, NULL)
+normalized_hamming._RF_Scorer = PyCapsule_New(&NormalizedHammingContext, NULL, NULL)
 
 cdef RF_Scorer JaroSimilarityContext = CreateJaroSimilarityFunctionTable()
-jaro_similarity.__RapidFuzzScorer = PyCapsule_New(&JaroSimilarityContext, NULL, NULL)
+jaro_similarity._RF_Scorer = PyCapsule_New(&JaroSimilarityContext, NULL, NULL)
 
 cdef bool JaroWinklerKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     cdef double* prefix_weight = <double*>malloc(sizeof(double))
@@ -682,4 +721,4 @@ cdef RF_Scorer JaroWinklerSimilarityContext
 JaroWinklerSimilarityContext.scorer_type = RF_SIMILARITY
 JaroWinklerSimilarityContext.kwargs_init = JaroWinklerKwargsInit
 JaroWinklerSimilarityContext.scorer.similarity_init = JaroWinklerSimilarityInit
-jaro_winkler_similarity.__RapidFuzzScorer = PyCapsule_New(&JaroWinklerSimilarityContext, NULL, NULL)
+jaro_winkler_similarity._RF_Scorer = PyCapsule_New(&JaroWinklerSimilarityContext, NULL, NULL)

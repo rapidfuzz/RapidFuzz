@@ -15,7 +15,7 @@ from cython.operator cimport dereference
 
 from cpp_common cimport (
     RF_StringWrapper, RF_KwargsWrapper, KwargsInit,
-    is_valid_string, convert_string, hash_array, hash_sequence, default_process_func
+    is_valid_string, convert_string, hash_array, hash_sequence
 )
 
 from array import array
@@ -47,6 +47,9 @@ cdef extern from "cpp_process_cdist.hpp":
     object cdist_two_lists_distance_impl(    const RF_KwargsWrapper&, RF_DistanceInit, const vector[RF_StringWrapper]&, const vector[RF_StringWrapper]&, int, int, size_t) except +
     object cdist_two_lists_similarity_impl(  const RF_KwargsWrapper&, RF_SimilarityInit, const vector[RF_StringWrapper]&, const vector[RF_StringWrapper]&, int, int, double) except +
     void set_score_similarity(np.PyArrayObject*, int, np.npy_intp, np.npy_intp, double)
+
+cdef extern from "cpp_utils.hpp":
+    RF_String default_process_func(RF_String sentence) except +
 
 cdef int dtype_to_type_num_similarity(dtype) except -1:
     if dtype is None or dtype is np.uint8:
@@ -143,8 +146,7 @@ cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, w
     cdef size_t choices_len = <size_t>len(choices)
     cdef RF_Scorer* scorer_context
 
-    cdef scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
-    scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
+    scorer_capsule = getattr(scorer, '_RF_Scorer', scorer)
     if PyCapsule_IsValid(scorer_capsule, NULL):
         scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
 
@@ -268,8 +270,7 @@ cdef cdist_single_list(queries, scorer, processor, score_cutoff, dtype, workers,
     cdef vector[PyObject*] proc_py_queries
     cdef RF_Scorer* scorer_context
 
-    cdef scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
-    scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
+    scorer_capsule = getattr(scorer, '_RF_Scorer', scorer)
     if PyCapsule_IsValid(scorer_capsule, NULL):
         scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
 

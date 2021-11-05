@@ -4,10 +4,10 @@
 from array import array
 from rapidfuzz.utils import default_process
 
-from rapidfuzz_capi cimport RF_String, RF_Scorer
+from rapidfuzz_capi cimport RF_String, RF_Scorer, RF_Preprocess
 from cpp_common cimport RF_StringWrapper, is_valid_string, convert_string, hash_array, hash_sequence
 
-from cpython.pycapsule cimport PyCapsule_New
+from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
 
 cdef inline RF_String conv_sequence(seq) except *:
     if is_valid_string(seq):
@@ -18,26 +18,16 @@ cdef inline RF_String conv_sequence(seq) except *:
         return hash_sequence(seq)
 
 cdef extern from "cpp_scorer.hpp":
-    double ratio_no_process(                         const RF_String&, const RF_String&, double) nogil except +
-    double ratio_default_process(                    const RF_String&, const RF_String&, double) nogil except +
-    double partial_ratio_no_process(                 const RF_String&, const RF_String&, double) nogil except +
-    double partial_ratio_default_process(            const RF_String&, const RF_String&, double) nogil except +
-    double token_sort_ratio_no_process(              const RF_String&, const RF_String&, double) nogil except +
-    double token_sort_ratio_default_process(         const RF_String&, const RF_String&, double) nogil except +
-    double token_set_ratio_no_process(               const RF_String&, const RF_String&, double) nogil except +
-    double token_set_ratio_default_process(          const RF_String&, const RF_String&, double) nogil except +
-    double token_ratio_no_process(                   const RF_String&, const RF_String&, double) nogil except +
-    double token_ratio_default_process(              const RF_String&, const RF_String&, double) nogil except +
-    double partial_token_sort_ratio_no_process(      const RF_String&, const RF_String&, double) nogil except +
-    double partial_token_sort_ratio_default_process( const RF_String&, const RF_String&, double) nogil except +
-    double partial_token_set_ratio_no_process(       const RF_String&, const RF_String&, double) nogil except +
-    double partial_token_set_ratio_default_process(  const RF_String&, const RF_String&, double) nogil except +
-    double partial_token_ratio_no_process(           const RF_String&, const RF_String&, double) nogil except +
-    double partial_token_ratio_default_process(      const RF_String&, const RF_String&, double) nogil except +
-    double WRatio_no_process(                        const RF_String&, const RF_String&, double) nogil except +
-    double WRatio_default_process(                   const RF_String&, const RF_String&, double) nogil except +
-    double QRatio_no_process(                        const RF_String&, const RF_String&, double) nogil except +
-    double QRatio_default_process(                   const RF_String&, const RF_String&, double) nogil except +
+    double ratio_func(                    const RF_String&, const RF_String&, double) nogil except +
+    double partial_ratio_func(            const RF_String&, const RF_String&, double) nogil except +
+    double token_sort_ratio_func(         const RF_String&, const RF_String&, double) nogil except +
+    double token_set_ratio_func(          const RF_String&, const RF_String&, double) nogil except +
+    double token_ratio_func(              const RF_String&, const RF_String&, double) nogil except +
+    double partial_token_sort_ratio_func( const RF_String&, const RF_String&, double) nogil except +
+    double partial_token_set_ratio_func(  const RF_String&, const RF_String&, double) nogil except +
+    double partial_token_ratio_func(      const RF_String&, const RF_String&, double) nogil except +
+    double WRatio_func(                   const RF_String&, const RF_String&, double) nogil except +
+    double QRatio_func(                   const RF_String&, const RF_String&, double) nogil except +
 
     RF_Scorer CreateRatioFunctionTable() except +
     RF_Scorer CreatePartialRatioFunctionTable() except +
@@ -60,10 +50,9 @@ def ratio(s1, s2, *, processor=None, score_cutoff=None):
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
-    processor: bool or callable, optional
+    processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. When processor is True ``utils.default_process``
-        is used. Default is None, which deactivates this behaviour.
+        comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
@@ -88,23 +77,29 @@ def ratio(s1, s2, *, processor=None, score_cutoff=None):
     96.55171966552734
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+    cdef RF_StringWrapper s1_proc, s2_proc
 
     if s1 is None or s2 is None:
         return 0
+    
+    if processor is True:
+        processor = default_process
 
-    if processor is True or processor == default_process:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-        return ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+    if PyCapsule_IsValid(processor_capsule, NULL):
+        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+        preprocess_func(s1, &s1_proc.string)
+        preprocess_func(s2, &s2_proc.string)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
+    else:
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
 
-    s1_proc = RF_StringWrapper(conv_sequence(s1))
-    s2_proc = RF_StringWrapper(conv_sequence(s2))
-
-    return ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
-
+    return ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
     """
@@ -117,10 +112,9 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
-    processor: bool or callable, optional
+    processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. When processor is True ``utils.default_process``
-        is used. Default is None, which deactivates this behaviour.
+        comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
@@ -173,24 +167,32 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
     100.0
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+    cdef RF_StringWrapper s1_proc, s2_proc
 
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True or processor == default_process:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-        return partial_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+    if processor is True:
+        processor = default_process
+
+    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+    if PyCapsule_IsValid(processor_capsule, NULL):
+        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+        preprocess_func(s1, &s1_proc.string)
+        preprocess_func(s2, &s2_proc.string)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
+    else:
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
 
-    s1_proc = RF_StringWrapper(conv_sequence(s1))
-    s2_proc = RF_StringWrapper(conv_sequence(s2))
-    return partial_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+    return partial_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
-def token_sort_ratio(s1, s2, *, processor=True, score_cutoff=None):
+def token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     """
     Sorts the words in the strings and calculates the fuzz.ratio between them
 
@@ -200,10 +202,9 @@ def token_sort_ratio(s1, s2, *, processor=True, score_cutoff=None):
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
-    processor: bool or callable, optional
+    processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. When processor is True ``utils.default_process``
-        is used. Default is True.
+        comparing them. Default is ``utils.default_process``.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
@@ -224,24 +225,32 @@ def token_sort_ratio(s1, s2, *, processor=True, score_cutoff=None):
     100.0
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+    cdef RF_StringWrapper s1_proc, s2_proc
 
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True or processor == default_process:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-        return token_sort_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+    if processor is True:
+        processor = default_process
+
+    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+    if PyCapsule_IsValid(processor_capsule, NULL):
+        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+        preprocess_func(s1, &s1_proc.string)
+        preprocess_func(s2, &s2_proc.string)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
+    else:
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
 
-    s1_proc = RF_StringWrapper(conv_sequence(s1))
-    s2_proc = RF_StringWrapper(conv_sequence(s2))
-    return token_sort_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+    return token_sort_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
-def token_set_ratio(s1, s2, *, processor=True, score_cutoff=None):
+def token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     """
     Compares the words in the strings based on unique and common words between them
     using fuzz.ratio
@@ -252,10 +261,9 @@ def token_set_ratio(s1, s2, *, processor=True, score_cutoff=None):
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
-    processor: bool or callable, optional
+    processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. When processor is True ``utils.default_process``
-        is used. Default is True.
+        comparing them. Default is ``utils.default_process``.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
@@ -278,24 +286,32 @@ def token_set_ratio(s1, s2, *, processor=True, score_cutoff=None):
     100.0
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+    cdef RF_StringWrapper s1_proc, s2_proc
 
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True or processor == default_process:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-        return token_set_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+    if processor is True:
+        processor = default_process
+
+    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+    if PyCapsule_IsValid(processor_capsule, NULL):
+        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+        preprocess_func(s1, &s1_proc.string)
+        preprocess_func(s2, &s2_proc.string)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
+    else:
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
 
-    s1_proc = RF_StringWrapper(conv_sequence(s1))
-    s2_proc = RF_StringWrapper(conv_sequence(s2))
-    return token_set_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+    return token_set_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
-def token_ratio(s1, s2, *, processor=True, score_cutoff=None):
+def token_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     """
     Helper method that returns the maximum of fuzz.token_set_ratio and fuzz.token_sort_ratio
     (faster than manually executing the two functions)
@@ -306,10 +322,9 @@ def token_ratio(s1, s2, *, processor=True, score_cutoff=None):
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
-    processor: bool or callable, optional
+    processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. When processor is True ``utils.default_process``
-        is used. Default is True.
+        comparing them. Default is ``utils.default_process``.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
@@ -325,24 +340,32 @@ def token_ratio(s1, s2, *, processor=True, score_cutoff=None):
     .. image:: img/token_ratio.svg
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+    cdef RF_StringWrapper s1_proc, s2_proc
 
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True or processor == default_process:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-        return token_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+    if processor is True:
+        processor = default_process
+
+    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+    if PyCapsule_IsValid(processor_capsule, NULL):
+        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+        preprocess_func(s1, &s1_proc.string)
+        preprocess_func(s2, &s2_proc.string)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
+    else:
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
 
-    s1_proc = RF_StringWrapper(conv_sequence(s1))
-    s2_proc = RF_StringWrapper(conv_sequence(s2))
-    return token_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+    return token_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
-def partial_token_sort_ratio(s1, s2, *, processor=True, score_cutoff=None):
+def partial_token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     """
     sorts the words in the strings and calculates the fuzz.partial_ratio between them
 
@@ -352,10 +375,9 @@ def partial_token_sort_ratio(s1, s2, *, processor=True, score_cutoff=None):
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
-    processor: bool or callable, optional
+    processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. When processor is True ``utils.default_process``
-        is used. Default is True.
+        comparing them. Default is ``utils.default_process``.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
@@ -371,24 +393,32 @@ def partial_token_sort_ratio(s1, s2, *, processor=True, score_cutoff=None):
     .. image:: img/partial_token_sort_ratio.svg
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+    cdef RF_StringWrapper s1_proc, s2_proc
 
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True or processor == default_process:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-        return partial_token_sort_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+    if processor is True:
+        processor = default_process
+
+    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+    if PyCapsule_IsValid(processor_capsule, NULL):
+        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+        preprocess_func(s1, &s1_proc.string)
+        preprocess_func(s2, &s2_proc.string)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
+    else:
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
 
-    s1_proc = RF_StringWrapper(conv_sequence(s1))
-    s2_proc = RF_StringWrapper(conv_sequence(s2))
-    return partial_token_sort_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+    return partial_token_sort_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
-def partial_token_set_ratio(s1, s2, *, processor=True, score_cutoff=None):
+def partial_token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     """
     Compares the words in the strings based on unique and common words between them
     using fuzz.partial_ratio
@@ -399,10 +429,9 @@ def partial_token_set_ratio(s1, s2, *, processor=True, score_cutoff=None):
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
-    processor: bool or callable, optional
+    processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. When processor is True ``utils.default_process``
-        is used. Default is True.
+        comparing them. Default is ``utils.default_process``.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
@@ -418,24 +447,32 @@ def partial_token_set_ratio(s1, s2, *, processor=True, score_cutoff=None):
     .. image:: img/partial_token_set_ratio.svg
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+    cdef RF_StringWrapper s1_proc, s2_proc
 
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True or processor == default_process:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-        return partial_token_set_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+    if processor is True:
+        processor = default_process
+
+    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+    if PyCapsule_IsValid(processor_capsule, NULL):
+        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+        preprocess_func(s1, &s1_proc.string)
+        preprocess_func(s2, &s2_proc.string)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
+    else:
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
 
-    s1_proc = RF_StringWrapper(conv_sequence(s1))
-    s2_proc = RF_StringWrapper(conv_sequence(s2))
-    return partial_token_set_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+    return partial_token_set_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
-def partial_token_ratio(s1, s2, *, processor=True, score_cutoff=None):
+def partial_token_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     """
     Helper method that returns the maximum of fuzz.partial_token_set_ratio and
     fuzz.partial_token_sort_ratio (faster than manually executing the two functions)
@@ -446,10 +483,9 @@ def partial_token_ratio(s1, s2, *, processor=True, score_cutoff=None):
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
-    processor: bool or callable, optional
+    processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. When processor is True ``utils.default_process``
-        is used. Default is True.
+        comparing them. Default is ``utils.default_process``.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
@@ -465,24 +501,32 @@ def partial_token_ratio(s1, s2, *, processor=True, score_cutoff=None):
     .. image:: img/partial_token_ratio.svg
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+    cdef RF_StringWrapper s1_proc, s2_proc
 
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True or processor == default_process:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-        return partial_token_ratio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+    if processor is True:
+        processor = default_process
+
+    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+    if PyCapsule_IsValid(processor_capsule, NULL):
+        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+        preprocess_func(s1, &s1_proc.string)
+        preprocess_func(s2, &s2_proc.string)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
+    else:
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
 
-    s1_proc = RF_StringWrapper(conv_sequence(s1))
-    s2_proc = RF_StringWrapper(conv_sequence(s2))
-    return partial_token_ratio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+    return partial_token_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
-def WRatio(s1, s2, *, processor=True, score_cutoff=None):
+def WRatio(s1, s2, *, processor=default_process, score_cutoff=None):
     """
     Calculates a weighted ratio based on the other ratio algorithms
 
@@ -492,10 +536,9 @@ def WRatio(s1, s2, *, processor=True, score_cutoff=None):
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
-    processor: bool or callable, optional
+    processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. When processor is True ``utils.default_process``
-        is used. Default is True.
+        comparing them. Default is ``utils.default_process``.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
@@ -511,24 +554,31 @@ def WRatio(s1, s2, *, processor=True, score_cutoff=None):
     .. image:: img/WRatio.svg
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+    cdef RF_StringWrapper s1_proc, s2_proc
 
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True or processor == default_process:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-        return WRatio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+    if processor is True:
+        processor = default_process
+
+    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+    if PyCapsule_IsValid(processor_capsule, NULL):
+        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+        preprocess_func(s1, &s1_proc.string)
+        preprocess_func(s2, &s2_proc.string)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
+    else:
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
 
-    s1_proc = RF_StringWrapper(conv_sequence(s1))
-    s2_proc = RF_StringWrapper(conv_sequence(s2))
-    return WRatio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+    return WRatio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
-
-def QRatio(s1, s2, *, processor=True, score_cutoff=None):
+def QRatio(s1, s2, *, processor=default_process, score_cutoff=None):
     """
     Calculates a quick ratio between two strings using fuzz.ratio.
     The only difference to fuzz.ratio is, that this preprocesses
@@ -540,10 +590,9 @@ def QRatio(s1, s2, *, processor=True, score_cutoff=None):
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
-    processor: bool or callable, optional
+    processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. When processor is True ``utils.default_process``
-        is used. Default is True.
+        comparing them. Default is ``utils.default_process``.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
@@ -560,48 +609,56 @@ def QRatio(s1, s2, *, processor=True, score_cutoff=None):
     100.0
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+    cdef RF_StringWrapper s1_proc, s2_proc
 
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True or processor == default_process:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-        return QRatio_default_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+    if processor is True:
+        processor = default_process
+
+    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+    if PyCapsule_IsValid(processor_capsule, NULL):
+        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+        preprocess_func(s1, &s1_proc.string)
+        preprocess_func(s2, &s2_proc.string)
     elif callable(processor):
         s1 = processor(s1)
         s2 = processor(s2)
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
+    else:
+        s1_proc = RF_StringWrapper(conv_sequence(s1))
+        s2_proc = RF_StringWrapper(conv_sequence(s2))
 
-    s1_proc = RF_StringWrapper(conv_sequence(s1))
-    s2_proc = RF_StringWrapper(conv_sequence(s2))
-    return QRatio_no_process(s1_proc.string, s2_proc.string, c_score_cutoff)
+    return QRatio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 cdef RF_Scorer RatioContext = CreateRatioFunctionTable()
-ratio.__RapidFuzzScorer = PyCapsule_New(&RatioContext, NULL, NULL)
+ratio._RF_Scorer = PyCapsule_New(&RatioContext, NULL, NULL)
 
 cdef RF_Scorer PartialRatioContext = CreatePartialRatioFunctionTable()
-partial_ratio.__RapidFuzzScorer = PyCapsule_New(&PartialRatioContext, NULL, NULL)
+partial_ratio._RF_Scorer = PyCapsule_New(&PartialRatioContext, NULL, NULL)
 
 cdef RF_Scorer TokenSortRatioContext = CreateTokenSortRatioFunctionTable()
-token_sort_ratio.__RapidFuzzScorer = PyCapsule_New(&TokenSortRatioContext, NULL, NULL)
+token_sort_ratio._RF_Scorer = PyCapsule_New(&TokenSortRatioContext, NULL, NULL)
 
 cdef RF_Scorer TokenSetRatioContext = CreateTokenSetRatioFunctionTable()
-token_set_ratio.__RapidFuzzScorer = PyCapsule_New(&TokenSetRatioContext, NULL, NULL)
+token_set_ratio._RF_Scorer = PyCapsule_New(&TokenSetRatioContext, NULL, NULL)
 
 cdef RF_Scorer TokenRatioContext = CreateTokenRatioFunctionTable()
-token_ratio.__RapidFuzzScorer = PyCapsule_New(&TokenRatioContext, NULL, NULL)
+token_ratio._RF_Scorer = PyCapsule_New(&TokenRatioContext, NULL, NULL)
 
 cdef RF_Scorer PartialTokenSortRatioContext = CreatePartialTokenSortRatioFunctionTable()
-partial_token_sort_ratio.__RapidFuzzScorer = PyCapsule_New(&PartialTokenSortRatioContext, NULL, NULL)
+partial_token_sort_ratio._RF_Scorer = PyCapsule_New(&PartialTokenSortRatioContext, NULL, NULL)
 
 cdef RF_Scorer PartialTokenSetRatioContext = CreatePartialTokenSetRatioFunctionTable()
-partial_token_set_ratio.__RapidFuzzScorer = PyCapsule_New(&PartialTokenSetRatioContext, NULL, NULL)
+partial_token_set_ratio._RF_Scorer = PyCapsule_New(&PartialTokenSetRatioContext, NULL, NULL)
 
 cdef RF_Scorer PartialTokenRatioContext = CreatePartialTokenRatioFunctionTable()
-partial_token_ratio.__RapidFuzzScorer = PyCapsule_New(&PartialTokenRatioContext, NULL, NULL)
+partial_token_ratio._RF_Scorer = PyCapsule_New(&PartialTokenRatioContext, NULL, NULL)
 
 cdef RF_Scorer WRatioContext = CreateWRatioFunctionTable()
-WRatio.__RapidFuzzScorer = PyCapsule_New(&WRatioContext, NULL, NULL)
+WRatio._RF_Scorer = PyCapsule_New(&WRatioContext, NULL, NULL)
 
 cdef RF_Scorer QRatioContext = CreateQRatioFunctionTable()
-QRatio.__RapidFuzzScorer = PyCapsule_New(&QRatioContext, NULL, NULL)
+QRatio._RF_Scorer = PyCapsule_New(&QRatioContext, NULL, NULL)

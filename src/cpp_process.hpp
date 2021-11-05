@@ -95,10 +95,8 @@ struct RF_SimilarityWrapper {
         }
     }
 
-    double similarity(const RF_String* str, double score_cutoff) {
-        double sim;
-        PyErr2RuntimeExn(context.similarity(&context, str, score_cutoff, &sim));
-        return sim;
+    void similarity(const RF_String* str, double score_cutoff, double* sim) {
+        PyErr2RuntimeExn(context.similarity(&context, str, score_cutoff, sim));
     }
 };
 
@@ -137,9 +135,7 @@ struct RF_DistanceWrapper {
         }
     }
 
-    size_t distance(const RF_String* str, size_t max) {
-        size_t dist;
-        PyErr2RuntimeExn(context.distance(&context, str, max, &dist));
-        return dist;
+    void distance(const RF_String* str, size_t max, size_t* dist) {
+        PyErr2RuntimeExn(context.distance(&context, str, max, dist));
     }
 };

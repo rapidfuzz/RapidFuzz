@@ -17,7 +17,7 @@ from cython.operator cimport dereference
 
 from cpp_common cimport (
     RF_StringWrapper, RF_KwargsWrapper, KwargsInit,
-    is_valid_string, convert_string, hash_array, hash_sequence, default_process_func
+    is_valid_string, convert_string, hash_array, hash_sequence
 )
 
 import heapq
@@ -77,12 +77,15 @@ cdef extern from "cpp_process.hpp":
     cdef cppclass RF_SimilarityWrapper:
         RF_SimilarityWrapper()
         RF_SimilarityWrapper(RF_Similarity)
-        double similarity(const RF_String*, double) except +
+        void similarity(const RF_String*, double, double*) except +
 
     cdef cppclass RF_DistanceWrapper:
         RF_DistanceWrapper()
         RF_DistanceWrapper(RF_Distance)
-        size_t distance(const RF_String*, size_t) except +
+        void distance(const RF_String*, size_t, size_t*) except +
+
+cdef extern from "cpp_utils.hpp":
+    RF_String default_process_func(RF_String sentence) except +
 
 cdef inline extractOne_dict(RF_SimilarityWrapper context, choices, processor, double score_cutoff):
     """
@@ -106,17 +109,17 @@ cdef inline extractOne_dict(RF_SimilarityWrapper context, choices, processor, do
 
         if def_process:
             choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
-            score = context.similarity(&choice_proc.string, score_cutoff)
+            context.similarity(&choice_proc.string, score_cutoff, &score)
         elif processor is not None:
             proc_choice = processor(choice)
             if proc_choice is None:
                 continue
 
             choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-            score = context.similarity(&choice_proc.string, score_cutoff)
+            context.similarity(&choice_proc.string, score_cutoff, &score)
         else:
             choice_proc = RF_StringWrapper(conv_sequence(choice))
-            score = context.similarity(&choice_proc.string, score_cutoff)
+            context.similarity(&choice_proc.string, score_cutoff, &score)
 
         if score >= score_cutoff and score > result_score:
             result_score = score_cutoff = score
@@ -150,17 +153,17 @@ cdef inline extractOne_distance_dict(RF_DistanceWrapper context, choices, proces
 
         if def_process:
             choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
-            distance = context.distance(&choice_proc.string, max_)
+            context.distance(&choice_proc.string, max_, &distance)
         elif processor is not None:
             proc_choice = processor(choice)
             if proc_choice is None:
                 continue
 
             choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-            distance = context.distance(&choice_proc.string, max_)
+            context.distance(&choice_proc.string, max_, &distance)
         else:
             choice_proc = RF_StringWrapper(conv_sequence(choice))
-            distance = context.distance(&choice_proc.string, max_)
+            context.distance(&choice_proc.string, max_, &distance)
 
         if distance <= max_ and distance < result_distance:
             result_distance = max_ = distance
@@ -196,17 +199,17 @@ cdef inline extractOne_list(RF_SimilarityWrapper context, choices, processor, do
 
         if def_process:
             choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
-            score = context.similarity(&choice_proc.string, score_cutoff)
+            context.similarity(&choice_proc.string, score_cutoff, &score)
         elif processor is not None:
             proc_choice = processor(choice)
             if proc_choice is None:
                 continue
 
             choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-            score = context.similarity(&choice_proc.string, score_cutoff)
+            context.similarity(&choice_proc.string, score_cutoff, &score)
         else:
             choice_proc = RF_StringWrapper(conv_sequence(choice))
-            score = context.similarity(&choice_proc.string, score_cutoff)
+            context.similarity(&choice_proc.string, score_cutoff, &score)
 
         if score >= score_cutoff and score > result_score:
             result_score = score_cutoff = score
@@ -241,17 +244,17 @@ cdef inline extractOne_distance_list(RF_DistanceWrapper context, choices, proces
 
         if def_process:
             choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
-            distance = context.distance(&choice_proc.string, max_)
+            context.distance(&choice_proc.string, max_, &distance)
         elif processor is not None:
             proc_choice = processor(choice)
             if proc_choice is None:
                 continue
 
             choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-            distance = context.distance(&choice_proc.string, max_)
+            context.distance(&choice_proc.string, max_, &distance)
         else:
             choice_proc = RF_StringWrapper(conv_sequence(choice))
-            distance = context.distance(&choice_proc.string, max_)
+            context.distance(&choice_proc.string, max_, &distance)
 
         if distance <= max_ and distance < result_distance:
             result_distance = max_ = distance
@@ -463,7 +466,7 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
         query = default_process(query)
         processor = default_process
 
-    scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
+    scorer_capsule = getattr(scorer, '_RF_Scorer', scorer)
     if PyCapsule_IsValid(scorer_capsule, NULL):
         scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
         kwargs_context = KwargsInit(dereference(scorer_context), kwargs)
@@ -522,17 +525,17 @@ cdef inline extract_dict(RF_SimilarityWrapper context, choices, processor, size_
 
             if def_process:
                 choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
-                score = context.similarity(&choice_proc.string, score_cutoff)
+                context.similarity(&choice_proc.string, score_cutoff, &score)
             elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
 
                 choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-                score = context.similarity(&choice_proc.string, score_cutoff)
+                context.similarity(&choice_proc.string, score_cutoff, &score)
             else:
                 choice_proc = RF_StringWrapper(conv_sequence(choice))
-                score = context.similarity(&choice_proc.string, score_cutoff)
+                context.similarity(&choice_proc.string, score_cutoff, &score)
 
             if score >= score_cutoff:
                 # especially the key object might be created on the fly by e.g. pandas.Dataframe
@@ -585,17 +588,17 @@ cdef inline extract_distance_dict(RF_DistanceWrapper context, choices, processor
 
             if def_process:
                 choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
-                distance = context.distance(&choice_proc.string, max_)
+                context.distance(&choice_proc.string, max_, &distance)
             elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
 
                 choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-                distance = context.distance(&choice_proc.string, max_)
+                context.distance(&choice_proc.string, max_, &distance)
             else:
                 choice_proc = RF_StringWrapper(conv_sequence(choice))
-                distance = context.distance(&choice_proc.string, max_)
+                context.distance(&choice_proc.string, max_, &distance)
 
             if distance <= max_:
                 # especially the key object might be created on the fly by e.g. pandas.Dataframe
@@ -649,17 +652,17 @@ cdef inline extract_list(RF_SimilarityWrapper context, choices, processor, size_
 
             if def_process:
                 choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
-                score = context.similarity(&choice_proc.string, score_cutoff)
+                context.similarity(&choice_proc.string, score_cutoff, &score)
             elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
 
                 choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-                score = context.similarity(&choice_proc.string, score_cutoff)
+                context.similarity(&choice_proc.string, score_cutoff, &score)
             else:
                 choice_proc = RF_StringWrapper(conv_sequence(choice))
-                score = context.similarity(&choice_proc.string, score_cutoff)
+                context.similarity(&choice_proc.string, score_cutoff, &score)
 
             if score >= score_cutoff:
                 Py_INCREF(choice)
@@ -709,17 +712,17 @@ cdef inline extract_distance_list(RF_DistanceWrapper context, choices, processor
 
             if def_process:
                 choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
-                distance = context.distance(&choice_proc.string, max_)
+                context.distance(&choice_proc.string, max_, &distance)
             elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
 
                 choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-                distance = context.distance(&choice_proc.string, max_)
+                context.distance(&choice_proc.string, max_, &distance)
             else:
                 choice_proc = RF_StringWrapper(conv_sequence(choice))
-                distance = context.distance(&choice_proc.string, max_)
+                context.distance(&choice_proc.string, max_, &distance)
 
             if distance <= max_:
                 Py_INCREF(choice)
@@ -885,7 +888,7 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
         query = default_process(query)
         processor = default_process
 
-    scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
+    scorer_capsule = getattr(scorer, '_RF_Scorer', scorer)
     if PyCapsule_IsValid(scorer_capsule, NULL):
         scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
         kwargs_context = KwargsInit(dereference(scorer_context), kwargs)
@@ -1003,17 +1006,17 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
 
             if def_process:
                 choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
-                score = ScorerContext.similarity(&choice_proc.string, c_score_cutoff)
+                ScorerContext.similarity(&choice_proc.string, c_score_cutoff, &score)
             elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
 
                 choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-                score = ScorerContext.similarity(&choice_proc.string, c_score_cutoff)
+                ScorerContext.similarity(&choice_proc.string, c_score_cutoff, &score)
             else:
                 choice_proc = RF_StringWrapper(conv_sequence(choice))
-                score = ScorerContext.similarity(&choice_proc.string, c_score_cutoff)
+                ScorerContext.similarity(&choice_proc.string, c_score_cutoff, &score)
 
             if score >= score_cutoff:
                 yield (choice, score, choice_key)
@@ -1033,17 +1036,17 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
 
             if def_process:
                 choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
-                score = ScorerContext.similarity(&choice_proc.string, c_score_cutoff)
+                ScorerContext.similarity(&choice_proc.string, c_score_cutoff, &score)
             elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
 
                 choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-                score = ScorerContext.similarity(&choice_proc.string, c_score_cutoff)
+                ScorerContext.similarity(&choice_proc.string, c_score_cutoff, &score)
             else:
                 choice_proc = RF_StringWrapper(conv_sequence(choice))
-                score = ScorerContext.similarity(&choice_proc.string, c_score_cutoff)
+                ScorerContext.similarity(&choice_proc.string, c_score_cutoff, &score)
 
             if score >= c_score_cutoff:
                 yield (choice, score, i)
@@ -1062,17 +1065,17 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
 
             if def_process:
                 choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
-                distance = DistanceContext.distance(&choice_proc.string, c_max)
+                DistanceContext.distance(&choice_proc.string, c_max, &distance)
             elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
 
                 choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-                distance = DistanceContext.distance(&choice_proc.string, c_max)
+                DistanceContext.distance(&choice_proc.string, c_max, &distance)
             else:
                 choice_proc = RF_StringWrapper(conv_sequence(choice))
-                distance = DistanceContext.distance(&choice_proc.string, c_max)
+                DistanceContext.distance(&choice_proc.string, c_max, &distance)
 
             if distance <= c_max:
                 yield (choice, distance, choice_key)
@@ -1092,17 +1095,17 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
 
             if def_process:
                 choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
-                distance = DistanceContext.distance(&choice_proc.string, c_max)
+                DistanceContext.distance(&choice_proc.string, c_max, &distance)
             elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
 
                 choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-                distance = DistanceContext.distance(&choice_proc.string, c_max)
+                DistanceContext.distance(&choice_proc.string, c_max, &distance)
             else:
                 choice_proc = RF_StringWrapper(conv_sequence(choice))
-                distance = DistanceContext.distance(&choice_proc.string, c_max)
+                DistanceContext.distance(&choice_proc.string, c_max, &distance)
 
             if distance <= c_max:
                 yield (choice, distance, i)
@@ -1169,7 +1172,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
     if processor is default_process:
         def_process = 1
 
-    scorer_capsule = getattr(scorer, '__RapidFuzzScorer', scorer)
+    scorer_capsule = getattr(scorer, '_RF_Scorer', scorer)
     if PyCapsule_IsValid(scorer_capsule, NULL):
         scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
         kwargs_context = KwargsInit(dereference(scorer_context), kwargs)

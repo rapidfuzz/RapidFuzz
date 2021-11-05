@@ -24,7 +24,6 @@ cdef extern from "cpp_common.hpp":
     int is_valid_string(object py_str) except +
     RF_String convert_string(object py_str)
     void validate_string(object py_str, const char* err) except +
-    RF_String default_process_func(RF_String sentence) except +
 
 cdef inline RF_String hash_array(arr) except *:
     # TODO on Cpython this does not require any copies

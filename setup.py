@@ -66,8 +66,7 @@ ext_modules = [
     Extension(
         name='rapidfuzz.cpp_fuzz',
         sources=[
-            'src/cpp_fuzz.cpp',
-            'src/rapidfuzz-cpp/rapidfuzz/details/unicode.cpp'
+            'src/cpp_fuzz.cpp'
         ],
         include_dirs=["src/rapidfuzz-cpp/", "capi/"],
         language='c++',
@@ -75,8 +74,7 @@ ext_modules = [
     Extension(
         name='rapidfuzz.cpp_string_metric',
         sources=[
-            'src/cpp_string_metric.cpp',
-            'src/rapidfuzz-cpp/rapidfuzz/details/unicode.cpp'
+            'src/cpp_string_metric.cpp'
         ],
         include_dirs=["src/rapidfuzz-cpp/", "capi/"],
         language='c++',

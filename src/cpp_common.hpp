@@ -2,7 +2,6 @@
 #include "Python.h"
 #define RAPIDFUZZ_PYTHON
 #include <rapidfuzz/fuzz.hpp>
-#include <rapidfuzz/utils.hpp>
 #include <rapidfuzz/string_metric.hpp>
 #include <exception>
 
@@ -12,7 +11,6 @@
 
 namespace string_metric = rapidfuzz::string_metric;
 namespace fuzz = rapidfuzz::fuzz;
-namespace utils = rapidfuzz::utils;
 
 class PythonTypeError: public std::bad_typeid {
 public:
@@ -170,29 +168,11 @@ static inline rapidfuzz::basic_string_view<T> no_process(const RF_String& s)
     return rapidfuzz::basic_string_view<T>((T*)s.data, s.length);
 }
 
-template <typename T>
-static inline std::basic_string<T> default_process(const RF_String& s)
-{
-    return utils::default_process(no_process<T>(s));
-}
-
 template <typename Func, typename... Args>
 auto visit(const RF_String& str, Func&& f, Args&&... args)
 {
     switch(str.kind) {
 # define X_ENUM(kind, type) case kind: return f(no_process<type>(str), std::forward<Args>(args)...);
-    LIST_OF_CASES()
-# undef X_ENUM
-    default:
-        throw std::logic_error("Invalid string type");
-    }
-}
-
-template <typename Func, typename... Args>
-auto visit_default_process(const RF_String& str, Func&& f, Args&&... args)
-{
-    switch(str.kind) {
-# define X_ENUM(kind, type) case kind: return f(default_process<type>(str), std::forward<Args>(args)...);
     LIST_OF_CASES()
 # undef X_ENUM
     default:
@@ -209,18 +189,6 @@ auto visitor(const RF_String& str1, const RF_String& str2, Func&& f, Args&&... a
         }
     );
 }
-
-/* todo this should be refactored in the future since preprocessing does not really belong here */
-template <typename Func, typename... Args>
-auto visitor_default_process(const RF_String& str1, const RF_String& str2, Func&& f, Args&&... args)
-{
-    return visit_default_process(str2,
-        [&](auto str) {
-            return visit_default_process(str1, std::forward<Func>(f), str, std::forward<Args>(args)...);
-        }
-    );
-}
-
 
 static inline PyObject* dist_to_long(std::size_t dist)
 {
@@ -346,37 +314,4 @@ static inline RF_String convert_string(PyObject* py_str)
         throw PythonTypeError("choice must be a String, Unicode or None");
     }
 #endif
-}
-
-template <typename CharT>
-RF_String default_process_func_impl(RF_String sentence) {
-    CharT* str = static_cast<CharT*>(sentence.data);
-
-    if (!sentence.dtor)
-    {
-      CharT* temp_str = (CharT*)malloc(sentence.length * sizeof(CharT));
-      if (temp_str == NULL)
-      {
-          throw std::bad_alloc();
-      }
-      std::copy(str, str + sentence.length, temp_str);
-      str = temp_str;
-    }
-
-    sentence.dtor = default_string_deinit;
-    sentence.data = str;
-    sentence.kind = sentence.kind;
-    sentence.length = utils::default_process(str, sentence.length);
-
-    return sentence;
-}
-
-RF_String default_process_func(RF_String sentence) {
-    switch (sentence.kind) {
-    # define X_ENUM(KIND, TYPE) case KIND: return default_process_func_impl<TYPE>(std::move(sentence));
-    LIST_OF_CASES()
-    default:
-       throw std::logic_error("Reached end of control flow in default_process_func");
-    # undef X_ENUM
-    }
 }

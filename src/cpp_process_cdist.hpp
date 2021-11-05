@@ -124,7 +124,8 @@ Py_BEGIN_ALLOW_THREADS
 
                 for (size_t col = row + 1; col < cols; ++col)
                 {
-                    size_t score = DistanceContext.distance(&queries[col].string, max);
+                    size_t score;
+                    DistanceContext.distance(&queries[col].string, max, &score);
                     set_score_distance(matrix, dtype, row, col, score);
                     set_score_distance(matrix, dtype, col, row, score);
                 }
@@ -173,7 +174,8 @@ Py_BEGIN_ALLOW_THREADS
 
                 for (size_t col = row + 1; col < cols; ++col)
                 {
-                    double score = ScorerContext.similarity(&queries[col].string, score_cutoff);
+                    double score;
+                    ScorerContext.similarity(&queries[col].string, score_cutoff, &score);
                     set_score_similarity(matrix, dtype, row, col, score);
                     set_score_similarity(matrix, dtype, col, row, score);
                 }
@@ -221,7 +223,8 @@ Py_BEGIN_ALLOW_THREADS
 
                 for (size_t col = 0; col < cols; ++col)
                 {
-                    size_t score = DistanceContext.distance(&choices[col].string, max);
+                    size_t score;
+                    DistanceContext.distance(&choices[col].string, max, &score);
                     set_score_distance(matrix, dtype, row, col, score);
                 }
             }
@@ -269,7 +272,8 @@ Py_BEGIN_ALLOW_THREADS
 
                 for (size_t col = 0; col < cols; ++col)
                 {
-                    double score = ScorerContext.similarity(&choices[col].string, score_cutoff);
+                    double score;
+                    ScorerContext.similarity(&choices[col].string, score_cutoff, &score);
                     set_score_similarity(matrix, dtype, row, col, score);
                 }
             }

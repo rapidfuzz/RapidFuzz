@@ -1,5 +1,8 @@
 #pragma once
 #include "cpp_common.hpp"
+#include <rapidfuzz/utils.hpp>
+
+namespace utils = rapidfuzz::utils;
 
 PyObject* default_process_impl(PyObject* sentence) {
     RF_String c_sentence = convert_string(sentence);
@@ -41,5 +44,38 @@ PyObject* default_process_impl(PyObject* sentence) {
     // ToDo: for now do not process these elements should be done in some way in the future
     default:
         return sentence;
+    }
+}
+
+template <typename CharT>
+RF_String default_process_func_impl(RF_String sentence) {
+    CharT* str = static_cast<CharT*>(sentence.data);
+
+    if (!sentence.dtor)
+    {
+      CharT* temp_str = (CharT*)malloc(sentence.length * sizeof(CharT));
+      if (temp_str == NULL)
+      {
+          throw std::bad_alloc();
+      }
+      std::copy(str, str + sentence.length, temp_str);
+      str = temp_str;
+    }
+
+    sentence.dtor = default_string_deinit;
+    sentence.data = str;
+    sentence.kind = sentence.kind;
+    sentence.length = utils::default_process(str, sentence.length);
+
+    return sentence;
+}
+
+RF_String default_process_func(RF_String sentence) {
+    switch (sentence.kind) {
+    # define X_ENUM(KIND, TYPE) case KIND: return default_process_func_impl<TYPE>(std::move(sentence));
+    LIST_OF_CASES()
+    default:
+       throw std::logic_error("Reached end of control flow in default_process_func");
+    # undef X_ENUM
     }
 }
