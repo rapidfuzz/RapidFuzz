@@ -5,17 +5,13 @@ from array import array
 from rapidfuzz.utils import default_process
 
 from rapidfuzz_capi cimport RF_String, RF_Scorer, RF_Preprocess
-from cpp_common cimport RF_StringWrapper, is_valid_string, convert_string, hash_array, hash_sequence
+from cpp_common cimport (
+    RF_StringWrapper, is_valid_string, convert_string, hash_array, hash_sequence
+)
 
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
-
-cdef inline RF_String conv_sequence(seq) except *:
-    if is_valid_string(seq):
-        return convert_string(seq)
-    elif isinstance(seq, array):
-        return hash_array(seq)
-    else:
-        return hash_sequence(seq)
+from cpython cimport PyObject
+from cpython.ref cimport Py_XDECREF
 
 cdef extern from "cpp_scorer.hpp":
     double ratio_func(                    const RF_String&, const RF_String&, double) nogil except +
@@ -39,6 +35,32 @@ cdef extern from "cpp_scorer.hpp":
     RF_Scorer CreatePartialTokenRatioFunctionTable() except +
     RF_Scorer CreateWRatioFunctionTable() except +
     RF_Scorer CreateQRatioFunctionTable() except +
+
+cdef inline RF_String conv_sequence(seq) except *:
+    if is_valid_string(seq):
+        return convert_string(seq)
+    elif isinstance(seq, array):
+        return hash_array(seq)
+    else:
+        return hash_sequence(seq)
+
+cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except *:
+    if processor is True:
+        processor = default_process
+
+    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+    if PyCapsule_IsValid(processor_capsule, NULL):
+        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+        preprocess_func(s1, &(s1_proc[0].string))
+        preprocess_func(s2, &(s2_proc[0].string))
+    elif callable(processor):
+        s1 = processor(s1)
+        s1_proc[0] = RF_StringWrapper(conv_sequence(s1), s1)
+        s2 = processor(s2)
+        s2_proc[0] = RF_StringWrapper(conv_sequence(s2), s2)
+    else:
+        s1_proc[0] = RF_StringWrapper(conv_sequence(s1))
+        s2_proc[0] = RF_StringWrapper(conv_sequence(s2))
 
 def ratio(s1, s2, *, processor=None, score_cutoff=None):
     """
@@ -82,24 +104,9 @@ def ratio(s1, s2, *, processor=None, score_cutoff=None):
     if s1 is None or s2 is None:
         return 0
     
-    if processor is True:
-        processor = default_process
-
-    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
-    if PyCapsule_IsValid(processor_capsule, NULL):
-        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
-        preprocess_func(s1, &s1_proc.string)
-        preprocess_func(s2, &s2_proc.string)
-    elif callable(processor):
-        s1 = processor(s1)
-        s2 = processor(s2)
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-    else:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+
 
 def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
     """
@@ -172,23 +179,7 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True:
-        processor = default_process
-
-    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
-    if PyCapsule_IsValid(processor_capsule, NULL):
-        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
-        preprocess_func(s1, &s1_proc.string)
-        preprocess_func(s2, &s2_proc.string)
-    elif callable(processor):
-        s1 = processor(s1)
-        s2 = processor(s2)
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-    else:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return partial_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
@@ -230,23 +221,7 @@ def token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True:
-        processor = default_process
-
-    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
-    if PyCapsule_IsValid(processor_capsule, NULL):
-        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
-        preprocess_func(s1, &s1_proc.string)
-        preprocess_func(s2, &s2_proc.string)
-    elif callable(processor):
-        s1 = processor(s1)
-        s2 = processor(s2)
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-    else:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return token_sort_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
@@ -291,23 +266,7 @@ def token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True:
-        processor = default_process
-
-    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
-    if PyCapsule_IsValid(processor_capsule, NULL):
-        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
-        preprocess_func(s1, &s1_proc.string)
-        preprocess_func(s2, &s2_proc.string)
-    elif callable(processor):
-        s1 = processor(s1)
-        s2 = processor(s2)
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-    else:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return token_set_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
@@ -345,23 +304,7 @@ def token_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True:
-        processor = default_process
-
-    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
-    if PyCapsule_IsValid(processor_capsule, NULL):
-        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
-        preprocess_func(s1, &s1_proc.string)
-        preprocess_func(s2, &s2_proc.string)
-    elif callable(processor):
-        s1 = processor(s1)
-        s2 = processor(s2)
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-    else:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return token_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
@@ -398,23 +341,7 @@ def partial_token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True:
-        processor = default_process
-
-    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
-    if PyCapsule_IsValid(processor_capsule, NULL):
-        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
-        preprocess_func(s1, &s1_proc.string)
-        preprocess_func(s2, &s2_proc.string)
-    elif callable(processor):
-        s1 = processor(s1)
-        s2 = processor(s2)
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-    else:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return partial_token_sort_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
@@ -455,20 +382,7 @@ def partial_token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=N
     if processor is True:
         processor = default_process
 
-    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
-    if PyCapsule_IsValid(processor_capsule, NULL):
-        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
-        preprocess_func(s1, &s1_proc.string)
-        preprocess_func(s2, &s2_proc.string)
-    elif callable(processor):
-        s1 = processor(s1)
-        s2 = processor(s2)
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-    else:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return partial_token_set_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
@@ -506,23 +420,7 @@ def partial_token_ratio(s1, s2, *, processor=default_process, score_cutoff=None)
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True:
-        processor = default_process
-
-    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
-    if PyCapsule_IsValid(processor_capsule, NULL):
-        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
-        preprocess_func(s1, &s1_proc.string)
-        preprocess_func(s2, &s2_proc.string)
-    elif callable(processor):
-        s1 = processor(s1)
-        s2 = processor(s2)
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-    else:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return partial_token_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
@@ -562,20 +460,7 @@ def WRatio(s1, s2, *, processor=default_process, score_cutoff=None):
     if processor is True:
         processor = default_process
 
-    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
-    if PyCapsule_IsValid(processor_capsule, NULL):
-        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
-        preprocess_func(s1, &s1_proc.string)
-        preprocess_func(s2, &s2_proc.string)
-    elif callable(processor):
-        s1 = processor(s1)
-        s2 = processor(s2)
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-    else:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return WRatio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 def QRatio(s1, s2, *, processor=default_process, score_cutoff=None):
@@ -617,20 +502,7 @@ def QRatio(s1, s2, *, processor=default_process, score_cutoff=None):
     if processor is True:
         processor = default_process
 
-    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
-    if PyCapsule_IsValid(processor_capsule, NULL):
-        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
-        preprocess_func(s1, &s1_proc.string)
-        preprocess_func(s2, &s2_proc.string)
-    elif callable(processor):
-        s1 = processor(s1)
-        s2 = processor(s2)
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-    else:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return QRatio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 cdef RF_Scorer RatioContext = CreateRatioFunctionTable()

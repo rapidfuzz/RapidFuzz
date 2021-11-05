@@ -14,6 +14,23 @@
 #endif
 
 #include "Python.h"
+
+    #if PY_MAJOR_VERSION >= 3
+      #define __Pyx_PyFloat_FromString(obj)  PyFloat_FromString(obj)
+    #else
+      #define __Pyx_PyFloat_FromString(obj)  PyFloat_FromString(obj, NULL)
+    #endif
+    
+
+    #if PY_MAJOR_VERSION <= 2
+    #define PyDict_GetItemWithError _PyDict_GetItemWithError
+    #endif
+    
+
+    #if PY_VERSION_HEX < 0x030700b1 && !defined(PyContextVar_Get)
+    #define PyContextVar_Get(var, d, v)         ((d) ?             ((void)(var), Py_INCREF(d), (v)[0] = (d), 0) :             ((v)[0] = NULL, 0)         )
+    #endif
+    
 #ifndef Py_PYTHON_H
     #error Python headers needed to compile C extensions, please install development version of Python.
 #elif PY_VERSION_HEX < 0x02070000 || (0x03000000 <= PY_VERSION_HEX && PY_VERSION_HEX < 0x03030000)
@@ -830,6 +847,8 @@ static CYTHON_INLINE float __PYX_NAN() {
 
     #endif
     
+#include <stdio.h>
+#include "pythread.h"
 #include "cpp_common.hpp"
 #include "cpp_scorer.hpp"
 #ifdef _OPENMP
@@ -1054,7 +1073,11 @@ static const char *__pyx_filename;
 
 static const char *__pyx_f[] = {
   "cpp_fuzz.pyx",
+  "contextvars.pxd",
   "cpp_common.pxd",
+  "type.pxd",
+  "bool.pxd",
+  "complex.pxd",
 };
 /* #### Code section: utility_code_proto_before_types ### */
 /* NoFastGil.proto */
@@ -1069,6 +1092,32 @@ static const char *__pyx_f[] = {
 /* #### Code section: type_declarations ### */
 
 /*--- Type declarations ---*/
+struct __pyx_opt_args_7cpython_11contextvars_get_value;
+struct __pyx_opt_args_7cpython_11contextvars_get_value_no_default;
+
+/* "cpython/contextvars.pxd":112
+ * 
+ * 
+ * cdef inline object get_value(var, default_value=None):             # <<<<<<<<<<<<<<
+ *     """Return a new reference to the value of the context variable,
+ *     or the default value of the context variable,
+ */
+struct __pyx_opt_args_7cpython_11contextvars_get_value {
+  int __pyx_n;
+  PyObject *default_value;
+};
+
+/* "cpython/contextvars.pxd":129
+ * 
+ * 
+ * cdef inline object get_value_no_default(var, default_value=None):             # <<<<<<<<<<<<<<
+ *     """Return a new reference to the value of the context variable,
+ *     or the provided default value if no such value was found.
+ */
+struct __pyx_opt_args_7cpython_11contextvars_get_value_no_default {
+  int __pyx_n;
+  PyObject *default_value;
+};
 struct __pyx_defaults;
 typedef struct __pyx_defaults __pyx_defaults;
 struct __pyx_defaults1;
@@ -1503,6 +1552,53 @@ static PyObject *__Pyx__GetModuleGlobalName(PyObject *name, PY_UINT64_T *dict_ve
 static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name);
 #endif
 
+/* GetAttr3.proto */
+static CYTHON_INLINE PyObject *__Pyx_GetAttr3(PyObject *, PyObject *, PyObject *);
+
+/* CallableCheck.proto */
+#if CYTHON_USE_TYPE_SLOTS && PY_MAJOR_VERSION >= 3
+#define __Pyx_PyCallable_Check(obj)   (Py_TYPE(obj)->tp_call != NULL)
+#else
+#define __Pyx_PyCallable_Check(obj)   PyCallable_Check(obj)
+#endif
+
+/* PyFunctionFastCall.proto */
+#if CYTHON_FAST_PYCALL
+#if !CYTHON_VECTORCALL
+#define __Pyx_PyFunction_FastCall(func, args, nargs)\
+    __Pyx_PyFunction_FastCallDict((func), (args), (nargs), NULL)
+static PyObject *__Pyx_PyFunction_FastCallDict(PyObject *func, PyObject **args, Py_ssize_t nargs, PyObject *kwargs);
+#endif
+#define __Pyx_BUILD_ASSERT_EXPR(cond)\
+    (sizeof(char [1 - 2*!(cond)]) - 1)
+#ifndef Py_MEMBER_SIZE
+#define Py_MEMBER_SIZE(type, member) sizeof(((type *)0)->member)
+#endif
+  static size_t __pyx_pyframe_localsplus_offset = 0;
+  #include "frameobject.h"
+  #define __Pxy_PyFrame_Initialize_Offsets()\
+    ((void)__Pyx_BUILD_ASSERT_EXPR(sizeof(PyFrameObject) == offsetof(PyFrameObject, f_localsplus) + Py_MEMBER_SIZE(PyFrameObject, f_localsplus)),\
+     (void)(__pyx_pyframe_localsplus_offset = ((size_t)PyFrame_Type.tp_basicsize) - Py_MEMBER_SIZE(PyFrameObject, f_localsplus)))
+  #define __Pyx_PyFrame_GetLocalsplus(frame)\
+    (assert(__pyx_pyframe_localsplus_offset), (PyObject **)(((char *)(frame)) + __pyx_pyframe_localsplus_offset))
+#endif
+
+/* PyObjectCall.proto */
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw);
+#else
+#define __Pyx_PyObject_Call(func, arg, kw) PyObject_Call(func, arg, kw)
+#endif
+
+/* PyObjectCallMethO.proto */
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg);
+#endif
+
+/* PyObjectFastCall.proto */
+#define __Pyx_PyObject_FastCall(func, args, nargs)  __Pyx_PyObject_FastCallDict(func, args, (size_t)(nargs), NULL)
+static CYTHON_INLINE PyObject* __Pyx_PyObject_FastCallDict(PyObject *func, PyObject **args, size_t nargs, PyObject *kwargs);
+
 /* TupleAndListFromArray.proto */
 #if CYTHON_COMPILING_IN_CPYTHON
 static CYTHON_INLINE PyObject* __Pyx_PyList_FromArray(PyObject *const *src, Py_ssize_t n);
@@ -1557,53 +1653,6 @@ static int __Pyx_ParseOptionalKeywords(PyObject *kwds, PyObject *const *kwvalues
     PyObject **argnames[],
     PyObject *kwds2, PyObject *values[], Py_ssize_t num_pos_args,
     const char* function_name);
-
-/* GetAttr3.proto */
-static CYTHON_INLINE PyObject *__Pyx_GetAttr3(PyObject *, PyObject *, PyObject *);
-
-/* CallableCheck.proto */
-#if CYTHON_USE_TYPE_SLOTS && PY_MAJOR_VERSION >= 3
-#define __Pyx_PyCallable_Check(obj)   (Py_TYPE(obj)->tp_call != NULL)
-#else
-#define __Pyx_PyCallable_Check(obj)   PyCallable_Check(obj)
-#endif
-
-/* PyFunctionFastCall.proto */
-#if CYTHON_FAST_PYCALL
-#if !CYTHON_VECTORCALL
-#define __Pyx_PyFunction_FastCall(func, args, nargs)\
-    __Pyx_PyFunction_FastCallDict((func), (args), (nargs), NULL)
-static PyObject *__Pyx_PyFunction_FastCallDict(PyObject *func, PyObject **args, Py_ssize_t nargs, PyObject *kwargs);
-#endif
-#define __Pyx_BUILD_ASSERT_EXPR(cond)\
-    (sizeof(char [1 - 2*!(cond)]) - 1)
-#ifndef Py_MEMBER_SIZE
-#define Py_MEMBER_SIZE(type, member) sizeof(((type *)0)->member)
-#endif
-  static size_t __pyx_pyframe_localsplus_offset = 0;
-  #include "frameobject.h"
-  #define __Pxy_PyFrame_Initialize_Offsets()\
-    ((void)__Pyx_BUILD_ASSERT_EXPR(sizeof(PyFrameObject) == offsetof(PyFrameObject, f_localsplus) + Py_MEMBER_SIZE(PyFrameObject, f_localsplus)),\
-     (void)(__pyx_pyframe_localsplus_offset = ((size_t)PyFrame_Type.tp_basicsize) - Py_MEMBER_SIZE(PyFrameObject, f_localsplus)))
-  #define __Pyx_PyFrame_GetLocalsplus(frame)\
-    (assert(__pyx_pyframe_localsplus_offset), (PyObject **)(((char *)(frame)) + __pyx_pyframe_localsplus_offset))
-#endif
-
-/* PyObjectCall.proto */
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw);
-#else
-#define __Pyx_PyObject_Call(func, arg, kw) PyObject_Call(func, arg, kw)
-#endif
-
-/* PyObjectCallMethO.proto */
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg);
-#endif
-
-/* PyObjectFastCall.proto */
-#define __Pyx_PyObject_FastCall(func, args, nargs)  __Pyx_PyObject_FastCallDict(func, args, (size_t)(nargs), NULL)
-static CYTHON_INLINE PyObject* __Pyx_PyObject_FastCallDict(PyObject *func, PyObject **args, size_t nargs, PyObject *kwargs);
 
 /* GetItemInt.proto */
 #define __Pyx_GetItemInt(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
@@ -1693,6 +1742,17 @@ static PyObject* __Pyx__CallUnboundCMethod0(__Pyx_CachedCFunction* cfunc, PyObje
 
 /* RaiseException.proto */
 static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause);
+
+/* TypeImport.proto */
+#ifndef __PYX_HAVE_RT_ImportType_proto
+#define __PYX_HAVE_RT_ImportType_proto
+enum __Pyx_ImportType_CheckSize {
+   __Pyx_ImportType_CheckSize_Error = 0,
+   __Pyx_ImportType_CheckSize_Warn = 1,
+   __Pyx_ImportType_CheckSize_Ignore = 2
+};
+static PyTypeObject *__Pyx_ImportType(PyObject* module, const char *module_name, const char *class_name, size_t size, enum __Pyx_ImportType_CheckSize check_size);
+#endif
 
 /* Import.proto */
 static PyObject *__Pyx_Import(PyObject *name, PyObject *from_list, int level);
@@ -1905,6 +1965,9 @@ static void __Pyx_CppExn2PyErr() {
 }
 #endif
 
+/* None.proto */
+#include <new>
+
 /* UnicodeAsUCS4.proto */
 static CYTHON_INLINE Py_UCS4 __Pyx_PyUnicode_AsPy_UCS4(PyObject*);
 
@@ -1974,6 +2037,8 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 #endif
 
 /* #### Code section: module_declarations ### */
+static CYTHON_INLINE double __pyx_f_7cpython_7complex_7complex_4real_real(PyComplexObject *__pyx_v_self); /* proto*/
+static CYTHON_INLINE double __pyx_f_7cpython_7complex_7complex_4imag_imag(PyComplexObject *__pyx_v_self); /* proto*/
 
 /* Module declarations from "libcpp" */
 #if !CYTHON_USE_MODULE_STATE
@@ -2003,15 +2068,178 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 #if !CYTHON_USE_MODULE_STATE
 #endif
 
+/* Module declarations from "cpython.version" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "__builtin__" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.type" */
+#if !CYTHON_USE_MODULE_STATE
+static PyTypeObject *__pyx_ptype_7cpython_4type_type = 0;
+#endif
+
+/* Module declarations from "libc.stdio" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.object" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.ref" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.exc" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.module" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.mem" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.tuple" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.list" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.sequence" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.mapping" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.iterator" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.number" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.int" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "__builtin__" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.bool" */
+#if !CYTHON_USE_MODULE_STATE
+static PyTypeObject *__pyx_ptype_7cpython_4bool_bool = 0;
+#endif
+
+/* Module declarations from "cpython.long" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.float" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "__builtin__" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.complex" */
+#if !CYTHON_USE_MODULE_STATE
+static PyTypeObject *__pyx_ptype_7cpython_7complex_complex = 0;
+#endif
+
+/* Module declarations from "cpython.string" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.unicode" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.pyport" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.dict" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.instance" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.function" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.method" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.weakref" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.getargs" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.pythread" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.pystate" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.cobject" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.oldbuffer" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.set" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.buffer" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.bytes" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.pycapsule" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython.contextvars" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
+/* Module declarations from "cpython" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
+
 /* Module declarations from "cpp_common" */
 #if !CYTHON_USE_MODULE_STATE
 #endif
 static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *); /*proto*/
 static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *); /*proto*/
-
-/* Module declarations from "cpython.pycapsule" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
 
 /* Module declarations from "cpp_fuzz" */
 #if !CYTHON_USE_MODULE_STATE
@@ -2027,6 +2255,7 @@ static RF_Scorer __pyx_v_8cpp_fuzz_PartialTokenRatioContext;
 static RF_Scorer __pyx_v_8cpp_fuzz_WRatioContext;
 static RF_Scorer __pyx_v_8cpp_fuzz_QRatioContext;
 static CYTHON_INLINE RF_String __pyx_f_8cpp_fuzz_conv_sequence(PyObject *); /*proto*/
+static CYTHON_INLINE void __pyx_f_8cpp_fuzz_preprocess_strings(PyObject *, PyObject *, PyObject *, RF_StringWrapper *, RF_StringWrapper *); /*proto*/
 /* #### Code section: typeinfo ### */
 /* #### Code section: before_global_var ### */
 #define __Pyx_MODULE_NAME "cpp_fuzz"
@@ -2057,6 +2286,7 @@ static const char __pyx_k_s1_proc[] = "s1_proc";
 static const char __pyx_k_s2_proc[] = "s2_proc";
 static const char __pyx_k_cpp_fuzz[] = "cpp_fuzz";
 static const char __pyx_k_typecode[] = "typecode";
+static const char __pyx_k_RF_Scorer[] = "_RF_Scorer";
 static const char __pyx_k_TypeError[] = "TypeError";
 static const char __pyx_k_processor[] = "processor";
 static const char __pyx_k_MemoryError[] = "MemoryError";
@@ -2064,26 +2294,23 @@ static const char __pyx_k_token_ratio[] = "token_ratio";
 static const char __pyx_k_cpp_fuzz_pyx[] = "cpp_fuzz.pyx";
 static const char __pyx_k_is_coroutine[] = "_is_coroutine";
 static const char __pyx_k_score_cutoff[] = "score_cutoff";
+static const char __pyx_k_RF_Preprocess[] = "_RF_Preprocess";
 static const char __pyx_k_partial_ratio[] = "partial_ratio";
-static const char __pyx_k_ratio_line_43[] = "ratio (line 43)";
+static const char __pyx_k_ratio_line_65[] = "ratio (line 65)";
 static const char __pyx_k_c_score_cutoff[] = "c_score_cutoff";
-static const char __pyx_k_QRatio_line_581[] = "QRatio (line 581)";
-static const char __pyx_k_RF_Scorer[] = "_RF_Scorer";
+static const char __pyx_k_QRatio_line_466[] = "QRatio (line 466)";
 static const char __pyx_k_default_process[] = "default_process";
-static const char __pyx_k_preprocess_func[] = "preprocess_func";
 static const char __pyx_k_rapidfuzz_utils[] = "rapidfuzz.utils";
 static const char __pyx_k_token_set_ratio[] = "token_set_ratio";
 static const char __pyx_k_token_sort_ratio[] = "token_sort_ratio";
-static const char __pyx_k_processor_capsule[] = "processor_capsule";
-static const char __pyx_k_RF_Preprocess[] = "_RF_Preprocess";
 static const char __pyx_k_asyncio_coroutines[] = "asyncio.coroutines";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_partial_token_ratio[] = "partial_token_ratio";
-static const char __pyx_k_partial_ratio_line_104[] = "partial_ratio (line 104)";
+static const char __pyx_k_partial_ratio_line_111[] = "partial_ratio (line 111)";
 static const char __pyx_k_partial_token_set_ratio[] = "partial_token_set_ratio";
 static const char __pyx_k_partial_token_sort_ratio[] = "partial_token_sort_ratio";
-static const char __pyx_k_token_set_ratio_line_253[] = "token_set_ratio (line 253)";
-static const char __pyx_k_token_sort_ratio_line_195[] = "token_sort_ratio (line 195)";
+static const char __pyx_k_token_set_ratio_line_228[] = "token_set_ratio (line 228)";
+static const char __pyx_k_token_sort_ratio_line_186[] = "token_sort_ratio (line 186)";
 static const char __pyx_k_Sorts_the_words_in_the_strings[] = "\n    Sorts the words in the strings and calculates the fuzz.ratio between them\n\n    Parameters\n    ----------\n    s1 : Sequence[Hashable]\n        First string to compare.\n    s2 : Sequence[Hashable]\n        Second string to compare.\n    processor: callable, optional\n        Optional callable that is used to preprocess the strings before\n        comparing them. Default is ``utils.default_process``.\n    score_cutoff : float, optional\n        Optional argument for a score threshold as a float between 0 and 100.\n        For ratio < score_cutoff 0 is returned instead. Default is 0,\n        which deactivates this behaviour.\n\n    Returns\n    -------\n    similarity : float\n        similarity between s1 and s2 as a float between 0 and 100\n\n    Notes\n    -----\n    .. image:: img/token_sort_ratio.svg\n\n    Examples\n    --------\n    >>> fuzz.token_sort_ratio(\"fuzzy wuzzy was a bear\", \"wuzzy fuzzy was a bear\")\n    100.0\n    ";
 static const char __pyx_k_Calculates_a_quick_ratio_betwee[] = "\n    Calculates a quick ratio between two strings using fuzz.ratio.\n    The only difference to fuzz.ratio is, that this preprocesses\n    the strings by default.\n\n    Parameters\n    ----------\n    s1 : Sequence[Hashable]\n        First string to compare.\n    s2 : Sequence[Hashable]\n        Second string to compare.\n    processor: callable, optional\n        Optional callable that is used to preprocess the strings before\n        comparing them. Default is ``utils.default_process``.\n    score_cutoff : float, optional\n        Optional argument for a score threshold as a float between 0 and 100.\n        For ratio < score_cutoff 0 is returned instead. Default is 0,\n        which deactivates this behaviour.\n\n    Returns\n    -------\n    similarity : float\n        similarity between s1 and s2 as a float between 0 and 100\n\n    Examples\n    --------\n    >>> fuzz.QRatio(\"this is a test\", \"THIS is a test!\")\n    100.0\n    ";
 static const char __pyx_k_Calculates_the_normalized_InDel[] = "\n    Calculates the normalized InDel distance.\n\n    Parameters\n    ----------\n    s1 : Sequence[Hashable]\n        First string to compare.\n    s2 : Sequence[Hashable]\n        Second string to compare.\n    processor: callable, optional\n        Optional callable that is used to preprocess the strings before\n        comparing them. Default is None, which deactivates this behaviour.\n    score_cutoff : float, optional\n        Optional argument for a score threshold as a float between 0 and 100.\n        For ratio < score_cutoff 0 is returned instead. Default is 0,\n        which deactivates this behaviour.\n\n    Returns\n    -------\n    similarity : float\n        similarity between s1 and s2 as a float between 0 and 100\n\n    See Also\n    --------\n    rapidfuzz.string_metric.normalized_levenshtein : Normalized levenshtein distance\n\n    Notes\n    -----\n    .. image:: img/ratio.svg\n\n    Examples\n    --------\n    >>> fuzz.ratio(\"this is a test\", \"this is a test!\")\n    96.55171966552734\n    ";
@@ -2097,7 +2324,7 @@ static PyObject *__pyx_kp_u_Compares_the_words_in_the_strin;
 static PyObject *__pyx_kp_u_Got_unexpected_keyword_arguments;
 static PyObject *__pyx_n_s_MemoryError;
 static PyObject *__pyx_n_s_QRatio;
-static PyObject *__pyx_kp_u_QRatio_line_581;
+static PyObject *__pyx_kp_u_QRatio_line_466;
 static PyObject *__pyx_n_u_RF_Preprocess;
 static PyObject *__pyx_n_s_RF_Scorer;
 static PyObject *__pyx_kp_u_Searches_for_the_optimal_alignm;
@@ -2119,17 +2346,15 @@ static PyObject *__pyx_n_s_keys;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_name;
 static PyObject *__pyx_n_s_partial_ratio;
-static PyObject *__pyx_kp_u_partial_ratio_line_104;
+static PyObject *__pyx_kp_u_partial_ratio_line_111;
 static PyObject *__pyx_n_s_partial_token_ratio;
 static PyObject *__pyx_n_s_partial_token_set_ratio;
 static PyObject *__pyx_n_s_partial_token_sort_ratio;
-static PyObject *__pyx_n_s_preprocess_func;
 static PyObject *__pyx_n_s_processor;
-static PyObject *__pyx_n_s_processor_capsule;
 static PyObject *__pyx_n_s_range;
 static PyObject *__pyx_n_s_rapidfuzz_utils;
 static PyObject *__pyx_n_s_ratio;
-static PyObject *__pyx_kp_u_ratio_line_43;
+static PyObject *__pyx_kp_u_ratio_line_65;
 static PyObject *__pyx_n_s_s1;
 static PyObject *__pyx_n_s_s1_proc;
 static PyObject *__pyx_n_s_s2;
@@ -2138,9 +2363,9 @@ static PyObject *__pyx_n_s_score_cutoff;
 static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_n_s_token_ratio;
 static PyObject *__pyx_n_s_token_set_ratio;
-static PyObject *__pyx_kp_u_token_set_ratio_line_253;
+static PyObject *__pyx_kp_u_token_set_ratio_line_228;
 static PyObject *__pyx_n_s_token_sort_ratio;
-static PyObject *__pyx_kp_u_token_sort_ratio_line_195;
+static PyObject *__pyx_kp_u_token_sort_ratio_line_186;
 static PyObject *__pyx_n_s_typecode;
 #endif
 /* #### Code section: decls ### */
@@ -2204,13 +2429,16 @@ typedef struct {
   #ifdef __Pyx_FusedFunction_USED
   PyTypeObject *__pyx_FusedFunctionType;
   #endif
+  PyTypeObject *__pyx_ptype_7cpython_4type_type;
+  PyTypeObject *__pyx_ptype_7cpython_4bool_bool;
+  PyTypeObject *__pyx_ptype_7cpython_7complex_complex;
   PyObject *__pyx_kp_u_Calculates_a_quick_ratio_betwee;
   PyObject *__pyx_kp_u_Calculates_the_normalized_InDel;
   PyObject *__pyx_kp_u_Compares_the_words_in_the_strin;
   PyObject *__pyx_kp_u_Got_unexpected_keyword_arguments;
   PyObject *__pyx_n_s_MemoryError;
   PyObject *__pyx_n_s_QRatio;
-  PyObject *__pyx_kp_u_QRatio_line_581;
+  PyObject *__pyx_kp_u_QRatio_line_466;
   PyObject *__pyx_n_u_RF_Preprocess;
   PyObject *__pyx_n_s_RF_Scorer;
   PyObject *__pyx_kp_u_Searches_for_the_optimal_alignm;
@@ -2232,17 +2460,15 @@ typedef struct {
   PyObject *__pyx_n_s_main;
   PyObject *__pyx_n_s_name;
   PyObject *__pyx_n_s_partial_ratio;
-  PyObject *__pyx_kp_u_partial_ratio_line_104;
+  PyObject *__pyx_kp_u_partial_ratio_line_111;
   PyObject *__pyx_n_s_partial_token_ratio;
   PyObject *__pyx_n_s_partial_token_set_ratio;
   PyObject *__pyx_n_s_partial_token_sort_ratio;
-  PyObject *__pyx_n_s_preprocess_func;
   PyObject *__pyx_n_s_processor;
-  PyObject *__pyx_n_s_processor_capsule;
   PyObject *__pyx_n_s_range;
   PyObject *__pyx_n_s_rapidfuzz_utils;
   PyObject *__pyx_n_s_ratio;
-  PyObject *__pyx_kp_u_ratio_line_43;
+  PyObject *__pyx_kp_u_ratio_line_65;
   PyObject *__pyx_n_s_s1;
   PyObject *__pyx_n_s_s1_proc;
   PyObject *__pyx_n_s_s2;
@@ -2251,9 +2477,9 @@ typedef struct {
   PyObject *__pyx_n_s_test;
   PyObject *__pyx_n_s_token_ratio;
   PyObject *__pyx_n_s_token_set_ratio;
-  PyObject *__pyx_kp_u_token_set_ratio_line_253;
+  PyObject *__pyx_kp_u_token_set_ratio_line_228;
   PyObject *__pyx_n_s_token_sort_ratio;
-  PyObject *__pyx_kp_u_token_sort_ratio_line_195;
+  PyObject *__pyx_kp_u_token_sort_ratio_line_186;
   PyObject *__pyx_n_s_typecode;
   PyObject *__pyx_int_0;
   PyObject *__pyx_codeobj_;
@@ -2309,13 +2535,16 @@ static int __pyx_m_clear(PyObject *m) {
   #ifdef __Pyx_FusedFunction_USED
   Py_CLEAR(clear_module_state->__pyx_FusedFunctionType);
   #endif
+  Py_CLEAR(clear_module_state->__pyx_ptype_7cpython_4type_type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_7cpython_4bool_bool);
+  Py_CLEAR(clear_module_state->__pyx_ptype_7cpython_7complex_complex);
   Py_CLEAR(clear_module_state->__pyx_kp_u_Calculates_a_quick_ratio_betwee);
   Py_CLEAR(clear_module_state->__pyx_kp_u_Calculates_the_normalized_InDel);
   Py_CLEAR(clear_module_state->__pyx_kp_u_Compares_the_words_in_the_strin);
   Py_CLEAR(clear_module_state->__pyx_kp_u_Got_unexpected_keyword_arguments);
   Py_CLEAR(clear_module_state->__pyx_n_s_MemoryError);
   Py_CLEAR(clear_module_state->__pyx_n_s_QRatio);
-  Py_CLEAR(clear_module_state->__pyx_kp_u_QRatio_line_581);
+  Py_CLEAR(clear_module_state->__pyx_kp_u_QRatio_line_466);
   Py_CLEAR(clear_module_state->__pyx_n_u_RF_Preprocess);
   Py_CLEAR(clear_module_state->__pyx_n_s_RF_Scorer);
   Py_CLEAR(clear_module_state->__pyx_kp_u_Searches_for_the_optimal_alignm);
@@ -2337,17 +2566,15 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_main);
   Py_CLEAR(clear_module_state->__pyx_n_s_name);
   Py_CLEAR(clear_module_state->__pyx_n_s_partial_ratio);
-  Py_CLEAR(clear_module_state->__pyx_kp_u_partial_ratio_line_104);
+  Py_CLEAR(clear_module_state->__pyx_kp_u_partial_ratio_line_111);
   Py_CLEAR(clear_module_state->__pyx_n_s_partial_token_ratio);
   Py_CLEAR(clear_module_state->__pyx_n_s_partial_token_set_ratio);
   Py_CLEAR(clear_module_state->__pyx_n_s_partial_token_sort_ratio);
-  Py_CLEAR(clear_module_state->__pyx_n_s_preprocess_func);
   Py_CLEAR(clear_module_state->__pyx_n_s_processor);
-  Py_CLEAR(clear_module_state->__pyx_n_s_processor_capsule);
   Py_CLEAR(clear_module_state->__pyx_n_s_range);
   Py_CLEAR(clear_module_state->__pyx_n_s_rapidfuzz_utils);
   Py_CLEAR(clear_module_state->__pyx_n_s_ratio);
-  Py_CLEAR(clear_module_state->__pyx_kp_u_ratio_line_43);
+  Py_CLEAR(clear_module_state->__pyx_kp_u_ratio_line_65);
   Py_CLEAR(clear_module_state->__pyx_n_s_s1);
   Py_CLEAR(clear_module_state->__pyx_n_s_s1_proc);
   Py_CLEAR(clear_module_state->__pyx_n_s_s2);
@@ -2356,9 +2583,9 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_test);
   Py_CLEAR(clear_module_state->__pyx_n_s_token_ratio);
   Py_CLEAR(clear_module_state->__pyx_n_s_token_set_ratio);
-  Py_CLEAR(clear_module_state->__pyx_kp_u_token_set_ratio_line_253);
+  Py_CLEAR(clear_module_state->__pyx_kp_u_token_set_ratio_line_228);
   Py_CLEAR(clear_module_state->__pyx_n_s_token_sort_ratio);
-  Py_CLEAR(clear_module_state->__pyx_kp_u_token_sort_ratio_line_195);
+  Py_CLEAR(clear_module_state->__pyx_kp_u_token_sort_ratio_line_186);
   Py_CLEAR(clear_module_state->__pyx_n_s_typecode);
   Py_CLEAR(clear_module_state->__pyx_int_0);
   Py_CLEAR(clear_module_state->__pyx_codeobj_);
@@ -2401,13 +2628,16 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   #ifdef __Pyx_FusedFunction_USED
   Py_VISIT(traverse_module_state->__pyx_FusedFunctionType);
   #endif
+  Py_VISIT(traverse_module_state->__pyx_ptype_7cpython_4type_type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_7cpython_4bool_bool);
+  Py_VISIT(traverse_module_state->__pyx_ptype_7cpython_7complex_complex);
   Py_VISIT(traverse_module_state->__pyx_kp_u_Calculates_a_quick_ratio_betwee);
   Py_VISIT(traverse_module_state->__pyx_kp_u_Calculates_the_normalized_InDel);
   Py_VISIT(traverse_module_state->__pyx_kp_u_Compares_the_words_in_the_strin);
   Py_VISIT(traverse_module_state->__pyx_kp_u_Got_unexpected_keyword_arguments);
   Py_VISIT(traverse_module_state->__pyx_n_s_MemoryError);
   Py_VISIT(traverse_module_state->__pyx_n_s_QRatio);
-  Py_VISIT(traverse_module_state->__pyx_kp_u_QRatio_line_581);
+  Py_VISIT(traverse_module_state->__pyx_kp_u_QRatio_line_466);
   Py_VISIT(traverse_module_state->__pyx_n_u_RF_Preprocess);
   Py_VISIT(traverse_module_state->__pyx_n_s_RF_Scorer);
   Py_VISIT(traverse_module_state->__pyx_kp_u_Searches_for_the_optimal_alignm);
@@ -2429,17 +2659,15 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_main);
   Py_VISIT(traverse_module_state->__pyx_n_s_name);
   Py_VISIT(traverse_module_state->__pyx_n_s_partial_ratio);
-  Py_VISIT(traverse_module_state->__pyx_kp_u_partial_ratio_line_104);
+  Py_VISIT(traverse_module_state->__pyx_kp_u_partial_ratio_line_111);
   Py_VISIT(traverse_module_state->__pyx_n_s_partial_token_ratio);
   Py_VISIT(traverse_module_state->__pyx_n_s_partial_token_set_ratio);
   Py_VISIT(traverse_module_state->__pyx_n_s_partial_token_sort_ratio);
-  Py_VISIT(traverse_module_state->__pyx_n_s_preprocess_func);
   Py_VISIT(traverse_module_state->__pyx_n_s_processor);
-  Py_VISIT(traverse_module_state->__pyx_n_s_processor_capsule);
   Py_VISIT(traverse_module_state->__pyx_n_s_range);
   Py_VISIT(traverse_module_state->__pyx_n_s_rapidfuzz_utils);
   Py_VISIT(traverse_module_state->__pyx_n_s_ratio);
-  Py_VISIT(traverse_module_state->__pyx_kp_u_ratio_line_43);
+  Py_VISIT(traverse_module_state->__pyx_kp_u_ratio_line_65);
   Py_VISIT(traverse_module_state->__pyx_n_s_s1);
   Py_VISIT(traverse_module_state->__pyx_n_s_s1_proc);
   Py_VISIT(traverse_module_state->__pyx_n_s_s2);
@@ -2448,9 +2676,9 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_test);
   Py_VISIT(traverse_module_state->__pyx_n_s_token_ratio);
   Py_VISIT(traverse_module_state->__pyx_n_s_token_set_ratio);
-  Py_VISIT(traverse_module_state->__pyx_kp_u_token_set_ratio_line_253);
+  Py_VISIT(traverse_module_state->__pyx_kp_u_token_set_ratio_line_228);
   Py_VISIT(traverse_module_state->__pyx_n_s_token_sort_ratio);
-  Py_VISIT(traverse_module_state->__pyx_kp_u_token_sort_ratio_line_195);
+  Py_VISIT(traverse_module_state->__pyx_kp_u_token_sort_ratio_line_186);
   Py_VISIT(traverse_module_state->__pyx_n_s_typecode);
   Py_VISIT(traverse_module_state->__pyx_int_0);
   Py_VISIT(traverse_module_state->__pyx_codeobj_);
@@ -2490,13 +2718,16 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #ifdef __Pyx_FusedFunction_USED
 #define __pyx_FusedFunctionType __pyx_mstate_global->__pyx_FusedFunctionType
 #endif
+#define __pyx_ptype_7cpython_4type_type __pyx_mstate_global->__pyx_ptype_7cpython_4type_type
+#define __pyx_ptype_7cpython_4bool_bool __pyx_mstate_global->__pyx_ptype_7cpython_4bool_bool
+#define __pyx_ptype_7cpython_7complex_complex __pyx_mstate_global->__pyx_ptype_7cpython_7complex_complex
 #define __pyx_kp_u_Calculates_a_quick_ratio_betwee __pyx_mstate_global->__pyx_kp_u_Calculates_a_quick_ratio_betwee
 #define __pyx_kp_u_Calculates_the_normalized_InDel __pyx_mstate_global->__pyx_kp_u_Calculates_the_normalized_InDel
 #define __pyx_kp_u_Compares_the_words_in_the_strin __pyx_mstate_global->__pyx_kp_u_Compares_the_words_in_the_strin
 #define __pyx_kp_u_Got_unexpected_keyword_arguments __pyx_mstate_global->__pyx_kp_u_Got_unexpected_keyword_arguments
 #define __pyx_n_s_MemoryError __pyx_mstate_global->__pyx_n_s_MemoryError
 #define __pyx_n_s_QRatio __pyx_mstate_global->__pyx_n_s_QRatio
-#define __pyx_kp_u_QRatio_line_581 __pyx_mstate_global->__pyx_kp_u_QRatio_line_581
+#define __pyx_kp_u_QRatio_line_466 __pyx_mstate_global->__pyx_kp_u_QRatio_line_466
 #define __pyx_n_u_RF_Preprocess __pyx_mstate_global->__pyx_n_u_RF_Preprocess
 #define __pyx_n_s_RF_Scorer __pyx_mstate_global->__pyx_n_s_RF_Scorer
 #define __pyx_kp_u_Searches_for_the_optimal_alignm __pyx_mstate_global->__pyx_kp_u_Searches_for_the_optimal_alignm
@@ -2518,17 +2749,15 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_main __pyx_mstate_global->__pyx_n_s_main
 #define __pyx_n_s_name __pyx_mstate_global->__pyx_n_s_name
 #define __pyx_n_s_partial_ratio __pyx_mstate_global->__pyx_n_s_partial_ratio
-#define __pyx_kp_u_partial_ratio_line_104 __pyx_mstate_global->__pyx_kp_u_partial_ratio_line_104
+#define __pyx_kp_u_partial_ratio_line_111 __pyx_mstate_global->__pyx_kp_u_partial_ratio_line_111
 #define __pyx_n_s_partial_token_ratio __pyx_mstate_global->__pyx_n_s_partial_token_ratio
 #define __pyx_n_s_partial_token_set_ratio __pyx_mstate_global->__pyx_n_s_partial_token_set_ratio
 #define __pyx_n_s_partial_token_sort_ratio __pyx_mstate_global->__pyx_n_s_partial_token_sort_ratio
-#define __pyx_n_s_preprocess_func __pyx_mstate_global->__pyx_n_s_preprocess_func
 #define __pyx_n_s_processor __pyx_mstate_global->__pyx_n_s_processor
-#define __pyx_n_s_processor_capsule __pyx_mstate_global->__pyx_n_s_processor_capsule
 #define __pyx_n_s_range __pyx_mstate_global->__pyx_n_s_range
 #define __pyx_n_s_rapidfuzz_utils __pyx_mstate_global->__pyx_n_s_rapidfuzz_utils
 #define __pyx_n_s_ratio __pyx_mstate_global->__pyx_n_s_ratio
-#define __pyx_kp_u_ratio_line_43 __pyx_mstate_global->__pyx_kp_u_ratio_line_43
+#define __pyx_kp_u_ratio_line_65 __pyx_mstate_global->__pyx_kp_u_ratio_line_65
 #define __pyx_n_s_s1 __pyx_mstate_global->__pyx_n_s_s1
 #define __pyx_n_s_s1_proc __pyx_mstate_global->__pyx_n_s_s1_proc
 #define __pyx_n_s_s2 __pyx_mstate_global->__pyx_n_s_s2
@@ -2537,9 +2766,9 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_test __pyx_mstate_global->__pyx_n_s_test
 #define __pyx_n_s_token_ratio __pyx_mstate_global->__pyx_n_s_token_ratio
 #define __pyx_n_s_token_set_ratio __pyx_mstate_global->__pyx_n_s_token_set_ratio
-#define __pyx_kp_u_token_set_ratio_line_253 __pyx_mstate_global->__pyx_kp_u_token_set_ratio_line_253
+#define __pyx_kp_u_token_set_ratio_line_228 __pyx_mstate_global->__pyx_kp_u_token_set_ratio_line_228
 #define __pyx_n_s_token_sort_ratio __pyx_mstate_global->__pyx_n_s_token_sort_ratio
-#define __pyx_kp_u_token_sort_ratio_line_195 __pyx_mstate_global->__pyx_kp_u_token_sort_ratio_line_195
+#define __pyx_kp_u_token_sort_ratio_line_186 __pyx_mstate_global->__pyx_kp_u_token_sort_ratio_line_186
 #define __pyx_n_s_typecode __pyx_mstate_global->__pyx_n_s_typecode
 #define __pyx_int_0 __pyx_mstate_global->__pyx_int_0
 #define __pyx_codeobj_ __pyx_mstate_global->__pyx_codeobj_
@@ -2565,8 +2794,8 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #endif
 /* #### Code section: module_code ### */
 
-/* "cpp_fuzz.pyx":12
- * from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
+/* "cpp_fuzz.pyx":39
+ *     RF_Scorer CreateQRatioFunctionTable() except +
  * 
  * cdef inline RF_String conv_sequence(seq) except *:             # <<<<<<<<<<<<<<
  *     if is_valid_string(seq):
@@ -2586,37 +2815,37 @@ static CYTHON_INLINE RF_String __pyx_f_8cpp_fuzz_conv_sequence(PyObject *__pyx_v
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("conv_sequence", 0);
-  __Pyx_TraceCall("conv_sequence", __pyx_f[0], 12, 0, __PYX_ERR(0, 12, __pyx_L1_error));
+  __Pyx_TraceCall("conv_sequence", __pyx_f[0], 39, 0, __PYX_ERR(0, 39, __pyx_L1_error));
 
-  /* "cpp_fuzz.pyx":13
+  /* "cpp_fuzz.pyx":40
  * 
  * cdef inline RF_String conv_sequence(seq) except *:
  *     if is_valid_string(seq):             # <<<<<<<<<<<<<<
  *         return convert_string(seq)
  *     elif isinstance(seq, array):
  */
-  __Pyx_TraceLine(13,0,__PYX_ERR(0, 13, __pyx_L1_error))
+  __Pyx_TraceLine(40,0,__PYX_ERR(0, 40, __pyx_L1_error))
   try {
     __pyx_t_1 = is_valid_string(__pyx_v_seq);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 13, __pyx_L1_error)
+    __PYX_ERR(0, 40, __pyx_L1_error)
   }
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "cpp_fuzz.pyx":14
+    /* "cpp_fuzz.pyx":41
  * cdef inline RF_String conv_sequence(seq) except *:
  *     if is_valid_string(seq):
  *         return convert_string(seq)             # <<<<<<<<<<<<<<
  *     elif isinstance(seq, array):
  *         return hash_array(seq)
  */
-    __Pyx_TraceLine(14,0,__PYX_ERR(0, 14, __pyx_L1_error))
+    __Pyx_TraceLine(41,0,__PYX_ERR(0, 41, __pyx_L1_error))
     __pyx_r = convert_string(__pyx_v_seq);
     goto __pyx_L0;
 
-    /* "cpp_fuzz.pyx":13
+    /* "cpp_fuzz.pyx":40
  * 
  * cdef inline RF_String conv_sequence(seq) except *:
  *     if is_valid_string(seq):             # <<<<<<<<<<<<<<
@@ -2625,34 +2854,34 @@ static CYTHON_INLINE RF_String __pyx_f_8cpp_fuzz_conv_sequence(PyObject *__pyx_v
  */
   }
 
-  /* "cpp_fuzz.pyx":15
+  /* "cpp_fuzz.pyx":42
  *     if is_valid_string(seq):
  *         return convert_string(seq)
  *     elif isinstance(seq, array):             # <<<<<<<<<<<<<<
  *         return hash_array(seq)
  *     else:
  */
-  __Pyx_TraceLine(15,0,__PYX_ERR(0, 15, __pyx_L1_error))
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_array); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 15, __pyx_L1_error)
+  __Pyx_TraceLine(42,0,__PYX_ERR(0, 42, __pyx_L1_error))
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_array); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = PyObject_IsInstance(__pyx_v_seq, __pyx_t_3); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 15, __pyx_L1_error)
+  __pyx_t_2 = PyObject_IsInstance(__pyx_v_seq, __pyx_t_3); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_4 = (__pyx_t_2 != 0);
   if (__pyx_t_4) {
 
-    /* "cpp_fuzz.pyx":16
+    /* "cpp_fuzz.pyx":43
  *         return convert_string(seq)
  *     elif isinstance(seq, array):
  *         return hash_array(seq)             # <<<<<<<<<<<<<<
  *     else:
  *         return hash_sequence(seq)
  */
-    __Pyx_TraceLine(16,0,__PYX_ERR(0, 16, __pyx_L1_error))
-    __pyx_t_5 = __pyx_f_10cpp_common_hash_array(__pyx_v_seq); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 16, __pyx_L1_error)
+    __Pyx_TraceLine(43,0,__PYX_ERR(0, 43, __pyx_L1_error))
+    __pyx_t_5 = __pyx_f_10cpp_common_hash_array(__pyx_v_seq); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 43, __pyx_L1_error)
     __pyx_r = __pyx_t_5;
     goto __pyx_L0;
 
-    /* "cpp_fuzz.pyx":15
+    /* "cpp_fuzz.pyx":42
  *     if is_valid_string(seq):
  *         return convert_string(seq)
  *     elif isinstance(seq, array):             # <<<<<<<<<<<<<<
@@ -2661,22 +2890,22 @@ static CYTHON_INLINE RF_String __pyx_f_8cpp_fuzz_conv_sequence(PyObject *__pyx_v
  */
   }
 
-  /* "cpp_fuzz.pyx":18
+  /* "cpp_fuzz.pyx":45
  *         return hash_array(seq)
  *     else:
  *         return hash_sequence(seq)             # <<<<<<<<<<<<<<
  * 
- * cdef extern from "cpp_scorer.hpp":
+ * cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except *:
  */
-  __Pyx_TraceLine(18,0,__PYX_ERR(0, 18, __pyx_L1_error))
+  __Pyx_TraceLine(45,0,__PYX_ERR(0, 45, __pyx_L1_error))
   /*else*/ {
-    __pyx_t_5 = __pyx_f_10cpp_common_hash_sequence(__pyx_v_seq); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 18, __pyx_L1_error)
+    __pyx_t_5 = __pyx_f_10cpp_common_hash_sequence(__pyx_v_seq); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 45, __pyx_L1_error)
     __pyx_r = __pyx_t_5;
     goto __pyx_L0;
   }
 
-  /* "cpp_fuzz.pyx":12
- * from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
+  /* "cpp_fuzz.pyx":39
+ *     RF_Scorer CreateQRatioFunctionTable() except +
  * 
  * cdef inline RF_String conv_sequence(seq) except *:             # <<<<<<<<<<<<<<
  *     if is_valid_string(seq):
@@ -2694,8 +2923,295 @@ static CYTHON_INLINE RF_String __pyx_f_8cpp_fuzz_conv_sequence(PyObject *__pyx_v
   return __pyx_r;
 }
 
-/* "cpp_fuzz.pyx":43
- *     RF_Scorer CreateQRatioFunctionTable() except +
+/* "cpp_fuzz.pyx":47
+ *         return hash_sequence(seq)
+ * 
+ * cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except *:             # <<<<<<<<<<<<<<
+ *     if processor is True:
+ *         processor = default_process
+ */
+
+static CYTHON_INLINE void __pyx_f_8cpp_fuzz_preprocess_strings(PyObject *__pyx_v_s1, PyObject *__pyx_v_s2, PyObject *__pyx_v_processor, RF_StringWrapper *__pyx_v_s1_proc, RF_StringWrapper *__pyx_v_s2_proc) {
+  PyObject *__pyx_v_processor_capsule = NULL;
+  RF_Preprocess __pyx_v_preprocess_func;
+  __Pyx_TraceDeclarations
+  __Pyx_RefNannyDeclarations
+  int __pyx_t_1;
+  int __pyx_t_2;
+  PyObject *__pyx_t_3 = NULL;
+  void *__pyx_t_4;
+  bool __pyx_t_5;
+  PyObject *__pyx_t_6 = NULL;
+  PyObject *__pyx_t_7 = NULL;
+  int __pyx_t_8;
+  RF_String __pyx_t_9;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("preprocess_strings", 0);
+  __Pyx_TraceCall("preprocess_strings", __pyx_f[0], 47, 0, __PYX_ERR(0, 47, __pyx_L1_error));
+  __Pyx_INCREF(__pyx_v_s1);
+  __Pyx_INCREF(__pyx_v_s2);
+  __Pyx_INCREF(__pyx_v_processor);
+
+  /* "cpp_fuzz.pyx":48
+ * 
+ * cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except *:
+ *     if processor is True:             # <<<<<<<<<<<<<<
+ *         processor = default_process
+ * 
+ */
+  __Pyx_TraceLine(48,0,__PYX_ERR(0, 48, __pyx_L1_error))
+  __pyx_t_1 = (__pyx_v_processor == Py_True);
+  __pyx_t_2 = (__pyx_t_1 != 0);
+  if (__pyx_t_2) {
+
+    /* "cpp_fuzz.pyx":49
+ * cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except *:
+ *     if processor is True:
+ *         processor = default_process             # <<<<<<<<<<<<<<
+ * 
+ *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+ */
+    __Pyx_TraceLine(49,0,__PYX_ERR(0, 49, __pyx_L1_error))
+    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_default_process); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 49, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __Pyx_DECREF_SET(__pyx_v_processor, __pyx_t_3);
+    __pyx_t_3 = 0;
+
+    /* "cpp_fuzz.pyx":48
+ * 
+ * cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except *:
+ *     if processor is True:             # <<<<<<<<<<<<<<
+ *         processor = default_process
+ * 
+ */
+  }
+
+  /* "cpp_fuzz.pyx":51
+ *         processor = default_process
+ * 
+ *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)             # <<<<<<<<<<<<<<
+ *     if PyCapsule_IsValid(processor_capsule, NULL):
+ *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+ */
+  __Pyx_TraceLine(51,0,__PYX_ERR(0, 51, __pyx_L1_error))
+  __pyx_t_3 = __Pyx_GetAttr3(__pyx_v_processor, __pyx_n_u_RF_Preprocess, __pyx_v_processor); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_v_processor_capsule = __pyx_t_3;
+  __pyx_t_3 = 0;
+
+  /* "cpp_fuzz.pyx":52
+ * 
+ *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+ *     if PyCapsule_IsValid(processor_capsule, NULL):             # <<<<<<<<<<<<<<
+ *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+ *         preprocess_func(s1, &(s1_proc[0].string))
+ */
+  __Pyx_TraceLine(52,0,__PYX_ERR(0, 52, __pyx_L1_error))
+  __pyx_t_2 = (PyCapsule_IsValid(__pyx_v_processor_capsule, NULL) != 0);
+  if (__pyx_t_2) {
+
+    /* "cpp_fuzz.pyx":53
+ *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+ *     if PyCapsule_IsValid(processor_capsule, NULL):
+ *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)             # <<<<<<<<<<<<<<
+ *         preprocess_func(s1, &(s1_proc[0].string))
+ *         preprocess_func(s2, &(s2_proc[0].string))
+ */
+    __Pyx_TraceLine(53,0,__PYX_ERR(0, 53, __pyx_L1_error))
+    __pyx_t_4 = PyCapsule_GetPointer(__pyx_v_processor_capsule, NULL); if (unlikely(__pyx_t_4 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 53, __pyx_L1_error)
+    __pyx_v_preprocess_func = ((RF_Preprocess)__pyx_t_4);
+
+    /* "cpp_fuzz.pyx":54
+ *     if PyCapsule_IsValid(processor_capsule, NULL):
+ *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+ *         preprocess_func(s1, &(s1_proc[0].string))             # <<<<<<<<<<<<<<
+ *         preprocess_func(s2, &(s2_proc[0].string))
+ *     elif callable(processor):
+ */
+    __Pyx_TraceLine(54,0,__PYX_ERR(0, 54, __pyx_L1_error))
+    __pyx_t_5 = __pyx_v_preprocess_func(__pyx_v_s1, (&(__pyx_v_s1_proc[0]).string)); if (unlikely(__pyx_t_5 == ((bool)0))) __PYX_ERR(0, 54, __pyx_L1_error)
+
+    /* "cpp_fuzz.pyx":55
+ *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+ *         preprocess_func(s1, &(s1_proc[0].string))
+ *         preprocess_func(s2, &(s2_proc[0].string))             # <<<<<<<<<<<<<<
+ *     elif callable(processor):
+ *         s1 = processor(s1)
+ */
+    __Pyx_TraceLine(55,0,__PYX_ERR(0, 55, __pyx_L1_error))
+    __pyx_t_5 = __pyx_v_preprocess_func(__pyx_v_s2, (&(__pyx_v_s2_proc[0]).string)); if (unlikely(__pyx_t_5 == ((bool)0))) __PYX_ERR(0, 55, __pyx_L1_error)
+
+    /* "cpp_fuzz.pyx":52
+ * 
+ *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+ *     if PyCapsule_IsValid(processor_capsule, NULL):             # <<<<<<<<<<<<<<
+ *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+ *         preprocess_func(s1, &(s1_proc[0].string))
+ */
+    goto __pyx_L4;
+  }
+
+  /* "cpp_fuzz.pyx":56
+ *         preprocess_func(s1, &(s1_proc[0].string))
+ *         preprocess_func(s2, &(s2_proc[0].string))
+ *     elif callable(processor):             # <<<<<<<<<<<<<<
+ *         s1 = processor(s1)
+ *         s1_proc[0] = RF_StringWrapper(conv_sequence(s1), s1)
+ */
+  __Pyx_TraceLine(56,0,__PYX_ERR(0, 56, __pyx_L1_error))
+  __pyx_t_2 = __Pyx_PyCallable_Check(__pyx_v_processor); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 56, __pyx_L1_error)
+  __pyx_t_1 = (__pyx_t_2 != 0);
+  if (__pyx_t_1) {
+
+    /* "cpp_fuzz.pyx":57
+ *         preprocess_func(s2, &(s2_proc[0].string))
+ *     elif callable(processor):
+ *         s1 = processor(s1)             # <<<<<<<<<<<<<<
+ *         s1_proc[0] = RF_StringWrapper(conv_sequence(s1), s1)
+ *         s2 = processor(s2)
+ */
+    __Pyx_TraceLine(57,0,__PYX_ERR(0, 57, __pyx_L1_error))
+    __Pyx_INCREF(__pyx_v_processor);
+    __pyx_t_6 = __pyx_v_processor; __pyx_t_7 = NULL;
+    __pyx_t_8 = 0;
+    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
+      __pyx_t_7 = PyMethod_GET_SELF(__pyx_t_6);
+      if (likely(__pyx_t_7)) {
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
+        __Pyx_INCREF(__pyx_t_7);
+        __Pyx_INCREF(function);
+        __Pyx_DECREF_SET(__pyx_t_6, function);
+        __pyx_t_8 = 1;
+      }
+    }
+    {
+      PyObject *__pyx_callargs[2] = {__pyx_t_7, __pyx_v_s1};
+      __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_8, 1+__pyx_t_8);
+      __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
+      if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 57, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_3);
+      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    }
+    __Pyx_DECREF_SET(__pyx_v_s1, __pyx_t_3);
+    __pyx_t_3 = 0;
+
+    /* "cpp_fuzz.pyx":58
+ *     elif callable(processor):
+ *         s1 = processor(s1)
+ *         s1_proc[0] = RF_StringWrapper(conv_sequence(s1), s1)             # <<<<<<<<<<<<<<
+ *         s2 = processor(s2)
+ *         s2_proc[0] = RF_StringWrapper(conv_sequence(s2), s2)
+ */
+    __Pyx_TraceLine(58,0,__PYX_ERR(0, 58, __pyx_L1_error))
+    __pyx_t_9 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 58, __pyx_L1_error)
+    (__pyx_v_s1_proc[0]) = RF_StringWrapper(__pyx_t_9, __pyx_v_s1);
+
+    /* "cpp_fuzz.pyx":59
+ *         s1 = processor(s1)
+ *         s1_proc[0] = RF_StringWrapper(conv_sequence(s1), s1)
+ *         s2 = processor(s2)             # <<<<<<<<<<<<<<
+ *         s2_proc[0] = RF_StringWrapper(conv_sequence(s2), s2)
+ *     else:
+ */
+    __Pyx_TraceLine(59,0,__PYX_ERR(0, 59, __pyx_L1_error))
+    __Pyx_INCREF(__pyx_v_processor);
+    __pyx_t_6 = __pyx_v_processor; __pyx_t_7 = NULL;
+    __pyx_t_8 = 0;
+    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
+      __pyx_t_7 = PyMethod_GET_SELF(__pyx_t_6);
+      if (likely(__pyx_t_7)) {
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
+        __Pyx_INCREF(__pyx_t_7);
+        __Pyx_INCREF(function);
+        __Pyx_DECREF_SET(__pyx_t_6, function);
+        __pyx_t_8 = 1;
+      }
+    }
+    {
+      PyObject *__pyx_callargs[2] = {__pyx_t_7, __pyx_v_s2};
+      __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_8, 1+__pyx_t_8);
+      __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
+      if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 59, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_3);
+      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    }
+    __Pyx_DECREF_SET(__pyx_v_s2, __pyx_t_3);
+    __pyx_t_3 = 0;
+
+    /* "cpp_fuzz.pyx":60
+ *         s1_proc[0] = RF_StringWrapper(conv_sequence(s1), s1)
+ *         s2 = processor(s2)
+ *         s2_proc[0] = RF_StringWrapper(conv_sequence(s2), s2)             # <<<<<<<<<<<<<<
+ *     else:
+ *         s1_proc[0] = RF_StringWrapper(conv_sequence(s1))
+ */
+    __Pyx_TraceLine(60,0,__PYX_ERR(0, 60, __pyx_L1_error))
+    __pyx_t_9 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 60, __pyx_L1_error)
+    (__pyx_v_s2_proc[0]) = RF_StringWrapper(__pyx_t_9, __pyx_v_s2);
+
+    /* "cpp_fuzz.pyx":56
+ *         preprocess_func(s1, &(s1_proc[0].string))
+ *         preprocess_func(s2, &(s2_proc[0].string))
+ *     elif callable(processor):             # <<<<<<<<<<<<<<
+ *         s1 = processor(s1)
+ *         s1_proc[0] = RF_StringWrapper(conv_sequence(s1), s1)
+ */
+    goto __pyx_L4;
+  }
+
+  /* "cpp_fuzz.pyx":62
+ *         s2_proc[0] = RF_StringWrapper(conv_sequence(s2), s2)
+ *     else:
+ *         s1_proc[0] = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
+ *         s2_proc[0] = RF_StringWrapper(conv_sequence(s2))
+ * 
+ */
+  __Pyx_TraceLine(62,0,__PYX_ERR(0, 62, __pyx_L1_error))
+  /*else*/ {
+    __pyx_t_9 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 62, __pyx_L1_error)
+    (__pyx_v_s1_proc[0]) = RF_StringWrapper(__pyx_t_9);
+
+    /* "cpp_fuzz.pyx":63
+ *     else:
+ *         s1_proc[0] = RF_StringWrapper(conv_sequence(s1))
+ *         s2_proc[0] = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
+ * 
+ * def ratio(s1, s2, *, processor=None, score_cutoff=None):
+ */
+    __Pyx_TraceLine(63,0,__PYX_ERR(0, 63, __pyx_L1_error))
+    __pyx_t_9 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 63, __pyx_L1_error)
+    (__pyx_v_s2_proc[0]) = RF_StringWrapper(__pyx_t_9);
+  }
+  __pyx_L4:;
+
+  /* "cpp_fuzz.pyx":47
+ *         return hash_sequence(seq)
+ * 
+ * cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except *:             # <<<<<<<<<<<<<<
+ *     if processor is True:
+ *         processor = default_process
+ */
+
+  /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_6);
+  __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_AddTraceback("cpp_fuzz.preprocess_strings", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_L0:;
+  __Pyx_XDECREF(__pyx_v_processor_capsule);
+  __Pyx_XDECREF(__pyx_v_s1);
+  __Pyx_XDECREF(__pyx_v_s2);
+  __Pyx_XDECREF(__pyx_v_processor);
+  __Pyx_TraceReturn(Py_None, 0);
+  __Pyx_RefNannyFinishContext();
+}
+
+/* "cpp_fuzz.pyx":65
+ *         s2_proc[0] = RF_StringWrapper(conv_sequence(s2))
  * 
  * def ratio(s1, s2, *, processor=None, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
@@ -2756,14 +3272,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       switch (__pyx_nargs) {
         case  0:
         if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_s1)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 43, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 65, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
         if (likely((values[1] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_s2)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 43, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 65, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("ratio", 1, 2, 2, 1); __PYX_ERR(0, 43, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("ratio", 1, 2, 2, 1); __PYX_ERR(0, 65, __pyx_L3_error)
         }
       }
       if (kw_args > 0 && likely(kw_args <= 2)) {
@@ -2771,12 +3287,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         for (index = 2; index < 4 && kw_args > 0; index++) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, *__pyx_pyargnames[index]);
           if (value) { values[index] = value; kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 43, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 65, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "ratio") < 0)) __PYX_ERR(0, 43, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "ratio") < 0)) __PYX_ERR(0, 65, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 2)) {
       goto __pyx_L5_argtuple_error;
@@ -2791,7 +3307,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("ratio", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 43, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("ratio", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 65, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("cpp_fuzz.ratio", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -2808,8 +3324,6 @@ static PyObject *__pyx_pf_8cpp_fuzz_ratio(CYTHON_UNUSED PyObject *__pyx_self, Py
   double __pyx_v_c_score_cutoff;
   RF_StringWrapper __pyx_v_s1_proc;
   RF_StringWrapper __pyx_v_s2_proc;
-  PyObject *__pyx_v_processor_capsule = NULL;
-  RF_Preprocess __pyx_v_preprocess_func;
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -2819,47 +3333,38 @@ static PyObject *__pyx_pf_8cpp_fuzz_ratio(CYTHON_UNUSED PyObject *__pyx_self, Py
   int __pyx_t_4;
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
-  void *__pyx_t_7;
-  bool __pyx_t_8;
-  PyObject *__pyx_t_9 = NULL;
-  PyObject *__pyx_t_10 = NULL;
-  int __pyx_t_11;
-  RF_String __pyx_t_12;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_TraceFrameInit(__pyx_codeobj_)
   __Pyx_RefNannySetupContext("ratio", 0);
-  __Pyx_TraceCall("ratio", __pyx_f[0], 43, 0, __PYX_ERR(0, 43, __pyx_L1_error));
-  __Pyx_INCREF(__pyx_v_s1);
-  __Pyx_INCREF(__pyx_v_s2);
-  __Pyx_INCREF(__pyx_v_processor);
+  __Pyx_TraceCall("ratio", __pyx_f[0], 65, 0, __PYX_ERR(0, 65, __pyx_L1_error));
 
-  /* "cpp_fuzz.pyx":79
+  /* "cpp_fuzz.pyx":101
  *     96.55171966552734
  *     """
  *     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff             # <<<<<<<<<<<<<<
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  */
-  __Pyx_TraceLine(79,0,__PYX_ERR(0, 79, __pyx_L1_error))
+  __Pyx_TraceLine(101,0,__PYX_ERR(0, 101, __pyx_L1_error))
   __pyx_t_2 = (__pyx_v_score_cutoff == Py_None);
   if ((__pyx_t_2 != 0)) {
     __pyx_t_1 = 0.0;
   } else {
-    __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 79, __pyx_L1_error)
+    __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 101, __pyx_L1_error)
     __pyx_t_1 = __pyx_t_3;
   }
   __pyx_v_c_score_cutoff = __pyx_t_1;
 
-  /* "cpp_fuzz.pyx":82
+  /* "cpp_fuzz.pyx":104
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  *     if s1 is None or s2 is None:             # <<<<<<<<<<<<<<
  *         return 0
  * 
  */
-  __Pyx_TraceLine(82,0,__PYX_ERR(0, 82, __pyx_L1_error))
+  __Pyx_TraceLine(104,0,__PYX_ERR(0, 104, __pyx_L1_error))
   __pyx_t_4 = (__pyx_v_s1 == Py_None);
   __pyx_t_5 = (__pyx_t_4 != 0);
   if (!__pyx_t_5) {
@@ -2873,20 +3378,20 @@ static PyObject *__pyx_pf_8cpp_fuzz_ratio(CYTHON_UNUSED PyObject *__pyx_self, Py
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_2) {
 
-    /* "cpp_fuzz.pyx":83
+    /* "cpp_fuzz.pyx":105
  * 
  *     if s1 is None or s2 is None:
  *         return 0             # <<<<<<<<<<<<<<
  * 
- *     if processor is True:
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
  */
-    __Pyx_TraceLine(83,0,__PYX_ERR(0, 83, __pyx_L1_error))
+    __Pyx_TraceLine(105,0,__PYX_ERR(0, 105, __pyx_L1_error))
     __Pyx_XDECREF(__pyx_r);
     __Pyx_INCREF(__pyx_int_0);
     __pyx_r = __pyx_int_0;
     goto __pyx_L0;
 
-    /* "cpp_fuzz.pyx":82
+    /* "cpp_fuzz.pyx":104
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  *     if s1 is None or s2 is None:             # <<<<<<<<<<<<<<
@@ -2895,261 +3400,39 @@ static PyObject *__pyx_pf_8cpp_fuzz_ratio(CYTHON_UNUSED PyObject *__pyx_self, Py
  */
   }
 
-  /* "cpp_fuzz.pyx":85
+  /* "cpp_fuzz.pyx":107
  *         return 0
  * 
- *     if processor is True:             # <<<<<<<<<<<<<<
- *         processor = default_process
- * 
- */
-  __Pyx_TraceLine(85,0,__PYX_ERR(0, 85, __pyx_L1_error))
-  __pyx_t_2 = (__pyx_v_processor == Py_True);
-  __pyx_t_4 = (__pyx_t_2 != 0);
-  if (__pyx_t_4) {
-
-    /* "cpp_fuzz.pyx":86
- * 
- *     if processor is True:
- *         processor = default_process             # <<<<<<<<<<<<<<
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- */
-    __Pyx_TraceLine(86,0,__PYX_ERR(0, 86, __pyx_L1_error))
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_default_process); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 86, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    __Pyx_DECREF_SET(__pyx_v_processor, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":85
- *         return 0
- * 
- *     if processor is True:             # <<<<<<<<<<<<<<
- *         processor = default_process
- * 
- */
-  }
-
-  /* "cpp_fuzz.pyx":88
- *         processor = default_process
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)             # <<<<<<<<<<<<<<
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- */
-  __Pyx_TraceLine(88,0,__PYX_ERR(0, 88, __pyx_L1_error))
-  __pyx_t_6 = __Pyx_GetAttr3(__pyx_v_processor, __pyx_n_u_RF_Preprocess, __pyx_v_processor); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 88, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_6);
-  __pyx_v_processor_capsule = __pyx_t_6;
-  __pyx_t_6 = 0;
-
-  /* "cpp_fuzz.pyx":89
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):             # <<<<<<<<<<<<<<
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- */
-  __Pyx_TraceLine(89,0,__PYX_ERR(0, 89, __pyx_L1_error))
-  __pyx_t_4 = (PyCapsule_IsValid(__pyx_v_processor_capsule, NULL) != 0);
-  if (__pyx_t_4) {
-
-    /* "cpp_fuzz.pyx":90
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)             # <<<<<<<<<<<<<<
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- */
-    __Pyx_TraceLine(90,0,__PYX_ERR(0, 90, __pyx_L1_error))
-    __pyx_t_7 = PyCapsule_GetPointer(__pyx_v_processor_capsule, NULL); if (unlikely(__pyx_t_7 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 90, __pyx_L1_error)
-    __pyx_v_preprocess_func = ((RF_Preprocess)__pyx_t_7);
-
-    /* "cpp_fuzz.pyx":91
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)             # <<<<<<<<<<<<<<
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):
- */
-    __Pyx_TraceLine(91,0,__PYX_ERR(0, 91, __pyx_L1_error))
-    __pyx_t_8 = __pyx_v_preprocess_func(__pyx_v_s1, (&__pyx_v_s1_proc.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 91, __pyx_L1_error)
-
-    /* "cpp_fuzz.pyx":92
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)             # <<<<<<<<<<<<<<
- *     elif callable(processor):
- *         s1 = processor(s1)
- */
-    __Pyx_TraceLine(92,0,__PYX_ERR(0, 92, __pyx_L1_error))
-    __pyx_t_8 = __pyx_v_preprocess_func(__pyx_v_s2, (&__pyx_v_s2_proc.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 92, __pyx_L1_error)
-
-    /* "cpp_fuzz.pyx":89
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):             # <<<<<<<<<<<<<<
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- */
-    goto __pyx_L7;
-  }
-
-  /* "cpp_fuzz.pyx":93
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):             # <<<<<<<<<<<<<<
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- */
-  __Pyx_TraceLine(93,0,__PYX_ERR(0, 93, __pyx_L1_error))
-  __pyx_t_4 = __Pyx_PyCallable_Check(__pyx_v_processor); if (unlikely(__pyx_t_4 == ((int)-1))) __PYX_ERR(0, 93, __pyx_L1_error)
-  __pyx_t_2 = (__pyx_t_4 != 0);
-  if (__pyx_t_2) {
-
-    /* "cpp_fuzz.pyx":94
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):
- *         s1 = processor(s1)             # <<<<<<<<<<<<<<
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- */
-    __Pyx_TraceLine(94,0,__PYX_ERR(0, 94, __pyx_L1_error))
-    __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_9 = __pyx_v_processor; __pyx_t_10 = NULL;
-    __pyx_t_11 = 0;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
-      __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_9);
-      if (likely(__pyx_t_10)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_9);
-        __Pyx_INCREF(__pyx_t_10);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_9, function);
-        __pyx_t_11 = 1;
-      }
-    }
-    {
-      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_s1};
-      __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_9, __pyx_callargs+1-__pyx_t_11, 1+__pyx_t_11);
-      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 94, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    }
-    __Pyx_DECREF_SET(__pyx_v_s1, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":95
- *     elif callable(processor):
- *         s1 = processor(s1)
- *         s2 = processor(s2)             # <<<<<<<<<<<<<<
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- */
-    __Pyx_TraceLine(95,0,__PYX_ERR(0, 95, __pyx_L1_error))
-    __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_9 = __pyx_v_processor; __pyx_t_10 = NULL;
-    __pyx_t_11 = 0;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
-      __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_9);
-      if (likely(__pyx_t_10)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_9);
-        __Pyx_INCREF(__pyx_t_10);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_9, function);
-        __pyx_t_11 = 1;
-      }
-    }
-    {
-      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_s2};
-      __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_9, __pyx_callargs+1-__pyx_t_11, 1+__pyx_t_11);
-      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 95, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    }
-    __Pyx_DECREF_SET(__pyx_v_s2, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":96
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- *     else:
- */
-    __Pyx_TraceLine(96,0,__PYX_ERR(0, 96, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L1_error)
-    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":97
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- */
-    __Pyx_TraceLine(97,0,__PYX_ERR(0, 97, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 97, __pyx_L1_error)
-    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":93
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):             # <<<<<<<<<<<<<<
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- */
-    goto __pyx_L7;
-  }
-
-  /* "cpp_fuzz.pyx":99
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- * 
- */
-  __Pyx_TraceLine(99,0,__PYX_ERR(0, 99, __pyx_L1_error))
-  /*else*/ {
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 99, __pyx_L1_error)
-    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":100
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
- * 
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)             # <<<<<<<<<<<<<<
  *     return ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
- */
-    __Pyx_TraceLine(100,0,__PYX_ERR(0, 100, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 100, __pyx_L1_error)
-    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_12);
-  }
-  __pyx_L7:;
-
-  /* "cpp_fuzz.pyx":102
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  * 
+ */
+  __Pyx_TraceLine(107,0,__PYX_ERR(0, 107, __pyx_L1_error))
+  __pyx_f_8cpp_fuzz_preprocess_strings(__pyx_v_s1, __pyx_v_s2, __pyx_v_processor, (&__pyx_v_s1_proc), (&__pyx_v_s2_proc)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 107, __pyx_L1_error)
+
+  /* "cpp_fuzz.pyx":108
+ * 
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
  *     return ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  * 
- * def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
+ * 
  */
-  __Pyx_TraceLine(102,0,__PYX_ERR(0, 102, __pyx_L1_error))
+  __Pyx_TraceLine(108,0,__PYX_ERR(0, 108, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
   try {
     __pyx_t_1 = ratio_func(__pyx_v_s1_proc.string, __pyx_v_s2_proc.string, __pyx_v_c_score_cutoff);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 102, __pyx_L1_error)
+    __PYX_ERR(0, 108, __pyx_L1_error)
   }
-  __pyx_t_6 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __pyx_t_6 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __pyx_r = __pyx_t_6;
   __pyx_t_6 = 0;
   goto __pyx_L0;
 
-  /* "cpp_fuzz.pyx":43
- *     RF_Scorer CreateQRatioFunctionTable() except +
+  /* "cpp_fuzz.pyx":65
+ *         s2_proc[0] = RF_StringWrapper(conv_sequence(s2))
  * 
  * def ratio(s1, s2, *, processor=None, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
@@ -3159,23 +3442,17 @@ static PyObject *__pyx_pf_8cpp_fuzz_ratio(CYTHON_UNUSED PyObject *__pyx_self, Py
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_XDECREF(__pyx_t_9);
-  __Pyx_XDECREF(__pyx_t_10);
   __Pyx_AddTraceback("cpp_fuzz.ratio", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
-  __Pyx_XDECREF(__pyx_v_processor_capsule);
-  __Pyx_XDECREF(__pyx_v_s1);
-  __Pyx_XDECREF(__pyx_v_s2);
-  __Pyx_XDECREF(__pyx_v_processor);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_TraceReturn(__pyx_r, 0);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "cpp_fuzz.pyx":104
- *     return ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+/* "cpp_fuzz.pyx":111
+ * 
  * 
  * def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
@@ -3236,14 +3513,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       switch (__pyx_nargs) {
         case  0:
         if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_s1)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 104, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 111, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
         if (likely((values[1] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_s2)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 104, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 111, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("partial_ratio", 1, 2, 2, 1); __PYX_ERR(0, 104, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("partial_ratio", 1, 2, 2, 1); __PYX_ERR(0, 111, __pyx_L3_error)
         }
       }
       if (kw_args > 0 && likely(kw_args <= 2)) {
@@ -3251,12 +3528,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         for (index = 2; index < 4 && kw_args > 0; index++) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, *__pyx_pyargnames[index]);
           if (value) { values[index] = value; kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 104, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 111, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "partial_ratio") < 0)) __PYX_ERR(0, 104, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "partial_ratio") < 0)) __PYX_ERR(0, 111, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 2)) {
       goto __pyx_L5_argtuple_error;
@@ -3271,7 +3548,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("partial_ratio", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 104, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("partial_ratio", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 111, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("cpp_fuzz.partial_ratio", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -3288,8 +3565,6 @@ static PyObject *__pyx_pf_8cpp_fuzz_2partial_ratio(CYTHON_UNUSED PyObject *__pyx
   double __pyx_v_c_score_cutoff;
   RF_StringWrapper __pyx_v_s1_proc;
   RF_StringWrapper __pyx_v_s2_proc;
-  PyObject *__pyx_v_processor_capsule = NULL;
-  RF_Preprocess __pyx_v_preprocess_func;
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -3299,47 +3574,38 @@ static PyObject *__pyx_pf_8cpp_fuzz_2partial_ratio(CYTHON_UNUSED PyObject *__pyx
   int __pyx_t_4;
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
-  void *__pyx_t_7;
-  bool __pyx_t_8;
-  PyObject *__pyx_t_9 = NULL;
-  PyObject *__pyx_t_10 = NULL;
-  int __pyx_t_11;
-  RF_String __pyx_t_12;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_TraceFrameInit(__pyx_codeobj__2)
   __Pyx_RefNannySetupContext("partial_ratio", 0);
-  __Pyx_TraceCall("partial_ratio", __pyx_f[0], 104, 0, __PYX_ERR(0, 104, __pyx_L1_error));
-  __Pyx_INCREF(__pyx_v_s1);
-  __Pyx_INCREF(__pyx_v_s2);
-  __Pyx_INCREF(__pyx_v_processor);
+  __Pyx_TraceCall("partial_ratio", __pyx_f[0], 111, 0, __PYX_ERR(0, 111, __pyx_L1_error));
 
-  /* "cpp_fuzz.pyx":169
+  /* "cpp_fuzz.pyx":176
  *     100.0
  *     """
  *     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff             # <<<<<<<<<<<<<<
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  */
-  __Pyx_TraceLine(169,0,__PYX_ERR(0, 169, __pyx_L1_error))
+  __Pyx_TraceLine(176,0,__PYX_ERR(0, 176, __pyx_L1_error))
   __pyx_t_2 = (__pyx_v_score_cutoff == Py_None);
   if ((__pyx_t_2 != 0)) {
     __pyx_t_1 = 0.0;
   } else {
-    __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 169, __pyx_L1_error)
+    __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 176, __pyx_L1_error)
     __pyx_t_1 = __pyx_t_3;
   }
   __pyx_v_c_score_cutoff = __pyx_t_1;
 
-  /* "cpp_fuzz.pyx":172
+  /* "cpp_fuzz.pyx":179
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  *     if s1 is None or s2 is None:             # <<<<<<<<<<<<<<
  *         return 0
  * 
  */
-  __Pyx_TraceLine(172,0,__PYX_ERR(0, 172, __pyx_L1_error))
+  __Pyx_TraceLine(179,0,__PYX_ERR(0, 179, __pyx_L1_error))
   __pyx_t_4 = (__pyx_v_s1 == Py_None);
   __pyx_t_5 = (__pyx_t_4 != 0);
   if (!__pyx_t_5) {
@@ -3353,20 +3619,20 @@ static PyObject *__pyx_pf_8cpp_fuzz_2partial_ratio(CYTHON_UNUSED PyObject *__pyx
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_2) {
 
-    /* "cpp_fuzz.pyx":173
+    /* "cpp_fuzz.pyx":180
  * 
  *     if s1 is None or s2 is None:
  *         return 0             # <<<<<<<<<<<<<<
  * 
- *     if processor is True:
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
  */
-    __Pyx_TraceLine(173,0,__PYX_ERR(0, 173, __pyx_L1_error))
+    __Pyx_TraceLine(180,0,__PYX_ERR(0, 180, __pyx_L1_error))
     __Pyx_XDECREF(__pyx_r);
     __Pyx_INCREF(__pyx_int_0);
     __pyx_r = __pyx_int_0;
     goto __pyx_L0;
 
-    /* "cpp_fuzz.pyx":172
+    /* "cpp_fuzz.pyx":179
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  *     if s1 is None or s2 is None:             # <<<<<<<<<<<<<<
@@ -3375,261 +3641,39 @@ static PyObject *__pyx_pf_8cpp_fuzz_2partial_ratio(CYTHON_UNUSED PyObject *__pyx
  */
   }
 
-  /* "cpp_fuzz.pyx":175
+  /* "cpp_fuzz.pyx":182
  *         return 0
  * 
- *     if processor is True:             # <<<<<<<<<<<<<<
- *         processor = default_process
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)             # <<<<<<<<<<<<<<
+ *     return partial_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
  * 
  */
-  __Pyx_TraceLine(175,0,__PYX_ERR(0, 175, __pyx_L1_error))
-  __pyx_t_2 = (__pyx_v_processor == Py_True);
-  __pyx_t_4 = (__pyx_t_2 != 0);
-  if (__pyx_t_4) {
-
-    /* "cpp_fuzz.pyx":176
- * 
- *     if processor is True:
- *         processor = default_process             # <<<<<<<<<<<<<<
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- */
-    __Pyx_TraceLine(176,0,__PYX_ERR(0, 176, __pyx_L1_error))
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_default_process); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 176, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    __Pyx_DECREF_SET(__pyx_v_processor, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":175
- *         return 0
- * 
- *     if processor is True:             # <<<<<<<<<<<<<<
- *         processor = default_process
- * 
- */
-  }
-
-  /* "cpp_fuzz.pyx":178
- *         processor = default_process
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)             # <<<<<<<<<<<<<<
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- */
-  __Pyx_TraceLine(178,0,__PYX_ERR(0, 178, __pyx_L1_error))
-  __pyx_t_6 = __Pyx_GetAttr3(__pyx_v_processor, __pyx_n_u_RF_Preprocess, __pyx_v_processor); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 178, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_6);
-  __pyx_v_processor_capsule = __pyx_t_6;
-  __pyx_t_6 = 0;
-
-  /* "cpp_fuzz.pyx":179
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):             # <<<<<<<<<<<<<<
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- */
-  __Pyx_TraceLine(179,0,__PYX_ERR(0, 179, __pyx_L1_error))
-  __pyx_t_4 = (PyCapsule_IsValid(__pyx_v_processor_capsule, NULL) != 0);
-  if (__pyx_t_4) {
-
-    /* "cpp_fuzz.pyx":180
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)             # <<<<<<<<<<<<<<
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- */
-    __Pyx_TraceLine(180,0,__PYX_ERR(0, 180, __pyx_L1_error))
-    __pyx_t_7 = PyCapsule_GetPointer(__pyx_v_processor_capsule, NULL); if (unlikely(__pyx_t_7 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 180, __pyx_L1_error)
-    __pyx_v_preprocess_func = ((RF_Preprocess)__pyx_t_7);
-
-    /* "cpp_fuzz.pyx":181
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)             # <<<<<<<<<<<<<<
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):
- */
-    __Pyx_TraceLine(181,0,__PYX_ERR(0, 181, __pyx_L1_error))
-    __pyx_t_8 = __pyx_v_preprocess_func(__pyx_v_s1, (&__pyx_v_s1_proc.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 181, __pyx_L1_error)
-
-    /* "cpp_fuzz.pyx":182
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)             # <<<<<<<<<<<<<<
- *     elif callable(processor):
- *         s1 = processor(s1)
- */
-    __Pyx_TraceLine(182,0,__PYX_ERR(0, 182, __pyx_L1_error))
-    __pyx_t_8 = __pyx_v_preprocess_func(__pyx_v_s2, (&__pyx_v_s2_proc.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 182, __pyx_L1_error)
-
-    /* "cpp_fuzz.pyx":179
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):             # <<<<<<<<<<<<<<
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- */
-    goto __pyx_L7;
-  }
+  __Pyx_TraceLine(182,0,__PYX_ERR(0, 182, __pyx_L1_error))
+  __pyx_f_8cpp_fuzz_preprocess_strings(__pyx_v_s1, __pyx_v_s2, __pyx_v_processor, (&__pyx_v_s1_proc), (&__pyx_v_s2_proc)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 182, __pyx_L1_error)
 
   /* "cpp_fuzz.pyx":183
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):             # <<<<<<<<<<<<<<
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- */
-  __Pyx_TraceLine(183,0,__PYX_ERR(0, 183, __pyx_L1_error))
-  __pyx_t_4 = __Pyx_PyCallable_Check(__pyx_v_processor); if (unlikely(__pyx_t_4 == ((int)-1))) __PYX_ERR(0, 183, __pyx_L1_error)
-  __pyx_t_2 = (__pyx_t_4 != 0);
-  if (__pyx_t_2) {
-
-    /* "cpp_fuzz.pyx":184
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):
- *         s1 = processor(s1)             # <<<<<<<<<<<<<<
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- */
-    __Pyx_TraceLine(184,0,__PYX_ERR(0, 184, __pyx_L1_error))
-    __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_9 = __pyx_v_processor; __pyx_t_10 = NULL;
-    __pyx_t_11 = 0;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
-      __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_9);
-      if (likely(__pyx_t_10)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_9);
-        __Pyx_INCREF(__pyx_t_10);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_9, function);
-        __pyx_t_11 = 1;
-      }
-    }
-    {
-      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_s1};
-      __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_9, __pyx_callargs+1-__pyx_t_11, 1+__pyx_t_11);
-      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 184, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    }
-    __Pyx_DECREF_SET(__pyx_v_s1, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":185
- *     elif callable(processor):
- *         s1 = processor(s1)
- *         s2 = processor(s2)             # <<<<<<<<<<<<<<
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- */
-    __Pyx_TraceLine(185,0,__PYX_ERR(0, 185, __pyx_L1_error))
-    __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_9 = __pyx_v_processor; __pyx_t_10 = NULL;
-    __pyx_t_11 = 0;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
-      __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_9);
-      if (likely(__pyx_t_10)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_9);
-        __Pyx_INCREF(__pyx_t_10);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_9, function);
-        __pyx_t_11 = 1;
-      }
-    }
-    {
-      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_s2};
-      __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_9, __pyx_callargs+1-__pyx_t_11, 1+__pyx_t_11);
-      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 185, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    }
-    __Pyx_DECREF_SET(__pyx_v_s2, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":186
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- *     else:
- */
-    __Pyx_TraceLine(186,0,__PYX_ERR(0, 186, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 186, __pyx_L1_error)
-    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":187
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- */
-    __Pyx_TraceLine(187,0,__PYX_ERR(0, 187, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 187, __pyx_L1_error)
-    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":183
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):             # <<<<<<<<<<<<<<
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- */
-    goto __pyx_L7;
-  }
-
-  /* "cpp_fuzz.pyx":189
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  * 
- */
-  __Pyx_TraceLine(189,0,__PYX_ERR(0, 189, __pyx_L1_error))
-  /*else*/ {
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 189, __pyx_L1_error)
-    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":190
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
- * 
- *     return partial_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
- */
-    __Pyx_TraceLine(190,0,__PYX_ERR(0, 190, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 190, __pyx_L1_error)
-    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_12);
-  }
-  __pyx_L7:;
-
-  /* "cpp_fuzz.pyx":192
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- * 
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
  *     return partial_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __Pyx_TraceLine(192,0,__PYX_ERR(0, 192, __pyx_L1_error))
+  __Pyx_TraceLine(183,0,__PYX_ERR(0, 183, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
   try {
     __pyx_t_1 = partial_ratio_func(__pyx_v_s1_proc.string, __pyx_v_s2_proc.string, __pyx_v_c_score_cutoff);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 192, __pyx_L1_error)
+    __PYX_ERR(0, 183, __pyx_L1_error)
   }
-  __pyx_t_6 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 192, __pyx_L1_error)
+  __pyx_t_6 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 183, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __pyx_r = __pyx_t_6;
   __pyx_t_6 = 0;
   goto __pyx_L0;
 
-  /* "cpp_fuzz.pyx":104
- *     return ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+  /* "cpp_fuzz.pyx":111
+ * 
  * 
  * def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
@@ -3639,22 +3683,16 @@ static PyObject *__pyx_pf_8cpp_fuzz_2partial_ratio(CYTHON_UNUSED PyObject *__pyx
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_XDECREF(__pyx_t_9);
-  __Pyx_XDECREF(__pyx_t_10);
   __Pyx_AddTraceback("cpp_fuzz.partial_ratio", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
-  __Pyx_XDECREF(__pyx_v_processor_capsule);
-  __Pyx_XDECREF(__pyx_v_s1);
-  __Pyx_XDECREF(__pyx_v_s2);
-  __Pyx_XDECREF(__pyx_v_processor);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_TraceReturn(__pyx_r, 0);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "cpp_fuzz.pyx":195
+/* "cpp_fuzz.pyx":186
  * 
  * 
  * def token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
@@ -3672,13 +3710,13 @@ static PyObject *__pyx_pf_8cpp_fuzz_20__defaults__(CYTHON_UNUSED PyObject *__pyx
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__defaults__", 0);
-  __Pyx_TraceCall("__defaults__", __pyx_f[0], 195, 0, __PYX_ERR(0, 195, __pyx_L1_error));
+  __Pyx_TraceCall("__defaults__", __pyx_f[0], 186, 0, __PYX_ERR(0, 186, __pyx_L1_error));
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 195, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 186, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_processor, __Pyx_CyFunction_Defaults(__pyx_defaults, __pyx_self)->__pyx_arg_processor) < 0) __PYX_ERR(0, 195, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_score_cutoff, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 195, __pyx_L1_error)
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 195, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_processor, __Pyx_CyFunction_Defaults(__pyx_defaults, __pyx_self)->__pyx_arg_processor) < 0) __PYX_ERR(0, 186, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_score_cutoff, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 186, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 186, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(Py_None);
   __Pyx_GIVEREF(Py_None);
@@ -3758,14 +3796,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       switch (__pyx_nargs) {
         case  0:
         if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_s1)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 195, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 186, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
         if (likely((values[1] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_s2)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 195, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 186, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("token_sort_ratio", 1, 2, 2, 1); __PYX_ERR(0, 195, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("token_sort_ratio", 1, 2, 2, 1); __PYX_ERR(0, 186, __pyx_L3_error)
         }
       }
       if (kw_args > 0 && likely(kw_args <= 2)) {
@@ -3773,12 +3811,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         for (index = 2; index < 4 && kw_args > 0; index++) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, *__pyx_pyargnames[index]);
           if (value) { values[index] = value; kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 195, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 186, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "token_sort_ratio") < 0)) __PYX_ERR(0, 195, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "token_sort_ratio") < 0)) __PYX_ERR(0, 186, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 2)) {
       goto __pyx_L5_argtuple_error;
@@ -3793,7 +3831,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("token_sort_ratio", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 195, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("token_sort_ratio", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 186, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("cpp_fuzz.token_sort_ratio", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -3810,8 +3848,6 @@ static PyObject *__pyx_pf_8cpp_fuzz_4token_sort_ratio(CYTHON_UNUSED PyObject *__
   double __pyx_v_c_score_cutoff;
   RF_StringWrapper __pyx_v_s1_proc;
   RF_StringWrapper __pyx_v_s2_proc;
-  PyObject *__pyx_v_processor_capsule = NULL;
-  RF_Preprocess __pyx_v_preprocess_func;
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -3821,47 +3857,38 @@ static PyObject *__pyx_pf_8cpp_fuzz_4token_sort_ratio(CYTHON_UNUSED PyObject *__
   int __pyx_t_4;
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
-  void *__pyx_t_7;
-  bool __pyx_t_8;
-  PyObject *__pyx_t_9 = NULL;
-  PyObject *__pyx_t_10 = NULL;
-  int __pyx_t_11;
-  RF_String __pyx_t_12;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_TraceFrameInit(__pyx_codeobj__3)
   __Pyx_RefNannySetupContext("token_sort_ratio", 0);
-  __Pyx_TraceCall("token_sort_ratio", __pyx_f[0], 195, 0, __PYX_ERR(0, 195, __pyx_L1_error));
-  __Pyx_INCREF(__pyx_v_s1);
-  __Pyx_INCREF(__pyx_v_s2);
-  __Pyx_INCREF(__pyx_v_processor);
+  __Pyx_TraceCall("token_sort_ratio", __pyx_f[0], 186, 0, __PYX_ERR(0, 186, __pyx_L1_error));
 
-  /* "cpp_fuzz.pyx":227
+  /* "cpp_fuzz.pyx":218
  *     100.0
  *     """
  *     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff             # <<<<<<<<<<<<<<
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  */
-  __Pyx_TraceLine(227,0,__PYX_ERR(0, 227, __pyx_L1_error))
+  __Pyx_TraceLine(218,0,__PYX_ERR(0, 218, __pyx_L1_error))
   __pyx_t_2 = (__pyx_v_score_cutoff == Py_None);
   if ((__pyx_t_2 != 0)) {
     __pyx_t_1 = 0.0;
   } else {
-    __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 227, __pyx_L1_error)
+    __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 218, __pyx_L1_error)
     __pyx_t_1 = __pyx_t_3;
   }
   __pyx_v_c_score_cutoff = __pyx_t_1;
 
-  /* "cpp_fuzz.pyx":230
+  /* "cpp_fuzz.pyx":221
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  *     if s1 is None or s2 is None:             # <<<<<<<<<<<<<<
  *         return 0
  * 
  */
-  __Pyx_TraceLine(230,0,__PYX_ERR(0, 230, __pyx_L1_error))
+  __Pyx_TraceLine(221,0,__PYX_ERR(0, 221, __pyx_L1_error))
   __pyx_t_4 = (__pyx_v_s1 == Py_None);
   __pyx_t_5 = (__pyx_t_4 != 0);
   if (!__pyx_t_5) {
@@ -3875,20 +3902,20 @@ static PyObject *__pyx_pf_8cpp_fuzz_4token_sort_ratio(CYTHON_UNUSED PyObject *__
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_2) {
 
-    /* "cpp_fuzz.pyx":231
+    /* "cpp_fuzz.pyx":222
  * 
  *     if s1 is None or s2 is None:
  *         return 0             # <<<<<<<<<<<<<<
  * 
- *     if processor is True:
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
  */
-    __Pyx_TraceLine(231,0,__PYX_ERR(0, 231, __pyx_L1_error))
+    __Pyx_TraceLine(222,0,__PYX_ERR(0, 222, __pyx_L1_error))
     __Pyx_XDECREF(__pyx_r);
     __Pyx_INCREF(__pyx_int_0);
     __pyx_r = __pyx_int_0;
     goto __pyx_L0;
 
-    /* "cpp_fuzz.pyx":230
+    /* "cpp_fuzz.pyx":221
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  *     if s1 is None or s2 is None:             # <<<<<<<<<<<<<<
@@ -3897,260 +3924,38 @@ static PyObject *__pyx_pf_8cpp_fuzz_4token_sort_ratio(CYTHON_UNUSED PyObject *__
  */
   }
 
-  /* "cpp_fuzz.pyx":233
+  /* "cpp_fuzz.pyx":224
  *         return 0
  * 
- *     if processor is True:             # <<<<<<<<<<<<<<
- *         processor = default_process
- * 
- */
-  __Pyx_TraceLine(233,0,__PYX_ERR(0, 233, __pyx_L1_error))
-  __pyx_t_2 = (__pyx_v_processor == Py_True);
-  __pyx_t_4 = (__pyx_t_2 != 0);
-  if (__pyx_t_4) {
-
-    /* "cpp_fuzz.pyx":234
- * 
- *     if processor is True:
- *         processor = default_process             # <<<<<<<<<<<<<<
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- */
-    __Pyx_TraceLine(234,0,__PYX_ERR(0, 234, __pyx_L1_error))
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_default_process); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 234, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    __Pyx_DECREF_SET(__pyx_v_processor, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":233
- *         return 0
- * 
- *     if processor is True:             # <<<<<<<<<<<<<<
- *         processor = default_process
- * 
- */
-  }
-
-  /* "cpp_fuzz.pyx":236
- *         processor = default_process
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)             # <<<<<<<<<<<<<<
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- */
-  __Pyx_TraceLine(236,0,__PYX_ERR(0, 236, __pyx_L1_error))
-  __pyx_t_6 = __Pyx_GetAttr3(__pyx_v_processor, __pyx_n_u_RF_Preprocess, __pyx_v_processor); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 236, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_6);
-  __pyx_v_processor_capsule = __pyx_t_6;
-  __pyx_t_6 = 0;
-
-  /* "cpp_fuzz.pyx":237
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):             # <<<<<<<<<<<<<<
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- */
-  __Pyx_TraceLine(237,0,__PYX_ERR(0, 237, __pyx_L1_error))
-  __pyx_t_4 = (PyCapsule_IsValid(__pyx_v_processor_capsule, NULL) != 0);
-  if (__pyx_t_4) {
-
-    /* "cpp_fuzz.pyx":238
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)             # <<<<<<<<<<<<<<
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- */
-    __Pyx_TraceLine(238,0,__PYX_ERR(0, 238, __pyx_L1_error))
-    __pyx_t_7 = PyCapsule_GetPointer(__pyx_v_processor_capsule, NULL); if (unlikely(__pyx_t_7 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 238, __pyx_L1_error)
-    __pyx_v_preprocess_func = ((RF_Preprocess)__pyx_t_7);
-
-    /* "cpp_fuzz.pyx":239
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)             # <<<<<<<<<<<<<<
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):
- */
-    __Pyx_TraceLine(239,0,__PYX_ERR(0, 239, __pyx_L1_error))
-    __pyx_t_8 = __pyx_v_preprocess_func(__pyx_v_s1, (&__pyx_v_s1_proc.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 239, __pyx_L1_error)
-
-    /* "cpp_fuzz.pyx":240
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)             # <<<<<<<<<<<<<<
- *     elif callable(processor):
- *         s1 = processor(s1)
- */
-    __Pyx_TraceLine(240,0,__PYX_ERR(0, 240, __pyx_L1_error))
-    __pyx_t_8 = __pyx_v_preprocess_func(__pyx_v_s2, (&__pyx_v_s2_proc.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 240, __pyx_L1_error)
-
-    /* "cpp_fuzz.pyx":237
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):             # <<<<<<<<<<<<<<
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- */
-    goto __pyx_L7;
-  }
-
-  /* "cpp_fuzz.pyx":241
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):             # <<<<<<<<<<<<<<
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- */
-  __Pyx_TraceLine(241,0,__PYX_ERR(0, 241, __pyx_L1_error))
-  __pyx_t_4 = __Pyx_PyCallable_Check(__pyx_v_processor); if (unlikely(__pyx_t_4 == ((int)-1))) __PYX_ERR(0, 241, __pyx_L1_error)
-  __pyx_t_2 = (__pyx_t_4 != 0);
-  if (__pyx_t_2) {
-
-    /* "cpp_fuzz.pyx":242
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):
- *         s1 = processor(s1)             # <<<<<<<<<<<<<<
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- */
-    __Pyx_TraceLine(242,0,__PYX_ERR(0, 242, __pyx_L1_error))
-    __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_9 = __pyx_v_processor; __pyx_t_10 = NULL;
-    __pyx_t_11 = 0;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
-      __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_9);
-      if (likely(__pyx_t_10)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_9);
-        __Pyx_INCREF(__pyx_t_10);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_9, function);
-        __pyx_t_11 = 1;
-      }
-    }
-    {
-      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_s1};
-      __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_9, __pyx_callargs+1-__pyx_t_11, 1+__pyx_t_11);
-      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 242, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    }
-    __Pyx_DECREF_SET(__pyx_v_s1, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":243
- *     elif callable(processor):
- *         s1 = processor(s1)
- *         s2 = processor(s2)             # <<<<<<<<<<<<<<
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- */
-    __Pyx_TraceLine(243,0,__PYX_ERR(0, 243, __pyx_L1_error))
-    __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_9 = __pyx_v_processor; __pyx_t_10 = NULL;
-    __pyx_t_11 = 0;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
-      __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_9);
-      if (likely(__pyx_t_10)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_9);
-        __Pyx_INCREF(__pyx_t_10);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_9, function);
-        __pyx_t_11 = 1;
-      }
-    }
-    {
-      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_s2};
-      __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_9, __pyx_callargs+1-__pyx_t_11, 1+__pyx_t_11);
-      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 243, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    }
-    __Pyx_DECREF_SET(__pyx_v_s2, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":244
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- *     else:
- */
-    __Pyx_TraceLine(244,0,__PYX_ERR(0, 244, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 244, __pyx_L1_error)
-    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":245
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- */
-    __Pyx_TraceLine(245,0,__PYX_ERR(0, 245, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 245, __pyx_L1_error)
-    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":241
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):             # <<<<<<<<<<<<<<
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- */
-    goto __pyx_L7;
-  }
-
-  /* "cpp_fuzz.pyx":247
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- * 
- */
-  __Pyx_TraceLine(247,0,__PYX_ERR(0, 247, __pyx_L1_error))
-  /*else*/ {
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 247, __pyx_L1_error)
-    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":248
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
- * 
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)             # <<<<<<<<<<<<<<
  *     return token_sort_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
- */
-    __Pyx_TraceLine(248,0,__PYX_ERR(0, 248, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 248, __pyx_L1_error)
-    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_12);
-  }
-  __pyx_L7:;
-
-  /* "cpp_fuzz.pyx":250
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  * 
+ */
+  __Pyx_TraceLine(224,0,__PYX_ERR(0, 224, __pyx_L1_error))
+  __pyx_f_8cpp_fuzz_preprocess_strings(__pyx_v_s1, __pyx_v_s2, __pyx_v_processor, (&__pyx_v_s1_proc), (&__pyx_v_s2_proc)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 224, __pyx_L1_error)
+
+  /* "cpp_fuzz.pyx":225
+ * 
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
  *     return token_sort_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __Pyx_TraceLine(250,0,__PYX_ERR(0, 250, __pyx_L1_error))
+  __Pyx_TraceLine(225,0,__PYX_ERR(0, 225, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
   try {
     __pyx_t_1 = token_sort_ratio_func(__pyx_v_s1_proc.string, __pyx_v_s2_proc.string, __pyx_v_c_score_cutoff);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 250, __pyx_L1_error)
+    __PYX_ERR(0, 225, __pyx_L1_error)
   }
-  __pyx_t_6 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 250, __pyx_L1_error)
+  __pyx_t_6 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 225, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __pyx_r = __pyx_t_6;
   __pyx_t_6 = 0;
   goto __pyx_L0;
 
-  /* "cpp_fuzz.pyx":195
+  /* "cpp_fuzz.pyx":186
  * 
  * 
  * def token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
@@ -4161,22 +3966,16 @@ static PyObject *__pyx_pf_8cpp_fuzz_4token_sort_ratio(CYTHON_UNUSED PyObject *__
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_XDECREF(__pyx_t_9);
-  __Pyx_XDECREF(__pyx_t_10);
   __Pyx_AddTraceback("cpp_fuzz.token_sort_ratio", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
-  __Pyx_XDECREF(__pyx_v_processor_capsule);
-  __Pyx_XDECREF(__pyx_v_s1);
-  __Pyx_XDECREF(__pyx_v_s2);
-  __Pyx_XDECREF(__pyx_v_processor);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_TraceReturn(__pyx_r, 0);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "cpp_fuzz.pyx":253
+/* "cpp_fuzz.pyx":228
  * 
  * 
  * def token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
@@ -4194,13 +3993,13 @@ static PyObject *__pyx_pf_8cpp_fuzz_22__defaults__(CYTHON_UNUSED PyObject *__pyx
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__defaults__", 0);
-  __Pyx_TraceCall("__defaults__", __pyx_f[0], 253, 0, __PYX_ERR(0, 253, __pyx_L1_error));
+  __Pyx_TraceCall("__defaults__", __pyx_f[0], 228, 0, __PYX_ERR(0, 228, __pyx_L1_error));
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 253, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 228, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_processor, __Pyx_CyFunction_Defaults(__pyx_defaults1, __pyx_self)->__pyx_arg_processor) < 0) __PYX_ERR(0, 253, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_score_cutoff, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 253, __pyx_L1_error)
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 253, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_processor, __Pyx_CyFunction_Defaults(__pyx_defaults1, __pyx_self)->__pyx_arg_processor) < 0) __PYX_ERR(0, 228, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_score_cutoff, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 228, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 228, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(Py_None);
   __Pyx_GIVEREF(Py_None);
@@ -4280,14 +4079,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       switch (__pyx_nargs) {
         case  0:
         if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_s1)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 253, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 228, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
         if (likely((values[1] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_s2)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 253, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 228, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("token_set_ratio", 1, 2, 2, 1); __PYX_ERR(0, 253, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("token_set_ratio", 1, 2, 2, 1); __PYX_ERR(0, 228, __pyx_L3_error)
         }
       }
       if (kw_args > 0 && likely(kw_args <= 2)) {
@@ -4295,12 +4094,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         for (index = 2; index < 4 && kw_args > 0; index++) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, *__pyx_pyargnames[index]);
           if (value) { values[index] = value; kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 253, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 228, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "token_set_ratio") < 0)) __PYX_ERR(0, 253, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "token_set_ratio") < 0)) __PYX_ERR(0, 228, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 2)) {
       goto __pyx_L5_argtuple_error;
@@ -4315,7 +4114,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("token_set_ratio", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 253, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("token_set_ratio", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 228, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("cpp_fuzz.token_set_ratio", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -4332,8 +4131,6 @@ static PyObject *__pyx_pf_8cpp_fuzz_6token_set_ratio(CYTHON_UNUSED PyObject *__p
   double __pyx_v_c_score_cutoff;
   RF_StringWrapper __pyx_v_s1_proc;
   RF_StringWrapper __pyx_v_s2_proc;
-  PyObject *__pyx_v_processor_capsule = NULL;
-  RF_Preprocess __pyx_v_preprocess_func;
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -4343,47 +4140,38 @@ static PyObject *__pyx_pf_8cpp_fuzz_6token_set_ratio(CYTHON_UNUSED PyObject *__p
   int __pyx_t_4;
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
-  void *__pyx_t_7;
-  bool __pyx_t_8;
-  PyObject *__pyx_t_9 = NULL;
-  PyObject *__pyx_t_10 = NULL;
-  int __pyx_t_11;
-  RF_String __pyx_t_12;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_TraceFrameInit(__pyx_codeobj__4)
   __Pyx_RefNannySetupContext("token_set_ratio", 0);
-  __Pyx_TraceCall("token_set_ratio", __pyx_f[0], 253, 0, __PYX_ERR(0, 253, __pyx_L1_error));
-  __Pyx_INCREF(__pyx_v_s1);
-  __Pyx_INCREF(__pyx_v_s2);
-  __Pyx_INCREF(__pyx_v_processor);
+  __Pyx_TraceCall("token_set_ratio", __pyx_f[0], 228, 0, __PYX_ERR(0, 228, __pyx_L1_error));
 
-  /* "cpp_fuzz.pyx":288
+  /* "cpp_fuzz.pyx":263
  *     100.0
  *     """
  *     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff             # <<<<<<<<<<<<<<
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  */
-  __Pyx_TraceLine(288,0,__PYX_ERR(0, 288, __pyx_L1_error))
+  __Pyx_TraceLine(263,0,__PYX_ERR(0, 263, __pyx_L1_error))
   __pyx_t_2 = (__pyx_v_score_cutoff == Py_None);
   if ((__pyx_t_2 != 0)) {
     __pyx_t_1 = 0.0;
   } else {
-    __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 288, __pyx_L1_error)
+    __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 263, __pyx_L1_error)
     __pyx_t_1 = __pyx_t_3;
   }
   __pyx_v_c_score_cutoff = __pyx_t_1;
 
-  /* "cpp_fuzz.pyx":291
+  /* "cpp_fuzz.pyx":266
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  *     if s1 is None or s2 is None:             # <<<<<<<<<<<<<<
  *         return 0
  * 
  */
-  __Pyx_TraceLine(291,0,__PYX_ERR(0, 291, __pyx_L1_error))
+  __Pyx_TraceLine(266,0,__PYX_ERR(0, 266, __pyx_L1_error))
   __pyx_t_4 = (__pyx_v_s1 == Py_None);
   __pyx_t_5 = (__pyx_t_4 != 0);
   if (!__pyx_t_5) {
@@ -4397,20 +4185,20 @@ static PyObject *__pyx_pf_8cpp_fuzz_6token_set_ratio(CYTHON_UNUSED PyObject *__p
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_2) {
 
-    /* "cpp_fuzz.pyx":292
+    /* "cpp_fuzz.pyx":267
  * 
  *     if s1 is None or s2 is None:
  *         return 0             # <<<<<<<<<<<<<<
  * 
- *     if processor is True:
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
  */
-    __Pyx_TraceLine(292,0,__PYX_ERR(0, 292, __pyx_L1_error))
+    __Pyx_TraceLine(267,0,__PYX_ERR(0, 267, __pyx_L1_error))
     __Pyx_XDECREF(__pyx_r);
     __Pyx_INCREF(__pyx_int_0);
     __pyx_r = __pyx_int_0;
     goto __pyx_L0;
 
-    /* "cpp_fuzz.pyx":291
+    /* "cpp_fuzz.pyx":266
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  *     if s1 is None or s2 is None:             # <<<<<<<<<<<<<<
@@ -4419,260 +4207,38 @@ static PyObject *__pyx_pf_8cpp_fuzz_6token_set_ratio(CYTHON_UNUSED PyObject *__p
  */
   }
 
-  /* "cpp_fuzz.pyx":294
+  /* "cpp_fuzz.pyx":269
  *         return 0
  * 
- *     if processor is True:             # <<<<<<<<<<<<<<
- *         processor = default_process
- * 
- */
-  __Pyx_TraceLine(294,0,__PYX_ERR(0, 294, __pyx_L1_error))
-  __pyx_t_2 = (__pyx_v_processor == Py_True);
-  __pyx_t_4 = (__pyx_t_2 != 0);
-  if (__pyx_t_4) {
-
-    /* "cpp_fuzz.pyx":295
- * 
- *     if processor is True:
- *         processor = default_process             # <<<<<<<<<<<<<<
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- */
-    __Pyx_TraceLine(295,0,__PYX_ERR(0, 295, __pyx_L1_error))
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_default_process); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 295, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    __Pyx_DECREF_SET(__pyx_v_processor, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":294
- *         return 0
- * 
- *     if processor is True:             # <<<<<<<<<<<<<<
- *         processor = default_process
- * 
- */
-  }
-
-  /* "cpp_fuzz.pyx":297
- *         processor = default_process
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)             # <<<<<<<<<<<<<<
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- */
-  __Pyx_TraceLine(297,0,__PYX_ERR(0, 297, __pyx_L1_error))
-  __pyx_t_6 = __Pyx_GetAttr3(__pyx_v_processor, __pyx_n_u_RF_Preprocess, __pyx_v_processor); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 297, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_6);
-  __pyx_v_processor_capsule = __pyx_t_6;
-  __pyx_t_6 = 0;
-
-  /* "cpp_fuzz.pyx":298
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):             # <<<<<<<<<<<<<<
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- */
-  __Pyx_TraceLine(298,0,__PYX_ERR(0, 298, __pyx_L1_error))
-  __pyx_t_4 = (PyCapsule_IsValid(__pyx_v_processor_capsule, NULL) != 0);
-  if (__pyx_t_4) {
-
-    /* "cpp_fuzz.pyx":299
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)             # <<<<<<<<<<<<<<
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- */
-    __Pyx_TraceLine(299,0,__PYX_ERR(0, 299, __pyx_L1_error))
-    __pyx_t_7 = PyCapsule_GetPointer(__pyx_v_processor_capsule, NULL); if (unlikely(__pyx_t_7 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 299, __pyx_L1_error)
-    __pyx_v_preprocess_func = ((RF_Preprocess)__pyx_t_7);
-
-    /* "cpp_fuzz.pyx":300
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)             # <<<<<<<<<<<<<<
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):
- */
-    __Pyx_TraceLine(300,0,__PYX_ERR(0, 300, __pyx_L1_error))
-    __pyx_t_8 = __pyx_v_preprocess_func(__pyx_v_s1, (&__pyx_v_s1_proc.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 300, __pyx_L1_error)
-
-    /* "cpp_fuzz.pyx":301
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)             # <<<<<<<<<<<<<<
- *     elif callable(processor):
- *         s1 = processor(s1)
- */
-    __Pyx_TraceLine(301,0,__PYX_ERR(0, 301, __pyx_L1_error))
-    __pyx_t_8 = __pyx_v_preprocess_func(__pyx_v_s2, (&__pyx_v_s2_proc.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 301, __pyx_L1_error)
-
-    /* "cpp_fuzz.pyx":298
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):             # <<<<<<<<<<<<<<
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- */
-    goto __pyx_L7;
-  }
-
-  /* "cpp_fuzz.pyx":302
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):             # <<<<<<<<<<<<<<
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- */
-  __Pyx_TraceLine(302,0,__PYX_ERR(0, 302, __pyx_L1_error))
-  __pyx_t_4 = __Pyx_PyCallable_Check(__pyx_v_processor); if (unlikely(__pyx_t_4 == ((int)-1))) __PYX_ERR(0, 302, __pyx_L1_error)
-  __pyx_t_2 = (__pyx_t_4 != 0);
-  if (__pyx_t_2) {
-
-    /* "cpp_fuzz.pyx":303
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):
- *         s1 = processor(s1)             # <<<<<<<<<<<<<<
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- */
-    __Pyx_TraceLine(303,0,__PYX_ERR(0, 303, __pyx_L1_error))
-    __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_9 = __pyx_v_processor; __pyx_t_10 = NULL;
-    __pyx_t_11 = 0;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
-      __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_9);
-      if (likely(__pyx_t_10)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_9);
-        __Pyx_INCREF(__pyx_t_10);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_9, function);
-        __pyx_t_11 = 1;
-      }
-    }
-    {
-      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_s1};
-      __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_9, __pyx_callargs+1-__pyx_t_11, 1+__pyx_t_11);
-      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 303, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    }
-    __Pyx_DECREF_SET(__pyx_v_s1, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":304
- *     elif callable(processor):
- *         s1 = processor(s1)
- *         s2 = processor(s2)             # <<<<<<<<<<<<<<
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- */
-    __Pyx_TraceLine(304,0,__PYX_ERR(0, 304, __pyx_L1_error))
-    __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_9 = __pyx_v_processor; __pyx_t_10 = NULL;
-    __pyx_t_11 = 0;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
-      __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_9);
-      if (likely(__pyx_t_10)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_9);
-        __Pyx_INCREF(__pyx_t_10);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_9, function);
-        __pyx_t_11 = 1;
-      }
-    }
-    {
-      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_s2};
-      __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_9, __pyx_callargs+1-__pyx_t_11, 1+__pyx_t_11);
-      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 304, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    }
-    __Pyx_DECREF_SET(__pyx_v_s2, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":305
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- *     else:
- */
-    __Pyx_TraceLine(305,0,__PYX_ERR(0, 305, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 305, __pyx_L1_error)
-    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":306
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- */
-    __Pyx_TraceLine(306,0,__PYX_ERR(0, 306, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 306, __pyx_L1_error)
-    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":302
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):             # <<<<<<<<<<<<<<
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- */
-    goto __pyx_L7;
-  }
-
-  /* "cpp_fuzz.pyx":308
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- * 
- */
-  __Pyx_TraceLine(308,0,__PYX_ERR(0, 308, __pyx_L1_error))
-  /*else*/ {
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 308, __pyx_L1_error)
-    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":309
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
- * 
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)             # <<<<<<<<<<<<<<
  *     return token_set_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
- */
-    __Pyx_TraceLine(309,0,__PYX_ERR(0, 309, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 309, __pyx_L1_error)
-    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_12);
-  }
-  __pyx_L7:;
-
-  /* "cpp_fuzz.pyx":311
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  * 
+ */
+  __Pyx_TraceLine(269,0,__PYX_ERR(0, 269, __pyx_L1_error))
+  __pyx_f_8cpp_fuzz_preprocess_strings(__pyx_v_s1, __pyx_v_s2, __pyx_v_processor, (&__pyx_v_s1_proc), (&__pyx_v_s2_proc)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 269, __pyx_L1_error)
+
+  /* "cpp_fuzz.pyx":270
+ * 
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
  *     return token_set_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __Pyx_TraceLine(311,0,__PYX_ERR(0, 311, __pyx_L1_error))
+  __Pyx_TraceLine(270,0,__PYX_ERR(0, 270, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
   try {
     __pyx_t_1 = token_set_ratio_func(__pyx_v_s1_proc.string, __pyx_v_s2_proc.string, __pyx_v_c_score_cutoff);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 311, __pyx_L1_error)
+    __PYX_ERR(0, 270, __pyx_L1_error)
   }
-  __pyx_t_6 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 311, __pyx_L1_error)
+  __pyx_t_6 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 270, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __pyx_r = __pyx_t_6;
   __pyx_t_6 = 0;
   goto __pyx_L0;
 
-  /* "cpp_fuzz.pyx":253
+  /* "cpp_fuzz.pyx":228
  * 
  * 
  * def token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
@@ -4683,22 +4249,16 @@ static PyObject *__pyx_pf_8cpp_fuzz_6token_set_ratio(CYTHON_UNUSED PyObject *__p
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_XDECREF(__pyx_t_9);
-  __Pyx_XDECREF(__pyx_t_10);
   __Pyx_AddTraceback("cpp_fuzz.token_set_ratio", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
-  __Pyx_XDECREF(__pyx_v_processor_capsule);
-  __Pyx_XDECREF(__pyx_v_s1);
-  __Pyx_XDECREF(__pyx_v_s2);
-  __Pyx_XDECREF(__pyx_v_processor);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_TraceReturn(__pyx_r, 0);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "cpp_fuzz.pyx":314
+/* "cpp_fuzz.pyx":273
  * 
  * 
  * def token_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
@@ -4716,13 +4276,13 @@ static PyObject *__pyx_pf_8cpp_fuzz_24__defaults__(CYTHON_UNUSED PyObject *__pyx
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__defaults__", 0);
-  __Pyx_TraceCall("__defaults__", __pyx_f[0], 314, 0, __PYX_ERR(0, 314, __pyx_L1_error));
+  __Pyx_TraceCall("__defaults__", __pyx_f[0], 273, 0, __PYX_ERR(0, 273, __pyx_L1_error));
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 314, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 273, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_processor, __Pyx_CyFunction_Defaults(__pyx_defaults2, __pyx_self)->__pyx_arg_processor) < 0) __PYX_ERR(0, 314, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_score_cutoff, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 314, __pyx_L1_error)
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 314, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_processor, __Pyx_CyFunction_Defaults(__pyx_defaults2, __pyx_self)->__pyx_arg_processor) < 0) __PYX_ERR(0, 273, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_score_cutoff, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 273, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 273, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(Py_None);
   __Pyx_GIVEREF(Py_None);
@@ -4802,14 +4362,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       switch (__pyx_nargs) {
         case  0:
         if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_s1)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 314, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 273, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
         if (likely((values[1] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_s2)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 314, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 273, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("token_ratio", 1, 2, 2, 1); __PYX_ERR(0, 314, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("token_ratio", 1, 2, 2, 1); __PYX_ERR(0, 273, __pyx_L3_error)
         }
       }
       if (kw_args > 0 && likely(kw_args <= 2)) {
@@ -4817,12 +4377,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         for (index = 2; index < 4 && kw_args > 0; index++) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, *__pyx_pyargnames[index]);
           if (value) { values[index] = value; kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 314, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 273, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "token_ratio") < 0)) __PYX_ERR(0, 314, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "token_ratio") < 0)) __PYX_ERR(0, 273, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 2)) {
       goto __pyx_L5_argtuple_error;
@@ -4837,7 +4397,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("token_ratio", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 314, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("token_ratio", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 273, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("cpp_fuzz.token_ratio", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -4854,8 +4414,6 @@ static PyObject *__pyx_pf_8cpp_fuzz_8token_ratio(CYTHON_UNUSED PyObject *__pyx_s
   double __pyx_v_c_score_cutoff;
   RF_StringWrapper __pyx_v_s1_proc;
   RF_StringWrapper __pyx_v_s2_proc;
-  PyObject *__pyx_v_processor_capsule = NULL;
-  RF_Preprocess __pyx_v_preprocess_func;
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -4865,47 +4423,38 @@ static PyObject *__pyx_pf_8cpp_fuzz_8token_ratio(CYTHON_UNUSED PyObject *__pyx_s
   int __pyx_t_4;
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
-  void *__pyx_t_7;
-  bool __pyx_t_8;
-  PyObject *__pyx_t_9 = NULL;
-  PyObject *__pyx_t_10 = NULL;
-  int __pyx_t_11;
-  RF_String __pyx_t_12;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_TraceFrameInit(__pyx_codeobj__5)
   __Pyx_RefNannySetupContext("token_ratio", 0);
-  __Pyx_TraceCall("token_ratio", __pyx_f[0], 314, 0, __PYX_ERR(0, 314, __pyx_L1_error));
-  __Pyx_INCREF(__pyx_v_s1);
-  __Pyx_INCREF(__pyx_v_s2);
-  __Pyx_INCREF(__pyx_v_processor);
+  __Pyx_TraceCall("token_ratio", __pyx_f[0], 273, 0, __PYX_ERR(0, 273, __pyx_L1_error));
 
-  /* "cpp_fuzz.pyx":342
+  /* "cpp_fuzz.pyx":301
  *     .. image:: img/token_ratio.svg
  *     """
  *     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff             # <<<<<<<<<<<<<<
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  */
-  __Pyx_TraceLine(342,0,__PYX_ERR(0, 342, __pyx_L1_error))
+  __Pyx_TraceLine(301,0,__PYX_ERR(0, 301, __pyx_L1_error))
   __pyx_t_2 = (__pyx_v_score_cutoff == Py_None);
   if ((__pyx_t_2 != 0)) {
     __pyx_t_1 = 0.0;
   } else {
-    __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 342, __pyx_L1_error)
+    __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 301, __pyx_L1_error)
     __pyx_t_1 = __pyx_t_3;
   }
   __pyx_v_c_score_cutoff = __pyx_t_1;
 
-  /* "cpp_fuzz.pyx":345
+  /* "cpp_fuzz.pyx":304
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  *     if s1 is None or s2 is None:             # <<<<<<<<<<<<<<
  *         return 0
  * 
  */
-  __Pyx_TraceLine(345,0,__PYX_ERR(0, 345, __pyx_L1_error))
+  __Pyx_TraceLine(304,0,__PYX_ERR(0, 304, __pyx_L1_error))
   __pyx_t_4 = (__pyx_v_s1 == Py_None);
   __pyx_t_5 = (__pyx_t_4 != 0);
   if (!__pyx_t_5) {
@@ -4919,20 +4468,20 @@ static PyObject *__pyx_pf_8cpp_fuzz_8token_ratio(CYTHON_UNUSED PyObject *__pyx_s
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_2) {
 
-    /* "cpp_fuzz.pyx":346
+    /* "cpp_fuzz.pyx":305
  * 
  *     if s1 is None or s2 is None:
  *         return 0             # <<<<<<<<<<<<<<
  * 
- *     if processor is True:
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
  */
-    __Pyx_TraceLine(346,0,__PYX_ERR(0, 346, __pyx_L1_error))
+    __Pyx_TraceLine(305,0,__PYX_ERR(0, 305, __pyx_L1_error))
     __Pyx_XDECREF(__pyx_r);
     __Pyx_INCREF(__pyx_int_0);
     __pyx_r = __pyx_int_0;
     goto __pyx_L0;
 
-    /* "cpp_fuzz.pyx":345
+    /* "cpp_fuzz.pyx":304
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  *     if s1 is None or s2 is None:             # <<<<<<<<<<<<<<
@@ -4941,260 +4490,38 @@ static PyObject *__pyx_pf_8cpp_fuzz_8token_ratio(CYTHON_UNUSED PyObject *__pyx_s
  */
   }
 
-  /* "cpp_fuzz.pyx":348
+  /* "cpp_fuzz.pyx":307
  *         return 0
  * 
- *     if processor is True:             # <<<<<<<<<<<<<<
- *         processor = default_process
- * 
- */
-  __Pyx_TraceLine(348,0,__PYX_ERR(0, 348, __pyx_L1_error))
-  __pyx_t_2 = (__pyx_v_processor == Py_True);
-  __pyx_t_4 = (__pyx_t_2 != 0);
-  if (__pyx_t_4) {
-
-    /* "cpp_fuzz.pyx":349
- * 
- *     if processor is True:
- *         processor = default_process             # <<<<<<<<<<<<<<
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- */
-    __Pyx_TraceLine(349,0,__PYX_ERR(0, 349, __pyx_L1_error))
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_default_process); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 349, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    __Pyx_DECREF_SET(__pyx_v_processor, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":348
- *         return 0
- * 
- *     if processor is True:             # <<<<<<<<<<<<<<
- *         processor = default_process
- * 
- */
-  }
-
-  /* "cpp_fuzz.pyx":351
- *         processor = default_process
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)             # <<<<<<<<<<<<<<
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- */
-  __Pyx_TraceLine(351,0,__PYX_ERR(0, 351, __pyx_L1_error))
-  __pyx_t_6 = __Pyx_GetAttr3(__pyx_v_processor, __pyx_n_u_RF_Preprocess, __pyx_v_processor); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 351, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_6);
-  __pyx_v_processor_capsule = __pyx_t_6;
-  __pyx_t_6 = 0;
-
-  /* "cpp_fuzz.pyx":352
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):             # <<<<<<<<<<<<<<
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- */
-  __Pyx_TraceLine(352,0,__PYX_ERR(0, 352, __pyx_L1_error))
-  __pyx_t_4 = (PyCapsule_IsValid(__pyx_v_processor_capsule, NULL) != 0);
-  if (__pyx_t_4) {
-
-    /* "cpp_fuzz.pyx":353
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)             # <<<<<<<<<<<<<<
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- */
-    __Pyx_TraceLine(353,0,__PYX_ERR(0, 353, __pyx_L1_error))
-    __pyx_t_7 = PyCapsule_GetPointer(__pyx_v_processor_capsule, NULL); if (unlikely(__pyx_t_7 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 353, __pyx_L1_error)
-    __pyx_v_preprocess_func = ((RF_Preprocess)__pyx_t_7);
-
-    /* "cpp_fuzz.pyx":354
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)             # <<<<<<<<<<<<<<
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):
- */
-    __Pyx_TraceLine(354,0,__PYX_ERR(0, 354, __pyx_L1_error))
-    __pyx_t_8 = __pyx_v_preprocess_func(__pyx_v_s1, (&__pyx_v_s1_proc.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 354, __pyx_L1_error)
-
-    /* "cpp_fuzz.pyx":355
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)             # <<<<<<<<<<<<<<
- *     elif callable(processor):
- *         s1 = processor(s1)
- */
-    __Pyx_TraceLine(355,0,__PYX_ERR(0, 355, __pyx_L1_error))
-    __pyx_t_8 = __pyx_v_preprocess_func(__pyx_v_s2, (&__pyx_v_s2_proc.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 355, __pyx_L1_error)
-
-    /* "cpp_fuzz.pyx":352
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):             # <<<<<<<<<<<<<<
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- */
-    goto __pyx_L7;
-  }
-
-  /* "cpp_fuzz.pyx":356
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):             # <<<<<<<<<<<<<<
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- */
-  __Pyx_TraceLine(356,0,__PYX_ERR(0, 356, __pyx_L1_error))
-  __pyx_t_4 = __Pyx_PyCallable_Check(__pyx_v_processor); if (unlikely(__pyx_t_4 == ((int)-1))) __PYX_ERR(0, 356, __pyx_L1_error)
-  __pyx_t_2 = (__pyx_t_4 != 0);
-  if (__pyx_t_2) {
-
-    /* "cpp_fuzz.pyx":357
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):
- *         s1 = processor(s1)             # <<<<<<<<<<<<<<
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- */
-    __Pyx_TraceLine(357,0,__PYX_ERR(0, 357, __pyx_L1_error))
-    __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_9 = __pyx_v_processor; __pyx_t_10 = NULL;
-    __pyx_t_11 = 0;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
-      __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_9);
-      if (likely(__pyx_t_10)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_9);
-        __Pyx_INCREF(__pyx_t_10);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_9, function);
-        __pyx_t_11 = 1;
-      }
-    }
-    {
-      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_s1};
-      __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_9, __pyx_callargs+1-__pyx_t_11, 1+__pyx_t_11);
-      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 357, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    }
-    __Pyx_DECREF_SET(__pyx_v_s1, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":358
- *     elif callable(processor):
- *         s1 = processor(s1)
- *         s2 = processor(s2)             # <<<<<<<<<<<<<<
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- */
-    __Pyx_TraceLine(358,0,__PYX_ERR(0, 358, __pyx_L1_error))
-    __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_9 = __pyx_v_processor; __pyx_t_10 = NULL;
-    __pyx_t_11 = 0;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
-      __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_9);
-      if (likely(__pyx_t_10)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_9);
-        __Pyx_INCREF(__pyx_t_10);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_9, function);
-        __pyx_t_11 = 1;
-      }
-    }
-    {
-      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_s2};
-      __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_9, __pyx_callargs+1-__pyx_t_11, 1+__pyx_t_11);
-      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 358, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    }
-    __Pyx_DECREF_SET(__pyx_v_s2, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":359
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- *     else:
- */
-    __Pyx_TraceLine(359,0,__PYX_ERR(0, 359, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 359, __pyx_L1_error)
-    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":360
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- */
-    __Pyx_TraceLine(360,0,__PYX_ERR(0, 360, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 360, __pyx_L1_error)
-    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":356
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):             # <<<<<<<<<<<<<<
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- */
-    goto __pyx_L7;
-  }
-
-  /* "cpp_fuzz.pyx":362
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- * 
- */
-  __Pyx_TraceLine(362,0,__PYX_ERR(0, 362, __pyx_L1_error))
-  /*else*/ {
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 362, __pyx_L1_error)
-    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":363
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
- * 
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)             # <<<<<<<<<<<<<<
  *     return token_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
- */
-    __Pyx_TraceLine(363,0,__PYX_ERR(0, 363, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 363, __pyx_L1_error)
-    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_12);
-  }
-  __pyx_L7:;
-
-  /* "cpp_fuzz.pyx":365
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  * 
+ */
+  __Pyx_TraceLine(307,0,__PYX_ERR(0, 307, __pyx_L1_error))
+  __pyx_f_8cpp_fuzz_preprocess_strings(__pyx_v_s1, __pyx_v_s2, __pyx_v_processor, (&__pyx_v_s1_proc), (&__pyx_v_s2_proc)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 307, __pyx_L1_error)
+
+  /* "cpp_fuzz.pyx":308
+ * 
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
  *     return token_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __Pyx_TraceLine(365,0,__PYX_ERR(0, 365, __pyx_L1_error))
+  __Pyx_TraceLine(308,0,__PYX_ERR(0, 308, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
   try {
     __pyx_t_1 = token_ratio_func(__pyx_v_s1_proc.string, __pyx_v_s2_proc.string, __pyx_v_c_score_cutoff);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 365, __pyx_L1_error)
+    __PYX_ERR(0, 308, __pyx_L1_error)
   }
-  __pyx_t_6 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 365, __pyx_L1_error)
+  __pyx_t_6 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 308, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __pyx_r = __pyx_t_6;
   __pyx_t_6 = 0;
   goto __pyx_L0;
 
-  /* "cpp_fuzz.pyx":314
+  /* "cpp_fuzz.pyx":273
  * 
  * 
  * def token_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
@@ -5205,22 +4532,16 @@ static PyObject *__pyx_pf_8cpp_fuzz_8token_ratio(CYTHON_UNUSED PyObject *__pyx_s
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_XDECREF(__pyx_t_9);
-  __Pyx_XDECREF(__pyx_t_10);
   __Pyx_AddTraceback("cpp_fuzz.token_ratio", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
-  __Pyx_XDECREF(__pyx_v_processor_capsule);
-  __Pyx_XDECREF(__pyx_v_s1);
-  __Pyx_XDECREF(__pyx_v_s2);
-  __Pyx_XDECREF(__pyx_v_processor);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_TraceReturn(__pyx_r, 0);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "cpp_fuzz.pyx":368
+/* "cpp_fuzz.pyx":311
  * 
  * 
  * def partial_token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
@@ -5238,13 +4559,13 @@ static PyObject *__pyx_pf_8cpp_fuzz_26__defaults__(CYTHON_UNUSED PyObject *__pyx
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__defaults__", 0);
-  __Pyx_TraceCall("__defaults__", __pyx_f[0], 368, 0, __PYX_ERR(0, 368, __pyx_L1_error));
+  __Pyx_TraceCall("__defaults__", __pyx_f[0], 311, 0, __PYX_ERR(0, 311, __pyx_L1_error));
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 368, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 311, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_processor, __Pyx_CyFunction_Defaults(__pyx_defaults3, __pyx_self)->__pyx_arg_processor) < 0) __PYX_ERR(0, 368, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_score_cutoff, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 368, __pyx_L1_error)
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 368, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_processor, __Pyx_CyFunction_Defaults(__pyx_defaults3, __pyx_self)->__pyx_arg_processor) < 0) __PYX_ERR(0, 311, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_score_cutoff, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 311, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 311, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(Py_None);
   __Pyx_GIVEREF(Py_None);
@@ -5324,14 +4645,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       switch (__pyx_nargs) {
         case  0:
         if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_s1)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 368, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 311, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
         if (likely((values[1] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_s2)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 368, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 311, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("partial_token_sort_ratio", 1, 2, 2, 1); __PYX_ERR(0, 368, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("partial_token_sort_ratio", 1, 2, 2, 1); __PYX_ERR(0, 311, __pyx_L3_error)
         }
       }
       if (kw_args > 0 && likely(kw_args <= 2)) {
@@ -5339,12 +4660,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         for (index = 2; index < 4 && kw_args > 0; index++) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, *__pyx_pyargnames[index]);
           if (value) { values[index] = value; kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 368, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 311, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "partial_token_sort_ratio") < 0)) __PYX_ERR(0, 368, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "partial_token_sort_ratio") < 0)) __PYX_ERR(0, 311, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 2)) {
       goto __pyx_L5_argtuple_error;
@@ -5359,7 +4680,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("partial_token_sort_ratio", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 368, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("partial_token_sort_ratio", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 311, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("cpp_fuzz.partial_token_sort_ratio", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -5376,8 +4697,6 @@ static PyObject *__pyx_pf_8cpp_fuzz_10partial_token_sort_ratio(CYTHON_UNUSED PyO
   double __pyx_v_c_score_cutoff;
   RF_StringWrapper __pyx_v_s1_proc;
   RF_StringWrapper __pyx_v_s2_proc;
-  PyObject *__pyx_v_processor_capsule = NULL;
-  RF_Preprocess __pyx_v_preprocess_func;
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -5387,47 +4706,38 @@ static PyObject *__pyx_pf_8cpp_fuzz_10partial_token_sort_ratio(CYTHON_UNUSED PyO
   int __pyx_t_4;
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
-  void *__pyx_t_7;
-  bool __pyx_t_8;
-  PyObject *__pyx_t_9 = NULL;
-  PyObject *__pyx_t_10 = NULL;
-  int __pyx_t_11;
-  RF_String __pyx_t_12;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_TraceFrameInit(__pyx_codeobj__6)
   __Pyx_RefNannySetupContext("partial_token_sort_ratio", 0);
-  __Pyx_TraceCall("partial_token_sort_ratio", __pyx_f[0], 368, 0, __PYX_ERR(0, 368, __pyx_L1_error));
-  __Pyx_INCREF(__pyx_v_s1);
-  __Pyx_INCREF(__pyx_v_s2);
-  __Pyx_INCREF(__pyx_v_processor);
+  __Pyx_TraceCall("partial_token_sort_ratio", __pyx_f[0], 311, 0, __PYX_ERR(0, 311, __pyx_L1_error));
 
-  /* "cpp_fuzz.pyx":395
+  /* "cpp_fuzz.pyx":338
  *     .. image:: img/partial_token_sort_ratio.svg
  *     """
  *     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff             # <<<<<<<<<<<<<<
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  */
-  __Pyx_TraceLine(395,0,__PYX_ERR(0, 395, __pyx_L1_error))
+  __Pyx_TraceLine(338,0,__PYX_ERR(0, 338, __pyx_L1_error))
   __pyx_t_2 = (__pyx_v_score_cutoff == Py_None);
   if ((__pyx_t_2 != 0)) {
     __pyx_t_1 = 0.0;
   } else {
-    __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 395, __pyx_L1_error)
+    __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 338, __pyx_L1_error)
     __pyx_t_1 = __pyx_t_3;
   }
   __pyx_v_c_score_cutoff = __pyx_t_1;
 
-  /* "cpp_fuzz.pyx":398
+  /* "cpp_fuzz.pyx":341
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  *     if s1 is None or s2 is None:             # <<<<<<<<<<<<<<
  *         return 0
  * 
  */
-  __Pyx_TraceLine(398,0,__PYX_ERR(0, 398, __pyx_L1_error))
+  __Pyx_TraceLine(341,0,__PYX_ERR(0, 341, __pyx_L1_error))
   __pyx_t_4 = (__pyx_v_s1 == Py_None);
   __pyx_t_5 = (__pyx_t_4 != 0);
   if (!__pyx_t_5) {
@@ -5441,20 +4751,20 @@ static PyObject *__pyx_pf_8cpp_fuzz_10partial_token_sort_ratio(CYTHON_UNUSED PyO
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_2) {
 
-    /* "cpp_fuzz.pyx":399
+    /* "cpp_fuzz.pyx":342
  * 
  *     if s1 is None or s2 is None:
  *         return 0             # <<<<<<<<<<<<<<
  * 
- *     if processor is True:
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
  */
-    __Pyx_TraceLine(399,0,__PYX_ERR(0, 399, __pyx_L1_error))
+    __Pyx_TraceLine(342,0,__PYX_ERR(0, 342, __pyx_L1_error))
     __Pyx_XDECREF(__pyx_r);
     __Pyx_INCREF(__pyx_int_0);
     __pyx_r = __pyx_int_0;
     goto __pyx_L0;
 
-    /* "cpp_fuzz.pyx":398
+    /* "cpp_fuzz.pyx":341
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  *     if s1 is None or s2 is None:             # <<<<<<<<<<<<<<
@@ -5463,260 +4773,38 @@ static PyObject *__pyx_pf_8cpp_fuzz_10partial_token_sort_ratio(CYTHON_UNUSED PyO
  */
   }
 
-  /* "cpp_fuzz.pyx":401
+  /* "cpp_fuzz.pyx":344
  *         return 0
  * 
- *     if processor is True:             # <<<<<<<<<<<<<<
- *         processor = default_process
- * 
- */
-  __Pyx_TraceLine(401,0,__PYX_ERR(0, 401, __pyx_L1_error))
-  __pyx_t_2 = (__pyx_v_processor == Py_True);
-  __pyx_t_4 = (__pyx_t_2 != 0);
-  if (__pyx_t_4) {
-
-    /* "cpp_fuzz.pyx":402
- * 
- *     if processor is True:
- *         processor = default_process             # <<<<<<<<<<<<<<
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- */
-    __Pyx_TraceLine(402,0,__PYX_ERR(0, 402, __pyx_L1_error))
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_default_process); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 402, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    __Pyx_DECREF_SET(__pyx_v_processor, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":401
- *         return 0
- * 
- *     if processor is True:             # <<<<<<<<<<<<<<
- *         processor = default_process
- * 
- */
-  }
-
-  /* "cpp_fuzz.pyx":404
- *         processor = default_process
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)             # <<<<<<<<<<<<<<
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- */
-  __Pyx_TraceLine(404,0,__PYX_ERR(0, 404, __pyx_L1_error))
-  __pyx_t_6 = __Pyx_GetAttr3(__pyx_v_processor, __pyx_n_u_RF_Preprocess, __pyx_v_processor); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 404, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_6);
-  __pyx_v_processor_capsule = __pyx_t_6;
-  __pyx_t_6 = 0;
-
-  /* "cpp_fuzz.pyx":405
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):             # <<<<<<<<<<<<<<
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- */
-  __Pyx_TraceLine(405,0,__PYX_ERR(0, 405, __pyx_L1_error))
-  __pyx_t_4 = (PyCapsule_IsValid(__pyx_v_processor_capsule, NULL) != 0);
-  if (__pyx_t_4) {
-
-    /* "cpp_fuzz.pyx":406
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)             # <<<<<<<<<<<<<<
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- */
-    __Pyx_TraceLine(406,0,__PYX_ERR(0, 406, __pyx_L1_error))
-    __pyx_t_7 = PyCapsule_GetPointer(__pyx_v_processor_capsule, NULL); if (unlikely(__pyx_t_7 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 406, __pyx_L1_error)
-    __pyx_v_preprocess_func = ((RF_Preprocess)__pyx_t_7);
-
-    /* "cpp_fuzz.pyx":407
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)             # <<<<<<<<<<<<<<
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):
- */
-    __Pyx_TraceLine(407,0,__PYX_ERR(0, 407, __pyx_L1_error))
-    __pyx_t_8 = __pyx_v_preprocess_func(__pyx_v_s1, (&__pyx_v_s1_proc.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 407, __pyx_L1_error)
-
-    /* "cpp_fuzz.pyx":408
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)             # <<<<<<<<<<<<<<
- *     elif callable(processor):
- *         s1 = processor(s1)
- */
-    __Pyx_TraceLine(408,0,__PYX_ERR(0, 408, __pyx_L1_error))
-    __pyx_t_8 = __pyx_v_preprocess_func(__pyx_v_s2, (&__pyx_v_s2_proc.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 408, __pyx_L1_error)
-
-    /* "cpp_fuzz.pyx":405
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):             # <<<<<<<<<<<<<<
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- */
-    goto __pyx_L7;
-  }
-
-  /* "cpp_fuzz.pyx":409
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):             # <<<<<<<<<<<<<<
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- */
-  __Pyx_TraceLine(409,0,__PYX_ERR(0, 409, __pyx_L1_error))
-  __pyx_t_4 = __Pyx_PyCallable_Check(__pyx_v_processor); if (unlikely(__pyx_t_4 == ((int)-1))) __PYX_ERR(0, 409, __pyx_L1_error)
-  __pyx_t_2 = (__pyx_t_4 != 0);
-  if (__pyx_t_2) {
-
-    /* "cpp_fuzz.pyx":410
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):
- *         s1 = processor(s1)             # <<<<<<<<<<<<<<
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- */
-    __Pyx_TraceLine(410,0,__PYX_ERR(0, 410, __pyx_L1_error))
-    __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_9 = __pyx_v_processor; __pyx_t_10 = NULL;
-    __pyx_t_11 = 0;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
-      __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_9);
-      if (likely(__pyx_t_10)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_9);
-        __Pyx_INCREF(__pyx_t_10);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_9, function);
-        __pyx_t_11 = 1;
-      }
-    }
-    {
-      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_s1};
-      __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_9, __pyx_callargs+1-__pyx_t_11, 1+__pyx_t_11);
-      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 410, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    }
-    __Pyx_DECREF_SET(__pyx_v_s1, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":411
- *     elif callable(processor):
- *         s1 = processor(s1)
- *         s2 = processor(s2)             # <<<<<<<<<<<<<<
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- */
-    __Pyx_TraceLine(411,0,__PYX_ERR(0, 411, __pyx_L1_error))
-    __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_9 = __pyx_v_processor; __pyx_t_10 = NULL;
-    __pyx_t_11 = 0;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
-      __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_9);
-      if (likely(__pyx_t_10)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_9);
-        __Pyx_INCREF(__pyx_t_10);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_9, function);
-        __pyx_t_11 = 1;
-      }
-    }
-    {
-      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_s2};
-      __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_9, __pyx_callargs+1-__pyx_t_11, 1+__pyx_t_11);
-      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 411, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    }
-    __Pyx_DECREF_SET(__pyx_v_s2, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":412
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- *     else:
- */
-    __Pyx_TraceLine(412,0,__PYX_ERR(0, 412, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 412, __pyx_L1_error)
-    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":413
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- */
-    __Pyx_TraceLine(413,0,__PYX_ERR(0, 413, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 413, __pyx_L1_error)
-    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":409
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):             # <<<<<<<<<<<<<<
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- */
-    goto __pyx_L7;
-  }
-
-  /* "cpp_fuzz.pyx":415
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- * 
- */
-  __Pyx_TraceLine(415,0,__PYX_ERR(0, 415, __pyx_L1_error))
-  /*else*/ {
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 415, __pyx_L1_error)
-    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":416
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
- * 
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)             # <<<<<<<<<<<<<<
  *     return partial_token_sort_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
- */
-    __Pyx_TraceLine(416,0,__PYX_ERR(0, 416, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 416, __pyx_L1_error)
-    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_12);
-  }
-  __pyx_L7:;
-
-  /* "cpp_fuzz.pyx":418
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  * 
+ */
+  __Pyx_TraceLine(344,0,__PYX_ERR(0, 344, __pyx_L1_error))
+  __pyx_f_8cpp_fuzz_preprocess_strings(__pyx_v_s1, __pyx_v_s2, __pyx_v_processor, (&__pyx_v_s1_proc), (&__pyx_v_s2_proc)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 344, __pyx_L1_error)
+
+  /* "cpp_fuzz.pyx":345
+ * 
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
  *     return partial_token_sort_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __Pyx_TraceLine(418,0,__PYX_ERR(0, 418, __pyx_L1_error))
+  __Pyx_TraceLine(345,0,__PYX_ERR(0, 345, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
   try {
     __pyx_t_1 = partial_token_sort_ratio_func(__pyx_v_s1_proc.string, __pyx_v_s2_proc.string, __pyx_v_c_score_cutoff);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 418, __pyx_L1_error)
+    __PYX_ERR(0, 345, __pyx_L1_error)
   }
-  __pyx_t_6 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 418, __pyx_L1_error)
+  __pyx_t_6 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 345, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __pyx_r = __pyx_t_6;
   __pyx_t_6 = 0;
   goto __pyx_L0;
 
-  /* "cpp_fuzz.pyx":368
+  /* "cpp_fuzz.pyx":311
  * 
  * 
  * def partial_token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
@@ -5727,22 +4815,16 @@ static PyObject *__pyx_pf_8cpp_fuzz_10partial_token_sort_ratio(CYTHON_UNUSED PyO
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_XDECREF(__pyx_t_9);
-  __Pyx_XDECREF(__pyx_t_10);
   __Pyx_AddTraceback("cpp_fuzz.partial_token_sort_ratio", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
-  __Pyx_XDECREF(__pyx_v_processor_capsule);
-  __Pyx_XDECREF(__pyx_v_s1);
-  __Pyx_XDECREF(__pyx_v_s2);
-  __Pyx_XDECREF(__pyx_v_processor);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_TraceReturn(__pyx_r, 0);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "cpp_fuzz.pyx":421
+/* "cpp_fuzz.pyx":348
  * 
  * 
  * def partial_token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
@@ -5760,13 +4842,13 @@ static PyObject *__pyx_pf_8cpp_fuzz_28__defaults__(CYTHON_UNUSED PyObject *__pyx
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__defaults__", 0);
-  __Pyx_TraceCall("__defaults__", __pyx_f[0], 421, 0, __PYX_ERR(0, 421, __pyx_L1_error));
+  __Pyx_TraceCall("__defaults__", __pyx_f[0], 348, 0, __PYX_ERR(0, 348, __pyx_L1_error));
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 421, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 348, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_processor, __Pyx_CyFunction_Defaults(__pyx_defaults4, __pyx_self)->__pyx_arg_processor) < 0) __PYX_ERR(0, 421, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_score_cutoff, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 421, __pyx_L1_error)
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 421, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_processor, __Pyx_CyFunction_Defaults(__pyx_defaults4, __pyx_self)->__pyx_arg_processor) < 0) __PYX_ERR(0, 348, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_score_cutoff, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 348, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 348, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(Py_None);
   __Pyx_GIVEREF(Py_None);
@@ -5846,14 +4928,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       switch (__pyx_nargs) {
         case  0:
         if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_s1)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 421, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 348, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
         if (likely((values[1] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_s2)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 421, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 348, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("partial_token_set_ratio", 1, 2, 2, 1); __PYX_ERR(0, 421, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("partial_token_set_ratio", 1, 2, 2, 1); __PYX_ERR(0, 348, __pyx_L3_error)
         }
       }
       if (kw_args > 0 && likely(kw_args <= 2)) {
@@ -5861,12 +4943,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         for (index = 2; index < 4 && kw_args > 0; index++) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, *__pyx_pyargnames[index]);
           if (value) { values[index] = value; kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 421, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 348, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "partial_token_set_ratio") < 0)) __PYX_ERR(0, 421, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "partial_token_set_ratio") < 0)) __PYX_ERR(0, 348, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 2)) {
       goto __pyx_L5_argtuple_error;
@@ -5881,7 +4963,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("partial_token_set_ratio", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 421, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("partial_token_set_ratio", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 348, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("cpp_fuzz.partial_token_set_ratio", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -5898,8 +4980,6 @@ static PyObject *__pyx_pf_8cpp_fuzz_12partial_token_set_ratio(CYTHON_UNUSED PyOb
   double __pyx_v_c_score_cutoff;
   RF_StringWrapper __pyx_v_s1_proc;
   RF_StringWrapper __pyx_v_s2_proc;
-  PyObject *__pyx_v_processor_capsule = NULL;
-  RF_Preprocess __pyx_v_preprocess_func;
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -5909,47 +4989,39 @@ static PyObject *__pyx_pf_8cpp_fuzz_12partial_token_set_ratio(CYTHON_UNUSED PyOb
   int __pyx_t_4;
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
-  void *__pyx_t_7;
-  bool __pyx_t_8;
-  PyObject *__pyx_t_9 = NULL;
-  PyObject *__pyx_t_10 = NULL;
-  int __pyx_t_11;
-  RF_String __pyx_t_12;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_TraceFrameInit(__pyx_codeobj__7)
   __Pyx_RefNannySetupContext("partial_token_set_ratio", 0);
-  __Pyx_TraceCall("partial_token_set_ratio", __pyx_f[0], 421, 0, __PYX_ERR(0, 421, __pyx_L1_error));
-  __Pyx_INCREF(__pyx_v_s1);
-  __Pyx_INCREF(__pyx_v_s2);
+  __Pyx_TraceCall("partial_token_set_ratio", __pyx_f[0], 348, 0, __PYX_ERR(0, 348, __pyx_L1_error));
   __Pyx_INCREF(__pyx_v_processor);
 
-  /* "cpp_fuzz.pyx":449
+  /* "cpp_fuzz.pyx":376
  *     .. image:: img/partial_token_set_ratio.svg
  *     """
  *     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff             # <<<<<<<<<<<<<<
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  */
-  __Pyx_TraceLine(449,0,__PYX_ERR(0, 449, __pyx_L1_error))
+  __Pyx_TraceLine(376,0,__PYX_ERR(0, 376, __pyx_L1_error))
   __pyx_t_2 = (__pyx_v_score_cutoff == Py_None);
   if ((__pyx_t_2 != 0)) {
     __pyx_t_1 = 0.0;
   } else {
-    __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 449, __pyx_L1_error)
+    __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 376, __pyx_L1_error)
     __pyx_t_1 = __pyx_t_3;
   }
   __pyx_v_c_score_cutoff = __pyx_t_1;
 
-  /* "cpp_fuzz.pyx":452
+  /* "cpp_fuzz.pyx":379
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  *     if s1 is None or s2 is None:             # <<<<<<<<<<<<<<
  *         return 0
  * 
  */
-  __Pyx_TraceLine(452,0,__PYX_ERR(0, 452, __pyx_L1_error))
+  __Pyx_TraceLine(379,0,__PYX_ERR(0, 379, __pyx_L1_error))
   __pyx_t_4 = (__pyx_v_s1 == Py_None);
   __pyx_t_5 = (__pyx_t_4 != 0);
   if (!__pyx_t_5) {
@@ -5963,20 +5035,20 @@ static PyObject *__pyx_pf_8cpp_fuzz_12partial_token_set_ratio(CYTHON_UNUSED PyOb
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_2) {
 
-    /* "cpp_fuzz.pyx":453
+    /* "cpp_fuzz.pyx":380
  * 
  *     if s1 is None or s2 is None:
  *         return 0             # <<<<<<<<<<<<<<
  * 
  *     if processor is True:
  */
-    __Pyx_TraceLine(453,0,__PYX_ERR(0, 453, __pyx_L1_error))
+    __Pyx_TraceLine(380,0,__PYX_ERR(0, 380, __pyx_L1_error))
     __Pyx_XDECREF(__pyx_r);
     __Pyx_INCREF(__pyx_int_0);
     __pyx_r = __pyx_int_0;
     goto __pyx_L0;
 
-    /* "cpp_fuzz.pyx":452
+    /* "cpp_fuzz.pyx":379
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  *     if s1 is None or s2 is None:             # <<<<<<<<<<<<<<
@@ -5985,32 +5057,32 @@ static PyObject *__pyx_pf_8cpp_fuzz_12partial_token_set_ratio(CYTHON_UNUSED PyOb
  */
   }
 
-  /* "cpp_fuzz.pyx":455
+  /* "cpp_fuzz.pyx":382
  *         return 0
  * 
  *     if processor is True:             # <<<<<<<<<<<<<<
  *         processor = default_process
  * 
  */
-  __Pyx_TraceLine(455,0,__PYX_ERR(0, 455, __pyx_L1_error))
+  __Pyx_TraceLine(382,0,__PYX_ERR(0, 382, __pyx_L1_error))
   __pyx_t_2 = (__pyx_v_processor == Py_True);
   __pyx_t_4 = (__pyx_t_2 != 0);
   if (__pyx_t_4) {
 
-    /* "cpp_fuzz.pyx":456
+    /* "cpp_fuzz.pyx":383
  * 
  *     if processor is True:
  *         processor = default_process             # <<<<<<<<<<<<<<
  * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
  */
-    __Pyx_TraceLine(456,0,__PYX_ERR(0, 456, __pyx_L1_error))
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_default_process); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 456, __pyx_L1_error)
+    __Pyx_TraceLine(383,0,__PYX_ERR(0, 383, __pyx_L1_error))
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_default_process); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 383, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF_SET(__pyx_v_processor, __pyx_t_6);
     __pyx_t_6 = 0;
 
-    /* "cpp_fuzz.pyx":455
+    /* "cpp_fuzz.pyx":382
  *         return 0
  * 
  *     if processor is True:             # <<<<<<<<<<<<<<
@@ -6019,226 +5091,38 @@ static PyObject *__pyx_pf_8cpp_fuzz_12partial_token_set_ratio(CYTHON_UNUSED PyOb
  */
   }
 
-  /* "cpp_fuzz.pyx":458
+  /* "cpp_fuzz.pyx":385
  *         processor = default_process
  * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)             # <<<<<<<<<<<<<<
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- */
-  __Pyx_TraceLine(458,0,__PYX_ERR(0, 458, __pyx_L1_error))
-  __pyx_t_6 = __Pyx_GetAttr3(__pyx_v_processor, __pyx_n_u_RF_Preprocess, __pyx_v_processor); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 458, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_6);
-  __pyx_v_processor_capsule = __pyx_t_6;
-  __pyx_t_6 = 0;
-
-  /* "cpp_fuzz.pyx":459
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):             # <<<<<<<<<<<<<<
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- */
-  __Pyx_TraceLine(459,0,__PYX_ERR(0, 459, __pyx_L1_error))
-  __pyx_t_4 = (PyCapsule_IsValid(__pyx_v_processor_capsule, NULL) != 0);
-  if (__pyx_t_4) {
-
-    /* "cpp_fuzz.pyx":460
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)             # <<<<<<<<<<<<<<
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- */
-    __Pyx_TraceLine(460,0,__PYX_ERR(0, 460, __pyx_L1_error))
-    __pyx_t_7 = PyCapsule_GetPointer(__pyx_v_processor_capsule, NULL); if (unlikely(__pyx_t_7 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 460, __pyx_L1_error)
-    __pyx_v_preprocess_func = ((RF_Preprocess)__pyx_t_7);
-
-    /* "cpp_fuzz.pyx":461
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)             # <<<<<<<<<<<<<<
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):
- */
-    __Pyx_TraceLine(461,0,__PYX_ERR(0, 461, __pyx_L1_error))
-    __pyx_t_8 = __pyx_v_preprocess_func(__pyx_v_s1, (&__pyx_v_s1_proc.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 461, __pyx_L1_error)
-
-    /* "cpp_fuzz.pyx":462
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)             # <<<<<<<<<<<<<<
- *     elif callable(processor):
- *         s1 = processor(s1)
- */
-    __Pyx_TraceLine(462,0,__PYX_ERR(0, 462, __pyx_L1_error))
-    __pyx_t_8 = __pyx_v_preprocess_func(__pyx_v_s2, (&__pyx_v_s2_proc.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 462, __pyx_L1_error)
-
-    /* "cpp_fuzz.pyx":459
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):             # <<<<<<<<<<<<<<
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- */
-    goto __pyx_L7;
-  }
-
-  /* "cpp_fuzz.pyx":463
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):             # <<<<<<<<<<<<<<
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- */
-  __Pyx_TraceLine(463,0,__PYX_ERR(0, 463, __pyx_L1_error))
-  __pyx_t_4 = __Pyx_PyCallable_Check(__pyx_v_processor); if (unlikely(__pyx_t_4 == ((int)-1))) __PYX_ERR(0, 463, __pyx_L1_error)
-  __pyx_t_2 = (__pyx_t_4 != 0);
-  if (__pyx_t_2) {
-
-    /* "cpp_fuzz.pyx":464
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):
- *         s1 = processor(s1)             # <<<<<<<<<<<<<<
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- */
-    __Pyx_TraceLine(464,0,__PYX_ERR(0, 464, __pyx_L1_error))
-    __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_9 = __pyx_v_processor; __pyx_t_10 = NULL;
-    __pyx_t_11 = 0;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
-      __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_9);
-      if (likely(__pyx_t_10)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_9);
-        __Pyx_INCREF(__pyx_t_10);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_9, function);
-        __pyx_t_11 = 1;
-      }
-    }
-    {
-      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_s1};
-      __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_9, __pyx_callargs+1-__pyx_t_11, 1+__pyx_t_11);
-      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 464, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    }
-    __Pyx_DECREF_SET(__pyx_v_s1, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":465
- *     elif callable(processor):
- *         s1 = processor(s1)
- *         s2 = processor(s2)             # <<<<<<<<<<<<<<
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- */
-    __Pyx_TraceLine(465,0,__PYX_ERR(0, 465, __pyx_L1_error))
-    __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_9 = __pyx_v_processor; __pyx_t_10 = NULL;
-    __pyx_t_11 = 0;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
-      __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_9);
-      if (likely(__pyx_t_10)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_9);
-        __Pyx_INCREF(__pyx_t_10);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_9, function);
-        __pyx_t_11 = 1;
-      }
-    }
-    {
-      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_s2};
-      __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_9, __pyx_callargs+1-__pyx_t_11, 1+__pyx_t_11);
-      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 465, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    }
-    __Pyx_DECREF_SET(__pyx_v_s2, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":466
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- *     else:
- */
-    __Pyx_TraceLine(466,0,__PYX_ERR(0, 466, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 466, __pyx_L1_error)
-    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":467
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- */
-    __Pyx_TraceLine(467,0,__PYX_ERR(0, 467, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 467, __pyx_L1_error)
-    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":463
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):             # <<<<<<<<<<<<<<
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- */
-    goto __pyx_L7;
-  }
-
-  /* "cpp_fuzz.pyx":469
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- * 
- */
-  __Pyx_TraceLine(469,0,__PYX_ERR(0, 469, __pyx_L1_error))
-  /*else*/ {
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 469, __pyx_L1_error)
-    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":470
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
- * 
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)             # <<<<<<<<<<<<<<
  *     return partial_token_set_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
- */
-    __Pyx_TraceLine(470,0,__PYX_ERR(0, 470, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 470, __pyx_L1_error)
-    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_12);
-  }
-  __pyx_L7:;
-
-  /* "cpp_fuzz.pyx":472
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  * 
+ */
+  __Pyx_TraceLine(385,0,__PYX_ERR(0, 385, __pyx_L1_error))
+  __pyx_f_8cpp_fuzz_preprocess_strings(__pyx_v_s1, __pyx_v_s2, __pyx_v_processor, (&__pyx_v_s1_proc), (&__pyx_v_s2_proc)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 385, __pyx_L1_error)
+
+  /* "cpp_fuzz.pyx":386
+ * 
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
  *     return partial_token_set_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __Pyx_TraceLine(472,0,__PYX_ERR(0, 472, __pyx_L1_error))
+  __Pyx_TraceLine(386,0,__PYX_ERR(0, 386, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
   try {
     __pyx_t_1 = partial_token_set_ratio_func(__pyx_v_s1_proc.string, __pyx_v_s2_proc.string, __pyx_v_c_score_cutoff);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 472, __pyx_L1_error)
+    __PYX_ERR(0, 386, __pyx_L1_error)
   }
-  __pyx_t_6 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 472, __pyx_L1_error)
+  __pyx_t_6 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 386, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __pyx_r = __pyx_t_6;
   __pyx_t_6 = 0;
   goto __pyx_L0;
 
-  /* "cpp_fuzz.pyx":421
+  /* "cpp_fuzz.pyx":348
  * 
  * 
  * def partial_token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
@@ -6249,14 +5133,9 @@ static PyObject *__pyx_pf_8cpp_fuzz_12partial_token_set_ratio(CYTHON_UNUSED PyOb
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_XDECREF(__pyx_t_9);
-  __Pyx_XDECREF(__pyx_t_10);
   __Pyx_AddTraceback("cpp_fuzz.partial_token_set_ratio", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
-  __Pyx_XDECREF(__pyx_v_processor_capsule);
-  __Pyx_XDECREF(__pyx_v_s1);
-  __Pyx_XDECREF(__pyx_v_s2);
   __Pyx_XDECREF(__pyx_v_processor);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_TraceReturn(__pyx_r, 0);
@@ -6264,7 +5143,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_12partial_token_set_ratio(CYTHON_UNUSED PyOb
   return __pyx_r;
 }
 
-/* "cpp_fuzz.pyx":475
+/* "cpp_fuzz.pyx":389
  * 
  * 
  * def partial_token_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
@@ -6282,13 +5161,13 @@ static PyObject *__pyx_pf_8cpp_fuzz_30__defaults__(CYTHON_UNUSED PyObject *__pyx
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__defaults__", 0);
-  __Pyx_TraceCall("__defaults__", __pyx_f[0], 475, 0, __PYX_ERR(0, 475, __pyx_L1_error));
+  __Pyx_TraceCall("__defaults__", __pyx_f[0], 389, 0, __PYX_ERR(0, 389, __pyx_L1_error));
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 475, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 389, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_processor, __Pyx_CyFunction_Defaults(__pyx_defaults5, __pyx_self)->__pyx_arg_processor) < 0) __PYX_ERR(0, 475, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_score_cutoff, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 475, __pyx_L1_error)
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 475, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_processor, __Pyx_CyFunction_Defaults(__pyx_defaults5, __pyx_self)->__pyx_arg_processor) < 0) __PYX_ERR(0, 389, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_score_cutoff, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 389, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 389, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(Py_None);
   __Pyx_GIVEREF(Py_None);
@@ -6368,14 +5247,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       switch (__pyx_nargs) {
         case  0:
         if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_s1)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 475, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 389, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
         if (likely((values[1] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_s2)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 475, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 389, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("partial_token_ratio", 1, 2, 2, 1); __PYX_ERR(0, 475, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("partial_token_ratio", 1, 2, 2, 1); __PYX_ERR(0, 389, __pyx_L3_error)
         }
       }
       if (kw_args > 0 && likely(kw_args <= 2)) {
@@ -6383,12 +5262,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         for (index = 2; index < 4 && kw_args > 0; index++) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, *__pyx_pyargnames[index]);
           if (value) { values[index] = value; kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 475, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 389, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "partial_token_ratio") < 0)) __PYX_ERR(0, 475, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "partial_token_ratio") < 0)) __PYX_ERR(0, 389, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 2)) {
       goto __pyx_L5_argtuple_error;
@@ -6403,7 +5282,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("partial_token_ratio", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 475, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("partial_token_ratio", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 389, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("cpp_fuzz.partial_token_ratio", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -6420,8 +5299,6 @@ static PyObject *__pyx_pf_8cpp_fuzz_14partial_token_ratio(CYTHON_UNUSED PyObject
   double __pyx_v_c_score_cutoff;
   RF_StringWrapper __pyx_v_s1_proc;
   RF_StringWrapper __pyx_v_s2_proc;
-  PyObject *__pyx_v_processor_capsule = NULL;
-  RF_Preprocess __pyx_v_preprocess_func;
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -6431,47 +5308,38 @@ static PyObject *__pyx_pf_8cpp_fuzz_14partial_token_ratio(CYTHON_UNUSED PyObject
   int __pyx_t_4;
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
-  void *__pyx_t_7;
-  bool __pyx_t_8;
-  PyObject *__pyx_t_9 = NULL;
-  PyObject *__pyx_t_10 = NULL;
-  int __pyx_t_11;
-  RF_String __pyx_t_12;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_TraceFrameInit(__pyx_codeobj__8)
   __Pyx_RefNannySetupContext("partial_token_ratio", 0);
-  __Pyx_TraceCall("partial_token_ratio", __pyx_f[0], 475, 0, __PYX_ERR(0, 475, __pyx_L1_error));
-  __Pyx_INCREF(__pyx_v_s1);
-  __Pyx_INCREF(__pyx_v_s2);
-  __Pyx_INCREF(__pyx_v_processor);
+  __Pyx_TraceCall("partial_token_ratio", __pyx_f[0], 389, 0, __PYX_ERR(0, 389, __pyx_L1_error));
 
-  /* "cpp_fuzz.pyx":503
+  /* "cpp_fuzz.pyx":417
  *     .. image:: img/partial_token_ratio.svg
  *     """
  *     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff             # <<<<<<<<<<<<<<
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  */
-  __Pyx_TraceLine(503,0,__PYX_ERR(0, 503, __pyx_L1_error))
+  __Pyx_TraceLine(417,0,__PYX_ERR(0, 417, __pyx_L1_error))
   __pyx_t_2 = (__pyx_v_score_cutoff == Py_None);
   if ((__pyx_t_2 != 0)) {
     __pyx_t_1 = 0.0;
   } else {
-    __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 503, __pyx_L1_error)
+    __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 417, __pyx_L1_error)
     __pyx_t_1 = __pyx_t_3;
   }
   __pyx_v_c_score_cutoff = __pyx_t_1;
 
-  /* "cpp_fuzz.pyx":506
+  /* "cpp_fuzz.pyx":420
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  *     if s1 is None or s2 is None:             # <<<<<<<<<<<<<<
  *         return 0
  * 
  */
-  __Pyx_TraceLine(506,0,__PYX_ERR(0, 506, __pyx_L1_error))
+  __Pyx_TraceLine(420,0,__PYX_ERR(0, 420, __pyx_L1_error))
   __pyx_t_4 = (__pyx_v_s1 == Py_None);
   __pyx_t_5 = (__pyx_t_4 != 0);
   if (!__pyx_t_5) {
@@ -6485,20 +5353,20 @@ static PyObject *__pyx_pf_8cpp_fuzz_14partial_token_ratio(CYTHON_UNUSED PyObject
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_2) {
 
-    /* "cpp_fuzz.pyx":507
+    /* "cpp_fuzz.pyx":421
  * 
  *     if s1 is None or s2 is None:
  *         return 0             # <<<<<<<<<<<<<<
  * 
- *     if processor is True:
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
  */
-    __Pyx_TraceLine(507,0,__PYX_ERR(0, 507, __pyx_L1_error))
+    __Pyx_TraceLine(421,0,__PYX_ERR(0, 421, __pyx_L1_error))
     __Pyx_XDECREF(__pyx_r);
     __Pyx_INCREF(__pyx_int_0);
     __pyx_r = __pyx_int_0;
     goto __pyx_L0;
 
-    /* "cpp_fuzz.pyx":506
+    /* "cpp_fuzz.pyx":420
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  *     if s1 is None or s2 is None:             # <<<<<<<<<<<<<<
@@ -6507,260 +5375,38 @@ static PyObject *__pyx_pf_8cpp_fuzz_14partial_token_ratio(CYTHON_UNUSED PyObject
  */
   }
 
-  /* "cpp_fuzz.pyx":509
+  /* "cpp_fuzz.pyx":423
  *         return 0
  * 
- *     if processor is True:             # <<<<<<<<<<<<<<
- *         processor = default_process
- * 
- */
-  __Pyx_TraceLine(509,0,__PYX_ERR(0, 509, __pyx_L1_error))
-  __pyx_t_2 = (__pyx_v_processor == Py_True);
-  __pyx_t_4 = (__pyx_t_2 != 0);
-  if (__pyx_t_4) {
-
-    /* "cpp_fuzz.pyx":510
- * 
- *     if processor is True:
- *         processor = default_process             # <<<<<<<<<<<<<<
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- */
-    __Pyx_TraceLine(510,0,__PYX_ERR(0, 510, __pyx_L1_error))
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_default_process); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 510, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    __Pyx_DECREF_SET(__pyx_v_processor, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":509
- *         return 0
- * 
- *     if processor is True:             # <<<<<<<<<<<<<<
- *         processor = default_process
- * 
- */
-  }
-
-  /* "cpp_fuzz.pyx":512
- *         processor = default_process
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)             # <<<<<<<<<<<<<<
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- */
-  __Pyx_TraceLine(512,0,__PYX_ERR(0, 512, __pyx_L1_error))
-  __pyx_t_6 = __Pyx_GetAttr3(__pyx_v_processor, __pyx_n_u_RF_Preprocess, __pyx_v_processor); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 512, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_6);
-  __pyx_v_processor_capsule = __pyx_t_6;
-  __pyx_t_6 = 0;
-
-  /* "cpp_fuzz.pyx":513
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):             # <<<<<<<<<<<<<<
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- */
-  __Pyx_TraceLine(513,0,__PYX_ERR(0, 513, __pyx_L1_error))
-  __pyx_t_4 = (PyCapsule_IsValid(__pyx_v_processor_capsule, NULL) != 0);
-  if (__pyx_t_4) {
-
-    /* "cpp_fuzz.pyx":514
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)             # <<<<<<<<<<<<<<
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- */
-    __Pyx_TraceLine(514,0,__PYX_ERR(0, 514, __pyx_L1_error))
-    __pyx_t_7 = PyCapsule_GetPointer(__pyx_v_processor_capsule, NULL); if (unlikely(__pyx_t_7 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 514, __pyx_L1_error)
-    __pyx_v_preprocess_func = ((RF_Preprocess)__pyx_t_7);
-
-    /* "cpp_fuzz.pyx":515
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)             # <<<<<<<<<<<<<<
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):
- */
-    __Pyx_TraceLine(515,0,__PYX_ERR(0, 515, __pyx_L1_error))
-    __pyx_t_8 = __pyx_v_preprocess_func(__pyx_v_s1, (&__pyx_v_s1_proc.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 515, __pyx_L1_error)
-
-    /* "cpp_fuzz.pyx":516
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)             # <<<<<<<<<<<<<<
- *     elif callable(processor):
- *         s1 = processor(s1)
- */
-    __Pyx_TraceLine(516,0,__PYX_ERR(0, 516, __pyx_L1_error))
-    __pyx_t_8 = __pyx_v_preprocess_func(__pyx_v_s2, (&__pyx_v_s2_proc.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 516, __pyx_L1_error)
-
-    /* "cpp_fuzz.pyx":513
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):             # <<<<<<<<<<<<<<
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- */
-    goto __pyx_L7;
-  }
-
-  /* "cpp_fuzz.pyx":517
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):             # <<<<<<<<<<<<<<
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- */
-  __Pyx_TraceLine(517,0,__PYX_ERR(0, 517, __pyx_L1_error))
-  __pyx_t_4 = __Pyx_PyCallable_Check(__pyx_v_processor); if (unlikely(__pyx_t_4 == ((int)-1))) __PYX_ERR(0, 517, __pyx_L1_error)
-  __pyx_t_2 = (__pyx_t_4 != 0);
-  if (__pyx_t_2) {
-
-    /* "cpp_fuzz.pyx":518
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):
- *         s1 = processor(s1)             # <<<<<<<<<<<<<<
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- */
-    __Pyx_TraceLine(518,0,__PYX_ERR(0, 518, __pyx_L1_error))
-    __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_9 = __pyx_v_processor; __pyx_t_10 = NULL;
-    __pyx_t_11 = 0;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
-      __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_9);
-      if (likely(__pyx_t_10)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_9);
-        __Pyx_INCREF(__pyx_t_10);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_9, function);
-        __pyx_t_11 = 1;
-      }
-    }
-    {
-      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_s1};
-      __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_9, __pyx_callargs+1-__pyx_t_11, 1+__pyx_t_11);
-      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 518, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    }
-    __Pyx_DECREF_SET(__pyx_v_s1, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":519
- *     elif callable(processor):
- *         s1 = processor(s1)
- *         s2 = processor(s2)             # <<<<<<<<<<<<<<
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- */
-    __Pyx_TraceLine(519,0,__PYX_ERR(0, 519, __pyx_L1_error))
-    __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_9 = __pyx_v_processor; __pyx_t_10 = NULL;
-    __pyx_t_11 = 0;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
-      __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_9);
-      if (likely(__pyx_t_10)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_9);
-        __Pyx_INCREF(__pyx_t_10);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_9, function);
-        __pyx_t_11 = 1;
-      }
-    }
-    {
-      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_s2};
-      __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_9, __pyx_callargs+1-__pyx_t_11, 1+__pyx_t_11);
-      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 519, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    }
-    __Pyx_DECREF_SET(__pyx_v_s2, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":520
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- *     else:
- */
-    __Pyx_TraceLine(520,0,__PYX_ERR(0, 520, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 520, __pyx_L1_error)
-    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":521
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- */
-    __Pyx_TraceLine(521,0,__PYX_ERR(0, 521, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 521, __pyx_L1_error)
-    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":517
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):             # <<<<<<<<<<<<<<
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- */
-    goto __pyx_L7;
-  }
-
-  /* "cpp_fuzz.pyx":523
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- * 
- */
-  __Pyx_TraceLine(523,0,__PYX_ERR(0, 523, __pyx_L1_error))
-  /*else*/ {
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 523, __pyx_L1_error)
-    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":524
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
- * 
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)             # <<<<<<<<<<<<<<
  *     return partial_token_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
- */
-    __Pyx_TraceLine(524,0,__PYX_ERR(0, 524, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 524, __pyx_L1_error)
-    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_12);
-  }
-  __pyx_L7:;
-
-  /* "cpp_fuzz.pyx":526
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  * 
+ */
+  __Pyx_TraceLine(423,0,__PYX_ERR(0, 423, __pyx_L1_error))
+  __pyx_f_8cpp_fuzz_preprocess_strings(__pyx_v_s1, __pyx_v_s2, __pyx_v_processor, (&__pyx_v_s1_proc), (&__pyx_v_s2_proc)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 423, __pyx_L1_error)
+
+  /* "cpp_fuzz.pyx":424
+ * 
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
  *     return partial_token_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __Pyx_TraceLine(526,0,__PYX_ERR(0, 526, __pyx_L1_error))
+  __Pyx_TraceLine(424,0,__PYX_ERR(0, 424, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
   try {
     __pyx_t_1 = partial_token_ratio_func(__pyx_v_s1_proc.string, __pyx_v_s2_proc.string, __pyx_v_c_score_cutoff);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 526, __pyx_L1_error)
+    __PYX_ERR(0, 424, __pyx_L1_error)
   }
-  __pyx_t_6 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 526, __pyx_L1_error)
+  __pyx_t_6 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 424, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __pyx_r = __pyx_t_6;
   __pyx_t_6 = 0;
   goto __pyx_L0;
 
-  /* "cpp_fuzz.pyx":475
+  /* "cpp_fuzz.pyx":389
  * 
  * 
  * def partial_token_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
@@ -6771,22 +5417,16 @@ static PyObject *__pyx_pf_8cpp_fuzz_14partial_token_ratio(CYTHON_UNUSED PyObject
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_XDECREF(__pyx_t_9);
-  __Pyx_XDECREF(__pyx_t_10);
   __Pyx_AddTraceback("cpp_fuzz.partial_token_ratio", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
-  __Pyx_XDECREF(__pyx_v_processor_capsule);
-  __Pyx_XDECREF(__pyx_v_s1);
-  __Pyx_XDECREF(__pyx_v_s2);
-  __Pyx_XDECREF(__pyx_v_processor);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_TraceReturn(__pyx_r, 0);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "cpp_fuzz.pyx":529
+/* "cpp_fuzz.pyx":427
  * 
  * 
  * def WRatio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
@@ -6804,13 +5444,13 @@ static PyObject *__pyx_pf_8cpp_fuzz_32__defaults__(CYTHON_UNUSED PyObject *__pyx
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__defaults__", 0);
-  __Pyx_TraceCall("__defaults__", __pyx_f[0], 529, 0, __PYX_ERR(0, 529, __pyx_L1_error));
+  __Pyx_TraceCall("__defaults__", __pyx_f[0], 427, 0, __PYX_ERR(0, 427, __pyx_L1_error));
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 529, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 427, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_processor, __Pyx_CyFunction_Defaults(__pyx_defaults6, __pyx_self)->__pyx_arg_processor) < 0) __PYX_ERR(0, 529, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_score_cutoff, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 529, __pyx_L1_error)
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 529, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_processor, __Pyx_CyFunction_Defaults(__pyx_defaults6, __pyx_self)->__pyx_arg_processor) < 0) __PYX_ERR(0, 427, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_score_cutoff, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 427, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 427, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(Py_None);
   __Pyx_GIVEREF(Py_None);
@@ -6890,14 +5530,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       switch (__pyx_nargs) {
         case  0:
         if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_s1)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 529, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 427, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
         if (likely((values[1] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_s2)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 529, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 427, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("WRatio", 1, 2, 2, 1); __PYX_ERR(0, 529, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("WRatio", 1, 2, 2, 1); __PYX_ERR(0, 427, __pyx_L3_error)
         }
       }
       if (kw_args > 0 && likely(kw_args <= 2)) {
@@ -6905,12 +5545,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         for (index = 2; index < 4 && kw_args > 0; index++) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, *__pyx_pyargnames[index]);
           if (value) { values[index] = value; kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 529, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 427, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "WRatio") < 0)) __PYX_ERR(0, 529, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "WRatio") < 0)) __PYX_ERR(0, 427, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 2)) {
       goto __pyx_L5_argtuple_error;
@@ -6925,7 +5565,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("WRatio", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 529, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("WRatio", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 427, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("cpp_fuzz.WRatio", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -6942,8 +5582,6 @@ static PyObject *__pyx_pf_8cpp_fuzz_16WRatio(CYTHON_UNUSED PyObject *__pyx_self,
   double __pyx_v_c_score_cutoff;
   RF_StringWrapper __pyx_v_s1_proc;
   RF_StringWrapper __pyx_v_s2_proc;
-  PyObject *__pyx_v_processor_capsule = NULL;
-  RF_Preprocess __pyx_v_preprocess_func;
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -6953,47 +5591,39 @@ static PyObject *__pyx_pf_8cpp_fuzz_16WRatio(CYTHON_UNUSED PyObject *__pyx_self,
   int __pyx_t_4;
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
-  void *__pyx_t_7;
-  bool __pyx_t_8;
-  PyObject *__pyx_t_9 = NULL;
-  PyObject *__pyx_t_10 = NULL;
-  int __pyx_t_11;
-  RF_String __pyx_t_12;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_TraceFrameInit(__pyx_codeobj__9)
   __Pyx_RefNannySetupContext("WRatio", 0);
-  __Pyx_TraceCall("WRatio", __pyx_f[0], 529, 0, __PYX_ERR(0, 529, __pyx_L1_error));
-  __Pyx_INCREF(__pyx_v_s1);
-  __Pyx_INCREF(__pyx_v_s2);
+  __Pyx_TraceCall("WRatio", __pyx_f[0], 427, 0, __PYX_ERR(0, 427, __pyx_L1_error));
   __Pyx_INCREF(__pyx_v_processor);
 
-  /* "cpp_fuzz.pyx":556
+  /* "cpp_fuzz.pyx":454
  *     .. image:: img/WRatio.svg
  *     """
  *     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff             # <<<<<<<<<<<<<<
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  */
-  __Pyx_TraceLine(556,0,__PYX_ERR(0, 556, __pyx_L1_error))
+  __Pyx_TraceLine(454,0,__PYX_ERR(0, 454, __pyx_L1_error))
   __pyx_t_2 = (__pyx_v_score_cutoff == Py_None);
   if ((__pyx_t_2 != 0)) {
     __pyx_t_1 = 0.0;
   } else {
-    __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 556, __pyx_L1_error)
+    __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 454, __pyx_L1_error)
     __pyx_t_1 = __pyx_t_3;
   }
   __pyx_v_c_score_cutoff = __pyx_t_1;
 
-  /* "cpp_fuzz.pyx":559
+  /* "cpp_fuzz.pyx":457
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  *     if s1 is None or s2 is None:             # <<<<<<<<<<<<<<
  *         return 0
  * 
  */
-  __Pyx_TraceLine(559,0,__PYX_ERR(0, 559, __pyx_L1_error))
+  __Pyx_TraceLine(457,0,__PYX_ERR(0, 457, __pyx_L1_error))
   __pyx_t_4 = (__pyx_v_s1 == Py_None);
   __pyx_t_5 = (__pyx_t_4 != 0);
   if (!__pyx_t_5) {
@@ -7007,20 +5637,20 @@ static PyObject *__pyx_pf_8cpp_fuzz_16WRatio(CYTHON_UNUSED PyObject *__pyx_self,
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_2) {
 
-    /* "cpp_fuzz.pyx":560
+    /* "cpp_fuzz.pyx":458
  * 
  *     if s1 is None or s2 is None:
  *         return 0             # <<<<<<<<<<<<<<
  * 
  *     if processor is True:
  */
-    __Pyx_TraceLine(560,0,__PYX_ERR(0, 560, __pyx_L1_error))
+    __Pyx_TraceLine(458,0,__PYX_ERR(0, 458, __pyx_L1_error))
     __Pyx_XDECREF(__pyx_r);
     __Pyx_INCREF(__pyx_int_0);
     __pyx_r = __pyx_int_0;
     goto __pyx_L0;
 
-    /* "cpp_fuzz.pyx":559
+    /* "cpp_fuzz.pyx":457
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  *     if s1 is None or s2 is None:             # <<<<<<<<<<<<<<
@@ -7029,32 +5659,32 @@ static PyObject *__pyx_pf_8cpp_fuzz_16WRatio(CYTHON_UNUSED PyObject *__pyx_self,
  */
   }
 
-  /* "cpp_fuzz.pyx":562
+  /* "cpp_fuzz.pyx":460
  *         return 0
  * 
  *     if processor is True:             # <<<<<<<<<<<<<<
  *         processor = default_process
  * 
  */
-  __Pyx_TraceLine(562,0,__PYX_ERR(0, 562, __pyx_L1_error))
+  __Pyx_TraceLine(460,0,__PYX_ERR(0, 460, __pyx_L1_error))
   __pyx_t_2 = (__pyx_v_processor == Py_True);
   __pyx_t_4 = (__pyx_t_2 != 0);
   if (__pyx_t_4) {
 
-    /* "cpp_fuzz.pyx":563
+    /* "cpp_fuzz.pyx":461
  * 
  *     if processor is True:
  *         processor = default_process             # <<<<<<<<<<<<<<
  * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
  */
-    __Pyx_TraceLine(563,0,__PYX_ERR(0, 563, __pyx_L1_error))
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_default_process); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 563, __pyx_L1_error)
+    __Pyx_TraceLine(461,0,__PYX_ERR(0, 461, __pyx_L1_error))
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_default_process); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 461, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF_SET(__pyx_v_processor, __pyx_t_6);
     __pyx_t_6 = 0;
 
-    /* "cpp_fuzz.pyx":562
+    /* "cpp_fuzz.pyx":460
  *         return 0
  * 
  *     if processor is True:             # <<<<<<<<<<<<<<
@@ -7063,226 +5693,38 @@ static PyObject *__pyx_pf_8cpp_fuzz_16WRatio(CYTHON_UNUSED PyObject *__pyx_self,
  */
   }
 
-  /* "cpp_fuzz.pyx":565
+  /* "cpp_fuzz.pyx":463
  *         processor = default_process
  * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)             # <<<<<<<<<<<<<<
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- */
-  __Pyx_TraceLine(565,0,__PYX_ERR(0, 565, __pyx_L1_error))
-  __pyx_t_6 = __Pyx_GetAttr3(__pyx_v_processor, __pyx_n_u_RF_Preprocess, __pyx_v_processor); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 565, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_6);
-  __pyx_v_processor_capsule = __pyx_t_6;
-  __pyx_t_6 = 0;
-
-  /* "cpp_fuzz.pyx":566
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):             # <<<<<<<<<<<<<<
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- */
-  __Pyx_TraceLine(566,0,__PYX_ERR(0, 566, __pyx_L1_error))
-  __pyx_t_4 = (PyCapsule_IsValid(__pyx_v_processor_capsule, NULL) != 0);
-  if (__pyx_t_4) {
-
-    /* "cpp_fuzz.pyx":567
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)             # <<<<<<<<<<<<<<
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- */
-    __Pyx_TraceLine(567,0,__PYX_ERR(0, 567, __pyx_L1_error))
-    __pyx_t_7 = PyCapsule_GetPointer(__pyx_v_processor_capsule, NULL); if (unlikely(__pyx_t_7 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 567, __pyx_L1_error)
-    __pyx_v_preprocess_func = ((RF_Preprocess)__pyx_t_7);
-
-    /* "cpp_fuzz.pyx":568
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)             # <<<<<<<<<<<<<<
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):
- */
-    __Pyx_TraceLine(568,0,__PYX_ERR(0, 568, __pyx_L1_error))
-    __pyx_t_8 = __pyx_v_preprocess_func(__pyx_v_s1, (&__pyx_v_s1_proc.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 568, __pyx_L1_error)
-
-    /* "cpp_fuzz.pyx":569
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)             # <<<<<<<<<<<<<<
- *     elif callable(processor):
- *         s1 = processor(s1)
- */
-    __Pyx_TraceLine(569,0,__PYX_ERR(0, 569, __pyx_L1_error))
-    __pyx_t_8 = __pyx_v_preprocess_func(__pyx_v_s2, (&__pyx_v_s2_proc.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 569, __pyx_L1_error)
-
-    /* "cpp_fuzz.pyx":566
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):             # <<<<<<<<<<<<<<
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- */
-    goto __pyx_L7;
-  }
-
-  /* "cpp_fuzz.pyx":570
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):             # <<<<<<<<<<<<<<
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- */
-  __Pyx_TraceLine(570,0,__PYX_ERR(0, 570, __pyx_L1_error))
-  __pyx_t_4 = __Pyx_PyCallable_Check(__pyx_v_processor); if (unlikely(__pyx_t_4 == ((int)-1))) __PYX_ERR(0, 570, __pyx_L1_error)
-  __pyx_t_2 = (__pyx_t_4 != 0);
-  if (__pyx_t_2) {
-
-    /* "cpp_fuzz.pyx":571
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):
- *         s1 = processor(s1)             # <<<<<<<<<<<<<<
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- */
-    __Pyx_TraceLine(571,0,__PYX_ERR(0, 571, __pyx_L1_error))
-    __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_9 = __pyx_v_processor; __pyx_t_10 = NULL;
-    __pyx_t_11 = 0;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
-      __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_9);
-      if (likely(__pyx_t_10)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_9);
-        __Pyx_INCREF(__pyx_t_10);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_9, function);
-        __pyx_t_11 = 1;
-      }
-    }
-    {
-      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_s1};
-      __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_9, __pyx_callargs+1-__pyx_t_11, 1+__pyx_t_11);
-      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 571, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    }
-    __Pyx_DECREF_SET(__pyx_v_s1, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":572
- *     elif callable(processor):
- *         s1 = processor(s1)
- *         s2 = processor(s2)             # <<<<<<<<<<<<<<
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- */
-    __Pyx_TraceLine(572,0,__PYX_ERR(0, 572, __pyx_L1_error))
-    __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_9 = __pyx_v_processor; __pyx_t_10 = NULL;
-    __pyx_t_11 = 0;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
-      __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_9);
-      if (likely(__pyx_t_10)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_9);
-        __Pyx_INCREF(__pyx_t_10);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_9, function);
-        __pyx_t_11 = 1;
-      }
-    }
-    {
-      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_s2};
-      __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_9, __pyx_callargs+1-__pyx_t_11, 1+__pyx_t_11);
-      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 572, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    }
-    __Pyx_DECREF_SET(__pyx_v_s2, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":573
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- *     else:
- */
-    __Pyx_TraceLine(573,0,__PYX_ERR(0, 573, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 573, __pyx_L1_error)
-    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":574
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- */
-    __Pyx_TraceLine(574,0,__PYX_ERR(0, 574, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 574, __pyx_L1_error)
-    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":570
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):             # <<<<<<<<<<<<<<
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- */
-    goto __pyx_L7;
-  }
-
-  /* "cpp_fuzz.pyx":576
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- * 
- */
-  __Pyx_TraceLine(576,0,__PYX_ERR(0, 576, __pyx_L1_error))
-  /*else*/ {
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 576, __pyx_L1_error)
-    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":577
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
- * 
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)             # <<<<<<<<<<<<<<
  *     return WRatio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
- */
-    __Pyx_TraceLine(577,0,__PYX_ERR(0, 577, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 577, __pyx_L1_error)
-    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_12);
-  }
-  __pyx_L7:;
-
-  /* "cpp_fuzz.pyx":579
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  * 
+ */
+  __Pyx_TraceLine(463,0,__PYX_ERR(0, 463, __pyx_L1_error))
+  __pyx_f_8cpp_fuzz_preprocess_strings(__pyx_v_s1, __pyx_v_s2, __pyx_v_processor, (&__pyx_v_s1_proc), (&__pyx_v_s2_proc)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 463, __pyx_L1_error)
+
+  /* "cpp_fuzz.pyx":464
+ * 
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
  *     return WRatio_func(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  * 
  * def QRatio(s1, s2, *, processor=default_process, score_cutoff=None):
  */
-  __Pyx_TraceLine(579,0,__PYX_ERR(0, 579, __pyx_L1_error))
+  __Pyx_TraceLine(464,0,__PYX_ERR(0, 464, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
   try {
     __pyx_t_1 = WRatio_func(__pyx_v_s1_proc.string, __pyx_v_s2_proc.string, __pyx_v_c_score_cutoff);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 579, __pyx_L1_error)
+    __PYX_ERR(0, 464, __pyx_L1_error)
   }
-  __pyx_t_6 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 579, __pyx_L1_error)
+  __pyx_t_6 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 464, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __pyx_r = __pyx_t_6;
   __pyx_t_6 = 0;
   goto __pyx_L0;
 
-  /* "cpp_fuzz.pyx":529
+  /* "cpp_fuzz.pyx":427
  * 
  * 
  * def WRatio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
@@ -7293,14 +5735,9 @@ static PyObject *__pyx_pf_8cpp_fuzz_16WRatio(CYTHON_UNUSED PyObject *__pyx_self,
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_XDECREF(__pyx_t_9);
-  __Pyx_XDECREF(__pyx_t_10);
   __Pyx_AddTraceback("cpp_fuzz.WRatio", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
-  __Pyx_XDECREF(__pyx_v_processor_capsule);
-  __Pyx_XDECREF(__pyx_v_s1);
-  __Pyx_XDECREF(__pyx_v_s2);
   __Pyx_XDECREF(__pyx_v_processor);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_TraceReturn(__pyx_r, 0);
@@ -7308,7 +5745,7 @@ static PyObject *__pyx_pf_8cpp_fuzz_16WRatio(CYTHON_UNUSED PyObject *__pyx_self,
   return __pyx_r;
 }
 
-/* "cpp_fuzz.pyx":581
+/* "cpp_fuzz.pyx":466
  *     return WRatio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
  * 
  * def QRatio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
@@ -7326,13 +5763,13 @@ static PyObject *__pyx_pf_8cpp_fuzz_34__defaults__(CYTHON_UNUSED PyObject *__pyx
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__defaults__", 0);
-  __Pyx_TraceCall("__defaults__", __pyx_f[0], 581, 0, __PYX_ERR(0, 581, __pyx_L1_error));
+  __Pyx_TraceCall("__defaults__", __pyx_f[0], 466, 0, __PYX_ERR(0, 466, __pyx_L1_error));
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 581, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 466, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_processor, __Pyx_CyFunction_Defaults(__pyx_defaults7, __pyx_self)->__pyx_arg_processor) < 0) __PYX_ERR(0, 581, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_score_cutoff, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 581, __pyx_L1_error)
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 581, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_processor, __Pyx_CyFunction_Defaults(__pyx_defaults7, __pyx_self)->__pyx_arg_processor) < 0) __PYX_ERR(0, 466, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_score_cutoff, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 466, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 466, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(Py_None);
   __Pyx_GIVEREF(Py_None);
@@ -7412,14 +5849,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       switch (__pyx_nargs) {
         case  0:
         if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_s1)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 581, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 466, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
         if (likely((values[1] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_s2)) != 0)) kw_args--;
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 581, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 466, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("QRatio", 1, 2, 2, 1); __PYX_ERR(0, 581, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("QRatio", 1, 2, 2, 1); __PYX_ERR(0, 466, __pyx_L3_error)
         }
       }
       if (kw_args > 0 && likely(kw_args <= 2)) {
@@ -7427,12 +5864,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         for (index = 2; index < 4 && kw_args > 0; index++) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, *__pyx_pyargnames[index]);
           if (value) { values[index] = value; kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 581, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 466, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "QRatio") < 0)) __PYX_ERR(0, 581, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "QRatio") < 0)) __PYX_ERR(0, 466, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 2)) {
       goto __pyx_L5_argtuple_error;
@@ -7447,7 +5884,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("QRatio", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 581, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("QRatio", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 466, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("cpp_fuzz.QRatio", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -7464,8 +5901,6 @@ static PyObject *__pyx_pf_8cpp_fuzz_18QRatio(CYTHON_UNUSED PyObject *__pyx_self,
   double __pyx_v_c_score_cutoff;
   RF_StringWrapper __pyx_v_s1_proc;
   RF_StringWrapper __pyx_v_s2_proc;
-  PyObject *__pyx_v_processor_capsule = NULL;
-  RF_Preprocess __pyx_v_preprocess_func;
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -7475,47 +5910,39 @@ static PyObject *__pyx_pf_8cpp_fuzz_18QRatio(CYTHON_UNUSED PyObject *__pyx_self,
   int __pyx_t_4;
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
-  void *__pyx_t_7;
-  bool __pyx_t_8;
-  PyObject *__pyx_t_9 = NULL;
-  PyObject *__pyx_t_10 = NULL;
-  int __pyx_t_11;
-  RF_String __pyx_t_12;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_TraceFrameInit(__pyx_codeobj__10)
   __Pyx_RefNannySetupContext("QRatio", 0);
-  __Pyx_TraceCall("QRatio", __pyx_f[0], 581, 0, __PYX_ERR(0, 581, __pyx_L1_error));
-  __Pyx_INCREF(__pyx_v_s1);
-  __Pyx_INCREF(__pyx_v_s2);
+  __Pyx_TraceCall("QRatio", __pyx_f[0], 466, 0, __PYX_ERR(0, 466, __pyx_L1_error));
   __Pyx_INCREF(__pyx_v_processor);
 
-  /* "cpp_fuzz.pyx":611
+  /* "cpp_fuzz.pyx":496
  *     100.0
  *     """
  *     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff             # <<<<<<<<<<<<<<
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  */
-  __Pyx_TraceLine(611,0,__PYX_ERR(0, 611, __pyx_L1_error))
+  __Pyx_TraceLine(496,0,__PYX_ERR(0, 496, __pyx_L1_error))
   __pyx_t_2 = (__pyx_v_score_cutoff == Py_None);
   if ((__pyx_t_2 != 0)) {
     __pyx_t_1 = 0.0;
   } else {
-    __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 611, __pyx_L1_error)
+    __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_score_cutoff); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 496, __pyx_L1_error)
     __pyx_t_1 = __pyx_t_3;
   }
   __pyx_v_c_score_cutoff = __pyx_t_1;
 
-  /* "cpp_fuzz.pyx":614
+  /* "cpp_fuzz.pyx":499
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  *     if s1 is None or s2 is None:             # <<<<<<<<<<<<<<
  *         return 0
  * 
  */
-  __Pyx_TraceLine(614,0,__PYX_ERR(0, 614, __pyx_L1_error))
+  __Pyx_TraceLine(499,0,__PYX_ERR(0, 499, __pyx_L1_error))
   __pyx_t_4 = (__pyx_v_s1 == Py_None);
   __pyx_t_5 = (__pyx_t_4 != 0);
   if (!__pyx_t_5) {
@@ -7529,20 +5956,20 @@ static PyObject *__pyx_pf_8cpp_fuzz_18QRatio(CYTHON_UNUSED PyObject *__pyx_self,
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_2) {
 
-    /* "cpp_fuzz.pyx":615
+    /* "cpp_fuzz.pyx":500
  * 
  *     if s1 is None or s2 is None:
  *         return 0             # <<<<<<<<<<<<<<
  * 
  *     if processor is True:
  */
-    __Pyx_TraceLine(615,0,__PYX_ERR(0, 615, __pyx_L1_error))
+    __Pyx_TraceLine(500,0,__PYX_ERR(0, 500, __pyx_L1_error))
     __Pyx_XDECREF(__pyx_r);
     __Pyx_INCREF(__pyx_int_0);
     __pyx_r = __pyx_int_0;
     goto __pyx_L0;
 
-    /* "cpp_fuzz.pyx":614
+    /* "cpp_fuzz.pyx":499
  *     cdef RF_StringWrapper s1_proc, s2_proc
  * 
  *     if s1 is None or s2 is None:             # <<<<<<<<<<<<<<
@@ -7551,32 +5978,32 @@ static PyObject *__pyx_pf_8cpp_fuzz_18QRatio(CYTHON_UNUSED PyObject *__pyx_self,
  */
   }
 
-  /* "cpp_fuzz.pyx":617
+  /* "cpp_fuzz.pyx":502
  *         return 0
  * 
  *     if processor is True:             # <<<<<<<<<<<<<<
  *         processor = default_process
  * 
  */
-  __Pyx_TraceLine(617,0,__PYX_ERR(0, 617, __pyx_L1_error))
+  __Pyx_TraceLine(502,0,__PYX_ERR(0, 502, __pyx_L1_error))
   __pyx_t_2 = (__pyx_v_processor == Py_True);
   __pyx_t_4 = (__pyx_t_2 != 0);
   if (__pyx_t_4) {
 
-    /* "cpp_fuzz.pyx":618
+    /* "cpp_fuzz.pyx":503
  * 
  *     if processor is True:
  *         processor = default_process             # <<<<<<<<<<<<<<
  * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
  */
-    __Pyx_TraceLine(618,0,__PYX_ERR(0, 618, __pyx_L1_error))
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_default_process); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 618, __pyx_L1_error)
+    __Pyx_TraceLine(503,0,__PYX_ERR(0, 503, __pyx_L1_error))
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_default_process); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 503, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF_SET(__pyx_v_processor, __pyx_t_6);
     __pyx_t_6 = 0;
 
-    /* "cpp_fuzz.pyx":617
+    /* "cpp_fuzz.pyx":502
  *         return 0
  * 
  *     if processor is True:             # <<<<<<<<<<<<<<
@@ -7585,226 +6012,38 @@ static PyObject *__pyx_pf_8cpp_fuzz_18QRatio(CYTHON_UNUSED PyObject *__pyx_self,
  */
   }
 
-  /* "cpp_fuzz.pyx":620
+  /* "cpp_fuzz.pyx":505
  *         processor = default_process
  * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)             # <<<<<<<<<<<<<<
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- */
-  __Pyx_TraceLine(620,0,__PYX_ERR(0, 620, __pyx_L1_error))
-  __pyx_t_6 = __Pyx_GetAttr3(__pyx_v_processor, __pyx_n_u_RF_Preprocess, __pyx_v_processor); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 620, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_6);
-  __pyx_v_processor_capsule = __pyx_t_6;
-  __pyx_t_6 = 0;
-
-  /* "cpp_fuzz.pyx":621
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):             # <<<<<<<<<<<<<<
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- */
-  __Pyx_TraceLine(621,0,__PYX_ERR(0, 621, __pyx_L1_error))
-  __pyx_t_4 = (PyCapsule_IsValid(__pyx_v_processor_capsule, NULL) != 0);
-  if (__pyx_t_4) {
-
-    /* "cpp_fuzz.pyx":622
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)             # <<<<<<<<<<<<<<
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- */
-    __Pyx_TraceLine(622,0,__PYX_ERR(0, 622, __pyx_L1_error))
-    __pyx_t_7 = PyCapsule_GetPointer(__pyx_v_processor_capsule, NULL); if (unlikely(__pyx_t_7 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 622, __pyx_L1_error)
-    __pyx_v_preprocess_func = ((RF_Preprocess)__pyx_t_7);
-
-    /* "cpp_fuzz.pyx":623
- *     if PyCapsule_IsValid(processor_capsule, NULL):
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)             # <<<<<<<<<<<<<<
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):
- */
-    __Pyx_TraceLine(623,0,__PYX_ERR(0, 623, __pyx_L1_error))
-    __pyx_t_8 = __pyx_v_preprocess_func(__pyx_v_s1, (&__pyx_v_s1_proc.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 623, __pyx_L1_error)
-
-    /* "cpp_fuzz.pyx":624
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)             # <<<<<<<<<<<<<<
- *     elif callable(processor):
- *         s1 = processor(s1)
- */
-    __Pyx_TraceLine(624,0,__PYX_ERR(0, 624, __pyx_L1_error))
-    __pyx_t_8 = __pyx_v_preprocess_func(__pyx_v_s2, (&__pyx_v_s2_proc.string)); if (unlikely(__pyx_t_8 == ((bool)0))) __PYX_ERR(0, 624, __pyx_L1_error)
-
-    /* "cpp_fuzz.pyx":621
- * 
- *     processor_capsule = getattr(processor, '_RF_Preprocess', processor)
- *     if PyCapsule_IsValid(processor_capsule, NULL):             # <<<<<<<<<<<<<<
- *         preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
- *         preprocess_func(s1, &s1_proc.string)
- */
-    goto __pyx_L7;
-  }
-
-  /* "cpp_fuzz.pyx":625
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):             # <<<<<<<<<<<<<<
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- */
-  __Pyx_TraceLine(625,0,__PYX_ERR(0, 625, __pyx_L1_error))
-  __pyx_t_4 = __Pyx_PyCallable_Check(__pyx_v_processor); if (unlikely(__pyx_t_4 == ((int)-1))) __PYX_ERR(0, 625, __pyx_L1_error)
-  __pyx_t_2 = (__pyx_t_4 != 0);
-  if (__pyx_t_2) {
-
-    /* "cpp_fuzz.pyx":626
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):
- *         s1 = processor(s1)             # <<<<<<<<<<<<<<
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- */
-    __Pyx_TraceLine(626,0,__PYX_ERR(0, 626, __pyx_L1_error))
-    __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_9 = __pyx_v_processor; __pyx_t_10 = NULL;
-    __pyx_t_11 = 0;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
-      __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_9);
-      if (likely(__pyx_t_10)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_9);
-        __Pyx_INCREF(__pyx_t_10);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_9, function);
-        __pyx_t_11 = 1;
-      }
-    }
-    {
-      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_s1};
-      __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_9, __pyx_callargs+1-__pyx_t_11, 1+__pyx_t_11);
-      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 626, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    }
-    __Pyx_DECREF_SET(__pyx_v_s1, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":627
- *     elif callable(processor):
- *         s1 = processor(s1)
- *         s2 = processor(s2)             # <<<<<<<<<<<<<<
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- */
-    __Pyx_TraceLine(627,0,__PYX_ERR(0, 627, __pyx_L1_error))
-    __Pyx_INCREF(__pyx_v_processor);
-    __pyx_t_9 = __pyx_v_processor; __pyx_t_10 = NULL;
-    __pyx_t_11 = 0;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
-      __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_9);
-      if (likely(__pyx_t_10)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_9);
-        __Pyx_INCREF(__pyx_t_10);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_9, function);
-        __pyx_t_11 = 1;
-      }
-    }
-    {
-      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_v_s2};
-      __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_9, __pyx_callargs+1-__pyx_t_11, 1+__pyx_t_11);
-      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 627, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    }
-    __Pyx_DECREF_SET(__pyx_v_s2, __pyx_t_6);
-    __pyx_t_6 = 0;
-
-    /* "cpp_fuzz.pyx":628
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- *     else:
- */
-    __Pyx_TraceLine(628,0,__PYX_ERR(0, 628, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 628, __pyx_L1_error)
-    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":629
- *         s2 = processor(s2)
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- */
-    __Pyx_TraceLine(629,0,__PYX_ERR(0, 629, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 629, __pyx_L1_error)
-    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":625
- *         preprocess_func(s1, &s1_proc.string)
- *         preprocess_func(s2, &s2_proc.string)
- *     elif callable(processor):             # <<<<<<<<<<<<<<
- *         s1 = processor(s1)
- *         s2 = processor(s2)
- */
-    goto __pyx_L7;
-  }
-
-  /* "cpp_fuzz.pyx":631
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))             # <<<<<<<<<<<<<<
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
- * 
- */
-  __Pyx_TraceLine(631,0,__PYX_ERR(0, 631, __pyx_L1_error))
-  /*else*/ {
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 631, __pyx_L1_error)
-    __pyx_v_s1_proc = RF_StringWrapper(__pyx_t_12);
-
-    /* "cpp_fuzz.pyx":632
- *     else:
- *         s1_proc = RF_StringWrapper(conv_sequence(s1))
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))             # <<<<<<<<<<<<<<
- * 
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)             # <<<<<<<<<<<<<<
  *     return QRatio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
- */
-    __Pyx_TraceLine(632,0,__PYX_ERR(0, 632, __pyx_L1_error))
-    __pyx_t_12 = __pyx_f_8cpp_fuzz_conv_sequence(__pyx_v_s2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 632, __pyx_L1_error)
-    __pyx_v_s2_proc = RF_StringWrapper(__pyx_t_12);
-  }
-  __pyx_L7:;
-
-  /* "cpp_fuzz.pyx":634
- *         s2_proc = RF_StringWrapper(conv_sequence(s2))
  * 
+ */
+  __Pyx_TraceLine(505,0,__PYX_ERR(0, 505, __pyx_L1_error))
+  __pyx_f_8cpp_fuzz_preprocess_strings(__pyx_v_s1, __pyx_v_s2, __pyx_v_processor, (&__pyx_v_s1_proc), (&__pyx_v_s2_proc)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 505, __pyx_L1_error)
+
+  /* "cpp_fuzz.pyx":506
+ * 
+ *     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
  *     return QRatio_func(s1_proc.string, s2_proc.string, c_score_cutoff)             # <<<<<<<<<<<<<<
  * 
  * cdef RF_Scorer RatioContext = CreateRatioFunctionTable()
  */
-  __Pyx_TraceLine(634,0,__PYX_ERR(0, 634, __pyx_L1_error))
+  __Pyx_TraceLine(506,0,__PYX_ERR(0, 506, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
   try {
     __pyx_t_1 = QRatio_func(__pyx_v_s1_proc.string, __pyx_v_s2_proc.string, __pyx_v_c_score_cutoff);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 634, __pyx_L1_error)
+    __PYX_ERR(0, 506, __pyx_L1_error)
   }
-  __pyx_t_6 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 634, __pyx_L1_error)
+  __pyx_t_6 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 506, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __pyx_r = __pyx_t_6;
   __pyx_t_6 = 0;
   goto __pyx_L0;
 
-  /* "cpp_fuzz.pyx":581
+  /* "cpp_fuzz.pyx":466
  *     return WRatio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
  * 
  * def QRatio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
@@ -7815,14 +6054,9 @@ static PyObject *__pyx_pf_8cpp_fuzz_18QRatio(CYTHON_UNUSED PyObject *__pyx_self,
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_XDECREF(__pyx_t_9);
-  __Pyx_XDECREF(__pyx_t_10);
   __Pyx_AddTraceback("cpp_fuzz.QRatio", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
-  __Pyx_XDECREF(__pyx_v_processor_capsule);
-  __Pyx_XDECREF(__pyx_v_s1);
-  __Pyx_XDECREF(__pyx_v_s2);
   __Pyx_XDECREF(__pyx_v_processor);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_TraceReturn(__pyx_r, 0);
@@ -7830,8 +6064,289 @@ static PyObject *__pyx_pf_8cpp_fuzz_18QRatio(CYTHON_UNUSED PyObject *__pyx_self,
   return __pyx_r;
 }
 
-/* "cpp_common.pxd":29
- *     RF_String default_process_func(RF_String sentence) except +
+/* "cpython/complex.pxd":19
+ * 
+ *         @property
+ *         cdef inline double real(self):             # <<<<<<<<<<<<<<
+ *             return self.cval.real
+ * 
+ */
+
+static CYTHON_INLINE double __pyx_f_7cpython_7complex_7complex_4real_real(PyComplexObject *__pyx_v_self) {
+  double __pyx_r;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("real", 0);
+
+  /* "cpython/complex.pxd":20
+ *         @property
+ *         cdef inline double real(self):
+ *             return self.cval.real             # <<<<<<<<<<<<<<
+ * 
+ *         @property
+ */
+  __pyx_r = __pyx_v_self->cval.real;
+  goto __pyx_L0;
+
+  /* "cpython/complex.pxd":19
+ * 
+ *         @property
+ *         cdef inline double real(self):             # <<<<<<<<<<<<<<
+ *             return self.cval.real
+ * 
+ */
+
+  /* function exit code */
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "cpython/complex.pxd":23
+ * 
+ *         @property
+ *         cdef inline double imag(self):             # <<<<<<<<<<<<<<
+ *             return self.cval.imag
+ * 
+ */
+
+static CYTHON_INLINE double __pyx_f_7cpython_7complex_7complex_4imag_imag(PyComplexObject *__pyx_v_self) {
+  double __pyx_r;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("imag", 0);
+
+  /* "cpython/complex.pxd":24
+ *         @property
+ *         cdef inline double imag(self):
+ *             return self.cval.imag             # <<<<<<<<<<<<<<
+ * 
+ *     # PyTypeObject PyComplex_Type
+ */
+  __pyx_r = __pyx_v_self->cval.imag;
+  goto __pyx_L0;
+
+  /* "cpython/complex.pxd":23
+ * 
+ *         @property
+ *         cdef inline double imag(self):             # <<<<<<<<<<<<<<
+ *             return self.cval.imag
+ * 
+ */
+
+  /* function exit code */
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "cpython/contextvars.pxd":112
+ * 
+ * 
+ * cdef inline object get_value(var, default_value=None):             # <<<<<<<<<<<<<<
+ *     """Return a new reference to the value of the context variable,
+ *     or the default value of the context variable,
+ */
+
+static CYTHON_INLINE PyObject *__pyx_f_7cpython_11contextvars_get_value(PyObject *__pyx_v_var, struct __pyx_opt_args_7cpython_11contextvars_get_value *__pyx_optional_args) {
+  PyObject *__pyx_v_default_value = ((PyObject *)Py_None);
+  PyObject *__pyx_v_value;
+  PyObject *__pyx_v_pyvalue = NULL;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  int __pyx_t_1;
+  int __pyx_t_2;
+  PyObject *__pyx_t_3 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("get_value", 0);
+  if (__pyx_optional_args) {
+    if (__pyx_optional_args->__pyx_n > 0) {
+      __pyx_v_default_value = __pyx_optional_args->default_value;
+    }
+  }
+
+  /* "cpython/contextvars.pxd":118
+ *     """
+ *     cdef PyObject *value
+ *     PyContextVar_Get(var, NULL, &value)             # <<<<<<<<<<<<<<
+ *     if value is NULL:
+ *         # context variable does not have a default
+ */
+  __pyx_t_1 = PyContextVar_Get(__pyx_v_var, NULL, (&__pyx_v_value)); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(1, 118, __pyx_L1_error)
+
+  /* "cpython/contextvars.pxd":119
+ *     cdef PyObject *value
+ *     PyContextVar_Get(var, NULL, &value)
+ *     if value is NULL:             # <<<<<<<<<<<<<<
+ *         # context variable does not have a default
+ *         pyvalue = default_value
+ */
+  __pyx_t_2 = ((__pyx_v_value == NULL) != 0);
+  if (__pyx_t_2) {
+
+    /* "cpython/contextvars.pxd":121
+ *     if value is NULL:
+ *         # context variable does not have a default
+ *         pyvalue = default_value             # <<<<<<<<<<<<<<
+ *     else:
+ *         # value or default value of context variable
+ */
+    __Pyx_INCREF(__pyx_v_default_value);
+    __pyx_v_pyvalue = __pyx_v_default_value;
+
+    /* "cpython/contextvars.pxd":119
+ *     cdef PyObject *value
+ *     PyContextVar_Get(var, NULL, &value)
+ *     if value is NULL:             # <<<<<<<<<<<<<<
+ *         # context variable does not have a default
+ *         pyvalue = default_value
+ */
+    goto __pyx_L3;
+  }
+
+  /* "cpython/contextvars.pxd":124
+ *     else:
+ *         # value or default value of context variable
+ *         pyvalue = <object>value             # <<<<<<<<<<<<<<
+ *         Py_XDECREF(value)  # PyContextVar_Get() returned an owned reference as 'PyObject*'
+ *     return pyvalue
+ */
+  /*else*/ {
+    __pyx_t_3 = ((PyObject *)__pyx_v_value);
+    __Pyx_INCREF(__pyx_t_3);
+    __pyx_v_pyvalue = __pyx_t_3;
+    __pyx_t_3 = 0;
+
+    /* "cpython/contextvars.pxd":125
+ *         # value or default value of context variable
+ *         pyvalue = <object>value
+ *         Py_XDECREF(value)  # PyContextVar_Get() returned an owned reference as 'PyObject*'             # <<<<<<<<<<<<<<
+ *     return pyvalue
+ * 
+ */
+    Py_XDECREF(__pyx_v_value);
+  }
+  __pyx_L3:;
+
+  /* "cpython/contextvars.pxd":126
+ *         pyvalue = <object>value
+ *         Py_XDECREF(value)  # PyContextVar_Get() returned an owned reference as 'PyObject*'
+ *     return pyvalue             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __Pyx_INCREF(__pyx_v_pyvalue);
+  __pyx_r = __pyx_v_pyvalue;
+  goto __pyx_L0;
+
+  /* "cpython/contextvars.pxd":112
+ * 
+ * 
+ * cdef inline object get_value(var, default_value=None):             # <<<<<<<<<<<<<<
+ *     """Return a new reference to the value of the context variable,
+ *     or the default value of the context variable,
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_AddTraceback("cpython.contextvars.get_value", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = 0;
+  __pyx_L0:;
+  __Pyx_XDECREF(__pyx_v_pyvalue);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "cpython/contextvars.pxd":129
+ * 
+ * 
+ * cdef inline object get_value_no_default(var, default_value=None):             # <<<<<<<<<<<<<<
+ *     """Return a new reference to the value of the context variable,
+ *     or the provided default value if no such value was found.
+ */
+
+static CYTHON_INLINE PyObject *__pyx_f_7cpython_11contextvars_get_value_no_default(PyObject *__pyx_v_var, struct __pyx_opt_args_7cpython_11contextvars_get_value_no_default *__pyx_optional_args) {
+  PyObject *__pyx_v_default_value = ((PyObject *)Py_None);
+  PyObject *__pyx_v_value;
+  PyObject *__pyx_v_pyvalue = NULL;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  int __pyx_t_1;
+  PyObject *__pyx_t_2 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("get_value_no_default", 0);
+  if (__pyx_optional_args) {
+    if (__pyx_optional_args->__pyx_n > 0) {
+      __pyx_v_default_value = __pyx_optional_args->default_value;
+    }
+  }
+
+  /* "cpython/contextvars.pxd":136
+ *     """
+ *     cdef PyObject *value
+ *     PyContextVar_Get(var, <PyObject*>default_value, &value)             # <<<<<<<<<<<<<<
+ *     # value of context variable or 'default_value'
+ *     pyvalue = <object>value
+ */
+  __pyx_t_1 = PyContextVar_Get(__pyx_v_var, ((PyObject *)__pyx_v_default_value), (&__pyx_v_value)); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(1, 136, __pyx_L1_error)
+
+  /* "cpython/contextvars.pxd":138
+ *     PyContextVar_Get(var, <PyObject*>default_value, &value)
+ *     # value of context variable or 'default_value'
+ *     pyvalue = <object>value             # <<<<<<<<<<<<<<
+ *     Py_XDECREF(value)  # PyContextVar_Get() returned an owned reference as 'PyObject*'
+ *     return pyvalue
+ */
+  __pyx_t_2 = ((PyObject *)__pyx_v_value);
+  __Pyx_INCREF(__pyx_t_2);
+  __pyx_v_pyvalue = __pyx_t_2;
+  __pyx_t_2 = 0;
+
+  /* "cpython/contextvars.pxd":139
+ *     # value of context variable or 'default_value'
+ *     pyvalue = <object>value
+ *     Py_XDECREF(value)  # PyContextVar_Get() returned an owned reference as 'PyObject*'             # <<<<<<<<<<<<<<
+ *     return pyvalue
+ */
+  Py_XDECREF(__pyx_v_value);
+
+  /* "cpython/contextvars.pxd":140
+ *     pyvalue = <object>value
+ *     Py_XDECREF(value)  # PyContextVar_Get() returned an owned reference as 'PyObject*'
+ *     return pyvalue             # <<<<<<<<<<<<<<
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __Pyx_INCREF(__pyx_v_pyvalue);
+  __pyx_r = __pyx_v_pyvalue;
+  goto __pyx_L0;
+
+  /* "cpython/contextvars.pxd":129
+ * 
+ * 
+ * cdef inline object get_value_no_default(var, default_value=None):             # <<<<<<<<<<<<<<
+ *     """Return a new reference to the value of the context variable,
+ *     or the provided default value if no such value was found.
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_AddTraceback("cpython.contextvars.get_value_no_default", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = 0;
+  __pyx_L0:;
+  __Pyx_XDECREF(__pyx_v_pyvalue);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "cpp_common.pxd":31
+ *     void validate_string(object py_str, const char* err) except +
  * 
  * cdef inline RF_String hash_array(arr) except *:             # <<<<<<<<<<<<<<
  *     # TODO on Cpython this does not require any copies
@@ -7873,30 +6388,30 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("hash_array", 0);
 
-  /* "cpp_common.pxd":32
+  /* "cpp_common.pxd":34
  *     # TODO on Cpython this does not require any copies
  *     cdef RF_String s_proc
  *     cdef Py_UCS4 typecode = <Py_UCS4>arr.typecode             # <<<<<<<<<<<<<<
  *     s_proc.length = <size_t>len(arr)
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_arr, __pyx_n_s_typecode); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 32, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_arr, __pyx_n_s_typecode); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 34, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_AsPy_UCS4(__pyx_t_1); if (unlikely((__pyx_t_2 == (Py_UCS4)-1) && PyErr_Occurred())) __PYX_ERR(1, 32, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_AsPy_UCS4(__pyx_t_1); if (unlikely((__pyx_t_2 == (Py_UCS4)-1) && PyErr_Occurred())) __PYX_ERR(2, 34, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_typecode = ((Py_UCS4)__pyx_t_2);
 
-  /* "cpp_common.pxd":33
+  /* "cpp_common.pxd":35
  *     cdef RF_String s_proc
  *     cdef Py_UCS4 typecode = <Py_UCS4>arr.typecode
  *     s_proc.length = <size_t>len(arr)             # <<<<<<<<<<<<<<
  * 
  *     s_proc.data = malloc(s_proc.length * sizeof(uint64_t))
  */
-  __pyx_t_3 = PyObject_Length(__pyx_v_arr); if (unlikely(__pyx_t_3 == ((Py_ssize_t)-1))) __PYX_ERR(1, 33, __pyx_L1_error)
+  __pyx_t_3 = PyObject_Length(__pyx_v_arr); if (unlikely(__pyx_t_3 == ((Py_ssize_t)-1))) __PYX_ERR(2, 35, __pyx_L1_error)
   __pyx_v_s_proc.length = ((size_t)__pyx_t_3);
 
-  /* "cpp_common.pxd":35
+  /* "cpp_common.pxd":37
  *     s_proc.length = <size_t>len(arr)
  * 
  *     s_proc.data = malloc(s_proc.length * sizeof(uint64_t))             # <<<<<<<<<<<<<<
@@ -7905,7 +6420,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  */
   __pyx_v_s_proc.data = malloc((__pyx_v_s_proc.length * (sizeof(uint64_t))));
 
-  /* "cpp_common.pxd":37
+  /* "cpp_common.pxd":39
  *     s_proc.data = malloc(s_proc.length * sizeof(uint64_t))
  * 
  *     if s_proc.data == NULL:             # <<<<<<<<<<<<<<
@@ -7915,16 +6430,16 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
   __pyx_t_4 = ((__pyx_v_s_proc.data == NULL) != 0);
   if (unlikely(__pyx_t_4)) {
 
-    /* "cpp_common.pxd":38
+    /* "cpp_common.pxd":40
  * 
  *     if s_proc.data == NULL:
  *         raise MemoryError             # <<<<<<<<<<<<<<
  * 
  *     try:
  */
-    PyErr_NoMemory(); __PYX_ERR(1, 38, __pyx_L1_error)
+    PyErr_NoMemory(); __PYX_ERR(2, 40, __pyx_L1_error)
 
-    /* "cpp_common.pxd":37
+    /* "cpp_common.pxd":39
  *     s_proc.data = malloc(s_proc.length * sizeof(uint64_t))
  * 
  *     if s_proc.data == NULL:             # <<<<<<<<<<<<<<
@@ -7933,7 +6448,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  */
   }
 
-  /* "cpp_common.pxd":40
+  /* "cpp_common.pxd":42
  *         raise MemoryError
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -7949,7 +6464,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
     __Pyx_XGOTREF(__pyx_t_7);
     /*try:*/ {
 
-      /* "cpp_common.pxd":42
+      /* "cpp_common.pxd":44
  *     try:
  *         # ignore signed/unsigned, since it is not relevant in any of the algorithms
  *         if typecode in {'b', 'B'}: # signed/unsigned char             # <<<<<<<<<<<<<<
@@ -7960,7 +6475,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
         case 98:
         case 66:
 
-        /* "cpp_common.pxd":43
+        /* "cpp_common.pxd":45
  *         # ignore signed/unsigned, since it is not relevant in any of the algorithms
  *         if typecode in {'b', 'B'}: # signed/unsigned char
  *             s_proc.kind = RF_StringType.RF_UINT64             # <<<<<<<<<<<<<<
@@ -7969,7 +6484,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  */
         __pyx_v_s_proc.kind = RF_UINT64;
 
-        /* "cpp_common.pxd":44
+        /* "cpp_common.pxd":46
  *         if typecode in {'b', 'B'}: # signed/unsigned char
  *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):             # <<<<<<<<<<<<<<
@@ -7981,21 +6496,21 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
         for (__pyx_t_10 = 0; __pyx_t_10 < __pyx_t_9; __pyx_t_10+=1) {
           __pyx_v_i = __pyx_t_10;
 
-          /* "cpp_common.pxd":45
+          /* "cpp_common.pxd":47
  *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]             # <<<<<<<<<<<<<<
  *         elif typecode == 'u': # 'u' wchar_t
  *             s_proc.kind = RF_StringType.RF_UINT64
  */
-          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 45, __pyx_L4_error)
+          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 47, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_11 = __Pyx_PyInt_As_uint64_t(__pyx_t_1); if (unlikely((__pyx_t_11 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 45, __pyx_L4_error)
+          __pyx_t_11 = __Pyx_PyInt_As_uint64_t(__pyx_t_1); if (unlikely((__pyx_t_11 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(2, 47, __pyx_L4_error)
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
           (((uint64_t *)__pyx_v_s_proc.data)[__pyx_v_i]) = ((uint64_t)__pyx_t_11);
         }
 
-        /* "cpp_common.pxd":42
+        /* "cpp_common.pxd":44
  *     try:
  *         # ignore signed/unsigned, since it is not relevant in any of the algorithms
  *         if typecode in {'b', 'B'}: # signed/unsigned char             # <<<<<<<<<<<<<<
@@ -8005,7 +6520,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
         break;
         case 0x75:
 
-        /* "cpp_common.pxd":47
+        /* "cpp_common.pxd":49
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode == 'u': # 'u' wchar_t
  *             s_proc.kind = RF_StringType.RF_UINT64             # <<<<<<<<<<<<<<
@@ -8014,7 +6529,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  */
         __pyx_v_s_proc.kind = RF_UINT64;
 
-        /* "cpp_common.pxd":48
+        /* "cpp_common.pxd":50
  *         elif typecode == 'u': # 'u' wchar_t
  *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):             # <<<<<<<<<<<<<<
@@ -8026,21 +6541,21 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
         for (__pyx_t_10 = 0; __pyx_t_10 < __pyx_t_9; __pyx_t_10+=1) {
           __pyx_v_i = __pyx_t_10;
 
-          /* "cpp_common.pxd":49
+          /* "cpp_common.pxd":51
  *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t><Py_UCS4>arr[i]             # <<<<<<<<<<<<<<
  *         elif typecode in {'h', 'H'}: #  signed/unsigned short
  *             s_proc.kind = RF_StringType.RF_UINT64
  */
-          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 49, __pyx_L4_error)
+          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 51, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_2 = __Pyx_PyObject_AsPy_UCS4(__pyx_t_1); if (unlikely((__pyx_t_2 == (Py_UCS4)-1) && PyErr_Occurred())) __PYX_ERR(1, 49, __pyx_L4_error)
+          __pyx_t_2 = __Pyx_PyObject_AsPy_UCS4(__pyx_t_1); if (unlikely((__pyx_t_2 == (Py_UCS4)-1) && PyErr_Occurred())) __PYX_ERR(2, 51, __pyx_L4_error)
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
           (((uint64_t *)__pyx_v_s_proc.data)[__pyx_v_i]) = ((uint64_t)((Py_UCS4)__pyx_t_2));
         }
 
-        /* "cpp_common.pxd":46
+        /* "cpp_common.pxd":48
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode == 'u': # 'u' wchar_t             # <<<<<<<<<<<<<<
@@ -8050,7 +6565,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
         break;
         case 0x68:
 
-        /* "cpp_common.pxd":50
+        /* "cpp_common.pxd":52
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t><Py_UCS4>arr[i]
  *         elif typecode in {'h', 'H'}: #  signed/unsigned short             # <<<<<<<<<<<<<<
@@ -8059,7 +6574,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  */
         case 72:
 
-        /* "cpp_common.pxd":51
+        /* "cpp_common.pxd":53
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t><Py_UCS4>arr[i]
  *         elif typecode in {'h', 'H'}: #  signed/unsigned short
  *             s_proc.kind = RF_StringType.RF_UINT64             # <<<<<<<<<<<<<<
@@ -8068,7 +6583,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  */
         __pyx_v_s_proc.kind = RF_UINT64;
 
-        /* "cpp_common.pxd":52
+        /* "cpp_common.pxd":54
  *         elif typecode in {'h', 'H'}: #  signed/unsigned short
  *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):             # <<<<<<<<<<<<<<
@@ -8080,21 +6595,21 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
         for (__pyx_t_10 = 0; __pyx_t_10 < __pyx_t_9; __pyx_t_10+=1) {
           __pyx_v_i = __pyx_t_10;
 
-          /* "cpp_common.pxd":53
+          /* "cpp_common.pxd":55
  *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]             # <<<<<<<<<<<<<<
  *         elif typecode in {'i', 'I'}: # signed/unsigned int
  *             s_proc.kind = RF_StringType.RF_UINT64
  */
-          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 53, __pyx_L4_error)
+          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 55, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_11 = __Pyx_PyInt_As_uint64_t(__pyx_t_1); if (unlikely((__pyx_t_11 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 53, __pyx_L4_error)
+          __pyx_t_11 = __Pyx_PyInt_As_uint64_t(__pyx_t_1); if (unlikely((__pyx_t_11 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(2, 55, __pyx_L4_error)
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
           (((uint64_t *)__pyx_v_s_proc.data)[__pyx_v_i]) = ((uint64_t)__pyx_t_11);
         }
 
-        /* "cpp_common.pxd":50
+        /* "cpp_common.pxd":52
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t><Py_UCS4>arr[i]
  *         elif typecode in {'h', 'H'}: #  signed/unsigned short             # <<<<<<<<<<<<<<
@@ -8104,7 +6619,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
         break;
         case 0x69:
 
-        /* "cpp_common.pxd":54
+        /* "cpp_common.pxd":56
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode in {'i', 'I'}: # signed/unsigned int             # <<<<<<<<<<<<<<
@@ -8113,7 +6628,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  */
         case 73:
 
-        /* "cpp_common.pxd":55
+        /* "cpp_common.pxd":57
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode in {'i', 'I'}: # signed/unsigned int
  *             s_proc.kind = RF_StringType.RF_UINT64             # <<<<<<<<<<<<<<
@@ -8122,7 +6637,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  */
         __pyx_v_s_proc.kind = RF_UINT64;
 
-        /* "cpp_common.pxd":56
+        /* "cpp_common.pxd":58
  *         elif typecode in {'i', 'I'}: # signed/unsigned int
  *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):             # <<<<<<<<<<<<<<
@@ -8134,21 +6649,21 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
         for (__pyx_t_10 = 0; __pyx_t_10 < __pyx_t_9; __pyx_t_10+=1) {
           __pyx_v_i = __pyx_t_10;
 
-          /* "cpp_common.pxd":57
+          /* "cpp_common.pxd":59
  *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]             # <<<<<<<<<<<<<<
  *         elif typecode in {'l', 'L'}: # signed/unsigned long
  *             s_proc.kind = RF_StringType.RF_UINT64
  */
-          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 57, __pyx_L4_error)
+          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 59, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_11 = __Pyx_PyInt_As_uint64_t(__pyx_t_1); if (unlikely((__pyx_t_11 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 57, __pyx_L4_error)
+          __pyx_t_11 = __Pyx_PyInt_As_uint64_t(__pyx_t_1); if (unlikely((__pyx_t_11 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(2, 59, __pyx_L4_error)
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
           (((uint64_t *)__pyx_v_s_proc.data)[__pyx_v_i]) = ((uint64_t)__pyx_t_11);
         }
 
-        /* "cpp_common.pxd":54
+        /* "cpp_common.pxd":56
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode in {'i', 'I'}: # signed/unsigned int             # <<<<<<<<<<<<<<
@@ -8158,7 +6673,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
         break;
         case 0x6C:
 
-        /* "cpp_common.pxd":58
+        /* "cpp_common.pxd":60
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode in {'l', 'L'}: # signed/unsigned long             # <<<<<<<<<<<<<<
@@ -8167,7 +6682,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  */
         case 76:
 
-        /* "cpp_common.pxd":59
+        /* "cpp_common.pxd":61
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode in {'l', 'L'}: # signed/unsigned long
  *             s_proc.kind = RF_StringType.RF_UINT64             # <<<<<<<<<<<<<<
@@ -8176,7 +6691,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  */
         __pyx_v_s_proc.kind = RF_UINT64;
 
-        /* "cpp_common.pxd":60
+        /* "cpp_common.pxd":62
  *         elif typecode in {'l', 'L'}: # signed/unsigned long
  *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):             # <<<<<<<<<<<<<<
@@ -8188,21 +6703,21 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
         for (__pyx_t_10 = 0; __pyx_t_10 < __pyx_t_9; __pyx_t_10+=1) {
           __pyx_v_i = __pyx_t_10;
 
-          /* "cpp_common.pxd":61
+          /* "cpp_common.pxd":63
  *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]             # <<<<<<<<<<<<<<
  *         elif typecode in {'q', 'Q'}: # signed/unsigned long long
  *             s_proc.kind = RF_StringType.RF_UINT64
  */
-          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 61, __pyx_L4_error)
+          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 63, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_11 = __Pyx_PyInt_As_uint64_t(__pyx_t_1); if (unlikely((__pyx_t_11 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 61, __pyx_L4_error)
+          __pyx_t_11 = __Pyx_PyInt_As_uint64_t(__pyx_t_1); if (unlikely((__pyx_t_11 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(2, 63, __pyx_L4_error)
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
           (((uint64_t *)__pyx_v_s_proc.data)[__pyx_v_i]) = ((uint64_t)__pyx_t_11);
         }
 
-        /* "cpp_common.pxd":58
+        /* "cpp_common.pxd":60
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode in {'l', 'L'}: # signed/unsigned long             # <<<<<<<<<<<<<<
@@ -8212,7 +6727,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
         break;
         case 0x71:
 
-        /* "cpp_common.pxd":62
+        /* "cpp_common.pxd":64
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode in {'q', 'Q'}: # signed/unsigned long long             # <<<<<<<<<<<<<<
@@ -8221,7 +6736,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  */
         case 81:
 
-        /* "cpp_common.pxd":63
+        /* "cpp_common.pxd":65
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode in {'q', 'Q'}: # signed/unsigned long long
  *             s_proc.kind = RF_StringType.RF_UINT64             # <<<<<<<<<<<<<<
@@ -8230,7 +6745,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  */
         __pyx_v_s_proc.kind = RF_UINT64;
 
-        /* "cpp_common.pxd":64
+        /* "cpp_common.pxd":66
  *         elif typecode in {'q', 'Q'}: # signed/unsigned long long
  *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):             # <<<<<<<<<<<<<<
@@ -8242,21 +6757,21 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
         for (__pyx_t_10 = 0; __pyx_t_10 < __pyx_t_9; __pyx_t_10+=1) {
           __pyx_v_i = __pyx_t_10;
 
-          /* "cpp_common.pxd":65
+          /* "cpp_common.pxd":67
  *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]             # <<<<<<<<<<<<<<
  *         else: # float/double are hashed
  *             s_proc.kind = RF_StringType.RF_UINT64
  */
-          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 65, __pyx_L4_error)
+          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 67, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_11 = __Pyx_PyInt_As_uint64_t(__pyx_t_1); if (unlikely((__pyx_t_11 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 65, __pyx_L4_error)
+          __pyx_t_11 = __Pyx_PyInt_As_uint64_t(__pyx_t_1); if (unlikely((__pyx_t_11 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(2, 67, __pyx_L4_error)
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
           (((uint64_t *)__pyx_v_s_proc.data)[__pyx_v_i]) = ((uint64_t)__pyx_t_11);
         }
 
-        /* "cpp_common.pxd":62
+        /* "cpp_common.pxd":64
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         elif typecode in {'q', 'Q'}: # signed/unsigned long long             # <<<<<<<<<<<<<<
@@ -8266,7 +6781,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
         break;
         default:
 
-        /* "cpp_common.pxd":67
+        /* "cpp_common.pxd":69
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
  *         else: # float/double are hashed
  *             s_proc.kind = RF_StringType.RF_UINT64             # <<<<<<<<<<<<<<
@@ -8275,7 +6790,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  */
         __pyx_v_s_proc.kind = RF_UINT64;
 
-        /* "cpp_common.pxd":68
+        /* "cpp_common.pxd":70
  *         else: # float/double are hashed
  *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):             # <<<<<<<<<<<<<<
@@ -8287,23 +6802,23 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
         for (__pyx_t_10 = 0; __pyx_t_10 < __pyx_t_9; __pyx_t_10+=1) {
           __pyx_v_i = __pyx_t_10;
 
-          /* "cpp_common.pxd":69
+          /* "cpp_common.pxd":71
  *             s_proc.kind = RF_StringType.RF_UINT64
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>hash(arr[i])             # <<<<<<<<<<<<<<
  *     except Exception as e:
  *         free(s_proc.data)
  */
-          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 69, __pyx_L4_error)
+          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 71, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_12 = PyObject_Hash(__pyx_t_1); if (unlikely(__pyx_t_12 == ((Py_hash_t)-1))) __PYX_ERR(1, 69, __pyx_L4_error)
+          __pyx_t_12 = PyObject_Hash(__pyx_t_1); if (unlikely(__pyx_t_12 == ((Py_hash_t)-1))) __PYX_ERR(2, 71, __pyx_L4_error)
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
           (((uint64_t *)__pyx_v_s_proc.data)[__pyx_v_i]) = ((uint64_t)__pyx_t_12);
         }
         break;
       }
 
-      /* "cpp_common.pxd":40
+      /* "cpp_common.pxd":42
  *         raise MemoryError
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -8318,7 +6833,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
     __pyx_L4_error:;
     __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "cpp_common.pxd":70
+    /* "cpp_common.pxd":72
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>hash(arr[i])
  *     except Exception as e:             # <<<<<<<<<<<<<<
@@ -8328,7 +6843,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
     __pyx_t_13 = __Pyx_PyErr_ExceptionMatches(((PyObject *)(&((PyTypeObject*)PyExc_Exception)[0])));
     if (__pyx_t_13) {
       __Pyx_AddTraceback("cpp_common.hash_array", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_1, &__pyx_t_14, &__pyx_t_15) < 0) __PYX_ERR(1, 70, __pyx_L6_except_error)
+      if (__Pyx_GetException(&__pyx_t_1, &__pyx_t_14, &__pyx_t_15) < 0) __PYX_ERR(2, 72, __pyx_L6_except_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_GOTREF(__pyx_t_14);
       __Pyx_GOTREF(__pyx_t_15);
@@ -8336,7 +6851,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
       __pyx_v_e = __pyx_t_14;
       /*try:*/ {
 
-        /* "cpp_common.pxd":71
+        /* "cpp_common.pxd":73
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>hash(arr[i])
  *     except Exception as e:
  *         free(s_proc.data)             # <<<<<<<<<<<<<<
@@ -8345,7 +6860,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  */
         free(__pyx_v_s_proc.data);
 
-        /* "cpp_common.pxd":72
+        /* "cpp_common.pxd":74
  *     except Exception as e:
  *         free(s_proc.data)
  *         s_proc.data = NULL             # <<<<<<<<<<<<<<
@@ -8354,7 +6869,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  */
         __pyx_v_s_proc.data = NULL;
 
-        /* "cpp_common.pxd":73
+        /* "cpp_common.pxd":75
  *         free(s_proc.data)
  *         s_proc.data = NULL
  *         raise             # <<<<<<<<<<<<<<
@@ -8366,10 +6881,10 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
         __Pyx_XGIVEREF(__pyx_t_15);
         __Pyx_ErrRestoreWithState(__pyx_t_1, __pyx_t_14, __pyx_t_15);
         __pyx_t_1 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; 
-        __PYX_ERR(1, 73, __pyx_L29_error)
+        __PYX_ERR(2, 75, __pyx_L29_error)
       }
 
-      /* "cpp_common.pxd":70
+      /* "cpp_common.pxd":72
  *             for i in range(s_proc.length):
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>hash(arr[i])
  *     except Exception as e:             # <<<<<<<<<<<<<<
@@ -8413,7 +6928,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
     goto __pyx_L6_except_error;
     __pyx_L6_except_error:;
 
-    /* "cpp_common.pxd":40
+    /* "cpp_common.pxd":42
  *         raise MemoryError
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -8428,7 +6943,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
     __pyx_L9_try_end:;
   }
 
-  /* "cpp_common.pxd":75
+  /* "cpp_common.pxd":77
  *         raise
  * 
  *     s_proc.dtor = default_string_deinit             # <<<<<<<<<<<<<<
@@ -8437,7 +6952,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  */
   __pyx_v_s_proc.dtor = default_string_deinit;
 
-  /* "cpp_common.pxd":76
+  /* "cpp_common.pxd":78
  * 
  *     s_proc.dtor = default_string_deinit
  *     return s_proc             # <<<<<<<<<<<<<<
@@ -8447,8 +6962,8 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
   __pyx_r = __pyx_v_s_proc;
   goto __pyx_L0;
 
-  /* "cpp_common.pxd":29
- *     RF_String default_process_func(RF_String sentence) except +
+  /* "cpp_common.pxd":31
+ *     void validate_string(object py_str, const char* err) except +
  * 
  * cdef inline RF_String hash_array(arr) except *:             # <<<<<<<<<<<<<<
  *     # TODO on Cpython this does not require any copies
@@ -8468,7 +6983,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
   return __pyx_r;
 }
 
-/* "cpp_common.pxd":79
+/* "cpp_common.pxd":81
  * 
  * 
  * cdef inline RF_String hash_sequence(seq) except *:             # <<<<<<<<<<<<<<
@@ -8512,17 +7027,17 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("hash_sequence", 0);
 
-  /* "cpp_common.pxd":81
+  /* "cpp_common.pxd":83
  * cdef inline RF_String hash_sequence(seq) except *:
  *     cdef RF_String s_proc
  *     s_proc.length = <size_t>len(seq)             # <<<<<<<<<<<<<<
  * 
  *     s_proc.data = malloc(s_proc.length * sizeof(uint64_t))
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_seq); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(1, 81, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_seq); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(2, 83, __pyx_L1_error)
   __pyx_v_s_proc.length = ((size_t)__pyx_t_1);
 
-  /* "cpp_common.pxd":83
+  /* "cpp_common.pxd":85
  *     s_proc.length = <size_t>len(seq)
  * 
  *     s_proc.data = malloc(s_proc.length * sizeof(uint64_t))             # <<<<<<<<<<<<<<
@@ -8531,7 +7046,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
  */
   __pyx_v_s_proc.data = malloc((__pyx_v_s_proc.length * (sizeof(uint64_t))));
 
-  /* "cpp_common.pxd":85
+  /* "cpp_common.pxd":87
  *     s_proc.data = malloc(s_proc.length * sizeof(uint64_t))
  * 
  *     if s_proc.data == NULL:             # <<<<<<<<<<<<<<
@@ -8541,16 +7056,16 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
   __pyx_t_2 = ((__pyx_v_s_proc.data == NULL) != 0);
   if (unlikely(__pyx_t_2)) {
 
-    /* "cpp_common.pxd":86
+    /* "cpp_common.pxd":88
  * 
  *     if s_proc.data == NULL:
  *         raise MemoryError             # <<<<<<<<<<<<<<
  * 
  *     try:
  */
-    PyErr_NoMemory(); __PYX_ERR(1, 86, __pyx_L1_error)
+    PyErr_NoMemory(); __PYX_ERR(2, 88, __pyx_L1_error)
 
-    /* "cpp_common.pxd":85
+    /* "cpp_common.pxd":87
  *     s_proc.data = malloc(s_proc.length * sizeof(uint64_t))
  * 
  *     if s_proc.data == NULL:             # <<<<<<<<<<<<<<
@@ -8559,7 +7074,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
  */
   }
 
-  /* "cpp_common.pxd":88
+  /* "cpp_common.pxd":90
  *         raise MemoryError
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -8575,7 +7090,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
     __Pyx_XGOTREF(__pyx_t_5);
     /*try:*/ {
 
-      /* "cpp_common.pxd":89
+      /* "cpp_common.pxd":91
  * 
  *     try:
  *         s_proc.kind = RF_StringType.RF_UINT64             # <<<<<<<<<<<<<<
@@ -8584,7 +7099,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
  */
       __pyx_v_s_proc.kind = RF_UINT64;
 
-      /* "cpp_common.pxd":90
+      /* "cpp_common.pxd":92
  *     try:
  *         s_proc.kind = RF_StringType.RF_UINT64
  *         for i in range(s_proc.length):             # <<<<<<<<<<<<<<
@@ -8596,19 +7111,19 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
       for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
         __pyx_v_i = __pyx_t_8;
 
-        /* "cpp_common.pxd":91
+        /* "cpp_common.pxd":93
  *         s_proc.kind = RF_StringType.RF_UINT64
  *         for i in range(s_proc.length):
  *             elem = seq[i]             # <<<<<<<<<<<<<<
  *             # this is required so e.g. a list of char can be compared to a string
  *             if isinstance(elem, str) and len(elem) == 1:
  */
-        __pyx_t_9 = __Pyx_GetItemInt(__pyx_v_seq, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 91, __pyx_L4_error)
+        __pyx_t_9 = __Pyx_GetItemInt(__pyx_v_seq, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_9)) __PYX_ERR(2, 93, __pyx_L4_error)
         __Pyx_GOTREF(__pyx_t_9);
         __Pyx_XDECREF_SET(__pyx_v_elem, __pyx_t_9);
         __pyx_t_9 = 0;
 
-        /* "cpp_common.pxd":93
+        /* "cpp_common.pxd":95
  *             elem = seq[i]
  *             # this is required so e.g. a list of char can be compared to a string
  *             if isinstance(elem, str) and len(elem) == 1:             # <<<<<<<<<<<<<<
@@ -8622,23 +7137,23 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
           __pyx_t_2 = __pyx_t_11;
           goto __pyx_L13_bool_binop_done;
         }
-        __pyx_t_1 = PyObject_Length(__pyx_v_elem); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(1, 93, __pyx_L4_error)
+        __pyx_t_1 = PyObject_Length(__pyx_v_elem); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(2, 95, __pyx_L4_error)
         __pyx_t_11 = ((__pyx_t_1 == 1) != 0);
         __pyx_t_2 = __pyx_t_11;
         __pyx_L13_bool_binop_done:;
         if (__pyx_t_2) {
 
-          /* "cpp_common.pxd":94
+          /* "cpp_common.pxd":96
  *             # this is required so e.g. a list of char can be compared to a string
  *             if isinstance(elem, str) and len(elem) == 1:
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t><Py_UCS4>elem             # <<<<<<<<<<<<<<
  *             else:
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>hash(elem)
  */
-          __pyx_t_12 = __Pyx_PyObject_AsPy_UCS4(__pyx_v_elem); if (unlikely((__pyx_t_12 == (Py_UCS4)-1) && PyErr_Occurred())) __PYX_ERR(1, 94, __pyx_L4_error)
+          __pyx_t_12 = __Pyx_PyObject_AsPy_UCS4(__pyx_v_elem); if (unlikely((__pyx_t_12 == (Py_UCS4)-1) && PyErr_Occurred())) __PYX_ERR(2, 96, __pyx_L4_error)
           (((uint64_t *)__pyx_v_s_proc.data)[__pyx_v_i]) = ((uint64_t)((Py_UCS4)__pyx_t_12));
 
-          /* "cpp_common.pxd":93
+          /* "cpp_common.pxd":95
  *             elem = seq[i]
  *             # this is required so e.g. a list of char can be compared to a string
  *             if isinstance(elem, str) and len(elem) == 1:             # <<<<<<<<<<<<<<
@@ -8648,7 +7163,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
           goto __pyx_L12;
         }
 
-        /* "cpp_common.pxd":96
+        /* "cpp_common.pxd":98
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t><Py_UCS4>elem
  *             else:
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>hash(elem)             # <<<<<<<<<<<<<<
@@ -8656,13 +7171,13 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
  *         free(s_proc.data)
  */
         /*else*/ {
-          __pyx_t_13 = PyObject_Hash(__pyx_v_elem); if (unlikely(__pyx_t_13 == ((Py_hash_t)-1))) __PYX_ERR(1, 96, __pyx_L4_error)
+          __pyx_t_13 = PyObject_Hash(__pyx_v_elem); if (unlikely(__pyx_t_13 == ((Py_hash_t)-1))) __PYX_ERR(2, 98, __pyx_L4_error)
           (((uint64_t *)__pyx_v_s_proc.data)[__pyx_v_i]) = ((uint64_t)__pyx_t_13);
         }
         __pyx_L12:;
       }
 
-      /* "cpp_common.pxd":88
+      /* "cpp_common.pxd":90
  *         raise MemoryError
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -8677,7 +7192,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
     __pyx_L4_error:;
     __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-    /* "cpp_common.pxd":97
+    /* "cpp_common.pxd":99
  *             else:
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>hash(elem)
  *     except Exception as e:             # <<<<<<<<<<<<<<
@@ -8687,7 +7202,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
     __pyx_t_14 = __Pyx_PyErr_ExceptionMatches(((PyObject *)(&((PyTypeObject*)PyExc_Exception)[0])));
     if (__pyx_t_14) {
       __Pyx_AddTraceback("cpp_common.hash_sequence", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_9, &__pyx_t_15, &__pyx_t_16) < 0) __PYX_ERR(1, 97, __pyx_L6_except_error)
+      if (__Pyx_GetException(&__pyx_t_9, &__pyx_t_15, &__pyx_t_16) < 0) __PYX_ERR(2, 99, __pyx_L6_except_error)
       __Pyx_GOTREF(__pyx_t_9);
       __Pyx_GOTREF(__pyx_t_15);
       __Pyx_GOTREF(__pyx_t_16);
@@ -8695,7 +7210,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
       __pyx_v_e = __pyx_t_15;
       /*try:*/ {
 
-        /* "cpp_common.pxd":98
+        /* "cpp_common.pxd":100
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>hash(elem)
  *     except Exception as e:
  *         free(s_proc.data)             # <<<<<<<<<<<<<<
@@ -8704,7 +7219,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
  */
         free(__pyx_v_s_proc.data);
 
-        /* "cpp_common.pxd":99
+        /* "cpp_common.pxd":101
  *     except Exception as e:
  *         free(s_proc.data)
  *         s_proc.data = NULL             # <<<<<<<<<<<<<<
@@ -8713,7 +7228,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
  */
         __pyx_v_s_proc.data = NULL;
 
-        /* "cpp_common.pxd":100
+        /* "cpp_common.pxd":102
  *         free(s_proc.data)
  *         s_proc.data = NULL
  *         raise             # <<<<<<<<<<<<<<
@@ -8725,10 +7240,10 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
         __Pyx_XGIVEREF(__pyx_t_16);
         __Pyx_ErrRestoreWithState(__pyx_t_9, __pyx_t_15, __pyx_t_16);
         __pyx_t_9 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0; 
-        __PYX_ERR(1, 100, __pyx_L20_error)
+        __PYX_ERR(2, 102, __pyx_L20_error)
       }
 
-      /* "cpp_common.pxd":97
+      /* "cpp_common.pxd":99
  *             else:
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>hash(elem)
  *     except Exception as e:             # <<<<<<<<<<<<<<
@@ -8772,7 +7287,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
     goto __pyx_L6_except_error;
     __pyx_L6_except_error:;
 
-    /* "cpp_common.pxd":88
+    /* "cpp_common.pxd":90
  *         raise MemoryError
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -8787,7 +7302,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
     __pyx_L9_try_end:;
   }
 
-  /* "cpp_common.pxd":102
+  /* "cpp_common.pxd":104
  *         raise
  * 
  *     s_proc.dtor = default_string_deinit             # <<<<<<<<<<<<<<
@@ -8796,7 +7311,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
  */
   __pyx_v_s_proc.dtor = default_string_deinit;
 
-  /* "cpp_common.pxd":103
+  /* "cpp_common.pxd":105
  * 
  *     s_proc.dtor = default_string_deinit
  *     return s_proc             # <<<<<<<<<<<<<<
@@ -8806,7 +7321,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
   __pyx_r = __pyx_v_s_proc;
   goto __pyx_L0;
 
-  /* "cpp_common.pxd":79
+  /* "cpp_common.pxd":81
  * 
  * 
  * cdef inline RF_String hash_sequence(seq) except *:             # <<<<<<<<<<<<<<
@@ -8828,7 +7343,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
   return __pyx_r;
 }
 
-/* "cpp_common.pxd":105
+/* "cpp_common.pxd":107
  *     return s_proc
  * 
  * cdef inline RF_KwargsWrapper KwargsInit(RF_Scorer scorer, dict kwargs) except *:             # <<<<<<<<<<<<<<
@@ -8850,7 +7365,7 @@ static CYTHON_INLINE RF_KwargsWrapper __pyx_f_10cpp_common_KwargsInit(RF_Scorer 
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("KwargsInit", 0);
 
-  /* "cpp_common.pxd":106
+  /* "cpp_common.pxd":108
  * 
  * cdef inline RF_KwargsWrapper KwargsInit(RF_Scorer scorer, dict kwargs) except *:
  *     cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()             # <<<<<<<<<<<<<<
@@ -8859,7 +7374,7 @@ static CYTHON_INLINE RF_KwargsWrapper __pyx_f_10cpp_common_KwargsInit(RF_Scorer 
  */
   __pyx_v_kwargs_context = RF_KwargsWrapper();
 
-  /* "cpp_common.pxd":107
+  /* "cpp_common.pxd":109
  * cdef inline RF_KwargsWrapper KwargsInit(RF_Scorer scorer, dict kwargs) except *:
  *     cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()
  *     if (NULL != scorer.kwargs_init):             # <<<<<<<<<<<<<<
@@ -8869,16 +7384,16 @@ static CYTHON_INLINE RF_KwargsWrapper __pyx_f_10cpp_common_KwargsInit(RF_Scorer 
   __pyx_t_1 = ((NULL != __pyx_v_scorer.kwargs_init) != 0);
   if (__pyx_t_1) {
 
-    /* "cpp_common.pxd":108
+    /* "cpp_common.pxd":110
  *     cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()
  *     if (NULL != scorer.kwargs_init):
  *         scorer.kwargs_init(&kwargs_context.kwargs, kwargs)             # <<<<<<<<<<<<<<
  *     elif len(kwargs):
  *         raise TypeError("Got unexpected keyword arguments: ", ", ".join(kwargs.keys()))
  */
-    __pyx_t_2 = __pyx_v_scorer.kwargs_init((&__pyx_v_kwargs_context.kwargs), __pyx_v_kwargs); if (unlikely(__pyx_t_2 == ((bool)0))) __PYX_ERR(1, 108, __pyx_L1_error)
+    __pyx_t_2 = __pyx_v_scorer.kwargs_init((&__pyx_v_kwargs_context.kwargs), __pyx_v_kwargs); if (unlikely(__pyx_t_2 == ((bool)0))) __PYX_ERR(2, 110, __pyx_L1_error)
 
-    /* "cpp_common.pxd":107
+    /* "cpp_common.pxd":109
  * cdef inline RF_KwargsWrapper KwargsInit(RF_Scorer scorer, dict kwargs) except *:
  *     cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()
  *     if (NULL != scorer.kwargs_init):             # <<<<<<<<<<<<<<
@@ -8888,7 +7403,7 @@ static CYTHON_INLINE RF_KwargsWrapper __pyx_f_10cpp_common_KwargsInit(RF_Scorer 
     goto __pyx_L3;
   }
 
-  /* "cpp_common.pxd":109
+  /* "cpp_common.pxd":111
  *     if (NULL != scorer.kwargs_init):
  *         scorer.kwargs_init(&kwargs_context.kwargs, kwargs)
  *     elif len(kwargs):             # <<<<<<<<<<<<<<
@@ -8897,13 +7412,13 @@ static CYTHON_INLINE RF_KwargsWrapper __pyx_f_10cpp_common_KwargsInit(RF_Scorer 
  */
   if (unlikely(__pyx_v_kwargs == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "object of type 'NoneType' has no len()");
-    __PYX_ERR(1, 109, __pyx_L1_error)
+    __PYX_ERR(2, 111, __pyx_L1_error)
   }
-  __pyx_t_3 = PyDict_Size(__pyx_v_kwargs); if (unlikely(__pyx_t_3 == ((Py_ssize_t)-1))) __PYX_ERR(1, 109, __pyx_L1_error)
+  __pyx_t_3 = PyDict_Size(__pyx_v_kwargs); if (unlikely(__pyx_t_3 == ((Py_ssize_t)-1))) __PYX_ERR(2, 111, __pyx_L1_error)
   __pyx_t_1 = (__pyx_t_3 != 0);
   if (unlikely(__pyx_t_1)) {
 
-    /* "cpp_common.pxd":110
+    /* "cpp_common.pxd":112
  *         scorer.kwargs_init(&kwargs_context.kwargs, kwargs)
  *     elif len(kwargs):
  *         raise TypeError("Got unexpected keyword arguments: ", ", ".join(kwargs.keys()))             # <<<<<<<<<<<<<<
@@ -8912,14 +7427,14 @@ static CYTHON_INLINE RF_KwargsWrapper __pyx_f_10cpp_common_KwargsInit(RF_Scorer 
  */
     if (unlikely(__pyx_v_kwargs == Py_None)) {
       PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "keys");
-      __PYX_ERR(1, 110, __pyx_L1_error)
+      __PYX_ERR(2, 112, __pyx_L1_error)
     }
-    __pyx_t_4 = __Pyx_PyDict_Keys(__pyx_v_kwargs); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 110, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyDict_Keys(__pyx_v_kwargs); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 112, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = PyUnicode_Join(__pyx_kp_u__11, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 110, __pyx_L1_error)
+    __pyx_t_5 = PyUnicode_Join(__pyx_kp_u__11, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(2, 112, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 110, __pyx_L1_error)
+    __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 112, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_INCREF(__pyx_kp_u_Got_unexpected_keyword_arguments);
     __Pyx_GIVEREF(__pyx_kp_u_Got_unexpected_keyword_arguments);
@@ -8927,14 +7442,14 @@ static CYTHON_INLINE RF_KwargsWrapper __pyx_f_10cpp_common_KwargsInit(RF_Scorer 
     __Pyx_GIVEREF(__pyx_t_5);
     PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_5);
     __pyx_t_5 = 0;
-    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_t_4, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 110, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_t_4, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(2, 112, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_Raise(__pyx_t_5, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __PYX_ERR(1, 110, __pyx_L1_error)
+    __PYX_ERR(2, 112, __pyx_L1_error)
 
-    /* "cpp_common.pxd":109
+    /* "cpp_common.pxd":111
  *     if (NULL != scorer.kwargs_init):
  *         scorer.kwargs_init(&kwargs_context.kwargs, kwargs)
  *     elif len(kwargs):             # <<<<<<<<<<<<<<
@@ -8944,7 +7459,7 @@ static CYTHON_INLINE RF_KwargsWrapper __pyx_f_10cpp_common_KwargsInit(RF_Scorer 
   }
   __pyx_L3:;
 
-  /* "cpp_common.pxd":112
+  /* "cpp_common.pxd":114
  *         raise TypeError("Got unexpected keyword arguments: ", ", ".join(kwargs.keys()))
  * 
  *     return move(kwargs_context)             # <<<<<<<<<<<<<<
@@ -8952,7 +7467,7 @@ static CYTHON_INLINE RF_KwargsWrapper __pyx_f_10cpp_common_KwargsInit(RF_Scorer 
   __pyx_r = cython_std::move<RF_KwargsWrapper>(__pyx_v_kwargs_context);
   goto __pyx_L0;
 
-  /* "cpp_common.pxd":105
+  /* "cpp_common.pxd":107
  *     return s_proc
  * 
  * cdef inline RF_KwargsWrapper KwargsInit(RF_Scorer scorer, dict kwargs) except *:             # <<<<<<<<<<<<<<
@@ -8993,7 +7508,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, __pyx_k_Got_unexpected_keyword_arguments, sizeof(__pyx_k_Got_unexpected_keyword_arguments), 0, 1, 0, 0},
   {0, __pyx_k_MemoryError, sizeof(__pyx_k_MemoryError), 0, 0, 1, 1},
   {0, __pyx_k_QRatio, sizeof(__pyx_k_QRatio), 0, 0, 1, 1},
-  {0, __pyx_k_QRatio_line_581, sizeof(__pyx_k_QRatio_line_581), 0, 1, 0, 0},
+  {0, __pyx_k_QRatio_line_466, sizeof(__pyx_k_QRatio_line_466), 0, 1, 0, 0},
   {0, __pyx_k_RF_Preprocess, sizeof(__pyx_k_RF_Preprocess), 0, 1, 0, 1},
   {0, __pyx_k_RF_Scorer, sizeof(__pyx_k_RF_Scorer), 0, 0, 1, 1},
   {0, __pyx_k_Searches_for_the_optimal_alignm, sizeof(__pyx_k_Searches_for_the_optimal_alignm), 0, 1, 0, 0},
@@ -9015,17 +7530,15 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {0, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
   {0, __pyx_k_partial_ratio, sizeof(__pyx_k_partial_ratio), 0, 0, 1, 1},
-  {0, __pyx_k_partial_ratio_line_104, sizeof(__pyx_k_partial_ratio_line_104), 0, 1, 0, 0},
+  {0, __pyx_k_partial_ratio_line_111, sizeof(__pyx_k_partial_ratio_line_111), 0, 1, 0, 0},
   {0, __pyx_k_partial_token_ratio, sizeof(__pyx_k_partial_token_ratio), 0, 0, 1, 1},
   {0, __pyx_k_partial_token_set_ratio, sizeof(__pyx_k_partial_token_set_ratio), 0, 0, 1, 1},
   {0, __pyx_k_partial_token_sort_ratio, sizeof(__pyx_k_partial_token_sort_ratio), 0, 0, 1, 1},
-  {0, __pyx_k_preprocess_func, sizeof(__pyx_k_preprocess_func), 0, 0, 1, 1},
   {0, __pyx_k_processor, sizeof(__pyx_k_processor), 0, 0, 1, 1},
-  {0, __pyx_k_processor_capsule, sizeof(__pyx_k_processor_capsule), 0, 0, 1, 1},
   {0, __pyx_k_range, sizeof(__pyx_k_range), 0, 0, 1, 1},
   {0, __pyx_k_rapidfuzz_utils, sizeof(__pyx_k_rapidfuzz_utils), 0, 0, 1, 1},
   {0, __pyx_k_ratio, sizeof(__pyx_k_ratio), 0, 0, 1, 1},
-  {0, __pyx_k_ratio_line_43, sizeof(__pyx_k_ratio_line_43), 0, 1, 0, 0},
+  {0, __pyx_k_ratio_line_65, sizeof(__pyx_k_ratio_line_65), 0, 1, 0, 0},
   {0, __pyx_k_s1, sizeof(__pyx_k_s1), 0, 0, 1, 1},
   {0, __pyx_k_s1_proc, sizeof(__pyx_k_s1_proc), 0, 0, 1, 1},
   {0, __pyx_k_s2, sizeof(__pyx_k_s2), 0, 0, 1, 1},
@@ -9034,9 +7547,9 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
   {0, __pyx_k_token_ratio, sizeof(__pyx_k_token_ratio), 0, 0, 1, 1},
   {0, __pyx_k_token_set_ratio, sizeof(__pyx_k_token_set_ratio), 0, 0, 1, 1},
-  {0, __pyx_k_token_set_ratio_line_253, sizeof(__pyx_k_token_set_ratio_line_253), 0, 1, 0, 0},
+  {0, __pyx_k_token_set_ratio_line_228, sizeof(__pyx_k_token_set_ratio_line_228), 0, 1, 0, 0},
   {0, __pyx_k_token_sort_ratio, sizeof(__pyx_k_token_sort_ratio), 0, 0, 1, 1},
-  {0, __pyx_k_token_sort_ratio_line_195, sizeof(__pyx_k_token_sort_ratio_line_195), 0, 1, 0, 0},
+  {0, __pyx_k_token_sort_ratio_line_186, sizeof(__pyx_k_token_sort_ratio_line_186), 0, 1, 0, 0},
   {0, __pyx_k_typecode, sizeof(__pyx_k_typecode), 0, 0, 1, 1},
   #else
   {&__pyx_kp_u_Calculates_a_quick_ratio_betwee, __pyx_k_Calculates_a_quick_ratio_betwee, sizeof(__pyx_k_Calculates_a_quick_ratio_betwee), 0, 1, 0, 0},
@@ -9045,7 +7558,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_u_Got_unexpected_keyword_arguments, __pyx_k_Got_unexpected_keyword_arguments, sizeof(__pyx_k_Got_unexpected_keyword_arguments), 0, 1, 0, 0},
   {&__pyx_n_s_MemoryError, __pyx_k_MemoryError, sizeof(__pyx_k_MemoryError), 0, 0, 1, 1},
   {&__pyx_n_s_QRatio, __pyx_k_QRatio, sizeof(__pyx_k_QRatio), 0, 0, 1, 1},
-  {&__pyx_kp_u_QRatio_line_581, __pyx_k_QRatio_line_581, sizeof(__pyx_k_QRatio_line_581), 0, 1, 0, 0},
+  {&__pyx_kp_u_QRatio_line_466, __pyx_k_QRatio_line_466, sizeof(__pyx_k_QRatio_line_466), 0, 1, 0, 0},
   {&__pyx_n_u_RF_Preprocess, __pyx_k_RF_Preprocess, sizeof(__pyx_k_RF_Preprocess), 0, 1, 0, 1},
   {&__pyx_n_s_RF_Scorer, __pyx_k_RF_Scorer, sizeof(__pyx_k_RF_Scorer), 0, 0, 1, 1},
   {&__pyx_kp_u_Searches_for_the_optimal_alignm, __pyx_k_Searches_for_the_optimal_alignm, sizeof(__pyx_k_Searches_for_the_optimal_alignm), 0, 1, 0, 0},
@@ -9067,17 +7580,15 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
   {&__pyx_n_s_partial_ratio, __pyx_k_partial_ratio, sizeof(__pyx_k_partial_ratio), 0, 0, 1, 1},
-  {&__pyx_kp_u_partial_ratio_line_104, __pyx_k_partial_ratio_line_104, sizeof(__pyx_k_partial_ratio_line_104), 0, 1, 0, 0},
+  {&__pyx_kp_u_partial_ratio_line_111, __pyx_k_partial_ratio_line_111, sizeof(__pyx_k_partial_ratio_line_111), 0, 1, 0, 0},
   {&__pyx_n_s_partial_token_ratio, __pyx_k_partial_token_ratio, sizeof(__pyx_k_partial_token_ratio), 0, 0, 1, 1},
   {&__pyx_n_s_partial_token_set_ratio, __pyx_k_partial_token_set_ratio, sizeof(__pyx_k_partial_token_set_ratio), 0, 0, 1, 1},
   {&__pyx_n_s_partial_token_sort_ratio, __pyx_k_partial_token_sort_ratio, sizeof(__pyx_k_partial_token_sort_ratio), 0, 0, 1, 1},
-  {&__pyx_n_s_preprocess_func, __pyx_k_preprocess_func, sizeof(__pyx_k_preprocess_func), 0, 0, 1, 1},
   {&__pyx_n_s_processor, __pyx_k_processor, sizeof(__pyx_k_processor), 0, 0, 1, 1},
-  {&__pyx_n_s_processor_capsule, __pyx_k_processor_capsule, sizeof(__pyx_k_processor_capsule), 0, 0, 1, 1},
   {&__pyx_n_s_range, __pyx_k_range, sizeof(__pyx_k_range), 0, 0, 1, 1},
   {&__pyx_n_s_rapidfuzz_utils, __pyx_k_rapidfuzz_utils, sizeof(__pyx_k_rapidfuzz_utils), 0, 0, 1, 1},
   {&__pyx_n_s_ratio, __pyx_k_ratio, sizeof(__pyx_k_ratio), 0, 0, 1, 1},
-  {&__pyx_kp_u_ratio_line_43, __pyx_k_ratio_line_43, sizeof(__pyx_k_ratio_line_43), 0, 1, 0, 0},
+  {&__pyx_kp_u_ratio_line_65, __pyx_k_ratio_line_65, sizeof(__pyx_k_ratio_line_65), 0, 1, 0, 0},
   {&__pyx_n_s_s1, __pyx_k_s1, sizeof(__pyx_k_s1), 0, 0, 1, 1},
   {&__pyx_n_s_s1_proc, __pyx_k_s1_proc, sizeof(__pyx_k_s1_proc), 0, 0, 1, 1},
   {&__pyx_n_s_s2, __pyx_k_s2, sizeof(__pyx_k_s2), 0, 0, 1, 1},
@@ -9086,18 +7597,18 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
   {&__pyx_n_s_token_ratio, __pyx_k_token_ratio, sizeof(__pyx_k_token_ratio), 0, 0, 1, 1},
   {&__pyx_n_s_token_set_ratio, __pyx_k_token_set_ratio, sizeof(__pyx_k_token_set_ratio), 0, 0, 1, 1},
-  {&__pyx_kp_u_token_set_ratio_line_253, __pyx_k_token_set_ratio_line_253, sizeof(__pyx_k_token_set_ratio_line_253), 0, 1, 0, 0},
+  {&__pyx_kp_u_token_set_ratio_line_228, __pyx_k_token_set_ratio_line_228, sizeof(__pyx_k_token_set_ratio_line_228), 0, 1, 0, 0},
   {&__pyx_n_s_token_sort_ratio, __pyx_k_token_sort_ratio, sizeof(__pyx_k_token_sort_ratio), 0, 0, 1, 1},
-  {&__pyx_kp_u_token_sort_ratio_line_195, __pyx_k_token_sort_ratio_line_195, sizeof(__pyx_k_token_sort_ratio_line_195), 0, 1, 0, 0},
+  {&__pyx_kp_u_token_sort_ratio_line_186, __pyx_k_token_sort_ratio_line_186, sizeof(__pyx_k_token_sort_ratio_line_186), 0, 1, 0, 0},
   {&__pyx_n_s_typecode, __pyx_k_typecode, sizeof(__pyx_k_typecode), 0, 0, 1, 1},
   #endif
   {0, 0, 0, 0, 0, 0, 0}
 };
 /* #### Code section: cached_builtins ### */
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(1, 38, __pyx_L1_error)
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(1, 44, __pyx_L1_error)
-  __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(1, 110, __pyx_L1_error)
+  __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(2, 40, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(2, 46, __pyx_L1_error)
+  __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(2, 112, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -9108,125 +7619,125 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "cpp_fuzz.pyx":43
- *     RF_Scorer CreateQRatioFunctionTable() except +
+  /* "cpp_fuzz.pyx":65
+ *         s2_proc[0] = RF_StringWrapper(conv_sequence(s2))
  * 
  * def ratio(s1, s2, *, processor=None, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
  *     Calculates the normalized InDel distance.
  */
-  __pyx_tuple__12 = PyTuple_Pack(9, __pyx_n_s_s1, __pyx_n_s_s2, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_c_score_cutoff, __pyx_n_s_s1_proc, __pyx_n_s_s2_proc, __pyx_n_s_processor_capsule, __pyx_n_s_preprocess_func); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(0, 43, __pyx_L1_error)
+  __pyx_tuple__12 = PyTuple_Pack(7, __pyx_n_s_s1, __pyx_n_s_s2, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_c_score_cutoff, __pyx_n_s_s1_proc, __pyx_n_s_s2_proc); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(0, 65, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__12);
   __Pyx_GIVEREF(__pyx_tuple__12);
-  __pyx_codeobj_ = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 9, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__12, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cpp_fuzz_pyx, __pyx_n_s_ratio, 43, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj_)) __PYX_ERR(0, 43, __pyx_L1_error)
+  __pyx_codeobj_ = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 7, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__12, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cpp_fuzz_pyx, __pyx_n_s_ratio, 65, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj_)) __PYX_ERR(0, 65, __pyx_L1_error)
 
-  /* "cpp_fuzz.pyx":104
- *     return ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+  /* "cpp_fuzz.pyx":111
+ * 
  * 
  * def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
  *     Searches for the optimal alignment of the shorter string in the
  */
-  __pyx_tuple__13 = PyTuple_Pack(9, __pyx_n_s_s1, __pyx_n_s_s2, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_c_score_cutoff, __pyx_n_s_s1_proc, __pyx_n_s_s2_proc, __pyx_n_s_processor_capsule, __pyx_n_s_preprocess_func); if (unlikely(!__pyx_tuple__13)) __PYX_ERR(0, 104, __pyx_L1_error)
+  __pyx_tuple__13 = PyTuple_Pack(7, __pyx_n_s_s1, __pyx_n_s_s2, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_c_score_cutoff, __pyx_n_s_s1_proc, __pyx_n_s_s2_proc); if (unlikely(!__pyx_tuple__13)) __PYX_ERR(0, 111, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__13);
   __Pyx_GIVEREF(__pyx_tuple__13);
-  __pyx_codeobj__2 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 9, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__13, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cpp_fuzz_pyx, __pyx_n_s_partial_ratio, 104, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__2)) __PYX_ERR(0, 104, __pyx_L1_error)
+  __pyx_codeobj__2 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 7, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__13, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cpp_fuzz_pyx, __pyx_n_s_partial_ratio, 111, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__2)) __PYX_ERR(0, 111, __pyx_L1_error)
 
-  /* "cpp_fuzz.pyx":195
+  /* "cpp_fuzz.pyx":186
  * 
  * 
  * def token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
  *     Sorts the words in the strings and calculates the fuzz.ratio between them
  */
-  __pyx_tuple__14 = PyTuple_Pack(9, __pyx_n_s_s1, __pyx_n_s_s2, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_c_score_cutoff, __pyx_n_s_s1_proc, __pyx_n_s_s2_proc, __pyx_n_s_processor_capsule, __pyx_n_s_preprocess_func); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(0, 195, __pyx_L1_error)
+  __pyx_tuple__14 = PyTuple_Pack(7, __pyx_n_s_s1, __pyx_n_s_s2, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_c_score_cutoff, __pyx_n_s_s1_proc, __pyx_n_s_s2_proc); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(0, 186, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__14);
   __Pyx_GIVEREF(__pyx_tuple__14);
-  __pyx_codeobj__3 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 9, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__14, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cpp_fuzz_pyx, __pyx_n_s_token_sort_ratio, 195, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__3)) __PYX_ERR(0, 195, __pyx_L1_error)
+  __pyx_codeobj__3 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 7, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__14, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cpp_fuzz_pyx, __pyx_n_s_token_sort_ratio, 186, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__3)) __PYX_ERR(0, 186, __pyx_L1_error)
 
-  /* "cpp_fuzz.pyx":253
+  /* "cpp_fuzz.pyx":228
  * 
  * 
  * def token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
  *     Compares the words in the strings based on unique and common words between them
  */
-  __pyx_tuple__15 = PyTuple_Pack(9, __pyx_n_s_s1, __pyx_n_s_s2, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_c_score_cutoff, __pyx_n_s_s1_proc, __pyx_n_s_s2_proc, __pyx_n_s_processor_capsule, __pyx_n_s_preprocess_func); if (unlikely(!__pyx_tuple__15)) __PYX_ERR(0, 253, __pyx_L1_error)
+  __pyx_tuple__15 = PyTuple_Pack(7, __pyx_n_s_s1, __pyx_n_s_s2, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_c_score_cutoff, __pyx_n_s_s1_proc, __pyx_n_s_s2_proc); if (unlikely(!__pyx_tuple__15)) __PYX_ERR(0, 228, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__15);
   __Pyx_GIVEREF(__pyx_tuple__15);
-  __pyx_codeobj__4 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 9, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__15, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cpp_fuzz_pyx, __pyx_n_s_token_set_ratio, 253, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__4)) __PYX_ERR(0, 253, __pyx_L1_error)
+  __pyx_codeobj__4 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 7, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__15, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cpp_fuzz_pyx, __pyx_n_s_token_set_ratio, 228, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__4)) __PYX_ERR(0, 228, __pyx_L1_error)
 
-  /* "cpp_fuzz.pyx":314
+  /* "cpp_fuzz.pyx":273
  * 
  * 
  * def token_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
  *     Helper method that returns the maximum of fuzz.token_set_ratio and fuzz.token_sort_ratio
  */
-  __pyx_tuple__16 = PyTuple_Pack(9, __pyx_n_s_s1, __pyx_n_s_s2, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_c_score_cutoff, __pyx_n_s_s1_proc, __pyx_n_s_s2_proc, __pyx_n_s_processor_capsule, __pyx_n_s_preprocess_func); if (unlikely(!__pyx_tuple__16)) __PYX_ERR(0, 314, __pyx_L1_error)
+  __pyx_tuple__16 = PyTuple_Pack(7, __pyx_n_s_s1, __pyx_n_s_s2, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_c_score_cutoff, __pyx_n_s_s1_proc, __pyx_n_s_s2_proc); if (unlikely(!__pyx_tuple__16)) __PYX_ERR(0, 273, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__16);
   __Pyx_GIVEREF(__pyx_tuple__16);
-  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 9, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__16, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cpp_fuzz_pyx, __pyx_n_s_token_ratio, 314, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(0, 314, __pyx_L1_error)
+  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 7, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__16, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cpp_fuzz_pyx, __pyx_n_s_token_ratio, 273, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(0, 273, __pyx_L1_error)
 
-  /* "cpp_fuzz.pyx":368
+  /* "cpp_fuzz.pyx":311
  * 
  * 
  * def partial_token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
  *     sorts the words in the strings and calculates the fuzz.partial_ratio between them
  */
-  __pyx_tuple__17 = PyTuple_Pack(9, __pyx_n_s_s1, __pyx_n_s_s2, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_c_score_cutoff, __pyx_n_s_s1_proc, __pyx_n_s_s2_proc, __pyx_n_s_processor_capsule, __pyx_n_s_preprocess_func); if (unlikely(!__pyx_tuple__17)) __PYX_ERR(0, 368, __pyx_L1_error)
+  __pyx_tuple__17 = PyTuple_Pack(7, __pyx_n_s_s1, __pyx_n_s_s2, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_c_score_cutoff, __pyx_n_s_s1_proc, __pyx_n_s_s2_proc); if (unlikely(!__pyx_tuple__17)) __PYX_ERR(0, 311, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__17);
   __Pyx_GIVEREF(__pyx_tuple__17);
-  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 9, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__17, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cpp_fuzz_pyx, __pyx_n_s_partial_token_sort_ratio, 368, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(0, 368, __pyx_L1_error)
+  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 7, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__17, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cpp_fuzz_pyx, __pyx_n_s_partial_token_sort_ratio, 311, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(0, 311, __pyx_L1_error)
 
-  /* "cpp_fuzz.pyx":421
+  /* "cpp_fuzz.pyx":348
  * 
  * 
  * def partial_token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
  *     Compares the words in the strings based on unique and common words between them
  */
-  __pyx_tuple__18 = PyTuple_Pack(9, __pyx_n_s_s1, __pyx_n_s_s2, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_c_score_cutoff, __pyx_n_s_s1_proc, __pyx_n_s_s2_proc, __pyx_n_s_processor_capsule, __pyx_n_s_preprocess_func); if (unlikely(!__pyx_tuple__18)) __PYX_ERR(0, 421, __pyx_L1_error)
+  __pyx_tuple__18 = PyTuple_Pack(7, __pyx_n_s_s1, __pyx_n_s_s2, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_c_score_cutoff, __pyx_n_s_s1_proc, __pyx_n_s_s2_proc); if (unlikely(!__pyx_tuple__18)) __PYX_ERR(0, 348, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__18);
   __Pyx_GIVEREF(__pyx_tuple__18);
-  __pyx_codeobj__7 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 9, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__18, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cpp_fuzz_pyx, __pyx_n_s_partial_token_set_ratio, 421, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__7)) __PYX_ERR(0, 421, __pyx_L1_error)
+  __pyx_codeobj__7 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 7, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__18, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cpp_fuzz_pyx, __pyx_n_s_partial_token_set_ratio, 348, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__7)) __PYX_ERR(0, 348, __pyx_L1_error)
 
-  /* "cpp_fuzz.pyx":475
+  /* "cpp_fuzz.pyx":389
  * 
  * 
  * def partial_token_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
  *     Helper method that returns the maximum of fuzz.partial_token_set_ratio and
  */
-  __pyx_tuple__19 = PyTuple_Pack(9, __pyx_n_s_s1, __pyx_n_s_s2, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_c_score_cutoff, __pyx_n_s_s1_proc, __pyx_n_s_s2_proc, __pyx_n_s_processor_capsule, __pyx_n_s_preprocess_func); if (unlikely(!__pyx_tuple__19)) __PYX_ERR(0, 475, __pyx_L1_error)
+  __pyx_tuple__19 = PyTuple_Pack(7, __pyx_n_s_s1, __pyx_n_s_s2, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_c_score_cutoff, __pyx_n_s_s1_proc, __pyx_n_s_s2_proc); if (unlikely(!__pyx_tuple__19)) __PYX_ERR(0, 389, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__19);
   __Pyx_GIVEREF(__pyx_tuple__19);
-  __pyx_codeobj__8 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 9, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__19, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cpp_fuzz_pyx, __pyx_n_s_partial_token_ratio, 475, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__8)) __PYX_ERR(0, 475, __pyx_L1_error)
+  __pyx_codeobj__8 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 7, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__19, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cpp_fuzz_pyx, __pyx_n_s_partial_token_ratio, 389, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__8)) __PYX_ERR(0, 389, __pyx_L1_error)
 
-  /* "cpp_fuzz.pyx":529
+  /* "cpp_fuzz.pyx":427
  * 
  * 
  * def WRatio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
  *     Calculates a weighted ratio based on the other ratio algorithms
  */
-  __pyx_tuple__20 = PyTuple_Pack(9, __pyx_n_s_s1, __pyx_n_s_s2, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_c_score_cutoff, __pyx_n_s_s1_proc, __pyx_n_s_s2_proc, __pyx_n_s_processor_capsule, __pyx_n_s_preprocess_func); if (unlikely(!__pyx_tuple__20)) __PYX_ERR(0, 529, __pyx_L1_error)
+  __pyx_tuple__20 = PyTuple_Pack(7, __pyx_n_s_s1, __pyx_n_s_s2, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_c_score_cutoff, __pyx_n_s_s1_proc, __pyx_n_s_s2_proc); if (unlikely(!__pyx_tuple__20)) __PYX_ERR(0, 427, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__20);
   __Pyx_GIVEREF(__pyx_tuple__20);
-  __pyx_codeobj__9 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 9, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__20, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cpp_fuzz_pyx, __pyx_n_s_WRatio, 529, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__9)) __PYX_ERR(0, 529, __pyx_L1_error)
+  __pyx_codeobj__9 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 7, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__20, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cpp_fuzz_pyx, __pyx_n_s_WRatio, 427, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__9)) __PYX_ERR(0, 427, __pyx_L1_error)
 
-  /* "cpp_fuzz.pyx":581
+  /* "cpp_fuzz.pyx":466
  *     return WRatio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
  * 
  * def QRatio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
  *     Calculates a quick ratio between two strings using fuzz.ratio.
  */
-  __pyx_tuple__21 = PyTuple_Pack(9, __pyx_n_s_s1, __pyx_n_s_s2, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_c_score_cutoff, __pyx_n_s_s1_proc, __pyx_n_s_s2_proc, __pyx_n_s_processor_capsule, __pyx_n_s_preprocess_func); if (unlikely(!__pyx_tuple__21)) __PYX_ERR(0, 581, __pyx_L1_error)
+  __pyx_tuple__21 = PyTuple_Pack(7, __pyx_n_s_s1, __pyx_n_s_s2, __pyx_n_s_processor, __pyx_n_s_score_cutoff, __pyx_n_s_c_score_cutoff, __pyx_n_s_s1_proc, __pyx_n_s_s2_proc); if (unlikely(!__pyx_tuple__21)) __PYX_ERR(0, 466, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__21);
   __Pyx_GIVEREF(__pyx_tuple__21);
-  __pyx_codeobj__10 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 9, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__21, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cpp_fuzz_pyx, __pyx_n_s_QRatio, 581, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__10)) __PYX_ERR(0, 581, __pyx_L1_error)
+  __pyx_codeobj__10 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 7, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__21, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cpp_fuzz_pyx, __pyx_n_s_QRatio, 466, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__10)) __PYX_ERR(0, 466, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -9245,7 +7756,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitGlobals(void) {
   if (__Pyx_InitString(__pyx_string_tab[3], &__pyx_kp_u_Got_unexpected_keyword_arguments) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   if (__Pyx_InitString(__pyx_string_tab[4], &__pyx_n_s_MemoryError) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   if (__Pyx_InitString(__pyx_string_tab[5], &__pyx_n_s_QRatio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[6], &__pyx_kp_u_QRatio_line_581) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[6], &__pyx_kp_u_QRatio_line_466) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   if (__Pyx_InitString(__pyx_string_tab[7], &__pyx_n_u_RF_Preprocess) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   if (__Pyx_InitString(__pyx_string_tab[8], &__pyx_n_s_RF_Scorer) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   if (__Pyx_InitString(__pyx_string_tab[9], &__pyx_kp_u_Searches_for_the_optimal_alignm) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
@@ -9267,29 +7778,27 @@ static CYTHON_SMALL_CODE int __Pyx_InitGlobals(void) {
   if (__Pyx_InitString(__pyx_string_tab[25], &__pyx_n_s_main) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   if (__Pyx_InitString(__pyx_string_tab[26], &__pyx_n_s_name) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   if (__Pyx_InitString(__pyx_string_tab[27], &__pyx_n_s_partial_ratio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[28], &__pyx_kp_u_partial_ratio_line_104) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[28], &__pyx_kp_u_partial_ratio_line_111) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   if (__Pyx_InitString(__pyx_string_tab[29], &__pyx_n_s_partial_token_ratio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   if (__Pyx_InitString(__pyx_string_tab[30], &__pyx_n_s_partial_token_set_ratio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   if (__Pyx_InitString(__pyx_string_tab[31], &__pyx_n_s_partial_token_sort_ratio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[32], &__pyx_n_s_preprocess_func) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[33], &__pyx_n_s_processor) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[34], &__pyx_n_s_processor_capsule) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[35], &__pyx_n_s_range) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[36], &__pyx_n_s_rapidfuzz_utils) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[37], &__pyx_n_s_ratio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[38], &__pyx_kp_u_ratio_line_43) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[39], &__pyx_n_s_s1) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[40], &__pyx_n_s_s1_proc) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[41], &__pyx_n_s_s2) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[42], &__pyx_n_s_s2_proc) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[43], &__pyx_n_s_score_cutoff) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[44], &__pyx_n_s_test) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[45], &__pyx_n_s_token_ratio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[46], &__pyx_n_s_token_set_ratio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[47], &__pyx_kp_u_token_set_ratio_line_253) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[48], &__pyx_n_s_token_sort_ratio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[49], &__pyx_kp_u_token_sort_ratio_line_195) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[50], &__pyx_n_s_typecode) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[32], &__pyx_n_s_processor) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[33], &__pyx_n_s_range) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[34], &__pyx_n_s_rapidfuzz_utils) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[35], &__pyx_n_s_ratio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[36], &__pyx_kp_u_ratio_line_65) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[37], &__pyx_n_s_s1) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[38], &__pyx_n_s_s1_proc) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[39], &__pyx_n_s_s2) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[40], &__pyx_n_s_s2_proc) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[41], &__pyx_n_s_score_cutoff) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[42], &__pyx_n_s_test) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[43], &__pyx_n_s_token_ratio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[44], &__pyx_n_s_token_set_ratio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[45], &__pyx_kp_u_token_set_ratio_line_228) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[46], &__pyx_n_s_token_sort_ratio) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[47], &__pyx_kp_u_token_sort_ratio_line_186) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[48], &__pyx_n_s_typecode) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   #endif
   #if !CYTHON_USE_MODULE_STATE
   if (__Pyx_InitStrings(__pyx_string_tab) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
@@ -9343,10 +7852,41 @@ static int __Pyx_modinit_type_init_code(void) {
 
 static int __Pyx_modinit_type_import_code(void) {
   __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_import_code", 0);
   /*--- Type import code ---*/
+  __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 9, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_ptype_7cpython_4type_type = __Pyx_ImportType(__pyx_t_1, __Pyx_BUILTIN_MODULE_NAME, "type", 
+  #if defined(PYPY_VERSION_NUM) && PYPY_VERSION_NUM < 0x050B0000
+  sizeof(PyTypeObject),
+  #elif CYTHON_COMPILING_IN_LIMITED_API
+  sizeof(PyTypeObject),
+  #else
+  sizeof(PyHeapTypeObject),
+  #endif
+  __Pyx_ImportType_CheckSize_Warn);
+   if (!__pyx_ptype_7cpython_4type_type) __PYX_ERR(3, 9, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 8, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_ptype_7cpython_4bool_bool = __Pyx_ImportType(__pyx_t_1, __Pyx_BUILTIN_MODULE_NAME, "bool", sizeof(PyBoolObject), __Pyx_ImportType_CheckSize_Warn);
+   if (!__pyx_ptype_7cpython_4bool_bool) __PYX_ERR(4, 8, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 15, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_ptype_7cpython_7complex_complex = __Pyx_ImportType(__pyx_t_1, __Pyx_BUILTIN_MODULE_NAME, "complex", sizeof(PyComplexObject), __Pyx_ImportType_CheckSize_Warn);
+   if (!__pyx_ptype_7cpython_7complex_complex) __PYX_ERR(5, 15, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_RefNannyFinishContext();
   return 0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_RefNannyFinishContext();
+  return -1;
 }
 
 static int __Pyx_modinit_variable_import_code(void) {
@@ -9629,7 +8169,7 @@ if (!__Pyx_RefNanny) {
   (void)__Pyx_modinit_variable_export_code();
   (void)__Pyx_modinit_function_export_code();
   (void)__Pyx_modinit_type_init_code();
-  (void)__Pyx_modinit_type_import_code();
+  if (unlikely((__Pyx_modinit_type_import_code() < 0))) __PYX_ERR(0, 1, __pyx_L1_error)
   (void)__Pyx_modinit_variable_import_code();
   (void)__Pyx_modinit_function_import_code();
   /*--- Execution code ---*/
@@ -9682,528 +8222,538 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "cpp_fuzz.pyx":12
- * from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
+  /* "cpp_fuzz.pyx":39
+ *     RF_Scorer CreateQRatioFunctionTable() except +
  * 
  * cdef inline RF_String conv_sequence(seq) except *:             # <<<<<<<<<<<<<<
  *     if is_valid_string(seq):
  *         return convert_string(seq)
  */
-  __Pyx_TraceLine(12,0,__PYX_ERR(0, 12, __pyx_L1_error))
+  __Pyx_TraceLine(39,0,__PYX_ERR(0, 39, __pyx_L1_error))
 
 
-  /* "cpp_fuzz.pyx":43
- *     RF_Scorer CreateQRatioFunctionTable() except +
+  /* "cpp_fuzz.pyx":47
+ *         return hash_sequence(seq)
+ * 
+ * cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except *:             # <<<<<<<<<<<<<<
+ *     if processor is True:
+ *         processor = default_process
+ */
+  __Pyx_TraceLine(47,0,__PYX_ERR(0, 47, __pyx_L1_error))
+
+
+  /* "cpp_fuzz.pyx":65
+ *         s2_proc[0] = RF_StringWrapper(conv_sequence(s2))
  * 
  * def ratio(s1, s2, *, processor=None, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
  *     Calculates the normalized InDel distance.
  */
-  __Pyx_TraceLine(43,0,__PYX_ERR(0, 43, __pyx_L1_error))
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 43, __pyx_L1_error)
+  __Pyx_TraceLine(65,0,__PYX_ERR(0, 65, __pyx_L1_error))
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 65, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_processor, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 43, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_score_cutoff, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 43, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_8cpp_fuzz_1ratio, 0, __pyx_n_s_ratio, NULL, __pyx_n_s_cpp_fuzz, __pyx_d, ((PyObject *)__pyx_codeobj_)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 43, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_processor, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 65, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_score_cutoff, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 65, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_8cpp_fuzz_1ratio, 0, __pyx_n_s_ratio, NULL, __pyx_n_s_cpp_fuzz, __pyx_d, ((PyObject *)__pyx_codeobj_)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 65, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_CyFunction_SetDefaultsKwDict(__pyx_t_2, __pyx_t_1);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_ratio, __pyx_t_2) < 0) __PYX_ERR(0, 43, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_ratio, __pyx_t_2) < 0) __PYX_ERR(0, 65, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "cpp_fuzz.pyx":104
- *     return ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+  /* "cpp_fuzz.pyx":111
+ * 
  * 
  * def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
  *     Searches for the optimal alignment of the shorter string in the
  */
-  __Pyx_TraceLine(104,0,__PYX_ERR(0, 104, __pyx_L1_error))
-  __pyx_t_2 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 104, __pyx_L1_error)
+  __Pyx_TraceLine(111,0,__PYX_ERR(0, 111, __pyx_L1_error))
+  __pyx_t_2 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 111, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_processor, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 104, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_score_cutoff, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 104, __pyx_L1_error)
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_8cpp_fuzz_3partial_ratio, 0, __pyx_n_s_partial_ratio, NULL, __pyx_n_s_cpp_fuzz, __pyx_d, ((PyObject *)__pyx_codeobj__2)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 104, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_processor, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 111, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_score_cutoff, ((PyObject *)Py_None)) < 0) __PYX_ERR(0, 111, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_8cpp_fuzz_3partial_ratio, 0, __pyx_n_s_partial_ratio, NULL, __pyx_n_s_cpp_fuzz, __pyx_d, ((PyObject *)__pyx_codeobj__2)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 111, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_CyFunction_SetDefaultsKwDict(__pyx_t_1, __pyx_t_2);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_partial_ratio, __pyx_t_1) < 0) __PYX_ERR(0, 104, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_partial_ratio, __pyx_t_1) < 0) __PYX_ERR(0, 111, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "cpp_fuzz.pyx":195
+  /* "cpp_fuzz.pyx":186
  * 
  * 
  * def token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
  *     Sorts the words in the strings and calculates the fuzz.ratio between them
  */
-  __Pyx_TraceLine(195,0,__PYX_ERR(0, 195, __pyx_L1_error))
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_8cpp_fuzz_5token_sort_ratio, 0, __pyx_n_s_token_sort_ratio, NULL, __pyx_n_s_cpp_fuzz, __pyx_d, ((PyObject *)__pyx_codeobj__3)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 195, __pyx_L1_error)
+  __Pyx_TraceLine(186,0,__PYX_ERR(0, 186, __pyx_L1_error))
+  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_8cpp_fuzz_5token_sort_ratio, 0, __pyx_n_s_token_sort_ratio, NULL, __pyx_n_s_cpp_fuzz, __pyx_d, ((PyObject *)__pyx_codeobj__3)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 186, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_1, sizeof(__pyx_defaults), 1)) __PYX_ERR(0, 195, __pyx_L1_error)
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_default_process); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 195, __pyx_L1_error)
+  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_1, sizeof(__pyx_defaults), 1)) __PYX_ERR(0, 186, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_default_process); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 186, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_CyFunction_Defaults(__pyx_defaults, __pyx_t_1)->__pyx_arg_processor = __pyx_t_2;
   __Pyx_GIVEREF(__pyx_t_2);
   __pyx_t_2 = 0;
   __Pyx_CyFunction_SetDefaultsGetter(__pyx_t_1, __pyx_pf_8cpp_fuzz_20__defaults__);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_token_sort_ratio, __pyx_t_1) < 0) __PYX_ERR(0, 195, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_token_sort_ratio, __pyx_t_1) < 0) __PYX_ERR(0, 186, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "cpp_fuzz.pyx":253
+  /* "cpp_fuzz.pyx":228
  * 
  * 
  * def token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
  *     Compares the words in the strings based on unique and common words between them
  */
-  __Pyx_TraceLine(253,0,__PYX_ERR(0, 253, __pyx_L1_error))
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_8cpp_fuzz_7token_set_ratio, 0, __pyx_n_s_token_set_ratio, NULL, __pyx_n_s_cpp_fuzz, __pyx_d, ((PyObject *)__pyx_codeobj__4)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 253, __pyx_L1_error)
+  __Pyx_TraceLine(228,0,__PYX_ERR(0, 228, __pyx_L1_error))
+  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_8cpp_fuzz_7token_set_ratio, 0, __pyx_n_s_token_set_ratio, NULL, __pyx_n_s_cpp_fuzz, __pyx_d, ((PyObject *)__pyx_codeobj__4)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 228, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_1, sizeof(__pyx_defaults1), 1)) __PYX_ERR(0, 253, __pyx_L1_error)
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_default_process); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 253, __pyx_L1_error)
+  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_1, sizeof(__pyx_defaults1), 1)) __PYX_ERR(0, 228, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_default_process); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 228, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_CyFunction_Defaults(__pyx_defaults1, __pyx_t_1)->__pyx_arg_processor = __pyx_t_2;
   __Pyx_GIVEREF(__pyx_t_2);
   __pyx_t_2 = 0;
   __Pyx_CyFunction_SetDefaultsGetter(__pyx_t_1, __pyx_pf_8cpp_fuzz_22__defaults__);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_token_set_ratio, __pyx_t_1) < 0) __PYX_ERR(0, 253, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_token_set_ratio, __pyx_t_1) < 0) __PYX_ERR(0, 228, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "cpp_fuzz.pyx":314
+  /* "cpp_fuzz.pyx":273
  * 
  * 
  * def token_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
  *     Helper method that returns the maximum of fuzz.token_set_ratio and fuzz.token_sort_ratio
  */
-  __Pyx_TraceLine(314,0,__PYX_ERR(0, 314, __pyx_L1_error))
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_8cpp_fuzz_9token_ratio, 0, __pyx_n_s_token_ratio, NULL, __pyx_n_s_cpp_fuzz, __pyx_d, ((PyObject *)__pyx_codeobj__5)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 314, __pyx_L1_error)
+  __Pyx_TraceLine(273,0,__PYX_ERR(0, 273, __pyx_L1_error))
+  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_8cpp_fuzz_9token_ratio, 0, __pyx_n_s_token_ratio, NULL, __pyx_n_s_cpp_fuzz, __pyx_d, ((PyObject *)__pyx_codeobj__5)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 273, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_1, sizeof(__pyx_defaults2), 1)) __PYX_ERR(0, 314, __pyx_L1_error)
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_default_process); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 314, __pyx_L1_error)
+  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_1, sizeof(__pyx_defaults2), 1)) __PYX_ERR(0, 273, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_default_process); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 273, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_CyFunction_Defaults(__pyx_defaults2, __pyx_t_1)->__pyx_arg_processor = __pyx_t_2;
   __Pyx_GIVEREF(__pyx_t_2);
   __pyx_t_2 = 0;
   __Pyx_CyFunction_SetDefaultsGetter(__pyx_t_1, __pyx_pf_8cpp_fuzz_24__defaults__);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_token_ratio, __pyx_t_1) < 0) __PYX_ERR(0, 314, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_token_ratio, __pyx_t_1) < 0) __PYX_ERR(0, 273, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "cpp_fuzz.pyx":368
+  /* "cpp_fuzz.pyx":311
  * 
  * 
  * def partial_token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
  *     sorts the words in the strings and calculates the fuzz.partial_ratio between them
  */
-  __Pyx_TraceLine(368,0,__PYX_ERR(0, 368, __pyx_L1_error))
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_8cpp_fuzz_11partial_token_sort_ratio, 0, __pyx_n_s_partial_token_sort_ratio, NULL, __pyx_n_s_cpp_fuzz, __pyx_d, ((PyObject *)__pyx_codeobj__6)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 368, __pyx_L1_error)
+  __Pyx_TraceLine(311,0,__PYX_ERR(0, 311, __pyx_L1_error))
+  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_8cpp_fuzz_11partial_token_sort_ratio, 0, __pyx_n_s_partial_token_sort_ratio, NULL, __pyx_n_s_cpp_fuzz, __pyx_d, ((PyObject *)__pyx_codeobj__6)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 311, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_1, sizeof(__pyx_defaults3), 1)) __PYX_ERR(0, 368, __pyx_L1_error)
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_default_process); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 368, __pyx_L1_error)
+  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_1, sizeof(__pyx_defaults3), 1)) __PYX_ERR(0, 311, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_default_process); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 311, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_CyFunction_Defaults(__pyx_defaults3, __pyx_t_1)->__pyx_arg_processor = __pyx_t_2;
   __Pyx_GIVEREF(__pyx_t_2);
   __pyx_t_2 = 0;
   __Pyx_CyFunction_SetDefaultsGetter(__pyx_t_1, __pyx_pf_8cpp_fuzz_26__defaults__);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_partial_token_sort_ratio, __pyx_t_1) < 0) __PYX_ERR(0, 368, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_partial_token_sort_ratio, __pyx_t_1) < 0) __PYX_ERR(0, 311, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "cpp_fuzz.pyx":421
+  /* "cpp_fuzz.pyx":348
  * 
  * 
  * def partial_token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
  *     Compares the words in the strings based on unique and common words between them
  */
-  __Pyx_TraceLine(421,0,__PYX_ERR(0, 421, __pyx_L1_error))
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_8cpp_fuzz_13partial_token_set_ratio, 0, __pyx_n_s_partial_token_set_ratio, NULL, __pyx_n_s_cpp_fuzz, __pyx_d, ((PyObject *)__pyx_codeobj__7)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 421, __pyx_L1_error)
+  __Pyx_TraceLine(348,0,__PYX_ERR(0, 348, __pyx_L1_error))
+  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_8cpp_fuzz_13partial_token_set_ratio, 0, __pyx_n_s_partial_token_set_ratio, NULL, __pyx_n_s_cpp_fuzz, __pyx_d, ((PyObject *)__pyx_codeobj__7)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 348, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_1, sizeof(__pyx_defaults4), 1)) __PYX_ERR(0, 421, __pyx_L1_error)
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_default_process); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 421, __pyx_L1_error)
+  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_1, sizeof(__pyx_defaults4), 1)) __PYX_ERR(0, 348, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_default_process); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 348, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_CyFunction_Defaults(__pyx_defaults4, __pyx_t_1)->__pyx_arg_processor = __pyx_t_2;
   __Pyx_GIVEREF(__pyx_t_2);
   __pyx_t_2 = 0;
   __Pyx_CyFunction_SetDefaultsGetter(__pyx_t_1, __pyx_pf_8cpp_fuzz_28__defaults__);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_partial_token_set_ratio, __pyx_t_1) < 0) __PYX_ERR(0, 421, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_partial_token_set_ratio, __pyx_t_1) < 0) __PYX_ERR(0, 348, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "cpp_fuzz.pyx":475
+  /* "cpp_fuzz.pyx":389
  * 
  * 
  * def partial_token_ratio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
  *     Helper method that returns the maximum of fuzz.partial_token_set_ratio and
  */
-  __Pyx_TraceLine(475,0,__PYX_ERR(0, 475, __pyx_L1_error))
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_8cpp_fuzz_15partial_token_ratio, 0, __pyx_n_s_partial_token_ratio, NULL, __pyx_n_s_cpp_fuzz, __pyx_d, ((PyObject *)__pyx_codeobj__8)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 475, __pyx_L1_error)
+  __Pyx_TraceLine(389,0,__PYX_ERR(0, 389, __pyx_L1_error))
+  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_8cpp_fuzz_15partial_token_ratio, 0, __pyx_n_s_partial_token_ratio, NULL, __pyx_n_s_cpp_fuzz, __pyx_d, ((PyObject *)__pyx_codeobj__8)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 389, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_1, sizeof(__pyx_defaults5), 1)) __PYX_ERR(0, 475, __pyx_L1_error)
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_default_process); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 475, __pyx_L1_error)
+  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_1, sizeof(__pyx_defaults5), 1)) __PYX_ERR(0, 389, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_default_process); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 389, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_CyFunction_Defaults(__pyx_defaults5, __pyx_t_1)->__pyx_arg_processor = __pyx_t_2;
   __Pyx_GIVEREF(__pyx_t_2);
   __pyx_t_2 = 0;
   __Pyx_CyFunction_SetDefaultsGetter(__pyx_t_1, __pyx_pf_8cpp_fuzz_30__defaults__);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_partial_token_ratio, __pyx_t_1) < 0) __PYX_ERR(0, 475, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_partial_token_ratio, __pyx_t_1) < 0) __PYX_ERR(0, 389, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "cpp_fuzz.pyx":529
+  /* "cpp_fuzz.pyx":427
  * 
  * 
  * def WRatio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
  *     Calculates a weighted ratio based on the other ratio algorithms
  */
-  __Pyx_TraceLine(529,0,__PYX_ERR(0, 529, __pyx_L1_error))
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_8cpp_fuzz_17WRatio, 0, __pyx_n_s_WRatio, NULL, __pyx_n_s_cpp_fuzz, __pyx_d, ((PyObject *)__pyx_codeobj__9)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 529, __pyx_L1_error)
+  __Pyx_TraceLine(427,0,__PYX_ERR(0, 427, __pyx_L1_error))
+  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_8cpp_fuzz_17WRatio, 0, __pyx_n_s_WRatio, NULL, __pyx_n_s_cpp_fuzz, __pyx_d, ((PyObject *)__pyx_codeobj__9)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 427, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_1, sizeof(__pyx_defaults6), 1)) __PYX_ERR(0, 529, __pyx_L1_error)
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_default_process); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 529, __pyx_L1_error)
+  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_1, sizeof(__pyx_defaults6), 1)) __PYX_ERR(0, 427, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_default_process); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 427, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_CyFunction_Defaults(__pyx_defaults6, __pyx_t_1)->__pyx_arg_processor = __pyx_t_2;
   __Pyx_GIVEREF(__pyx_t_2);
   __pyx_t_2 = 0;
   __Pyx_CyFunction_SetDefaultsGetter(__pyx_t_1, __pyx_pf_8cpp_fuzz_32__defaults__);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_WRatio, __pyx_t_1) < 0) __PYX_ERR(0, 529, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_WRatio, __pyx_t_1) < 0) __PYX_ERR(0, 427, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "cpp_fuzz.pyx":581
+  /* "cpp_fuzz.pyx":466
  *     return WRatio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
  * 
  * def QRatio(s1, s2, *, processor=default_process, score_cutoff=None):             # <<<<<<<<<<<<<<
  *     """
  *     Calculates a quick ratio between two strings using fuzz.ratio.
  */
-  __Pyx_TraceLine(581,0,__PYX_ERR(0, 581, __pyx_L1_error))
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_8cpp_fuzz_19QRatio, 0, __pyx_n_s_QRatio, NULL, __pyx_n_s_cpp_fuzz, __pyx_d, ((PyObject *)__pyx_codeobj__10)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 581, __pyx_L1_error)
+  __Pyx_TraceLine(466,0,__PYX_ERR(0, 466, __pyx_L1_error))
+  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_8cpp_fuzz_19QRatio, 0, __pyx_n_s_QRatio, NULL, __pyx_n_s_cpp_fuzz, __pyx_d, ((PyObject *)__pyx_codeobj__10)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 466, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_1, sizeof(__pyx_defaults7), 1)) __PYX_ERR(0, 581, __pyx_L1_error)
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_default_process); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 581, __pyx_L1_error)
+  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_1, sizeof(__pyx_defaults7), 1)) __PYX_ERR(0, 466, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_default_process); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 466, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_CyFunction_Defaults(__pyx_defaults7, __pyx_t_1)->__pyx_arg_processor = __pyx_t_2;
   __Pyx_GIVEREF(__pyx_t_2);
   __pyx_t_2 = 0;
   __Pyx_CyFunction_SetDefaultsGetter(__pyx_t_1, __pyx_pf_8cpp_fuzz_34__defaults__);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_QRatio, __pyx_t_1) < 0) __PYX_ERR(0, 581, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_QRatio, __pyx_t_1) < 0) __PYX_ERR(0, 466, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "cpp_fuzz.pyx":636
+  /* "cpp_fuzz.pyx":508
  *     return QRatio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
  * 
  * cdef RF_Scorer RatioContext = CreateRatioFunctionTable()             # <<<<<<<<<<<<<<
  * ratio._RF_Scorer = PyCapsule_New(&RatioContext, NULL, NULL)
  * 
  */
-  __Pyx_TraceLine(636,0,__PYX_ERR(0, 636, __pyx_L1_error))
+  __Pyx_TraceLine(508,0,__PYX_ERR(0, 508, __pyx_L1_error))
   try {
     __pyx_t_3 = CreateRatioFunctionTable();
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 636, __pyx_L1_error)
+    __PYX_ERR(0, 508, __pyx_L1_error)
   }
   __pyx_v_8cpp_fuzz_RatioContext = __pyx_t_3;
 
-  /* "cpp_fuzz.pyx":637
+  /* "cpp_fuzz.pyx":509
  * 
  * cdef RF_Scorer RatioContext = CreateRatioFunctionTable()
  * ratio._RF_Scorer = PyCapsule_New(&RatioContext, NULL, NULL)             # <<<<<<<<<<<<<<
  * 
  * cdef RF_Scorer PartialRatioContext = CreatePartialRatioFunctionTable()
  */
-  __Pyx_TraceLine(637,0,__PYX_ERR(0, 637, __pyx_L1_error))
-  __pyx_t_1 = PyCapsule_New((&__pyx_v_8cpp_fuzz_RatioContext), NULL, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 637, __pyx_L1_error)
+  __Pyx_TraceLine(509,0,__PYX_ERR(0, 509, __pyx_L1_error))
+  __pyx_t_1 = PyCapsule_New((&__pyx_v_8cpp_fuzz_RatioContext), NULL, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 509, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_ratio); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 637, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_ratio); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 509, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (__Pyx_PyObject_SetAttrStr(__pyx_t_2, __pyx_n_s_RF_Scorer, __pyx_t_1) < 0) __PYX_ERR(0, 637, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_t_2, __pyx_n_s_RF_Scorer, __pyx_t_1) < 0) __PYX_ERR(0, 509, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "cpp_fuzz.pyx":639
+  /* "cpp_fuzz.pyx":511
  * ratio._RF_Scorer = PyCapsule_New(&RatioContext, NULL, NULL)
  * 
  * cdef RF_Scorer PartialRatioContext = CreatePartialRatioFunctionTable()             # <<<<<<<<<<<<<<
  * partial_ratio._RF_Scorer = PyCapsule_New(&PartialRatioContext, NULL, NULL)
  * 
  */
-  __Pyx_TraceLine(639,0,__PYX_ERR(0, 639, __pyx_L1_error))
+  __Pyx_TraceLine(511,0,__PYX_ERR(0, 511, __pyx_L1_error))
   try {
     __pyx_t_3 = CreatePartialRatioFunctionTable();
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 639, __pyx_L1_error)
+    __PYX_ERR(0, 511, __pyx_L1_error)
   }
   __pyx_v_8cpp_fuzz_PartialRatioContext = __pyx_t_3;
 
-  /* "cpp_fuzz.pyx":640
+  /* "cpp_fuzz.pyx":512
  * 
  * cdef RF_Scorer PartialRatioContext = CreatePartialRatioFunctionTable()
  * partial_ratio._RF_Scorer = PyCapsule_New(&PartialRatioContext, NULL, NULL)             # <<<<<<<<<<<<<<
  * 
  * cdef RF_Scorer TokenSortRatioContext = CreateTokenSortRatioFunctionTable()
  */
-  __Pyx_TraceLine(640,0,__PYX_ERR(0, 640, __pyx_L1_error))
-  __pyx_t_2 = PyCapsule_New((&__pyx_v_8cpp_fuzz_PartialRatioContext), NULL, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 640, __pyx_L1_error)
+  __Pyx_TraceLine(512,0,__PYX_ERR(0, 512, __pyx_L1_error))
+  __pyx_t_2 = PyCapsule_New((&__pyx_v_8cpp_fuzz_PartialRatioContext), NULL, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 512, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_partial_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 640, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_partial_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 512, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (__Pyx_PyObject_SetAttrStr(__pyx_t_1, __pyx_n_s_RF_Scorer, __pyx_t_2) < 0) __PYX_ERR(0, 640, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_t_1, __pyx_n_s_RF_Scorer, __pyx_t_2) < 0) __PYX_ERR(0, 512, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "cpp_fuzz.pyx":642
+  /* "cpp_fuzz.pyx":514
  * partial_ratio._RF_Scorer = PyCapsule_New(&PartialRatioContext, NULL, NULL)
  * 
  * cdef RF_Scorer TokenSortRatioContext = CreateTokenSortRatioFunctionTable()             # <<<<<<<<<<<<<<
  * token_sort_ratio._RF_Scorer = PyCapsule_New(&TokenSortRatioContext, NULL, NULL)
  * 
  */
-  __Pyx_TraceLine(642,0,__PYX_ERR(0, 642, __pyx_L1_error))
+  __Pyx_TraceLine(514,0,__PYX_ERR(0, 514, __pyx_L1_error))
   try {
     __pyx_t_3 = CreateTokenSortRatioFunctionTable();
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 642, __pyx_L1_error)
+    __PYX_ERR(0, 514, __pyx_L1_error)
   }
   __pyx_v_8cpp_fuzz_TokenSortRatioContext = __pyx_t_3;
 
-  /* "cpp_fuzz.pyx":643
+  /* "cpp_fuzz.pyx":515
  * 
  * cdef RF_Scorer TokenSortRatioContext = CreateTokenSortRatioFunctionTable()
  * token_sort_ratio._RF_Scorer = PyCapsule_New(&TokenSortRatioContext, NULL, NULL)             # <<<<<<<<<<<<<<
  * 
  * cdef RF_Scorer TokenSetRatioContext = CreateTokenSetRatioFunctionTable()
  */
-  __Pyx_TraceLine(643,0,__PYX_ERR(0, 643, __pyx_L1_error))
-  __pyx_t_1 = PyCapsule_New((&__pyx_v_8cpp_fuzz_TokenSortRatioContext), NULL, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 643, __pyx_L1_error)
+  __Pyx_TraceLine(515,0,__PYX_ERR(0, 515, __pyx_L1_error))
+  __pyx_t_1 = PyCapsule_New((&__pyx_v_8cpp_fuzz_TokenSortRatioContext), NULL, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 515, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_token_sort_ratio); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 643, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_token_sort_ratio); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 515, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (__Pyx_PyObject_SetAttrStr(__pyx_t_2, __pyx_n_s_RF_Scorer, __pyx_t_1) < 0) __PYX_ERR(0, 643, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_t_2, __pyx_n_s_RF_Scorer, __pyx_t_1) < 0) __PYX_ERR(0, 515, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "cpp_fuzz.pyx":645
+  /* "cpp_fuzz.pyx":517
  * token_sort_ratio._RF_Scorer = PyCapsule_New(&TokenSortRatioContext, NULL, NULL)
  * 
  * cdef RF_Scorer TokenSetRatioContext = CreateTokenSetRatioFunctionTable()             # <<<<<<<<<<<<<<
  * token_set_ratio._RF_Scorer = PyCapsule_New(&TokenSetRatioContext, NULL, NULL)
  * 
  */
-  __Pyx_TraceLine(645,0,__PYX_ERR(0, 645, __pyx_L1_error))
+  __Pyx_TraceLine(517,0,__PYX_ERR(0, 517, __pyx_L1_error))
   try {
     __pyx_t_3 = CreateTokenSetRatioFunctionTable();
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 645, __pyx_L1_error)
+    __PYX_ERR(0, 517, __pyx_L1_error)
   }
   __pyx_v_8cpp_fuzz_TokenSetRatioContext = __pyx_t_3;
 
-  /* "cpp_fuzz.pyx":646
+  /* "cpp_fuzz.pyx":518
  * 
  * cdef RF_Scorer TokenSetRatioContext = CreateTokenSetRatioFunctionTable()
  * token_set_ratio._RF_Scorer = PyCapsule_New(&TokenSetRatioContext, NULL, NULL)             # <<<<<<<<<<<<<<
  * 
  * cdef RF_Scorer TokenRatioContext = CreateTokenRatioFunctionTable()
  */
-  __Pyx_TraceLine(646,0,__PYX_ERR(0, 646, __pyx_L1_error))
-  __pyx_t_2 = PyCapsule_New((&__pyx_v_8cpp_fuzz_TokenSetRatioContext), NULL, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 646, __pyx_L1_error)
+  __Pyx_TraceLine(518,0,__PYX_ERR(0, 518, __pyx_L1_error))
+  __pyx_t_2 = PyCapsule_New((&__pyx_v_8cpp_fuzz_TokenSetRatioContext), NULL, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 518, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_token_set_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 646, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_token_set_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 518, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (__Pyx_PyObject_SetAttrStr(__pyx_t_1, __pyx_n_s_RF_Scorer, __pyx_t_2) < 0) __PYX_ERR(0, 646, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_t_1, __pyx_n_s_RF_Scorer, __pyx_t_2) < 0) __PYX_ERR(0, 518, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "cpp_fuzz.pyx":648
+  /* "cpp_fuzz.pyx":520
  * token_set_ratio._RF_Scorer = PyCapsule_New(&TokenSetRatioContext, NULL, NULL)
  * 
  * cdef RF_Scorer TokenRatioContext = CreateTokenRatioFunctionTable()             # <<<<<<<<<<<<<<
  * token_ratio._RF_Scorer = PyCapsule_New(&TokenRatioContext, NULL, NULL)
  * 
  */
-  __Pyx_TraceLine(648,0,__PYX_ERR(0, 648, __pyx_L1_error))
+  __Pyx_TraceLine(520,0,__PYX_ERR(0, 520, __pyx_L1_error))
   try {
     __pyx_t_3 = CreateTokenRatioFunctionTable();
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 648, __pyx_L1_error)
+    __PYX_ERR(0, 520, __pyx_L1_error)
   }
   __pyx_v_8cpp_fuzz_TokenRatioContext = __pyx_t_3;
 
-  /* "cpp_fuzz.pyx":649
+  /* "cpp_fuzz.pyx":521
  * 
  * cdef RF_Scorer TokenRatioContext = CreateTokenRatioFunctionTable()
  * token_ratio._RF_Scorer = PyCapsule_New(&TokenRatioContext, NULL, NULL)             # <<<<<<<<<<<<<<
  * 
  * cdef RF_Scorer PartialTokenSortRatioContext = CreatePartialTokenSortRatioFunctionTable()
  */
-  __Pyx_TraceLine(649,0,__PYX_ERR(0, 649, __pyx_L1_error))
-  __pyx_t_1 = PyCapsule_New((&__pyx_v_8cpp_fuzz_TokenRatioContext), NULL, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 649, __pyx_L1_error)
+  __Pyx_TraceLine(521,0,__PYX_ERR(0, 521, __pyx_L1_error))
+  __pyx_t_1 = PyCapsule_New((&__pyx_v_8cpp_fuzz_TokenRatioContext), NULL, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 521, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_token_ratio); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 649, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_token_ratio); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 521, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (__Pyx_PyObject_SetAttrStr(__pyx_t_2, __pyx_n_s_RF_Scorer, __pyx_t_1) < 0) __PYX_ERR(0, 649, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_t_2, __pyx_n_s_RF_Scorer, __pyx_t_1) < 0) __PYX_ERR(0, 521, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "cpp_fuzz.pyx":651
+  /* "cpp_fuzz.pyx":523
  * token_ratio._RF_Scorer = PyCapsule_New(&TokenRatioContext, NULL, NULL)
  * 
  * cdef RF_Scorer PartialTokenSortRatioContext = CreatePartialTokenSortRatioFunctionTable()             # <<<<<<<<<<<<<<
  * partial_token_sort_ratio._RF_Scorer = PyCapsule_New(&PartialTokenSortRatioContext, NULL, NULL)
  * 
  */
-  __Pyx_TraceLine(651,0,__PYX_ERR(0, 651, __pyx_L1_error))
+  __Pyx_TraceLine(523,0,__PYX_ERR(0, 523, __pyx_L1_error))
   try {
     __pyx_t_3 = CreatePartialTokenSortRatioFunctionTable();
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 651, __pyx_L1_error)
+    __PYX_ERR(0, 523, __pyx_L1_error)
   }
   __pyx_v_8cpp_fuzz_PartialTokenSortRatioContext = __pyx_t_3;
 
-  /* "cpp_fuzz.pyx":652
+  /* "cpp_fuzz.pyx":524
  * 
  * cdef RF_Scorer PartialTokenSortRatioContext = CreatePartialTokenSortRatioFunctionTable()
  * partial_token_sort_ratio._RF_Scorer = PyCapsule_New(&PartialTokenSortRatioContext, NULL, NULL)             # <<<<<<<<<<<<<<
  * 
  * cdef RF_Scorer PartialTokenSetRatioContext = CreatePartialTokenSetRatioFunctionTable()
  */
-  __Pyx_TraceLine(652,0,__PYX_ERR(0, 652, __pyx_L1_error))
-  __pyx_t_2 = PyCapsule_New((&__pyx_v_8cpp_fuzz_PartialTokenSortRatioContext), NULL, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 652, __pyx_L1_error)
+  __Pyx_TraceLine(524,0,__PYX_ERR(0, 524, __pyx_L1_error))
+  __pyx_t_2 = PyCapsule_New((&__pyx_v_8cpp_fuzz_PartialTokenSortRatioContext), NULL, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 524, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_partial_token_sort_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 652, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_partial_token_sort_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 524, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (__Pyx_PyObject_SetAttrStr(__pyx_t_1, __pyx_n_s_RF_Scorer, __pyx_t_2) < 0) __PYX_ERR(0, 652, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_t_1, __pyx_n_s_RF_Scorer, __pyx_t_2) < 0) __PYX_ERR(0, 524, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "cpp_fuzz.pyx":654
+  /* "cpp_fuzz.pyx":526
  * partial_token_sort_ratio._RF_Scorer = PyCapsule_New(&PartialTokenSortRatioContext, NULL, NULL)
  * 
  * cdef RF_Scorer PartialTokenSetRatioContext = CreatePartialTokenSetRatioFunctionTable()             # <<<<<<<<<<<<<<
  * partial_token_set_ratio._RF_Scorer = PyCapsule_New(&PartialTokenSetRatioContext, NULL, NULL)
  * 
  */
-  __Pyx_TraceLine(654,0,__PYX_ERR(0, 654, __pyx_L1_error))
+  __Pyx_TraceLine(526,0,__PYX_ERR(0, 526, __pyx_L1_error))
   try {
     __pyx_t_3 = CreatePartialTokenSetRatioFunctionTable();
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 654, __pyx_L1_error)
+    __PYX_ERR(0, 526, __pyx_L1_error)
   }
   __pyx_v_8cpp_fuzz_PartialTokenSetRatioContext = __pyx_t_3;
 
-  /* "cpp_fuzz.pyx":655
+  /* "cpp_fuzz.pyx":527
  * 
  * cdef RF_Scorer PartialTokenSetRatioContext = CreatePartialTokenSetRatioFunctionTable()
  * partial_token_set_ratio._RF_Scorer = PyCapsule_New(&PartialTokenSetRatioContext, NULL, NULL)             # <<<<<<<<<<<<<<
  * 
  * cdef RF_Scorer PartialTokenRatioContext = CreatePartialTokenRatioFunctionTable()
  */
-  __Pyx_TraceLine(655,0,__PYX_ERR(0, 655, __pyx_L1_error))
-  __pyx_t_1 = PyCapsule_New((&__pyx_v_8cpp_fuzz_PartialTokenSetRatioContext), NULL, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 655, __pyx_L1_error)
+  __Pyx_TraceLine(527,0,__PYX_ERR(0, 527, __pyx_L1_error))
+  __pyx_t_1 = PyCapsule_New((&__pyx_v_8cpp_fuzz_PartialTokenSetRatioContext), NULL, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 527, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_partial_token_set_ratio); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 655, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_partial_token_set_ratio); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 527, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (__Pyx_PyObject_SetAttrStr(__pyx_t_2, __pyx_n_s_RF_Scorer, __pyx_t_1) < 0) __PYX_ERR(0, 655, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_t_2, __pyx_n_s_RF_Scorer, __pyx_t_1) < 0) __PYX_ERR(0, 527, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "cpp_fuzz.pyx":657
+  /* "cpp_fuzz.pyx":529
  * partial_token_set_ratio._RF_Scorer = PyCapsule_New(&PartialTokenSetRatioContext, NULL, NULL)
  * 
  * cdef RF_Scorer PartialTokenRatioContext = CreatePartialTokenRatioFunctionTable()             # <<<<<<<<<<<<<<
  * partial_token_ratio._RF_Scorer = PyCapsule_New(&PartialTokenRatioContext, NULL, NULL)
  * 
  */
-  __Pyx_TraceLine(657,0,__PYX_ERR(0, 657, __pyx_L1_error))
+  __Pyx_TraceLine(529,0,__PYX_ERR(0, 529, __pyx_L1_error))
   try {
     __pyx_t_3 = CreatePartialTokenRatioFunctionTable();
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 657, __pyx_L1_error)
+    __PYX_ERR(0, 529, __pyx_L1_error)
   }
   __pyx_v_8cpp_fuzz_PartialTokenRatioContext = __pyx_t_3;
 
-  /* "cpp_fuzz.pyx":658
+  /* "cpp_fuzz.pyx":530
  * 
  * cdef RF_Scorer PartialTokenRatioContext = CreatePartialTokenRatioFunctionTable()
  * partial_token_ratio._RF_Scorer = PyCapsule_New(&PartialTokenRatioContext, NULL, NULL)             # <<<<<<<<<<<<<<
  * 
  * cdef RF_Scorer WRatioContext = CreateWRatioFunctionTable()
  */
-  __Pyx_TraceLine(658,0,__PYX_ERR(0, 658, __pyx_L1_error))
-  __pyx_t_2 = PyCapsule_New((&__pyx_v_8cpp_fuzz_PartialTokenRatioContext), NULL, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 658, __pyx_L1_error)
+  __Pyx_TraceLine(530,0,__PYX_ERR(0, 530, __pyx_L1_error))
+  __pyx_t_2 = PyCapsule_New((&__pyx_v_8cpp_fuzz_PartialTokenRatioContext), NULL, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 530, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_partial_token_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 658, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_partial_token_ratio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 530, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (__Pyx_PyObject_SetAttrStr(__pyx_t_1, __pyx_n_s_RF_Scorer, __pyx_t_2) < 0) __PYX_ERR(0, 658, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_t_1, __pyx_n_s_RF_Scorer, __pyx_t_2) < 0) __PYX_ERR(0, 530, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "cpp_fuzz.pyx":660
+  /* "cpp_fuzz.pyx":532
  * partial_token_ratio._RF_Scorer = PyCapsule_New(&PartialTokenRatioContext, NULL, NULL)
  * 
  * cdef RF_Scorer WRatioContext = CreateWRatioFunctionTable()             # <<<<<<<<<<<<<<
  * WRatio._RF_Scorer = PyCapsule_New(&WRatioContext, NULL, NULL)
  * 
  */
-  __Pyx_TraceLine(660,0,__PYX_ERR(0, 660, __pyx_L1_error))
+  __Pyx_TraceLine(532,0,__PYX_ERR(0, 532, __pyx_L1_error))
   try {
     __pyx_t_3 = CreateWRatioFunctionTable();
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 660, __pyx_L1_error)
+    __PYX_ERR(0, 532, __pyx_L1_error)
   }
   __pyx_v_8cpp_fuzz_WRatioContext = __pyx_t_3;
 
-  /* "cpp_fuzz.pyx":661
+  /* "cpp_fuzz.pyx":533
  * 
  * cdef RF_Scorer WRatioContext = CreateWRatioFunctionTable()
  * WRatio._RF_Scorer = PyCapsule_New(&WRatioContext, NULL, NULL)             # <<<<<<<<<<<<<<
  * 
  * cdef RF_Scorer QRatioContext = CreateQRatioFunctionTable()
  */
-  __Pyx_TraceLine(661,0,__PYX_ERR(0, 661, __pyx_L1_error))
-  __pyx_t_1 = PyCapsule_New((&__pyx_v_8cpp_fuzz_WRatioContext), NULL, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 661, __pyx_L1_error)
+  __Pyx_TraceLine(533,0,__PYX_ERR(0, 533, __pyx_L1_error))
+  __pyx_t_1 = PyCapsule_New((&__pyx_v_8cpp_fuzz_WRatioContext), NULL, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 533, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_WRatio); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 661, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_WRatio); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 533, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (__Pyx_PyObject_SetAttrStr(__pyx_t_2, __pyx_n_s_RF_Scorer, __pyx_t_1) < 0) __PYX_ERR(0, 661, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_t_2, __pyx_n_s_RF_Scorer, __pyx_t_1) < 0) __PYX_ERR(0, 533, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "cpp_fuzz.pyx":663
+  /* "cpp_fuzz.pyx":535
  * WRatio._RF_Scorer = PyCapsule_New(&WRatioContext, NULL, NULL)
  * 
  * cdef RF_Scorer QRatioContext = CreateQRatioFunctionTable()             # <<<<<<<<<<<<<<
  * QRatio._RF_Scorer = PyCapsule_New(&QRatioContext, NULL, NULL)
  */
-  __Pyx_TraceLine(663,0,__PYX_ERR(0, 663, __pyx_L1_error))
+  __Pyx_TraceLine(535,0,__PYX_ERR(0, 535, __pyx_L1_error))
   try {
     __pyx_t_3 = CreateQRatioFunctionTable();
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 663, __pyx_L1_error)
+    __PYX_ERR(0, 535, __pyx_L1_error)
   }
   __pyx_v_8cpp_fuzz_QRatioContext = __pyx_t_3;
 
-  /* "cpp_fuzz.pyx":664
+  /* "cpp_fuzz.pyx":536
  * 
  * cdef RF_Scorer QRatioContext = CreateQRatioFunctionTable()
  * QRatio._RF_Scorer = PyCapsule_New(&QRatioContext, NULL, NULL)             # <<<<<<<<<<<<<<
  */
-  __Pyx_TraceLine(664,0,__PYX_ERR(0, 664, __pyx_L1_error))
-  __pyx_t_2 = PyCapsule_New((&__pyx_v_8cpp_fuzz_QRatioContext), NULL, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 664, __pyx_L1_error)
+  __Pyx_TraceLine(536,0,__PYX_ERR(0, 536, __pyx_L1_error))
+  __pyx_t_2 = PyCapsule_New((&__pyx_v_8cpp_fuzz_QRatioContext), NULL, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 536, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_QRatio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 664, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_QRatio); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 536, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (__Pyx_PyObject_SetAttrStr(__pyx_t_1, __pyx_n_s_RF_Scorer, __pyx_t_2) < 0) __PYX_ERR(0, 664, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_t_1, __pyx_n_s_RF_Scorer, __pyx_t_2) < 0) __PYX_ERR(0, 536, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
@@ -10215,19 +8765,20 @@ if (!__Pyx_RefNanny) {
   __Pyx_TraceLine(1,0,__PYX_ERR(0, 1, __pyx_L1_error))
   __pyx_t_1 = __Pyx_PyDict_NewPresized(5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_kp_u_ratio_line_43, __pyx_kp_u_Calculates_the_normalized_InDel) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_1, __pyx_kp_u_partial_ratio_line_104, __pyx_kp_u_Searches_for_the_optimal_alignm) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_1, __pyx_kp_u_token_sort_ratio_line_195, __pyx_kp_u_Sorts_the_words_in_the_strings) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_1, __pyx_kp_u_token_set_ratio_line_253, __pyx_kp_u_Compares_the_words_in_the_strin) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_1, __pyx_kp_u_QRatio_line_581, __pyx_kp_u_Calculates_a_quick_ratio_betwee) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_kp_u_ratio_line_65, __pyx_kp_u_Calculates_the_normalized_InDel) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_kp_u_partial_ratio_line_111, __pyx_kp_u_Searches_for_the_optimal_alignm) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_kp_u_token_sort_ratio_line_186, __pyx_kp_u_Sorts_the_words_in_the_strings) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_kp_u_token_set_ratio_line_228, __pyx_kp_u_Compares_the_words_in_the_strin) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_kp_u_QRatio_line_466, __pyx_kp_u_Calculates_a_quick_ratio_betwee) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_1) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "cpython/pycapsule.pxd":2
+  /* "cpp_common.pxd":107
+ *     return s_proc
  * 
- * # available since Python 3.1!             # <<<<<<<<<<<<<<
- * 
- * 
+ * cdef inline RF_KwargsWrapper KwargsInit(RF_Scorer scorer, dict kwargs) except *:             # <<<<<<<<<<<<<<
+ *     cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()
+ *     if (NULL != scorer.kwargs_init):
  */
   __Pyx_TraceReturn(Py_None, 0);
 
@@ -10260,6 +8811,14 @@ if (!__Pyx_RefNanny) {
 /* #### Code section: cleanup_globals ### */
 /* #### Code section: cleanup_module ### */
 /* #### Code section: main_method ### */
+/* #### Code section: utility_code_pragmas ### */
+#if _MSC_VER
+#pragma warning( push )
+#pragma warning( disable : 4127 )
+#endif
+
+
+
 /* #### Code section: utility_code_def ### */
 
 /* --- Runtime support code --- */
@@ -10538,6 +9097,265 @@ static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name)
     PyErr_Clear();
 #endif
     return __Pyx_GetBuiltinName(name);
+}
+
+/* GetAttr3 */
+static PyObject *__Pyx_GetAttr3Default(PyObject *d) {
+    __Pyx_PyThreadState_declare
+    __Pyx_PyThreadState_assign
+    if (unlikely(!__Pyx_PyErr_ExceptionMatches(PyExc_AttributeError)))
+        return NULL;
+    __Pyx_PyErr_Clear();
+    Py_INCREF(d);
+    return d;
+}
+static CYTHON_INLINE PyObject *__Pyx_GetAttr3(PyObject *o, PyObject *n, PyObject *d) {
+    PyObject *r;
+#if CYTHON_USE_TYPE_SLOTS
+    if (likely(PyString_Check(n))) {
+        r = __Pyx_PyObject_GetAttrStrNoError(o, n);
+        if (unlikely(!r) && likely(!PyErr_Occurred())) {
+            r = __Pyx_NewRef(d);
+        }
+        return r;
+    }
+#endif
+    r = PyObject_GetAttr(o, n);
+    return (likely(r)) ? r : __Pyx_GetAttr3Default(d);
+}
+
+/* PyFunctionFastCall */
+#if CYTHON_FAST_PYCALL && !CYTHON_VECTORCALL
+static PyObject* __Pyx_PyFunction_FastCallNoKw(PyCodeObject *co, PyObject **args, Py_ssize_t na,
+                                               PyObject *globals) {
+    PyFrameObject *f;
+    PyThreadState *tstate = __Pyx_PyThreadState_Current;
+    PyObject **fastlocals;
+    Py_ssize_t i;
+    PyObject *result;
+    assert(globals != NULL);
+    /* XXX Perhaps we should create a specialized
+       PyFrame_New() that doesn't take locals, but does
+       take builtins without sanity checking them.
+       */
+    assert(tstate != NULL);
+    f = PyFrame_New(tstate, co, globals, NULL);
+    if (f == NULL) {
+        return NULL;
+    }
+    fastlocals = __Pyx_PyFrame_GetLocalsplus(f);
+    for (i = 0; i < na; i++) {
+        Py_INCREF(*args);
+        fastlocals[i] = *args++;
+    }
+    result = PyEval_EvalFrameEx(f,0);
+    ++tstate->recursion_depth;
+    Py_DECREF(f);
+    --tstate->recursion_depth;
+    return result;
+}
+static PyObject *__Pyx_PyFunction_FastCallDict(PyObject *func, PyObject **args, Py_ssize_t nargs, PyObject *kwargs) {
+    PyCodeObject *co = (PyCodeObject *)PyFunction_GET_CODE(func);
+    PyObject *globals = PyFunction_GET_GLOBALS(func);
+    PyObject *argdefs = PyFunction_GET_DEFAULTS(func);
+    PyObject *closure;
+#if PY_MAJOR_VERSION >= 3
+    PyObject *kwdefs;
+#endif
+    PyObject *kwtuple, **k;
+    PyObject **d;
+    Py_ssize_t nd;
+    Py_ssize_t nk;
+    PyObject *result;
+    assert(kwargs == NULL || PyDict_Check(kwargs));
+    nk = kwargs ? PyDict_Size(kwargs) : 0;
+    if (unlikely(Py_EnterRecursiveCall((char*)" while calling a Python object"))) {
+        return NULL;
+    }
+    if (
+#if PY_MAJOR_VERSION >= 3
+            co->co_kwonlyargcount == 0 &&
+#endif
+            likely(kwargs == NULL || nk == 0) &&
+            co->co_flags == (CO_OPTIMIZED | CO_NEWLOCALS | CO_NOFREE)) {
+        if (argdefs == NULL && co->co_argcount == nargs) {
+            result = __Pyx_PyFunction_FastCallNoKw(co, args, nargs, globals);
+            goto done;
+        }
+        else if (nargs == 0 && argdefs != NULL
+                 && co->co_argcount == Py_SIZE(argdefs)) {
+            /* function called with no arguments, but all parameters have
+               a default value: use default values as arguments .*/
+            args = &PyTuple_GET_ITEM(argdefs, 0);
+            result =__Pyx_PyFunction_FastCallNoKw(co, args, Py_SIZE(argdefs), globals);
+            goto done;
+        }
+    }
+    if (kwargs != NULL) {
+        Py_ssize_t pos, i;
+        kwtuple = PyTuple_New(2 * nk);
+        if (kwtuple == NULL) {
+            result = NULL;
+            goto done;
+        }
+        k = &PyTuple_GET_ITEM(kwtuple, 0);
+        pos = i = 0;
+        while (PyDict_Next(kwargs, &pos, &k[i], &k[i+1])) {
+            Py_INCREF(k[i]);
+            Py_INCREF(k[i+1]);
+            i += 2;
+        }
+        nk = i / 2;
+    }
+    else {
+        kwtuple = NULL;
+        k = NULL;
+    }
+    closure = PyFunction_GET_CLOSURE(func);
+#if PY_MAJOR_VERSION >= 3
+    kwdefs = PyFunction_GET_KW_DEFAULTS(func);
+#endif
+    if (argdefs != NULL) {
+        d = &PyTuple_GET_ITEM(argdefs, 0);
+        nd = Py_SIZE(argdefs);
+    }
+    else {
+        d = NULL;
+        nd = 0;
+    }
+#if PY_MAJOR_VERSION >= 3
+    result = PyEval_EvalCodeEx((PyObject*)co, globals, (PyObject *)NULL,
+                               args, (int)nargs,
+                               k, (int)nk,
+                               d, (int)nd, kwdefs, closure);
+#else
+    result = PyEval_EvalCodeEx(co, globals, (PyObject *)NULL,
+                               args, (int)nargs,
+                               k, (int)nk,
+                               d, (int)nd, closure);
+#endif
+    Py_XDECREF(kwtuple);
+done:
+    Py_LeaveRecursiveCall();
+    return result;
+}
+#endif
+
+/* PyObjectCall */
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw) {
+    PyObject *result;
+    ternaryfunc call = Py_TYPE(func)->tp_call;
+    if (unlikely(!call))
+        return PyObject_Call(func, arg, kw);
+    if (unlikely(Py_EnterRecursiveCall((char*)" while calling a Python object")))
+        return NULL;
+    result = (*call)(func, arg, kw);
+    Py_LeaveRecursiveCall();
+    if (unlikely(!result) && unlikely(!PyErr_Occurred())) {
+        PyErr_SetString(
+            PyExc_SystemError,
+            "NULL result without error in PyObject_Call");
+    }
+    return result;
+}
+#endif
+
+/* PyObjectCallMethO */
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg) {
+    PyObject *self, *result;
+    PyCFunction cfunc;
+    cfunc = PyCFunction_GET_FUNCTION(func);
+    self = PyCFunction_GET_SELF(func);
+    if (unlikely(Py_EnterRecursiveCall((char*)" while calling a Python object")))
+        return NULL;
+    result = cfunc(self, arg);
+    Py_LeaveRecursiveCall();
+    if (unlikely(!result) && unlikely(!PyErr_Occurred())) {
+        PyErr_SetString(
+            PyExc_SystemError,
+            "NULL result without error in PyObject_Call");
+    }
+    return result;
+}
+#endif
+
+/* PyObjectFastCall */
+static PyObject* __Pyx_PyObject_FastCall_fallback(PyObject *func, PyObject **args, size_t nargs, PyObject *kwargs) {
+    PyObject *argstuple;
+    PyObject *result;
+    size_t i;
+    argstuple = PyTuple_New((Py_ssize_t)nargs);
+    if (unlikely(!argstuple)) return NULL;
+    for (i = 0; i < nargs; i++) {
+        Py_INCREF(args[i]);
+        PyTuple_SET_ITEM(argstuple, (Py_ssize_t)i, args[i]);
+    }
+    result = __Pyx_PyObject_Call(func, argstuple, kwargs);
+    Py_DECREF(argstuple);
+    return result;
+}
+static CYTHON_INLINE PyObject* __Pyx_PyObject_FastCallDict(PyObject *func, PyObject **args, size_t _nargs, PyObject *kwargs) {
+    Py_ssize_t nargs = __Pyx_PyVectorcall_NARGS(_nargs);
+#if CYTHON_COMPILING_IN_CPYTHON
+    if (nargs == 0 && kwargs == NULL) {
+#ifdef __Pyx_CyFunction_USED
+        if (__Pyx_IsCyOrPyCFunction(func))
+#else
+        if (PyCFunction_Check(func))
+#endif
+        {
+            if (likely(PyCFunction_GET_FLAGS(func) & METH_NOARGS)) {
+                return __Pyx_PyObject_CallMethO(func, NULL);
+            }
+        }
+    }
+    else if (nargs == 1 && kwargs == NULL) {
+        if (PyCFunction_Check(func))
+        {
+            if (likely(PyCFunction_GET_FLAGS(func) & METH_O)) {
+                return __Pyx_PyObject_CallMethO(func, args[0]);
+            }
+        }
+    }
+#endif
+    #if PY_VERSION_HEX < 0x030800B1
+    #if CYTHON_FAST_PYCCALL
+    if (PyCFunction_Check(func)) {
+        if (kwargs) {
+            return _PyCFunction_FastCallDict(func, args, nargs, kwargs);
+        } else {
+            return _PyCFunction_FastCallKeywords(func, args, nargs, NULL);
+        }
+    }
+    #if PY_VERSION_HEX >= 0x030700A1
+    if (!kwargs && __Pyx_IS_TYPE(func, &PyMethodDescr_Type)) {
+        return _PyMethodDescr_FastCallKeywords(func, args, nargs, NULL);
+    }
+    #endif
+    #endif
+    #if CYTHON_FAST_PYCALL
+    if (PyFunction_Check(func)) {
+        return __Pyx_PyFunction_FastCallDict(func, args, nargs, kwargs);
+    }
+    #endif
+    #endif
+    #if CYTHON_VECTORCALL
+    vectorcallfunc f = _PyVectorcall_Function(func);
+    if (f) {
+        return f(func, args, (size_t)nargs, kwargs);
+    }
+    #elif defined(__Pyx_CyFunction_USED) && CYTHON_BACKPORT_VECTORCALL
+    if (__Pyx_CyFunction_CheckExact(func)) {
+        __pyx_vectorcallfunc f = __Pyx_CyFunction_func_vectorcall(func);
+        if (f) return f(func, args, (size_t)nargs, kwargs);
+    }
+    #endif
+    if (nargs == 0) {
+        return __Pyx_PyObject_Call(func, __pyx_empty_tuple, kwargs);
+    }
+    return __Pyx_PyObject_FastCall_fallback(func, args, (size_t)nargs, kwargs);
 }
 
 /* TupleAndListFromArray */
@@ -10901,265 +9719,6 @@ invalid_keyword:
     #endif
 bad:
     return -1;
-}
-
-/* GetAttr3 */
-static PyObject *__Pyx_GetAttr3Default(PyObject *d) {
-    __Pyx_PyThreadState_declare
-    __Pyx_PyThreadState_assign
-    if (unlikely(!__Pyx_PyErr_ExceptionMatches(PyExc_AttributeError)))
-        return NULL;
-    __Pyx_PyErr_Clear();
-    Py_INCREF(d);
-    return d;
-}
-static CYTHON_INLINE PyObject *__Pyx_GetAttr3(PyObject *o, PyObject *n, PyObject *d) {
-    PyObject *r;
-#if CYTHON_USE_TYPE_SLOTS
-    if (likely(PyString_Check(n))) {
-        r = __Pyx_PyObject_GetAttrStrNoError(o, n);
-        if (unlikely(!r) && likely(!PyErr_Occurred())) {
-            r = __Pyx_NewRef(d);
-        }
-        return r;
-    }
-#endif
-    r = PyObject_GetAttr(o, n);
-    return (likely(r)) ? r : __Pyx_GetAttr3Default(d);
-}
-
-/* PyFunctionFastCall */
-#if CYTHON_FAST_PYCALL && !CYTHON_VECTORCALL
-static PyObject* __Pyx_PyFunction_FastCallNoKw(PyCodeObject *co, PyObject **args, Py_ssize_t na,
-                                               PyObject *globals) {
-    PyFrameObject *f;
-    PyThreadState *tstate = __Pyx_PyThreadState_Current;
-    PyObject **fastlocals;
-    Py_ssize_t i;
-    PyObject *result;
-    assert(globals != NULL);
-    /* XXX Perhaps we should create a specialized
-       PyFrame_New() that doesn't take locals, but does
-       take builtins without sanity checking them.
-       */
-    assert(tstate != NULL);
-    f = PyFrame_New(tstate, co, globals, NULL);
-    if (f == NULL) {
-        return NULL;
-    }
-    fastlocals = __Pyx_PyFrame_GetLocalsplus(f);
-    for (i = 0; i < na; i++) {
-        Py_INCREF(*args);
-        fastlocals[i] = *args++;
-    }
-    result = PyEval_EvalFrameEx(f,0);
-    ++tstate->recursion_depth;
-    Py_DECREF(f);
-    --tstate->recursion_depth;
-    return result;
-}
-static PyObject *__Pyx_PyFunction_FastCallDict(PyObject *func, PyObject **args, Py_ssize_t nargs, PyObject *kwargs) {
-    PyCodeObject *co = (PyCodeObject *)PyFunction_GET_CODE(func);
-    PyObject *globals = PyFunction_GET_GLOBALS(func);
-    PyObject *argdefs = PyFunction_GET_DEFAULTS(func);
-    PyObject *closure;
-#if PY_MAJOR_VERSION >= 3
-    PyObject *kwdefs;
-#endif
-    PyObject *kwtuple, **k;
-    PyObject **d;
-    Py_ssize_t nd;
-    Py_ssize_t nk;
-    PyObject *result;
-    assert(kwargs == NULL || PyDict_Check(kwargs));
-    nk = kwargs ? PyDict_Size(kwargs) : 0;
-    if (unlikely(Py_EnterRecursiveCall((char*)" while calling a Python object"))) {
-        return NULL;
-    }
-    if (
-#if PY_MAJOR_VERSION >= 3
-            co->co_kwonlyargcount == 0 &&
-#endif
-            likely(kwargs == NULL || nk == 0) &&
-            co->co_flags == (CO_OPTIMIZED | CO_NEWLOCALS | CO_NOFREE)) {
-        if (argdefs == NULL && co->co_argcount == nargs) {
-            result = __Pyx_PyFunction_FastCallNoKw(co, args, nargs, globals);
-            goto done;
-        }
-        else if (nargs == 0 && argdefs != NULL
-                 && co->co_argcount == Py_SIZE(argdefs)) {
-            /* function called with no arguments, but all parameters have
-               a default value: use default values as arguments .*/
-            args = &PyTuple_GET_ITEM(argdefs, 0);
-            result =__Pyx_PyFunction_FastCallNoKw(co, args, Py_SIZE(argdefs), globals);
-            goto done;
-        }
-    }
-    if (kwargs != NULL) {
-        Py_ssize_t pos, i;
-        kwtuple = PyTuple_New(2 * nk);
-        if (kwtuple == NULL) {
-            result = NULL;
-            goto done;
-        }
-        k = &PyTuple_GET_ITEM(kwtuple, 0);
-        pos = i = 0;
-        while (PyDict_Next(kwargs, &pos, &k[i], &k[i+1])) {
-            Py_INCREF(k[i]);
-            Py_INCREF(k[i+1]);
-            i += 2;
-        }
-        nk = i / 2;
-    }
-    else {
-        kwtuple = NULL;
-        k = NULL;
-    }
-    closure = PyFunction_GET_CLOSURE(func);
-#if PY_MAJOR_VERSION >= 3
-    kwdefs = PyFunction_GET_KW_DEFAULTS(func);
-#endif
-    if (argdefs != NULL) {
-        d = &PyTuple_GET_ITEM(argdefs, 0);
-        nd = Py_SIZE(argdefs);
-    }
-    else {
-        d = NULL;
-        nd = 0;
-    }
-#if PY_MAJOR_VERSION >= 3
-    result = PyEval_EvalCodeEx((PyObject*)co, globals, (PyObject *)NULL,
-                               args, (int)nargs,
-                               k, (int)nk,
-                               d, (int)nd, kwdefs, closure);
-#else
-    result = PyEval_EvalCodeEx(co, globals, (PyObject *)NULL,
-                               args, (int)nargs,
-                               k, (int)nk,
-                               d, (int)nd, closure);
-#endif
-    Py_XDECREF(kwtuple);
-done:
-    Py_LeaveRecursiveCall();
-    return result;
-}
-#endif
-
-/* PyObjectCall */
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw) {
-    PyObject *result;
-    ternaryfunc call = Py_TYPE(func)->tp_call;
-    if (unlikely(!call))
-        return PyObject_Call(func, arg, kw);
-    if (unlikely(Py_EnterRecursiveCall((char*)" while calling a Python object")))
-        return NULL;
-    result = (*call)(func, arg, kw);
-    Py_LeaveRecursiveCall();
-    if (unlikely(!result) && unlikely(!PyErr_Occurred())) {
-        PyErr_SetString(
-            PyExc_SystemError,
-            "NULL result without error in PyObject_Call");
-    }
-    return result;
-}
-#endif
-
-/* PyObjectCallMethO */
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg) {
-    PyObject *self, *result;
-    PyCFunction cfunc;
-    cfunc = PyCFunction_GET_FUNCTION(func);
-    self = PyCFunction_GET_SELF(func);
-    if (unlikely(Py_EnterRecursiveCall((char*)" while calling a Python object")))
-        return NULL;
-    result = cfunc(self, arg);
-    Py_LeaveRecursiveCall();
-    if (unlikely(!result) && unlikely(!PyErr_Occurred())) {
-        PyErr_SetString(
-            PyExc_SystemError,
-            "NULL result without error in PyObject_Call");
-    }
-    return result;
-}
-#endif
-
-/* PyObjectFastCall */
-static PyObject* __Pyx_PyObject_FastCall_fallback(PyObject *func, PyObject **args, size_t nargs, PyObject *kwargs) {
-    PyObject *argstuple;
-    PyObject *result;
-    size_t i;
-    argstuple = PyTuple_New((Py_ssize_t)nargs);
-    if (unlikely(!argstuple)) return NULL;
-    for (i = 0; i < nargs; i++) {
-        Py_INCREF(args[i]);
-        PyTuple_SET_ITEM(argstuple, (Py_ssize_t)i, args[i]);
-    }
-    result = __Pyx_PyObject_Call(func, argstuple, kwargs);
-    Py_DECREF(argstuple);
-    return result;
-}
-static CYTHON_INLINE PyObject* __Pyx_PyObject_FastCallDict(PyObject *func, PyObject **args, size_t _nargs, PyObject *kwargs) {
-    Py_ssize_t nargs = __Pyx_PyVectorcall_NARGS(_nargs);
-#if CYTHON_COMPILING_IN_CPYTHON
-    if (nargs == 0 && kwargs == NULL) {
-#ifdef __Pyx_CyFunction_USED
-        if (__Pyx_IsCyOrPyCFunction(func))
-#else
-        if (PyCFunction_Check(func))
-#endif
-        {
-            if (likely(PyCFunction_GET_FLAGS(func) & METH_NOARGS)) {
-                return __Pyx_PyObject_CallMethO(func, NULL);
-            }
-        }
-    }
-    else if (nargs == 1 && kwargs == NULL) {
-        if (PyCFunction_Check(func))
-        {
-            if (likely(PyCFunction_GET_FLAGS(func) & METH_O)) {
-                return __Pyx_PyObject_CallMethO(func, args[0]);
-            }
-        }
-    }
-#endif
-    #if PY_VERSION_HEX < 0x030800B1
-    #if CYTHON_FAST_PYCCALL
-    if (PyCFunction_Check(func)) {
-        if (kwargs) {
-            return _PyCFunction_FastCallDict(func, args, nargs, kwargs);
-        } else {
-            return _PyCFunction_FastCallKeywords(func, args, nargs, NULL);
-        }
-    }
-    #if PY_VERSION_HEX >= 0x030700A1
-    if (!kwargs && __Pyx_IS_TYPE(func, &PyMethodDescr_Type)) {
-        return _PyMethodDescr_FastCallKeywords(func, args, nargs, NULL);
-    }
-    #endif
-    #endif
-    #if CYTHON_FAST_PYCALL
-    if (PyFunction_Check(func)) {
-        return __Pyx_PyFunction_FastCallDict(func, args, nargs, kwargs);
-    }
-    #endif
-    #endif
-    #if CYTHON_VECTORCALL
-    vectorcallfunc f = _PyVectorcall_Function(func);
-    if (f) {
-        return f(func, args, (size_t)nargs, kwargs);
-    }
-    #elif defined(__Pyx_CyFunction_USED) && CYTHON_BACKPORT_VECTORCALL
-    if (__Pyx_CyFunction_CheckExact(func)) {
-        __pyx_vectorcallfunc f = __Pyx_CyFunction_func_vectorcall(func);
-        if (f) return f(func, args, (size_t)nargs, kwargs);
-    }
-    #endif
-    if (nargs == 0) {
-        return __Pyx_PyObject_Call(func, __pyx_empty_tuple, kwargs);
-    }
-    return __Pyx_PyObject_FastCall_fallback(func, args, (size_t)nargs, kwargs);
 }
 
 /* GetItemInt */
@@ -11625,6 +10184,67 @@ static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject 
 bad:
     Py_XDECREF(owned_instance);
     return;
+}
+#endif
+
+/* TypeImport */
+#ifndef __PYX_HAVE_RT_ImportType
+#define __PYX_HAVE_RT_ImportType
+static PyTypeObject *__Pyx_ImportType(PyObject *module, const char *module_name, const char *class_name,
+    size_t size, enum __Pyx_ImportType_CheckSize check_size)
+{
+    PyObject *result = 0;
+    char warning[200];
+    Py_ssize_t basicsize;
+#if CYTHON_COMPILING_IN_LIMITED_API
+    PyObject *py_basicsize;
+#endif
+    result = PyObject_GetAttrString(module, class_name);
+    if (!result)
+        goto bad;
+    if (!PyType_Check(result)) {
+        PyErr_Format(PyExc_TypeError,
+            "%.200s.%.200s is not a type object",
+            module_name, class_name);
+        goto bad;
+    }
+#if !CYTHON_COMPILING_IN_LIMITED_API
+    basicsize = ((PyTypeObject *)result)->tp_basicsize;
+#else
+    py_basicsize = PyObject_GetAttrString(result, "__basicsize__");
+    if (!py_basicsize)
+        goto bad;
+    basicsize = PyLong_AsSsize_t(py_basicsize);
+    Py_DECREF(py_basicsize);
+    py_basicsize = 0;
+    if (basicsize == (Py_ssize_t)-1 && PyErr_Occurred())
+        goto bad;
+#endif
+    if ((size_t)basicsize < size) {
+        PyErr_Format(PyExc_ValueError,
+            "%.200s.%.200s size changed, may indicate binary incompatibility. "
+            "Expected %zd from C header, got %zd from PyObject",
+            module_name, class_name, size, basicsize);
+        goto bad;
+    }
+    if (check_size == __Pyx_ImportType_CheckSize_Error && (size_t)basicsize != size) {
+        PyErr_Format(PyExc_ValueError,
+            "%.200s.%.200s size changed, may indicate binary incompatibility. "
+            "Expected %zd from C header, got %zd from PyObject",
+            module_name, class_name, size, basicsize);
+        goto bad;
+    }
+    else if (check_size == __Pyx_ImportType_CheckSize_Warn && (size_t)basicsize > size) {
+        PyOS_snprintf(warning, sizeof(warning),
+            "%s.%s size changed, may indicate binary incompatibility. "
+            "Expected %zd from C header, got %zd from PyObject",
+            module_name, class_name, size, basicsize);
+        if (PyErr_WarnEx(NULL, warning, 0) < 0) goto bad;
+    }
+    return (PyTypeObject *)result;
+bad:
+    Py_XDECREF(result);
+    return NULL;
 }
 #endif
 
@@ -14375,6 +12995,13 @@ static CYTHON_INLINE PyObject * __Pyx_PyBool_FromLong(long b) {
 static CYTHON_INLINE PyObject * __Pyx_PyInt_FromSize_t(size_t ival) {
     return PyInt_FromSize_t(ival);
 }
+
+
+/* #### Code section: utility_code_pragmas_end ### */
+#if _MSV_VER
+#pragma warning( pop )
+#endif
+
 
 
 /* #### Code section: end ### */

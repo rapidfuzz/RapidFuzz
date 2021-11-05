@@ -3,15 +3,18 @@ from libc.stdlib cimport malloc, free
 from libc.stddef cimport wchar_t
 from libcpp cimport bool
 from libcpp.utility cimport move
+from cpython cimport PyObject
 
 from rapidfuzz_capi cimport RF_Scorer, RF_StringType, RF_String, RF_Kwargs
 
 cdef extern from "cpp_common.hpp":
     cdef cppclass RF_StringWrapper:
         RF_String string
+        PyObject* obj
 
         RF_StringWrapper()
         RF_StringWrapper(RF_String)
+        RF_StringWrapper(RF_String, object)
 
     cdef cppclass RF_KwargsWrapper:
         RF_Kwargs kwargs

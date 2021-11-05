@@ -85,12 +85,19 @@ static inline void PyErr2RuntimeExn(bool success) {
 /* RAII Wrapper for RF_String */
 struct RF_StringWrapper {
     RF_String string;
+    PyObject* obj;
 
     RF_StringWrapper()
-        : string({nullptr, (RF_StringType)0, nullptr, 0, nullptr}) {}
+        : string({nullptr, (RF_StringType)0, nullptr, 0, nullptr}), obj(nullptr) {}
 
     RF_StringWrapper(RF_String string_)
-        : string(string_) {}
+        : string(string_), obj(nullptr) {}
+
+    RF_StringWrapper(RF_String string_, PyObject* o)
+        : string(string_), obj(o)
+    {
+        Py_XINCREF(obj);
+    }
 
     RF_StringWrapper(const RF_StringWrapper&) = delete;
     RF_StringWrapper& operator=(const RF_StringWrapper&) = delete;
@@ -98,7 +105,9 @@ struct RF_StringWrapper {
     RF_StringWrapper(RF_StringWrapper&& other)
     {
         string = other.string;
+        obj = other.obj;
         other.string = {nullptr, (RF_StringType)0, nullptr, 0, nullptr};
+        other.obj = nullptr;
     }
 
     RF_StringWrapper& operator=(RF_StringWrapper&& other) {
@@ -106,8 +115,11 @@ struct RF_StringWrapper {
             if (string.dtor) {
                 string.dtor(&string);
             }
+            Py_XDECREF(obj);
             string = other.string;
+            obj = other.obj;
             other.string = {nullptr, (RF_StringType)0, nullptr, 0, nullptr};
+            other.obj = nullptr;
       }
       return *this;
     };
@@ -116,6 +128,7 @@ struct RF_StringWrapper {
         if (string.dtor) {
             string.dtor(&string);
         }
+        Py_XDECREF(obj);
     }
 };
 

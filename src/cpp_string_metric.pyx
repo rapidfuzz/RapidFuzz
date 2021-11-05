@@ -19,14 +19,6 @@ from cpython.ref cimport Py_INCREF
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
 from cython.operator cimport dereference
 
-cdef inline RF_String conv_sequence(seq) except *:
-    if is_valid_string(seq):
-        return move(convert_string(seq))
-    elif isinstance(seq, array):
-        return move(hash_array(seq))
-    else:
-        return move(hash_sequence(seq))
-
 cdef extern from "cpp_scorer.hpp" namespace "rapidfuzz" nogil:
     cpdef enum class LevenshteinEditType:
         None    = 0,
@@ -63,6 +55,32 @@ cdef extern from "cpp_scorer.hpp":
     RF_Scorer CreateNormalizedHammingFunctionTable() except +
     RF_Scorer CreateJaroSimilarityFunctionTable() except +
     bool JaroWinklerSimilarityInit(RF_Similarity* context, const RF_Kwargs* kwargs, size_t, const RF_String* str) nogil except False
+
+cdef inline RF_String conv_sequence(seq) except *:
+    if is_valid_string(seq):
+        return move(convert_string(seq))
+    elif isinstance(seq, array):
+        return move(hash_array(seq))
+    else:
+        return move(hash_sequence(seq))
+
+cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except *:
+    if processor is True:
+        processor = default_process
+
+    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+    if PyCapsule_IsValid(processor_capsule, NULL):
+        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
+        preprocess_func(s1, &(s1_proc[0].string))
+        preprocess_func(s2, &(s2_proc[0].string))
+    elif callable(processor):
+        s1 = processor(s1)
+        s1_proc[0] = RF_StringWrapper(conv_sequence(s1), s1)
+        s2 = processor(s2)
+        s2_proc[0] = RF_StringWrapper(conv_sequence(s2), s2)
+    else:
+        s1_proc[0] = RF_StringWrapper(conv_sequence(s1))
+        s2_proc[0] = RF_StringWrapper(conv_sequence(s2))
 
 def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
     """
@@ -235,23 +253,7 @@ def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
 
     cdef size_t c_max = <size_t>-1 if max is None else max
 
-    if processor is True:
-        processor = default_process
-
-    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
-    if PyCapsule_IsValid(processor_capsule, NULL):
-        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
-        preprocess_func(s1, &s1_proc.string)
-        preprocess_func(s2, &s2_proc.string)
-    elif callable(processor):
-        s1 = processor(s1)
-        s2 = processor(s2)
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-    else:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return levenshtein_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_max)
 
 cdef str levenshtein_edit_type_to_str(LevenshteinEditType edit_type):
@@ -308,23 +310,7 @@ def levenshtein_editops(s1, s2, *, processor=None):
      insert s1[6] s2[6]
     """
     cdef RF_StringWrapper s1_proc, s2_proc
-    if processor is True:
-        processor = default_process
-
-    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
-    if PyCapsule_IsValid(processor_capsule, NULL):
-        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
-        preprocess_func(s1, &s1_proc.string)
-        preprocess_func(s2, &s2_proc.string)
-    elif callable(processor):
-        s1 = processor(s1)
-        s2 = processor(s2)
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-    else:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return levenshtein_editops_to_list(
         levenshtein_editops_func(s1_proc.string, s2_proc.string)
     )
@@ -424,23 +410,7 @@ def normalized_levenshtein(s1, s2, *, weights=(1,1,1), processor=None, score_cut
 
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
 
-    if processor is True:
-        processor = default_process
-
-    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
-    if PyCapsule_IsValid(processor_capsule, NULL):
-        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
-        preprocess_func(s1, &s1_proc.string)
-        preprocess_func(s2, &s2_proc.string)
-    elif callable(processor):
-        s1 = processor(s1)
-        s2 = processor(s2)
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-    else:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return normalized_levenshtein_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
 
 
@@ -482,23 +452,7 @@ def hamming(s1, s2, *, processor=None, max=None):
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True:
-        processor = default_process
-
-    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
-    if PyCapsule_IsValid(processor_capsule, NULL):
-        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
-        preprocess_func(s1, &s1_proc.string)
-        preprocess_func(s2, &s2_proc.string)
-    elif callable(processor):
-        s1 = processor(s1)
-        s2 = processor(s2)
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-    else:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return hamming_func(s1_proc.string, s2_proc.string, c_max)
 
 
@@ -540,23 +494,7 @@ def normalized_hamming(s1, s2, *, processor=None, score_cutoff=None):
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True:
-        processor = default_process
-
-    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
-    if PyCapsule_IsValid(processor_capsule, NULL):
-        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
-        preprocess_func(s1, &s1_proc.string)
-        preprocess_func(s2, &s2_proc.string)
-    elif callable(processor):
-        s1 = processor(s1)
-        s2 = processor(s2)
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-    else:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return normalized_hamming_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
@@ -590,23 +528,7 @@ def jaro_similarity(s1, s2, *, processor=None, score_cutoff=None):
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True:
-        processor = default_process
-
-    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
-    if PyCapsule_IsValid(processor_capsule, NULL):
-        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
-        preprocess_func(s1, &s1_proc.string)
-        preprocess_func(s2, &s2_proc.string)
-    elif callable(processor):
-        s1 = processor(s1)
-        s2 = processor(s2)
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-    else:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return jaro_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
@@ -647,23 +569,7 @@ def jaro_winkler_similarity(s1, s2, *, double prefix_weight=0.1, processor=None,
     if s1 is None or s2 is None:
         return 0
 
-    if processor is True:
-        processor = default_process
-
-    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
-    if PyCapsule_IsValid(processor_capsule, NULL):
-        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
-        preprocess_func(s1, &s1_proc.string)
-        preprocess_func(s2, &s2_proc.string)
-    elif callable(processor):
-        s1 = processor(s1)
-        s2 = processor(s2)
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-    else:
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return jaro_winkler_similarity_func(s1_proc.string, s2_proc.string, prefix_weight, c_score_cutoff)
 
 cdef void KwargsDeinit(RF_Kwargs* self):
