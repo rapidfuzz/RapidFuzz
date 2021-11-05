@@ -48,8 +48,7 @@ ext_modules = [
     Extension(
        name='rapidfuzz.cpp_process',
         sources=[
-            'src/cpp_process.cpp',
-            'src/rapidfuzz-cpp/rapidfuzz/details/unicode.cpp'
+            'src/cpp_process.cpp'
         ],
         include_dirs=["src/rapidfuzz-cpp/", "capi/"],
         language='c++',
@@ -57,8 +56,7 @@ ext_modules = [
     Extension(
        name='rapidfuzz.cpp_process_cdist',
         sources=[
-            'src/cpp_process_cdist.cpp',
-            'src/rapidfuzz-cpp/rapidfuzz/details/unicode.cpp'
+            'src/cpp_process_cdist.cpp'
         ],
         include_dirs=["src/rapidfuzz-cpp/", "capi/", "3rd-party/taskflow/", np.get_include()],
         language='c++',
@@ -89,8 +87,6 @@ ext_modules = [
         language='c++',
     )
 ]
-
-
 
 if __name__ == "__main__":
     setup(

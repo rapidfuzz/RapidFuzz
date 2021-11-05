@@ -14,23 +14,6 @@
 #endif
 
 #include "Python.h"
-
-    #if PY_MAJOR_VERSION >= 3
-      #define __Pyx_PyFloat_FromString(obj)  PyFloat_FromString(obj)
-    #else
-      #define __Pyx_PyFloat_FromString(obj)  PyFloat_FromString(obj, NULL)
-    #endif
-    
-
-    #if PY_MAJOR_VERSION <= 2
-    #define PyDict_GetItemWithError _PyDict_GetItemWithError
-    #endif
-    
-
-    #if PY_VERSION_HEX < 0x030700b1 && !defined(PyContextVar_Get)
-    #define PyContextVar_Get(var, d, v)         ((d) ?             ((void)(var), Py_INCREF(d), (v)[0] = (d), 0) :             ((v)[0] = NULL, 0)         )
-    #endif
-    
 #ifndef Py_PYTHON_H
     #error Python headers needed to compile C extensions, please install development version of Python.
 #elif PY_VERSION_HEX < 0x02070000 || (0x03000000 <= PY_VERSION_HEX && PY_VERSION_HEX < 0x03030000)
@@ -848,7 +831,6 @@ static CYTHON_INLINE float __PYX_NAN() {
     #endif
     
 #include <stdio.h>
-#include "pythread.h"
 #include "cpp_common.hpp"
 #include "cpp_utils.hpp"
 #ifdef _OPENMP
@@ -1073,11 +1055,8 @@ static const char *__pyx_filename;
 
 static const char *__pyx_f[] = {
   "cpp_utils.pyx",
-  "contextvars.pxd",
   "cpp_common.pxd",
   "type.pxd",
-  "bool.pxd",
-  "complex.pxd",
 };
 /* #### Code section: utility_code_proto_before_types ### */
 /* NoFastGil.proto */
@@ -1092,32 +1071,6 @@ static const char *__pyx_f[] = {
 /* #### Code section: type_declarations ### */
 
 /*--- Type declarations ---*/
-struct __pyx_opt_args_7cpython_11contextvars_get_value;
-struct __pyx_opt_args_7cpython_11contextvars_get_value_no_default;
-
-/* "cpython/contextvars.pxd":112
- * 
- * 
- * cdef inline object get_value(var, default_value=None):             # <<<<<<<<<<<<<<
- *     """Return a new reference to the value of the context variable,
- *     or the default value of the context variable,
- */
-struct __pyx_opt_args_7cpython_11contextvars_get_value {
-  int __pyx_n;
-  PyObject *default_value;
-};
-
-/* "cpython/contextvars.pxd":129
- * 
- * 
- * cdef inline object get_value_no_default(var, default_value=None):             # <<<<<<<<<<<<<<
- *     """Return a new reference to the value of the context variable,
- *     or the provided default value if no such value was found.
- */
-struct __pyx_opt_args_7cpython_11contextvars_get_value_no_default {
-  int __pyx_n;
-  PyObject *default_value;
-};
 /* #### Code section: utility_code_proto ### */
 
 /* --- Runtime support code (head) --- */
@@ -1885,9 +1838,6 @@ static void __Pyx_CppExn2PyErr() {
 }
 #endif
 
-/* None.proto */
-#include <new>
-
 /* UnicodeAsUCS4.proto */
 static CYTHON_INLINE Py_UCS4 __Pyx_PyUnicode_AsPy_UCS4(PyObject*);
 
@@ -1957,8 +1907,6 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 #endif
 
 /* #### Code section: module_declarations ### */
-static CYTHON_INLINE double __pyx_f_7cpython_7complex_7complex_4real_real(PyComplexObject *__pyx_v_self); /* proto*/
-static CYTHON_INLINE double __pyx_f_7cpython_7complex_7complex_4imag_imag(PyComplexObject *__pyx_v_self); /* proto*/
 
 /* Module declarations from "libcpp" */
 #if !CYTHON_USE_MODULE_STATE
@@ -1988,7 +1936,7 @@ static CYTHON_INLINE double __pyx_f_7cpython_7complex_7complex_4imag_imag(PyComp
 #if !CYTHON_USE_MODULE_STATE
 #endif
 
-/* Module declarations from "cpython.version" */
+/* Module declarations from "libc.stdio" */
 #if !CYTHON_USE_MODULE_STATE
 #endif
 
@@ -2001,157 +1949,11 @@ static CYTHON_INLINE double __pyx_f_7cpython_7complex_7complex_4imag_imag(PyComp
 static PyTypeObject *__pyx_ptype_7cpython_4type_type = 0;
 #endif
 
-/* Module declarations from "libc.stdio" */
+/* Module declarations from "cpython" */
 #if !CYTHON_USE_MODULE_STATE
 #endif
 
 /* Module declarations from "cpython.object" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.ref" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.exc" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.module" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.mem" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.tuple" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.list" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.sequence" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.mapping" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.iterator" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.number" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.int" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "__builtin__" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.bool" */
-#if !CYTHON_USE_MODULE_STATE
-static PyTypeObject *__pyx_ptype_7cpython_4bool_bool = 0;
-#endif
-
-/* Module declarations from "cpython.long" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.float" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "__builtin__" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.complex" */
-#if !CYTHON_USE_MODULE_STATE
-static PyTypeObject *__pyx_ptype_7cpython_7complex_complex = 0;
-#endif
-
-/* Module declarations from "cpython.string" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.unicode" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.pyport" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.dict" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.instance" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.function" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.method" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.weakref" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.getargs" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.pythread" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.pystate" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.cobject" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.oldbuffer" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.set" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.buffer" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.bytes" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.pycapsule" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython.contextvars" */
-#if !CYTHON_USE_MODULE_STATE
-#endif
-
-/* Module declarations from "cpython" */
 #if !CYTHON_USE_MODULE_STATE
 #endif
 
@@ -2160,6 +1962,10 @@ static PyTypeObject *__pyx_ptype_7cpython_7complex_complex = 0;
 #endif
 static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *); /*proto*/
 static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *); /*proto*/
+
+/* Module declarations from "cpython.pycapsule" */
+#if !CYTHON_USE_MODULE_STATE
+#endif
 
 /* Module declarations from "cpp_utils" */
 #if !CYTHON_USE_MODULE_STATE
@@ -2248,8 +2054,6 @@ typedef struct {
   PyTypeObject *__pyx_FusedFunctionType;
   #endif
   PyTypeObject *__pyx_ptype_7cpython_4type_type;
-  PyTypeObject *__pyx_ptype_7cpython_4bool_bool;
-  PyTypeObject *__pyx_ptype_7cpython_7complex_complex;
   PyObject *__pyx_kp_u_Got_unexpected_keyword_arguments;
   PyObject *__pyx_n_s_MemoryError;
   PyObject *__pyx_n_s_RF_Preprocess;
@@ -2307,8 +2111,6 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_FusedFunctionType);
   #endif
   Py_CLEAR(clear_module_state->__pyx_ptype_7cpython_4type_type);
-  Py_CLEAR(clear_module_state->__pyx_ptype_7cpython_4bool_bool);
-  Py_CLEAR(clear_module_state->__pyx_ptype_7cpython_7complex_complex);
   Py_CLEAR(clear_module_state->__pyx_kp_u_Got_unexpected_keyword_arguments);
   Py_CLEAR(clear_module_state->__pyx_n_s_MemoryError);
   Py_CLEAR(clear_module_state->__pyx_n_s_RF_Preprocess);
@@ -2353,8 +2155,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_FusedFunctionType);
   #endif
   Py_VISIT(traverse_module_state->__pyx_ptype_7cpython_4type_type);
-  Py_VISIT(traverse_module_state->__pyx_ptype_7cpython_4bool_bool);
-  Py_VISIT(traverse_module_state->__pyx_ptype_7cpython_7complex_complex);
   Py_VISIT(traverse_module_state->__pyx_kp_u_Got_unexpected_keyword_arguments);
   Py_VISIT(traverse_module_state->__pyx_n_s_MemoryError);
   Py_VISIT(traverse_module_state->__pyx_n_s_RF_Preprocess);
@@ -2396,8 +2196,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_FusedFunctionType __pyx_mstate_global->__pyx_FusedFunctionType
 #endif
 #define __pyx_ptype_7cpython_4type_type __pyx_mstate_global->__pyx_ptype_7cpython_4type_type
-#define __pyx_ptype_7cpython_4bool_bool __pyx_mstate_global->__pyx_ptype_7cpython_4bool_bool
-#define __pyx_ptype_7cpython_7complex_complex __pyx_mstate_global->__pyx_ptype_7cpython_7complex_complex
 #define __pyx_kp_u_Got_unexpected_keyword_arguments __pyx_mstate_global->__pyx_kp_u_Got_unexpected_keyword_arguments
 #define __pyx_n_s_MemoryError __pyx_mstate_global->__pyx_n_s_MemoryError
 #define __pyx_n_s_RF_Preprocess __pyx_mstate_global->__pyx_n_s_RF_Preprocess
@@ -2909,287 +2707,6 @@ static bool __pyx_f_9cpp_utils_default_process_capi(PyObject *__pyx_v_sentence, 
   return __pyx_r;
 }
 
-/* "cpython/complex.pxd":19
- * 
- *         @property
- *         cdef inline double real(self):             # <<<<<<<<<<<<<<
- *             return self.cval.real
- * 
- */
-
-static CYTHON_INLINE double __pyx_f_7cpython_7complex_7complex_4real_real(PyComplexObject *__pyx_v_self) {
-  double __pyx_r;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("real", 0);
-
-  /* "cpython/complex.pxd":20
- *         @property
- *         cdef inline double real(self):
- *             return self.cval.real             # <<<<<<<<<<<<<<
- * 
- *         @property
- */
-  __pyx_r = __pyx_v_self->cval.real;
-  goto __pyx_L0;
-
-  /* "cpython/complex.pxd":19
- * 
- *         @property
- *         cdef inline double real(self):             # <<<<<<<<<<<<<<
- *             return self.cval.real
- * 
- */
-
-  /* function exit code */
-  __pyx_L0:;
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "cpython/complex.pxd":23
- * 
- *         @property
- *         cdef inline double imag(self):             # <<<<<<<<<<<<<<
- *             return self.cval.imag
- * 
- */
-
-static CYTHON_INLINE double __pyx_f_7cpython_7complex_7complex_4imag_imag(PyComplexObject *__pyx_v_self) {
-  double __pyx_r;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("imag", 0);
-
-  /* "cpython/complex.pxd":24
- *         @property
- *         cdef inline double imag(self):
- *             return self.cval.imag             # <<<<<<<<<<<<<<
- * 
- *     # PyTypeObject PyComplex_Type
- */
-  __pyx_r = __pyx_v_self->cval.imag;
-  goto __pyx_L0;
-
-  /* "cpython/complex.pxd":23
- * 
- *         @property
- *         cdef inline double imag(self):             # <<<<<<<<<<<<<<
- *             return self.cval.imag
- * 
- */
-
-  /* function exit code */
-  __pyx_L0:;
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "cpython/contextvars.pxd":112
- * 
- * 
- * cdef inline object get_value(var, default_value=None):             # <<<<<<<<<<<<<<
- *     """Return a new reference to the value of the context variable,
- *     or the default value of the context variable,
- */
-
-static CYTHON_INLINE PyObject *__pyx_f_7cpython_11contextvars_get_value(PyObject *__pyx_v_var, struct __pyx_opt_args_7cpython_11contextvars_get_value *__pyx_optional_args) {
-  PyObject *__pyx_v_default_value = ((PyObject *)Py_None);
-  PyObject *__pyx_v_value;
-  PyObject *__pyx_v_pyvalue = NULL;
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  int __pyx_t_1;
-  int __pyx_t_2;
-  PyObject *__pyx_t_3 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("get_value", 0);
-  if (__pyx_optional_args) {
-    if (__pyx_optional_args->__pyx_n > 0) {
-      __pyx_v_default_value = __pyx_optional_args->default_value;
-    }
-  }
-
-  /* "cpython/contextvars.pxd":118
- *     """
- *     cdef PyObject *value
- *     PyContextVar_Get(var, NULL, &value)             # <<<<<<<<<<<<<<
- *     if value is NULL:
- *         # context variable does not have a default
- */
-  __pyx_t_1 = PyContextVar_Get(__pyx_v_var, NULL, (&__pyx_v_value)); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(1, 118, __pyx_L1_error)
-
-  /* "cpython/contextvars.pxd":119
- *     cdef PyObject *value
- *     PyContextVar_Get(var, NULL, &value)
- *     if value is NULL:             # <<<<<<<<<<<<<<
- *         # context variable does not have a default
- *         pyvalue = default_value
- */
-  __pyx_t_2 = ((__pyx_v_value == NULL) != 0);
-  if (__pyx_t_2) {
-
-    /* "cpython/contextvars.pxd":121
- *     if value is NULL:
- *         # context variable does not have a default
- *         pyvalue = default_value             # <<<<<<<<<<<<<<
- *     else:
- *         # value or default value of context variable
- */
-    __Pyx_INCREF(__pyx_v_default_value);
-    __pyx_v_pyvalue = __pyx_v_default_value;
-
-    /* "cpython/contextvars.pxd":119
- *     cdef PyObject *value
- *     PyContextVar_Get(var, NULL, &value)
- *     if value is NULL:             # <<<<<<<<<<<<<<
- *         # context variable does not have a default
- *         pyvalue = default_value
- */
-    goto __pyx_L3;
-  }
-
-  /* "cpython/contextvars.pxd":124
- *     else:
- *         # value or default value of context variable
- *         pyvalue = <object>value             # <<<<<<<<<<<<<<
- *         Py_XDECREF(value)  # PyContextVar_Get() returned an owned reference as 'PyObject*'
- *     return pyvalue
- */
-  /*else*/ {
-    __pyx_t_3 = ((PyObject *)__pyx_v_value);
-    __Pyx_INCREF(__pyx_t_3);
-    __pyx_v_pyvalue = __pyx_t_3;
-    __pyx_t_3 = 0;
-
-    /* "cpython/contextvars.pxd":125
- *         # value or default value of context variable
- *         pyvalue = <object>value
- *         Py_XDECREF(value)  # PyContextVar_Get() returned an owned reference as 'PyObject*'             # <<<<<<<<<<<<<<
- *     return pyvalue
- * 
- */
-    Py_XDECREF(__pyx_v_value);
-  }
-  __pyx_L3:;
-
-  /* "cpython/contextvars.pxd":126
- *         pyvalue = <object>value
- *         Py_XDECREF(value)  # PyContextVar_Get() returned an owned reference as 'PyObject*'
- *     return pyvalue             # <<<<<<<<<<<<<<
- * 
- * 
- */
-  __Pyx_XDECREF(__pyx_r);
-  __Pyx_INCREF(__pyx_v_pyvalue);
-  __pyx_r = __pyx_v_pyvalue;
-  goto __pyx_L0;
-
-  /* "cpython/contextvars.pxd":112
- * 
- * 
- * cdef inline object get_value(var, default_value=None):             # <<<<<<<<<<<<<<
- *     """Return a new reference to the value of the context variable,
- *     or the default value of the context variable,
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_AddTraceback("cpython.contextvars.get_value", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = 0;
-  __pyx_L0:;
-  __Pyx_XDECREF(__pyx_v_pyvalue);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "cpython/contextvars.pxd":129
- * 
- * 
- * cdef inline object get_value_no_default(var, default_value=None):             # <<<<<<<<<<<<<<
- *     """Return a new reference to the value of the context variable,
- *     or the provided default value if no such value was found.
- */
-
-static CYTHON_INLINE PyObject *__pyx_f_7cpython_11contextvars_get_value_no_default(PyObject *__pyx_v_var, struct __pyx_opt_args_7cpython_11contextvars_get_value_no_default *__pyx_optional_args) {
-  PyObject *__pyx_v_default_value = ((PyObject *)Py_None);
-  PyObject *__pyx_v_value;
-  PyObject *__pyx_v_pyvalue = NULL;
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  int __pyx_t_1;
-  PyObject *__pyx_t_2 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("get_value_no_default", 0);
-  if (__pyx_optional_args) {
-    if (__pyx_optional_args->__pyx_n > 0) {
-      __pyx_v_default_value = __pyx_optional_args->default_value;
-    }
-  }
-
-  /* "cpython/contextvars.pxd":136
- *     """
- *     cdef PyObject *value
- *     PyContextVar_Get(var, <PyObject*>default_value, &value)             # <<<<<<<<<<<<<<
- *     # value of context variable or 'default_value'
- *     pyvalue = <object>value
- */
-  __pyx_t_1 = PyContextVar_Get(__pyx_v_var, ((PyObject *)__pyx_v_default_value), (&__pyx_v_value)); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(1, 136, __pyx_L1_error)
-
-  /* "cpython/contextvars.pxd":138
- *     PyContextVar_Get(var, <PyObject*>default_value, &value)
- *     # value of context variable or 'default_value'
- *     pyvalue = <object>value             # <<<<<<<<<<<<<<
- *     Py_XDECREF(value)  # PyContextVar_Get() returned an owned reference as 'PyObject*'
- *     return pyvalue
- */
-  __pyx_t_2 = ((PyObject *)__pyx_v_value);
-  __Pyx_INCREF(__pyx_t_2);
-  __pyx_v_pyvalue = __pyx_t_2;
-  __pyx_t_2 = 0;
-
-  /* "cpython/contextvars.pxd":139
- *     # value of context variable or 'default_value'
- *     pyvalue = <object>value
- *     Py_XDECREF(value)  # PyContextVar_Get() returned an owned reference as 'PyObject*'             # <<<<<<<<<<<<<<
- *     return pyvalue
- */
-  Py_XDECREF(__pyx_v_value);
-
-  /* "cpython/contextvars.pxd":140
- *     pyvalue = <object>value
- *     Py_XDECREF(value)  # PyContextVar_Get() returned an owned reference as 'PyObject*'
- *     return pyvalue             # <<<<<<<<<<<<<<
- */
-  __Pyx_XDECREF(__pyx_r);
-  __Pyx_INCREF(__pyx_v_pyvalue);
-  __pyx_r = __pyx_v_pyvalue;
-  goto __pyx_L0;
-
-  /* "cpython/contextvars.pxd":129
- * 
- * 
- * cdef inline object get_value_no_default(var, default_value=None):             # <<<<<<<<<<<<<<
- *     """Return a new reference to the value of the context variable,
- *     or the provided default value if no such value was found.
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_AddTraceback("cpython.contextvars.get_value_no_default", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = 0;
-  __pyx_L0:;
-  __Pyx_XDECREF(__pyx_v_pyvalue);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
 /* "cpp_common.pxd":37
  *     void validate_string(object py_str, const char* err) except +
  * 
@@ -3240,9 +2757,9 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  *     s_proc.length = <size_t>len(arr)
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_arr, __pyx_n_s_typecode); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 40, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_arr, __pyx_n_s_typecode); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 40, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_AsPy_UCS4(__pyx_t_1); if (unlikely((__pyx_t_2 == (Py_UCS4)-1) && PyErr_Occurred())) __PYX_ERR(2, 40, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_AsPy_UCS4(__pyx_t_1); if (unlikely((__pyx_t_2 == (Py_UCS4)-1) && PyErr_Occurred())) __PYX_ERR(1, 40, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_typecode = ((Py_UCS4)__pyx_t_2);
 
@@ -3253,7 +2770,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  * 
  *     s_proc.data = malloc(s_proc.length * sizeof(uint64_t))
  */
-  __pyx_t_3 = PyObject_Length(__pyx_v_arr); if (unlikely(__pyx_t_3 == ((Py_ssize_t)-1))) __PYX_ERR(2, 41, __pyx_L1_error)
+  __pyx_t_3 = PyObject_Length(__pyx_v_arr); if (unlikely(__pyx_t_3 == ((Py_ssize_t)-1))) __PYX_ERR(1, 41, __pyx_L1_error)
   __pyx_v_s_proc.length = ((size_t)__pyx_t_3);
 
   /* "cpp_common.pxd":43
@@ -3282,7 +2799,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  * 
  *     try:
  */
-    PyErr_NoMemory(); __PYX_ERR(2, 46, __pyx_L1_error)
+    PyErr_NoMemory(); __PYX_ERR(1, 46, __pyx_L1_error)
 
     /* "cpp_common.pxd":45
  *     s_proc.data = malloc(s_proc.length * sizeof(uint64_t))
@@ -3348,9 +2865,9 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  *         elif typecode == 'u': # 'u' wchar_t
  *             s_proc.kind = RF_StringType.RF_UINT64
  */
-          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 53, __pyx_L4_error)
+          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 53, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_11 = __Pyx_PyInt_As_uint64_t(__pyx_t_1); if (unlikely((__pyx_t_11 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(2, 53, __pyx_L4_error)
+          __pyx_t_11 = __Pyx_PyInt_As_uint64_t(__pyx_t_1); if (unlikely((__pyx_t_11 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 53, __pyx_L4_error)
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
           (((uint64_t *)__pyx_v_s_proc.data)[__pyx_v_i]) = ((uint64_t)__pyx_t_11);
         }
@@ -3393,9 +2910,9 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  *         elif typecode in {'h', 'H'}: #  signed/unsigned short
  *             s_proc.kind = RF_StringType.RF_UINT64
  */
-          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 57, __pyx_L4_error)
+          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 57, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_2 = __Pyx_PyObject_AsPy_UCS4(__pyx_t_1); if (unlikely((__pyx_t_2 == (Py_UCS4)-1) && PyErr_Occurred())) __PYX_ERR(2, 57, __pyx_L4_error)
+          __pyx_t_2 = __Pyx_PyObject_AsPy_UCS4(__pyx_t_1); if (unlikely((__pyx_t_2 == (Py_UCS4)-1) && PyErr_Occurred())) __PYX_ERR(1, 57, __pyx_L4_error)
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
           (((uint64_t *)__pyx_v_s_proc.data)[__pyx_v_i]) = ((uint64_t)((Py_UCS4)__pyx_t_2));
         }
@@ -3447,9 +2964,9 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  *         elif typecode in {'i', 'I'}: # signed/unsigned int
  *             s_proc.kind = RF_StringType.RF_UINT64
  */
-          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 61, __pyx_L4_error)
+          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 61, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_11 = __Pyx_PyInt_As_uint64_t(__pyx_t_1); if (unlikely((__pyx_t_11 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(2, 61, __pyx_L4_error)
+          __pyx_t_11 = __Pyx_PyInt_As_uint64_t(__pyx_t_1); if (unlikely((__pyx_t_11 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 61, __pyx_L4_error)
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
           (((uint64_t *)__pyx_v_s_proc.data)[__pyx_v_i]) = ((uint64_t)__pyx_t_11);
         }
@@ -3501,9 +3018,9 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  *         elif typecode in {'l', 'L'}: # signed/unsigned long
  *             s_proc.kind = RF_StringType.RF_UINT64
  */
-          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 65, __pyx_L4_error)
+          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 65, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_11 = __Pyx_PyInt_As_uint64_t(__pyx_t_1); if (unlikely((__pyx_t_11 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(2, 65, __pyx_L4_error)
+          __pyx_t_11 = __Pyx_PyInt_As_uint64_t(__pyx_t_1); if (unlikely((__pyx_t_11 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 65, __pyx_L4_error)
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
           (((uint64_t *)__pyx_v_s_proc.data)[__pyx_v_i]) = ((uint64_t)__pyx_t_11);
         }
@@ -3555,9 +3072,9 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  *         elif typecode in {'q', 'Q'}: # signed/unsigned long long
  *             s_proc.kind = RF_StringType.RF_UINT64
  */
-          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 69, __pyx_L4_error)
+          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 69, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_11 = __Pyx_PyInt_As_uint64_t(__pyx_t_1); if (unlikely((__pyx_t_11 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(2, 69, __pyx_L4_error)
+          __pyx_t_11 = __Pyx_PyInt_As_uint64_t(__pyx_t_1); if (unlikely((__pyx_t_11 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 69, __pyx_L4_error)
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
           (((uint64_t *)__pyx_v_s_proc.data)[__pyx_v_i]) = ((uint64_t)__pyx_t_11);
         }
@@ -3609,9 +3126,9 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  *         else: # float/double are hashed
  *             s_proc.kind = RF_StringType.RF_UINT64
  */
-          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 73, __pyx_L4_error)
+          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 73, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_11 = __Pyx_PyInt_As_uint64_t(__pyx_t_1); if (unlikely((__pyx_t_11 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(2, 73, __pyx_L4_error)
+          __pyx_t_11 = __Pyx_PyInt_As_uint64_t(__pyx_t_1); if (unlikely((__pyx_t_11 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 73, __pyx_L4_error)
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
           (((uint64_t *)__pyx_v_s_proc.data)[__pyx_v_i]) = ((uint64_t)__pyx_t_11);
         }
@@ -3654,9 +3171,9 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
  *     except Exception as e:
  *         free(s_proc.data)
  */
-          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 77, __pyx_L4_error)
+          __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_arr, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 77, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_12 = PyObject_Hash(__pyx_t_1); if (unlikely(__pyx_t_12 == ((Py_hash_t)-1))) __PYX_ERR(2, 77, __pyx_L4_error)
+          __pyx_t_12 = PyObject_Hash(__pyx_t_1); if (unlikely(__pyx_t_12 == ((Py_hash_t)-1))) __PYX_ERR(1, 77, __pyx_L4_error)
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
           (((uint64_t *)__pyx_v_s_proc.data)[__pyx_v_i]) = ((uint64_t)__pyx_t_12);
         }
@@ -3688,7 +3205,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
     __pyx_t_13 = __Pyx_PyErr_ExceptionMatches(((PyObject *)(&((PyTypeObject*)PyExc_Exception)[0])));
     if (__pyx_t_13) {
       __Pyx_AddTraceback("cpp_common.hash_array", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_1, &__pyx_t_14, &__pyx_t_15) < 0) __PYX_ERR(2, 78, __pyx_L6_except_error)
+      if (__Pyx_GetException(&__pyx_t_1, &__pyx_t_14, &__pyx_t_15) < 0) __PYX_ERR(1, 78, __pyx_L6_except_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_GOTREF(__pyx_t_14);
       __Pyx_GOTREF(__pyx_t_15);
@@ -3726,7 +3243,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_array(PyObject *__pyx_v
         __Pyx_XGIVEREF(__pyx_t_15);
         __Pyx_ErrRestoreWithState(__pyx_t_1, __pyx_t_14, __pyx_t_15);
         __pyx_t_1 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; 
-        __PYX_ERR(2, 81, __pyx_L29_error)
+        __PYX_ERR(1, 81, __pyx_L29_error)
       }
 
       /* "cpp_common.pxd":78
@@ -3879,7 +3396,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
  * 
  *     s_proc.data = malloc(s_proc.length * sizeof(uint64_t))
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_seq); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(2, 89, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_seq); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(1, 89, __pyx_L1_error)
   __pyx_v_s_proc.length = ((size_t)__pyx_t_1);
 
   /* "cpp_common.pxd":91
@@ -3908,7 +3425,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
  * 
  *     try:
  */
-    PyErr_NoMemory(); __PYX_ERR(2, 94, __pyx_L1_error)
+    PyErr_NoMemory(); __PYX_ERR(1, 94, __pyx_L1_error)
 
     /* "cpp_common.pxd":93
  *     s_proc.data = malloc(s_proc.length * sizeof(uint64_t))
@@ -3963,7 +3480,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
  *             # this is required so e.g. a list of char can be compared to a string
  *             if isinstance(elem, str) and len(elem) == 1:
  */
-        __pyx_t_9 = __Pyx_GetItemInt(__pyx_v_seq, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_9)) __PYX_ERR(2, 99, __pyx_L4_error)
+        __pyx_t_9 = __Pyx_GetItemInt(__pyx_v_seq, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 99, __pyx_L4_error)
         __Pyx_GOTREF(__pyx_t_9);
         __Pyx_XDECREF_SET(__pyx_v_elem, __pyx_t_9);
         __pyx_t_9 = 0;
@@ -3982,7 +3499,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
           __pyx_t_2 = __pyx_t_11;
           goto __pyx_L13_bool_binop_done;
         }
-        __pyx_t_1 = PyObject_Length(__pyx_v_elem); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(2, 101, __pyx_L4_error)
+        __pyx_t_1 = PyObject_Length(__pyx_v_elem); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(1, 101, __pyx_L4_error)
         __pyx_t_11 = ((__pyx_t_1 == 1) != 0);
         __pyx_t_2 = __pyx_t_11;
         __pyx_L13_bool_binop_done:;
@@ -3995,7 +3512,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
  *             else:
  *                 (<uint64_t*>s_proc.data)[i] = <uint64_t>hash(elem)
  */
-          __pyx_t_12 = __Pyx_PyObject_AsPy_UCS4(__pyx_v_elem); if (unlikely((__pyx_t_12 == (Py_UCS4)-1) && PyErr_Occurred())) __PYX_ERR(2, 102, __pyx_L4_error)
+          __pyx_t_12 = __Pyx_PyObject_AsPy_UCS4(__pyx_v_elem); if (unlikely((__pyx_t_12 == (Py_UCS4)-1) && PyErr_Occurred())) __PYX_ERR(1, 102, __pyx_L4_error)
           (((uint64_t *)__pyx_v_s_proc.data)[__pyx_v_i]) = ((uint64_t)((Py_UCS4)__pyx_t_12));
 
           /* "cpp_common.pxd":101
@@ -4016,7 +3533,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
  *         free(s_proc.data)
  */
         /*else*/ {
-          __pyx_t_13 = PyObject_Hash(__pyx_v_elem); if (unlikely(__pyx_t_13 == ((Py_hash_t)-1))) __PYX_ERR(2, 104, __pyx_L4_error)
+          __pyx_t_13 = PyObject_Hash(__pyx_v_elem); if (unlikely(__pyx_t_13 == ((Py_hash_t)-1))) __PYX_ERR(1, 104, __pyx_L4_error)
           (((uint64_t *)__pyx_v_s_proc.data)[__pyx_v_i]) = ((uint64_t)__pyx_t_13);
         }
         __pyx_L12:;
@@ -4047,7 +3564,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
     __pyx_t_14 = __Pyx_PyErr_ExceptionMatches(((PyObject *)(&((PyTypeObject*)PyExc_Exception)[0])));
     if (__pyx_t_14) {
       __Pyx_AddTraceback("cpp_common.hash_sequence", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_9, &__pyx_t_15, &__pyx_t_16) < 0) __PYX_ERR(2, 105, __pyx_L6_except_error)
+      if (__Pyx_GetException(&__pyx_t_9, &__pyx_t_15, &__pyx_t_16) < 0) __PYX_ERR(1, 105, __pyx_L6_except_error)
       __Pyx_GOTREF(__pyx_t_9);
       __Pyx_GOTREF(__pyx_t_15);
       __Pyx_GOTREF(__pyx_t_16);
@@ -4085,7 +3602,7 @@ static CYTHON_INLINE RF_String __pyx_f_10cpp_common_hash_sequence(PyObject *__py
         __Pyx_XGIVEREF(__pyx_t_16);
         __Pyx_ErrRestoreWithState(__pyx_t_9, __pyx_t_15, __pyx_t_16);
         __pyx_t_9 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0; 
-        __PYX_ERR(2, 108, __pyx_L20_error)
+        __PYX_ERR(1, 108, __pyx_L20_error)
       }
 
       /* "cpp_common.pxd":105
@@ -4236,7 +3753,7 @@ static CYTHON_INLINE RF_KwargsWrapper __pyx_f_10cpp_common_KwargsInit(RF_Scorer 
  *     elif len(kwargs):
  *         raise TypeError("Got unexpected keyword arguments: ", ", ".join(kwargs.keys()))
  */
-    __pyx_t_2 = __pyx_v_scorer.kwargs_init((&__pyx_v_kwargs_context.kwargs), __pyx_v_kwargs); if (unlikely(__pyx_t_2 == ((bool)0))) __PYX_ERR(2, 116, __pyx_L1_error)
+    __pyx_t_2 = __pyx_v_scorer.kwargs_init((&__pyx_v_kwargs_context.kwargs), __pyx_v_kwargs); if (unlikely(__pyx_t_2 == ((bool)0))) __PYX_ERR(1, 116, __pyx_L1_error)
 
     /* "cpp_common.pxd":115
  * cdef inline RF_KwargsWrapper KwargsInit(RF_Scorer scorer, dict kwargs) except *:
@@ -4257,9 +3774,9 @@ static CYTHON_INLINE RF_KwargsWrapper __pyx_f_10cpp_common_KwargsInit(RF_Scorer 
  */
   if (unlikely(__pyx_v_kwargs == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "object of type 'NoneType' has no len()");
-    __PYX_ERR(2, 117, __pyx_L1_error)
+    __PYX_ERR(1, 117, __pyx_L1_error)
   }
-  __pyx_t_3 = PyDict_Size(__pyx_v_kwargs); if (unlikely(__pyx_t_3 == ((Py_ssize_t)-1))) __PYX_ERR(2, 117, __pyx_L1_error)
+  __pyx_t_3 = PyDict_Size(__pyx_v_kwargs); if (unlikely(__pyx_t_3 == ((Py_ssize_t)-1))) __PYX_ERR(1, 117, __pyx_L1_error)
   __pyx_t_1 = (__pyx_t_3 != 0);
   if (unlikely(__pyx_t_1)) {
 
@@ -4272,14 +3789,14 @@ static CYTHON_INLINE RF_KwargsWrapper __pyx_f_10cpp_common_KwargsInit(RF_Scorer 
  */
     if (unlikely(__pyx_v_kwargs == Py_None)) {
       PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "keys");
-      __PYX_ERR(2, 118, __pyx_L1_error)
+      __PYX_ERR(1, 118, __pyx_L1_error)
     }
-    __pyx_t_4 = __Pyx_PyDict_Keys(__pyx_v_kwargs); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 118, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyDict_Keys(__pyx_v_kwargs); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 118, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = PyUnicode_Join(__pyx_kp_u__2, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(2, 118, __pyx_L1_error)
+    __pyx_t_5 = PyUnicode_Join(__pyx_kp_u__2, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 118, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 118, __pyx_L1_error)
+    __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 118, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_INCREF(__pyx_kp_u_Got_unexpected_keyword_arguments);
     __Pyx_GIVEREF(__pyx_kp_u_Got_unexpected_keyword_arguments);
@@ -4287,12 +3804,12 @@ static CYTHON_INLINE RF_KwargsWrapper __pyx_f_10cpp_common_KwargsInit(RF_Scorer 
     __Pyx_GIVEREF(__pyx_t_5);
     PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_5);
     __pyx_t_5 = 0;
-    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_t_4, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(2, 118, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_t_4, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 118, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_Raise(__pyx_t_5, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __PYX_ERR(2, 118, __pyx_L1_error)
+    __PYX_ERR(1, 118, __pyx_L1_error)
 
     /* "cpp_common.pxd":117
  *     if (NULL != scorer.kwargs_init):
@@ -4395,9 +3912,9 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
 };
 /* #### Code section: cached_builtins ### */
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(2, 46, __pyx_L1_error)
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(2, 52, __pyx_L1_error)
-  __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(2, 118, __pyx_L1_error)
+  __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(1, 46, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(1, 52, __pyx_L1_error)
+  __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(1, 118, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -4510,7 +4027,7 @@ static int __Pyx_modinit_type_import_code(void) {
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_import_code", 0);
   /*--- Type import code ---*/
-  __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 9, __pyx_L1_error)
+  __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 9, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_ptype_7cpython_4type_type = __Pyx_ImportType(__pyx_t_1, __Pyx_BUILTIN_MODULE_NAME, "type", 
   #if defined(PYPY_VERSION_NUM) && PYPY_VERSION_NUM < 0x050B0000
@@ -4521,17 +4038,7 @@ static int __Pyx_modinit_type_import_code(void) {
   sizeof(PyHeapTypeObject),
   #endif
   __Pyx_ImportType_CheckSize_Warn);
-   if (!__pyx_ptype_7cpython_4type_type) __PYX_ERR(3, 9, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 8, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_ptype_7cpython_4bool_bool = __Pyx_ImportType(__pyx_t_1, __Pyx_BUILTIN_MODULE_NAME, "bool", sizeof(PyBoolObject), __Pyx_ImportType_CheckSize_Warn);
-   if (!__pyx_ptype_7cpython_4bool_bool) __PYX_ERR(4, 8, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 15, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_ptype_7cpython_7complex_complex = __Pyx_ImportType(__pyx_t_1, __Pyx_BUILTIN_MODULE_NAME, "complex", sizeof(PyComplexObject), __Pyx_ImportType_CheckSize_Warn);
-   if (!__pyx_ptype_7cpython_7complex_complex) __PYX_ERR(5, 15, __pyx_L1_error)
+   if (!__pyx_ptype_7cpython_4type_type) __PYX_ERR(2, 9, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_RefNannyFinishContext();
   return 0;
@@ -4909,12 +4416,11 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_1) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "cpp_common.pxd":113
- *     return s_proc
+  /* "cpython/pycapsule.pxd":2
  * 
- * cdef inline RF_KwargsWrapper KwargsInit(RF_Scorer scorer, dict kwargs) except *:             # <<<<<<<<<<<<<<
- *     cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()
- *     if (NULL != scorer.kwargs_init):
+ * # available since Python 3.1!             # <<<<<<<<<<<<<<
+ * 
+ * 
  */
   __Pyx_TraceReturn(Py_None, 0);
 

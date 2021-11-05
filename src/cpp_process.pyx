@@ -23,7 +23,7 @@ import heapq
 from array import array
 
 from rapidfuzz_capi cimport (
-    RF_String, RF_Distance, RF_Similarity, RF_Scorer,
+    RF_Preprocess, RF_String, RF_Distance, RF_Similarity, RF_Scorer,
     RF_DistanceInit, RF_SimilarityInit,
     RF_SIMILARITY, RF_DISTANCE
 )
@@ -82,8 +82,11 @@ cdef extern from "cpp_process.hpp":
         RF_DistanceWrapper(RF_Distance)
         void distance(const RF_String*, size_t, size_t*) except +
 
-cdef extern from "cpp_utils.hpp":
-    RF_String default_process_func(RF_String sentence) except +
+# todo support different scorers
+default_process_capsule = getattr(default_process, '_RF_Preprocess')
+if not PyCapsule_IsValid(default_process_capsule, NULL):
+    raise RuntimeError("PyCapsule missing from utils.default_process")
+cdef RF_Preprocess default_process_func = <RF_Preprocess>PyCapsule_GetPointer(default_process_capsule, NULL)
 
 cdef inline extractOne_dict(RF_SimilarityWrapper context, choices, processor, double score_cutoff):
     """
@@ -95,6 +98,7 @@ cdef inline extractOne_dict(RF_SimilarityWrapper context, choices, processor, do
     # use -1 as score, so even a score of 0 in the first iteration is higher
     cdef double result_score = -1
     cdef int def_process = 0
+    cdef RF_String proc_str
     result_choice = None
     result_key = None
 
@@ -106,7 +110,8 @@ cdef inline extractOne_dict(RF_SimilarityWrapper context, choices, processor, do
             continue
 
         if def_process:
-            choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
+            default_process_func(choice, &proc_str)
+            choice_proc = RF_StringWrapper(proc_str)
             context.similarity(&choice_proc.string, score_cutoff, &score)
         elif processor is not None:
             proc_choice = processor(choice)
@@ -139,6 +144,7 @@ cdef inline extractOne_distance_dict(RF_DistanceWrapper context, choices, proces
     cdef size_t distance
     cdef size_t result_distance = <size_t>-1
     cdef int def_process = 0
+    cdef RF_String proc_str
     result_choice = None
     result_key = None
 
@@ -150,7 +156,8 @@ cdef inline extractOne_distance_dict(RF_DistanceWrapper context, choices, proces
             continue
 
         if def_process:
-            choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
+            default_process_func(choice, &proc_str)
+            choice_proc = RF_StringWrapper(proc_str)
             context.distance(&choice_proc.string, max_, &distance)
         elif processor is not None:
             proc_choice = processor(choice)
@@ -186,6 +193,7 @@ cdef inline extractOne_list(RF_SimilarityWrapper context, choices, processor, do
     cdef size_t i
     cdef size_t result_index = 0
     cdef int def_process = 0
+    cdef RF_String proc_str
     result_choice = None
 
     if processor is default_process:
@@ -196,7 +204,8 @@ cdef inline extractOne_list(RF_SimilarityWrapper context, choices, processor, do
             continue
 
         if def_process:
-            choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
+            default_process_func(choice, &proc_str)
+            choice_proc = RF_StringWrapper(proc_str)
             context.similarity(&choice_proc.string, score_cutoff, &score)
         elif processor is not None:
             proc_choice = processor(choice)
@@ -231,6 +240,7 @@ cdef inline extractOne_distance_list(RF_DistanceWrapper context, choices, proces
     cdef size_t i
     cdef size_t result_index = 0
     cdef int def_process = 0
+    cdef RF_String proc_str
     result_choice = None
 
     if processor is default_process:
@@ -241,7 +251,8 @@ cdef inline extractOne_distance_list(RF_DistanceWrapper context, choices, proces
             continue
 
         if def_process:
-            choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
+            default_process_func(choice, &proc_str)
+            choice_proc = RF_StringWrapper(proc_str)
             context.distance(&choice_proc.string, max_, &distance)
         elif processor is not None:
             proc_choice = processor(choice)
@@ -512,6 +523,7 @@ cdef inline extract_dict(RF_SimilarityWrapper context, choices, processor, size_
     results.reserve(<size_t>len(choices))
     cdef list result_list
     cdef int def_process = 0
+    cdef RF_String proc_str
 
     if processor is default_process:
         def_process = 1
@@ -521,7 +533,8 @@ cdef inline extract_dict(RF_SimilarityWrapper context, choices, processor, size_
             continue
 
         if def_process:
-            choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
+            default_process_func(choice, &proc_str)
+            choice_proc = RF_StringWrapper(proc_str)
             context.similarity(&choice_proc.string, score_cutoff, &score)
         elif processor is not None:
             proc_choice = processor(choice)
@@ -564,6 +577,7 @@ cdef inline extract_distance_dict(RF_DistanceWrapper context, choices, processor
     results.reserve(<size_t>len(choices))
     cdef list result_list
     cdef int def_process = 0
+    cdef RF_String proc_str
 
     if processor is default_process:
         def_process = 1
@@ -573,7 +587,8 @@ cdef inline extract_distance_dict(RF_DistanceWrapper context, choices, processor
             continue
 
         if def_process:
-            choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
+            default_process_func(choice, &proc_str)
+            choice_proc = RF_StringWrapper(proc_str)
             context.distance(&choice_proc.string, max_, &distance)
         elif processor is not None:
             proc_choice = processor(choice)
@@ -617,6 +632,7 @@ cdef inline extract_list(RF_SimilarityWrapper context, choices, processor, size_
     results.reserve(<size_t>len(choices))
     cdef list result_list
     cdef int def_process = 0
+    cdef RF_String proc_str
 
     if processor is default_process:
         def_process = 1
@@ -626,7 +642,8 @@ cdef inline extract_list(RF_SimilarityWrapper context, choices, processor, size_
             continue
 
         if def_process:
-            choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
+            default_process_func(choice, &proc_str)
+            choice_proc = RF_StringWrapper(proc_str)
             context.similarity(&choice_proc.string, score_cutoff, &score)
         elif processor is not None:
             proc_choice = processor(choice)
@@ -671,6 +688,7 @@ cdef inline extract_distance_list(RF_DistanceWrapper context, choices, processor
     results.reserve(<size_t>len(choices))
     cdef list result_list
     cdef int def_process = 0
+    cdef RF_String proc_str
 
     if processor is default_process:
         def_process = 1
@@ -680,7 +698,8 @@ cdef inline extract_distance_list(RF_DistanceWrapper context, choices, processor
             continue
 
         if def_process:
-            choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
+            default_process_func(choice, &proc_str)
+            choice_proc = RF_StringWrapper(proc_str)
             context.distance(&choice_proc.string, max_, &distance)
         elif processor is not None:
             proc_choice = processor(choice)
@@ -954,6 +973,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
     cdef RF_Similarity similarity_context
     cdef RF_Distance distance_context
     cdef RF_Scorer* scorer_context = NULL
+    cdef RF_String proc_str
 
     def extract_iter_dict():
         """
@@ -968,7 +988,8 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
                 continue
 
             if def_process:
-                choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
+                default_process_func(choice, &proc_str)
+                choice_proc = RF_StringWrapper(proc_str)
                 ScorerContext.similarity(&choice_proc.string, c_score_cutoff, &score)
             elif processor is not None:
                 proc_choice = processor(choice)
@@ -998,7 +1019,8 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
                 continue
 
             if def_process:
-                choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
+                default_process_func(choice, &proc_str)
+                choice_proc = RF_StringWrapper(proc_str)
                 ScorerContext.similarity(&choice_proc.string, c_score_cutoff, &score)
             elif processor is not None:
                 proc_choice = processor(choice)
@@ -1027,7 +1049,8 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
                 continue
 
             if def_process:
-                choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
+                default_process_func(choice, &proc_str)
+                choice_proc = RF_StringWrapper(proc_str)
                 DistanceContext.distance(&choice_proc.string, c_max, &distance)
             elif processor is not None:
                 proc_choice = processor(choice)
@@ -1057,7 +1080,8 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
                 continue
 
             if def_process:
-                choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
+                default_process_func(choice, &proc_str)
+                choice_proc = RF_StringWrapper(proc_str)
                 DistanceContext.distance(&choice_proc.string, c_max, &distance)
             elif processor is not None:
                 proc_choice = processor(choice)

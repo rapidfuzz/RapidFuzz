@@ -10,8 +10,6 @@ from cpp_common cimport (
 )
 
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
-from cpython cimport PyObject
-from cpython.ref cimport Py_XDECREF
 
 cdef extern from "cpp_scorer.hpp":
     double ratio_func(                    const RF_String&, const RF_String&, double) nogil except +

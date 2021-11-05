@@ -23,7 +23,7 @@ cimport numpy as np
 cimport cython
 
 from rapidfuzz_capi cimport (
-    RF_Kwargs, RF_String, RF_Scorer, RF_DistanceInit, RF_SimilarityInit,
+    RF_Preprocess, RF_Kwargs, RF_String, RF_Scorer, RF_DistanceInit, RF_SimilarityInit,
     RF_SIMILARITY, RF_DISTANCE
 )
 from cpython.pycapsule cimport PyCapsule_IsValid, PyCapsule_GetPointer
@@ -45,8 +45,11 @@ cdef extern from "cpp_process_cdist.hpp":
     object cdist_two_lists_similarity_impl(  const RF_KwargsWrapper&, RF_SimilarityInit, const vector[RF_StringWrapper]&, const vector[RF_StringWrapper]&, int, int, double) except +
     void set_score_similarity(np.PyArrayObject*, int, np.npy_intp, np.npy_intp, double)
 
-cdef extern from "cpp_utils.hpp":
-    RF_String default_process_func(RF_String sentence) except +
+# todo support different scorers
+default_process_capsule = getattr(default_process, '_RF_Preprocess')
+if not PyCapsule_IsValid(default_process_capsule, NULL):
+    raise RuntimeError("PyCapsule missing from utils.default_process")
+cdef RF_Preprocess default_process_func = <RF_Preprocess>PyCapsule_GetPointer(default_process_capsule, NULL)
 
 cdef int dtype_to_type_num_similarity(dtype) except -1:
     if dtype is None or dtype is np.uint8:
@@ -142,6 +145,7 @@ cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, w
     cdef size_t queries_len = <size_t>len(queries)
     cdef size_t choices_len = <size_t>len(choices)
     cdef RF_Scorer* scorer_context
+    cdef RF_String proc_str
 
     scorer_capsule = getattr(scorer, '_RF_Scorer', scorer)
     if PyCapsule_IsValid(scorer_capsule, NULL):
@@ -171,14 +175,12 @@ cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, w
         # processor is True / default_process
         else:
             for query in queries:
-                proc_queries.push_back(
-                    move(RF_StringWrapper(default_process_func(conv_sequence(query))))
-                )
+                default_process_func(query, &proc_str)
+                proc_queries.push_back(move(RF_StringWrapper(proc_str)))
 
             for choice in choices:
-                proc_choices.push_back(
-                    move(RF_StringWrapper(default_process_func(conv_sequence(choice))))
-                )
+                default_process_func(choice, &proc_str)
+                proc_choices.push_back(move(RF_StringWrapper(proc_str)))
 
         if scorer_context.scorer_type == RF_SIMILARITY:
             return cdist_two_lists_similarity(proc_queries, proc_choices, dereference(scorer_context), score_cutoff, dtype, workers, kwargs)
@@ -247,6 +249,7 @@ cdef cdist_single_list(queries, scorer, processor, score_cutoff, dtype, workers,
     cdef vector[RF_StringWrapper] proc_queries
     cdef vector[PyObjectWrapper] proc_py_queries
     cdef RF_Scorer* scorer_context
+    cdef RF_String proc_str
 
     scorer_capsule = getattr(scorer, '_RF_Scorer', scorer)
     if PyCapsule_IsValid(scorer_capsule, NULL):
@@ -269,9 +272,8 @@ cdef cdist_single_list(queries, scorer, processor, score_cutoff, dtype, workers,
         # processor is True / default_process
         else:
             for query in queries:
-                proc_queries.push_back(
-                    move(RF_StringWrapper(default_process_func(conv_sequence(query))))
-                )
+                default_process_func(query, &proc_str)
+                proc_queries.push_back(move(RF_StringWrapper(proc_str)))
 
         if scorer_context.scorer_type == RF_SIMILARITY:
             return cdist_single_list_similarity(proc_queries, dereference(scorer_context), score_cutoff, dtype, workers, kwargs)

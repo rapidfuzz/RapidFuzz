@@ -3,7 +3,7 @@ from libc.stdlib cimport malloc, free
 from libc.stddef cimport wchar_t
 from libcpp cimport bool
 from libcpp.utility cimport move
-from cpython cimport PyObject
+from cpython.object cimport PyObject
 
 from rapidfuzz_capi cimport RF_Scorer, RF_StringType, RF_String, RF_Kwargs
 
