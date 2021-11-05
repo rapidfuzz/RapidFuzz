@@ -170,6 +170,42 @@ struct RF_KwargsWrapper {
     }
 };
 
+/* RAII Wrapper for PyObject* */
+struct PyObjectWrapper {
+    PyObject* obj;
+
+    PyObjectWrapper()
+        : obj(nullptr) {}
+
+    PyObjectWrapper(PyObject* o)
+        : obj(o)
+    {
+        Py_XINCREF(obj);
+    }
+
+    PyObjectWrapper(const PyObjectWrapper&) = delete;
+    PyObjectWrapper& operator=(const PyObjectWrapper&) = delete;
+
+    PyObjectWrapper(PyObjectWrapper&& other)
+    {
+        obj = other.obj;
+        other.obj = nullptr;
+    }
+
+    PyObjectWrapper& operator=(PyObjectWrapper&& other) {
+        if (&other != this) {
+            Py_XDECREF(obj);
+            obj = other.obj;
+            other.obj = nullptr;
+      }
+      return *this;
+    };
+
+    ~PyObjectWrapper() {
+        Py_XDECREF(obj);
+    }
+};
+
 void default_string_deinit(RF_String* string)
 {
     free(string->data);

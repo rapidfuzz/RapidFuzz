@@ -11,18 +11,16 @@ from libc.stdint cimport uint8_t, int32_t
 from libc.math cimport floor
 
 from cpython.list cimport PyList_New, PyList_SET_ITEM
-from cpython.object cimport PyObject
-from cpython.ref cimport Py_INCREF, Py_DECREF
+from cpython.ref cimport Py_INCREF
 from cython.operator cimport dereference
 
 from cpp_common cimport (
-    RF_StringWrapper, RF_KwargsWrapper, KwargsInit,
+    PyObjectWrapper, RF_StringWrapper, RF_KwargsWrapper, KwargsInit,
     is_valid_string, convert_string, hash_array, hash_sequence
 )
 
 import heapq
 from array import array
-from libc.stdlib cimport malloc, free
 
 from rapidfuzz_capi cimport (
     RF_String, RF_Distance, RF_Similarity, RF_Scorer,
@@ -52,13 +50,13 @@ cdef extern from "cpp_process.hpp":
     ctypedef struct ListMatchScorerElem:
         double score
         size_t index
-        PyObject* choice
+        PyObjectWrapper choice
 
     ctypedef struct DictMatchScorerElem:
         double score
         size_t index
-        PyObject* choice
-        PyObject* key
+        PyObjectWrapper choice
+        PyObjectWrapper key
 
     ctypedef struct ExtractDistanceComp:
         pass
@@ -66,13 +64,13 @@ cdef extern from "cpp_process.hpp":
     ctypedef struct ListMatchDistanceElem:
         size_t distance
         size_t index
-        PyObject* choice
+        PyObjectWrapper choice
 
     ctypedef struct DictMatchDistanceElem:
         size_t distance
         size_t index
-        PyObject* choice
-        PyObject* key
+        PyObjectWrapper choice
+        PyObjectWrapper key
 
     cdef cppclass RF_SimilarityWrapper:
         RF_SimilarityWrapper()
@@ -518,54 +516,43 @@ cdef inline extract_dict(RF_SimilarityWrapper context, choices, processor, size_
     if processor is default_process:
         def_process = 1
 
-    try:
-        for i, (choice_key, choice) in enumerate(choices.items()):
-            if choice is None:
+    for i, (choice_key, choice) in enumerate(choices.items()):
+        if choice is None:
+            continue
+
+        if def_process:
+            choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
+            context.similarity(&choice_proc.string, score_cutoff, &score)
+        elif processor is not None:
+            proc_choice = processor(choice)
+            if proc_choice is None:
                 continue
 
-            if def_process:
-                choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
-                context.similarity(&choice_proc.string, score_cutoff, &score)
-            elif processor is not None:
-                proc_choice = processor(choice)
-                if proc_choice is None:
-                    continue
-
-                choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-                context.similarity(&choice_proc.string, score_cutoff, &score)
-            else:
-                choice_proc = RF_StringWrapper(conv_sequence(choice))
-                context.similarity(&choice_proc.string, score_cutoff, &score)
-
-            if score >= score_cutoff:
-                # especially the key object might be created on the fly by e.g. pandas.Dataframe
-                # so we need to ensure Python does not deallocate it
-                Py_INCREF(choice)
-                Py_INCREF(choice_key)
-                results.push_back(DictMatchScorerElem(score, i, <PyObject*>choice, <PyObject*>choice_key))
-
-        # due to score_cutoff not always completely filled
-        if limit > results.size():
-            limit = results.size()
-
-        if limit >= results.size():
-            algorithm.sort(results.begin(), results.end(), ExtractScorerComp())
+            choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
+            context.similarity(&choice_proc.string, score_cutoff, &score)
         else:
-            algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractScorerComp())
-            results.resize(limit)
+            choice_proc = RF_StringWrapper(conv_sequence(choice))
+            context.similarity(&choice_proc.string, score_cutoff, &score)
 
-        # copy elements into Python List
-        result_list = PyList_New(<Py_ssize_t>limit)
-        for i in range(limit):
-            result_item = (<object>results[i].choice, results[i].score, <object>results[i].key)
-            Py_INCREF(result_item)
-            PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
+        if score >= score_cutoff:
+            results.push_back(move(DictMatchScorerElem(score, i, PyObjectWrapper(choice), PyObjectWrapper(choice_key))))
 
-    finally:
-        # decref all reference counts
-        for item in results:
-            Py_DECREF(<object>item.choice)
-            Py_DECREF(<object>item.key)
+    # due to score_cutoff not always completely filled
+    if limit > results.size():
+        limit = results.size()
+
+    if limit >= results.size():
+        algorithm.sort(results.begin(), results.end(), ExtractScorerComp())
+    else:
+        algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractScorerComp())
+        results.resize(limit)
+
+    # copy elements into Python List
+    result_list = PyList_New(<Py_ssize_t>limit)
+    for i in range(limit):
+        result_item = (<object>results[i].choice.obj, results[i].score, <object>results[i].key.obj)
+        Py_INCREF(result_item)
+        PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
 
     return result_list
 
@@ -581,54 +568,43 @@ cdef inline extract_distance_dict(RF_DistanceWrapper context, choices, processor
     if processor is default_process:
         def_process = 1
 
-    try:
-        for i, (choice_key, choice) in enumerate(choices.items()):
-            if choice is None:
+    for i, (choice_key, choice) in enumerate(choices.items()):
+        if choice is None:
+            continue
+
+        if def_process:
+            choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
+            context.distance(&choice_proc.string, max_, &distance)
+        elif processor is not None:
+            proc_choice = processor(choice)
+            if proc_choice is None:
                 continue
 
-            if def_process:
-                choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
-                context.distance(&choice_proc.string, max_, &distance)
-            elif processor is not None:
-                proc_choice = processor(choice)
-                if proc_choice is None:
-                    continue
-
-                choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-                context.distance(&choice_proc.string, max_, &distance)
-            else:
-                choice_proc = RF_StringWrapper(conv_sequence(choice))
-                context.distance(&choice_proc.string, max_, &distance)
-
-            if distance <= max_:
-                # especially the key object might be created on the fly by e.g. pandas.Dataframe
-                # so we need to ensure Python does not deallocate it
-                Py_INCREF(choice)
-                Py_INCREF(choice_key)
-                results.push_back(DictMatchDistanceElem(distance, i, <PyObject*>choice, <PyObject*>choice_key))
-
-        # due to max_ not always completely filled
-        if limit > results.size():
-            limit = results.size()
-
-        if limit >= results.size():
-            algorithm.sort(results.begin(), results.end(), ExtractDistanceComp())
+            choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
+            context.distance(&choice_proc.string, max_, &distance)
         else:
-            algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractDistanceComp())
-            results.resize(limit)
+            choice_proc = RF_StringWrapper(conv_sequence(choice))
+            context.distance(&choice_proc.string, max_, &distance)
 
-        # copy elements into Python List
-        result_list = PyList_New(<Py_ssize_t>limit)
-        for i in range(limit):
-            result_item = (<object>results[i].choice, results[i].distance, <object>results[i].key)
-            Py_INCREF(result_item)
-            PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
+        if distance <= max_:
+            results.push_back(move(DictMatchDistanceElem(distance, i, PyObjectWrapper(choice), PyObjectWrapper(choice_key))))
 
-    finally:
-        # decref all reference counts
-        for item in results:
-            Py_DECREF(<object>item.choice)
-            Py_DECREF(<object>item.key)
+    # due to max_ not always completely filled
+    if limit > results.size():
+        limit = results.size()
+
+    if limit >= results.size():
+        algorithm.sort(results.begin(), results.end(), ExtractDistanceComp())
+    else:
+        algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractDistanceComp())
+        results.resize(limit)
+
+    # copy elements into Python List
+    result_list = PyList_New(<Py_ssize_t>limit)
+    for i in range(limit):
+        result_item = (<object>results[i].choice.obj, results[i].distance, <object>results[i].key.obj)
+        Py_INCREF(result_item)
+        PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
 
     return result_list
 
@@ -645,50 +621,44 @@ cdef inline extract_list(RF_SimilarityWrapper context, choices, processor, size_
     if processor is default_process:
         def_process = 1
 
-    try:
-        for i, choice in enumerate(choices):
-            if choice is None:
+    for i, choice in enumerate(choices):
+        if choice is None:
+            continue
+
+        if def_process:
+            choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
+            context.similarity(&choice_proc.string, score_cutoff, &score)
+        elif processor is not None:
+            proc_choice = processor(choice)
+            if proc_choice is None:
                 continue
 
-            if def_process:
-                choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
-                context.similarity(&choice_proc.string, score_cutoff, &score)
-            elif processor is not None:
-                proc_choice = processor(choice)
-                if proc_choice is None:
-                    continue
-
-                choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-                context.similarity(&choice_proc.string, score_cutoff, &score)
-            else:
-                choice_proc = RF_StringWrapper(conv_sequence(choice))
-                context.similarity(&choice_proc.string, score_cutoff, &score)
-
-            if score >= score_cutoff:
-                Py_INCREF(choice)
-                results.push_back(ListMatchScorerElem(score, i, <PyObject*>choice))
-
-        # due to score_cutoff not always completely filled
-        if limit > results.size():
-            limit = results.size()
-
-        if limit >= results.size():
-            algorithm.sort(results.begin(), results.end(), ExtractScorerComp())
+            choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
+            context.similarity(&choice_proc.string, score_cutoff, &score)
         else:
-            algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractScorerComp())
-            results.resize(limit)
+            choice_proc = RF_StringWrapper(conv_sequence(choice))
+            context.similarity(&choice_proc.string, score_cutoff, &score)
 
-        # copy elements into Python List
-        result_list = PyList_New(<Py_ssize_t>limit)
-        for i in range(limit):
-            result_item = (<object>results[i].choice, results[i].score, results[i].index)
-            Py_INCREF(result_item)
-            PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
+        if score >= score_cutoff:
+            results.push_back(move(ListMatchScorerElem(score, i, PyObjectWrapper(choice))))
 
-    finally:
-        # decref all reference counts
-        for item in results:
-            Py_DECREF(<object>item.choice)
+    # due to score_cutoff not always completely filled
+    if limit > results.size():
+        limit = results.size()
+
+    if limit >= results.size():
+        algorithm.sort(results.begin(), results.end(), ExtractScorerComp())
+    else:
+        algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractScorerComp())
+        results.resize(limit)
+
+    # copy elements into Python List
+    result_list = PyList_New(<Py_ssize_t>limit)
+    for i in range(limit):
+        result_item = (<object>results[i].choice.obj, results[i].score, results[i].index)
+        Py_INCREF(result_item)
+        PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
+
 
     return result_list
 
@@ -705,50 +675,43 @@ cdef inline extract_distance_list(RF_DistanceWrapper context, choices, processor
     if processor is default_process:
         def_process = 1
 
-    try:
-        for i, choice in enumerate(choices):
-            if choice is None:
+    for i, choice in enumerate(choices):
+        if choice is None:
+            continue
+
+        if def_process:
+            choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
+            context.distance(&choice_proc.string, max_, &distance)
+        elif processor is not None:
+            proc_choice = processor(choice)
+            if proc_choice is None:
                 continue
 
-            if def_process:
-                choice_proc = RF_StringWrapper(default_process_func(conv_sequence(choice)))
-                context.distance(&choice_proc.string, max_, &distance)
-            elif processor is not None:
-                proc_choice = processor(choice)
-                if proc_choice is None:
-                    continue
-
-                choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-                context.distance(&choice_proc.string, max_, &distance)
-            else:
-                choice_proc = RF_StringWrapper(conv_sequence(choice))
-                context.distance(&choice_proc.string, max_, &distance)
-
-            if distance <= max_:
-                Py_INCREF(choice)
-                results.push_back(ListMatchDistanceElem(distance, i, <PyObject*>choice))
-
-        # due to max_ not always completely filled
-        if limit > results.size():
-            limit = results.size()
-
-        if limit >= results.size():
-            algorithm.sort(results.begin(), results.end(), ExtractDistanceComp())
+            choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
+            context.distance(&choice_proc.string, max_, &distance)
         else:
-            algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractDistanceComp())
-            results.resize(limit)
+            choice_proc = RF_StringWrapper(conv_sequence(choice))
+            context.distance(&choice_proc.string, max_, &distance)
 
-        # copy elements into Python List
-        result_list = PyList_New(<Py_ssize_t>limit)
-        for i in range(limit):
-            result_item = (<object>results[i].choice, results[i].distance, results[i].index)
-            Py_INCREF(result_item)
-            PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
+        if distance <= max_:
+            results.push_back(move(ListMatchDistanceElem(distance, i, PyObjectWrapper(choice))))
 
-    finally:
-        # decref all reference counts
-        for item in results:
-            Py_DECREF(<object>item.choice)
+    # due to max_ not always completely filled
+    if limit > results.size():
+        limit = results.size()
+
+    if limit >= results.size():
+        algorithm.sort(results.begin(), results.end(), ExtractDistanceComp())
+    else:
+        algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractDistanceComp())
+        results.resize(limit)
+
+    # copy elements into Python List
+    result_list = PyList_New(<Py_ssize_t>limit)
+    for i in range(limit):
+        result_item = (<object>results[i].choice.obj, results[i].distance, results[i].index)
+        Py_INCREF(result_item)
+        PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
 
     return result_list
 

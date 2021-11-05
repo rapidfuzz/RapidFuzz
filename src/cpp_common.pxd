@@ -22,6 +22,12 @@ cdef extern from "cpp_common.hpp":
         RF_KwargsWrapper()
         RF_KwargsWrapper(RF_Kwargs)
 
+    cdef cppclass PyObjectWrapper:
+        PyObject* obj
+
+        PyObjectWrapper()
+        PyObjectWrapper(object)
+
     void default_string_deinit(RF_String* string) nogil
 
     int is_valid_string(object py_str) except +

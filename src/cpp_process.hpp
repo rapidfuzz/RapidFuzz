@@ -2,34 +2,34 @@
 #include "cpp_common.hpp"
 
 struct DictElem {
-    PyObject* key;
-    PyObject* value;
+    PyObjectWrapper key;
+    PyObjectWrapper value;
 };
 
 struct ListMatchScorerElem {
     double score;
     size_t index;
-    PyObject* choice;
+    PyObjectWrapper choice;
 };
 
 struct DictMatchScorerElem {
     double score;
     size_t index;
-    PyObject* choice;
-    PyObject* key;
+    PyObjectWrapper choice;
+    PyObjectWrapper key;
 };
 
 struct ListMatchDistanceElem {
     std::size_t distance;
     size_t index;
-    PyObject* choice;
+    PyObjectWrapper choice;
 };
 
 struct DictMatchDistanceElem {
     std::size_t distance;
     size_t index;
-    PyObject* choice;
-    PyObject* key;
+    PyObjectWrapper choice;
+    PyObjectWrapper key;
 };
 
 struct ExtractScorerComp

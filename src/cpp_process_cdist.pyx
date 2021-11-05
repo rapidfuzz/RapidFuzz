@@ -9,17 +9,14 @@ from libcpp.utility cimport move
 from libcpp cimport bool
 from libc.math cimport floor
 
-from cpython.object cimport PyObject
-from cpython.ref cimport Py_INCREF, Py_DECREF
 from cython.operator cimport dereference
 
 from cpp_common cimport (
-    RF_StringWrapper, RF_KwargsWrapper, KwargsInit,
+    PyObjectWrapper, RF_StringWrapper, RF_KwargsWrapper, KwargsInit,
     is_valid_string, convert_string, hash_array, hash_sequence
 )
 
 from array import array
-from libc.stdlib cimport malloc, free
 
 import numpy as np
 cimport numpy as np
@@ -109,7 +106,7 @@ cdef inline cdist_two_lists_distance(
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef inline py_cdist_two_lists(
-    const vector[PyObject*]& queries, const vector[PyObject*]& choices,
+    const vector[PyObjectWrapper]& queries, const vector[PyObjectWrapper]& choices,
     scorer, score_cutoff, dtype, dict kwargs
 ):
     cdef size_t queries_len = queries.size()
@@ -132,7 +129,7 @@ cdef inline py_cdist_two_lists(
 
     for i in range(queries_len):
         for j in range(choices_len):
-            score = <double>scorer(<object>queries[i], <object>choices[j],**kwargs)
+            score = <double>scorer(<object>queries[i].obj, <object>choices[j].obj,**kwargs)
             set_score_similarity(<np.PyArrayObject*>matrix, c_dtype, i, j, score)
 
     return matrix
@@ -140,8 +137,8 @@ cdef inline py_cdist_two_lists(
 cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, workers, dict kwargs):
     cdef vector[RF_StringWrapper] proc_queries
     cdef vector[RF_StringWrapper] proc_choices
-    cdef vector[PyObject*] proc_py_queries
-    cdef vector[PyObject*] proc_py_choices
+    cdef vector[PyObjectWrapper] proc_py_queries
+    cdef vector[PyObjectWrapper] proc_py_choices
     cdef size_t queries_len = <size_t>len(queries)
     cdef size_t choices_len = <size_t>len(choices)
     cdef RF_Scorer* scorer_context
@@ -150,88 +147,69 @@ cdef cdist_two_lists(queries, choices, scorer, processor, score_cutoff, dtype, w
     if PyCapsule_IsValid(scorer_capsule, NULL):
         scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
 
-    try:
-        if scorer_context:
-            proc_queries.reserve(queries_len)
-            proc_choices.reserve(choices_len)
+    if scorer_context:
+        proc_queries.reserve(queries_len)
+        proc_choices.reserve(choices_len)
 
-            # processor None/False
-            if not processor:
-                for query in queries:
-                    proc_queries.push_back(move(RF_StringWrapper(conv_sequence(query))))
+        # processor None/False
+        if not processor:
+            for query in queries:
+                proc_queries.push_back(move(RF_StringWrapper(conv_sequence(query))))
 
-                for choice in choices:
-                    proc_choices.push_back(move(RF_StringWrapper(conv_sequence(choice))))
-            # processor has to be called through python
-            elif processor is not default_process and callable(processor):
-                proc_py_queries.reserve(queries_len)
-                for query in queries:
-                    proc_query = processor(query)
-                    Py_INCREF(proc_query)
-                    proc_py_queries.push_back(<PyObject*>proc_query)
-                    proc_queries.push_back(move(RF_StringWrapper(conv_sequence(proc_query))))
+            for choice in choices:
+                proc_choices.push_back(move(RF_StringWrapper(conv_sequence(choice))))
+        # processor has to be called through python
+        elif processor is not default_process and callable(processor):
+            for query in queries:
+                proc_query = processor(query)
+                proc_queries.push_back(move(RF_StringWrapper(conv_sequence(proc_query), proc_query)))
 
-                proc_py_choices.reserve(choices_len)
-                for choice in choices:
-                    proc_choice = processor(choice)
-                    Py_INCREF(proc_choice)
-                    proc_py_choices.push_back(<PyObject*>proc_choice)
-                    proc_choices.push_back(move(RF_StringWrapper(conv_sequence(proc_choice))))
+            for choice in choices:
+                proc_choice = processor(choice)
+                proc_choices.push_back(move(RF_StringWrapper(conv_sequence(proc_choice), proc_choice)))
 
-            # processor is True / default_process
-            else:
-                for query in queries:
-                    proc_queries.push_back(
-                        move(RF_StringWrapper(default_process_func(conv_sequence(query))))
-                    )
-
-                for choice in choices:
-                    proc_choices.push_back(
-                        move(RF_StringWrapper(default_process_func(conv_sequence(choice))))
-                    )
-
-            if scorer_context.scorer_type == RF_SIMILARITY:
-                return cdist_two_lists_similarity(proc_queries, proc_choices, dereference(scorer_context), score_cutoff, dtype, workers, kwargs)
-            else:
-                return cdist_two_lists_distance(proc_queries, proc_choices, dereference(scorer_context), score_cutoff, dtype, workers, kwargs)
-
+        # processor is True / default_process
         else:
-            proc_py_queries.reserve(queries_len)
-            proc_py_choices.reserve(choices_len)
+            for query in queries:
+                proc_queries.push_back(
+                    move(RF_StringWrapper(default_process_func(conv_sequence(query))))
+                )
 
-            # processor None/False
-            if not processor:
-                for query in queries:
-                    Py_INCREF(query)
-                    proc_py_queries.push_back(<PyObject*>query)
+            for choice in choices:
+                proc_choices.push_back(
+                    move(RF_StringWrapper(default_process_func(conv_sequence(choice))))
+                )
 
-                for choice in choices:
-                    Py_INCREF(choice)
-                    proc_py_choices.push_back(<PyObject*>choice)
-            # processor has to be called through python
-            else:
-                if not callable(processor):
-                    processor = default_process
+        if scorer_context.scorer_type == RF_SIMILARITY:
+            return cdist_two_lists_similarity(proc_queries, proc_choices, dereference(scorer_context), score_cutoff, dtype, workers, kwargs)
+        else:
+            return cdist_two_lists_distance(proc_queries, proc_choices, dereference(scorer_context), score_cutoff, dtype, workers, kwargs)
 
-                for query in queries:
-                    proc_query = processor(query)
-                    Py_INCREF(proc_query)
-                    proc_py_queries.push_back(<PyObject*>proc_query)
+    else:
+        proc_py_queries.reserve(queries_len)
+        proc_py_choices.reserve(choices_len)
 
-                for choice in choices:
-                    proc_choice = processor(choice)
-                    Py_INCREF(proc_choice)
-                    proc_py_choices.push_back(<PyObject*>proc_choice)
+        # processor None/False
+        if not processor:
+            for query in queries:
+                proc_py_queries.push_back(move(PyObjectWrapper(query)))
 
-            return py_cdist_two_lists(proc_py_queries, proc_py_choices, scorer, score_cutoff, dtype, kwargs)
+            for choice in choices:
+                proc_py_choices.push_back(move(PyObjectWrapper(choice)))
+        # processor has to be called through python
+        else:
+            if not callable(processor):
+                processor = default_process
 
-    finally:
-        # decref all reference counts
-        for item in proc_py_queries:
-            Py_DECREF(<object>item)
+            for query in queries:
+                proc_query = processor(query)
+                proc_py_queries.push_back(move(PyObjectWrapper(proc_query)))
 
-        for item in proc_py_choices:
-            Py_DECREF(<object>item)
+            for choice in choices:
+                proc_choice = processor(choice)
+                proc_py_choices.push_back(move(PyObjectWrapper(proc_choice)))
+
+        return py_cdist_two_lists(proc_py_queries, proc_py_choices, scorer, score_cutoff, dtype, kwargs)
 
 cdef inline cdist_single_list_similarity(
     const vector[RF_StringWrapper]& queries, RF_Scorer scorer, score_cutoff, dtype, workers, dict kwargs
@@ -267,66 +245,57 @@ cdef cdist_single_list(queries, scorer, processor, score_cutoff, dtype, workers,
     cdef size_t queries_len = <size_t>len(queries)
 
     cdef vector[RF_StringWrapper] proc_queries
-    cdef vector[PyObject*] proc_py_queries
+    cdef vector[PyObjectWrapper] proc_py_queries
     cdef RF_Scorer* scorer_context
 
     scorer_capsule = getattr(scorer, '_RF_Scorer', scorer)
     if PyCapsule_IsValid(scorer_capsule, NULL):
         scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
 
-    try:
-        if scorer_context:
-            proc_queries.reserve(queries_len)
+    if scorer_context:
+        proc_queries.reserve(queries_len)
 
-            # processor None/False
-            if not processor:
-                for query in queries:
-                    proc_queries.push_back(move(RF_StringWrapper(conv_sequence(query))))
-            # processor has to be called through python
-            elif processor is not default_process and callable(processor):
-                proc_py_queries.reserve(queries_len)
-                for query in queries:
-                    proc_query = processor(query)
-                    Py_INCREF(proc_query)
-                    proc_py_queries.push_back(<PyObject*>proc_query)
-                    proc_queries.push_back(move(RF_StringWrapper(conv_sequence(proc_query))))
-
-            # processor is True / default_process
-            else:
-                for query in queries:
-                    proc_queries.push_back(
-                        move(RF_StringWrapper(default_process_func(conv_sequence(query))))
-                    )
-
-            if scorer_context.scorer_type == RF_SIMILARITY:
-                return cdist_single_list_similarity(proc_queries, dereference(scorer_context), score_cutoff, dtype, workers, kwargs)
-            else:
-                return cdist_single_list_distance(proc_queries, dereference(scorer_context), score_cutoff, dtype, workers, kwargs)
-        else:
+        # processor None/False
+        if not processor:
+            for query in queries:
+                proc_queries.push_back(move(RF_StringWrapper(conv_sequence(query))))
+        # processor has to be called through python
+        elif processor is not default_process and callable(processor):
             proc_py_queries.reserve(queries_len)
+            for query in queries:
+                proc_query = processor(query)
+                proc_queries.push_back(move(RF_StringWrapper(conv_sequence(proc_query), proc_query)))
 
-            # processor None/False
-            if not processor:
-                for query in queries:
-                    Py_INCREF(query)
-                    proc_py_queries.push_back(<PyObject*>query)
-            # processor has to be called through python
-            else:
-                if not callable(processor):
-                    processor = default_process
+        # processor is True / default_process
+        else:
+            for query in queries:
+                proc_queries.push_back(
+                    move(RF_StringWrapper(default_process_func(conv_sequence(query))))
+                )
 
-                for query in queries:
-                    proc_query = processor(query)
-                    Py_INCREF(proc_query)
-                    proc_py_queries.push_back(<PyObject*>proc_query)
+        if scorer_context.scorer_type == RF_SIMILARITY:
+            return cdist_single_list_similarity(proc_queries, dereference(scorer_context), score_cutoff, dtype, workers, kwargs)
+        else:
+            return cdist_single_list_distance(proc_queries, dereference(scorer_context), score_cutoff, dtype, workers, kwargs)
+    else:
+        proc_py_queries.reserve(queries_len)
 
-            # scorer(a, b) might not be equal to scorer(b, a)
-            return py_cdist_two_lists(proc_py_queries, proc_py_queries, scorer, score_cutoff, dtype, kwargs)
+        # processor None/False
+        if not processor:
+            for query in queries:
+                proc_py_queries.push_back(move(PyObjectWrapper(query)))
+        # processor has to be called through python
+        else:
+            if not callable(processor):
+                processor = default_process
 
-    finally:
-        # decref all reference counts
-        for item in proc_py_queries:
-            Py_DECREF(<object>item)
+            for query in queries:
+                proc_query = processor(query)
+                proc_py_queries.push_back(move(PyObjectWrapper(proc_query)))
+
+        # scorer(a, b) might not be equal to scorer(b, a)
+        return py_cdist_two_lists(proc_py_queries, proc_py_queries, scorer, score_cutoff, dtype, kwargs)
+
 
 def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, dtype=None, workers=1, **kwargs):
     """
@@ -346,8 +315,7 @@ def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, 
         fuzz.ratio is used by default.
     processor : Callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. When processor is True ``utils.default_process``
-        is used. Default is None, which deactivates this behaviour.
+        comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : Any, optional
         Optional argument for a score threshold. When an edit distance is used this represents the maximum
         edit distance and matches with a `distance <= score_cutoff` are inserted as -1. When a
