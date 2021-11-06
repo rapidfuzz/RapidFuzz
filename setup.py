@@ -50,7 +50,7 @@ ext_modules = [
         sources=[
             'src/cpp_process.cpp'
         ],
-        include_dirs=["src/rapidfuzz-cpp/", "capi/"],
+        include_dirs=["extern/rapidfuzz-cpp/", "capi/"],
         language='c++',
     ),
     Extension(
@@ -58,7 +58,7 @@ ext_modules = [
         sources=[
             'src/cpp_process_cdist.cpp'
         ],
-        include_dirs=["src/rapidfuzz-cpp/", "capi/", "3rd-party/taskflow/", np.get_include()],
+        include_dirs=["extern/rapidfuzz-cpp/", "capi/", "extern/taskflow/", np.get_include()],
         language='c++',
     ),
     Extension(
@@ -66,7 +66,7 @@ ext_modules = [
         sources=[
             'src/cpp_fuzz.cpp'
         ],
-        include_dirs=["src/rapidfuzz-cpp/", "capi/"],
+        include_dirs=["extern/rapidfuzz-cpp/", "capi/"],
         language='c++',
     ),
     Extension(
@@ -74,16 +74,16 @@ ext_modules = [
         sources=[
             'src/cpp_string_metric.cpp'
         ],
-        include_dirs=["src/rapidfuzz-cpp/", "capi/"],
+        include_dirs=["extern/rapidfuzz-cpp/", "capi/"],
         language='c++',
     ),
     Extension(
         name='rapidfuzz.cpp_utils',
         sources=[
             'src/cpp_utils.cpp',
-            'src/rapidfuzz-cpp/rapidfuzz/details/unicode.cpp'
+            'extern/rapidfuzz-cpp/rapidfuzz/details/unicode.cpp'
         ],
-        include_dirs=["src/rapidfuzz-cpp/", "capi/"],
+        include_dirs=["extern/rapidfuzz-cpp/", "capi/"],
         language='c++',
     )
 ]

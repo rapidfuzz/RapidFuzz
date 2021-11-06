@@ -281,9 +281,6 @@ cdef inline py_extractOne_dict(query, choices, scorer, processor, double score_c
     result_choice = None
     result_key = None
 
-    kwargs["processor"] = None
-    kwargs["score_cutoff"] = score_cutoff
-
     for choice_key, choice in choices.items():
         if choice is None:
             continue
@@ -311,9 +308,6 @@ cdef inline py_extractOne_list(query, choices, scorer, processor, double score_c
     cdef size_t i
     result_score = -1
     result_choice = None
-
-    kwargs["processor"] = None
-    kwargs["score_cutoff"] = score_cutoff
 
     for i, choice in enumerate(choices):
         if choice is None:
@@ -509,6 +503,9 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
     # the scorer has to be called through Python
     if score_cutoff is not None:
         c_score_cutoff = score_cutoff
+
+    kwargs["processor"] = None
+    kwargs["score_cutoff"] = score_cutoff
 
     if hasattr(choices, "items"):
         return py_extractOne_dict(query, choices, scorer, processor, c_score_cutoff, kwargs)
@@ -741,9 +738,6 @@ cdef inline py_extract_dict(query, choices, scorer, processor, size_t limit, dou
     # a part is used. This should be optimised in the future
     cdef list result_list = []
 
-    kwargs["processor"] = None
-    kwargs["score_cutoff"] = score_cutoff
-
     for choice_key, choice in choices.items():
         if choice is None:
             continue
@@ -766,9 +760,6 @@ cdef inline py_extract_list(query, choices, scorer, processor, size_t limit, dou
     # a part is used. This should be optimised in the future
     cdef list result_list = []
     cdef size_t i
-
-    kwargs["processor"] = None
-    kwargs["score_cutoff"] = score_cutoff
 
     for i, choice in enumerate(choices):
         if choice is None:
@@ -904,6 +895,9 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
     # the scorer has to be called through Python
     if score_cutoff is not None:
         c_score_cutoff = score_cutoff
+
+    kwargs["processor"] = None
+    kwargs["score_cutoff"] = score_cutoff
 
     if hasattr(choices, "items"):
         return py_extract_dict(query, choices, scorer, processor, limit, c_score_cutoff, kwargs)
@@ -1103,10 +1097,6 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
           - type of choices = dict
           - scorer = python function
         """
-
-        kwargs["processor"] = None
-        kwargs["score_cutoff"] = c_score_cutoff
-
         for choice_key, choice in choices.items():
             if choice is None:
                 continue
@@ -1126,9 +1116,6 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
           - scorer = python function
         """
         cdef size_t i
-
-        kwargs["processor"] = None
-        kwargs["score_cutoff"] = c_score_cutoff
 
         for i, choice in enumerate(choices):
             if choice is None:
@@ -1197,6 +1184,9 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
     # the scorer has to be called through Python
     if score_cutoff is not None:
         c_score_cutoff = score_cutoff
+
+    kwargs["processor"] = None
+    kwargs["score_cutoff"] = c_score_cutoff
 
     if hasattr(choices, "items"):
         yield from py_extract_iter_dict()

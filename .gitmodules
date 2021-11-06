@@ -1,6 +1,6 @@
-[submodule "src/rapidfuzz-cpp"]
-	path = src/rapidfuzz-cpp
+[submodule "extern/rapidfuzz-cpp"]
+	path = extern/rapidfuzz-cpp
 	url = ../../maxbachmann/rapidfuzz-cpp.git
-[submodule "3rd-party/taskflow"]
-	path = 3rd-party/taskflow
+[submodule "extern/taskflow"]
+	path = extern/taskflow
 	url = ../../taskflow/taskflow.git
