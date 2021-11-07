@@ -52,7 +52,7 @@ cdef bool default_process_capi(sentence, RF_String* str_) except False:
             proc_str.dtor(&proc_str)
         raise
     
-    str_[0] = proc_str # dereference
+    str_[0] = proc_str
     return True
 
 default_process._RF_Preprocess = PyCapsule_New(<void*>default_process_capi, NULL, NULL)

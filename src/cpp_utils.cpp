@@ -2638,7 +2638,7 @@ static bool __pyx_f_9cpp_utils_default_process_capi(PyObject *__pyx_v_sentence, 
  *             proc_str.dtor(&proc_str)
  *         raise             # <<<<<<<<<<<<<<
  * 
- *     str_[0] = proc_str # dereference
+ *     str_[0] = proc_str
  */
       __Pyx_TraceLine(53,0,__PYX_ERR(0, 53, __pyx_L5_except_error))
       __Pyx_GIVEREF(__pyx_t_5);
@@ -2668,7 +2668,7 @@ static bool __pyx_f_9cpp_utils_default_process_capi(PyObject *__pyx_v_sentence, 
   /* "cpp_utils.pyx":55
  *         raise
  * 
- *     str_[0] = proc_str # dereference             # <<<<<<<<<<<<<<
+ *     str_[0] = proc_str             # <<<<<<<<<<<<<<
  *     return True
  * 
  */
@@ -2677,7 +2677,7 @@ static bool __pyx_f_9cpp_utils_default_process_capi(PyObject *__pyx_v_sentence, 
 
   /* "cpp_utils.pyx":56
  * 
- *     str_[0] = proc_str # dereference
+ *     str_[0] = proc_str
  *     return True             # <<<<<<<<<<<<<<
  * 
  * default_process._RF_Preprocess = PyCapsule_New(<void*>default_process_capi, NULL, NULL)
