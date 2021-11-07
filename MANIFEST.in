@@ -10,13 +10,13 @@ include src/*.cpp
 include capi/*.h
 include capi/*.pxd
 
-include src/rapidfuzz-cpp/LICENSE
-recursive-include src/rapidfuzz-cpp/rapidfuzz *.hpp *.h *.txx *cpp
+include extern/rapidfuzz-cpp/LICENSE
+recursive-include extern/rapidfuzz-cpp/rapidfuzz *.hpp *.h *cpp
 
-include 3rd-party/taskflow/LICENSE
-include 3rd-party/taskflow/taskflow/algorithm/*
-include 3rd-party/taskflow/taskflow/core/*
-include 3rd-party/taskflow/taskflow/nstd/variant.hpp
-include 3rd-party/taskflow/taskflow/utility/*
-include 3rd-party/taskflow/taskflow/declarations.hpp
-include 3rd-party/taskflow/taskflow/taskflow.hpp
+include extern/taskflow/LICENSE
+include extern/taskflow/taskflow/algorithm/*
+include extern/taskflow/taskflow/core/*
+include extern/taskflow/taskflow/nstd/variant.hpp
+include extern/taskflow/taskflow/utility/*
+include extern/taskflow/taskflow/declarations.hpp
+include extern/taskflow/taskflow/taskflow.hpp
