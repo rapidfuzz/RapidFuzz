@@ -2,6 +2,7 @@
 __pycache__/
 .idea/
 build/
+_skbuild/
 rapidfuzz.egg-info/
 dist/
 *.data

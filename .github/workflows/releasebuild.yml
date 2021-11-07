@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - scikit-build
   release:
     types:
       - published
@@ -18,7 +19,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     env:
       CIBW_BUILD: cp27-* cp35-* pp27-*
-      CIBW_BUILD_VERBOSITY: 3
+      CIBW_BUILD_VERBOSITY: 1
 
     steps:
       - uses: actions/checkout@v2
@@ -53,7 +54,7 @@ jobs:
         env:
           CIBW_BUILD: cp27-win_amd64
           DISTUTILS_USE_SDK: 1
-          CIBW_BUILD_VERBOSITY: 3
+          CIBW_BUILD_VERBOSITY: 1
           MSSdk: 1
 
       - uses: ilammy/msvc-dev-cmd@v1
@@ -67,7 +68,7 @@ jobs:
         env:
           CIBW_BUILD: cp27-win32
           DISTUTILS_USE_SDK: 1
-          CIBW_BUILD_VERBOSITY: 3
+          CIBW_BUILD_VERBOSITY: 1
           MSSdk: 1
 
       - name: Upload wheels
@@ -87,7 +88,7 @@ jobs:
       CIBW_BUILD: ${{matrix.python_tag}}
       CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_COMMAND: pytest {package}/tests
-      CIBW_BUILD_VERBOSITY: 3
+      CIBW_BUILD_VERBOSITY: 1
 
     steps:
       - uses: actions/checkout@v2
@@ -116,7 +117,7 @@ jobs:
       CIBW_BUILD: ${{matrix.python_tag}}
       CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_COMMAND: pytest {package}/tests
-      CIBW_BUILD_VERBOSITY: 3
+      CIBW_BUILD_VERBOSITY: 1
 
     steps:
       - uses: actions/checkout@v2
@@ -143,7 +144,7 @@ jobs:
     env:
       CIBW_BUILD: ${{matrix.python_tag}}
       CIBW_ARCHS_MACOS: "universal2 arm64"
-      CIBW_BUILD_VERBOSITY: 3
+      CIBW_BUILD_VERBOSITY: 1
 
     steps:
       - uses: actions/checkout@v2
@@ -176,7 +177,7 @@ jobs:
       CIBW_TEST_SKIP: "*-manylinux_{aarch64,ppc64le,s390x}"
       CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_COMMAND: pytest {package}/tests
-      CIBW_BUILD_VERBOSITY: 3
+      CIBW_BUILD_VERBOSITY: 1
 
     steps:
       - uses: actions/checkout@v2
@@ -210,7 +211,7 @@ jobs:
       # https://foss.heptapod.net/pypy/pypy/-/issues/3413 is released
       CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_COMMAND: pytest {package}/tests
-      CIBW_BUILD_VERBOSITY: 3
+      CIBW_BUILD_VERBOSITY: 1
 
     steps:
       - uses: actions/checkout@v2

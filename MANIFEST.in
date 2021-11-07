@@ -1,5 +1,6 @@
+include setup.py
+include CMakeLists.txt
 include README.md
-include VERSION
 include LICENSE
 include pyproject.toml
 include src/rapidfuzz/*.pyi
@@ -11,7 +12,7 @@ include capi/*.h
 include capi/*.pxd
 
 include extern/rapidfuzz-cpp/LICENSE
-recursive-include extern/rapidfuzz-cpp/rapidfuzz *.hpp *.h *.txx *cpp
+recursive-include extern/rapidfuzz-cpp/rapidfuzz *.hpp *cpp
 
 include extern/taskflow/LICENSE
 include extern/taskflow/taskflow/algorithm/*
