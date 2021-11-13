@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11.0)
+cmake_minimum_required(VERSION 3.12.0)
 
 cmake_policy(SET CMP0054 NEW)
 
@@ -9,9 +9,19 @@ endif()
 
 project(rapidfuzz LANGUAGES C CXX)
 
-find_package(NumPy REQUIRED)
+
+find_package(Python COMPONENTS Interpreter Development NumPy REQUIRED)
+set(PYTHONINTERP_FOUND TRUE)
+set(PYTHONLIBS_FOUND TRUE)
+set(PYTHON_EXECUTABLE ${Python_EXECUTABLE})
+set(PYTHON_VERSION_MAJOR ${Python_VERSION_MAJOR})
+set(PYTHON_INCLUDE_DIRS ${Python_INCLUDE_DIRS})
+set(PYTHON_LIBRARIES ${Python_LIBRARIES})
+
+#find_package(NumPy REQUIRED)
 find_package(PythonExtensions REQUIRED)
 find_package(Threads REQUIRED)
+#find_package(Python COMPONENTS Interpreter Development)
 
 add_library(cpp_utils MODULE src/cpp_utils.cpp extern/rapidfuzz-cpp/rapidfuzz/details/unicode.cpp)
 target_compile_features(cpp_utils PUBLIC cxx_std_14)
@@ -39,7 +49,7 @@ install(TARGETS cpp_process LIBRARY DESTINATION src/rapidfuzz)
 
 add_library(cpp_process_cdist MODULE src/cpp_process_cdist.cpp)
 target_compile_features(cpp_process_cdist PUBLIC cxx_std_14)
-target_include_directories(cpp_process_cdist PRIVATE extern/rapidfuzz-cpp/ capi/ extern/taskflow/ ${NumPy_INCLUDE_DIR})
+target_include_directories(cpp_process_cdist PRIVATE extern/rapidfuzz-cpp/ capi/ extern/taskflow/ ${Python_NumPy_INCLUDE_DIRS})
 # this fails with All uses of target_link_libraries with a target must be either all-keyword or all-plain.
 #target_link_libraries(cpp_process_cdist PRIVATE Threads::Threads)
 target_link_libraries(cpp_process_cdist Threads::Threads)
