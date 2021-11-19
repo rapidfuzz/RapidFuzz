@@ -81,7 +81,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python_tag: ["cp37-*", "cp38-*", "cp39-*", "cp310-*"]
+        python_tag: ["cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*"]
         os: [windows-latest]
     env:
       CIBW_BUILD: ${{matrix.python_tag}}
@@ -110,7 +110,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python_tag: ["cp37-*", "cp38-*", "cp39-*", "cp310-*"]
+        python_tag: ["cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*"]
         os: [macos-latest]
     env:
       CIBW_BUILD: ${{matrix.python_tag}}
