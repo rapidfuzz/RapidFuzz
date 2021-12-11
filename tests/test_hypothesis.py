@@ -109,6 +109,32 @@ def extract_scorer(s1, s2, scorer, processor=None, **kwargs):
 def extract_iter_scorer(s1, s2, scorer, processor=None, **kwargs):
     return list(process.extract_iter(s1, [s2], processor=processor, scorer=scorer, **kwargs))[0][1]
 
+def apply_editops(s1, s2, ops):
+    new_str = ''
+    s1_pos = 0
+    for op in ops:
+        j = op[1] - s1_pos
+        while j:
+            new_str += s1[s1_pos]
+            s1_pos += 1
+            j -= 1
+
+        if op[0] == 'delete':
+            s1_pos += 1
+        elif op[0] == 'insert':
+            new_str += s2[op[2]]
+        elif op[0] == 'replace':
+            new_str += s2[op[2]]
+            s1_pos += 1
+
+    j = len(s1) - s1_pos
+    while j:
+        new_str += s1[s1_pos]
+        s1_pos += 1
+        j -= 1
+
+    return new_str
+
 
 HYPOTHESIS_ALPHABET = ascii_letters + digits + punctuation
 
@@ -137,12 +163,13 @@ PROCESSORS = [
 ]
 
 @given(s1=st.text(), s2=st.text())
-@settings(max_examples=50, deadline=1000)
+@settings(max_examples=100, deadline=None)
 def test_levenshtein_editops(s1, s2):
     """
     test levenshtein_editops. Currently this only tests, so there are no exceptions.
     """
-    string_metric.levenshtein_editops(s1, s2)
+    ops = string_metric.levenshtein_editops(s1, s2)
+    assert apply_editops(s1, s2, ops) == s2
 
 @given(s1=st.text(max_size=64), s2=st.text())
 @settings(max_examples=50, deadline=1000)
@@ -322,4 +349,4 @@ def test_cdist(queries, choices):
 
     reference_matrix = cdist_distance(queries, queries, scorer=string_metric.levenshtein)
     matrix = process.cdist(queries, queries, scorer=string_metric.levenshtein)
-    assert (matrix == reference_matrix).all() 
+    assert (matrix == reference_matrix).all()

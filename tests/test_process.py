@@ -143,7 +143,7 @@ class ProcessTest(unittest.TestCase):
         self.assertEqual(best[0], choices_mapping[1])
         best = process.extract(query, choices_mapping, scorer=fuzz.QRatio)[0]
         self.assertEqual(best[0], choices_mapping[1])
-        
+
     def testWithCutoff(self):
         choices = [
             "new york mets vs chicago cubs",
