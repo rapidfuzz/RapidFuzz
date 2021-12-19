@@ -69,18 +69,11 @@ static inline void PyErr2RuntimeExn(bool success) {
     }
 }
 
-#if PY_VERSION_HEX > PYTHON_VERSION(3, 0, 0)
 #define LIST_OF_CASES()   \
     X_ENUM(RF_UINT8,  uint8_t ) \
     X_ENUM(RF_UINT16, uint16_t) \
     X_ENUM(RF_UINT32, uint32_t) \
     X_ENUM(RF_UINT64, uint64_t)
-#else /* Python2 */
-#define LIST_OF_CASES()   \
-    X_ENUM(RF_CHAR,    char      ) \
-    X_ENUM(RF_UNICODE, Py_UNICODE) \
-    X_ENUM(RF_UINT64,  uint64_t  )
-#endif
 
 /* RAII Wrapper for RF_String */
 struct RF_StringWrapper {
@@ -251,7 +244,6 @@ static inline bool is_valid_string(PyObject* py_str)
 {
     bool is_string = false;
 
-#if PY_VERSION_HEX > PYTHON_VERSION(3, 0, 0)
     if (PyBytes_Check(py_str)) {
         is_string = true;
     }
@@ -266,21 +258,12 @@ static inline bool is_valid_string(PyObject* py_str)
 #endif
         is_string = true;
     }
-#else /* Python2 */
-    if (PyObject_TypeCheck(py_str, &PyString_Type)) {
-        is_string = true;
-    }
-    else if (PyObject_TypeCheck(py_str, &PyUnicode_Type)) {
-        is_string = true;
-    }
-#endif
 
     return is_string;
 }
 
 static inline void validate_string(PyObject* py_str, const char* err)
 {
-#if PY_VERSION_HEX > PYTHON_VERSION(3, 0, 0)
     if (PyBytes_Check(py_str)) {
         return;
     }
@@ -295,21 +278,12 @@ static inline void validate_string(PyObject* py_str, const char* err)
 #endif
         return;
     }
-#else /* Python2 */
-    if (PyObject_TypeCheck(py_str, &PyString_Type)) {
-        return;
-    }
-    else if (PyObject_TypeCheck(py_str, &PyUnicode_Type)) {
-        return;
-    }
-#endif
 
     throw PythonTypeError(err);
 }
 
 static inline RF_String convert_string(PyObject* py_str)
 {
-#if PY_VERSION_HEX > PYTHON_VERSION(3, 0, 0)
     if (PyBytes_Check(py_str)) {
         return {
             nullptr,
@@ -340,27 +314,4 @@ static inline RF_String convert_string(PyObject* py_str)
             nullptr
         };
     }
-#else /* Python2 */
-    if (PyObject_TypeCheck(py_str, &PyString_Type)) {
-        return {
-            nullptr,
-            RF_CHAR,
-            PyString_AS_STRING(py_str),
-            static_cast<std::size_t>(PyString_GET_SIZE(py_str)),
-            nullptr
-        };
-    }
-    else if (PyObject_TypeCheck(py_str, &PyUnicode_Type)) {
-        return {
-            nullptr,
-            RF_UNICODE,
-            PyUnicode_AS_UNICODE(py_str),
-            static_cast<std::size_t>(PyUnicode_GET_SIZE(py_str)),
-            nullptr
-        };
-    }
-    else {
-        throw PythonTypeError("choice must be a String, Unicode or None");
-    }
-#endif
 }

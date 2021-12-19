@@ -9,72 +9,6 @@ on:
       - published
 
 jobs:
-  build_legacy:
-    name: Build wheel for legacy Python versions
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    env:
-      CIBW_BUILD: cp27-* cp35-* pp27-*
-      CIBW_BUILD_VERBOSITY: 3
-
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v1.12.0
-        with:
-          output-dir: wheelhouse
-
-      - name: Upload wheels
-        uses: actions/upload-artifact@v2
-        with:
-          path: ./wheelhouse/*.whl
-
-  build_windows_27_legacy:
-    name: Build wheel on windows-latest/auto/2.7
-    runs-on: windows-latest
-
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-
-      - uses: ilammy/msvc-dev-cmd@v1
-
-      - name: Build 64-bit wheel
-        uses: pypa/cibuildwheel@v1.12.0
-        with:
-          output-dir: wheelhouse
-        env:
-          CIBW_BUILD: cp27-win_amd64
-          DISTUTILS_USE_SDK: 1
-          CIBW_BUILD_VERBOSITY: 3
-          MSSdk: 1
-
-      - uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x86
-
-      - name: Build 32-bit wheel
-        uses: pypa/cibuildwheel@v1.12.0
-        with:
-          output-dir: wheelhouse
-        env:
-          CIBW_BUILD: cp27-win32
-          DISTUTILS_USE_SDK: 1
-          CIBW_BUILD_VERBOSITY: 3
-          MSSdk: 1
-
-      - name: Upload wheels
-        uses: actions/upload-artifact@v2
-        with:
-          path: ./wheelhouse/*.whl
-
   build_wheels_windows:
     name: Build wheel on ${{ matrix.os }}/auto/${{matrix.python_tag}}
     runs-on: ${{ matrix.os }}
@@ -253,7 +187,7 @@ jobs:
 
   deploy-wheels:
     if: github.event_name == 'release' && github.event.action == 'published'
-    needs: [build_legacy, build_windows_27_legacy, build_wheels_windows, build_wheels_macos, build_wheels_apple_silicon, build_wheels_manylinux, build_wheels_pypy, build_sdist]
+    needs: [build_wheels_windows, build_wheels_macos, build_wheels_apple_silicon, build_wheels_manylinux, build_wheels_pypy, build_sdist]
     name: deploy wheels to pypi
     runs-on: ubuntu-18.04
 

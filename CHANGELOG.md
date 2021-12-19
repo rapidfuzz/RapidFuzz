@@ -6,6 +6,7 @@
 
 #### Removed
 - remove the `rapidfuzz.levenshtein` module which was deprecated in v1.0.0 and scheduled for removal in v2.0.0
+- dropped support for Python2.7 and Python3.5
 
 #### Deprecated
 

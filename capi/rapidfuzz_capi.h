@@ -10,19 +10,11 @@ extern "C" {
 #include <stddef.h>
 #include <stdbool.h>
 
-#define RF_PYTHON_VERSION(major, minor, micro) ((major << 24) | (minor << 16) | (micro << 8))
-
 enum RF_StringType {
-#if PY_VERSION_HEX < RF_PYTHON_VERSION(3, 0, 0)
-    RF_CHAR,    /* char */
-    RF_UNICODE, /* Py_UNICODE */
-    RF_UINT64   /* uint64_t */
-#else /* Python3 */
     RF_UINT8,  /* uint8_t */
     RF_UINT16, /* uint16_t */
     RF_UINT32, /* uint32_t */
     RF_UINT64  /* uint64_t */
-#endif
 };
 
 enum RF_ScorerType {
