@@ -3,6 +3,7 @@
 ### [2.0.0] - Unreleased
 #### Changed
 - when the result of `string_metric.levenshtein` or `string_metric.hamming` is below max they do now return `max + 1` instead of -1
+- Replace setuptools with scikit-build
 
 #### Removed
 - remove the `rapidfuzz.levenshtein` module which was deprecated in v1.0.0 and scheduled for removal in v2.0.0
