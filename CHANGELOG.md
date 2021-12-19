@@ -2,6 +2,7 @@
 
 ### [2.0.0] - Unreleased
 #### Changed
+- when the result of `string_metric.levenshtein` or `string_metric.hamming` is below max they do now return `max + 1` instead of -1
 
 #### Removed
 

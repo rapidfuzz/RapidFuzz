@@ -104,7 +104,7 @@ def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
     max : int or None, optional
         Maximum distance between s1 and s2, that is
         considered as a result. If the distance is bigger than max,
-        -1 is returned instead. Default is None, which deactivates
+        max + 1 is returned instead. Default is None, which deactivates
         this behaviour.
 
     Returns
@@ -237,7 +237,7 @@ def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
     a more efficient implementation:
 
     >>> levenshtein("lewenstein", "levenshtein", max=1)
-    -1
+    2
 
     It is possible to select different weights by passing a `weight`
     tuple.
@@ -433,7 +433,7 @@ def hamming(s1, s2, *, processor=None, max=None):
     max : int or None, optional
         Maximum distance between s1 and s2, that is
         considered as a result. If the distance is bigger than max,
-        -1 is returned instead. Default is None, which deactivates
+        max + 1 is returned instead. Default is None, which deactivates
         this behaviour.
 
     Returns
