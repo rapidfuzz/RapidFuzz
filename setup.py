@@ -26,7 +26,7 @@ setup(
         "License :: OSI Approved :: MIT License"
     ],
 
-    packages=["rapidfuzz", "rapidfuzz.string_metric"],
+    packages=["rapidfuzz"],
     package_dir={'':'src'},
     zip_safe=True,
     include_package_data=True,

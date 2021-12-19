@@ -3967,12 +3967,12 @@ static PyObject *__pyx_pf_17cpp_string_metric_levenshtein(CYTHON_UNUSED PyObject
   __Pyx_TraceLine(257,0,__PYX_ERR(0, 257, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
   try {
-    __pyx_t_5 = levenshtein_func(__pyx_v_s1_proc.string, __pyx_v_s2_proc.string, __pyx_v_insertion, __pyx_v_deletion, __pyx_v_substitution, __pyx_v_c_max);
-    if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 257, __pyx_L1_error)
+    __pyx_t_10 = levenshtein_func(__pyx_v_s1_proc.string, __pyx_v_s2_proc.string, __pyx_v_insertion, __pyx_v_deletion, __pyx_v_substitution, __pyx_v_c_max);
   } catch(...) {
     __Pyx_CppExn2PyErr();
     __PYX_ERR(0, 257, __pyx_L1_error)
   }
+  __pyx_t_5 = __Pyx_PyInt_FromSize_t(__pyx_t_10); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 257, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_r = __pyx_t_5;
   __pyx_t_5 = 0;
@@ -5030,12 +5030,12 @@ static PyObject *__pyx_pf_17cpp_string_metric_6hamming(CYTHON_UNUSED PyObject *_
   __Pyx_TraceLine(456,0,__PYX_ERR(0, 456, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
   try {
-    __pyx_t_6 = hamming_func(__pyx_v_s1_proc.string, __pyx_v_s2_proc.string, __pyx_v_c_max);
-    if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 456, __pyx_L1_error)
+    __pyx_t_1 = hamming_func(__pyx_v_s1_proc.string, __pyx_v_s2_proc.string, __pyx_v_c_max);
   } catch(...) {
     __Pyx_CppExn2PyErr();
     __PYX_ERR(0, 456, __pyx_L1_error)
   }
+  __pyx_t_6 = __Pyx_PyInt_FromSize_t(__pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 456, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __pyx_r = __pyx_t_6;
   __pyx_t_6 = 0;

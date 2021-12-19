@@ -290,13 +290,13 @@ static inline RF_Scorer CreateQRatioFunctionTable()
 }
 
 /* string_metric */
-static inline PyObject* levenshtein_func(const RF_String& s1, const RF_String& s2,
+static inline size_t levenshtein_func(const RF_String& s1, const RF_String& s2,
     size_t insertion, size_t deletion, size_t substitution, size_t max)
 {
     size_t result = visitor(s1, s2, [&](auto str1, auto str2) {
         return string_metric::levenshtein(str1, str2, {insertion, deletion, substitution}, max);
     });
-    return dist_to_long(result);
+    return result;
 }
 static inline bool LevenshteinInit(RF_Distance* self, const RF_Kwargs* kwargs, size_t str_count, const RF_String* str)
 {
@@ -319,12 +319,12 @@ static inline bool NormalizedLevenshteinInit(RF_Similarity* self, const RF_Kwarg
     );
 }
 
-static inline PyObject* hamming_func(const RF_String& s1, const RF_String& s2, size_t max)
+static inline size_t hamming_func(const RF_String& s1, const RF_String& s2, size_t max)
 {
     size_t result = visitor(s1, s2, [&](auto str1, auto str2) {
         return string_metric::hamming(str1, str2, max);
     });
-    return dist_to_long(result);
+    return result;
 }
 static inline RF_Scorer CreateHammingFunctionTable()
 {

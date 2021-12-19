@@ -232,14 +232,6 @@ auto visitor(const RF_String& str1, const RF_String& str2, Func&& f, Args&&... a
     );
 }
 
-static inline PyObject* dist_to_long(std::size_t dist)
-{
-    if (dist == (std::size_t)-1) {
-        return PyLong_FromLong(-1);
-    }
-    return PyLong_FromSize_t(dist);
-}
-
 static inline bool is_valid_string(PyObject* py_str)
 {
     bool is_string = false;

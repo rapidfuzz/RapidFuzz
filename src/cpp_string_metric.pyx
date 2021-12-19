@@ -43,8 +43,8 @@ cdef extern from "cpp_scorer.hpp":
     double jaro_similarity_func(        const RF_String&, const RF_String&, double) nogil except +
     double jaro_winkler_similarity_func(const RF_String&, const RF_String&, double, double) nogil except +
 
-    object levenshtein_func(const RF_String&, const RF_String&, size_t, size_t, size_t, size_t) nogil except +
-    object hamming_func(    const RF_String&, const RF_String&, size_t) nogil except +
+    size_t levenshtein_func(const RF_String&, const RF_String&, size_t, size_t, size_t, size_t) nogil except +
+    size_t hamming_func(    const RF_String&, const RF_String&, size_t) nogil except +
 
     vector[LevenshteinEditOp] levenshtein_editops_func(const RF_String& s1, const RF_String& s2) nogil except +
 
