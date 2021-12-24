@@ -22,3 +22,6 @@ bench_results/
 # Hypothesis results
 .hypothesis/
 
+# Cython
+src/*.pyx
+

@@ -28,6 +28,14 @@ jobs:
         with:
           submodules: 'true'
 
+      - uses: actions/setup-python@v2
+
+      - name: cythonize
+        run: |
+          pip install Cython==3.0.0a9
+          ./tools/cythonize.sh
+        shell: sh
+
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.1.1
         with:
@@ -57,6 +65,14 @@ jobs:
         with:
           submodules: 'true'
 
+      - uses: actions/setup-python@v2
+
+      - name: cythonize
+        run: |
+          pip install Cython==3.0.0a9
+          ./tools/cythonize.sh
+        shell: sh
+
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.1.1
         with:
@@ -83,6 +99,14 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: 'true'
+
+      - uses: actions/setup-python@v2
+
+      - name: cythonize
+        run: |
+          pip install Cython==3.0.0a9
+          ./tools/cythonize.sh
+        shell: sh
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.1.1
@@ -116,6 +140,14 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: 'true'
+
+      - uses: actions/setup-python@v2
+
+      - name: cythonize
+        run: |
+          pip install Cython==3.0.0a9
+          ./tools/cythonize.sh
+        shell: sh
 
       - uses: docker/setup-qemu-action@v1
         name: Set up QEMU
@@ -151,6 +183,14 @@ jobs:
         with:
           submodules: 'true'
 
+      - uses: actions/setup-python@v2
+
+      - name: cythonize
+        run: |
+          pip install Cython==3.0.0a9
+          ./tools/cythonize.sh
+        shell: sh
+
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.1.1
         with:
@@ -170,9 +210,12 @@ jobs:
           submodules: 'true'
 
       - uses: actions/setup-python@v2
-        name: Install Python
-        with:
-          python-version: '3.7'
+
+      - name: cythonize
+        run: |
+          pip install Cython==3.0.0a9
+          ./tools/cythonize.sh
+        shell: sh
 
       - name: Build sdist
         run: |

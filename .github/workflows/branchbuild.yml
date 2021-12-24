@@ -22,6 +22,12 @@ jobs:
         with:
           python-version: "${{ matrix.python-version }}"
 
+      - name: cythonize
+        run: |
+          pip install Cython==3.0.0a9
+          ./tools/cythonize.sh
+        shell: sh
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip

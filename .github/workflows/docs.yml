@@ -13,10 +13,13 @@ jobs:
         with:
           submodules: 'true'
 
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
+      - uses: actions/setup-python@v2
+
+      - name: cythonize
+        run: |
+          pip install Cython==3.0.0a9
+          ./tools/cythonize.sh
+        shell: sh
 
       - name: Install dependencies
         run: |
