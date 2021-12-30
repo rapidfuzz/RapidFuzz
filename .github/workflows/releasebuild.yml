@@ -37,7 +37,7 @@ jobs:
         shell: sh
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.1.1
+        uses: pypa/cibuildwheel@v2.3.1
         with:
           output-dir: wheelhouse
 
@@ -74,7 +74,7 @@ jobs:
         shell: sh
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.1.1
+        uses: pypa/cibuildwheel@v2.3.1
         with:
           output-dir: wheelhouse
 
@@ -109,7 +109,7 @@ jobs:
         shell: sh
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.1.1
+        uses: pypa/cibuildwheel@v2.3.1
         with:
           output-dir: wheelhouse
 
@@ -153,7 +153,7 @@ jobs:
         name: Set up QEMU
 
       - name: Build wheel
-        uses: pypa/cibuildwheel@v2.1.1
+        uses: pypa/cibuildwheel@v2.3.1
         with:
           output-dir: wheelhouse
 
@@ -162,44 +162,46 @@ jobs:
         with:
           path: ./wheelhouse/*.whl
 
-  build_wheels_pypy:
-    name: Build wheel on ${{ matrix.os }}/auto/pp37-*
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        # numpy ships no wheels for pypy on mac os
-        os: [ubuntu-latest, windows-latest]
-    env:
-      CIBW_BUILD: "pp37-*"
-      # activate tests when the fix for
-      # https://foss.heptapod.net/pypy/pypy/-/issues/3413 is released
-      CIBW_TEST_REQUIRES: pytest hypothesis pandas
-      CIBW_TEST_COMMAND: pytest {package}/tests
-      CIBW_BUILD_VERBOSITY: 3
-
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-
-      - uses: actions/setup-python@v2
-
-      - name: cythonize
-        run: |
-          pip install Cython==3.0.0a9
-          ./tools/cythonize.sh
-        shell: sh
-
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.1.1
-        with:
-          output-dir: wheelhouse
-
-      - name: Upload wheels
-        uses: actions/upload-artifact@v2
-        with:
-          path: ./wheelhouse/*.whl
+  # Scikit-build fails to build on pypy
+  #build_wheels_pypy:
+  #  name: Build wheel on ${{ matrix.os }}/auto/${{matrix.python_tag}}
+  #  runs-on: ${{ matrix.os }}
+  #  strategy:
+  #    fail-fast: false
+  #    matrix:
+  #      # numpy ships no wheels for pypy on mac os
+  #      os: [ubuntu-latest, windows-latest]
+  #      python_tag: ["pp37-*", "pp38-*"]
+  #  env:
+  #    CIBW_BUILD: ${{matrix.python_tag}}
+  #    # activate tests when the fix for
+  #    # https://foss.heptapod.net/pypy/pypy/-/issues/3413 is released
+  #    CIBW_TEST_REQUIRES: pytest hypothesis pandas
+  #    CIBW_TEST_COMMAND: pytest {package}/tests
+  #    CIBW_BUILD_VERBOSITY: 3
+  #
+  #  steps:
+  #    - uses: actions/checkout@v2
+  #      with:
+  #        submodules: 'true'
+  #
+  #    - uses: actions/setup-python@v2
+  #
+  #    - name: cythonize
+  #      run: |
+  #        pip install Cython==3.0.0a9
+  #        ./tools/cythonize.sh
+  #      shell: sh
+  #
+  #    - name: Build wheels
+  #      uses: pypa/cibuildwheel@v2.3.1
+  #      with:
+  #        output-dir: wheelhouse
+  #
+  #    - name: Upload wheels
+  #      uses: actions/upload-artifact@v2
+  #      with:
+  #        path: ./wheelhouse/*.whl
 
   build_sdist:
     name: Build source distribution
