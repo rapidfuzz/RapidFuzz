@@ -1,11 +1,23 @@
-from libc.stdint cimport uint64_t
+# distutils: language=c++
+# cython: language_level=3, binding=True, linetrace=True
+
+from libc.stdint cimport uint64_t, int64_t
 from libc.stdlib cimport malloc, free
 from libc.stddef cimport wchar_t
+from libcpp.utility cimport pair
 from libcpp cimport bool
 from libcpp.utility cimport move
 from cpython.object cimport PyObject
+from cython.operator cimport dereference
+from libcpp.vector cimport vector
+from cpython.pycapsule cimport PyCapsule_IsValid, PyCapsule_GetPointer
 
-from rapidfuzz_capi cimport RF_Scorer, RF_StringType, RF_String, RF_Kwargs
+from rapidfuzz_capi cimport (
+    RF_Scorer, RF_StringType, RF_String, RF_Kwargs,
+    RF_ScorerFlags, RF_Preprocessor
+)
+
+from array import array
 
 cdef extern from "cpp_common.hpp":
     cdef cppclass RF_StringWrapper:
@@ -110,11 +122,64 @@ cdef inline RF_String hash_sequence(seq) except *:
     s_proc.dtor = default_string_deinit
     return s_proc
 
-cdef inline RF_KwargsWrapper KwargsInit(RF_Scorer scorer, dict kwargs) except *:
-    cdef RF_KwargsWrapper kwargs_context = RF_KwargsWrapper()
-    if (NULL != scorer.kwargs_init):
-        scorer.kwargs_init(&kwargs_context.kwargs, kwargs)
-    elif len(kwargs):
-        raise TypeError("Got unexpected keyword arguments: ", ", ".join(kwargs.keys()))
+cdef inline RF_String conv_sequence(seq) except *:
+    if is_valid_string(seq):
+        return move(convert_string(seq))
+    elif isinstance(seq, array):
+        return move(hash_array(seq))
+    else:
+        return move(hash_sequence(seq))
 
-    return move(kwargs_context)
+cdef inline double get_score_cutoff_f64(score_cutoff, const RF_ScorerFlags* scorer_flags) except *:
+    worst_score = dereference(scorer_flags).worst_score.f64
+    optimal_score = dereference(scorer_flags).optimal_score.f64
+    c_score_cutoff = worst_score
+    
+    if score_cutoff is not None:
+        c_score_cutoff = score_cutoff
+        if optimal_score > worst_score:
+            # e.g. 0.0 - 100.0
+            if c_score_cutoff < worst_score or c_score_cutoff > optimal_score:
+                raise TypeError(f"score_cutoff has to be in the range of {worst_score} - {optimal_score}")
+        else:
+            # e.g. DBL_MAX - 0
+            if c_score_cutoff > worst_score or c_score_cutoff < optimal_score:
+                raise TypeError(f"score_cutoff has to be in the range of {optimal_score} - {worst_score}")
+    
+    return c_score_cutoff
+
+cdef inline uint64_t get_score_cutoff_u64(score_cutoff, const RF_ScorerFlags* scorer_flags) except *:
+    worst_score = dereference(scorer_flags).worst_score.u64
+    optimal_score = dereference(scorer_flags).optimal_score.u64
+    c_score_cutoff = worst_score
+    
+    if score_cutoff is not None:
+        c_score_cutoff = score_cutoff
+        if optimal_score > worst_score:
+            # e.g. 0.0 - 100.0
+            if c_score_cutoff < worst_score or c_score_cutoff > optimal_score:
+                raise TypeError(f"score_cutoff has to be in the range of {worst_score} - {optimal_score}")
+        else:
+            # e.g. DBL_MAX - 0
+            if c_score_cutoff > worst_score or c_score_cutoff < optimal_score:
+                raise TypeError(f"score_cutoff has to be in the range of {optimal_score} - {worst_score}")
+
+    return c_score_cutoff
+
+cdef inline int64_t get_score_cutoff_i64(score_cutoff, const RF_ScorerFlags* scorer_flags) except *:
+    worst_score = dereference(scorer_flags).worst_score.i64
+    optimal_score = dereference(scorer_flags).optimal_score.i64
+    c_score_cutoff = worst_score
+    
+    if score_cutoff is not None:
+        c_score_cutoff = score_cutoff
+        if optimal_score > worst_score:
+            # e.g. 0.0 - 100.0
+            if c_score_cutoff < worst_score or c_score_cutoff > optimal_score:
+                raise TypeError(f"score_cutoff has to be in the range of {worst_score} - {optimal_score}")
+        else:
+            # e.g. DBL_MAX - 0
+            if c_score_cutoff > worst_score or c_score_cutoff < optimal_score:
+                raise TypeError(f"score_cutoff has to be in the range of {optimal_score} - {worst_score}")
+    
+    return c_score_cutoff

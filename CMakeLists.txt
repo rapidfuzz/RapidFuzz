@@ -9,7 +9,6 @@ endif()
 
 project(rapidfuzz LANGUAGES C CXX)
 
-
 find_package(NumPy REQUIRED)
 find_package(PythonExtensions REQUIRED)
 find_package(Threads REQUIRED)
@@ -35,13 +34,13 @@ install(TARGETS cpp_string_metric LIBRARY DESTINATION src/rapidfuzz)
 
 add_library(cpp_process MODULE src/cpp_process.cpp)
 target_compile_features(cpp_process PUBLIC cxx_std_14)
-target_include_directories(cpp_process PRIVATE extern/rapidfuzz-cpp/ capi/)
+target_include_directories(cpp_process PRIVATE extern/rapidfuzz-cpp/ extern/optional-lite/include capi/)
 python_extension_module(cpp_process)
 install(TARGETS cpp_process LIBRARY DESTINATION src/rapidfuzz)
 
 add_library(cpp_process_cdist MODULE src/cpp_process_cdist.cpp)
 target_compile_features(cpp_process_cdist PUBLIC cxx_std_14)
-target_include_directories(cpp_process_cdist PRIVATE extern/rapidfuzz-cpp/ capi/ extern/taskflow/ ${NumPy_INCLUDE_DIR})
+target_include_directories(cpp_process_cdist PRIVATE extern/rapidfuzz-cpp/ extern/optional-lite/include capi/ extern/taskflow/ ${NumPy_INCLUDE_DIR})
 # this fails with All uses of target_link_libraries with a target must be either all-keyword or all-plain.
 # target_link_libraries(cpp_process_cdist PRIVATE Threads::Threads)
 target_link_libraries(cpp_process_cdist Threads::Threads)

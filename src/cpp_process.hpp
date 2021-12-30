@@ -1,141 +1,382 @@
 #pragma once
 #include "cpp_common.hpp"
+#include "nonstd/optional.hpp"
 
-struct DictElem {
-    PyObjectWrapper key;
-    PyObjectWrapper value;
-};
-
-struct ListMatchScorerElem {
-    double score;
-    size_t index;
-    PyObjectWrapper choice;
-};
-
-struct DictMatchScorerElem {
-    double score;
-    size_t index;
-    PyObjectWrapper choice;
-    PyObjectWrapper key;
-};
-
-struct ListMatchDistanceElem {
-    std::size_t distance;
-    size_t index;
-    PyObjectWrapper choice;
-};
-
-struct DictMatchDistanceElem {
-    std::size_t distance;
-    size_t index;
-    PyObjectWrapper choice;
-    PyObjectWrapper key;
-};
-
-struct ExtractScorerComp
+template <typename T>
+struct ListMatchElem
 {
-    template<class T>
+    ListMatchElem() {}
+    ListMatchElem(T score, size_t index, PyObjectWrapper choice)
+        : score(score), index(index), choice(std::move(choice)) {}
+
+    T score;
+    size_t index;
+    PyObjectWrapper choice;
+};
+
+template <typename T>
+struct DictMatchElem
+{
+    DictMatchElem() {}
+    DictMatchElem(T score, size_t index, PyObjectWrapper choice, PyObjectWrapper key)
+        : score(score), index(index), choice(std::move(choice)), key(std::move(key)) {}
+
+    T score;
+    size_t index;
+    PyObjectWrapper choice;
+    PyObjectWrapper key;
+};
+
+struct DictStringElem
+{
+    DictStringElem() : index(-1) {}
+    DictStringElem(size_t index, PyObjectWrapper key, PyObjectWrapper val, RF_StringWrapper proc_val)
+        : index(index), key(std::move(key)), val(std::move(val)), proc_val(std::move(proc_val)) {}
+
+    size_t index;
+    PyObjectWrapper key;
+    PyObjectWrapper val;
+    RF_StringWrapper proc_val;
+};
+
+struct ListStringElem
+{
+    ListStringElem() : index(-1) {}
+    ListStringElem(size_t index, PyObjectWrapper val, RF_StringWrapper proc_val)
+        : index(index), val(std::move(val)), proc_val(std::move(proc_val)) {}
+
+    size_t index;
+    PyObjectWrapper val;
+    RF_StringWrapper proc_val;
+};
+
+struct ExtractComp
+{
+    ExtractComp()
+        : m_scorer_flags(nullptr) { }
+
+    explicit ExtractComp(const RF_ScorerFlags* scorer_flags)
+        : m_scorer_flags(scorer_flags) { }
+
+    template<typename T>
     bool operator()(T const &a, T const &b) const {
-        if (a.score > b.score) {
-            return true;
-        } else if (a.score < b.score) {
-            return false;
-        } else {
-            return a.index < b.index;
+        if (m_scorer_flags->flags & RF_SCORER_FLAG_RESULT_F64)
+        {
+            return is_first(a, b, m_scorer_flags->optimal_score.f64, m_scorer_flags->worst_score.f64);
+        }
+        else if (m_scorer_flags->flags & RF_SCORER_FLAG_RESULT_U64)
+        {
+            return is_first(a, b, m_scorer_flags->optimal_score.u64, m_scorer_flags->worst_score.u64);
+        }
+        else
+        {
+            return is_first(a, b, m_scorer_flags->optimal_score.i64, m_scorer_flags->worst_score.i64);
         }
     }
-};
 
-struct ExtractDistanceComp
-{
-    template<class T>
-    bool operator()(T const &a, T const &b) const {
-        if (a.distance < b.distance) {
-            return true;
-        } else if (a.distance > b.distance) {
-            return false;
-        } else {
-            return a.index < b.index;
+private:
+    template<typename T, typename U>
+    static bool is_first(T const &a, T const &b, U optimal, U worst) {
+        if (optimal > worst)
+        {
+            if (a.score > b.score) {
+                return true;
+            } else if (a.score < b.score) {
+                return false;
+            }
         }
+        else
+        {
+            if (a.score > b.score) {
+                return false;
+            } else if (a.score < b.score) {
+                return true;
+            }
+        }
+        return a.index < b.index;
     }
+
+    const RF_ScorerFlags* m_scorer_flags;
 };
 
-struct RF_SimilarityWrapper {
-    RF_Similarity context;
+struct RF_ScorerWrapper {
+    RF_ScorerFunc scorer_func;
 
-    RF_SimilarityWrapper()
-      : context({nullptr, nullptr, nullptr}) {}
-    explicit RF_SimilarityWrapper(RF_Similarity context_)
-      : context(context_) {}
+    RF_ScorerWrapper()
+      : scorer_func({nullptr, nullptr, nullptr}) {}
+    explicit RF_ScorerWrapper(RF_ScorerFunc scorer_func_)
+      : scorer_func(scorer_func_) {}
 
-    RF_SimilarityWrapper(const RF_SimilarityWrapper&) = delete;
-    RF_SimilarityWrapper& operator=(const RF_SimilarityWrapper&) = delete;
+    RF_ScorerWrapper(const RF_ScorerWrapper&) = delete;
+    RF_ScorerWrapper& operator=(const RF_ScorerWrapper&) = delete;
 
-    RF_SimilarityWrapper(RF_SimilarityWrapper&& other)
-     : context(other.context)
+    RF_ScorerWrapper(RF_ScorerWrapper&& other)
+     : scorer_func(other.scorer_func)
     {
-        other.context = {nullptr, nullptr, nullptr};
+        other.scorer_func = {nullptr, nullptr, nullptr};
     }
 
-    RF_SimilarityWrapper& operator=(RF_SimilarityWrapper&& other) {
+    RF_ScorerWrapper& operator=(RF_ScorerWrapper&& other) {
         if (&other != this) {
-            if (context.dtor) {
-                context.dtor(&context);
+            if (scorer_func.dtor) {
+                scorer_func.dtor(&scorer_func);
             }
 
-            context = other.context;
-            other.context = {nullptr, nullptr, nullptr};
+            scorer_func = other.scorer_func;
+            other.scorer_func = {nullptr, nullptr, nullptr};
       }
       return *this;
     };
 
-    ~RF_SimilarityWrapper() {
-        if (context.dtor) {
-            context.dtor(&context);
+    ~RF_ScorerWrapper() {
+        if (scorer_func.dtor) {
+            scorer_func.dtor(&scorer_func);
         }
     }
 
-    void similarity(const RF_String* str, double score_cutoff, double* sim) {
-        PyErr2RuntimeExn(context.similarity(&context, str, score_cutoff, sim));
+    void call(const RF_String* str, double score_cutoff, double* result) const {
+        PyErr2RuntimeExn(scorer_func.call.f64(&scorer_func, str, score_cutoff, result));
+    }
+
+    void call(const RF_String* str, uint64_t score_cutoff, uint64_t* result) const {
+        PyErr2RuntimeExn(scorer_func.call.u64(&scorer_func, str, score_cutoff, result));
+    }
+
+    void call(const RF_String* str, int64_t score_cutoff, int64_t* result) const {
+        PyErr2RuntimeExn(scorer_func.call.i64(&scorer_func, str, score_cutoff, result));
     }
 };
 
-struct RF_DistanceWrapper {
-    RF_Distance context;
-
-    RF_DistanceWrapper()
-      : context({nullptr, nullptr, nullptr}) {}
-    explicit RF_DistanceWrapper(RF_Distance context_)
-      : context(context_) {}
-
-    RF_DistanceWrapper(const RF_DistanceWrapper&) = delete;
-    RF_DistanceWrapper& operator=(const RF_DistanceWrapper&) = delete;
-
-    RF_DistanceWrapper(RF_DistanceWrapper&& other)
-     : context(other.context)
+template <typename T>
+bool is_lowest_score_worst(const RF_ScorerFlags* scorer_flags)
+{
+    if (std::is_same<T, double>::value)
     {
-        other.context = {nullptr, nullptr, nullptr};
+        return scorer_flags->optimal_score.f64 > scorer_flags->worst_score.f64;
     }
+    else if (std::is_same<T, uint64_t>::value)
+    {
+        return scorer_flags->optimal_score.u64 > scorer_flags->worst_score.u64;
+    }
+    else
+    {
+        return scorer_flags->optimal_score.i64 > scorer_flags->worst_score.i64;
+    }
+}
 
-    RF_DistanceWrapper& operator=(RF_DistanceWrapper&& other) {
-        if (&other != this) {
-            if (context.dtor) {
-                context.dtor(&context);
+template <typename T>
+T get_optimal_score(const RF_ScorerFlags* scorer_flags)
+{
+    if (std::is_same<T, double>::value)
+    {
+        return (T)scorer_flags->optimal_score.f64;
+    }
+    else if (std::is_same<T, uint64_t>::value)
+    {
+        return (T)scorer_flags->optimal_score.u64;
+    }
+    else
+    {
+        return (T)scorer_flags->optimal_score.i64;
+    }
+}
+
+
+template <typename T>
+nonstd::optional<DictMatchElem<T>> extractOne_dict_impl(
+    const RF_Kwargs* kwargs, const RF_ScorerFlags* scorer_flags, RF_Scorer* scorer,
+    const RF_StringWrapper& query, const std::vector<DictStringElem>& choices, T score_cutoff)
+{
+    nonstd::optional<DictMatchElem<T>> result = nonstd::nullopt;;
+
+    RF_ScorerFunc scorer_func;
+    PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, 1, &query.string));
+    RF_ScorerWrapper ScorerFunc(scorer_func);    
+
+    bool lowest_score_worst = is_lowest_score_worst<T>(scorer_flags);
+    T optimal_score = get_optimal_score<T>(scorer_flags);
+
+    for (const auto& choice : choices)
+    {
+        T score;
+        ScorerFunc.call(&choice.proc_val.string, score_cutoff, &score);
+
+        if (lowest_score_worst)
+        {
+            if (score >= score_cutoff && (!result || score > result->score))
+            {
+                result = DictMatchElem<T>(score, choice.index, choice.val, choice.key);
             }
+        }
+        else
+        {
+            if (score <= score_cutoff && (!result || score < result->score))
+            {
+                result = DictMatchElem<T>(score, choice.index, choice.val, choice.key);
+            }
+        }
 
-            context = other.context;
-            other.context = {nullptr, nullptr, nullptr};
-      }
-      return *this;
-    };
-
-    ~RF_DistanceWrapper() {
-        if (context.dtor) {
-            context.dtor(&context);
+        if (score == optimal_score)
+        {
+            break;
         }
     }
 
-    void distance(const RF_String* str, size_t max, size_t* dist) {
-        PyErr2RuntimeExn(context.distance(&context, str, max, dist));
+    return result;
+}
+
+
+template <typename T>
+nonstd::optional<ListMatchElem<T>> extractOne_list_impl(
+    const RF_Kwargs* kwargs, const RF_ScorerFlags* scorer_flags, RF_Scorer* scorer,
+    const RF_StringWrapper& query, const std::vector<ListStringElem>& choices, T score_cutoff)
+{
+    nonstd::optional<ListMatchElem<T>> result = nonstd::nullopt;
+
+    RF_ScorerFunc scorer_func;
+    PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, 1, &query.string));
+    RF_ScorerWrapper ScorerFunc(scorer_func);    
+
+    bool lowest_score_worst = is_lowest_score_worst<T>(scorer_flags);
+    T optimal_score = get_optimal_score<T>(scorer_flags);
+
+    for (const auto& choice : choices)
+    {
+        T score;
+        ScorerFunc.call(&choice.proc_val.string, score_cutoff, &score);
+
+        if (lowest_score_worst)
+        {
+            if (score >= score_cutoff && (!result || score > result->score))
+            {
+                result = ListMatchElem<T>(score, choice.index, choice.val);
+            }
+        }
+        else
+        {
+            if (score <= score_cutoff && (!result || score < result->score))
+            {
+                result = ListMatchElem<T>(score, choice.index, choice.val);
+            }
+        }
+
+        if (score == optimal_score)
+        {
+            break;
+        }
     }
-};
+
+    return result;
+}
+
+
+template <typename T>
+std::vector<DictMatchElem<T>> extract_dict_impl(
+    const RF_Kwargs* kwargs, const RF_ScorerFlags* scorer_flags, RF_Scorer* scorer,
+    const RF_StringWrapper& query, const std::vector<DictStringElem>& choices, T score_cutoff)
+{
+    std::vector<DictMatchElem<T>> results;
+    results.reserve(choices.size());
+
+    RF_ScorerFunc scorer_func;
+    PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, 1, &query.string));
+    RF_ScorerWrapper ScorerFunc(scorer_func);    
+
+    bool lowest_score_worst = is_lowest_score_worst<T>(scorer_flags);
+
+    for (const auto& choice : choices)
+    {
+        T score;
+        ScorerFunc.call(&choice.proc_val.string, score_cutoff, &score);
+
+        if (lowest_score_worst)
+        {
+            if (score >= score_cutoff)
+            {
+                results.emplace_back(score, choice.index, choice.val, choice.key);
+            }
+        }
+        else
+        {
+            if (score <= score_cutoff)
+            {
+                results.emplace_back(score, choice.index, choice.val, choice.key);
+            }
+        }
+    }
+
+    return results;
+}
+
+
+template <typename T>
+std::vector<ListMatchElem<T>> extract_list_impl(
+    const RF_Kwargs* kwargs, const RF_ScorerFlags* scorer_flags, RF_Scorer* scorer,
+    const RF_StringWrapper& query, const std::vector<ListStringElem>& choices, T score_cutoff)
+{
+    std::vector<ListMatchElem<T>> results;
+    results.reserve(choices.size());
+
+    RF_ScorerFunc scorer_func;
+    PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, 1, &query.string));
+    RF_ScorerWrapper ScorerFunc(scorer_func);    
+
+    bool lowest_score_worst = is_lowest_score_worst<T>(scorer_flags);
+
+    for (const auto& choice : choices)
+    {
+        T score;
+        ScorerFunc.call(&choice.proc_val.string, score_cutoff, &score);
+
+        if (lowest_score_worst)
+        {
+            if (score >= score_cutoff)
+            {
+                results.emplace_back(score, choice.index, choice.val);
+            }
+        }
+        else
+        {
+            if (score <= score_cutoff)
+            {
+                results.emplace_back(score, choice.index, choice.val);
+            }
+        }
+    }
+
+    return results;
+}
+
+template <typename T>
+nonstd::optional<T> extract_iter_impl(
+    const RF_ScorerWrapper* ScorerFunc, const RF_ScorerFlags* scorer_flags,
+    const RF_StringWrapper& choice, T score_cutoff)
+{
+    bool lowest_score_worst = is_lowest_score_worst<T>(scorer_flags);
+
+    T score;
+    ScorerFunc->call(&choice.string, score_cutoff, &score);
+
+    if (lowest_score_worst)
+    {
+        if (score >= score_cutoff)
+        {
+            return score;
+        }
+        else
+        {
+            return nonstd::nullopt;
+        }
+    }
+    else
+    {
+        if (score <= score_cutoff)
+        {
+            return score;
+        }
+        else
+        {
+            return nonstd::nullopt;
+        }
+    }
+}

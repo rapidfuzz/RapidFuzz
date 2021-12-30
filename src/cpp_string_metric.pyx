@@ -5,19 +5,25 @@ from array import array
 from rapidfuzz.utils import default_process
 
 from rapidfuzz_capi cimport (
-    RF_String, RF_Scorer, RF_Kwargs, RF_Distance, RF_Similarity, RF_Preprocess,
-    RF_KwargsInit, RF_SIMILARITY, RF_DISTANCE
+    RF_String, RF_Scorer, RF_Kwargs, RF_ScorerFunc, RF_Preprocess, RF_KwargsInit,
+    SCORER_STRUCT_VERSION, RF_Preprocessor,
+    RF_ScorerFlags,
+    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_U64, RF_SCORER_FLAG_MULTI_STRING, RF_SCORER_FLAG_SYMMETRIC
 )
-from cpp_common cimport RF_StringWrapper, is_valid_string, convert_string, hash_array, hash_sequence
+from cpp_common cimport RF_StringWrapper, conv_sequence
+from libc.stdint cimport SIZE_MAX
 
 from libcpp cimport bool
 from libcpp.utility cimport move
 from libcpp.vector cimport vector
 from libc.stdlib cimport malloc, free
+from libc.stdint cimport uint32_t
 from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.ref cimport Py_INCREF
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
 from cython.operator cimport dereference
+
+from array import array
 
 cdef extern from "cpp_scorer.hpp" namespace "rapidfuzz" nogil:
     cpdef enum class LevenshteinEditType:
@@ -46,41 +52,38 @@ cdef extern from "cpp_scorer.hpp":
     size_t levenshtein_func(const RF_String&, const RF_String&, size_t, size_t, size_t, size_t) nogil except +
     size_t hamming_func(    const RF_String&, const RF_String&, size_t) nogil except +
 
-    vector[LevenshteinEditOp] levenshtein_editops_func(const RF_String& s1, const RF_String& s2) nogil except +
+    vector[LevenshteinEditOp] levenshtein_editops_func(const RF_String&, const RF_String&) nogil except +
 
-    bool LevenshteinInit(RF_Distance* context, const RF_Kwargs* kwargs, size_t, const RF_String* str) nogil except False
-    bool NormalizedLevenshteinInit(RF_Similarity* context, const RF_Kwargs* kwargs, size_t, const RF_String* str) nogil except False
-
-    RF_Scorer CreateHammingFunctionTable() except +
-    RF_Scorer CreateNormalizedHammingFunctionTable() except +
-    RF_Scorer CreateJaroSimilarityFunctionTable() except +
-    bool JaroWinklerSimilarityInit(RF_Similarity* context, const RF_Kwargs* kwargs, size_t, const RF_String* str) nogil except False
-
-cdef inline RF_String conv_sequence(seq) except *:
-    if is_valid_string(seq):
-        return move(convert_string(seq))
-    elif isinstance(seq, array):
-        return move(hash_array(seq))
-    else:
-        return move(hash_sequence(seq))
+    bool LevenshteinInit(           RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
+    bool NormalizedLevenshteinInit( RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
+    bool HammingInit(               RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
+    bool NormalizedHammingInit(     RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
+    bool JaroSimilarityInit(        RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
+    bool JaroWinklerSimilarityInit( RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
 
 cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except *:
+    cdef RF_Preprocessor* preprocess_context = NULL
+
     if processor is True:
+        # todo: deprecate
         processor = default_process
 
-    processor_capsule = getattr(processor, '_RF_Preprocess', processor)
-    if PyCapsule_IsValid(processor_capsule, NULL):
-        preprocess_func = <RF_Preprocess>PyCapsule_GetPointer(processor_capsule, NULL)
-        preprocess_func(s1, &(s1_proc[0].string))
-        preprocess_func(s2, &(s2_proc[0].string))
-    elif callable(processor):
-        s1 = processor(s1)
-        s1_proc[0] = RF_StringWrapper(conv_sequence(s1), s1)
-        s2 = processor(s2)
-        s2_proc[0] = RF_StringWrapper(conv_sequence(s2), s2)
-    else:
+    if not processor:
         s1_proc[0] = RF_StringWrapper(conv_sequence(s1))
         s2_proc[0] = RF_StringWrapper(conv_sequence(s2))
+    else:
+        processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+        if PyCapsule_IsValid(processor_capsule, NULL):
+            preprocess_context = <RF_Preprocessor*>PyCapsule_GetPointer(processor_capsule, NULL)
+        
+        if preprocess_context != NULL and preprocess_context.version == 1:
+            preprocess_context.preprocess(s1, &(s1_proc[0].string))
+            preprocess_context.preprocess(s2, &(s2_proc[0].string))
+        else:
+            s1 = processor(s1)
+            s1_proc[0] = RF_StringWrapper(conv_sequence(s1), s1)
+            s2 = processor(s2)
+            s2_proc[0] = RF_StringWrapper(conv_sequence(s2), s2)
 
 def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
     """
@@ -590,28 +593,6 @@ cdef bool LevenshteinKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     dereference(self).dtor = KwargsDeinit
     return True
 
-
-cdef RF_Scorer LevenshteinContext
-LevenshteinContext.scorer_type = RF_DISTANCE
-LevenshteinContext.kwargs_init = LevenshteinKwargsInit
-LevenshteinContext.scorer.distance_init = LevenshteinInit
-levenshtein._RF_Scorer = PyCapsule_New(&LevenshteinContext, NULL, NULL)
-
-cdef RF_Scorer NormalizedLevenshteinContext
-NormalizedLevenshteinContext.scorer_type = RF_SIMILARITY
-NormalizedLevenshteinContext.kwargs_init = LevenshteinKwargsInit
-NormalizedLevenshteinContext.scorer.similarity_init = NormalizedLevenshteinInit
-normalized_levenshtein._RF_Scorer = PyCapsule_New(&NormalizedLevenshteinContext, NULL, NULL)
-
-cdef RF_Scorer HammingContext = CreateHammingFunctionTable()
-hamming._RF_Scorer = PyCapsule_New(&HammingContext, NULL, NULL)
-
-cdef RF_Scorer NormalizedHammingContext = CreateNormalizedHammingFunctionTable()
-normalized_hamming._RF_Scorer = PyCapsule_New(&NormalizedHammingContext, NULL, NULL)
-
-cdef RF_Scorer JaroSimilarityContext = CreateJaroSimilarityFunctionTable()
-jaro_similarity._RF_Scorer = PyCapsule_New(&JaroSimilarityContext, NULL, NULL)
-
 cdef bool JaroWinklerKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     cdef double* prefix_weight = <double*>malloc(sizeof(double))
 
@@ -623,8 +604,96 @@ cdef bool JaroWinklerKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     dereference(self).dtor = KwargsDeinit
     return True
 
+cdef bool NoKwargsInit(RF_Kwargs* self, dict kwargs) except False:
+    if len(kwargs):
+        raise TypeError("Got unexpected keyword arguments: ", ", ".join(kwargs.keys()))
+
+    dereference(self).context = NULL
+    dereference(self).dtor = NULL
+    return True
+
+cdef bool GetScorerFlagsLevenshtein(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>dereference(self).context
+    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_U64
+    if dereference(weights).insert_cost == dereference(weights).delete_cost:
+        dereference(scorer_flags).flags |= RF_SCORER_FLAG_SYMMETRIC
+    dereference(scorer_flags).optimal_score.u64 = 0
+    dereference(scorer_flags).worst_score.u64 = SIZE_MAX
+    return True
+
+cdef bool GetScorerFlagsNormalizedLevenshtein(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>dereference(self).context
+    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
+    if dereference(weights).insert_cost == dereference(weights).delete_cost:
+        dereference(scorer_flags).flags |= RF_SCORER_FLAG_SYMMETRIC
+    dereference(scorer_flags).optimal_score.f64 = 100
+    dereference(scorer_flags).worst_score.f64 = 0
+    return True
+
+cdef bool GetScorerFlagsHamming(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_U64 | RF_SCORER_FLAG_SYMMETRIC
+    dereference(scorer_flags).optimal_score.u64 = 0
+    dereference(scorer_flags).worst_score.u64 = SIZE_MAX
+    return True
+
+cdef bool GetScorerFlagsNormalizedHamming(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    dereference(scorer_flags).optimal_score.f64 = 100
+    dereference(scorer_flags).worst_score.f64 = 0
+    return True
+
+cdef bool GetScorerFlagsJaroSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    dereference(scorer_flags).optimal_score.f64 = 100
+    dereference(scorer_flags).worst_score.f64 = 0
+    return True
+
+cdef bool GetScorerFlagsJaroWinklerSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    dereference(scorer_flags).optimal_score.f64 = 100
+    dereference(scorer_flags).worst_score.f64 = 0
+    return True
+
+
+cdef RF_Scorer LevenshteinContext
+LevenshteinContext.version = SCORER_STRUCT_VERSION
+LevenshteinContext.kwargs_init = LevenshteinKwargsInit
+LevenshteinContext.get_scorer_flags = GetScorerFlagsLevenshtein
+LevenshteinContext.scorer_func_init = LevenshteinInit
+levenshtein._RF_Scorer = PyCapsule_New(&LevenshteinContext, NULL, NULL)
+
+cdef RF_Scorer NormalizedLevenshteinContext
+NormalizedLevenshteinContext.version = SCORER_STRUCT_VERSION
+NormalizedLevenshteinContext.kwargs_init = LevenshteinKwargsInit
+NormalizedLevenshteinContext.get_scorer_flags = GetScorerFlagsNormalizedLevenshtein
+NormalizedLevenshteinContext.scorer_func_init = NormalizedLevenshteinInit
+normalized_levenshtein._RF_Scorer = PyCapsule_New(&NormalizedLevenshteinContext, NULL, NULL)
+
+cdef RF_Scorer HammingContext
+HammingContext.version = SCORER_STRUCT_VERSION
+HammingContext.kwargs_init = NoKwargsInit
+HammingContext.get_scorer_flags = GetScorerFlagsHamming
+HammingContext.scorer_func_init = HammingInit
+hamming._RF_Scorer = PyCapsule_New(&HammingContext, NULL, NULL)
+
+cdef RF_Scorer NormalizedHammingContext
+NormalizedHammingContext.version = SCORER_STRUCT_VERSION
+NormalizedHammingContext.kwargs_init = NoKwargsInit
+NormalizedHammingContext.get_scorer_flags = GetScorerFlagsNormalizedHamming
+NormalizedHammingContext.scorer_func_init = NormalizedHammingInit
+normalized_hamming._RF_Scorer = PyCapsule_New(&NormalizedHammingContext, NULL, NULL)
+
+cdef RF_Scorer JaroSimilarityContext 
+JaroSimilarityContext.version = SCORER_STRUCT_VERSION
+JaroSimilarityContext.kwargs_init = NoKwargsInit
+JaroSimilarityContext.get_scorer_flags = GetScorerFlagsJaroSimilarity
+JaroSimilarityContext.scorer_func_init = JaroSimilarityInit
+jaro_similarity._RF_Scorer = PyCapsule_New(&JaroSimilarityContext, NULL, NULL)
+
+
 cdef RF_Scorer JaroWinklerSimilarityContext
-JaroWinklerSimilarityContext.scorer_type = RF_SIMILARITY
+JaroWinklerSimilarityContext.version = SCORER_STRUCT_VERSION
 JaroWinklerSimilarityContext.kwargs_init = JaroWinklerKwargsInit
-JaroWinklerSimilarityContext.scorer.similarity_init = JaroWinklerSimilarityInit
+JaroSimilarityContext.get_scorer_flags = GetScorerFlagsJaroWinklerSimilarity
+JaroWinklerSimilarityContext.scorer_func_init = JaroWinklerSimilarityInit
 jaro_winkler_similarity._RF_Scorer = PyCapsule_New(&JaroWinklerSimilarityContext, NULL, NULL)

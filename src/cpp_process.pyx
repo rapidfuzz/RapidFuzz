@@ -4,10 +4,10 @@
 from rapidfuzz.utils import default_process
 from rapidfuzz.fuzz import WRatio
 
-from libcpp.vector cimport vector
+from vector cimport vector
 from libcpp cimport algorithm
 from libcpp.utility cimport move
-from libc.stdint cimport uint8_t, int32_t
+from libc.stdint cimport uint8_t, int32_t, uint64_t, int64_t
 from libc.math cimport floor
 
 from cpython.list cimport PyList_New, PyList_SET_ITEM
@@ -15,265 +15,295 @@ from cpython.ref cimport Py_INCREF
 from cython.operator cimport dereference
 
 from cpp_common cimport (
-    PyObjectWrapper, RF_StringWrapper, RF_KwargsWrapper, KwargsInit,
-    is_valid_string, convert_string, hash_array, hash_sequence
+    PyObjectWrapper, RF_StringWrapper, RF_KwargsWrapper,
+    conv_sequence, get_score_cutoff_f64, get_score_cutoff_u64, get_score_cutoff_i64
 )
 
 import heapq
 from array import array
 
 from rapidfuzz_capi cimport (
-    RF_Preprocess, RF_String, RF_Distance, RF_Similarity, RF_Scorer,
-    RF_DistanceInit, RF_SimilarityInit,
-    RF_SIMILARITY, RF_DISTANCE
+    RF_Kwargs, RF_String, RF_Scorer, RF_ScorerFunc,
+    RF_Preprocessor, RF_ScorerFlags,
+    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_I64, RF_SCORER_FLAG_RESULT_U64
 )
 from cpython.pycapsule cimport PyCapsule_IsValid, PyCapsule_GetPointer
 
-cdef inline RF_String conv_sequence(seq) except *:
-    if is_valid_string(seq):
-        return move(convert_string(seq))
-    elif isinstance(seq, array):
-        return move(hash_array(seq))
-    else:
-        return move(hash_sequence(seq))
-
-cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
-    cdef struct LevenshteinWeightTable:
-        size_t insert_cost
-        size_t delete_cost
-        size_t replace_cost
+from optional cimport optional
 
 cdef extern from "cpp_process.hpp":
-    ctypedef struct ExtractScorerComp:
-        pass
+    cdef cppclass ExtractComp:
+        ExtractComp()
+        ExtractComp(const RF_ScorerFlags* scorer_flags)
 
-    ctypedef struct ListMatchScorerElem:
-        double score
+    cdef cppclass ListMatchElem[T]:
+        T score
         size_t index
         PyObjectWrapper choice
 
-    ctypedef struct DictMatchScorerElem:
-        double score
-        size_t index
-        PyObjectWrapper choice
-        PyObjectWrapper key
-
-    ctypedef struct ExtractDistanceComp:
-        pass
-
-    ctypedef struct ListMatchDistanceElem:
-        size_t distance
-        size_t index
-        PyObjectWrapper choice
-
-    ctypedef struct DictMatchDistanceElem:
-        size_t distance
+    cdef cppclass DictMatchElem[T]:
+        T score
         size_t index
         PyObjectWrapper choice
         PyObjectWrapper key
 
-    cdef cppclass RF_SimilarityWrapper:
-        RF_SimilarityWrapper()
-        RF_SimilarityWrapper(RF_Similarity)
-        void similarity(const RF_String*, double, double*) except +
+    cdef cppclass DictStringElem:
+        DictStringElem()
+        DictStringElem(size_t index, PyObjectWrapper key, PyObjectWrapper val, RF_StringWrapper proc_val)
 
-    cdef cppclass RF_DistanceWrapper:
-        RF_DistanceWrapper()
-        RF_DistanceWrapper(RF_Distance)
-        void distance(const RF_String*, size_t, size_t*) except +
+        size_t index
+        PyObjectWrapper key
+        PyObjectWrapper val
+        RF_StringWrapper proc_val
 
-# todo support different scorers
-default_process_capsule = getattr(default_process, '_RF_Preprocess')
-if not PyCapsule_IsValid(default_process_capsule, NULL):
-    raise RuntimeError("PyCapsule missing from utils.default_process")
-cdef RF_Preprocess default_process_func = <RF_Preprocess>PyCapsule_GetPointer(default_process_capsule, NULL)
+    cdef cppclass ListStringElem:
+        ListStringElem()
+        ListStringElem(size_t index, PyObjectWrapper val, RF_StringWrapper proc_val)
 
-cdef inline extractOne_dict(RF_SimilarityWrapper context, choices, processor, double score_cutoff):
-    """
-    implementation of extractOne for:
-      - type of choices = dict
-      - scorer = normalized scorer implemented in C++
-    """
-    cdef double score
-    # use -1 as score, so even a score of 0 in the first iteration is higher
-    cdef double result_score = -1
-    cdef int def_process = 0
+        size_t index
+        PyObjectWrapper val
+        RF_StringWrapper proc_val
+
+    cdef cppclass RF_ScorerWrapper:
+        RF_ScorerFunc scorer_func
+
+        RF_ScorerWrapper()
+        RF_ScorerWrapper(RF_ScorerFunc)
+
+    cdef optional[DictMatchElem[T]] extractOne_dict_impl[T](
+        const RF_Kwargs*, const RF_ScorerFlags*, RF_Scorer*,
+        const RF_StringWrapper&, const vector[DictStringElem]&, T) except +
+
+    cdef optional[ListMatchElem[T]] extractOne_list_impl[T](
+        const RF_Kwargs*, const RF_ScorerFlags*, RF_Scorer*,
+        const RF_StringWrapper&, const vector[ListStringElem]&, T) except +
+
+    cdef vector[DictMatchElem[T]] extract_dict_impl[T](
+        const RF_Kwargs*, const RF_ScorerFlags*, RF_Scorer*,
+        const RF_StringWrapper&, const vector[DictStringElem]&, T) except +
+
+    cdef vector[ListMatchElem[T]] extract_list_impl[T](
+        const RF_Kwargs*, const RF_ScorerFlags*, RF_Scorer*,
+        const RF_StringWrapper&, const vector[ListStringElem]&, T) except +
+
+    cdef optional[T] extract_iter_impl[T](
+        const RF_ScorerWrapper*, const RF_ScorerFlags*, const RF_StringWrapper&, T) except +
+
+cdef inline vector[DictStringElem] preprocess_dict(queries, processor) except *:
+    cdef vector[DictStringElem] proc_queries
+    cdef size_t queries_len = <size_t>len(queries)
     cdef RF_String proc_str
-    result_choice = None
-    result_key = None
-
-    if processor is default_process:
-        def_process = 1
-
-    for choice_key, choice in choices.items():
-        if choice is None:
-            continue
-
-        if def_process:
-            default_process_func(choice, &proc_str)
-            choice_proc = RF_StringWrapper(proc_str)
-            context.similarity(&choice_proc.string, score_cutoff, &score)
-        elif processor is not None:
-            proc_choice = processor(choice)
-            if proc_choice is None:
-                continue
-
-            choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-            context.similarity(&choice_proc.string, score_cutoff, &score)
-        else:
-            choice_proc = RF_StringWrapper(conv_sequence(choice))
-            context.similarity(&choice_proc.string, score_cutoff, &score)
-
-        if score >= score_cutoff and score > result_score:
-            result_score = score_cutoff = score
-            result_choice = choice
-            result_key = choice_key
-
-            if result_score == 100:
-                break
-
-    return (result_choice, result_score, result_key) if result_choice is not None else None
-
-
-cdef inline extractOne_distance_dict(RF_DistanceWrapper context, choices, processor, size_t max_):
-    """
-    implementation of extractOne for:
-      - type of choices = dict
-      - scorer = Distance implemented in C++
-    """
-    cdef size_t distance
-    cdef size_t result_distance = <size_t>-1
-    cdef int def_process = 0
-    cdef RF_String proc_str
-    result_choice = None
-    result_key = None
-
-    if processor is default_process:
-        def_process = 1
-
-    for choice_key, choice in choices.items():
-        if choice is None:
-            continue
-
-        if def_process:
-            default_process_func(choice, &proc_str)
-            choice_proc = RF_StringWrapper(proc_str)
-            context.distance(&choice_proc.string, max_, &distance)
-        elif processor is not None:
-            proc_choice = processor(choice)
-            if proc_choice is None:
-                continue
-
-            choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-            context.distance(&choice_proc.string, max_, &distance)
-        else:
-            choice_proc = RF_StringWrapper(conv_sequence(choice))
-            context.distance(&choice_proc.string, max_, &distance)
-
-        if distance <= max_ and distance < result_distance:
-            result_distance = max_ = distance
-            result_choice = choice
-            result_key = choice_key
-
-            if result_distance == 0:
-                break
-
-    return (result_choice, result_distance, result_key) if result_choice is not None else None
-
-
-cdef inline extractOne_list(RF_SimilarityWrapper context, choices, processor, double score_cutoff):
-    """
-    implementation of extractOne for:
-      - type of choices = list
-      - scorer = normalized scorer implemented in C++
-    """
-    cdef double score = 0.0
-    # use -1 as score, so even a score of 0 in the first iteration is higher
-    cdef double result_score = -1
+    cdef RF_Preprocessor* processor_context = NULL
+    proc_queries.reserve(queries_len)
     cdef size_t i
-    cdef size_t result_index = 0
-    cdef int def_process = 0
-    cdef RF_String proc_str
-    result_choice = None
 
-    if processor is default_process:
-        def_process = 1
-
-    for i, choice in enumerate(choices):
-        if choice is None:
-            continue
-
-        if def_process:
-            default_process_func(choice, &proc_str)
-            choice_proc = RF_StringWrapper(proc_str)
-            context.similarity(&choice_proc.string, score_cutoff, &score)
-        elif processor is not None:
-            proc_choice = processor(choice)
-            if proc_choice is None:
+    # No processor
+    if not processor:
+        for i, (query_key, query) in enumerate(queries.items()):
+            if query is None:
                 continue
+            proc_queries.emplace_back(
+                i,
+                move(PyObjectWrapper(query_key)),
+                move(PyObjectWrapper(query)),
+                move(RF_StringWrapper(conv_sequence(query)))
+            )
+    else:
+        processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+        if PyCapsule_IsValid(processor_capsule, NULL):
+            processor_context = <RF_Preprocessor*>PyCapsule_GetPointer(processor_capsule, NULL)
 
-            choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-            context.similarity(&choice_proc.string, score_cutoff, &score)
+        # use RapidFuzz C-Api
+        if processor_context != NULL and processor_context.version == 1:
+            for i, (query_key, query) in enumerate(queries.items()):
+                if query is None:
+                    continue
+                processor_context.preprocess(query, &proc_str)
+                proc_queries.emplace_back(
+                    i,
+                    move(PyObjectWrapper(query_key)),
+                    move(PyObjectWrapper(query)),
+                    move(RF_StringWrapper(proc_str))
+                )
+
+        # Call Processor through Python
         else:
-            choice_proc = RF_StringWrapper(conv_sequence(choice))
-            context.similarity(&choice_proc.string, score_cutoff, &score)
+            for i, (query_key, query) in enumerate(queries.items()):
+                if query is None:
+                    continue
+                proc_query = processor(query)
+                proc_queries.emplace_back(
+                    i,
+                    move(PyObjectWrapper(query_key)),
+                    move(PyObjectWrapper(query)),
+                    move(RF_StringWrapper(conv_sequence(proc_query), proc_query))
+                )
+    
+    return move(proc_queries)
 
-        if score >= score_cutoff and score > result_score:
-            result_score = score_cutoff = score
-            result_choice = choice
-            result_index = i
-
-            if result_score == 100:
-                break
-
-    return (result_choice, result_score, result_index) if result_choice is not None else None
-
-
-cdef inline extractOne_distance_list(RF_DistanceWrapper context, choices, processor, size_t max_):
-    """
-    implementation of extractOne for:
-      - type of choices = list
-      - scorer = Distance implemented in C++
-    """
-    cdef size_t distance
-    cdef size_t result_distance = <size_t>-1
+cdef inline vector[ListStringElem] preprocess_list(queries, processor) except *:
+    cdef vector[ListStringElem] proc_queries
+    cdef size_t queries_len = <size_t>len(queries)
+    cdef RF_String proc_str
+    cdef RF_Preprocessor* processor_context = NULL
+    proc_queries.reserve(queries_len)
     cdef size_t i
-    cdef size_t result_index = 0
-    cdef int def_process = 0
-    cdef RF_String proc_str
-    result_choice = None
 
-    if processor is default_process:
-        def_process = 1
-
-    for i, choice in enumerate(choices):
-        if choice is None:
-            continue
-
-        if def_process:
-            default_process_func(choice, &proc_str)
-            choice_proc = RF_StringWrapper(proc_str)
-            context.distance(&choice_proc.string, max_, &distance)
-        elif processor is not None:
-            proc_choice = processor(choice)
-            if proc_choice is None:
+    # No processor
+    if not processor:
+        for i, query in enumerate(queries):
+            if query is None:
                 continue
+            proc_queries.emplace_back(
+                i,
+                move(PyObjectWrapper(query)),
+                move(RF_StringWrapper(conv_sequence(query)))
+            )
+    else:
+        processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+        if PyCapsule_IsValid(processor_capsule, NULL):
+            processor_context = <RF_Preprocessor*>PyCapsule_GetPointer(processor_capsule, NULL)
 
-            choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-            context.distance(&choice_proc.string, max_, &distance)
+        # use RapidFuzz C-Api
+        if processor_context != NULL and processor_context.version == 1:
+            for i, query in enumerate(queries):
+                if query is None:
+                    continue
+                processor_context.preprocess(query, &proc_str)
+                proc_queries.emplace_back(
+                    i,
+                    move(PyObjectWrapper(query)),
+                    move(RF_StringWrapper(proc_str))
+                )
+
+        # Call Processor through Python
         else:
-            choice_proc = RF_StringWrapper(conv_sequence(choice))
-            context.distance(&choice_proc.string, max_, &distance)
+            for i, query in enumerate(queries):
+                if query is None:
+                    continue
+                proc_query = processor(query)
+                proc_queries.emplace_back(
+                    i,
+                    move(PyObjectWrapper(query)),
+                    move(RF_StringWrapper(conv_sequence(proc_query), proc_query))
+                )
+    
+    return move(proc_queries)
 
-        if distance <= max_ and distance < result_distance:
-            result_distance = max_ = distance
-            result_choice = choice
-            result_index = i
 
-            if result_distance == 0:
-                break
+cdef inline extractOne_dict_f64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, const RF_Kwargs* kwargs):
+    proc_query = move(RF_StringWrapper(conv_sequence(query)))
+    proc_choices = preprocess_dict(choices, processor)
+    c_score_cutoff = get_score_cutoff_f64(score_cutoff, scorer_flags)
 
-    return (result_choice, result_distance, result_index) if result_choice is not None else None
+    cdef optional[DictMatchElem[double]] result = extractOne_dict_impl[double](
+        kwargs, scorer_flags, scorer, proc_query, proc_choices, c_score_cutoff)
+
+    if result:
+        return (<object>result.value().choice.obj, result.value().score, <object>result.value().key.obj)
+    return None
+
+cdef inline extractOne_dict_u64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, const RF_Kwargs* kwargs):
+    proc_query = move(RF_StringWrapper(conv_sequence(query)))
+    proc_choices = preprocess_dict(choices, processor)
+    c_score_cutoff = get_score_cutoff_u64(score_cutoff, scorer_flags)
+
+    cdef optional[DictMatchElem[uint64_t]] result = extractOne_dict_impl[uint64_t](
+        kwargs, scorer_flags, scorer, proc_query, proc_choices, c_score_cutoff)
+
+    if result:
+        return (<object>result.value().choice.obj, result.value().score, <object>result.value().key.obj)
+    return None
+
+
+cdef inline extractOne_dict_i64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, const RF_Kwargs* kwargs):
+    proc_query = move(RF_StringWrapper(conv_sequence(query)))
+    proc_choices = preprocess_dict(choices, processor)
+    c_score_cutoff = get_score_cutoff_i64(score_cutoff, scorer_flags)
+
+    cdef optional[DictMatchElem[int64_t]] result = extractOne_dict_impl[int64_t](
+        kwargs, scorer_flags, scorer, proc_query, proc_choices, c_score_cutoff)
+
+    if result:
+        return (<object>result.value().choice.obj, result.value().score, <object>result.value().key.obj)
+    return None
+
+
+cdef inline extractOne_dict(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, const RF_Kwargs* kwargs):
+    flags = dereference(scorer_flags).flags
+
+    if flags & RF_SCORER_FLAG_RESULT_F64:
+        return extractOne_dict_f64(
+            query, choices, scorer, scorer_flags, processor, score_cutoff, kwargs
+        )
+    elif flags & RF_SCORER_FLAG_RESULT_U64:
+        return extractOne_dict_u64(
+            query, choices, scorer, scorer_flags, processor, score_cutoff, kwargs
+        )
+    elif flags & RF_SCORER_FLAG_RESULT_I64:
+        return extractOne_dict_i64(
+            query, choices, scorer, scorer_flags, processor, score_cutoff, kwargs
+        )
+
+    raise ValueError("scorer does not properly use the C-API")
+
+
+cdef inline extractOne_list_f64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, const RF_Kwargs* kwargs):
+    proc_query = move(RF_StringWrapper(conv_sequence(query)))
+    proc_choices = preprocess_list(choices, processor)
+    c_score_cutoff = get_score_cutoff_f64(score_cutoff, scorer_flags)
+
+    cdef optional[ListMatchElem[double]] result = extractOne_list_impl[double](
+        kwargs, scorer_flags, scorer, proc_query, proc_choices, c_score_cutoff)
+        
+    if result:
+        return (<object>result.value().choice.obj, result.value().score, result.value().index)
+    return None
+
+
+cdef inline extractOne_list_u64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, const RF_Kwargs* kwargs):
+    proc_query = move(RF_StringWrapper(conv_sequence(query)))
+    proc_choices = preprocess_list(choices, processor)
+    c_score_cutoff = get_score_cutoff_u64(score_cutoff, scorer_flags)
+
+    cdef optional[ListMatchElem[uint64_t]] result = extractOne_list_impl[uint64_t](
+        kwargs, scorer_flags, scorer, proc_query, proc_choices, c_score_cutoff)
+        
+    if result:
+        return (<object>result.value().choice.obj, result.value().score, result.value().index)
+    return None
+
+
+cdef inline extractOne_list_i64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, const RF_Kwargs* kwargs):
+    proc_query = move(RF_StringWrapper(conv_sequence(query)))
+    proc_choices = preprocess_list(choices, processor)
+    c_score_cutoff = get_score_cutoff_i64(score_cutoff, scorer_flags)
+
+    cdef optional[ListMatchElem[int64_t]] result = extractOne_list_impl[int64_t](
+        kwargs, scorer_flags, scorer, proc_query, proc_choices, c_score_cutoff)
+
+    if result:
+        return (<object>result.value().choice.obj, result.value().score, result.value().index)
+    return None
+
+
+cdef inline extractOne_list(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, const RF_Kwargs* kwargs):
+    flags = dereference(scorer_flags).flags
+
+    if flags & RF_SCORER_FLAG_RESULT_F64:
+        return extractOne_list_f64(
+            query, choices, scorer, scorer_flags, processor, score_cutoff, kwargs
+        )
+    elif flags & RF_SCORER_FLAG_RESULT_U64:
+        return extractOne_list_u64(
+            query, choices, scorer, scorer_flags, processor, score_cutoff, kwargs
+        )
+    elif flags & RF_SCORER_FLAG_RESULT_I64:
+        return extractOne_list_i64(
+            query, choices, scorer, scorer_flags, processor, score_cutoff, kwargs
+        )
+
+    raise ValueError("scorer does not properly use the C-API")
 
 
 cdef inline py_extractOne_dict(query, choices, scorer, processor, double score_cutoff, dict kwargs):
@@ -420,7 +450,7 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
 
     By default each string is preprocessed using `utils.default_process`, which lowercases the strings,
     replaces non alphanumeric characters with whitespaces and trims whitespaces from start and end of them.
-    This behavior can be changed by passing a custom function, or None/False to disable the behavior. Preprocessing
+    This behavior can be changed by passing a custom function, or None to disable the behavior. Preprocessing
     can take a significant part of the runtime, so it makes sense to disable it, when it is not required.
 
 
@@ -449,112 +479,71 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
     None
 
     """
-    cdef double c_score_cutoff = 0.0
-    cdef size_t c_max = <size_t>-1
-    cdef RF_KwargsWrapper kwargs_context
-    cdef RF_Similarity similarity_context
-    cdef RF_Distance distance_context
     cdef RF_Scorer* scorer_context = NULL
+    cdef RF_ScorerFlags scorer_flags
 
     if query is None:
         return None
 
-    if not processor:
+    if processor is True:
+        # todo: deprecate this
+        processor = default_process
+    elif processor is False:
         processor = None
 
     # preprocess the query
     if callable(processor):
         query = processor(query)
-    elif processor:
-        query = default_process(query)
-        processor = default_process
+    
 
     scorer_capsule = getattr(scorer, '_RF_Scorer', scorer)
     if PyCapsule_IsValid(scorer_capsule, NULL):
         scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
-        kwargs_context = KwargsInit(dereference(scorer_context), kwargs)
 
-    if scorer_context and scorer_context.scorer_type == RF_SIMILARITY:
-        query_context = RF_StringWrapper(conv_sequence(query))
-        scorer_context.scorer.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
-        ScorerContext = RF_SimilarityWrapper(similarity_context)
-        if score_cutoff is not None:
-            c_score_cutoff = score_cutoff
-        if c_score_cutoff < 0 or c_score_cutoff > 100:
-            raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
+    if scorer_context and dereference(scorer_context).version == 1:
+        kwargs_context = RF_KwargsWrapper()
+        dereference(scorer_context).kwargs_init(&kwargs_context.kwargs, kwargs)
+        dereference(scorer_context).get_scorer_flags(&kwargs_context.kwargs, &scorer_flags)
 
         if hasattr(choices, "items"):
-            return extractOne_dict(move(ScorerContext), choices, processor, c_score_cutoff)
+            return extractOne_dict(query, choices, scorer_context, &scorer_flags,
+                processor, score_cutoff, &kwargs_context.kwargs)
         else:
-            return extractOne_list(move(ScorerContext), choices, processor, c_score_cutoff)
+            return extractOne_list(query, choices, scorer_context, &scorer_flags,
+                processor, score_cutoff, &kwargs_context.kwargs)
 
-    if scorer_context and scorer_context.scorer_type == RF_DISTANCE:
-        query_context = RF_StringWrapper(conv_sequence(query))
-        scorer_context.scorer.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
-        DistanceContext = RF_DistanceWrapper(distance_context)
-        if score_cutoff is not None and score_cutoff != -1:
-            c_max = score_cutoff
-
-        if hasattr(choices, "items"):
-            return extractOne_distance_dict(move(DistanceContext), choices, processor, c_max)
-        else:
-            return extractOne_distance_list(move(DistanceContext), choices, processor, c_max)
 
     # the scorer has to be called through Python
-    if score_cutoff is not None:
-        c_score_cutoff = score_cutoff
+    if score_cutoff is None:
+        score_cutoff = 0
+    elif score_cutoff < 0 or score_cutoff > 100:
+        raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
 
     kwargs["processor"] = None
     kwargs["score_cutoff"] = score_cutoff
 
     if hasattr(choices, "items"):
-        return py_extractOne_dict(query, choices, scorer, processor, c_score_cutoff, kwargs)
+        return py_extractOne_dict(query, choices, scorer, processor, score_cutoff, kwargs)
     else:
-        return py_extractOne_list(query, choices, scorer, processor, c_score_cutoff, kwargs)
+        return py_extractOne_list(query, choices, scorer, processor, score_cutoff, kwargs)
 
 
-cdef inline extract_dict(RF_SimilarityWrapper context, choices, processor, size_t limit, double score_cutoff):
-    cdef double score = 0.0
-    cdef size_t i
-    cdef vector[DictMatchScorerElem] results
-    results.reserve(<size_t>len(choices))
-    cdef list result_list
-    cdef int def_process = 0
-    cdef RF_String proc_str
+cdef inline extract_dict_f64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, size_t limit, score_cutoff, const RF_Kwargs* kwargs):
+    proc_query = move(RF_StringWrapper(conv_sequence(query)))
+    proc_choices = preprocess_dict(choices, processor)
 
-    if processor is default_process:
-        def_process = 1
-
-    for i, (choice_key, choice) in enumerate(choices.items()):
-        if choice is None:
-            continue
-
-        if def_process:
-            default_process_func(choice, &proc_str)
-            choice_proc = RF_StringWrapper(proc_str)
-            context.similarity(&choice_proc.string, score_cutoff, &score)
-        elif processor is not None:
-            proc_choice = processor(choice)
-            if proc_choice is None:
-                continue
-
-            choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-            context.similarity(&choice_proc.string, score_cutoff, &score)
-        else:
-            choice_proc = RF_StringWrapper(conv_sequence(choice))
-            context.similarity(&choice_proc.string, score_cutoff, &score)
-
-        if score >= score_cutoff:
-            results.push_back(move(DictMatchScorerElem(score, i, PyObjectWrapper(choice), PyObjectWrapper(choice_key))))
+    cdef vector[DictMatchElem[double]] results = extract_dict_impl[double](
+        kwargs, scorer_flags, scorer, proc_query, proc_choices,
+        get_score_cutoff_f64(score_cutoff, scorer_flags))
 
     # due to score_cutoff not always completely filled
     if limit > results.size():
         limit = results.size()
 
     if limit >= results.size():
-        algorithm.sort(results.begin(), results.end(), ExtractScorerComp())
+        algorithm.sort(results.begin(), results.end(), ExtractComp(scorer_flags))
     else:
-        algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractScorerComp())
+        algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractComp(scorer_flags))
         results.resize(limit)
 
     # copy elements into Python List
@@ -567,103 +556,97 @@ cdef inline extract_dict(RF_SimilarityWrapper context, choices, processor, size_
     return result_list
 
 
-cdef inline extract_distance_dict(RF_DistanceWrapper context, choices, processor, size_t limit, size_t max_):
-    cdef size_t distance
-    cdef size_t i
-    cdef vector[DictMatchDistanceElem] results
-    results.reserve(<size_t>len(choices))
-    cdef list result_list
-    cdef int def_process = 0
-    cdef RF_String proc_str
+cdef inline extract_dict_u64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, size_t limit, score_cutoff, const RF_Kwargs* kwargs):
+    proc_query = move(RF_StringWrapper(conv_sequence(query)))
+    proc_choices = preprocess_dict(choices, processor)
 
-    if processor is default_process:
-        def_process = 1
-
-    for i, (choice_key, choice) in enumerate(choices.items()):
-        if choice is None:
-            continue
-
-        if def_process:
-            default_process_func(choice, &proc_str)
-            choice_proc = RF_StringWrapper(proc_str)
-            context.distance(&choice_proc.string, max_, &distance)
-        elif processor is not None:
-            proc_choice = processor(choice)
-            if proc_choice is None:
-                continue
-
-            choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-            context.distance(&choice_proc.string, max_, &distance)
-        else:
-            choice_proc = RF_StringWrapper(conv_sequence(choice))
-            context.distance(&choice_proc.string, max_, &distance)
-
-        if distance <= max_:
-            results.push_back(move(DictMatchDistanceElem(distance, i, PyObjectWrapper(choice), PyObjectWrapper(choice_key))))
-
-    # due to max_ not always completely filled
-    if limit > results.size():
-        limit = results.size()
-
-    if limit >= results.size():
-        algorithm.sort(results.begin(), results.end(), ExtractDistanceComp())
-    else:
-        algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractDistanceComp())
-        results.resize(limit)
-
-    # copy elements into Python List
-    result_list = PyList_New(<Py_ssize_t>limit)
-    for i in range(limit):
-        result_item = (<object>results[i].choice.obj, results[i].distance, <object>results[i].key.obj)
-        Py_INCREF(result_item)
-        PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
-
-    return result_list
-
-
-cdef inline extract_list(RF_SimilarityWrapper context, choices, processor, size_t limit, double score_cutoff):
-    cdef double score = 0.0
-    cdef size_t i
-    # todo possibly a smaller vector would be good to reduce memory usage
-    cdef vector[ListMatchScorerElem] results
-    results.reserve(<size_t>len(choices))
-    cdef list result_list
-    cdef int def_process = 0
-    cdef RF_String proc_str
-
-    if processor is default_process:
-        def_process = 1
-
-    for i, choice in enumerate(choices):
-        if choice is None:
-            continue
-
-        if def_process:
-            default_process_func(choice, &proc_str)
-            choice_proc = RF_StringWrapper(proc_str)
-            context.similarity(&choice_proc.string, score_cutoff, &score)
-        elif processor is not None:
-            proc_choice = processor(choice)
-            if proc_choice is None:
-                continue
-
-            choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-            context.similarity(&choice_proc.string, score_cutoff, &score)
-        else:
-            choice_proc = RF_StringWrapper(conv_sequence(choice))
-            context.similarity(&choice_proc.string, score_cutoff, &score)
-
-        if score >= score_cutoff:
-            results.push_back(move(ListMatchScorerElem(score, i, PyObjectWrapper(choice))))
+    cdef vector[DictMatchElem[uint64_t]] results = extract_dict_impl[uint64_t](
+        kwargs, scorer_flags, scorer, proc_query, proc_choices,
+        get_score_cutoff_u64(score_cutoff, scorer_flags))
 
     # due to score_cutoff not always completely filled
     if limit > results.size():
         limit = results.size()
 
     if limit >= results.size():
-        algorithm.sort(results.begin(), results.end(), ExtractScorerComp())
+        algorithm.sort(results.begin(), results.end(), ExtractComp(scorer_flags))
     else:
-        algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractScorerComp())
+        algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractComp(scorer_flags))
+        results.resize(limit)
+
+    # copy elements into Python List
+    result_list = PyList_New(<Py_ssize_t>limit)
+    for i in range(limit):
+        result_item = (<object>results[i].choice.obj, results[i].score, <object>results[i].key.obj)
+        Py_INCREF(result_item)
+        PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
+
+    return result_list
+
+
+cdef inline extract_dict_i64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, size_t limit, score_cutoff, const RF_Kwargs* kwargs):
+    proc_query = move(RF_StringWrapper(conv_sequence(query)))
+    proc_choices = preprocess_dict(choices, processor)
+
+    cdef vector[DictMatchElem[int64_t]] results = extract_dict_impl[int64_t](
+        kwargs, scorer_flags, scorer, proc_query, proc_choices,
+        get_score_cutoff_i64(score_cutoff, scorer_flags))
+
+    # due to score_cutoff not always completely filled
+    if limit > results.size():
+        limit = results.size()
+
+    if limit >= results.size():
+        algorithm.sort(results.begin(), results.end(), ExtractComp(scorer_flags))
+    else:
+        algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractComp(scorer_flags))
+        results.resize(limit)
+
+    # copy elements into Python List
+    result_list = PyList_New(<Py_ssize_t>limit)
+    for i in range(limit):
+        result_item = (<object>results[i].choice.obj, results[i].score, <object>results[i].key.obj)
+        Py_INCREF(result_item)
+        PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
+
+    return result_list
+
+
+cdef inline extract_dict(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, size_t limit, score_cutoff, const RF_Kwargs* kwargs):
+    flags = dereference(scorer_flags).flags
+
+    if flags & RF_SCORER_FLAG_RESULT_F64:
+        return extract_dict_f64(
+            query, choices, scorer, scorer_flags, processor, limit, score_cutoff, kwargs
+        )
+    elif flags & RF_SCORER_FLAG_RESULT_U64:
+        return extract_dict_u64(
+            query, choices, scorer, scorer_flags, processor, limit, score_cutoff, kwargs
+        )
+    elif flags & RF_SCORER_FLAG_RESULT_I64:
+        return extract_dict_i64(
+            query, choices, scorer, scorer_flags, processor, limit, score_cutoff, kwargs
+        )
+
+    raise ValueError("scorer does not properly use the C-API")
+
+
+cdef inline extract_list_f64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, size_t limit, score_cutoff, const RF_Kwargs* kwargs):
+    proc_query = move(RF_StringWrapper(conv_sequence(query)))
+    proc_choices = preprocess_list(choices, processor)
+
+    cdef vector[ListMatchElem[double]] results = extract_list_impl[double](
+        kwargs, scorer_flags, scorer, proc_query, proc_choices,
+        get_score_cutoff_f64(score_cutoff, scorer_flags))
+
+    # due to score_cutoff not always completely filled
+    if limit > results.size():
+        limit = results.size()
+
+    if limit >= results.size():
+        algorithm.sort(results.begin(), results.end(), ExtractComp(scorer_flags))
+    else:
+        algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractComp(scorer_flags))
         results.resize(limit)
 
     # copy elements into Python List
@@ -673,69 +656,86 @@ cdef inline extract_list(RF_SimilarityWrapper context, choices, processor, size_
         Py_INCREF(result_item)
         PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
 
-
     return result_list
 
 
-cdef inline extract_distance_list(RF_DistanceWrapper context, choices, processor, size_t limit, size_t max_):
-    cdef size_t distance
-    cdef size_t i
-    # todo possibly a smaller vector would be good to reduce memory usage
-    cdef vector[ListMatchDistanceElem] results
-    results.reserve(<size_t>len(choices))
-    cdef list result_list
-    cdef int def_process = 0
-    cdef RF_String proc_str
+cdef inline extract_list_u64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, size_t limit, score_cutoff, const RF_Kwargs* kwargs):
+    proc_query = move(RF_StringWrapper(conv_sequence(query)))
+    proc_choices = preprocess_list(choices, processor)
 
-    if processor is default_process:
-        def_process = 1
+    cdef vector[ListMatchElem[uint64_t]] results = extract_list_impl[uint64_t](
+        kwargs, scorer_flags, scorer, proc_query, proc_choices,
+        get_score_cutoff_u64(score_cutoff, scorer_flags))
 
-    for i, choice in enumerate(choices):
-        if choice is None:
-            continue
-
-        if def_process:
-            default_process_func(choice, &proc_str)
-            choice_proc = RF_StringWrapper(proc_str)
-            context.distance(&choice_proc.string, max_, &distance)
-        elif processor is not None:
-            proc_choice = processor(choice)
-            if proc_choice is None:
-                continue
-
-            choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-            context.distance(&choice_proc.string, max_, &distance)
-        else:
-            choice_proc = RF_StringWrapper(conv_sequence(choice))
-            context.distance(&choice_proc.string, max_, &distance)
-
-        if distance <= max_:
-            results.push_back(move(ListMatchDistanceElem(distance, i, PyObjectWrapper(choice))))
-
-    # due to max_ not always completely filled
+    # due to score_cutoff not always completely filled
     if limit > results.size():
         limit = results.size()
 
     if limit >= results.size():
-        algorithm.sort(results.begin(), results.end(), ExtractDistanceComp())
+        algorithm.sort(results.begin(), results.end(), ExtractComp(scorer_flags))
     else:
-        algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractDistanceComp())
+        algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractComp(scorer_flags))
         results.resize(limit)
 
     # copy elements into Python List
     result_list = PyList_New(<Py_ssize_t>limit)
     for i in range(limit):
-        result_item = (<object>results[i].choice.obj, results[i].distance, results[i].index)
+        result_item = (<object>results[i].choice.obj, results[i].score, results[i].index)
         Py_INCREF(result_item)
         PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
 
     return result_list
 
+
+cdef inline extract_list_i64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, size_t limit, score_cutoff, const RF_Kwargs* kwargs):
+    proc_query = move(RF_StringWrapper(conv_sequence(query)))
+    proc_choices = preprocess_list(choices, processor)
+
+    cdef vector[ListMatchElem[int64_t]] results = extract_list_impl[int64_t](
+        kwargs, scorer_flags, scorer, proc_query, proc_choices,
+        get_score_cutoff_i64(score_cutoff, scorer_flags))
+
+    # due to score_cutoff not always completely filled
+    if limit > results.size():
+        limit = results.size()
+
+    if limit >= results.size():
+        algorithm.sort(results.begin(), results.end(), ExtractComp(scorer_flags))
+    else:
+        algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractComp(scorer_flags))
+        results.resize(limit)
+
+    # copy elements into Python List
+    result_list = PyList_New(<Py_ssize_t>limit)
+    for i in range(limit):
+        result_item = (<object>results[i].choice.obj, results[i].score, results[i].index)
+        Py_INCREF(result_item)
+        PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
+
+    return result_list
+
+
+cdef inline extract_list(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, size_t limit, score_cutoff, const RF_Kwargs* kwargs):
+    flags = dereference(scorer_flags).flags
+
+    if flags & RF_SCORER_FLAG_RESULT_F64:
+        return extract_list_f64(
+            query, choices, scorer, scorer_flags, processor, limit, score_cutoff, kwargs
+        )
+    elif flags & RF_SCORER_FLAG_RESULT_U64:
+        return extract_list_u64(
+            query, choices, scorer, scorer_flags, processor, limit, score_cutoff, kwargs
+        )
+    elif flags & RF_SCORER_FLAG_RESULT_I64:
+        return extract_list_i64(
+            query, choices, scorer, scorer_flags, processor, limit, score_cutoff, kwargs
+        )
+
+    raise ValueError("scorer does not properly use the C-API")
+
+
 cdef inline py_extract_dict(query, choices, scorer, processor, size_t limit, double score_cutoff, dict kwargs):
     cdef object score = None
-    # todo working directly with a list is relatively slow
-    # also it is not very memory efficient to allocate space for all elements even when only
-    # a part is used. This should be optimised in the future
     cdef list result_list = []
 
     for choice_key, choice in choices.items():
@@ -755,9 +755,6 @@ cdef inline py_extract_dict(query, choices, scorer, processor, size_t limit, dou
 
 cdef inline py_extract_list(query, choices, scorer, processor, size_t limit, double score_cutoff, dict kwargs):
     cdef object score = None
-    # todo working directly with a list is relatively slow
-    # also it is not very memory efficient to allocate space for all elements even when only
-    # a part is used. This should be optimised in the future
     cdef list result_list = []
     cdef size_t i
 
@@ -837,72 +834,55 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
         has the `highest similarity`/`smallest distance`.
 
     """
-    cdef double c_score_cutoff = 0.0
-    cdef size_t c_max = <size_t>-1
-    cdef int def_process = 0
-    cdef RF_KwargsWrapper kwargs_context
-    cdef RF_Similarity similarity_context
-    cdef RF_Distance distance_context
     cdef RF_Scorer* scorer_context = NULL
+    cdef RF_ScorerFlags scorer_flags
 
     if query is None:
         return []
 
+    if processor is True:
+        processor = default_process
+    elif processor is False:
+        processor = None
+
     if limit is None or limit > len(choices):
         limit = len(choices)
-
-    if not processor:
-        processor = None
 
     # preprocess the query
     if callable(processor):
         query = processor(query)
-    elif processor:
-        query = default_process(query)
-        processor = default_process
 
     scorer_capsule = getattr(scorer, '_RF_Scorer', scorer)
     if PyCapsule_IsValid(scorer_capsule, NULL):
         scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
-        kwargs_context = KwargsInit(dereference(scorer_context), kwargs)
 
-    if scorer_context and scorer_context.scorer_type == RF_SIMILARITY:
-        query_context = RF_StringWrapper(conv_sequence(query))
-        scorer_context.scorer.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
-        ScorerContext = RF_SimilarityWrapper(similarity_context)
-        if score_cutoff is not None:
-            c_score_cutoff = score_cutoff
-        if c_score_cutoff < 0 or c_score_cutoff > 100:
-            raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
+    if scorer_context and dereference(scorer_context).version == 1:
+        kwargs_context = RF_KwargsWrapper()
+        dereference(scorer_context).kwargs_init(&kwargs_context.kwargs, kwargs)
+        dereference(scorer_context).get_scorer_flags(&kwargs_context.kwargs, &scorer_flags)
 
         if hasattr(choices, "items"):
-            return extract_dict(move(ScorerContext), choices, processor, limit, c_score_cutoff)
+            return extract_dict(query, choices, scorer_context, &scorer_flags,
+                processor, limit, score_cutoff, &kwargs_context.kwargs)
         else:
-            return extract_list(move(ScorerContext), choices, processor, limit, c_score_cutoff)
+            return extract_list(query, choices, scorer_context, &scorer_flags,
+                processor, limit, score_cutoff, &kwargs_context.kwargs)
 
-    if scorer_context and scorer_context.scorer_type == RF_DISTANCE:
-        query_context = RF_StringWrapper(conv_sequence(query))
-        scorer_context.scorer.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
-        DistanceContext = RF_DistanceWrapper(distance_context)
-        if score_cutoff is not None and score_cutoff != -1:
-            c_max = score_cutoff
-
-        if hasattr(choices, "items"):
-            return extract_distance_dict(move(DistanceContext), choices, processor, limit, c_max)
-        else:
-            return extract_distance_list(move(DistanceContext), choices, processor, limit, c_max)
 
     # the scorer has to be called through Python
-    if score_cutoff is not None:
-        c_score_cutoff = score_cutoff
+    if score_cutoff is None:
+        score_cutoff = 0
+    elif score_cutoff < 0 or score_cutoff > 100:
+        raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
 
     kwargs["processor"] = None
     kwargs["score_cutoff"] = score_cutoff
 
     if hasattr(choices, "items"):
-        return py_extract_dict(query, choices, scorer, processor, limit, c_score_cutoff, kwargs)
+        return py_extract_dict(query, choices, scorer, processor, limit, score_cutoff, kwargs)
     else:
-        return py_extract_list(query, choices, scorer, processor, limit, c_score_cutoff, kwargs)
+        return py_extract_list(query, choices, scorer, processor, limit, score_cutoff, kwargs)
+
 
 def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):
     """
@@ -959,137 +939,238 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
           * The `key of choice` when choices is a mapping like a dict, or a pandas Series
 
     """
-    cdef double c_score_cutoff = 0.0
-    cdef size_t c_max = <size_t>-1
-    cdef RF_KwargsWrapper kwargs_context
-    cdef RF_SimilarityWrapper ScorerContext
-    cdef RF_DistanceWrapper DistanceContext
-    cdef RF_Similarity similarity_context
-    cdef RF_Distance distance_context
     cdef RF_Scorer* scorer_context = NULL
-    cdef RF_String proc_str
+    cdef RF_ScorerFlags scorer_flags
+    cdef RF_Preprocessor* processor_context = NULL
+    cdef RF_KwargsWrapper kwargs_context
 
-    def extract_iter_dict():
+    def extract_iter_dict_f64():
         """
-        implementation of extract_iter for:
-          - type of choices = dict
-          - scorer = normalized scorer implemented in C++
+        implementation of extract_iter for dict, scorer using RapidFuzz C-API with the result type
+        float64
         """
-        cdef double score
+        cdef RF_String proc_str
+        cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, &scorer_flags)
+        query_proc = RF_StringWrapper(conv_sequence(query))
+
+        cdef RF_ScorerFunc scorer_func
+        dereference(scorer_context).scorer_func_init(
+            &scorer_func, &kwargs_context.kwargs, 1, &query_proc.string
+        )
+        cdef RF_ScorerWrapper ScorerFunc = RF_ScorerWrapper(scorer_func)
+        cdef optional[double] result 
 
         for choice_key, choice in choices.items():
             if choice is None:
                 continue
-
-            if def_process:
-                default_process_func(choice, &proc_str)
+            
+            # use RapidFuzz C-Api
+            if processor_context != NULL and processor_context.version == 1:
+                processor_context.preprocess(choice, &proc_str)
                 choice_proc = RF_StringWrapper(proc_str)
-                ScorerContext.similarity(&choice_proc.string, c_score_cutoff, &score)
             elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
 
                 choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-                ScorerContext.similarity(&choice_proc.string, c_score_cutoff, &score)
             else:
                 choice_proc = RF_StringWrapper(conv_sequence(choice))
-                ScorerContext.similarity(&choice_proc.string, c_score_cutoff, &score)
 
-            if score >= score_cutoff:
-                yield (choice, score, choice_key)
+            result = extract_iter_impl[double](&ScorerFunc, &scorer_flags, choice_proc, c_score_cutoff)
 
-    def extract_iter_list():
+            if result:
+                yield (choice, result.value(), choice_key)
+
+    def extract_iter_dict_u64():
         """
-        implementation of extract_iter for:
-          - type of choices = list
-          - scorer = normalized scorer implemented in C++
+        implementation of extract_iter for dict, scorer using RapidFuzz C-API with the result type
+        uint64_t
         """
-        cdef size_t i
-        cdef double score
+        cdef RF_String proc_str
+        cdef uint64_t c_score_cutoff = get_score_cutoff_u64(score_cutoff, &scorer_flags)
+        query_proc = RF_StringWrapper(conv_sequence(query))
 
-        for i, choice in enumerate(choices):
-            if choice is None:
-                continue
-
-            if def_process:
-                default_process_func(choice, &proc_str)
-                choice_proc = RF_StringWrapper(proc_str)
-                ScorerContext.similarity(&choice_proc.string, c_score_cutoff, &score)
-            elif processor is not None:
-                proc_choice = processor(choice)
-                if proc_choice is None:
-                    continue
-
-                choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-                ScorerContext.similarity(&choice_proc.string, c_score_cutoff, &score)
-            else:
-                choice_proc = RF_StringWrapper(conv_sequence(choice))
-                ScorerContext.similarity(&choice_proc.string, c_score_cutoff, &score)
-
-            if score >= c_score_cutoff:
-                yield (choice, score, i)
-
-    def extract_iter_distance_dict():
-        """
-        implementation of extract_iter for:
-          - type of choices = dict
-          - scorer = distance implemented in C++
-        """
-        cdef size_t distance
+        cdef RF_ScorerFunc scorer_func
+        dereference(scorer_context).scorer_func_init(
+            &scorer_func, &kwargs_context.kwargs, 1, &query_proc.string
+        )
+        cdef RF_ScorerWrapper ScorerFunc = RF_ScorerWrapper(scorer_func)
+        cdef optional[uint64_t] result 
 
         for choice_key, choice in choices.items():
             if choice is None:
                 continue
-
-            if def_process:
-                default_process_func(choice, &proc_str)
+            
+            # use RapidFuzz C-Api
+            if processor_context != NULL and processor_context.version == 1:
+                processor_context.preprocess(choice, &proc_str)
                 choice_proc = RF_StringWrapper(proc_str)
-                DistanceContext.distance(&choice_proc.string, c_max, &distance)
             elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
 
                 choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-                DistanceContext.distance(&choice_proc.string, c_max, &distance)
             else:
                 choice_proc = RF_StringWrapper(conv_sequence(choice))
-                DistanceContext.distance(&choice_proc.string, c_max, &distance)
 
-            if distance <= c_max:
-                yield (choice, distance, choice_key)
+            result = extract_iter_impl[uint64_t](&ScorerFunc, &scorer_flags, choice_proc, c_score_cutoff)
 
-    def extract_iter_distance_list():
+            if result:
+                yield (choice, result.value(), choice_key)
+
+    def extract_iter_dict_i64():
         """
-        implementation of extract_iter for:
-          - type of choices = list
-          - scorer = distance implemented in C++
+        implementation of extract_iter for dict, scorer using RapidFuzz C-API with the result type
+        int64_t
         """
-        cdef size_t i
-        cdef size_t distance
+        cdef RF_String proc_str
+        cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, &scorer_flags)
+        query_proc = RF_StringWrapper(conv_sequence(query))
+
+        cdef RF_ScorerFunc scorer_func
+        dereference(scorer_context).scorer_func_init(
+            &scorer_func, &kwargs_context.kwargs, 1, &query_proc.string
+        )
+        cdef RF_ScorerWrapper ScorerFunc = RF_ScorerWrapper(scorer_func)
+        cdef optional[int64_t] result 
+
+        for choice_key, choice in choices.items():
+            if choice is None:
+                continue
+            
+            # use RapidFuzz C-Api
+            if processor_context != NULL and processor_context.version == 1:
+                processor_context.preprocess(choice, &proc_str)
+                choice_proc = RF_StringWrapper(proc_str)
+            elif processor is not None:
+                proc_choice = processor(choice)
+                if proc_choice is None:
+                    continue
+
+                choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
+            else:
+                choice_proc = RF_StringWrapper(conv_sequence(choice))
+
+            result = extract_iter_impl[int64_t](&ScorerFunc, &scorer_flags, choice_proc, c_score_cutoff)
+
+            if result:
+                yield (choice, result.value(), choice_key)
+
+    def extract_iter_list_f64():
+        """
+        implementation of extract_iter for list, scorer using RapidFuzz C-API with the result type
+        float64
+        """
+        cdef RF_String proc_str
+        cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, &scorer_flags)
+        query_proc = RF_StringWrapper(conv_sequence(query))
+
+        cdef RF_ScorerFunc scorer_func
+        dereference(scorer_context).scorer_func_init(
+            &scorer_func, &kwargs_context.kwargs, 1, &query_proc.string
+        )
+        cdef RF_ScorerWrapper ScorerFunc = RF_ScorerWrapper(scorer_func)
+        cdef optional[double] result 
 
         for i, choice in enumerate(choices):
             if choice is None:
                 continue
-
-            if def_process:
-                default_process_func(choice, &proc_str)
+            
+            # use RapidFuzz C-Api
+            if processor_context != NULL and processor_context.version == 1:
+                processor_context.preprocess(choice, &proc_str)
                 choice_proc = RF_StringWrapper(proc_str)
-                DistanceContext.distance(&choice_proc.string, c_max, &distance)
             elif processor is not None:
                 proc_choice = processor(choice)
                 if proc_choice is None:
                     continue
 
                 choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-                DistanceContext.distance(&choice_proc.string, c_max, &distance)
             else:
                 choice_proc = RF_StringWrapper(conv_sequence(choice))
-                DistanceContext.distance(&choice_proc.string, c_max, &distance)
 
-            if distance <= c_max:
-                yield (choice, distance, i)
+            result = extract_iter_impl[double](&ScorerFunc, &scorer_flags, choice_proc, c_score_cutoff)
+
+            if result:
+                yield (choice, result.value(), i)
+
+    def extract_iter_list_u64():
+        """
+        implementation of extract_iter for list, scorer using RapidFuzz C-API with the result type
+        uint64_t
+        """
+        cdef RF_String proc_str
+        cdef uint64_t c_score_cutoff = get_score_cutoff_u64(score_cutoff, &scorer_flags)
+        query_proc = RF_StringWrapper(conv_sequence(query))
+
+        cdef RF_ScorerFunc scorer_func
+        dereference(scorer_context).scorer_func_init(
+            &scorer_func, &kwargs_context.kwargs, 1, &query_proc.string
+        )
+        cdef RF_ScorerWrapper ScorerFunc = RF_ScorerWrapper(scorer_func)
+        cdef optional[uint64_t] result 
+
+        for i, choice in enumerate(choices):
+            if choice is None:
+                continue
+            
+            # use RapidFuzz C-Api
+            if processor_context != NULL and processor_context.version == 1:
+                processor_context.preprocess(choice, &proc_str)
+                choice_proc = RF_StringWrapper(proc_str)
+            elif processor is not None:
+                proc_choice = processor(choice)
+                if proc_choice is None:
+                    continue
+
+                choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
+            else:
+                choice_proc = RF_StringWrapper(conv_sequence(choice))
+
+            result = extract_iter_impl[uint64_t](&ScorerFunc, &scorer_flags, choice_proc, c_score_cutoff)
+
+            if result:
+                yield (choice, result.value(), i)
+
+    def extract_iter_list_i64():
+        """
+        implementation of extract_iter for list, scorer using RapidFuzz C-API with the result type
+        int64_t
+        """
+        cdef RF_String proc_str
+        cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, &scorer_flags)
+        query_proc = RF_StringWrapper(conv_sequence(query))
+
+        cdef RF_ScorerFunc scorer_func
+        dereference(scorer_context).scorer_func_init(
+            &scorer_func, &kwargs_context.kwargs, 1, &query_proc.string
+        )
+        cdef RF_ScorerWrapper ScorerFunc = RF_ScorerWrapper(scorer_func)
+        cdef optional[int64_t] result 
+
+        for i, choice in enumerate(choices):
+            if choice is None:
+                continue
+            
+            # use RapidFuzz C-Api
+            if processor_context != NULL and processor_context.version == 1:
+                processor_context.preprocess(choice, &proc_str)
+                choice_proc = RF_StringWrapper(proc_str)
+            elif processor is not None:
+                proc_choice = processor(choice)
+                if proc_choice is None:
+                    continue
+
+                choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
+            else:
+                choice_proc = RF_StringWrapper(conv_sequence(choice))
+
+            result = extract_iter_impl[int64_t](&ScorerFunc, &scorer_flags, choice_proc, c_score_cutoff)
+
+            if result:
+                yield (choice, result.value(), i)
 
     def py_extract_iter_dict():
         """
@@ -1097,6 +1178,8 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
           - type of choices = dict
           - scorer = python function
         """
+        cdef double c_score_cutoff = score_cutoff
+
         for choice_key, choice in choices.items():
             if choice is None:
                 continue
@@ -1116,6 +1199,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
           - scorer = python function
         """
         cdef size_t i
+        cdef double c_score_cutoff = score_cutoff
 
         for i, choice in enumerate(choices):
             if choice is None:
@@ -1133,60 +1217,57 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         # finish generator
         return
 
-    if not processor:
+    if processor is True:
+        processor = default_process
+    elif processor is False:
         processor = None
 
     # preprocess the query
     if callable(processor):
         query = processor(query)
-    elif processor:
-        query = default_process(query)
-        processor = default_process
-
-    if processor is default_process:
-        def_process = 1
 
     scorer_capsule = getattr(scorer, '_RF_Scorer', scorer)
     if PyCapsule_IsValid(scorer_capsule, NULL):
         scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
-        kwargs_context = KwargsInit(dereference(scorer_context), kwargs)
 
-    if scorer_context and scorer_context.scorer_type == RF_SIMILARITY:
-        query_context = RF_StringWrapper(conv_sequence(query))
-        scorer_context.scorer.similarity_init(&similarity_context, &kwargs_context.kwargs, 1, &query_context.string)
-        ScorerContext = RF_SimilarityWrapper(similarity_context)
-        if score_cutoff is not None:
-            c_score_cutoff = score_cutoff
-        if c_score_cutoff < 0 or c_score_cutoff > 100:
-            raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
+    if scorer_context and dereference(scorer_context).version == 1:
+        kwargs_context = RF_KwargsWrapper()
+        dereference(scorer_context).kwargs_init(&kwargs_context.kwargs, kwargs)
+        dereference(scorer_context).get_scorer_flags(&kwargs_context.kwargs, &scorer_flags)
 
-        if hasattr(choices, "items"):
-            yield from extract_iter_dict()
-        else:
-            yield from extract_iter_list()
-        # finish generator
-        return
-
-    if scorer_context and scorer_context.scorer_type == RF_DISTANCE:
-        query_context = RF_StringWrapper(conv_sequence(query))
-        scorer_context.scorer.distance_init(&distance_context, &kwargs_context.kwargs, 1, &query_context.string)
-        DistanceContext = RF_DistanceWrapper(distance_context)
-        if score_cutoff is not None and score_cutoff != -1:
-            c_max = score_cutoff
+        processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+        if PyCapsule_IsValid(processor_capsule, NULL):
+            processor_context = <RF_Preprocessor*>PyCapsule_GetPointer(processor_capsule, NULL)
 
         if hasattr(choices, "items"):
-            yield from extract_iter_distance_dict()
+            if scorer_flags.flags & RF_SCORER_FLAG_RESULT_F64:
+                yield from extract_iter_dict_f64()
+                return
+            elif scorer_flags.flags & RF_SCORER_FLAG_RESULT_U64:
+                yield from extract_iter_dict_u64()
+                return
+            elif scorer_flags.flags & RF_SCORER_FLAG_RESULT_I64:
+                yield from extract_iter_dict_i64()
+                return
         else:
-            yield from extract_iter_distance_list()
-        # finish generator
-        return
+            if scorer_flags.flags & RF_SCORER_FLAG_RESULT_F64:
+                yield from extract_iter_list_f64()
+                return
+            elif scorer_flags.flags & RF_SCORER_FLAG_RESULT_U64:
+                yield from extract_iter_list_u64()
+                return
+            elif scorer_flags.flags & RF_SCORER_FLAG_RESULT_I64:
+                yield from extract_iter_list_i64()
+                return
+        
+        raise ValueError("scorer does not properly use the C-API")
 
     # the scorer has to be called through Python
-    if score_cutoff is not None:
-        c_score_cutoff = score_cutoff
+    if score_cutoff is None:
+        score_cutoff = 0.0
 
     kwargs["processor"] = None
-    kwargs["score_cutoff"] = c_score_cutoff
+    kwargs["score_cutoff"] = score_cutoff
 
     if hasattr(choices, "items"):
         yield from py_extract_iter_dict()
