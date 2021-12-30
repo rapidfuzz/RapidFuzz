@@ -15,12 +15,6 @@ jobs:
 
       - uses: actions/setup-python@v2
 
-      - name: cythonize
-        run: |
-          pip install Cython==3.0.0a9
-          ./tools/cythonize.sh
-        shell: sh
-
       - name: Install dependencies
         run: |
           python -m pip install Sphinx sphinx_rtd_theme numpy

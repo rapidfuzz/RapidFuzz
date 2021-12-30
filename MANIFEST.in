@@ -4,6 +4,7 @@ include README.md
 include VERSION
 include LICENSE
 include pyproject.toml
+include src/CMakeLists.txt
 include src/rapidfuzz/**/*.pyi
 include src/rapidfuzz/py.typed
 include src/*.hpp

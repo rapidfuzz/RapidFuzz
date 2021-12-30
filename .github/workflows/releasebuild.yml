@@ -30,12 +30,6 @@ jobs:
 
       - uses: actions/setup-python@v2
 
-      - name: cythonize
-        run: |
-          pip install Cython==3.0.0a9
-          ./tools/cythonize.sh
-        shell: sh
-
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.3.1
         with:
@@ -67,12 +61,6 @@ jobs:
 
       - uses: actions/setup-python@v2
 
-      - name: cythonize
-        run: |
-          pip install Cython==3.0.0a9
-          ./tools/cythonize.sh
-        shell: sh
-
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.3.1
         with:
@@ -101,12 +89,6 @@ jobs:
           submodules: 'true'
 
       - uses: actions/setup-python@v2
-
-      - name: cythonize
-        run: |
-          pip install Cython==3.0.0a9
-          ./tools/cythonize.sh
-        shell: sh
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.3.1
@@ -142,12 +124,6 @@ jobs:
           submodules: 'true'
 
       - uses: actions/setup-python@v2
-
-      - name: cythonize
-        run: |
-          pip install Cython==3.0.0a9
-          ./tools/cythonize.sh
-        shell: sh
 
       - uses: docker/setup-qemu-action@v1
         name: Set up QEMU
@@ -187,12 +163,6 @@ jobs:
   #
   #    - uses: actions/setup-python@v2
   #
-  #    - name: cythonize
-  #      run: |
-  #        pip install Cython==3.0.0a9
-  #        ./tools/cythonize.sh
-  #      shell: sh
-  #
   #    - name: Build wheels
   #      uses: pypa/cibuildwheel@v2.3.1
   #      with:
@@ -213,12 +183,6 @@ jobs:
 
       - uses: actions/setup-python@v2
 
-      - name: cythonize
-        run: |
-          pip install Cython==3.0.0a9
-          ./tools/cythonize.sh
-        shell: sh
-
       - name: Build sdist
         run: |
           pip3 install build; python3 -m build --sdist
@@ -232,7 +196,7 @@ jobs:
 
   deploy-wheels:
     if: github.event_name == 'release' && github.event.action == 'published'
-    needs: [build_wheels_windows, build_wheels_macos, build_wheels_apple_silicon, build_wheels_manylinux, build_wheels_pypy, build_sdist]
+    needs: [build_wheels_windows, build_wheels_macos, build_wheels_apple_silicon, build_wheels_manylinux, build_sdist]
     name: deploy wheels to pypi
     runs-on: ubuntu-18.04
 
