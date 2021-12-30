@@ -4,3 +4,6 @@
 [submodule "extern/taskflow"]
 	path = extern/taskflow
 	url = ../../taskflow/taskflow.git
+[submodule "extern/optional-lite"]
+	path = extern/optional-lite
+	url = ../../martinmoene/optional-lite.git

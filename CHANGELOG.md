@@ -1,6 +1,10 @@
 ## Changelog
 
 ### [2.0.0] - Unreleased
+#### Added
+- added C-Api which can be used to extend RapidFuzz from different Python modules using any
+  programming language which allows the usage of C-Apis (C/C++/Rust)
+
 #### Changed
 - when the result of `string_metric.levenshtein` or `string_metric.hamming` is below max they do now return `max + 1` instead of -1
 - Replace setuptools with scikit-build
@@ -10,6 +14,11 @@
 - dropped support for Python2.7 and Python3.5
 
 #### Deprecated
+- deprecate support to specify processor in form of a boolean (will be removed in v3.0.0)
+  - new functions will not get support for this in the first place
+
+#### Fixed
+- process.cdist did raise an exception when used with a pure python scorer
 
 ### [1.9.1] - 2021-12-13
 #### Fixed

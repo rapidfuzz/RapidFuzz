@@ -96,11 +96,9 @@ struct RF_StringWrapper {
     RF_StringWrapper& operator=(const RF_StringWrapper&) = delete;
 
     RF_StringWrapper(RF_StringWrapper&& other)
+        : RF_StringWrapper()
     {
-        string = other.string;
-        obj = other.obj;
-        other.string = {nullptr, (RF_StringType)0, nullptr, 0, nullptr};
-        other.obj = nullptr;
+        swap(*this, other);
     }
 
     RF_StringWrapper& operator=(RF_StringWrapper&& other) {
@@ -123,6 +121,13 @@ struct RF_StringWrapper {
         }
         Py_XDECREF(obj);
     }
+
+    friend void swap(RF_StringWrapper& first, RF_StringWrapper& second) noexcept
+    {
+        using std::swap;
+        swap(first.string, second.string);
+        swap(first.obj, second.obj);
+    }
 };
 
 /* RAII Wrapper for RF_Kwargs */
@@ -139,9 +144,9 @@ struct RF_KwargsWrapper {
     RF_KwargsWrapper& operator=(const RF_KwargsWrapper&) = delete;
 
     RF_KwargsWrapper(RF_KwargsWrapper&& other)
+        : RF_KwargsWrapper()
     {
-        kwargs = other.kwargs;
-        other.kwargs = {NULL, NULL};
+        swap(*this, other);
     }
 
     RF_KwargsWrapper& operator=(RF_KwargsWrapper&& other)
@@ -161,41 +166,56 @@ struct RF_KwargsWrapper {
             kwargs.dtor(&kwargs);
         }
     }
+
+    friend void swap(RF_KwargsWrapper& first, RF_KwargsWrapper& second) noexcept
+    {
+        using std::swap;
+        swap(first.kwargs, second.kwargs);
+    }
 };
 
 /* RAII Wrapper for PyObject* */
 struct PyObjectWrapper {
     PyObject* obj;
 
-    PyObjectWrapper()
+    PyObjectWrapper() noexcept
         : obj(nullptr) {}
 
-    PyObjectWrapper(PyObject* o)
+    PyObjectWrapper(PyObject* o) noexcept
         : obj(o)
     {
         Py_XINCREF(obj);
     }
 
-    PyObjectWrapper(const PyObjectWrapper&) = delete;
-    PyObjectWrapper& operator=(const PyObjectWrapper&) = delete;
-
-    PyObjectWrapper(PyObjectWrapper&& other)
+    PyObjectWrapper(const PyObjectWrapper& other) noexcept
     {
         obj = other.obj;
-        other.obj = nullptr;
+        Py_XINCREF(obj);
+    }
+    PyObjectWrapper& operator=(PyObjectWrapper other) noexcept
+    {
+        swap(*this, other);
+        return *this;
     }
 
-    PyObjectWrapper& operator=(PyObjectWrapper&& other) {
-        if (&other != this) {
-            Py_XDECREF(obj);
-            obj = other.obj;
-            other.obj = nullptr;
-      }
-      return *this;
+    PyObjectWrapper(PyObjectWrapper&& other) noexcept
+        : PyObjectWrapper()
+    {
+        swap(*this, other);
+    }
+
+    PyObjectWrapper& operator=(PyObjectWrapper&& other) noexcept
+    {
+        swap(*this, other);
+        return *this;
     };
 
-    ~PyObjectWrapper() {
-        Py_XDECREF(obj);
+    ~PyObjectWrapper() { Py_XDECREF(obj); }
+
+    friend void swap(PyObjectWrapper& first, PyObjectWrapper& second) noexcept
+    {
+        using std::swap;
+        swap(first.obj, second.obj);
     }
 };
 
