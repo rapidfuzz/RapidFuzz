@@ -1,7 +1,6 @@
-import io
 from skbuild import setup
 
-with io.open('README.md', 'rt', encoding="utf8") as f:
+with open('README.md', 'rt', encoding="utf8") as f:
     readme = f.read()
 
 setup(
