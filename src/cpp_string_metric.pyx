@@ -24,8 +24,9 @@ from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPo
 from cython.operator cimport dereference
 
 from array import array
+import warnings
 
-cdef extern from "cpp_scorer.hpp" namespace "rapidfuzz" nogil:
+cdef extern from "cpp_string_metric.hpp" namespace "rapidfuzz" nogil:
     cpdef enum class LevenshteinEditType:
         None    = 0,
         Replace = 1,
@@ -43,7 +44,7 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
         size_t delete_cost
         size_t replace_cost
 
-cdef extern from "cpp_scorer.hpp":
+cdef extern from "cpp_string_metric.hpp":
     double normalized_levenshtein_func( const RF_String&, const RF_String&, size_t, size_t, size_t, double) nogil except +
     double normalized_hamming_func(     const RF_String&, const RF_String&, double) nogil except +
     double jaro_similarity_func(        const RF_String&, const RF_String&, double) nogil except +
@@ -84,6 +85,9 @@ cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc
             s1_proc[0] = RF_StringWrapper(conv_sequence(s1), s1)
             s2 = processor(s2)
             s2_proc[0] = RF_StringWrapper(conv_sequence(s2), s2)
+
+cdef inline void deprecation(message):
+    warnings.warn(message, DeprecationWarning, stacklevel=2)
 
 def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
     """
@@ -256,6 +260,11 @@ def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
 
     cdef size_t c_max = <size_t>-1 if max is None else max
 
+    deprecation(
+        "string_metric.levenshtein is deprecated and will be removed in v3.0.0. "
+        "Use rapidfuzz.algorithm.edit_based.Levenshtein.distance instead"
+    )
+
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return levenshtein_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_max)
 
@@ -313,6 +322,12 @@ def levenshtein_editops(s1, s2, *, processor=None):
      insert s1[6] s2[6]
     """
     cdef RF_StringWrapper s1_proc, s2_proc
+
+    deprecation(
+        "string_metric.levenshtein_editops is deprecated and will be removed in v3.0.0. "
+        "Use rapidfuzz.algorithm.edit_based.Levenshtein.editops instead"
+    )
+
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return levenshtein_editops_to_list(
         levenshtein_editops_func(s1_proc.string, s2_proc.string)
@@ -413,6 +428,11 @@ def normalized_levenshtein(s1, s2, *, weights=(1,1,1), processor=None, score_cut
 
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
 
+    deprecation(
+        "string_metric.normalized_levenshtein is deprecated and will be removed in v3.0.0. "
+        "Use rapidfuzz.algorithm.edit_based.Levenshtein.normalized_distance instead"
+    )
+
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return normalized_levenshtein_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
 
@@ -451,6 +471,11 @@ def hamming(s1, s2, *, processor=None, max=None):
     """
     cdef size_t c_max = <size_t>-1 if max is None else max
     cdef RF_StringWrapper s1_proc, s2_proc
+
+    deprecation(
+        "string_metric.hamming is deprecated and will be removed in v3.0.0. "
+        "Use rapidfuzz.algorithm.edit_based.Hamming.distance instead"
+    )
 
     if s1 is None or s2 is None:
         return 0
@@ -494,6 +519,11 @@ def normalized_hamming(s1, s2, *, processor=None, score_cutoff=None):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
+    deprecation(
+        "string_metric.normalized_hamming is deprecated and will be removed in v3.0.0. "
+        "Use rapidfuzz.algorithm.edit_based.Hamming.normalized_distance instead"
+    )
+
     if s1 is None or s2 is None:
         return 0
 
@@ -527,6 +557,11 @@ def jaro_similarity(s1, s2, *, processor=None, score_cutoff=None):
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
+
+    deprecation(
+        "string_metric.jaro_similarity is deprecated and will be removed in v3.0.0. "
+        "Use rapidfuzz.algorithm.edit_based.Jaro.similarity instead"
+    )
 
     if s1 is None or s2 is None:
         return 0
@@ -568,6 +603,11 @@ def jaro_winkler_similarity(s1, s2, *, double prefix_weight=0.1, processor=None,
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
+
+    deprecation(
+        "string_metric.jaro_winkler_similarity is deprecated and will be removed in v3.0.0. "
+        "Use rapidfuzz.algorithm.edit_based.JaroWinkler.similarity instead"
+    )
 
     if s1 is None or s2 is None:
         return 0

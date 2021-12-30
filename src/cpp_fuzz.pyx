@@ -24,7 +24,7 @@ from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPo
 
 from array import array
 
-cdef extern from "cpp_scorer.hpp":
+cdef extern from "cpp_fuzz.hpp":
     double ratio_func(                    const RF_String&, const RF_String&, double) nogil except +
     double partial_ratio_func(            const RF_String&, const RF_String&, double) nogil except +
     double token_sort_ratio_func(         const RF_String&, const RF_String&, double) nogil except +
@@ -73,7 +73,7 @@ cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc
 
 def ratio(s1, s2, *, processor=None, score_cutoff=None):
     """
-    Calculates the normalized InDel distance.
+    Calculates the normalized Indel distance.
 
     Parameters
     ----------

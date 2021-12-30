@@ -16,6 +16,8 @@
 #### Deprecated
 - deprecate support to specify processor in form of a boolean (will be removed in v3.0.0)
   - new functions will not get support for this in the first place
+- deprecate `rapidfuzz.string_metric` (will be removed in v3.0.0). Similar scorers are available
+  in `rapidfuzz.algorithm.*`
 
 #### Fixed
 - process.cdist did raise an exception when used with a pure python scorer

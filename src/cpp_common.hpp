@@ -327,3 +327,108 @@ static inline RF_String convert_string(PyObject* py_str)
         };
     }
 }
+
+template <typename CachedScorer>
+static void scorer_deinit(RF_ScorerFunc* self)
+{
+    delete (CachedScorer*)self->context;
+}
+
+template<typename CachedScorer>
+static inline bool scorer_func_wrapper_f64(const RF_ScorerFunc* self, const RF_String* str, double score_cutoff, double* result)
+{
+    CachedScorer& scorer = *(CachedScorer*)self->context;
+    try {
+        *result = visit(*str, [&](auto s){
+            return scorer.ratio(s, score_cutoff);
+        });
+    } catch(...) {
+      PyGILState_STATE gilstate_save = PyGILState_Ensure();
+      CppExn2PyErr();
+      PyGILState_Release(gilstate_save);
+      return false;
+    }
+    return true;
+}
+
+template<typename CachedScorer>
+static inline bool scorer_func_wrapper_u64(const RF_ScorerFunc* self, const RF_String* str, uint64_t score_cutoff, uint64_t* result)
+{
+    CachedScorer& scorer = *(CachedScorer*)self->context;
+    try {
+        *result = visit(*str, [&](auto s){
+            return scorer.distance(s, score_cutoff);
+        });
+    } catch(...) {
+      PyGILState_STATE gilstate_save = PyGILState_Ensure();
+      CppExn2PyErr();
+      PyGILState_Release(gilstate_save);
+      return false;
+    }
+    return true;
+}
+
+
+template<template <typename> class CachedScorer, typename Sentence, typename ...Args>
+static inline RF_ScorerFunc get_ScorerContext_f64(Sentence str, Args... args)
+{
+    RF_ScorerFunc context;
+    context.context = (void*) new CachedScorer<Sentence>(str, args...);
+
+    context.call.f64 = scorer_func_wrapper_f64<CachedScorer<Sentence>>;
+    context.dtor = scorer_deinit<CachedScorer<Sentence>>;
+    return context;
+}
+
+template<template <typename> class CachedScorer, typename Sentence, typename ...Args>
+static inline RF_ScorerFunc get_ScorerContext_u64(Sentence str, Args... args)
+{
+    RF_ScorerFunc context;
+    context.context = (void*) new CachedScorer<Sentence>(str, args...);
+
+    context.call.u64 = scorer_func_wrapper_u64<CachedScorer<Sentence>>;
+    context.dtor = scorer_deinit<CachedScorer<Sentence>>;
+    return context;
+}
+
+template<template <typename> class CachedScorer, typename ...Args>
+static inline bool scorer_init_f64(RF_ScorerFunc* self, size_t str_count, const RF_String* strings, Args... args)
+{
+    try {
+        /* todo support different string counts, which is required e.g. for SIMD */
+        if (str_count != 1)
+        {
+            throw std::logic_error("Only str_count == 1 supported");
+        }
+        *self = visit(*strings, [&](auto s){
+            return get_ScorerContext_f64<CachedScorer>(s, args...);
+        });
+    } catch(...) {
+      PyGILState_STATE gilstate_save = PyGILState_Ensure();
+      CppExn2PyErr();
+      PyGILState_Release(gilstate_save);
+      return false;
+    }
+    return true;
+}
+
+template<template <typename> class CachedScorer, typename ...Args>
+static inline bool scorer_init_u64(RF_ScorerFunc* self, size_t str_count, const RF_String* strings, Args... args)
+{
+    try {
+        /* todo support different string counts, which is required e.g. for SIMD */
+        if (str_count != 1)
+        {
+            throw std::logic_error("Only str_count == 1 supported");
+        }
+        *self = visit(*strings, [&](auto s){
+            return get_ScorerContext_u64<CachedScorer>(s, args...);
+        });
+    } catch(...) {
+      PyGILState_STATE gilstate_save = PyGILState_Ensure();
+      CppExn2PyErr();
+      PyGILState_Release(gilstate_save);
+      return false;
+    }
+    return true;
+}
