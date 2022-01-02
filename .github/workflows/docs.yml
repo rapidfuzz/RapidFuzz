@@ -28,3 +28,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build/html
+          # for some reason currently this generates broken docs, so manually generate docs for now
+          publish_branch: gh-pages-test
