@@ -2,6 +2,7 @@
 # cython: language_level=3, binding=True, linetrace=True
 
 from array import array
+import warnings
 from rapidfuzz.utils import default_process
 
 from rapidfuzz_capi cimport (
@@ -22,9 +23,6 @@ from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.ref cimport Py_INCREF
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
 from cython.operator cimport dereference
-
-from array import array
-import warnings
 
 cdef extern from "cpp_string_metric.hpp" namespace "rapidfuzz" nogil:
     cpdef enum class LevenshteinEditType:
@@ -318,8 +316,8 @@ def levenshtein_editops(s1, s2, *, processor=None):
     >>> for tag, src_pos, dest_pos in levenshtein_editops("qabxcd", "abycdf"):
     ...    print(("%7s s1[%d] s2[%d]" % (tag, src_pos, dest_pos)))
      delete s1[1] s2[0]
-    replace s1[4] s2[3]
-     insert s1[6] s2[6]
+    replace s1[3] s2[2]
+     insert s1[6] s2[5]
     """
     cdef RF_StringWrapper s1_proc, s2_proc
 
