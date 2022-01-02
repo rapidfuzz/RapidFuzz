@@ -7,8 +7,9 @@ include pyproject.toml
 include src/CMakeLists.txt
 include src/rapidfuzz/**/*.pyi
 include src/rapidfuzz/py.typed
-include src/*.hpp
-include src/*.cpp
+recursive-include src *.hpp
+recursive-include src *.pyx
+recursive-include src *.pxd
 
 include capi/*.h
 include capi/*.pxd
