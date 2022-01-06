@@ -67,10 +67,11 @@ def test_levenshtein_editops():
         ("delete", 0, 0), ("replace", 3, 2), ("insert", 6, 5)
     ]
     assert string_metric.levenshtein_editops("Lorem ipsum.", "XYZLorem ABC iPsum") == [
-        ("insert", 0, 0), ("insert", 0, 1), ("insert", 0, 2), ("insert", 5, 8),
-        ("insert", 5, 9), ("insert", 5, 10), ("insert", 5, 11), ("replace", 7, 14),
-        ("delete", 11, 18)
+        ('insert', 0, 0), ('insert', 0, 1), ('insert', 0, 2), ('insert', 6, 9),
+        ('insert', 6, 10), ('insert', 6, 11), ('insert', 6, 12), ('replace', 7, 14),
+        ('delete', 11, 18)
     ]
+
 
 def test_help():
     """

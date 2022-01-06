@@ -15,4 +15,7 @@ find_package(Threads REQUIRED)
 find_package(Python COMPONENTS Interpreter Development)
 find_package(Cython REQUIRED)
 
+set(RAPIDFUZZ_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
+add_subdirectory(src/rapidfuzz/algorithm/edit_based)
 add_subdirectory(src)

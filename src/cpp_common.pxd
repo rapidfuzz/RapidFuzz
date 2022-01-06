@@ -46,6 +46,8 @@ cdef extern from "cpp_common.hpp":
     RF_String convert_string(object py_str)
     void validate_string(object py_str, const char* err) except +
 
+    vector[T] vector_slice[T](const vector[T]& vec, int start, int stop, int step) except +
+
 cdef inline RF_String hash_array(arr) except *:
     # TODO on Cpython this does not require any copies
     cdef RF_String s_proc

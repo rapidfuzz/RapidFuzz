@@ -1,4 +1,5 @@
 from skbuild import setup
+import rapidfuzz_capi
 
 with open('README.md', 'rt', encoding="utf8") as f:
     readme = f.read()
@@ -25,9 +26,11 @@ setup(
         "License :: OSI Approved :: MIT License"
     ],
 
-    packages=["rapidfuzz"],
+    packages=["rapidfuzz", "rapidfuzz/algorithm", "rapidfuzz/algorithm/edit_based"],
     package_dir={'':'src'},
     zip_safe=True,
     include_package_data=True,
-    python_requires=">=3.6"
+    python_requires=">=3.6",
+
+    cmake_args=[f'-DRAPIDFUZZ_CAPI_PATH:STRING={rapidfuzz_capi.get_include()}']
 )

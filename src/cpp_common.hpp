@@ -432,3 +432,62 @@ static inline bool scorer_init_u64(RF_ScorerFunc* self, size_t str_count, const 
     }
     return true;
 }
+
+template<typename T>
+std::vector<T> vector_slice(const std::vector<T>& vec, int start, int stop, int step)
+{
+    std::vector<T> new_vec;
+    if (step == 0)
+    {
+        throw std::invalid_argument("slice step cannot be zero");
+    }
+
+    if (start < 0)
+    {
+        start += vec.size();
+    }
+    else if (start > vec.size())
+    {
+        start = vec.size();
+    }
+
+    if (stop < 0)
+    {
+        stop += vec.size();
+    }
+    else if (stop > vec.size())
+    {
+        stop = vec.size();
+    }
+
+    // todo perhaps makes sence to add special implementation for
+    // step == 1 since this should be the most common
+    if (start > stop)
+    {
+        stop = std::max(stop, -1);
+        if (start != stop && start >= 0 && step < 0)
+        {
+            int count = 1 + (stop - start + 1) / step;
+            new_vec.reserve(count);
+            for (int i = start - 1; i > stop; i += step)
+            {
+                new_vec.push_back(vec[i]);
+            }
+        }
+    }
+    else if (start < stop)
+    {
+        start = std::max(start, 0);
+        if (start != stop && stop >= 0 && step > 0)
+        {
+            int count = 1 + (stop - start - 1) / step;
+            new_vec.reserve(count);
+            for (int i = start; i < stop; i += step)
+            {
+                new_vec.push_back(vec[i]);
+            }
+        }
+    }
+
+    return new_vec;
+}
