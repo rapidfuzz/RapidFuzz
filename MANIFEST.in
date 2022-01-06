@@ -1,18 +1,15 @@
 include setup.py
 include CMakeLists.txt
 include README.md
-include VERSION
 include LICENSE
 include pyproject.toml
 include src/rapidfuzz/**/*.pyi
 include src/rapidfuzz/py.typed
-recursive-include src CMakeLists.txt
-recursive-include src *.hpp
-recursive-include src *.pyx
-recursive-include src *.pxd
 
-include capi/*.h
-include capi/*.pxd
+recursive-include src/cython CMakeLists.txt
+recursive-include src/cython *.hpp
+recursive-include src/cython *.pyx
+recursive-include src/cython *.pxd
 
 include extern/rapidfuzz-cpp/LICENSE
 recursive-include extern/rapidfuzz-cpp/rapidfuzz *.hpp *.h *cpp
