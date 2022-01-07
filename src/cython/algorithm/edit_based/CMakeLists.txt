@@ -23,6 +23,17 @@ target_include_directories(Levenshtein PRIVATE
 python_extension_module(Levenshtein)
 install(TARGETS Levenshtein LIBRARY DESTINATION src/rapidfuzz/algorithm/edit_based)
 
+add_cython_target(Indel CXX)
+add_library(Indel MODULE ${Indel})
+target_compile_features(Indel PUBLIC cxx_std_14)
+target_include_directories(Indel PRIVATE
+    ${RAPIDFUZZ_BASE_DIR}/extern/rapidfuzz-cpp/
+    ${RAPIDFUZZ_CAPI_PATH}
+    ${RAPIDFUZZ_BASE_DIR}/src/cython
+    ${RAPIDFUZZ_BASE_DIR}/src/cython/algorithm/edit_based)
+python_extension_module(Indel)
+install(TARGETS Indel LIBRARY DESTINATION src/rapidfuzz/algorithm/edit_based)
+
 add_cython_target(Jaro CXX)
 add_library(Jaro MODULE ${Jaro})
 target_compile_features(Jaro PUBLIC cxx_std_14)

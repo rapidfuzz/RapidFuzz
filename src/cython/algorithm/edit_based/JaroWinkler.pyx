@@ -58,14 +58,14 @@ def similarity(s1, s2, *, double prefix_weight=0.1, processor=None, score_cutoff
         Optional callable that is used to preprocess the strings before
         comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : float, optional
-        Optional argument for a score threshold as a float between 0 and 100.
+        Optional argument for a score threshold as a float between 0 and 1.0.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
         which deactivates this behaviour.
 
     Returns
     -------
     similarity : float
-        similarity between s1 and s2 as a float between 0 and 100
+        similarity between s1 and s2 as a float between 0 and 1.0
 
     Raises
     ------
@@ -97,7 +97,7 @@ cdef bool JaroWinklerKwargsInit(RF_Kwargs* self, dict kwargs) except False:
 
 cdef bool GetScorerFlagsJaroWinklerSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 100
+    dereference(scorer_flags).optimal_score.f64 = 1.0
     dereference(scorer_flags).worst_score.f64 = 0
     return True
 

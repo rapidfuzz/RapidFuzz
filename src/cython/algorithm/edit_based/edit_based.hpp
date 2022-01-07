@@ -53,6 +53,30 @@ static inline bool NormalizedHammingInit(RF_ScorerFunc* self, const RF_Kwargs*, 
     return scorer_init_f64<string_metric::CachedNormalizedHamming>(self, str_count, str);
 }
 
+static inline size_t indel_func(const RF_String& s1, const RF_String& s2, size_t max)
+{
+    return visitor(s1, s2, [&](auto str1, auto str2) {
+        return string_metric::levenshtein(str1, str2, {1, 1, 2}, max);
+    });
+}
+static inline bool IndelInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, size_t str_count, const RF_String* str)
+{
+    rapidfuzz::LevenshteinWeightTable weights = {1, 1, 2};
+    return scorer_init_u64<string_metric::CachedLevenshtein>(self, str_count, str, weights);
+}
+
+static inline double normalized_indel_func(const RF_String& s1, const RF_String& s2, double score_cutoff)
+{
+    return visitor(s1, s2, [&](auto str1, auto str2) {
+        return string_metric::normalized_levenshtein(str1, str2, {1, 1, 2}, score_cutoff);
+    });
+}
+static inline bool NormalizedIndelInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, size_t str_count, const RF_String* str)
+{
+    rapidfuzz::LevenshteinWeightTable weights = {1, 1, 2};
+    return scorer_init_f64<string_metric::CachedNormalizedLevenshtein>(self, str_count, str, weights);
+}
+
 static inline double jaro_similarity_func(const RF_String& s1, const RF_String& s2, double score_cutoff)
 {
     return visitor(s1, s2, [&](auto str1, auto str2) {

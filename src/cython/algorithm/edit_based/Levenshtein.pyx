@@ -373,7 +373,7 @@ def normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff
 
     See Also
     --------
-    levenshtein : Levenshtein distance
+    Levenshtein.distance : Levenshtein distance
 
     Notes
     -----
@@ -408,7 +408,7 @@ def normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff
     Setting a score_cutoff allows the implementation to select
     a more efficient implementation:
 
-    >>> Levenshtein.normalized_distance("lewenstein", "levenshtein", score_cutoff=85)
+    >>> Levenshtein.normalized_distance("lewenstein", "levenshtein", score_cutoff=0.85)
     0.0
 
     It is possible to select different weights by passing a `weight`
