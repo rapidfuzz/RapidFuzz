@@ -23,7 +23,7 @@ from cpython.ref cimport Py_INCREF
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
 from cython.operator cimport dereference
 
-cdef extern from "cpp_string_metric.hpp" namespace "rapidfuzz" nogil:
+cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
     cpdef enum class LevenshteinEditType:
         None    = 0,
         Replace = 1,
@@ -35,7 +35,6 @@ cdef extern from "cpp_string_metric.hpp" namespace "rapidfuzz" nogil:
         size_t src_pos
         size_t dest_pos
 
-cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
     cdef struct LevenshteinWeightTable:
         size_t insert_cost
         size_t delete_cost
@@ -693,6 +692,6 @@ jaro_similarity._RF_Scorer = PyCapsule_New(&JaroSimilarityContext, NULL, NULL)
 cdef RF_Scorer JaroWinklerSimilarityContext
 JaroWinklerSimilarityContext.version = SCORER_STRUCT_VERSION
 JaroWinklerSimilarityContext.kwargs_init = JaroWinklerKwargsInit
-JaroSimilarityContext.get_scorer_flags = GetScorerFlagsJaroWinklerSimilarity
+JaroWinklerSimilarityContext.get_scorer_flags = GetScorerFlagsJaroWinklerSimilarity
 JaroWinklerSimilarityContext.scorer_func_init = JaroWinklerSimilarityInit
 jaro_winkler_similarity._RF_Scorer = PyCapsule_New(&JaroWinklerSimilarityContext, NULL, NULL)

@@ -1,3 +1,5 @@
+# should use target_include_directories once this is supported by scikit-build
+include_directories(${RAPIDFUZZ_BASE_DIR}/src/cython)
 
 add_cython_target(cpp_utils CXX)
 add_library(cpp_utils MODULE

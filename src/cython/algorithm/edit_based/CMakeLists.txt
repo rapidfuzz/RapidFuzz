@@ -1,3 +1,5 @@
+# should use target_include_directories once this is supported by scikit-build
+include_directories(${RAPIDFUZZ_BASE_DIR}/src/cython)
 
 add_cython_target(Hamming CXX)
 add_library(Hamming MODULE ${Hamming})
@@ -5,7 +7,8 @@ target_compile_features(Hamming PUBLIC cxx_std_14)
 target_include_directories(Hamming PRIVATE
     ${RAPIDFUZZ_BASE_DIR}/extern/rapidfuzz-cpp/
     ${RAPIDFUZZ_CAPI_PATH}
-    ${RAPIDFUZZ_BASE_DIR}/src/cython)
+    ${RAPIDFUZZ_BASE_DIR}/src/cython
+    ${RAPIDFUZZ_BASE_DIR}/src/cython/algorithm/edit_based)
 python_extension_module(Hamming)
 install(TARGETS Hamming LIBRARY DESTINATION src/rapidfuzz/algorithm/edit_based)
 
@@ -15,6 +18,29 @@ target_compile_features(Levenshtein PUBLIC cxx_std_14)
 target_include_directories(Levenshtein PRIVATE
     ${RAPIDFUZZ_BASE_DIR}/extern/rapidfuzz-cpp/
     ${RAPIDFUZZ_CAPI_PATH}
-    ${RAPIDFUZZ_BASE_DIR}/src/cython)
+    ${RAPIDFUZZ_BASE_DIR}/src/cython
+    ${RAPIDFUZZ_BASE_DIR}/src/cython/algorithm/edit_based)
 python_extension_module(Levenshtein)
 install(TARGETS Levenshtein LIBRARY DESTINATION src/rapidfuzz/algorithm/edit_based)
+
+add_cython_target(Jaro CXX)
+add_library(Jaro MODULE ${Jaro})
+target_compile_features(Jaro PUBLIC cxx_std_14)
+target_include_directories(Jaro PRIVATE
+    ${RAPIDFUZZ_BASE_DIR}/extern/rapidfuzz-cpp/
+    ${RAPIDFUZZ_CAPI_PATH}
+    ${RAPIDFUZZ_BASE_DIR}/src/cython
+    ${RAPIDFUZZ_BASE_DIR}/src/cython/algorithm/edit_based)
+python_extension_module(Jaro)
+install(TARGETS Jaro LIBRARY DESTINATION src/rapidfuzz/algorithm/edit_based)
+
+add_cython_target(JaroWinkler CXX)
+add_library(JaroWinkler MODULE ${JaroWinkler})
+target_compile_features(JaroWinkler PUBLIC cxx_std_14)
+target_include_directories(JaroWinkler PRIVATE
+    ${RAPIDFUZZ_BASE_DIR}/extern/rapidfuzz-cpp/
+    ${RAPIDFUZZ_CAPI_PATH}
+    ${RAPIDFUZZ_BASE_DIR}/src/cython
+    ${RAPIDFUZZ_BASE_DIR}/src/cython/algorithm/edit_based)
+python_extension_module(JaroWinkler)
+install(TARGETS JaroWinkler LIBRARY DESTINATION src/rapidfuzz/algorithm/edit_based)

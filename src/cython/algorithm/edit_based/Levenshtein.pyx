@@ -13,7 +13,6 @@ from cpp_common cimport RF_StringWrapper, conv_sequence, vector_slice
 from libc.stdint cimport SIZE_MAX
 
 from libcpp cimport bool
-from libcpp.utility cimport move
 from libcpp.vector cimport vector
 from libc.stdlib cimport malloc, free
 from libc.stdint cimport uint32_t
@@ -22,7 +21,7 @@ from cpython.ref cimport Py_INCREF
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
 from cython.operator cimport dereference
 
-cdef extern from "cpp_string_metric.hpp" namespace "rapidfuzz" nogil:
+cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
     cpdef enum class LevenshteinEditType:
         None    = 0,
         Replace = 1,
@@ -34,13 +33,12 @@ cdef extern from "cpp_string_metric.hpp" namespace "rapidfuzz" nogil:
         size_t src_pos
         size_t dest_pos
 
-cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
     cdef struct LevenshteinWeightTable:
         size_t insert_cost
         size_t delete_cost
         size_t replace_cost
 
-cdef extern from "cpp_string_metric.hpp":
+cdef extern from "edit_based.hpp":
     double normalized_levenshtein_func( const RF_String&, const RF_String&, size_t, size_t, size_t, double) nogil except +
 
     size_t levenshtein_func(const RF_String&, const RF_String&, size_t, size_t, size_t, size_t) nogil except +
@@ -263,35 +261,6 @@ cdef list levenshtein_editops_to_list(vector[LevenshteinEditOp] ops):
 
     return result_list
 
-'''
-cdef class Editops:
-    cdef vector[LevenshteinEditOp] editops
-
-    def __init__(self, s1, s2):
-        pass
-
-    @classmethod
-    def from_opcodes(cls, opcodes):
-        self = cls.__new__(cls)
-
-        return self
-
-    def to_editops(self):
-        return Opcodes.from_editops(self)
-
-    def to_list(self):
-        return self.editops
-
-    def __getitem__(self, subscript):
-        if isinstance(subscript, slice):
-            # do your handling for a slice object:
-            #print(subscript.start, subscript.stop, subscript.step)
-        else:
-
-            # Do your handling for a plain index
-            print(subscript)
-'''
-
 cdef class Editops:
     """
     List like object of 3-tuples describing how to turn s1 into s2.
@@ -344,6 +313,9 @@ cdef class Editops:
 
         new_self.editops = vector_slice(self.editops, start, stop, step)
         return new_self
+
+    def as_list(self):
+        return levenshtein_editops_to_list(self.editops)
 
     def __len__(self):
         return self.editops.size()

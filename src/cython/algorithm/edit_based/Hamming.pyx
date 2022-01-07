@@ -16,7 +16,7 @@ from libcpp cimport bool
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
 from cython.operator cimport dereference
 
-cdef extern from "cpp_string_metric.hpp":
+cdef extern from "edit_based.hpp":
     double normalized_hamming_func(     const RF_String&, const RF_String&, double) nogil except +
     size_t hamming_func(    const RF_String&, const RF_String&, size_t) nogil except +
 

@@ -3,7 +3,6 @@
 
 import unittest
 import pytest
-import sys
 
 from rapidfuzz import string_metric
 
@@ -22,9 +21,8 @@ def test_cross_type_matching():
     strings should always be interpreted in the same way
     """
     assert string_metric.levenshtein("aaaa", "aaaa") == 0
-    if sys.version_info[0] > 2:
-        assert string_metric.levenshtein("aaaa", ["a", "a", "a", "a"]) == 0
-        assert string_metric.levenshtein("aaaa", [ord("a"), ord("a"), "a", "a"]) == 0
+    assert string_metric.levenshtein("aaaa", ["a", "a", "a", "a"]) == 0
+    assert string_metric.levenshtein("aaaa", [ord("a"), ord("a"), "a", "a"]) == 0
 
 def test_word_error_rate():
     """
