@@ -166,7 +166,16 @@ PROCESSORS = [
 @settings(max_examples=100, deadline=None)
 def test_levenshtein_editops(s1, s2):
     """
-    test levenshtein_editops. Currently this only tests, so there are no exceptions.
+    test levenshtein_editops with any sizes
+    """
+    ops = string_metric.levenshtein_editops(s1, s2)
+    assert apply_editops(s1, s2, ops) == s2
+
+@given(s1=st.text(min_size=65), s2=st.text(min_size=65))
+@settings(max_examples=50, deadline=None)
+def test_levenshtein_editops_block(s1, s2):
+    """
+    test levenshtein_editops for long strings
     """
     ops = string_metric.levenshtein_editops(s1, s2)
     assert apply_editops(s1, s2, ops) == s2

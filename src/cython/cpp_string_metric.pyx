@@ -300,6 +300,16 @@ def levenshtein_editops(s1, s2, *, processor=None):
     editops : list[]
         edit operations required to turn s1 into s2
 
+    Notes
+    -----
+    The alignment is calculated using an algorithm of Heikki Hyyrö, which is
+    described [1]_. It has a time complexity and memory usage of ``O([N/64] * M)``.
+
+    References
+    ----------
+    .. [1] Hyyrö, Heikki. "A Note on Bit-Parallel Alignment Computation."
+           Stringology (2004).
+
     Examples
     --------
     >>> from rapidfuzz.string_metric import levenshtein_editops

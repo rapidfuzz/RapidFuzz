@@ -27,6 +27,11 @@
 #### Fixed
 - process.cdist did raise an exception when used with a pure python scorer
 
+#### Performance
+- improve performance and memory usage of `rapidfuzz.string_metric.levenshtein_editops`
+  - memory usage is reduced by 33%
+  - performance is improved by around 10%-20%
+
 ### [1.9.1] - 2021-12-13
 #### Fixed
 - fix bug in new editops implementation, causing it to SegFault on some inputs (see qurator-spk/dinglehopper#64)
