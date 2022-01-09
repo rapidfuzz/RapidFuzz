@@ -55,20 +55,20 @@ def test_Editops():
     """
     basic test for levenshtein.Editops
     """
-    #assert Levenshtein.Editops("0", "") == [("delete", 0, 0)]
-    #assert Levenshtein.Editops("", "0") == [("insert", 0, 0)]
+    assert Levenshtein.Editops("0", "").as_list() == [("delete", 0, 0)]
+    assert Levenshtein.Editops("", "0").as_list() == [("insert", 0, 0)]
 
-    #assert Levenshtein.Editops("00", "0") == [("delete", 1, 1)]
-    #assert Levenshtein.Editops("0", "00") == [("insert", 1, 1)]
+    assert Levenshtein.Editops("00", "0").as_list() == [("delete", 1, 1)]
+    assert Levenshtein.Editops("0", "00").as_list() == [("insert", 1, 1)]
 
-    #assert Levenshtein.Editops("qabxcd", "abycdf") == [
-    #    ("delete", 0, 0), ("replace", 3, 2), ("insert", 6, 5)
-    #]
-    #assert Levenshtein.Editops("Lorem ipsum.", "XYZLorem ABC iPsum") == [
-    #    ('insert', 0, 0), ('insert', 0, 1), ('insert', 0, 2), ('insert', 6, 9),
-    #    ('insert', 6, 10), ('insert', 6, 11), ('insert', 6, 12), ('replace', 7, 14),
-    #    ('delete', 11, 18)
-    #]
+    assert Levenshtein.Editops("qabxcd", "abycdf").as_list() == [
+        ("delete", 0, 0), ("replace", 3, 2), ("insert", 6, 5)
+    ]
+    assert Levenshtein.Editops("Lorem ipsum.", "XYZLorem ABC iPsum").as_list() == [
+        ('insert', 0, 0), ('insert', 0, 1), ('insert', 0, 2), ('insert', 6, 9),
+        ('insert', 6, 10), ('insert', 6, 11), ('insert', 6, 12), ('replace', 7, 14),
+        ('delete', 11, 18)
+    ]
 
 if __name__ == '__main__':
     unittest.main()

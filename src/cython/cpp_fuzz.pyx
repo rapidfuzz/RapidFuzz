@@ -61,7 +61,7 @@ cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc
         processor_capsule = getattr(processor, '_RF_Preprocess', processor)
         if PyCapsule_IsValid(processor_capsule, NULL):
             preprocess_context = <RF_Preprocessor*>PyCapsule_GetPointer(processor_capsule, NULL)
-        
+
         if preprocess_context != NULL and preprocess_context.version == 1:
             preprocess_context.preprocess(s1, &(s1_proc[0].string))
             preprocess_context.preprocess(s2, &(s2_proc[0].string))
@@ -112,7 +112,7 @@ def ratio(s1, s2, *, processor=None, score_cutoff=None):
 
     if s1 is None or s2 is None:
         return 0
-    
+
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 

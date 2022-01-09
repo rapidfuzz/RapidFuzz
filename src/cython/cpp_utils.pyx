@@ -45,7 +45,7 @@ cdef bool default_process_capi(sentence, RF_String* str_) except False:
         if proc_str.dtor:
             proc_str.dtor(&proc_str)
         raise
-    
+
     str_[0] = proc_str
     return True
 

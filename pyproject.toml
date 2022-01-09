@@ -6,7 +6,7 @@ requires = [
     "cmake",
     "ninja",
     "oldest-supported-numpy",
-    "Cython==3.0.0a9",
+    "Cython==3.0.0a10",
     "rapidfuzz_capi"
 ]
 build-backend = "setuptools.build_meta"

@@ -4,7 +4,7 @@
 from rapidfuzz.fuzz import ratio
 from rapidfuzz.utils import default_process
 
-from vector cimport vector
+from libcpp.vector cimport vector
 from libcpp.utility cimport move
 from libcpp cimport bool
 from libc.math cimport floor
@@ -88,7 +88,7 @@ cdef inline vector[RF_StringWrapper] preprocess(queries, processor) except *:
             for query in queries:
                 proc_query = processor(query)
                 proc_queries.emplace_back(conv_sequence(proc_query), <PyObject*>proc_query)
-    
+
     return move(proc_queries)
 
 cdef inline int dtype_to_type_num(dtype) except -1:
@@ -140,7 +140,7 @@ cdef cdist_two_lists(queries, choices, RF_Scorer* scorer, const RF_ScorerFlags* 
             kwargs, scorer, proc_queries, proc_choices,
             dtype_to_type_num_f64(dtype),
             c_workers,
-            get_score_cutoff_f64(score_cutoff, scorer_flags)) 
+            get_score_cutoff_f64(score_cutoff, scorer_flags))
 
     elif flags & RF_SCORER_FLAG_RESULT_U64:
         return cdist_two_lists_impl(
@@ -154,7 +154,7 @@ cdef cdist_two_lists(queries, choices, RF_Scorer* scorer, const RF_ScorerFlags* 
             kwargs, scorer, proc_queries, proc_choices,
             dtype_to_type_num_i64(dtype),
             c_workers,
-            get_score_cutoff_i64(score_cutoff, scorer_flags))   
+            get_score_cutoff_i64(score_cutoff, scorer_flags))
 
     raise ValueError("scorer does not properly use the C-API")
 
@@ -167,7 +167,7 @@ cdef cdist_single_list(queries, RF_Scorer* scorer, const RF_ScorerFlags* scorer_
             kwargs, scorer, proc_queries,
             dtype_to_type_num_f64(dtype),
             c_workers,
-            get_score_cutoff_f64(score_cutoff, scorer_flags)) 
+            get_score_cutoff_f64(score_cutoff, scorer_flags))
 
     elif flags & RF_SCORER_FLAG_RESULT_U64:
         return cdist_single_list_impl(
@@ -181,7 +181,7 @@ cdef cdist_single_list(queries, RF_Scorer* scorer, const RF_ScorerFlags* scorer_
             kwargs, scorer, proc_queries,
             dtype_to_type_num_i64(dtype),
             c_workers,
-            get_score_cutoff_i64(score_cutoff, scorer_flags))   
+            get_score_cutoff_i64(score_cutoff, scorer_flags))
 
     raise ValueError("scorer does not properly use the C-API")
 

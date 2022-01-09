@@ -4,7 +4,7 @@
 from rapidfuzz.utils import default_process
 from rapidfuzz.fuzz import WRatio
 
-from vector cimport vector
+from libcpp.vector cimport vector
 from libcpp cimport algorithm
 from libcpp.utility cimport move
 from libc.stdint cimport uint8_t, int32_t, uint64_t, int64_t
@@ -138,7 +138,7 @@ cdef inline vector[DictStringElem] preprocess_dict(queries, processor) except *:
                     move(PyObjectWrapper(query)),
                     move(RF_StringWrapper(conv_sequence(proc_query), proc_query))
                 )
-    
+
     return move(proc_queries)
 
 cdef inline vector[ListStringElem] preprocess_list(queries, processor) except *:
@@ -187,7 +187,7 @@ cdef inline vector[ListStringElem] preprocess_list(queries, processor) except *:
                     move(PyObjectWrapper(query)),
                     move(RF_StringWrapper(conv_sequence(proc_query), proc_query))
                 )
-    
+
     return move(proc_queries)
 
 
@@ -255,7 +255,7 @@ cdef inline extractOne_list_f64(query, choices, RF_Scorer* scorer, const RF_Scor
 
     cdef optional[ListMatchElem[double]] result = extractOne_list_impl[double](
         kwargs, scorer_flags, scorer, proc_query, proc_choices, c_score_cutoff)
-        
+
     if result:
         return (<object>result.value().choice.obj, result.value().score, result.value().index)
     return None
@@ -268,7 +268,7 @@ cdef inline extractOne_list_u64(query, choices, RF_Scorer* scorer, const RF_Scor
 
     cdef optional[ListMatchElem[uint64_t]] result = extractOne_list_impl[uint64_t](
         kwargs, scorer_flags, scorer, proc_query, proc_choices, c_score_cutoff)
-        
+
     if result:
         return (<object>result.value().choice.obj, result.value().score, result.value().index)
     return None
@@ -494,7 +494,7 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
     # preprocess the query
     if callable(processor):
         query = processor(query)
-    
+
 
     scorer_capsule = getattr(scorer, '_RF_Scorer', scorer)
     if PyCapsule_IsValid(scorer_capsule, NULL):
@@ -958,12 +958,12 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
             &scorer_func, &kwargs_context.kwargs, 1, &query_proc.string
         )
         cdef RF_ScorerWrapper ScorerFunc = RF_ScorerWrapper(scorer_func)
-        cdef optional[double] result 
+        cdef optional[double] result
 
         for choice_key, choice in choices.items():
             if choice is None:
                 continue
-            
+
             # use RapidFuzz C-Api
             if processor_context != NULL and processor_context.version == 1:
                 processor_context.preprocess(choice, &proc_str)
@@ -996,12 +996,12 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
             &scorer_func, &kwargs_context.kwargs, 1, &query_proc.string
         )
         cdef RF_ScorerWrapper ScorerFunc = RF_ScorerWrapper(scorer_func)
-        cdef optional[uint64_t] result 
+        cdef optional[uint64_t] result
 
         for choice_key, choice in choices.items():
             if choice is None:
                 continue
-            
+
             # use RapidFuzz C-Api
             if processor_context != NULL and processor_context.version == 1:
                 processor_context.preprocess(choice, &proc_str)
@@ -1034,12 +1034,12 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
             &scorer_func, &kwargs_context.kwargs, 1, &query_proc.string
         )
         cdef RF_ScorerWrapper ScorerFunc = RF_ScorerWrapper(scorer_func)
-        cdef optional[int64_t] result 
+        cdef optional[int64_t] result
 
         for choice_key, choice in choices.items():
             if choice is None:
                 continue
-            
+
             # use RapidFuzz C-Api
             if processor_context != NULL and processor_context.version == 1:
                 processor_context.preprocess(choice, &proc_str)
@@ -1072,12 +1072,12 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
             &scorer_func, &kwargs_context.kwargs, 1, &query_proc.string
         )
         cdef RF_ScorerWrapper ScorerFunc = RF_ScorerWrapper(scorer_func)
-        cdef optional[double] result 
+        cdef optional[double] result
 
         for i, choice in enumerate(choices):
             if choice is None:
                 continue
-            
+
             # use RapidFuzz C-Api
             if processor_context != NULL and processor_context.version == 1:
                 processor_context.preprocess(choice, &proc_str)
@@ -1110,12 +1110,12 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
             &scorer_func, &kwargs_context.kwargs, 1, &query_proc.string
         )
         cdef RF_ScorerWrapper ScorerFunc = RF_ScorerWrapper(scorer_func)
-        cdef optional[uint64_t] result 
+        cdef optional[uint64_t] result
 
         for i, choice in enumerate(choices):
             if choice is None:
                 continue
-            
+
             # use RapidFuzz C-Api
             if processor_context != NULL and processor_context.version == 1:
                 processor_context.preprocess(choice, &proc_str)
@@ -1148,12 +1148,12 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
             &scorer_func, &kwargs_context.kwargs, 1, &query_proc.string
         )
         cdef RF_ScorerWrapper ScorerFunc = RF_ScorerWrapper(scorer_func)
-        cdef optional[int64_t] result 
+        cdef optional[int64_t] result
 
         for i, choice in enumerate(choices):
             if choice is None:
                 continue
-            
+
             # use RapidFuzz C-Api
             if processor_context != NULL and processor_context.version == 1:
                 processor_context.preprocess(choice, &proc_str)
@@ -1259,7 +1259,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
             elif scorer_flags.flags & RF_SCORER_FLAG_RESULT_I64:
                 yield from extract_iter_list_i64()
                 return
-        
+
         raise ValueError("scorer does not properly use the C-API")
 
     # the scorer has to be called through Python

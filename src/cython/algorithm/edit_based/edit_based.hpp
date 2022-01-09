@@ -1,6 +1,35 @@
 #pragma once
 #include "cpp_common.hpp"
 
+/**
+ * @brief Edit operations used by the Levenshtein distance
+ *
+ * This represents an edit operation of type type which is applied to
+ * the source string
+ *
+ * None:    s1[src_begin:src_end] == s1[dest_begin:dest_end]
+ * Replace: s1[i1:i2] should be replaced by s2[dest_begin:dest_end]
+ * Insert:  s2[dest_begin:dest_end] should be inserted at s1[src_begin:src_begin].
+ *          Note that src_begin==src_end in this case.
+ * Delete:  s1[src_begin:src_end] should be deleted.
+ *          Note that dest_begin==dest_end in this case.
+ */
+struct LevenshteinOpcodes {
+    rapidfuzz::LevenshteinEditType type; /**< type of the edit operation */
+    std::size_t src_begin;    /**< index into the source string */
+    std::size_t src_end;      /**< index into the source string */
+    std::size_t dest_begin;   /**< index into the destination string */
+    std::size_t dest_end;     /**< index into the destination string */
+};
+
+static inline bool operator ==(const LevenshteinOpcodes& a, const LevenshteinOpcodes& b) {
+	return (a.type == b.type)
+        && (a.src_begin == b.src_begin)
+        && (a.src_end == b.src_end)
+        && (a.dest_begin == b.dest_begin)
+        && (a.dest_end == b.dest_end);
+}
+
 static inline size_t levenshtein_func(const RF_String& s1, const RF_String& s2,
     size_t insertion, size_t deletion, size_t substitution, size_t max)
 {
@@ -106,4 +135,115 @@ static inline std::vector<rapidfuzz::LevenshteinEditOp> levenshtein_editops_func
     return visitor(s1, s2, [](auto str1, auto str2) {
         return string_metric::levenshtein_editops(str1, str2);
     });
+}
+
+std::vector<rapidfuzz::LevenshteinEditOp> opcodes_to_editops(const std::vector<LevenshteinOpcodes>& ops)
+{
+    std::vector<rapidfuzz::LevenshteinEditOp> result;
+
+    for (const auto& op : ops)
+    {
+        switch(op.type)
+        {
+        case rapidfuzz::LevenshteinEditType::None:
+            break;
+
+        case rapidfuzz::LevenshteinEditType::Replace:
+            for (size_t j = 0; j < op.src_end - op.src_begin; j++) {
+                result.push_back({
+                    rapidfuzz::LevenshteinEditType::Replace,
+                    op.src_begin + j,
+                    op.dest_begin + j
+                });
+            }
+            break;
+
+        case rapidfuzz::LevenshteinEditType::Insert:
+            for (size_t j = 0; j < op.dest_end - op.dest_begin; j++) {
+                result.push_back({
+                    rapidfuzz::LevenshteinEditType::Insert,
+                    op.src_begin,
+                    op.dest_begin + j
+                });
+            }
+            break;
+
+        case rapidfuzz::LevenshteinEditType::Delete:
+            for (size_t j = 0; j < op.src_end - op.src_begin; j++) {
+                result.push_back({
+                    rapidfuzz::LevenshteinEditType::Delete,
+                    op.src_begin + j,
+                    op.dest_begin
+                });
+            }
+            break;
+        }
+    }
+
+    return result;
+}
+
+
+std::vector<LevenshteinOpcodes> editops_to_opcodes(const std::vector<rapidfuzz::LevenshteinEditOp>& ops, size_t src_len, size_t dest_len)
+{
+    std::vector<LevenshteinOpcodes> result;
+
+    size_t src_pos = 0;
+    size_t dest_pos = 0;
+    for (size_t i = 0; i < ops.size();)
+    {
+        if (src_pos < ops[i].src_pos || dest_pos < ops[i].dest_pos)
+        {
+            result.push_back({
+                rapidfuzz::LevenshteinEditType::None,
+                src_pos, ops[i].src_pos,
+                dest_pos, ops[i].dest_pos
+            });
+            src_pos = ops[i].src_pos;
+            dest_pos = ops[i].dest_pos;
+        }
+
+        size_t src_begin = src_pos;
+        size_t dest_begin = dest_pos;
+        rapidfuzz::LevenshteinEditType type = ops[i].type;
+        for (; i < ops.size(); ++i)
+        {
+            if (ops[i].type == type && src_pos < ops[i].src_pos && dest_pos < ops[i].dest_pos)
+            {
+                break;
+            }
+
+            switch(type)
+            {
+            case rapidfuzz::LevenshteinEditType::None:
+                break;
+
+            case rapidfuzz::LevenshteinEditType::Replace:
+                src_pos++;
+                dest_pos++;
+                break;
+
+            case rapidfuzz::LevenshteinEditType::Insert:
+                dest_pos++;
+                break;
+
+            case rapidfuzz::LevenshteinEditType::Delete:
+                src_pos++;
+                break;
+            }
+        }
+
+        result.push_back({type, src_begin, src_pos, dest_begin, dest_pos});
+    }
+
+    if (src_pos < src_len || dest_pos < dest_len)
+    {
+        result.push_back({
+            rapidfuzz::LevenshteinEditType::None,
+            src_pos, src_len,
+            dest_pos, dest_len
+        });
+    }
+
+    return result;
 }

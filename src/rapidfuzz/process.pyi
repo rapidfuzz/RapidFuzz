@@ -144,7 +144,7 @@ try:
         dtype: Optional[np.dtype] = None,
         **kwargs: Any
     ) -> np.ndarray: ...
-    
+
     @overload
     def cdist(
         queries: Iterable[S1],

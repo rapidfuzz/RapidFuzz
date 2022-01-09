@@ -29,7 +29,7 @@ cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc
         processor_capsule = getattr(processor, '_RF_Preprocess', processor)
         if PyCapsule_IsValid(processor_capsule, NULL):
             preprocess_context = <RF_Preprocessor*>PyCapsule_GetPointer(processor_capsule, NULL)
-        
+
         if preprocess_context != NULL and preprocess_context.version == 1:
             preprocess_context.preprocess(s1, &(s1_proc[0].string))
             preprocess_context.preprocess(s2, &(s2_proc[0].string))
@@ -86,7 +86,7 @@ cdef bool GetScorerFlagsJaroSimilarity(const RF_Kwargs* self, RF_ScorerFlags* sc
     dereference(scorer_flags).worst_score.f64 = 0
     return True
 
-cdef RF_Scorer JaroSimilarityContext 
+cdef RF_Scorer JaroSimilarityContext
 JaroSimilarityContext.version = SCORER_STRUCT_VERSION
 JaroSimilarityContext.kwargs_init = NoKwargsInit
 JaroSimilarityContext.get_scorer_flags = GetScorerFlagsJaroSimilarity

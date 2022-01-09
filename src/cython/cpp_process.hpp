@@ -191,7 +191,7 @@ nonstd::optional<DictMatchElem<T>> extractOne_dict_impl(
 
     RF_ScorerFunc scorer_func;
     PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, 1, &query.string));
-    RF_ScorerWrapper ScorerFunc(scorer_func);    
+    RF_ScorerWrapper ScorerFunc(scorer_func);
 
     bool lowest_score_worst = is_lowest_score_worst<T>(scorer_flags);
     T optimal_score = get_optimal_score<T>(scorer_flags);
@@ -235,7 +235,7 @@ nonstd::optional<ListMatchElem<T>> extractOne_list_impl(
 
     RF_ScorerFunc scorer_func;
     PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, 1, &query.string));
-    RF_ScorerWrapper ScorerFunc(scorer_func);    
+    RF_ScorerWrapper ScorerFunc(scorer_func);
 
     bool lowest_score_worst = is_lowest_score_worst<T>(scorer_flags);
     T optimal_score = get_optimal_score<T>(scorer_flags);
@@ -280,7 +280,7 @@ std::vector<DictMatchElem<T>> extract_dict_impl(
 
     RF_ScorerFunc scorer_func;
     PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, 1, &query.string));
-    RF_ScorerWrapper ScorerFunc(scorer_func);    
+    RF_ScorerWrapper ScorerFunc(scorer_func);
 
     bool lowest_score_worst = is_lowest_score_worst<T>(scorer_flags);
 
@@ -319,7 +319,7 @@ std::vector<ListMatchElem<T>> extract_list_impl(
 
     RF_ScorerFunc scorer_func;
     PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, 1, &query.string));
-    RF_ScorerWrapper ScorerFunc(scorer_func);    
+    RF_ScorerWrapper ScorerFunc(scorer_func);
 
     bool lowest_score_worst = is_lowest_score_worst<T>(scorer_flags);
 

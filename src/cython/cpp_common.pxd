@@ -136,7 +136,7 @@ cdef inline double get_score_cutoff_f64(score_cutoff, const RF_ScorerFlags* scor
     worst_score = dereference(scorer_flags).worst_score.f64
     optimal_score = dereference(scorer_flags).optimal_score.f64
     c_score_cutoff = worst_score
-    
+
     if score_cutoff is not None:
         c_score_cutoff = score_cutoff
         if optimal_score > worst_score:
@@ -147,14 +147,14 @@ cdef inline double get_score_cutoff_f64(score_cutoff, const RF_ScorerFlags* scor
             # e.g. DBL_MAX - 0
             if c_score_cutoff > worst_score or c_score_cutoff < optimal_score:
                 raise TypeError(f"score_cutoff has to be in the range of {optimal_score} - {worst_score}")
-    
+
     return c_score_cutoff
 
 cdef inline uint64_t get_score_cutoff_u64(score_cutoff, const RF_ScorerFlags* scorer_flags) except *:
     worst_score = dereference(scorer_flags).worst_score.u64
     optimal_score = dereference(scorer_flags).optimal_score.u64
     c_score_cutoff = worst_score
-    
+
     if score_cutoff is not None:
         c_score_cutoff = score_cutoff
         if optimal_score > worst_score:
@@ -172,7 +172,7 @@ cdef inline int64_t get_score_cutoff_i64(score_cutoff, const RF_ScorerFlags* sco
     worst_score = dereference(scorer_flags).worst_score.i64
     optimal_score = dereference(scorer_flags).optimal_score.i64
     c_score_cutoff = worst_score
-    
+
     if score_cutoff is not None:
         c_score_cutoff = score_cutoff
         if optimal_score > worst_score:
@@ -183,5 +183,5 @@ cdef inline int64_t get_score_cutoff_i64(score_cutoff, const RF_ScorerFlags* sco
             # e.g. DBL_MAX - 0
             if c_score_cutoff > worst_score or c_score_cutoff < optimal_score:
                 raise TypeError(f"score_cutoff has to be in the range of {optimal_score} - {worst_score}")
-    
+
     return c_score_cutoff

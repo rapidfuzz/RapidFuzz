@@ -72,7 +72,7 @@ cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc
         processor_capsule = getattr(processor, '_RF_Preprocess', processor)
         if PyCapsule_IsValid(processor_capsule, NULL):
             preprocess_context = <RF_Preprocessor*>PyCapsule_GetPointer(processor_capsule, NULL)
-        
+
         if preprocess_context != NULL and preprocess_context.version == 1:
             preprocess_context.preprocess(s1, &(s1_proc[0].string))
             preprocess_context.preprocess(s2, &(s2_proc[0].string))
@@ -681,7 +681,7 @@ NormalizedHammingContext.get_scorer_flags = GetScorerFlagsNormalizedHamming
 NormalizedHammingContext.scorer_func_init = NormalizedHammingInit
 normalized_hamming._RF_Scorer = PyCapsule_New(&NormalizedHammingContext, NULL, NULL)
 
-cdef RF_Scorer JaroSimilarityContext 
+cdef RF_Scorer JaroSimilarityContext
 JaroSimilarityContext.version = SCORER_STRUCT_VERSION
 JaroSimilarityContext.kwargs_init = NoKwargsInit
 JaroSimilarityContext.get_scorer_flags = GetScorerFlagsJaroSimilarity
