@@ -1,4 +1,5 @@
 from typing import Callable, Hashable, Sequence, Optional, Union, TypeVar, Tuple, List
+from rapidfuzz.algorithm.edit_based import Editops, Opcodes
 
 _StringType = Sequence[Hashable]
 S1 = TypeVar("S1")
@@ -6,46 +7,18 @@ S2 = TypeVar("S2")
 
 def distance(
     s1: S1, s2: S2, *,
-    processor: Optional[Callable[[Union[S1, S2]], _StringType]] = ...,
+    processor: Optional[Callable[[Union[S1, S2]], _StringType]] = None,
     max: Optional[int] = None) -> int: ...
 
 def normalized_distance(
     s1: S1, s2: S2, *,
-    processor: Optional[Callable[[Union[S1, S2]], _StringType]] = ...,
+    processor: Optional[Callable[[Union[S1, S2]], _StringType]] = None,
     score_cutoff: Optional[float] = 0) -> float: ...
 
-class Editops:
-    def __init__(self, s1: S1, s2: S2): ...
+def editops(
+    s1: S1, s2: S2, *,
+    processor: Optional[Callable[[Union[S1, S2]], _StringType]] = None) -> Editops: ...
 
-    @classmethod
-    def from_opcodes(cls, other: Opcodes) -> Editops: ...
-
-    def as_opcodes(self) -> Opcodes: ...
-
-    def as_list(self) -> List[Tuple[str, int, int]]: ...
-
-    def __eq__(self, other: Editops) -> bool: ...
-
-    def __len__(self) -> int: ...
-
-    def __getitem__(self, subscript: int) -> Tuple[str, int, int]:
-
-    def __repr__(self) -> str: ...
-
-class Opcodes:
-    def __init__(self, s1: S1, s2: S2): ...
-
-    @classmethod
-    def from_editops(cls, other: Editops) -> Opcodes: ...
-
-    def as_editops(self) -> Editops: ...
-
-    def as_list(self) -> List[Tuple[str, int, int, int, int]]: ...
-
-    def __eq__(self, other: Editops) -> bool: ...
-
-    def __len__(self) -> int: ...
-
-    def __getitem__(self, subscript: int) -> Tuple[str, int, int, int, int]:
-
-    def __repr__(self) -> str: ...
+def opcodes(
+    s1: S1, s2: S2, *,
+    processor: Optional[Callable[[Union[S1, S2]], _StringType]] = None) -> Opcodes: ...

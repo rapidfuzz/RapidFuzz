@@ -1,6 +1,17 @@
 # should use target_include_directories once this is supported by scikit-build
 include_directories(${RAPIDFUZZ_BASE_DIR}/src/cython)
 
+add_cython_target(_initialize CXX)
+add_library(_initialize MODULE ${_initialize})
+target_compile_features(_initialize PUBLIC cxx_std_14)
+target_include_directories(_initialize PRIVATE
+    ${RAPIDFUZZ_BASE_DIR}/extern/rapidfuzz-cpp/
+    ${RAPIDFUZZ_CAPI_PATH}
+    ${RAPIDFUZZ_BASE_DIR}/src/cython
+    ${RAPIDFUZZ_BASE_DIR}/src/cython/algorithm/edit_based)
+python_extension_module(_initialize)
+install(TARGETS _initialize LIBRARY DESTINATION src/rapidfuzz/algorithm/edit_based)
+
 add_cython_target(Hamming CXX)
 add_library(Hamming MODULE ${Hamming})
 target_compile_features(Hamming PUBLIC cxx_std_14)

@@ -1,5 +1,6 @@
 #pragma once
 #include "cpp_common.hpp"
+#include <iostream>
 
 /**
  * @brief Edit operations used by the Levenshtein distance
@@ -14,7 +15,7 @@
  * Delete:  s1[src_begin:src_end] should be deleted.
  *          Note that dest_begin==dest_end in this case.
  */
-struct LevenshteinOpcodes {
+struct LevenshteinOpcode {
     rapidfuzz::LevenshteinEditType type; /**< type of the edit operation */
     std::size_t src_begin;    /**< index into the source string */
     std::size_t src_end;      /**< index into the source string */
@@ -22,7 +23,7 @@ struct LevenshteinOpcodes {
     std::size_t dest_end;     /**< index into the destination string */
 };
 
-static inline bool operator ==(const LevenshteinOpcodes& a, const LevenshteinOpcodes& b) {
+static inline bool operator ==(const LevenshteinOpcode& a, const LevenshteinOpcode& b) {
 	return (a.type == b.type)
         && (a.src_begin == b.src_begin)
         && (a.src_end == b.src_end)
@@ -137,7 +138,7 @@ static inline std::vector<rapidfuzz::LevenshteinEditOp> levenshtein_editops_func
     });
 }
 
-std::vector<rapidfuzz::LevenshteinEditOp> opcodes_to_editops(const std::vector<LevenshteinOpcodes>& ops)
+std::vector<rapidfuzz::LevenshteinEditOp> opcodes_to_editops(const std::vector<LevenshteinOpcode>& ops)
 {
     std::vector<rapidfuzz::LevenshteinEditOp> result;
 
@@ -184,9 +185,9 @@ std::vector<rapidfuzz::LevenshteinEditOp> opcodes_to_editops(const std::vector<L
 }
 
 
-std::vector<LevenshteinOpcodes> editops_to_opcodes(const std::vector<rapidfuzz::LevenshteinEditOp>& ops, size_t src_len, size_t dest_len)
+std::vector<LevenshteinOpcode> editops_to_opcodes(const std::vector<rapidfuzz::LevenshteinEditOp>& ops, size_t src_len, size_t dest_len)
 {
-    std::vector<LevenshteinOpcodes> result;
+    std::vector<LevenshteinOpcode> result;
 
     size_t src_pos = 0;
     size_t dest_pos = 0;
@@ -206,13 +207,8 @@ std::vector<LevenshteinOpcodes> editops_to_opcodes(const std::vector<rapidfuzz::
         size_t src_begin = src_pos;
         size_t dest_begin = dest_pos;
         rapidfuzz::LevenshteinEditType type = ops[i].type;
-        for (; i < ops.size(); ++i)
+        do
         {
-            if (ops[i].type == type && src_pos < ops[i].src_pos && dest_pos < ops[i].dest_pos)
-            {
-                break;
-            }
-
             switch(type)
             {
             case rapidfuzz::LevenshteinEditType::None:
@@ -231,7 +227,8 @@ std::vector<LevenshteinOpcodes> editops_to_opcodes(const std::vector<rapidfuzz::
                 src_pos++;
                 break;
             }
-        }
+            i++;
+        } while (i < ops.size() && ops[i].type == type && src_pos && ops[i].src_pos && dest_pos == ops[i].dest_pos);
 
         result.push_back({type, src_begin, src_pos, dest_begin, dest_pos});
     }

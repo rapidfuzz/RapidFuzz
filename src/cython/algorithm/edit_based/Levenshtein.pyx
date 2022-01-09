@@ -1,6 +1,8 @@
 # distutils: language=c++
 # cython: language_level=3, binding=True, linetrace=True
 
+from _initialize import Editops
+from _initialize cimport Editops
 from array import array
 
 from rapidfuzz_capi cimport (
@@ -42,20 +44,11 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
         size_t replace_cost
 
 cdef extern from "edit_based.hpp":
-    ctypedef struct LevenshteinOpcodes:
-        LevenshteinEditType type
-        size_t src_begin
-        size_t src_end
-        size_t dest_begin
-        size_t dest_end
-
     double normalized_levenshtein_func( const RF_String&, const RF_String&, size_t, size_t, size_t, double) nogil except +
 
     size_t levenshtein_func(const RF_String&, const RF_String&, size_t, size_t, size_t, size_t) nogil except +
 
     vector[LevenshteinEditOp] levenshtein_editops_func(const RF_String&, const RF_String&) nogil except +
-    vector[LevenshteinEditOp] opcodes_to_editops(const vector[LevenshteinOpcodes]&) nogil except +
-    vector[LevenshteinOpcodes] editops_to_opcodes(const vector[LevenshteinEditOp]&, size_t, size_t) nogil except +
 
     bool LevenshteinInit(           RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
     bool NormalizedLevenshteinInit( RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
@@ -254,169 +247,86 @@ def distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return levenshtein_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
 
-cdef str levenshtein_edit_type_to_str(LevenshteinEditType edit_type):
-    if edit_type == LevenshteinEditType.Insert:
-        return "insert"
-    elif edit_type == LevenshteinEditType.Delete:
-        return "delete"
-    elif edit_type == LevenshteinEditType.Replace:
-        return "replace"
-    else:
-        return "equal"
-
-cdef list levenshtein_editops_to_list(vector[LevenshteinEditOp] ops):
-    cdef size_t op_count = ops.size()
-    cdef list result_list = PyList_New(<Py_ssize_t>op_count)
-    for i in range(op_count):
-        result_item = (levenshtein_edit_type_to_str(ops[i].type), ops[i].src_pos, ops[i].dest_pos)
-        Py_INCREF(result_item)
-        PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
-
-    return result_list
-
-cdef list levenshtein_opcodes_to_list(vector[LevenshteinOpcodes] ops):
-    cdef size_t op_count = ops.size()
-    cdef list result_list = PyList_New(<Py_ssize_t>op_count)
-    for i in range(op_count):
-        result_item = (
-            levenshtein_edit_type_to_str(ops[i].type),
-            ops[i].src_begin, ops[i].src_end,
-            ops[i].dest_begin, ops[i].dest_end)
-        Py_INCREF(result_item)
-        PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
-
-    return result_list
-
-
-cdef class Editops:
+def editops(s1, s2, *, processor=None):
     """
-    List like object of 3-tuples describing how to turn s1 into s2.
-    Each tuple is of the form (tag, src_pos, dest_pos).
+    Return Editops describing how to turn s1 into s2.
 
-    The tags are strings, with these meanings:
-    'replace':  s1[src_pos] should be replaced by s2[dest_pos]
-    'delete':   s1[src_pos] should be deleted.
-    'insert':   s2[dest_pos] should be inserted at s1[src_pos].
+    Parameters
+    ----------
+    s1 : Sequence[Hashable]
+        First string to compare.
+    s2 : Sequence[Hashable]
+        Second string to compare.
+    processor: callable, optional
+        Optional callable that is used to preprocess the strings before
+        comparing them. Default is None, which deactivates this behaviour.
+
+    Returns
+    -------
+    editops : Editops
+        edit operations required to turn s1 into s2
+
+    Notes
+    -----
+    The alignment is calculated using an algorithm of Heikki Hyyrö, which is
+    described [1]_. It has a time complexity and memory usage of ``O([N/64] * M)``.
+
+    References
+    ----------
+    .. [1] Hyyrö, Heikki. "A Note on Bit-Parallel Alignment Computation."
+           Stringology (2004).
 
     Examples
     --------
     >>> from rapidfuzz.algorithm.edit_based import Levenshtein
-    >>> for tag, src_pos, dest_pos in Levenshtein.Editops("qabxcd", "abycdf"):
+    >>> for tag, src_pos, dest_pos in Levenshtein.editops("qabxcd", "abycdf"):
     ...    print(("%7s s1[%d] s2[%d]" % (tag, src_pos, dest_pos)))
      delete s1[1] s2[0]
     replace s1[3] s2[2]
      insert s1[6] s2[5]
     """
+    cdef RF_StringWrapper s1_proc, s2_proc
+    cdef Editops ops = Editops.__new__(Editops)
 
-    cdef vector[LevenshteinEditOp] editops
-    cdef size_t len_s1
-    cdef size_t len_s2
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
+    ops.editops = levenshtein_editops_func(s1_proc.string, s2_proc.string)
+    ops.len_s1 = s1_proc.string.length
+    ops.len_s2 = s2_proc.string.length
+    return ops
 
-    def __init__(self, s1, s2):
-        """
-        Create Editops
-
-        Parameters
-        ----------
-        s1 : Sequence[Hashable]
-            First string to compare.
-        s2 : Sequence[Hashable]
-            Second string to compare.
-        """
-
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-        self.len_s1 = s1_proc.string.length
-        self.len_s2 = s2_proc.string.length
-        self.editops = levenshtein_editops_func(s1_proc.string, s2_proc.string)
-
-    @classmethod
-    def from_opcodes(cls, other):
-        cdef Editops self = cls.__new__(cls)
-        if not isinstance(other, Opcodes):
-            raise TypeError("expected argument of type Opcodes")
-
-        cdef Opcodes opcodes = other
-        self.editops = opcodes_to_editops(opcodes.opcodes)
-        self.len_s1 = opcodes.len_s1
-        self.len_s2 = opcodes.len_s2
-        return self
-
-    def as_opcodes(self):
-        cdef Opcodes opcodes = Opcodes.__new__(Opcodes)
-        opcodes.opcodes = editops_to_opcodes(self.editops, self.len_s1, self.len_s2)
-        opcodes.len_s1 = self.len_s1
-        opcodes.len_s2 = self.len_s2
-        return opcodes
-
-    def as_list(self):
-        return levenshtein_editops_to_list(self.editops)
-
-    def __eq__(self, other):
-        if isinstance(other, Editops):
-            return equal(
-                self.editops.begin(), self.editops.end(),
-                (<Editops>other).editops.begin(), (<Editops>other).editops.end()
-            )
-
-        # todo implement comparision to list/Opcodes
-        return False
-
-    def __len__(self):
-        return self.editops.size()
-
-    cdef from_slice(self, slice subscript):
-        cdef int start = subscript.start if subscript.start is not None else 0
-        cdef int stop  = subscript.stop  if subscript.stop  is not None else self.editops.size()
-        cdef int step  = subscript.step  if subscript.step  is not None else 1
-        cdef Editops new_self = self.__class__.__new__(self.__class__)
-
-        new_self.editops = vector_slice(self.editops, start, stop, step)
-        return new_self
-
-    def __getitem__(self, subscript):
-        cdef int index
-        if isinstance(subscript, slice):
-            # disable this for now, since I am not sure how this should
-            # affect conversion function
-            raise TypeError("Editops does not support slicing")
-            #return self.from_slice(subscript)
-        else:
-            index = subscript
-            if index < 0:
-                index += self.editops.size()
-
-            if index < 0 or index >= self.editops.size():
-                raise IndexError("Editops index out of range")
-
-            return (
-                levenshtein_edit_type_to_str(self.editops[index].type),
-                self.editops[index].src_pos,
-                self.editops[index].dest_pos
-            )
-
-    def __repr__(self):
-        return "[" + ", ".join(repr(op) for op in self) + "]"
-
-cdef class Opcodes:
+def opcodes(s1, s2, *, processor=None):
     """
-    List like object of 5-tuples describing how to turn s1 into s2.
-    Each tuple is of the form (tag, i1, i2, j1, j2). The first tuple
-    has i1 == j1 == 0, and remaining tuples have i1 == the i2 from the
-    tuple preceding it, and likewise for j1 == the previous j2.
+    Return Opcodes describing how to turn s1 into s2.
 
-    The tags are strings, with these meanings:
-    'replace':  s1[i1:i2] should be replaced by s2[j1:j2]
-    'delete':   s1[i1:i2] should be deleted.
-                Note that j1==j2 in this case.
-    'insert':   s2[j1:j2] should be inserted at s1[i1:i1].
-                Note that i1==i2 in this case.
-    'equal':    s1[i1:i2] == s2[j1:j2]
+    Parameters
+    ----------
+    s1 : Sequence[Hashable]
+        First string to compare.
+    s2 : Sequence[Hashable]
+        Second string to compare.
+    processor: callable, optional
+        Optional callable that is used to preprocess the strings before
+        comparing them. Default is None, which deactivates this behaviour.
+
+    Returns
+    -------
+    opcodes : Opcodes
+        edit operations required to turn s1 into s2
+
+    Notes
+    -----
+    The alignment is calculated using an algorithm of Heikki Hyyrö, which is
+    described [1]_. It has a time complexity and memory usage of ``O([N/64] * M)``.
+
+    References
+    ----------
+    .. [1] Hyyrö, Heikki. "A Note on Bit-Parallel Alignment Computation."
+           Stringology (2004).
 
     Examples
     --------
     >>> from rapidfuzz.algorithm.edit_based import Levenshtein
-    >>> for tag, i1, i2, j1, j2 in Levenshtein.Opcodes("qabxcd", "abycdf"):
+    >>> for tag, i1, i2, j1, j2 in Levenshtein.opcodes("qabxcd", "abycdf"):
     ...    print(("%7s a[%d:%d] (%s) b[%d:%d] (%s)" %
     ...           (tag, i1, i2, a[i1:i2], j1, j2, b[j1:j2])))
      delete a[0:1] (q) b[0:0] ()
@@ -425,101 +335,14 @@ cdef class Opcodes:
       equal a[4:6] (cd) b[3:5] (cd)
      insert a[6:6] () b[5:6] (f)
     """
+    cdef RF_StringWrapper s1_proc, s2_proc
+    cdef Editops ops = Editops.__new__(Editops)
 
-    cdef vector[LevenshteinOpcodes] opcodes
-    cdef size_t len_s1
-    cdef size_t len_s2
-
-    def __init__(self, s1, s2):
-        """
-        Create Opcodes
-
-        Parameters
-        ----------
-        s1 : Sequence[Hashable]
-            First string to compare.
-        s2 : Sequence[Hashable]
-            Second string to compare.
-        """
-
-        s1_proc = RF_StringWrapper(conv_sequence(s1))
-        s2_proc = RF_StringWrapper(conv_sequence(s2))
-        self.len_s1 = s1_proc.string.length
-        self.len_s2 = s2_proc.string.length
-        self.opcodes = editops_to_opcodes(
-            levenshtein_editops_func(s1_proc.string, s2_proc.string), self.len_s1, self.len_s2
-        )
-
-    @classmethod
-    def from_editops(cls, other):
-        cdef Opcodes self = cls.__new__(cls)
-        if not isinstance(other, Editops):
-            raise TypeError("expected argument of type Editops")
-
-        cdef Editops editops = other
-        self.opcodes = editops_to_opcodes(editops.editops, editops.len_s1, editops.len_s2)
-        self.len_s1 = editops.len_s1
-        self.len_s2 = editops.len_s2
-        return self
-
-    def as_editops(self):
-        cdef Editops editops = Editops.__new__(Editops)
-        editops.editops = opcodes_to_editops(self.opcodes)
-        editops.len_s1 = self.len_s1
-        editops.len_s2 = self.len_s2
-        return editops
-
-    def as_list(self):
-        return levenshtein_opcodes_to_list(self.opcodes)
-
-    def __eq__(self, other):
-        if isinstance(other, Opcodes):
-            return equal(
-                self.opcodes.begin(), self.opcodes.end(),
-                (<Opcodes>other).opcodes.begin(), (<Opcodes>other).opcodes.end()
-            )
-
-        # todo implement comparision to list/Editops
-        return False
-
-    def __len__(self):
-        return self.opcodes.size()
-
-    cdef from_slice(self, slice subscript):
-        cdef int start = subscript.start if subscript.start is not None else 0
-        cdef int stop  = subscript.stop  if subscript.stop  is not None else self.editops.size()
-        cdef int step  = subscript.step  if subscript.step  is not None else 1
-        cdef Opcodes new_self = self.__class__.__new__(self.__class__)
-
-        new_self.opcodes = vector_slice(self.opcodes, start, stop, step)
-        return new_self
-
-    def __getitem__(self, subscript):
-        cdef int index
-        if isinstance(subscript, slice):
-            # disable this for now, since I am not sure how this should
-            # affect conversion function
-            raise TypeError("Opcodes does not support slicing")
-            #return self.from_slice(subscript)
-        else:
-            index = subscript
-            if index < 0:
-                index += self.opcodes.size()
-
-            if index < 0 or index >= self.opcodes.size():
-                raise IndexError("Opcodes index out of range")
-
-            return (
-                levenshtein_edit_type_to_str(self.opcodes[index].type),
-                self.opcodes[index].src_begin,
-                self.opcodes[index].src_end,
-                self.opcodes[index].dest_begin,
-                self.opcodes[index].dest_end
-            )
-
-    def __repr__(self):
-        return "[" + ", ".join(repr(op) for op in self) + "]"
-
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
+    ops.editops = levenshtein_editops_func(s1_proc.string, s2_proc.string)
+    ops.len_s1 = s1_proc.string.length
+    ops.len_s2 = s2_proc.string.length
+    return ops.as_opcodes()
 
 def normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
     """
