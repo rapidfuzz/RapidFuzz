@@ -1,6 +1,8 @@
 # distutils: language=c++
 # cython: language_level=3, binding=True, linetrace=True
 
+from _initialize import Editops
+from _initialize cimport Editops
 from array import array
 
 from rapidfuzz_capi cimport (
@@ -21,10 +23,24 @@ from cpython.ref cimport Py_INCREF
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
 from cython.operator cimport dereference
 
+cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
+    cpdef enum class LevenshteinEditType:
+        None    = 0,
+        Replace = 1,
+        Insert  = 2,
+        Delete  = 3
+
+    ctypedef struct LevenshteinEditOp:
+        LevenshteinEditType type
+        size_t src_pos
+        size_t dest_pos
+
 cdef extern from "edit_based.hpp":
     double normalized_indel_func( const RF_String&, const RF_String&, double) nogil except +
 
     size_t indel_func(const RF_String&, const RF_String&, size_t) nogil except +
+
+    vector[LevenshteinEditOp] llcs_editops_func(const RF_String&, const RF_String&) nogil except +
 
     bool IndelInit(           RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
     bool NormalizedIndelInit( RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
@@ -216,6 +232,109 @@ def normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return normalized_indel_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+
+def editops(s1, s2, *, processor=None):
+    """
+    Return Editops describing how to turn s1 into s2.
+
+    Parameters
+    ----------
+    s1 : Sequence[Hashable]
+        First string to compare.
+    s2 : Sequence[Hashable]
+        Second string to compare.
+    processor: callable, optional
+        Optional callable that is used to preprocess the strings before
+        comparing them. Default is None, which deactivates this behaviour.
+
+    Returns
+    -------
+    editops : Editops
+        edit operations required to turn s1 into s2
+
+    Notes
+    -----
+    The alignment is calculated using an algorithm of Heikki Hyyrö, which is
+    described [1]_. It has a time complexity and memory usage of ``O([N/64] * M)``.
+
+    References
+    ----------
+    .. [1] Hyyrö, Heikki. "A Note on Bit-Parallel Alignment Computation."
+           Stringology (2004).
+
+    Examples
+    --------
+    >>> from rapidfuzz.algorithm.edit_based import Indel
+    >>> for tag, src_pos, dest_pos in Indel.editops("qabxcd", "abycdf"):
+    ...    print(("%7s s1[%d] s2[%d]" % (tag, src_pos, dest_pos)))
+     delete s1[0] s2[0]
+     delete s1[3] s2[2]
+     insert s1[4] s2[2]
+     insert s1[6] s2[5]
+    """
+    cdef RF_StringWrapper s1_proc, s2_proc
+    cdef Editops ops = Editops.__new__(Editops)
+
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
+    ops.editops = llcs_editops_func(s1_proc.string, s2_proc.string)
+    ops.len_s1 = s1_proc.string.length
+    ops.len_s2 = s2_proc.string.length
+    return ops
+
+def opcodes(s1, s2, *, processor=None):
+    """
+    Return Opcodes describing how to turn s1 into s2.
+
+    Parameters
+    ----------
+    s1 : Sequence[Hashable]
+        First string to compare.
+    s2 : Sequence[Hashable]
+        Second string to compare.
+    processor: callable, optional
+        Optional callable that is used to preprocess the strings before
+        comparing them. Default is None, which deactivates this behaviour.
+
+    Returns
+    -------
+    opcodes : Opcodes
+        edit operations required to turn s1 into s2
+
+    Notes
+    -----
+    The alignment is calculated using an algorithm of Heikki Hyyrö, which is
+    described [1]_. It has a time complexity and memory usage of ``O([N/64] * M)``.
+
+    References
+    ----------
+    .. [1] Hyyrö, Heikki. "A Note on Bit-Parallel Alignment Computation."
+           Stringology (2004).
+
+    Examples
+    --------
+    >>> from rapidfuzz.algorithm.edit_based import Indel
+
+    >>> a = "qabxcd"
+    >>> b = "abycdf"
+    >>> for tag, i1, i2, j1, j2 in Indel.opcodes(a, b):
+    ...    print(("%7s a[%d:%d] (%s) b[%d:%d] (%s)" %
+    ...           (tag, i1, i2, a[i1:i2], j1, j2, b[j1:j2])))
+     delete a[0:1] (q) b[0:0] ()
+      equal a[1:3] (ab) b[0:2] (ab)
+     delete a[3:4] (x) b[2:2] ()
+     insert a[4:4] () b[2:3] (y)
+      equal a[4:6] (cd) b[3:5] (cd)
+     insert a[6:6] () b[5:6] (f)
+    """
+    cdef RF_StringWrapper s1_proc, s2_proc
+    cdef Editops ops = Editops.__new__(Editops)
+
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
+    ops.editops = llcs_editops_func(s1_proc.string, s2_proc.string)
+    ops.len_s1 = s1_proc.string.length
+    ops.len_s2 = s2_proc.string.length
+    return ops.as_opcodes()
+
 
 cdef bool NoKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     if len(kwargs):

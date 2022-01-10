@@ -326,6 +326,9 @@ def opcodes(s1, s2, *, processor=None):
     Examples
     --------
     >>> from rapidfuzz.algorithm.edit_based import Levenshtein
+    
+    >>> a = "qabxcd"
+    >>> b = "abycdf"
     >>> for tag, i1, i2, j1, j2 in Levenshtein.opcodes("qabxcd", "abycdf"):
     ...    print(("%7s a[%d:%d] (%s) b[%d:%d] (%s)" %
     ...           (tag, i1, i2, a[i1:i2], j1, j2, b[j1:j2])))

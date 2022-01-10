@@ -138,6 +138,14 @@ static inline std::vector<rapidfuzz::LevenshteinEditOp> levenshtein_editops_func
     });
 }
 
+static inline std::vector<rapidfuzz::LevenshteinEditOp> llcs_editops_func(
+    const RF_String& s1, const RF_String& s2)
+{
+    return visitor(s1, s2, [](auto str1, auto str2) {
+        return string_metric::llcs_editops(str1, str2);
+    });
+}
+
 std::vector<rapidfuzz::LevenshteinEditOp> opcodes_to_editops(const std::vector<LevenshteinOpcode>& ops)
 {
     std::vector<rapidfuzz::LevenshteinEditOp> result;

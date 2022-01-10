@@ -5,8 +5,8 @@
 - added C-Api which can be used to extend RapidFuzz from different Python modules using any
   programming language which allows the usage of C-Apis (C/C++/Rust)
 - added new scorers in `rapidfuzz.algorithm.*`
-  - port existing ports to this new api
-  - add Indel distance
+  - port existing algorithms to this new api
+  - add Indel distance along with the corresponding editops function
 
 #### Changed
 - when the result of `string_metric.levenshtein` or `string_metric.hamming` is below max

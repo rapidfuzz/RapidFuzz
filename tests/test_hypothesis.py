@@ -7,6 +7,7 @@ import hypothesis.strategies as st
 import pytest
 
 from rapidfuzz import fuzz, process, utils, string_metric
+from rapidfuzz.algorithm.edit_based import Levenshtein, Indel
 import random
 import numpy as np
 
@@ -166,18 +167,36 @@ PROCESSORS = [
 @settings(max_examples=100, deadline=None)
 def test_levenshtein_editops(s1, s2):
     """
-    test levenshtein_editops with any sizes
+    test Levenshtein.editops with any sizes
     """
-    ops = string_metric.levenshtein_editops(s1, s2)
+    ops = Levenshtein.editops(s1, s2)
     assert apply_editops(s1, s2, ops) == s2
 
 @given(s1=st.text(min_size=65), s2=st.text(min_size=65))
 @settings(max_examples=50, deadline=None)
 def test_levenshtein_editops_block(s1, s2):
     """
-    test levenshtein_editops for long strings
+    test Levenshtein.editops for long strings
     """
-    ops = string_metric.levenshtein_editops(s1, s2)
+    ops = Levenshtein.editops(s1, s2)
+    assert apply_editops(s1, s2, ops) == s2
+
+@given(s1=st.text(), s2=st.text())
+@settings(max_examples=100, deadline=None)
+def test_indel_editops(s1, s2):
+    """
+    test Indel.editops with any sizes
+    """
+    ops = Indel.editops(s1, s2)
+    assert apply_editops(s1, s2, ops) == s2
+
+@given(s1=st.text(min_size=65), s2=st.text(min_size=65))
+@settings(max_examples=50, deadline=None)
+def test_indel_editops_block(s1, s2):
+    """
+    test Indel.editops for long strings
+    """
+    ops = Indel.editops(s1, s2)
     assert apply_editops(s1, s2, ops) == s2
 
 @given(s1=st.text(max_size=64), s2=st.text())
