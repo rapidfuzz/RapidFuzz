@@ -7,7 +7,7 @@ import hypothesis.strategies as st
 import pytest
 
 from rapidfuzz import fuzz, process, utils, string_metric
-from rapidfuzz.algorithm.edit_based import Levenshtein, Indel
+from rapidfuzz.distance import Levenshtein, Indel
 import random
 import numpy as np
 

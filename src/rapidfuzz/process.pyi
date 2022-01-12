@@ -53,7 +53,7 @@ def extract(
     choices: Collection[_AnyStringType], *,
     scorer: Callable[..., ResultType] = WRatio,
     processor: Optional[bool] = None,
-    limit: Optional[int] = ...,
+    limit: Optional[int] = None,
     score_cutoff: Optional[ResultType] = None,
     **kwargs: Any
 ) -> List[Tuple[_AnyStringType, ResultType, int]]: ...
@@ -65,7 +65,7 @@ def extract(
     choices: Mapping[Any, _AnyStringType], *,
     scorer: Callable[..., ResultType] = WRatio,
     processor: Optional[bool] = None,
-    limit: Optional[int] = ...,
+    limit: Optional[int] = None,
     score_cutoff: Optional[ResultType] = None,
     **kwargs: Any
 ) -> List[Tuple[_AnyStringType, ResultType, Any]]: ...
@@ -76,7 +76,7 @@ def extract(
     choices: Collection[S2], *,
     scorer: Callable[..., ResultType] = WRatio,
     processor: Callable[[Union[S1, S2]], _StringType] = None,
-    limit: Optional[int] = ...,
+    limit: Optional[int] = None,
     score_cutoff: Optional[ResultType] = None,
     **kwargs: Any
 ) -> List[Tuple[S2, ResultType, int]]: ...

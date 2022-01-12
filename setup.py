@@ -26,7 +26,7 @@ setup(
         "License :: OSI Approved :: MIT License"
     ],
 
-    packages=["rapidfuzz", "rapidfuzz/algorithm", "rapidfuzz/algorithm/edit_based"],
+    packages=["rapidfuzz", "rapidfuzz/distance"],
     package_dir={'':'src'},
     zip_safe=True,
     include_package_data=True,

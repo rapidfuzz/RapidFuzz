@@ -4,8 +4,8 @@
 #### Added
 - added C-Api which can be used to extend RapidFuzz from different Python modules using any
   programming language which allows the usage of C-Apis (C/C++/Rust)
-- added new scorers in `rapidfuzz.algorithm.*`
-  - port existing algorithms to this new api
+- added new scorers in `rapidfuzz.distance.*`
+  - port existing distances to this new api
   - add Indel distance along with the corresponding editops function
 
 #### Changed
@@ -22,7 +22,7 @@
 - deprecate support to specify processor in form of a boolean (will be removed in v3.0.0)
   - new functions will not get support for this in the first place
 - deprecate `rapidfuzz.string_metric` (will be removed in v3.0.0). Similar scorers are available
-  in `rapidfuzz.algorithm.*`
+  in `rapidfuzz.distance.*`
 
 #### Fixed
 - process.cdist did raise an exception when used with a pure python scorer

@@ -18,4 +18,4 @@ find_package(Cython REQUIRED)
 set(RAPIDFUZZ_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_subdirectory(src/cython)
-add_subdirectory(src/cython/algorithm/edit_based)
+add_subdirectory(src/cython/distance)

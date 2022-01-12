@@ -4,7 +4,7 @@
 import unittest
 import pytest
 
-from rapidfuzz.algorithm.edit_based import Levenshtein
+from rapidfuzz.distance import Levenshtein
 
 def test_empty_string():
     """

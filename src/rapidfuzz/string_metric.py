@@ -8,13 +8,12 @@ from rapidfuzz.cpp_string_metric import (
     hamming,
     normalized_hamming,
     jaro_similarity,
-    jaro_winkler_similarity,
-    #Editops
+    jaro_winkler_similarity
 )
 
 import warnings
 
 warnings.warn(
-    "This module is deprecated. Use the replacements in rapidfuzz.algorithm instead",
+    "This module is deprecated. Use the replacements in rapidfuzz.distance instead",
     DeprecationWarning
 )
