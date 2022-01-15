@@ -301,7 +301,7 @@ static inline RF_String convert_string(PyObject* py_str)
             nullptr,
             RF_UINT8,
             PyBytes_AS_STRING(py_str),
-            static_cast<std::size_t>(PyBytes_GET_SIZE(py_str)),
+            static_cast<size_t>(PyBytes_GET_SIZE(py_str)),
             nullptr
         };
     } else {
@@ -322,7 +322,7 @@ static inline RF_String convert_string(PyObject* py_str)
             nullptr,
             kind,
             PyUnicode_DATA(py_str),
-            static_cast<std::size_t>(PyUnicode_GET_LENGTH(py_str)),
+            static_cast<size_t>(PyUnicode_GET_LENGTH(py_str)),
             nullptr
         };
     }

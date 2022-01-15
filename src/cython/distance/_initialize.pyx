@@ -27,7 +27,7 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
         size_t delete_cost
         size_t replace_cost
 
-cdef str levenshtein_edit_type_to_str(EditType edit_type):
+cdef str edit_type_to_str(EditType edit_type):
     if edit_type == EditType.Insert:
         return "insert"
     elif edit_type == EditType.Delete:
@@ -37,7 +37,7 @@ cdef str levenshtein_edit_type_to_str(EditType edit_type):
     else:
         return "equal"
 
-cdef EditType levenshtein_str_to_edit_type(edit_type) except *:
+cdef EditType str_to_edit_type(edit_type) except *:
     if edit_type == "insert":
         return EditType.Insert
     elif edit_type == "delete":
@@ -49,23 +49,46 @@ cdef EditType levenshtein_str_to_edit_type(edit_type) except *:
     else:
         raise ValueError("Invalid Edit Type")
 
+cdef RfEditops list_to_editops(ops) except *:
+    cdef RfEditops result
+    result.reserve(len(ops))
+    for op in ops:
+        if len(op) != 3:
+            raise TypeError("Expected list of 3-tuples")
+        result.emplace_back(
+            str_to_edit_type(op[0]), <size_t>op[1], <size_t>op[2]
+        )
+    return result
 
-cdef list levenshtein_editops_to_list(const RfEditops& ops):
+cdef RfOpcodes list_to_opcodes(ops) except *:
+    cdef RfOpcodes result
+    result.reserve(len(ops))
+    for op in ops:
+        if len(op) != 5:
+            raise TypeError("Expected list of 5-tuples")
+        result.emplace_back(
+            str_to_edit_type(op[0]),
+            <size_t>op[1], <size_t>op[2],
+            <size_t>op[3], <size_t>op[4]
+        )
+    return result
+
+cdef list editops_to_list(const RfEditops& ops):
     cdef size_t op_count = ops.size()
     cdef list result_list = PyList_New(<Py_ssize_t>op_count)
     for i in range(op_count):
-        result_item = (levenshtein_edit_type_to_str(ops[i].type), ops[i].src_pos, ops[i].dest_pos)
+        result_item = (edit_type_to_str(ops[i].type), ops[i].src_pos, ops[i].dest_pos)
         Py_INCREF(result_item)
         PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
 
     return result_list
 
-cdef list levenshtein_opcodes_to_list(const RfOpcodes& ops):
+cdef list opcodes_to_list(const RfOpcodes& ops):
     cdef size_t op_count = ops.size()
     cdef list result_list = PyList_New(<Py_ssize_t>op_count)
     for i in range(op_count):
         result_item = (
-            levenshtein_edit_type_to_str(ops[i].type),
+            edit_type_to_str(ops[i].type),
             ops[i].src_begin, ops[i].src_end,
             ops[i].dest_begin, ops[i].dest_end)
         Py_INCREF(result_item)
@@ -84,6 +107,12 @@ cdef class Editops:
     'delete':   s1[src_pos] should be deleted.
     'insert':   s2[dest_pos] should be inserted at s1[src_pos].
     """
+
+    def __init__(self, editops=None, src_len=0, dest_len=0):
+        if editops is not None:
+            self.editops = list_to_editops(editops)
+        self.editops.set_src_len(src_len)
+        self.editops.set_dest_len(dest_len)
 
     @classmethod
     def from_opcodes(cls, Opcodes opcodes):
@@ -123,7 +152,7 @@ cdef class Editops:
 
         This is the equivalent of ``[x for x in editops]``
         """
-        return levenshtein_editops_to_list(self.editops)
+        return editops_to_list(self.editops)
 
     def copy(self):
         """
@@ -213,7 +242,7 @@ cdef class Editops:
         edit_type, src_pos, dest_pos = value
 
         self.editops[index] = RfEditOp(
-            levenshtein_str_to_edit_type(edit_type),
+            str_to_edit_type(edit_type),
             src_pos, dest_pos
         )
 
@@ -237,7 +266,7 @@ cdef class Editops:
                 raise IndexError("Editops index out of range")
 
             return (
-                levenshtein_edit_type_to_str(self.editops[index].type),
+                edit_type_to_str(self.editops[index].type),
                 self.editops[index].src_pos,
                 self.editops[index].dest_pos
             )
@@ -267,6 +296,12 @@ cdef class Opcodes:
     Opcodes uses tuples similar to difflib's SequenceMatcher to make them
     interoperable
     """
+
+    def __init__(self, opcodes=None, src_len=0, dest_len=0):
+        if opcodes is not None:
+            self.opcodes = list_to_opcodes(opcodes)
+        self.opcodes.set_src_len(src_len)
+        self.opcodes.set_dest_len(dest_len)
 
     @classmethod
     def from_editops(cls, Editops editops):
@@ -307,7 +342,7 @@ cdef class Opcodes:
 
         This is the equivalent of ``[x for x in opcodes]``
         """
-        return levenshtein_opcodes_to_list(self.opcodes)
+        return opcodes_to_list(self.opcodes)
 
     def copy(self):
         """
@@ -402,7 +437,7 @@ cdef class Opcodes:
         edit_type, src_begin, src_end, dest_begin, dest_end = value
 
         self.opcodes[index] = RfOpcode(
-            levenshtein_str_to_edit_type(edit_type),
+            str_to_edit_type(edit_type),
             src_begin, src_end, dest_begin, dest_end
         )
 
@@ -426,7 +461,7 @@ cdef class Opcodes:
                 raise IndexError("Opcodes index out of range")
 
             return (
-                levenshtein_edit_type_to_str(self.opcodes[index].type),
+                edit_type_to_str(self.opcodes[index].type),
                 self.opcodes[index].src_begin,
                 self.opcodes[index].src_end,
                 self.opcodes[index].dest_begin,

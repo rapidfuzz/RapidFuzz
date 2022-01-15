@@ -35,6 +35,7 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
 
     cdef cppclass RfEditops "rapidfuzz::Editops":
         RfEditops() except +
+        RfEditops(size_t) except +
         RfEditops(const RfEditops&) except +
         RfEditops(const RfOpcodes&) except +
         bool operator==(const RfEditops&)
@@ -47,6 +48,8 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
         size_t get_dest_len()
         void set_dest_len(size_t)
         RfEditops reverse()
+        void emplace_back(...)
+        void reserve(size_t) except +
 
     ctypedef struct RfOpcode "rapidfuzz::Opcode":
         EditType type
@@ -57,6 +60,7 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
 
     cdef cppclass RfOpcodes "rapidfuzz::Opcodes":
         RfOpcodes() except +
+        RfOpcodes(size_t) except +
         RfOpcodes(const RfOpcodes&) except +
         RfOpcodes(const RfEditops&) except +
         bool operator==(const RfOpcodes&)
@@ -69,6 +73,8 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
         size_t get_dest_len()
         void set_dest_len(size_t)
         RfOpcodes reverse()
+        void emplace_back(...)
+        void reserve(size_t) except +
 
 cdef extern from "cpp_common.hpp":
     cdef cppclass RF_StringWrapper:
