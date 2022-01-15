@@ -367,19 +367,19 @@ cdef class Opcodes:
 
     @property
     def src_len(self):
-        return self.editops.get_src_len()
+        return self.opcodes.get_src_len()
 
     @src_len.setter
     def src_len(self, value):
-        self.editops.set_src_len(value)
+        self.opcodes.set_src_len(value)
 
     @property
     def dest_len(self):
-        return self.editops.get_dest_len()
+        return self.opcodes.get_dest_len()
 
     @dest_len.setter
     def dest_len(self, value):
-        self.editops.set_dest_len(value)
+        self.opcodes.set_dest_len(value)
 
     def __eq__(self, other):
         if isinstance(other, Opcodes):

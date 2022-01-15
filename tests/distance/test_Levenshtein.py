@@ -69,5 +69,9 @@ def test_Editops():
         ('delete', 11, 18)
     ]
 
+    ops = Levenshtein.editops("aaabaaa", "abbaaabba")
+    assert ops.src_len == 7
+    assert ops.dest_len == 9
+
 if __name__ == '__main__':
     unittest.main()
