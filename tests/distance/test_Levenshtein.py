@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-import pytest
 
 from rapidfuzz.distance import Levenshtein
 

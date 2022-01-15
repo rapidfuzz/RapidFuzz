@@ -2,35 +2,6 @@
 #include "cpp_common.hpp"
 #include <iostream>
 
-/**
- * @brief Edit operations used by the Levenshtein distance
- *
- * This represents an edit operation of type type which is applied to
- * the source string
- *
- * None:    s1[src_begin:src_end] == s1[dest_begin:dest_end]
- * Replace: s1[i1:i2] should be replaced by s2[dest_begin:dest_end]
- * Insert:  s2[dest_begin:dest_end] should be inserted at s1[src_begin:src_begin].
- *          Note that src_begin==src_end in this case.
- * Delete:  s1[src_begin:src_end] should be deleted.
- *          Note that dest_begin==dest_end in this case.
- */
-struct LevenshteinOpcode {
-    rapidfuzz::LevenshteinEditType type; /**< type of the edit operation */
-    std::size_t src_begin;    /**< index into the source string */
-    std::size_t src_end;      /**< index into the source string */
-    std::size_t dest_begin;   /**< index into the destination string */
-    std::size_t dest_end;     /**< index into the destination string */
-};
-
-static inline bool operator ==(const LevenshteinOpcode& a, const LevenshteinOpcode& b) {
-	return (a.type == b.type)
-        && (a.src_begin == b.src_begin)
-        && (a.src_end == b.src_end)
-        && (a.dest_begin == b.dest_begin)
-        && (a.dest_end == b.dest_end);
-}
-
 static inline size_t levenshtein_func(const RF_String& s1, const RF_String& s2,
     size_t insertion, size_t deletion, size_t substitution, size_t max)
 {
@@ -130,7 +101,7 @@ static inline bool JaroWinklerSimilarityInit(RF_ScorerFunc* self, const RF_Kwarg
     return scorer_init_f64<string_metric::CachedJaroWinklerSimilarity>(self, str_count, str, *(double*)(kwargs->context));
 }
 
-static inline std::vector<rapidfuzz::LevenshteinEditOp> levenshtein_editops_func(
+static inline rapidfuzz::Editops levenshtein_editops_func(
     const RF_String& s1, const RF_String& s2)
 {
     return visitor(s1, s2, [](auto str1, auto str2) {
@@ -138,117 +109,10 @@ static inline std::vector<rapidfuzz::LevenshteinEditOp> levenshtein_editops_func
     });
 }
 
-static inline std::vector<rapidfuzz::LevenshteinEditOp> llcs_editops_func(
+static inline rapidfuzz::Editops llcs_editops_func(
     const RF_String& s1, const RF_String& s2)
 {
     return visitor(s1, s2, [](auto str1, auto str2) {
         return string_metric::llcs_editops(str1, str2);
     });
-}
-
-std::vector<rapidfuzz::LevenshteinEditOp> opcodes_to_editops(const std::vector<LevenshteinOpcode>& ops)
-{
-    std::vector<rapidfuzz::LevenshteinEditOp> result;
-
-    for (const auto& op : ops)
-    {
-        switch(op.type)
-        {
-        case rapidfuzz::LevenshteinEditType::None:
-            break;
-
-        case rapidfuzz::LevenshteinEditType::Replace:
-            for (size_t j = 0; j < op.src_end - op.src_begin; j++) {
-                result.push_back({
-                    rapidfuzz::LevenshteinEditType::Replace,
-                    op.src_begin + j,
-                    op.dest_begin + j
-                });
-            }
-            break;
-
-        case rapidfuzz::LevenshteinEditType::Insert:
-            for (size_t j = 0; j < op.dest_end - op.dest_begin; j++) {
-                result.push_back({
-                    rapidfuzz::LevenshteinEditType::Insert,
-                    op.src_begin,
-                    op.dest_begin + j
-                });
-            }
-            break;
-
-        case rapidfuzz::LevenshteinEditType::Delete:
-            for (size_t j = 0; j < op.src_end - op.src_begin; j++) {
-                result.push_back({
-                    rapidfuzz::LevenshteinEditType::Delete,
-                    op.src_begin + j,
-                    op.dest_begin
-                });
-            }
-            break;
-        }
-    }
-
-    return result;
-}
-
-
-std::vector<LevenshteinOpcode> editops_to_opcodes(const std::vector<rapidfuzz::LevenshteinEditOp>& ops, size_t src_len, size_t dest_len)
-{
-    std::vector<LevenshteinOpcode> result;
-
-    size_t src_pos = 0;
-    size_t dest_pos = 0;
-    for (size_t i = 0; i < ops.size();)
-    {
-        if (src_pos < ops[i].src_pos || dest_pos < ops[i].dest_pos)
-        {
-            result.push_back({
-                rapidfuzz::LevenshteinEditType::None,
-                src_pos, ops[i].src_pos,
-                dest_pos, ops[i].dest_pos
-            });
-            src_pos = ops[i].src_pos;
-            dest_pos = ops[i].dest_pos;
-        }
-
-        size_t src_begin = src_pos;
-        size_t dest_begin = dest_pos;
-        rapidfuzz::LevenshteinEditType type = ops[i].type;
-        do
-        {
-            switch(type)
-            {
-            case rapidfuzz::LevenshteinEditType::None:
-                break;
-
-            case rapidfuzz::LevenshteinEditType::Replace:
-                src_pos++;
-                dest_pos++;
-                break;
-
-            case rapidfuzz::LevenshteinEditType::Insert:
-                dest_pos++;
-                break;
-
-            case rapidfuzz::LevenshteinEditType::Delete:
-                src_pos++;
-                break;
-            }
-            i++;
-        } while (i < ops.size() && ops[i].type == type && src_pos && ops[i].src_pos && dest_pos == ops[i].dest_pos);
-
-        result.push_back({type, src_begin, src_pos, dest_begin, dest_pos});
-    }
-
-    if (src_pos < src_len || dest_pos < dest_len)
-    {
-        result.push_back({
-            rapidfuzz::LevenshteinEditType::None,
-            src_pos, src_len,
-            dest_pos, dest_len
-        });
-    }
-
-    return result;
 }

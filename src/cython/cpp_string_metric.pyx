@@ -22,19 +22,9 @@ from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.ref cimport Py_INCREF
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
 from cython.operator cimport dereference
+from cpp_common cimport RfEditops, RfEditOp, EditType
 
 cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
-    cpdef enum class LevenshteinEditType:
-        None    = 0,
-        Replace = 1,
-        Insert  = 2,
-        Delete  = 3
-
-    ctypedef struct LevenshteinEditOp:
-        LevenshteinEditType type
-        size_t src_pos
-        size_t dest_pos
-
     cdef struct LevenshteinWeightTable:
         size_t insert_cost
         size_t delete_cost
@@ -49,7 +39,7 @@ cdef extern from "cpp_string_metric.hpp":
     size_t levenshtein_func(const RF_String&, const RF_String&, size_t, size_t, size_t, size_t) nogil except +
     size_t hamming_func(    const RF_String&, const RF_String&, size_t) nogil except +
 
-    vector[LevenshteinEditOp] levenshtein_editops_func(const RF_String&, const RF_String&) nogil except +
+    RfEditops levenshtein_editops_func(const RF_String&, const RF_String&) nogil except +
 
     bool LevenshteinInit(           RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
     bool NormalizedLevenshteinInit( RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
@@ -256,16 +246,16 @@ def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return levenshtein_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_max)
 
-cdef str levenshtein_edit_type_to_str(LevenshteinEditType edit_type):
-    if edit_type == LevenshteinEditType.Insert:
+cdef str levenshtein_edit_type_to_str(EditType edit_type):
+    if edit_type == EditType.Insert:
         return "insert"
-    elif edit_type == LevenshteinEditType.Delete:
+    elif edit_type == EditType.Delete:
         return "delete"
     # possibly requires no-op in the future as well
     else:
         return "replace"
 
-cdef list levenshtein_editops_to_list(vector[LevenshteinEditOp] ops):
+cdef list levenshtein_editops_to_list(const RfEditops& ops):
     cdef size_t op_count = ops.size()
     cdef list result_list = PyList_New(<Py_ssize_t>op_count)
     for i in range(op_count):

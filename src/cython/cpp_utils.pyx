@@ -19,9 +19,12 @@ cdef extern from "cpp_utils.hpp":
 def default_process(sentence):
     """
     This function preprocesses a string by:
-    - removing all non alphanumeric characters
-    - trimming whitespaces
-    - converting all characters to lower case
+
+    * removing all non alphanumeric characters
+
+    * trimming whitespaces
+    
+    * converting all characters to lower case
 
     Parameters
     ----------

@@ -2,7 +2,7 @@
 # cython: language_level=3, binding=True, linetrace=True
 
 from _initialize import Editops
-from _initialize cimport Editops
+from _initialize cimport Editops, RfEditops
 from array import array
 
 from rapidfuzz_capi cimport (
@@ -11,11 +11,10 @@ from rapidfuzz_capi cimport (
     RF_ScorerFlags,
     RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_U64, RF_SCORER_FLAG_MULTI_STRING, RF_SCORER_FLAG_SYMMETRIC
 )
-from cpp_common cimport RF_StringWrapper, conv_sequence, vector_slice
+from cpp_common cimport RF_StringWrapper, conv_sequence
 from libc.stdint cimport SIZE_MAX
 
 from libcpp cimport bool
-from libcpp.vector cimport vector
 from libc.stdlib cimport malloc, free
 from libc.stdint cimport uint32_t
 from cpython.list cimport PyList_New, PyList_SET_ITEM
@@ -23,21 +22,7 @@ from cpython.ref cimport Py_INCREF
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
 from cython.operator cimport dereference
 
-cdef extern from "<algorithm>" namespace "std" nogil:
-    bool equal[InputIt1, InputIt2](InputIt1 first1, InputIt1 last1, InputIt2 first2, ...) except +
-
 cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
-    cpdef enum class LevenshteinEditType:
-        None    = 0,
-        Replace = 1,
-        Insert  = 2,
-        Delete  = 3
-
-    ctypedef struct LevenshteinEditOp:
-        LevenshteinEditType type
-        size_t src_pos
-        size_t dest_pos
-
     cdef struct LevenshteinWeightTable:
         size_t insert_cost
         size_t delete_cost
@@ -48,7 +33,7 @@ cdef extern from "edit_based.hpp":
 
     size_t levenshtein_func(const RF_String&, const RF_String&, size_t, size_t, size_t, size_t) nogil except +
 
-    vector[LevenshteinEditOp] levenshtein_editops_func(const RF_String&, const RF_String&) nogil except +
+    RfEditops levenshtein_editops_func(const RF_String&, const RF_String&) nogil except +
 
     bool LevenshteinInit(           RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
     bool NormalizedLevenshteinInit( RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
@@ -290,8 +275,6 @@ def editops(s1, s2, *, processor=None):
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     ops.editops = levenshtein_editops_func(s1_proc.string, s2_proc.string)
-    ops.len_s1 = s1_proc.string.length
-    ops.len_s2 = s2_proc.string.length
     return ops
 
 def opcodes(s1, s2, *, processor=None):
@@ -343,8 +326,6 @@ def opcodes(s1, s2, *, processor=None):
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     ops.editops = levenshtein_editops_func(s1_proc.string, s2_proc.string)
-    ops.len_s1 = s1_proc.string.length
-    ops.len_s2 = s2_proc.string.length
     return ops.as_opcodes()
 
 def normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):

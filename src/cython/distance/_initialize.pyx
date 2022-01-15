@@ -9,7 +9,7 @@ from rapidfuzz_capi cimport (
     RF_ScorerFlags,
     RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_U64, RF_SCORER_FLAG_MULTI_STRING, RF_SCORER_FLAG_SYMMETRIC
 )
-from cpp_common cimport RF_StringWrapper, conv_sequence, vector_slice
+from cpp_common cimport RF_StringWrapper, conv_sequence, vector_slice, RfEditOp, RfOpcode, EditType
 
 from libcpp cimport bool
 from libcpp.vector cimport vector
@@ -21,49 +21,36 @@ from cpython.ref cimport Py_INCREF
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
 from cython.operator cimport dereference
 
-cdef extern from "<algorithm>" namespace "std" nogil:
-    bool equal[InputIt1, InputIt2](InputIt1 first1, InputIt1 last1, InputIt2 first2, ...) except +
-
 cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
-    cpdef enum class LevenshteinEditType:
-        None    = 0,
-        Replace = 1,
-        Insert  = 2,
-        Delete  = 3
-
-    ctypedef struct LevenshteinEditOp:
-        LevenshteinEditType type
-        size_t src_pos
-        size_t dest_pos
-
     cdef struct LevenshteinWeightTable:
         size_t insert_cost
         size_t delete_cost
         size_t replace_cost
 
-cdef extern from "edit_based.hpp":
-    ctypedef struct LevenshteinOpcode:
-        LevenshteinEditType type
-        size_t src_begin
-        size_t src_end
-        size_t dest_begin
-        size_t dest_end
-
-    vector[LevenshteinEditOp] opcodes_to_editops(const vector[LevenshteinOpcode]&) nogil except +
-    vector[LevenshteinOpcode] editops_to_opcodes(const vector[LevenshteinEditOp]&, size_t, size_t) nogil except +
-
-
-cdef str levenshtein_edit_type_to_str(LevenshteinEditType edit_type):
-    if edit_type == LevenshteinEditType.Insert:
+cdef str levenshtein_edit_type_to_str(EditType edit_type):
+    if edit_type == EditType.Insert:
         return "insert"
-    elif edit_type == LevenshteinEditType.Delete:
+    elif edit_type == EditType.Delete:
         return "delete"
-    elif edit_type == LevenshteinEditType.Replace:
+    elif edit_type == EditType.Replace:
         return "replace"
     else:
         return "equal"
 
-cdef list levenshtein_editops_to_list(vector[LevenshteinEditOp] ops):
+cdef EditType levenshtein_str_to_edit_type(edit_type) except *:
+    if edit_type == "insert":
+        return EditType.Insert
+    elif edit_type == "delete":
+        return EditType.Delete
+    elif edit_type == "replace":
+        return EditType.Replace
+    elif edit_type == "equal":
+        return EditType.None
+    else:
+        raise ValueError("Invalid Edit Type")
+
+
+cdef list levenshtein_editops_to_list(const RfEditops& ops):
     cdef size_t op_count = ops.size()
     cdef list result_list = PyList_New(<Py_ssize_t>op_count)
     for i in range(op_count):
@@ -73,7 +60,7 @@ cdef list levenshtein_editops_to_list(vector[LevenshteinEditOp] ops):
 
     return result_list
 
-cdef list levenshtein_opcodes_to_list(vector[LevenshteinOpcode] ops):
+cdef list levenshtein_opcodes_to_list(const RfOpcodes& ops):
     cdef size_t op_count = ops.size()
     cdef list result_list = PyList_New(<Py_ssize_t>op_count)
     for i in range(op_count):
@@ -114,9 +101,7 @@ cdef class Editops:
             Opcodes converted to Editops
         """
         cdef Editops self = cls.__new__(cls)
-        self.editops = opcodes_to_editops(opcodes.opcodes)
-        self.len_s1 = opcodes.len_s1
-        self.len_s2 = opcodes.len_s2
+        self.editops = RfEditops(opcodes.opcodes)
         return self
 
     def as_opcodes(self):
@@ -129,9 +114,7 @@ cdef class Editops:
             Editops converted to Opcodes
         """
         cdef Opcodes opcodes = Opcodes.__new__(Opcodes)
-        opcodes.opcodes = editops_to_opcodes(self.editops, self.len_s1, self.len_s2)
-        opcodes.len_s1 = self.len_s1
-        opcodes.len_s2 = self.len_s2
+        opcodes.opcodes = RfOpcodes(self.editops)
         return opcodes
 
     def as_list(self):
@@ -142,31 +125,103 @@ cdef class Editops:
         """
         return levenshtein_editops_to_list(self.editops)
 
+    def copy(self):
+        """
+        performs copy of Editops
+        """
+        cdef Editops x = Editops.__new__(Editops)
+        x.editops = self.editops
+        return x
+
+    def inverse(self):
+        """
+        Invert Editops, so it describes how to transform the destination string to
+        the source string.
+
+        Returns
+        -------
+        editops : Editops
+            inverted Editops
+
+        Examples
+        --------
+        >>> from rapidfuzz.distance import Levenshtein
+        >>> Levenshtein.editops('spam', 'park')
+        [('delete', 0, 0), ('replace', 3, 2), ('insert', 4, 3)]
+        >>> Levenshtein.editops('spam', 'park').inverse()
+        [('insert', 0, 0), ('replace', 2, 3), ('delete', 3, 4)]
+        """
+        cdef Editops x = Editops.__new__(Editops)
+        x.editops = self.editops.inverse()
+        return x
+
+    @property
+    def src_len(self):
+        return self.editops.get_src_len()
+
+    @src_len.setter
+    def src_len(self, value):
+        self.editops.set_src_len(value)
+
+    @property
+    def dest_len(self):
+        return self.editops.get_dest_len()
+
+    @dest_len.setter
+    def dest_len(self, value):
+        self.editops.set_dest_len(value)
+
     def __eq__(self, other):
         if isinstance(other, Editops):
-            return equal(
-                self.editops.begin(), self.editops.end(),
-                (<Editops>other).editops.begin(), (<Editops>other).editops.end()
-            )
+            return self.editops == (<Editops>other).editops
 
-        # todo implement comparision to list/Opcodes
         return False
 
     def __len__(self):
         return self.editops.size()
 
-    def __getitem__(self, int index):
+    def __setitem__(self, int index, tuple value):
+        cdef size_t src_pos, dest_pos
+
         if index < 0:
             index += self.editops.size()
 
         if index < 0 or index >= self.editops.size():
             raise IndexError("Editops index out of range")
 
-        return (
-            levenshtein_edit_type_to_str(self.editops[index].type),
-            self.editops[index].src_pos,
-            self.editops[index].dest_pos
+        edit_type, src_pos, dest_pos = value
+
+        self.editops[index] = RfEditOp(
+            levenshtein_str_to_edit_type(edit_type),
+            src_pos, dest_pos
         )
+
+    def __getitem__(self, key):
+        cdef int index, start, stop, step
+        cdef Editops x
+
+        if isinstance(key, slice):
+            start = <slice>key.start if <slice>key.start is not None else 0
+            stop = <slice>key.stop if <slice>key.stop is not None else self.editops.size()
+            step = <slice>key.step if <slice>key.step is not None else 1
+            x = Editops.__new__(Editops)
+            x.editops = self.editops.slice(start, stop, step)
+            return x
+        elif isinstance(key, int):
+            index = key
+            if index < 0:
+                index += self.editops.size()
+
+            if index < 0 or index >= self.editops.size():
+                raise IndexError("Editops index out of range")
+
+            return (
+                levenshtein_edit_type_to_str(self.editops[index].type),
+                self.editops[index].src_pos,
+                self.editops[index].dest_pos
+            )
+        else:
+            raise TypeError("Expected slice or index")
 
     def __repr__(self):
         return "[" + ", ".join(repr(op) for op in self) + "]"
@@ -208,9 +263,7 @@ cdef class Opcodes:
             Editops converted to Opcodes
         """
         cdef Opcodes self = cls.__new__(cls)
-        self.opcodes = editops_to_opcodes(editops.editops, editops.len_s1, editops.len_s2)
-        self.len_s1 = editops.len_s1
-        self.len_s2 = editops.len_s2
+        self.opcodes = RfOpcodes(editops.editops)
         return self
 
     def as_editops(self):
@@ -223,9 +276,7 @@ cdef class Opcodes:
             Opcodes converted to Editops
         """
         cdef Editops editops = Editops.__new__(Editops)
-        editops.editops = opcodes_to_editops(self.opcodes)
-        editops.len_s1 = self.len_s1
-        editops.len_s2 = self.len_s2
+        editops.editops = RfEditops(self.opcodes)
         return editops
 
     def as_list(self):
@@ -237,33 +288,107 @@ cdef class Opcodes:
         """
         return levenshtein_opcodes_to_list(self.opcodes)
 
+    def copy(self):
+        """
+        performs copy of Opcodes
+        """
+        cdef Opcodes x = Opcodes.__new__(Opcodes)
+        x.opcodes = self.opcodes
+        return x
+
+    def inverse(self):
+        """
+        Invert Opcodes, so it describes how to transform the destination string to
+        the source string.
+
+        Returns
+        -------
+        opcodes : Opcodes
+            inverted Opcodes
+
+        Examples
+        --------
+        >>> from rapidfuzz.distance import Levenshtein
+        >>> Levenshtein.opcodes('spam', 'park')
+        [('delete', 0, 1, 0, 0), ('equal', 1, 3, 0, 2), ('replace', 3, 4, 2, 3),
+         ('insert', 4, 4, 3, 4)]
+        >>> Levenshtein.opcodes('spam', 'park').inverse()
+        [('insert', 0, 0, 0, 1), ('equal', 0, 2, 1, 3), ('replace', 2, 3, 3, 4),
+         ('delete', 3, 4, 4, 4)]
+        """
+        cdef Opcodes x = Opcodes.__new__(Opcodes)
+        x.opcodes = self.opcodes.inverse()
+        return x
+
+    @property
+    def src_len(self):
+        return self.editops.get_src_len()
+
+    @src_len.setter
+    def src_len(self, value):
+        self.editops.set_src_len(value)
+
+    @property
+    def dest_len(self):
+        return self.editops.get_dest_len()
+
+    @dest_len.setter
+    def dest_len(self, value):
+        self.editops.set_dest_len(value)
+
     def __eq__(self, other):
         if isinstance(other, Opcodes):
-            return equal(
-                self.opcodes.begin(), self.opcodes.end(),
-                (<Opcodes>other).opcodes.begin(), (<Opcodes>other).opcodes.end()
-            )
+            return self.opcodes == (<Opcodes>other).opcodes
 
-        # todo implement comparision to list/Editops
         return False
 
     def __len__(self):
         return self.opcodes.size()
 
-    def __getitem__(self, int index):
+    def __setitem__(self, int index, tuple value):
+        cdef size_t src_begin, src_end, dest_begin, dest_end
+
         if index < 0:
             index += self.opcodes.size()
 
         if index < 0 or index >= self.opcodes.size():
             raise IndexError("Opcodes index out of range")
 
-        return (
-            levenshtein_edit_type_to_str(self.opcodes[index].type),
-            self.opcodes[index].src_begin,
-            self.opcodes[index].src_end,
-            self.opcodes[index].dest_begin,
-            self.opcodes[index].dest_end
+        edit_type, src_begin, src_end, dest_begin, dest_end = value
+
+        self.opcodes[index] = RfOpcode(
+            levenshtein_str_to_edit_type(edit_type),
+            src_begin, src_end, dest_begin, dest_end
         )
+
+    def __getitem__(self, key):
+        cdef int index, start, stop, step
+        cdef Opcodes x
+
+        if isinstance(key, slice):
+            start = <slice>key.start if <slice>key.start is not None else 0
+            stop = <slice>key.stop if <slice>key.stop is not None else self.opcodes.size()
+            step = <slice>key.step if <slice>key.step is not None else 1
+            x = Opcodes.__new__(Opcodes)
+            x.opcodes = self.opcodes.slice(start, stop, step)
+            return x
+        elif isinstance(key, int):
+            index = key
+            if index < 0:
+                index += self.opcodes.size()
+
+            if index < 0 or index >= self.opcodes.size():
+                raise IndexError("Opcodes index out of range")
+
+            return (
+                levenshtein_edit_type_to_str(self.opcodes[index].type),
+                self.opcodes[index].src_begin,
+                self.opcodes[index].src_end,
+                self.opcodes[index].dest_begin,
+                self.opcodes[index].dest_end
+            )
+        else:
+            raise TypeError("Expected slice or index")
 
     def __repr__(self):
         return "[" + ", ".join(repr(op) for op in self) + "]"

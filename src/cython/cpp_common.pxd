@@ -19,6 +19,55 @@ from rapidfuzz_capi cimport (
 
 from array import array
 
+cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
+    cpdef enum class EditType:
+        None    = 0,
+        Replace = 1,
+        Insert  = 2,
+        Delete  = 3
+
+    ctypedef struct RfEditOp "rapidfuzz::EditOp":
+        EditType type
+        size_t src_pos
+        size_t dest_pos
+
+    cdef cppclass RfOpcodes "rapidfuzz::Opcodes"
+
+    cdef cppclass RfEditops "rapidfuzz::Editops":
+        RfEditops() except +
+        RfEditops(const RfEditops&) except +
+        RfEditops(const RfOpcodes&) except +
+        bool operator==(const RfEditops&)
+        RfEditOp& operator[](size_t pos) except +
+        size_t size()
+        RfEditops inverse() except +
+        RfEditops slice(int, int, int) except +
+        size_t get_src_len()
+        void set_src_len(size_t)
+        size_t get_dest_len()
+        void set_dest_len(size_t)
+
+    ctypedef struct RfOpcode "rapidfuzz::Opcode":
+        EditType type
+        size_t src_begin
+        size_t src_end
+        size_t dest_begin
+        size_t dest_end
+
+    cdef cppclass RfOpcodes "rapidfuzz::Opcodes":
+        RfOpcodes() except +
+        RfOpcodes(const RfOpcodes&) except +
+        RfOpcodes(const RfEditops&) except +
+        bool operator==(const RfOpcodes&)
+        RfOpcode& operator[](size_t pos) except +
+        size_t size()
+        RfOpcodes inverse() except +
+        RfOpcodes slice(int, int, int) except +
+        size_t get_src_len()
+        void set_src_len(size_t)
+        size_t get_dest_len()
+        void set_dest_len(size_t)
+
 cdef extern from "cpp_common.hpp":
     cdef cppclass RF_StringWrapper:
         RF_String string

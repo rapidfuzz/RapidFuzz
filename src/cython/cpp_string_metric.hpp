@@ -126,7 +126,7 @@ static inline bool JaroWinklerSimilarityInit(RF_ScorerFunc* self, const RF_Kwarg
     return legacy_scorer_init_f64<string_metric::CachedJaroWinklerSimilarity>(self, str_count, str, *(double*)(kwargs->context));
 }
 
-static inline std::vector<rapidfuzz::LevenshteinEditOp> levenshtein_editops_func(
+static inline rapidfuzz::Editops levenshtein_editops_func(
     const RF_String& s1, const RF_String& s2)
 {
     return visitor(s1, s2, [](auto str1, auto str2) {
