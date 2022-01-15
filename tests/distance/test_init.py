@@ -50,7 +50,7 @@ def test_editops_slicing():
     assert ops[1:4:-1].as_list() == []
     assert ops[4:-6:-1].as_list() == [('insert', 6, 7), ('insert', 6, 6),
         ('insert', 6, 5), ('replace', 2, 1), ('delete', 1, 1)]
-    #assert ops[4:-6:-1] == ops.reverse()
+    assert ops[4:-6:-1] == ops.reverse()
     assert ops[4:-4:-1].as_list() == [('insert', 6, 7), ('insert', 6, 6), ('insert', 6, 5)]
     assert ops[3:-5:-1].as_list() == [('insert', 6, 6), ('insert', 6, 5), ('replace', 2, 1)]
     assert ops[3:-5:-2].as_list() == [('insert', 6, 6), ('replace', 2, 1)]
@@ -124,7 +124,7 @@ def test_opcodes_slicing():
     assert ops[1:4:-1].as_list() == []
     assert ops[4:-6:-1].as_list() == [('insert', 6, 6, 5, 8), ('equal', 3, 6, 2, 5),
         ('replace', 2, 3, 1, 2), ('delete', 1, 2, 1, 1), ('equal', 0, 1, 0, 1)]
-    #assert ops[4:-6:-1] == ops.reverse()
+    assert ops[4:-6:-1] == ops.reverse()
     assert ops[4:-4:-1].as_list() == [('insert', 6, 6, 5, 8), ('equal', 3, 6, 2, 5),
         ('replace', 2, 3, 1, 2)]
     assert ops[3:-5:-1].as_list() == [('equal', 3, 6, 2, 5), ('replace', 2, 3, 1, 2),

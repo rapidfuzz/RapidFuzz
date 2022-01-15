@@ -46,6 +46,7 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
         void set_src_len(size_t)
         size_t get_dest_len()
         void set_dest_len(size_t)
+        RfEditops reverse()
 
     ctypedef struct RfOpcode "rapidfuzz::Opcode":
         EditType type
@@ -67,6 +68,7 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
         void set_src_len(size_t)
         size_t get_dest_len()
         void set_dest_len(size_t)
+        RfOpcodes reverse()
 
 cdef extern from "cpp_common.hpp":
     cdef cppclass RF_StringWrapper:

@@ -155,6 +155,27 @@ cdef class Editops:
         x.editops = self.editops.inverse()
         return x
 
+    def reverse(self):
+        """
+        Reverse order of Editops
+
+        Returns
+        -------
+        editops : Editops
+            inverted Editops
+
+        Examples
+        --------
+        >>> from rapidfuzz.distance import Levenshtein
+        >>> Levenshtein.editops('spam', 'park')
+        [('delete', 0, 0), ('replace', 3, 2), ('insert', 4, 3)]
+        >>> Levenshtein.editops('spam', 'park').reverse()
+        [('insert', 4, 3), ('replace', 3, 2), ('delete', 0, 0)]
+        """
+        cdef Editops x = Editops.__new__(Editops)
+        x.editops = self.editops.reverse()
+        return x
+
     @property
     def src_len(self):
         return self.editops.get_src_len()
@@ -318,6 +339,30 @@ cdef class Opcodes:
         """
         cdef Opcodes x = Opcodes.__new__(Opcodes)
         x.opcodes = self.opcodes.inverse()
+        return x
+
+
+    def reverse(self):
+        """
+        Reverse order of Opcodes
+
+        Returns
+        -------
+        opcodes : Opcodes
+            inverted Opcodes
+
+        Examples
+        --------
+        >>> from rapidfuzz.distance import Levenshtein
+        >>> Levenshtein.opcodes('spam', 'park')
+        [('delete', 0, 1, 0, 0), ('equal', 1, 3, 0, 2), ('replace', 3, 4, 2, 3),
+         ('insert', 4, 4, 3, 4)]
+        >>> Levenshtein.opcodes('spam', 'park').reverse()
+        [('insert', 4, 4, 3, 4), ('replace', 3, 4, 2, 3), ('equal', 1, 3, 0, 2),
+         ('delete', 0, 1, 0, 0)]
+        """
+        cdef Opcodes x = Opcodes.__new__(Opcodes)
+        x.opcodes = self.opcodes.reverse()
         return x
 
     @property
