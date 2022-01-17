@@ -32,5 +32,5 @@ setup(
     include_package_data=True,
     python_requires=">=3.6",
 
-    cmake_args=[f'-DRAPIDFUZZ_CAPI_PATH:STRING={rapidfuzz_capi.get_include()}']
+    cmake_args=[f'-DRF_CAPI_PATH:STRING={rapidfuzz_capi.get_include()}']
 )

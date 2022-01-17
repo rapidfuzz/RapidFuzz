@@ -8,6 +8,7 @@ include src/rapidfuzz/py.typed
 
 recursive-include src/cython CMakeLists.txt
 recursive-include src/cython *.hpp
+recursive-include src/cython *.cpp
 recursive-include src/cython *.pyx
 recursive-include src/cython *.pxd
 

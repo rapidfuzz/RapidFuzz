@@ -1,8 +1,6 @@
 #pragma once
 #include "cpp_common.hpp"
-#include <rapidfuzz/utils.hpp>
-
-namespace utils = rapidfuzz::utils;
+#include "utils.hpp"
 
 PyObject* default_process_impl(PyObject* sentence) {
     RF_String c_sentence = convert_string(sentence);
@@ -10,19 +8,19 @@ PyObject* default_process_impl(PyObject* sentence) {
     switch (c_sentence.kind) {
     case RF_UINT8:
     {
-        auto proc_str = utils::default_process(
+        auto proc_str = default_process(
             rapidfuzz::basic_string_view<uint8_t>(static_cast<uint8_t*>(c_sentence.data), c_sentence.length));
         return PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, proc_str.data(), (Py_ssize_t)proc_str.size());
     }
     case RF_UINT16:
     {
-        auto proc_str = utils::default_process(
+        auto proc_str = default_process(
             rapidfuzz::basic_string_view<uint16_t>(static_cast<uint16_t*>(c_sentence.data), c_sentence.length));
         return PyUnicode_FromKindAndData(PyUnicode_2BYTE_KIND, proc_str.data(), (Py_ssize_t)proc_str.size());
     }
     case RF_UINT32:
     {
-        auto proc_str = utils::default_process(
+        auto proc_str = default_process(
             rapidfuzz::basic_string_view<uint32_t>(static_cast<uint32_t*>(c_sentence.data), c_sentence.length));
         return PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, proc_str.data(), (Py_ssize_t)proc_str.size());
     }
@@ -50,7 +48,7 @@ RF_String default_process_func_impl(RF_String sentence) {
     sentence.dtor = default_string_deinit;
     sentence.data = str;
     sentence.kind = sentence.kind;
-    sentence.length = utils::default_process(str, sentence.length);
+    sentence.length = default_process(str, sentence.length);
 
     return sentence;
 }
