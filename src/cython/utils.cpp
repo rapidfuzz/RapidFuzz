@@ -1,7 +1,4 @@
-#include "unicode.hpp"
-
-namespace rapidfuzz {
-namespace Unicode {
+#include "utils.hpp"
 
 #define ALPHA_MASK 0x01
 #define DECIMAL_MASK 0x02
@@ -80,6 +77,3 @@ uint32_t UnicodeDefaultProcess(uint32_t ch)
     }
     return ch + static_cast<uint32_t>(ctype->lower);
 }
-
-} // namespace Unicode
-} // namespace rapidfuzz

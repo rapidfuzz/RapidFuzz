@@ -13,9 +13,11 @@ recursive-include src/cython *.pyx
 recursive-include src/cython *.pxd
 
 include extern/rapidfuzz-cpp/LICENSE
-recursive-include extern/rapidfuzz-cpp/rapidfuzz *.hpp *.h *cpp
+include extern/rapidfuzz-cpp/CMakeLists.txt
+recursive-include extern/rapidfuzz-cpp/rapidfuzz *.hpp *.inl
 
 include extern/taskflow/LICENSE
+include extern/taskflow/CMakeLists.txt
 include extern/taskflow/taskflow/algorithm/*
 include extern/taskflow/taskflow/core/*
 include extern/taskflow/taskflow/nstd/variant.hpp
