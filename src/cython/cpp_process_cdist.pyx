@@ -15,7 +15,7 @@ from cython.operator cimport dereference
 
 from cpp_common cimport (
     PyObjectWrapper, RF_StringWrapper, RF_KwargsWrapper,
-    get_score_cutoff_f64, get_score_cutoff_u64, get_score_cutoff_i64,
+    get_score_cutoff_f64, get_score_cutoff_i64,
     conv_sequence
 )
 
@@ -28,7 +28,7 @@ from numpy cimport npy_intp, PyArray_SimpleNew, PyArrayObject
 from rapidfuzz_capi cimport (
     RF_Preprocess, RF_Kwargs, RF_String, RF_Scorer, RF_ScorerFunc,
     RF_Preprocessor, RF_ScorerFlags,
-    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_I64, RF_SCORER_FLAG_RESULT_U64,
+    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_I64,
     RF_SCORER_FLAG_SYMMETRIC
 )
 from cpython.pycapsule cimport PyCapsule_IsValid, PyCapsule_GetPointer
@@ -46,7 +46,7 @@ cdef extern from "cpp_process_cdist.hpp":
 
 cdef inline vector[PyObjectWrapper] preprocess_py(queries, processor) except *:
     cdef vector[PyObjectWrapper] proc_queries
-    cdef size_t queries_len = <size_t>len(queries)
+    cdef int64_t queries_len = <int64_t>len(queries)
     proc_queries.reserve(queries_len)
 
     # processor None/False
@@ -63,7 +63,7 @@ cdef inline vector[PyObjectWrapper] preprocess_py(queries, processor) except *:
 
 cdef inline vector[RF_StringWrapper] preprocess(queries, processor) except *:
     cdef vector[RF_StringWrapper] proc_queries
-    cdef size_t queries_len = <size_t>len(queries)
+    cdef int64_t queries_len = <int64_t>len(queries)
     cdef RF_String proc_str
     cdef RF_Preprocessor* processor_context = NULL
     proc_queries.reserve(queries_len)
@@ -120,11 +120,6 @@ cdef inline int dtype_to_type_num_f64(dtype) except -1:
         return np.NPY_FLOAT32
     return dtype_to_type_num(dtype)
 
-cdef inline int dtype_to_type_num_u64(dtype) except -1:
-    if dtype is None:
-        return np.NPY_UINT32
-    return dtype_to_type_num(dtype)
-
 cdef inline int dtype_to_type_num_i64(dtype) except -1:
     if dtype is None:
         return np.NPY_INT32
@@ -141,13 +136,6 @@ cdef cdist_two_lists(queries, choices, RF_Scorer* scorer, const RF_ScorerFlags* 
             dtype_to_type_num_f64(dtype),
             c_workers,
             get_score_cutoff_f64(score_cutoff, scorer_flags))
-
-    elif flags & RF_SCORER_FLAG_RESULT_U64:
-        return cdist_two_lists_impl(
-            kwargs, scorer, proc_queries, proc_choices,
-            dtype_to_type_num_u64(dtype),
-            c_workers,
-            get_score_cutoff_u64(score_cutoff, scorer_flags))
 
     elif flags & RF_SCORER_FLAG_RESULT_I64:
         return cdist_two_lists_impl(
@@ -168,13 +156,6 @@ cdef cdist_single_list(queries, RF_Scorer* scorer, const RF_ScorerFlags* scorer_
             dtype_to_type_num_f64(dtype),
             c_workers,
             get_score_cutoff_f64(score_cutoff, scorer_flags))
-
-    elif flags & RF_SCORER_FLAG_RESULT_U64:
-        return cdist_single_list_impl(
-            kwargs, scorer, proc_queries,
-            dtype_to_type_num_u64(dtype),
-            c_workers,
-            get_score_cutoff_u64(score_cutoff, scorer_flags))
 
     elif flags & RF_SCORER_FLAG_RESULT_I64:
         return cdist_single_list_impl(

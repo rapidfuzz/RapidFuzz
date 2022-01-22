@@ -7,10 +7,10 @@ from rapidfuzz_capi cimport (
     RF_String, RF_Scorer, RF_Kwargs, RF_ScorerFunc, RF_Preprocess,
     SCORER_STRUCT_VERSION, RF_Preprocessor,
     RF_ScorerFlags,
-    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_U64, RF_SCORER_FLAG_MULTI_STRING, RF_SCORER_FLAG_SYMMETRIC
+    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_I64, RF_SCORER_FLAG_MULTI_STRING, RF_SCORER_FLAG_SYMMETRIC
 )
 from cpp_common cimport RF_StringWrapper, conv_sequence
-from libc.stdint cimport SIZE_MAX
+from libc.stdint cimport INT64_MAX, int64_t
 
 from libcpp cimport bool
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
@@ -18,10 +18,10 @@ from cython.operator cimport dereference
 
 cdef extern from "edit_based.hpp":
     double normalized_hamming_func(     const RF_String&, const RF_String&, double) nogil except +
-    size_t hamming_func(    const RF_String&, const RF_String&, size_t) nogil except +
+    int64_t hamming_func(    const RF_String&, const RF_String&, int64_t) nogil except +
 
-    bool HammingInit(               RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
-    bool NormalizedHammingInit(     RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
+    bool HammingInit(               RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool NormalizedHammingInit(     RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
 
 cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except *:
     cdef RF_Preprocessor* preprocess_context = NULL
@@ -43,7 +43,7 @@ cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc
             s2 = processor(s2)
             s2_proc[0] = RF_StringWrapper(conv_sequence(s2), s2)
 
-def distance(s1, s2, *, processor=None, max=None):
+def distance(s1, s2, *, processor=None, score_cutoff=None):
     """
     Calculates the Hamming distance between two strings.
     The hamming distance is defined as the number of positions
@@ -75,14 +75,17 @@ def distance(s1, s2, *, processor=None, max=None):
     ValueError
         If s1 and s2 have a different length
     """
-    cdef size_t c_max = <size_t>-1 if max is None else max
+    cdef int64_t c_score_cutoff = INT64_MAX if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
+
+    if c_score_cutoff < 0:
+        raise ValueError("score_cutoff has to be >= 0")
 
     if s1 is None or s2 is None:
         return 0
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
-    return hamming_func(s1_proc.string, s2_proc.string, c_max)
+    return hamming_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
 def normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
@@ -135,9 +138,9 @@ cdef bool NoKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     return True
 
 cdef bool GetScorerFlagsHamming(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_U64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.u64 = 0
-    dereference(scorer_flags).worst_score.u64 = SIZE_MAX
+    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    dereference(scorer_flags).optimal_score.i64 = 0
+    dereference(scorer_flags).worst_score.i64 = INT64_MAX
     return True
 
 cdef bool GetScorerFlagsNormalizedHamming(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:

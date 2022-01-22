@@ -6,11 +6,11 @@ template <typename T>
 struct ListMatchElem
 {
     ListMatchElem() {}
-    ListMatchElem(T score, size_t index, PyObjectWrapper choice)
+    ListMatchElem(T score, int64_t index, PyObjectWrapper choice)
         : score(score), index(index), choice(std::move(choice)) {}
 
     T score;
-    size_t index;
+    int64_t index;
     PyObjectWrapper choice;
 };
 
@@ -18,11 +18,11 @@ template <typename T>
 struct DictMatchElem
 {
     DictMatchElem() {}
-    DictMatchElem(T score, size_t index, PyObjectWrapper choice, PyObjectWrapper key)
+    DictMatchElem(T score, int64_t index, PyObjectWrapper choice, PyObjectWrapper key)
         : score(score), index(index), choice(std::move(choice)), key(std::move(key)) {}
 
     T score;
-    size_t index;
+    int64_t index;
     PyObjectWrapper choice;
     PyObjectWrapper key;
 };
@@ -30,10 +30,10 @@ struct DictMatchElem
 struct DictStringElem
 {
     DictStringElem() : index(-1) {}
-    DictStringElem(size_t index, PyObjectWrapper key, PyObjectWrapper val, RF_StringWrapper proc_val)
+    DictStringElem(int64_t index, PyObjectWrapper key, PyObjectWrapper val, RF_StringWrapper proc_val)
         : index(index), key(std::move(key)), val(std::move(val)), proc_val(std::move(proc_val)) {}
 
-    size_t index;
+    int64_t index;
     PyObjectWrapper key;
     PyObjectWrapper val;
     RF_StringWrapper proc_val;
@@ -42,10 +42,10 @@ struct DictStringElem
 struct ListStringElem
 {
     ListStringElem() : index(-1) {}
-    ListStringElem(size_t index, PyObjectWrapper val, RF_StringWrapper proc_val)
+    ListStringElem(int64_t index, PyObjectWrapper val, RF_StringWrapper proc_val)
         : index(index), val(std::move(val)), proc_val(std::move(proc_val)) {}
 
-    size_t index;
+    int64_t index;
     PyObjectWrapper val;
     RF_StringWrapper proc_val;
 };
@@ -63,10 +63,6 @@ struct ExtractComp
         if (m_scorer_flags->flags & RF_SCORER_FLAG_RESULT_F64)
         {
             return is_first(a, b, m_scorer_flags->optimal_score.f64, m_scorer_flags->worst_score.f64);
-        }
-        else if (m_scorer_flags->flags & RF_SCORER_FLAG_RESULT_U64)
-        {
-            return is_first(a, b, m_scorer_flags->optimal_score.u64, m_scorer_flags->worst_score.u64);
         }
         else
         {
@@ -138,10 +134,6 @@ struct RF_ScorerWrapper {
         PyErr2RuntimeExn(scorer_func.call.f64(&scorer_func, str, score_cutoff, result));
     }
 
-    void call(const RF_String* str, uint64_t score_cutoff, uint64_t* result) const {
-        PyErr2RuntimeExn(scorer_func.call.u64(&scorer_func, str, score_cutoff, result));
-    }
-
     void call(const RF_String* str, int64_t score_cutoff, int64_t* result) const {
         PyErr2RuntimeExn(scorer_func.call.i64(&scorer_func, str, score_cutoff, result));
     }
@@ -153,10 +145,6 @@ bool is_lowest_score_worst(const RF_ScorerFlags* scorer_flags)
     if (std::is_same<T, double>::value)
     {
         return scorer_flags->optimal_score.f64 > scorer_flags->worst_score.f64;
-    }
-    else if (std::is_same<T, uint64_t>::value)
-    {
-        return scorer_flags->optimal_score.u64 > scorer_flags->worst_score.u64;
     }
     else
     {
@@ -170,10 +158,6 @@ T get_optimal_score(const RF_ScorerFlags* scorer_flags)
     if (std::is_same<T, double>::value)
     {
         return (T)scorer_flags->optimal_score.f64;
-    }
-    else if (std::is_same<T, uint64_t>::value)
-    {
-        return (T)scorer_flags->optimal_score.u64;
     }
     else
     {

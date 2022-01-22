@@ -7,3 +7,6 @@
 [submodule "extern/optional-lite"]
 	path = extern/optional-lite
 	url = ../../martinmoene/optional-lite.git
+[submodule "extern/jarowinkler-cpp"]
+	path = extern/jarowinkler-cpp
+	url = ../../maxbachmann/jarowinkler-cpp

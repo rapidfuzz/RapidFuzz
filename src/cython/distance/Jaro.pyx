@@ -7,17 +7,18 @@ from rapidfuzz_capi cimport (
     RF_String, RF_Scorer, RF_Kwargs, RF_ScorerFunc, RF_Preprocess, RF_KwargsInit,
     SCORER_STRUCT_VERSION, RF_Preprocessor,
     RF_ScorerFlags,
-    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_U64, RF_SCORER_FLAG_MULTI_STRING, RF_SCORER_FLAG_SYMMETRIC
+    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_MULTI_STRING, RF_SCORER_FLAG_SYMMETRIC
 )
 from cpp_common cimport RF_StringWrapper, conv_sequence
 
 from libcpp cimport bool
+from libc.stdint cimport int64_t
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
 from cython.operator cimport dereference
 
 cdef extern from "edit_based.hpp":
     double jaro_similarity_func(        const RF_String&, const RF_String&, double) nogil except +
-    bool JaroSimilarityInit(        RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
+    bool JaroSimilarityInit(        RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
 
 cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except *:
     cdef RF_Preprocessor* preprocess_context = NULL

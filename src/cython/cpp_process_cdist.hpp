@@ -130,7 +130,7 @@ void set_score(PyArrayObject* matrix, int dtype, npy_intp row, npy_intp col, uin
 }
 
 template <typename Func>
-void run_parallel(int workers, size_t rows, Func&& func)
+void run_parallel(int workers, int64_t rows, Func&& func)
 {
     /* for these cases spawning threads causes to much overhead to be worth it */
     if (workers == 0 || workers == 1)
@@ -148,16 +148,16 @@ void run_parallel(int workers, size_t rows, Func&& func)
     std::atomic<int> exceptions_occured{0};
     tf::Executor executor(workers);
     tf::Taskflow taskflow;
-    std::size_t step_size = 1;
+    std::int64_t step_size = 1;
 
-    taskflow.for_each_index((std::size_t)0, rows, step_size, [&] (std::size_t row) {
+    taskflow.for_each_index((std::int64_t)0, rows, step_size, [&] (std::int64_t row) {
         /* skip work after an exception occured */
         if (exceptions_occured.load() > 0) {
             return;
         }
         try
         {
-            std::size_t row_end = std::min(row + step_size, rows);
+            std::int64_t row_end = std::min(row + step_size, rows);
             func(row, row_end);
         }
         catch(...)
@@ -181,8 +181,8 @@ static PyObject* cdist_single_list_impl(
     const RF_Kwargs* kwargs, RF_Scorer* scorer,
     const std::vector<RF_StringWrapper>& queries, int dtype, int workers, T score_cutoff)
 {
-    std::size_t rows = queries.size();
-    std::size_t cols = queries.size();
+    std::int64_t rows = queries.size();
+    std::int64_t cols = queries.size();
     npy_intp dims[] = {(npy_intp)rows, (npy_intp)cols};
     PyArrayObject* matrix = (PyArrayObject*)PyArray_SimpleNew(2, dims, dtype);
 
@@ -196,7 +196,7 @@ static PyObject* cdist_single_list_impl(
 Py_BEGIN_ALLOW_THREADS
     try
     {
-        run_parallel(workers, rows, [&] (std::size_t row, std::size_t row_end) {
+        run_parallel(workers, rows, [&] (std::int64_t row, std::int64_t row_end) {
             for (; row < row_end; ++row)
             {
                 RF_ScorerFunc scorer_func;
@@ -207,7 +207,7 @@ Py_BEGIN_ALLOW_THREADS
                 ScorerFunc.call(&queries[row].string, score_cutoff, &score);
                 set_score(matrix, dtype, row, row, score);
 
-                for (size_t col = row + 1; col < cols; ++col)
+                for (int64_t col = row + 1; col < cols; ++col)
                 {
                     ScorerFunc.call(&queries[col].string, score_cutoff, &score);
                     set_score(matrix, dtype, row, col, score);
@@ -234,8 +234,8 @@ static PyObject* cdist_two_lists_impl(
     const RF_Kwargs* kwargs, RF_Scorer* scorer,
     const std::vector<RF_StringWrapper>& queries, const std::vector<RF_StringWrapper>& choices, int dtype, int workers, T score_cutoff)
 {
-    std::size_t rows = queries.size();
-    std::size_t cols = choices.size();
+    std::int64_t rows = queries.size();
+    std::int64_t cols = choices.size();
     npy_intp dims[] = {(npy_intp)rows, (npy_intp)cols};
     PyArrayObject* matrix = (PyArrayObject*)PyArray_SimpleNew(2, dims, dtype);
 
@@ -249,14 +249,14 @@ static PyObject* cdist_two_lists_impl(
 Py_BEGIN_ALLOW_THREADS
     try
     {
-        run_parallel(workers, rows, [&] (std::size_t row, std::size_t row_end) {
+        run_parallel(workers, rows, [&] (std::int64_t row, std::int64_t row_end) {
             for (; row < row_end; ++row)
             {
                 RF_ScorerFunc scorer_func;
                 PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, 1, &queries[row].string));
                 RF_ScorerWrapper ScorerFunc(scorer_func);
 
-                for (size_t col = 0; col < cols; ++col)
+                for (int64_t col = 0; col < cols; ++col)
                 {
                     T score;
                     ScorerFunc.call(&choices[col].string, score_cutoff, &score);

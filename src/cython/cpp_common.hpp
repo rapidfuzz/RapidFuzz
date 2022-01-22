@@ -2,14 +2,13 @@
 #include "Python.h"
 #define RAPIDFUZZ_PYTHON
 #include <rapidfuzz/fuzz.hpp>
-#include <rapidfuzz/string_metric.hpp>
+#include <rapidfuzz/distance.hpp>
 #include <exception>
 
 #include "rapidfuzz_capi.h"
 
 #define PYTHON_VERSION(major, minor, micro) ((major << 24) | (minor << 16) | (micro << 8))
 
-namespace string_metric = rapidfuzz::string_metric;
 namespace fuzz = rapidfuzz::fuzz;
 
 class PythonTypeError: public std::bad_typeid {
@@ -224,17 +223,11 @@ void default_string_deinit(RF_String* string)
     free(string->data);
 }
 
-template <typename T>
-static inline rapidfuzz::basic_string_view<T> no_process(const RF_String& s)
-{
-    return rapidfuzz::basic_string_view<T>((T*)s.data, s.length);
-}
-
 template <typename Func, typename... Args>
 auto visit(const RF_String& str, Func&& f, Args&&... args)
 {
     switch(str.kind) {
-# define X_ENUM(kind, type) case kind: return f(no_process<type>(str), std::forward<Args>(args)...);
+# define X_ENUM(kind, type) case kind: return f((type*)str.data, (type*)str.data + str.length, std::forward<Args>(args)...);
     LIST_OF_CASES()
 # undef X_ENUM
     default:
@@ -246,8 +239,8 @@ template <typename Func, typename... Args>
 auto visitor(const RF_String& str1, const RF_String& str2, Func&& f, Args&&... args)
 {
     return visit(str2,
-        [&](auto str) {
-            return visit(str1, std::forward<Func>(f), str, std::forward<Args>(args)...);
+        [&](auto first, auto last) {
+            return visit(str1, std::forward<Func>(f), first, last, std::forward<Args>(args)...);
         }
     );
 }
@@ -301,7 +294,7 @@ static inline RF_String convert_string(PyObject* py_str)
             nullptr,
             RF_UINT8,
             PyBytes_AS_STRING(py_str),
-            static_cast<size_t>(PyBytes_GET_SIZE(py_str)),
+            static_cast<int64_t>(PyBytes_GET_SIZE(py_str)),
             nullptr
         };
     } else {
@@ -322,7 +315,7 @@ static inline RF_String convert_string(PyObject* py_str)
             nullptr,
             kind,
             PyUnicode_DATA(py_str),
-            static_cast<size_t>(PyUnicode_GET_LENGTH(py_str)),
+            static_cast<int64_t>(PyUnicode_GET_LENGTH(py_str)),
             nullptr
         };
     }
@@ -334,13 +327,13 @@ static void scorer_deinit(RF_ScorerFunc* self)
     delete (CachedScorer*)self->context;
 }
 
-template<typename CachedScorer>
-static inline bool scorer_func_wrapper_f64(const RF_ScorerFunc* self, const RF_String* str, double score_cutoff, double* result)
+template<typename CachedScorer, typename T>
+static inline bool distance_func_wrapper(const RF_ScorerFunc* self, const RF_String* str, T score_cutoff, T* result)
 {
     CachedScorer& scorer = *(CachedScorer*)self->context;
     try {
-        *result = visit(*str, [&](auto s){
-            return scorer.ratio(s, score_cutoff);
+        *result = visit(*str, [&](auto first, auto last){
+            return scorer.distance(first, last, score_cutoff);
         });
     } catch(...) {
       PyGILState_STATE gilstate_save = PyGILState_Ensure();
@@ -351,13 +344,13 @@ static inline bool scorer_func_wrapper_f64(const RF_ScorerFunc* self, const RF_S
     return true;
 }
 
-template<typename CachedScorer>
-static inline bool scorer_func_wrapper_u64(const RF_ScorerFunc* self, const RF_String* str, uint64_t score_cutoff, uint64_t* result)
+template<typename CachedScorer, typename T>
+static inline bool normalized_distance_func_wrapper(const RF_ScorerFunc* self, const RF_String* str, T score_cutoff, T* result)
 {
     CachedScorer& scorer = *(CachedScorer*)self->context;
     try {
-        *result = visit(*str, [&](auto s){
-            return scorer.distance(s, score_cutoff);
+        *result = visit(*str, [&](auto first, auto last){
+            return scorer.normalized_distance(first, last, score_cutoff);
         });
     } catch(...) {
       PyGILState_STATE gilstate_save = PyGILState_Ensure();
@@ -368,40 +361,112 @@ static inline bool scorer_func_wrapper_u64(const RF_ScorerFunc* self, const RF_S
     return true;
 }
 
-
-template<template <typename> class CachedScorer, typename Sentence, typename ...Args>
-static inline RF_ScorerFunc get_ScorerContext_f64(Sentence str, Args... args)
+template<typename CachedScorer, typename T>
+static inline bool similarity_func_wrapper(const RF_ScorerFunc* self, const RF_String* str, T score_cutoff, T* result)
 {
-    RF_ScorerFunc context;
-    context.context = (void*) new CachedScorer<Sentence>(str, args...);
+    CachedScorer& scorer = *(CachedScorer*)self->context;
+    try {
+        *result = visit(*str, [&](auto first, auto last){
+            return scorer.similarity(first, last, score_cutoff);
+        });
+    } catch(...) {
+      PyGILState_STATE gilstate_save = PyGILState_Ensure();
+      CppExn2PyErr();
+      PyGILState_Release(gilstate_save);
+      return false;
+    }
+    return true;
+}
 
-    context.call.f64 = scorer_func_wrapper_f64<CachedScorer<Sentence>>;
-    context.dtor = scorer_deinit<CachedScorer<Sentence>>;
+// todo cleanup
+typedef bool (*func_f64) (const struct _RF_ScorerFunc* self, const RF_String* str, double score_cutoff, double* result);
+typedef bool (*func_i64) (const struct _RF_ScorerFunc* self, const RF_String* str, int64_t score_cutoff, int64_t* result);
+
+void assign_callback(RF_ScorerFunc& context, func_f64 func)
+{
+    context.call.f64 = func;
+}
+
+void assign_callback(RF_ScorerFunc& context, func_i64 func)
+{
+    context.call.i64 = func;
+}
+
+template<typename CachedScorer, typename T>
+static inline bool normalized_similarity_func_wrapper(const RF_ScorerFunc* self, const RF_String* str, T score_cutoff, T* result)
+{
+    CachedScorer& scorer = *(CachedScorer*)self->context;
+    try {
+        *result = visit(*str, [&](auto first, auto last){
+            return scorer.normalized_similarity(first, last, score_cutoff);
+        });
+    } catch(...) {
+      PyGILState_STATE gilstate_save = PyGILState_Ensure();
+      CppExn2PyErr();
+      PyGILState_Release(gilstate_save);
+      return false;
+    }
+    return true;
+}
+
+template<template <typename> class CachedScorer, typename T, typename InputIt1, typename ...Args>
+static inline RF_ScorerFunc get_ScorerContext_distance(InputIt1 first1, InputIt1 last1, Args... args)
+{
+    using CharT1 = typename std::iterator_traits<InputIt1>::value_type;
+    RF_ScorerFunc context;
+    context.context = (void*) new CachedScorer<CharT1>(first1, last1, args...);
+
+    assign_callback(context, distance_func_wrapper<CachedScorer<CharT1>, T>);
+    context.dtor = scorer_deinit<CachedScorer<CharT1>>;
     return context;
 }
 
-template<template <typename> class CachedScorer, typename Sentence, typename ...Args>
-static inline RF_ScorerFunc get_ScorerContext_u64(Sentence str, Args... args)
+template<template <typename> class CachedScorer, typename T, typename InputIt1, typename ...Args>
+static inline RF_ScorerFunc get_ScorerContext_normalized_distance(InputIt1 first1, InputIt1 last1, Args... args)
 {
+    using CharT1 = typename std::iterator_traits<InputIt1>::value_type;
     RF_ScorerFunc context;
-    context.context = (void*) new CachedScorer<Sentence>(str, args...);
+    context.context = (void*) new CachedScorer<CharT1>(first1, last1, args...);
 
-    context.call.u64 = scorer_func_wrapper_u64<CachedScorer<Sentence>>;
-    context.dtor = scorer_deinit<CachedScorer<Sentence>>;
+    assign_callback(context, normalized_distance_func_wrapper<CachedScorer<CharT1>, T>);
+    context.dtor = scorer_deinit<CachedScorer<CharT1>>;
     return context;
 }
 
-template<template <typename> class CachedScorer, typename ...Args>
-static inline bool scorer_init_f64(RF_ScorerFunc* self, size_t str_count, const RF_String* strings, Args... args)
+template<template <typename> class CachedScorer, typename T, typename InputIt1, typename ...Args>
+static inline RF_ScorerFunc get_ScorerContext_similarity(InputIt1 first1, InputIt1 last1, Args... args)
+{
+    using CharT1 = typename std::iterator_traits<InputIt1>::value_type;
+    RF_ScorerFunc context;
+    context.context = (void*) new CachedScorer<CharT1>(first1, last1, args...);
+
+    assign_callback(context, similarity_func_wrapper<CachedScorer<CharT1>, T>);
+    context.dtor = scorer_deinit<CachedScorer<CharT1>>;
+    return context;
+}
+
+template<template <typename> class CachedScorer, typename T, typename InputIt1, typename ...Args>
+static inline RF_ScorerFunc get_ScorerContext_normalized_similarity(InputIt1 first1, InputIt1 last1, Args... args)
+{
+    using CharT1 = typename std::iterator_traits<InputIt1>::value_type;
+    RF_ScorerFunc context;
+    context.context = (void*) new CachedScorer<CharT1>(first1, last1, args...);
+
+    assign_callback(context, normalized_similarity_func_wrapper<CachedScorer<CharT1>, T>);
+    context.dtor = scorer_deinit<CachedScorer<CharT1>>;
+    return context;
+}
+
+template<template <typename> class CachedScorer, typename T, typename ...Args>
+static inline bool distance_init(RF_ScorerFunc* self, int64_t str_count, const RF_String* strings, Args... args)
 {
     try {
-        /* todo support different string counts, which is required e.g. for SIMD */
         if (str_count != 1)
         {
             throw std::logic_error("Only str_count == 1 supported");
         }
-        *self = visit(*strings, [&](auto s){
-            return get_ScorerContext_f64<CachedScorer>(s, args...);
+        *self = visit(*strings, [&](auto first1, auto last1){
+            return get_ScorerContext_distance<CachedScorer, T>(first1, last1, args...);
         });
     } catch(...) {
       PyGILState_STATE gilstate_save = PyGILState_Ensure();
@@ -412,17 +477,56 @@ static inline bool scorer_init_f64(RF_ScorerFunc* self, size_t str_count, const 
     return true;
 }
 
-template<template <typename> class CachedScorer, typename ...Args>
-static inline bool scorer_init_u64(RF_ScorerFunc* self, size_t str_count, const RF_String* strings, Args... args)
+template<template <typename> class CachedScorer, typename T, typename ...Args>
+static inline bool normalized_distance_init(RF_ScorerFunc* self, int64_t str_count, const RF_String* strings, Args... args)
 {
     try {
-        /* todo support different string counts, which is required e.g. for SIMD */
         if (str_count != 1)
         {
             throw std::logic_error("Only str_count == 1 supported");
         }
-        *self = visit(*strings, [&](auto s){
-            return get_ScorerContext_u64<CachedScorer>(s, args...);
+        *self = visit(*strings, [&](auto first1, auto last1){
+            return get_ScorerContext_normalized_distance<CachedScorer, T>(first1, last1, args...);
+        });
+    } catch(...) {
+      PyGILState_STATE gilstate_save = PyGILState_Ensure();
+      CppExn2PyErr();
+      PyGILState_Release(gilstate_save);
+      return false;
+    }
+    return true;
+}
+
+template<template <typename> class CachedScorer, typename T, typename ...Args>
+static inline bool similarity_init(RF_ScorerFunc* self, int64_t str_count, const RF_String* strings, Args... args)
+{
+    try {
+        if (str_count != 1)
+        {
+            throw std::logic_error("Only str_count == 1 supported");
+        }
+        *self = visit(*strings, [&](auto first1, auto last1){
+            return get_ScorerContext_similarity<CachedScorer, T>(first1, last1, args...);
+        });
+    } catch(...) {
+      PyGILState_STATE gilstate_save = PyGILState_Ensure();
+      CppExn2PyErr();
+      PyGILState_Release(gilstate_save);
+      return false;
+    }
+    return true;
+}
+
+template<template <typename> class CachedScorer, typename T, typename ...Args>
+static inline bool normalized_similarity_init(RF_ScorerFunc* self, int64_t str_count, const RF_String* strings, Args... args)
+{
+    try {
+        if (str_count != 1)
+        {
+            throw std::logic_error("Only str_count == 1 supported");
+        }
+        *self = visit(*strings, [&](auto first1, auto last1){
+            return get_ScorerContext_normalized_similarity<CachedScorer, T>(first1, last1, args...);
         });
     } catch(...) {
       PyGILState_STATE gilstate_save = PyGILState_Ensure();

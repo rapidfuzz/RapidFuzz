@@ -9,14 +9,13 @@ from rapidfuzz_capi cimport (
     RF_String, RF_Scorer, RF_Kwargs, RF_ScorerFunc, RF_Preprocess, RF_KwargsInit,
     SCORER_STRUCT_VERSION, RF_Preprocessor,
     RF_ScorerFlags,
-    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_U64, RF_SCORER_FLAG_MULTI_STRING, RF_SCORER_FLAG_SYMMETRIC
+    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_I64, RF_SCORER_FLAG_MULTI_STRING, RF_SCORER_FLAG_SYMMETRIC
 )
 from cpp_common cimport RF_StringWrapper, conv_sequence
-from libc.stdint cimport SIZE_MAX
 
 from libcpp cimport bool
 from libc.stdlib cimport malloc, free
-from libc.stdint cimport uint32_t
+from libc.stdint cimport INT64_MAX, uint32_t, int64_t
 from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.ref cimport Py_INCREF
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
@@ -25,12 +24,12 @@ from cython.operator cimport dereference
 cdef extern from "edit_based.hpp":
     double normalized_indel_func( const RF_String&, const RF_String&, double) nogil except +
 
-    size_t indel_func(const RF_String&, const RF_String&, size_t) nogil except +
+    int64_t indel_func(const RF_String&, const RF_String&, int64_t) nogil except +
 
     RfEditops llcs_editops_func(const RF_String&, const RF_String&) nogil except +
 
-    bool IndelInit(           RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
-    bool NormalizedIndelInit( RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
+    bool IndelInit(           RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool NormalizedIndelInit( RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
 
 cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except *:
     cdef RF_Preprocessor* preprocess_context = NULL
@@ -148,7 +147,9 @@ def distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
 
     """
     cdef RF_StringWrapper s1_proc, s2_proc
-    cdef size_t c_score_cutoff = <size_t>-1 if score_cutoff is None else score_cutoff
+    cdef int64_t c_score_cutoff = INT64_MAX if score_cutoff is None else score_cutoff
+    if c_score_cutoff < 0:
+        raise ValueError("score_cutoff has to be >= 0")
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return indel_func(s1_proc.string, s2_proc.string, c_score_cutoff)
@@ -328,9 +329,9 @@ cdef bool NoKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     return True
 
 cdef bool GetScorerFlagsIndel(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_U64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.u64 = 0
-    dereference(scorer_flags).worst_score.u64 = SIZE_MAX
+    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    dereference(scorer_flags).optimal_score.i64 = 0
+    dereference(scorer_flags).worst_score.i64 = INT64_MAX
     return True
 
 cdef bool GetScorerFlagsNormalizedIndel(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:

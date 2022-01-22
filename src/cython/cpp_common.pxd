@@ -28,53 +28,53 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
 
     ctypedef struct RfEditOp "rapidfuzz::EditOp":
         EditType type
-        size_t src_pos
-        size_t dest_pos
+        int64_t src_pos
+        int64_t dest_pos
 
     cdef cppclass RfOpcodes "rapidfuzz::Opcodes"
 
     cdef cppclass RfEditops "rapidfuzz::Editops":
         RfEditops() except +
-        RfEditops(size_t) except +
+        RfEditops(int64_t) except +
         RfEditops(const RfEditops&) except +
         RfEditops(const RfOpcodes&) except +
         bool operator==(const RfEditops&)
-        RfEditOp& operator[](size_t pos) except +
-        size_t size()
+        RfEditOp& operator[](int64_t pos) except +
+        int64_t size()
         RfEditops inverse() except +
         RfEditops slice(int, int, int) except +
-        size_t get_src_len()
-        void set_src_len(size_t)
-        size_t get_dest_len()
-        void set_dest_len(size_t)
+        int64_t get_src_len()
+        void set_src_len(int64_t)
+        int64_t get_dest_len()
+        void set_dest_len(int64_t)
         RfEditops reverse()
         void emplace_back(...)
-        void reserve(size_t) except +
+        void reserve(int64_t) except +
 
     ctypedef struct RfOpcode "rapidfuzz::Opcode":
         EditType type
-        size_t src_begin
-        size_t src_end
-        size_t dest_begin
-        size_t dest_end
+        int64_t src_begin
+        int64_t src_end
+        int64_t dest_begin
+        int64_t dest_end
 
     cdef cppclass RfOpcodes "rapidfuzz::Opcodes":
         RfOpcodes() except +
-        RfOpcodes(size_t) except +
+        RfOpcodes(int64_t) except +
         RfOpcodes(const RfOpcodes&) except +
         RfOpcodes(const RfEditops&) except +
         bool operator==(const RfOpcodes&)
-        RfOpcode& operator[](size_t pos) except +
-        size_t size()
+        RfOpcode& operator[](int64_t pos) except +
+        int64_t size()
         RfOpcodes inverse() except +
         RfOpcodes slice(int, int, int) except +
-        size_t get_src_len()
-        void set_src_len(size_t)
-        size_t get_dest_len()
-        void set_dest_len(size_t)
+        int64_t get_src_len()
+        void set_src_len(int64_t)
+        int64_t get_dest_len()
+        void set_dest_len(int64_t)
         RfOpcodes reverse()
         void emplace_back(...)
-        void reserve(size_t) except +
+        void reserve(int64_t) except +
 
 cdef extern from "cpp_common.hpp":
     cdef cppclass RF_StringWrapper:
@@ -109,7 +109,7 @@ cdef inline RF_String hash_array(arr) except *:
     # TODO on Cpython this does not require any copies
     cdef RF_String s_proc
     cdef Py_UCS4 typecode = <Py_UCS4>arr.typecode
-    s_proc.length = <size_t>len(arr)
+    s_proc.length = <int64_t>len(arr)
 
     s_proc.data = malloc(s_proc.length * sizeof(uint64_t))
 
@@ -157,7 +157,7 @@ cdef inline RF_String hash_array(arr) except *:
 
 cdef inline RF_String hash_sequence(seq) except *:
     cdef RF_String s_proc
-    s_proc.length = <size_t>len(seq)
+    s_proc.length = <int64_t>len(seq)
 
     s_proc.data = malloc(s_proc.length * sizeof(uint64_t))
 
@@ -192,24 +192,6 @@ cdef inline RF_String conv_sequence(seq) except *:
 cdef inline double get_score_cutoff_f64(score_cutoff, const RF_ScorerFlags* scorer_flags) except *:
     worst_score = dereference(scorer_flags).worst_score.f64
     optimal_score = dereference(scorer_flags).optimal_score.f64
-    c_score_cutoff = worst_score
-
-    if score_cutoff is not None:
-        c_score_cutoff = score_cutoff
-        if optimal_score > worst_score:
-            # e.g. 0.0 - 100.0
-            if c_score_cutoff < worst_score or c_score_cutoff > optimal_score:
-                raise TypeError(f"score_cutoff has to be in the range of {worst_score} - {optimal_score}")
-        else:
-            # e.g. DBL_MAX - 0
-            if c_score_cutoff > worst_score or c_score_cutoff < optimal_score:
-                raise TypeError(f"score_cutoff has to be in the range of {optimal_score} - {worst_score}")
-
-    return c_score_cutoff
-
-cdef inline uint64_t get_score_cutoff_u64(score_cutoff, const RF_ScorerFlags* scorer_flags) except *:
-    worst_score = dereference(scorer_flags).worst_score.u64
-    optimal_score = dereference(scorer_flags).optimal_score.u64
     c_score_cutoff = worst_score
 
     if score_cutoff is not None:

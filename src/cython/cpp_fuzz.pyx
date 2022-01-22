@@ -16,7 +16,7 @@ from cpp_common cimport (
     conv_sequence
 )
 
-from libc.stdint cimport uint32_t
+from libc.stdint cimport uint32_t, int64_t
 from libcpp cimport bool
 from cython.operator cimport dereference
 
@@ -36,16 +36,16 @@ cdef extern from "cpp_fuzz.hpp":
     double WRatio_func(                   const RF_String&, const RF_String&, double) nogil except +
     double QRatio_func(                   const RF_String&, const RF_String&, double) nogil except +
 
-    bool RatioInit(                 RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
-    bool PartialRatioInit(          RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
-    bool TokenSortRatioInit(        RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
-    bool TokenSetRatioInit(         RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
-    bool TokenRatioInit(            RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
-    bool PartialTokenSortRatioInit( RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
-    bool PartialTokenSetRatioInit(  RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
-    bool PartialTokenRatioInit(     RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
-    bool WRatioInit(                RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
-    bool QRatioInit(                RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
+    bool RatioInit(                 RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool PartialRatioInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool TokenSortRatioInit(        RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool TokenSetRatioInit(         RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool TokenRatioInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool PartialTokenSortRatioInit( RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool PartialTokenSetRatioInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool PartialTokenRatioInit(     RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool WRatioInit(                RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool QRatioInit(                RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
 
 cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except *:
     cdef RF_Preprocessor* preprocess_context = NULL

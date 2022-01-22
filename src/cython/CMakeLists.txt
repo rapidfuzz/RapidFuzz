@@ -21,7 +21,7 @@ add_cython_target(cpp_string_metric CXX)
 add_library(cpp_string_metric MODULE ${cpp_string_metric})
 target_compile_features(cpp_string_metric PUBLIC cxx_std_14)
 target_include_directories(cpp_string_metric PRIVATE ${RF_CAPI_PATH} ${RF_BASE_DIR}/src/cython)
-target_link_libraries(cpp_string_metric rapidfuzz::rapidfuzz)
+target_link_libraries(cpp_string_metric rapidfuzz::rapidfuzz jaro_winkler::jaro_winkler)
 python_extension_module(cpp_string_metric)
 install(TARGETS cpp_string_metric LIBRARY DESTINATION src/rapidfuzz)
 

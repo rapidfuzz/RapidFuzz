@@ -9,14 +9,13 @@ from rapidfuzz_capi cimport (
     RF_String, RF_Scorer, RF_Kwargs, RF_ScorerFunc, RF_Preprocess, RF_KwargsInit,
     SCORER_STRUCT_VERSION, RF_Preprocessor,
     RF_ScorerFlags,
-    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_U64, RF_SCORER_FLAG_MULTI_STRING, RF_SCORER_FLAG_SYMMETRIC
+    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_I64, RF_SCORER_FLAG_MULTI_STRING, RF_SCORER_FLAG_SYMMETRIC
 )
 from cpp_common cimport RF_StringWrapper, conv_sequence
-from libc.stdint cimport SIZE_MAX
 
 from libcpp cimport bool
 from libc.stdlib cimport malloc, free
-from libc.stdint cimport uint32_t
+from libc.stdint cimport INT64_MAX, uint32_t, int64_t
 from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.ref cimport Py_INCREF
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
@@ -24,19 +23,19 @@ from cython.operator cimport dereference
 
 cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
     cdef struct LevenshteinWeightTable:
-        size_t insert_cost
-        size_t delete_cost
-        size_t replace_cost
+        int64_t insert_cost
+        int64_t delete_cost
+        int64_t replace_cost
 
 cdef extern from "edit_based.hpp":
-    double normalized_levenshtein_func( const RF_String&, const RF_String&, size_t, size_t, size_t, double) nogil except +
+    double normalized_levenshtein_func( const RF_String&, const RF_String&, int64_t, int64_t, int64_t, double) nogil except +
 
-    size_t levenshtein_func(const RF_String&, const RF_String&, size_t, size_t, size_t, size_t) nogil except +
+    int64_t levenshtein_func(const RF_String&, const RF_String&, int64_t, int64_t, int64_t, int64_t) nogil except +
 
     RfEditops levenshtein_editops_func(const RF_String&, const RF_String&) nogil except +
 
-    bool LevenshteinInit(           RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
-    bool NormalizedLevenshteinInit( RF_ScorerFunc*, const RF_Kwargs*, size_t, const RF_String*) nogil except False
+    bool LevenshteinInit(           RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool NormalizedLevenshteinInit( RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
 
 cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except *:
     cdef RF_Preprocessor* preprocess_context = NULL
@@ -222,12 +221,15 @@ def distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
     3
     """
     cdef RF_StringWrapper s1_proc, s2_proc
-    cdef size_t insertion, deletion, substitution
+    cdef int64_t insertion, deletion, substitution
     insertion = deletion = substitution = 1
     if weights is not None:
         insertion, deletion, substitution = weights
 
-    cdef size_t c_score_cutoff = <size_t>-1 if score_cutoff is None else score_cutoff
+    cdef int64_t c_score_cutoff = INT64_MAX if score_cutoff is None else score_cutoff
+
+    if c_score_cutoff < 0:
+        raise ValueError("score_cutoff has to be >= 0")
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return levenshtein_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
@@ -416,7 +418,7 @@ def normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff
     if s1 is None or s2 is None:
         return 0
 
-    cdef size_t insertion, deletion, substitution
+    cdef int64_t insertion, deletion, substitution
     insertion = deletion = substitution = 1
     if weights is not None:
         insertion, deletion, substitution = weights
@@ -430,7 +432,7 @@ cdef void KwargsDeinit(RF_Kwargs* self):
     free(<void*>dereference(self).context)
 
 cdef bool LevenshteinKwargsInit(RF_Kwargs* self, dict kwargs) except False:
-    cdef size_t insertion, deletion, substitution
+    cdef int64_t insertion, deletion, substitution
     cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>malloc(sizeof(LevenshteinWeightTable))
 
     if not weights:
@@ -446,11 +448,11 @@ cdef bool LevenshteinKwargsInit(RF_Kwargs* self, dict kwargs) except False:
 
 cdef bool GetScorerFlagsLevenshtein(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>dereference(self).context
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_U64
+    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64
     if dereference(weights).insert_cost == dereference(weights).delete_cost:
         dereference(scorer_flags).flags |= RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.u64 = 0
-    dereference(scorer_flags).worst_score.u64 = SIZE_MAX
+    dereference(scorer_flags).optimal_score.i64 = 0
+    dereference(scorer_flags).worst_score.i64 = INT64_MAX
     return True
 
 cdef bool GetScorerFlagsNormalizedLevenshtein(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:

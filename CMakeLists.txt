@@ -9,6 +9,12 @@ endif()
 
 project(rapidfuzz LANGUAGES C CXX)
 
+if (MSVC)
+    add_compile_options(/W4)
+else()
+    add_compile_options(-Wall -Wextra -pedantic)
+endif()
+
 find_package(NumPy REQUIRED)
 find_package(PythonExtensions REQUIRED)
 find_package(Python COMPONENTS Interpreter Development)
@@ -21,6 +27,7 @@ set(TF_BUILD_TESTS OFF CACHE BOOL "Enables build of tests")
 set(TF_BUILD_EXAMPLES OFF CACHE BOOL "Enables build of examples")
 add_subdirectory(extern/taskflow)
 add_subdirectory(extern/rapidfuzz-cpp)
+add_subdirectory(extern/jarowinkler-cpp)
 
 add_subdirectory(src/cython)
 add_subdirectory(src/cython/distance)

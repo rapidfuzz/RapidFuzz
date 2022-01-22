@@ -7,7 +7,7 @@ from rapidfuzz_capi cimport (
     RF_String, RF_Scorer, RF_Kwargs, RF_ScorerFunc, RF_Preprocess, RF_KwargsInit,
     SCORER_STRUCT_VERSION, RF_Preprocessor,
     RF_ScorerFlags,
-    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_U64, RF_SCORER_FLAG_MULTI_STRING, RF_SCORER_FLAG_SYMMETRIC
+    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_MULTI_STRING, RF_SCORER_FLAG_SYMMETRIC
 )
 from cpp_common cimport RF_StringWrapper, conv_sequence, vector_slice, RfEditOp, RfOpcode, EditType
 
@@ -15,7 +15,7 @@ from libcpp cimport bool
 from libcpp.vector cimport vector
 from libcpp.utility cimport move
 from libc.stdlib cimport malloc, free
-from libc.stdint cimport uint32_t
+from libc.stdint cimport uint32_t, int64_t
 from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.ref cimport Py_INCREF
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
@@ -23,9 +23,9 @@ from cython.operator cimport dereference
 
 cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
     cdef struct LevenshteinWeightTable:
-        size_t insert_cost
-        size_t delete_cost
-        size_t replace_cost
+        int64_t insert_cost
+        int64_t delete_cost
+        int64_t replace_cost
 
 cdef str edit_type_to_str(EditType edit_type):
     if edit_type == EditType.Insert:
@@ -56,7 +56,7 @@ cdef RfEditops list_to_editops(ops) except *:
         if len(op) != 3:
             raise TypeError("Expected list of 3-tuples")
         result.emplace_back(
-            str_to_edit_type(op[0]), <size_t>op[1], <size_t>op[2]
+            str_to_edit_type(op[0]), <int64_t>op[1], <int64_t>op[2]
         )
     return result
 
@@ -68,13 +68,13 @@ cdef RfOpcodes list_to_opcodes(ops) except *:
             raise TypeError("Expected list of 5-tuples")
         result.emplace_back(
             str_to_edit_type(op[0]),
-            <size_t>op[1], <size_t>op[2],
-            <size_t>op[3], <size_t>op[4]
+            <int64_t>op[1], <int64_t>op[2],
+            <int64_t>op[3], <int64_t>op[4]
         )
     return result
 
 cdef list editops_to_list(const RfEditops& ops):
-    cdef size_t op_count = ops.size()
+    cdef int64_t op_count = ops.size()
     cdef list result_list = PyList_New(<Py_ssize_t>op_count)
     for i in range(op_count):
         result_item = (edit_type_to_str(ops[i].type), ops[i].src_pos, ops[i].dest_pos)
@@ -84,7 +84,7 @@ cdef list editops_to_list(const RfEditops& ops):
     return result_list
 
 cdef list opcodes_to_list(const RfOpcodes& ops):
-    cdef size_t op_count = ops.size()
+    cdef int64_t op_count = ops.size()
     cdef list result_list = PyList_New(<Py_ssize_t>op_count)
     for i in range(op_count):
         result_item = (
@@ -231,7 +231,7 @@ cdef class Editops:
         return self.editops.size()
 
     def __setitem__(self, int index, tuple value):
-        cdef size_t src_pos, dest_pos
+        cdef int64_t src_pos, dest_pos
 
         if index < 0:
             index += self.editops.size()
@@ -426,7 +426,7 @@ cdef class Opcodes:
         return self.opcodes.size()
 
     def __setitem__(self, int index, tuple value):
-        cdef size_t src_begin, src_end, dest_begin, dest_end
+        cdef int64_t src_begin, src_end, dest_begin, dest_end
 
         if index < 0:
             index += self.opcodes.size()

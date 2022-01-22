@@ -16,7 +16,7 @@ from cython.operator cimport dereference
 
 from cpp_common cimport (
     PyObjectWrapper, RF_StringWrapper, RF_KwargsWrapper,
-    conv_sequence, get_score_cutoff_f64, get_score_cutoff_u64, get_score_cutoff_i64
+    conv_sequence, get_score_cutoff_f64, get_score_cutoff_i64
 )
 
 import heapq
@@ -25,7 +25,7 @@ from array import array
 from rapidfuzz_capi cimport (
     RF_Kwargs, RF_String, RF_Scorer, RF_ScorerFunc,
     RF_Preprocessor, RF_ScorerFlags,
-    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_I64, RF_SCORER_FLAG_RESULT_U64
+    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_I64
 )
 from cpython.pycapsule cimport PyCapsule_IsValid, PyCapsule_GetPointer
 
@@ -38,29 +38,29 @@ cdef extern from "cpp_process.hpp":
 
     cdef cppclass ListMatchElem[T]:
         T score
-        size_t index
+        int64_t index
         PyObjectWrapper choice
 
     cdef cppclass DictMatchElem[T]:
         T score
-        size_t index
+        int64_t index
         PyObjectWrapper choice
         PyObjectWrapper key
 
     cdef cppclass DictStringElem:
         DictStringElem()
-        DictStringElem(size_t index, PyObjectWrapper key, PyObjectWrapper val, RF_StringWrapper proc_val)
+        DictStringElem(int64_t index, PyObjectWrapper key, PyObjectWrapper val, RF_StringWrapper proc_val)
 
-        size_t index
+        int64_t index
         PyObjectWrapper key
         PyObjectWrapper val
         RF_StringWrapper proc_val
 
     cdef cppclass ListStringElem:
         ListStringElem()
-        ListStringElem(size_t index, PyObjectWrapper val, RF_StringWrapper proc_val)
+        ListStringElem(int64_t index, PyObjectWrapper val, RF_StringWrapper proc_val)
 
-        size_t index
+        int64_t index
         PyObjectWrapper val
         RF_StringWrapper proc_val
 
@@ -91,11 +91,11 @@ cdef extern from "cpp_process.hpp":
 
 cdef inline vector[DictStringElem] preprocess_dict(queries, processor) except *:
     cdef vector[DictStringElem] proc_queries
-    cdef size_t queries_len = <size_t>len(queries)
+    cdef int64_t queries_len = <int64_t>len(queries)
     cdef RF_String proc_str
     cdef RF_Preprocessor* processor_context = NULL
     proc_queries.reserve(queries_len)
-    cdef size_t i
+    cdef int64_t i
 
     # No processor
     if not processor:
@@ -143,11 +143,11 @@ cdef inline vector[DictStringElem] preprocess_dict(queries, processor) except *:
 
 cdef inline vector[ListStringElem] preprocess_list(queries, processor) except *:
     cdef vector[ListStringElem] proc_queries
-    cdef size_t queries_len = <size_t>len(queries)
+    cdef int64_t queries_len = <int64_t>len(queries)
     cdef RF_String proc_str
     cdef RF_Preprocessor* processor_context = NULL
     proc_queries.reserve(queries_len)
-    cdef size_t i
+    cdef int64_t i
 
     # No processor
     if not processor:
@@ -203,19 +203,6 @@ cdef inline extractOne_dict_f64(query, choices, RF_Scorer* scorer, const RF_Scor
         return (<object>result.value().choice.obj, result.value().score, <object>result.value().key.obj)
     return None
 
-cdef inline extractOne_dict_u64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, const RF_Kwargs* kwargs):
-    proc_query = move(RF_StringWrapper(conv_sequence(query)))
-    proc_choices = preprocess_dict(choices, processor)
-    c_score_cutoff = get_score_cutoff_u64(score_cutoff, scorer_flags)
-
-    cdef optional[DictMatchElem[uint64_t]] result = extractOne_dict_impl[uint64_t](
-        kwargs, scorer_flags, scorer, proc_query, proc_choices, c_score_cutoff)
-
-    if result:
-        return (<object>result.value().choice.obj, result.value().score, <object>result.value().key.obj)
-    return None
-
-
 cdef inline extractOne_dict_i64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, const RF_Kwargs* kwargs):
     proc_query = move(RF_StringWrapper(conv_sequence(query)))
     proc_choices = preprocess_dict(choices, processor)
@@ -236,10 +223,6 @@ cdef inline extractOne_dict(query, choices, RF_Scorer* scorer, const RF_ScorerFl
         return extractOne_dict_f64(
             query, choices, scorer, scorer_flags, processor, score_cutoff, kwargs
         )
-    elif flags & RF_SCORER_FLAG_RESULT_U64:
-        return extractOne_dict_u64(
-            query, choices, scorer, scorer_flags, processor, score_cutoff, kwargs
-        )
     elif flags & RF_SCORER_FLAG_RESULT_I64:
         return extractOne_dict_i64(
             query, choices, scorer, scorer_flags, processor, score_cutoff, kwargs
@@ -254,19 +237,6 @@ cdef inline extractOne_list_f64(query, choices, RF_Scorer* scorer, const RF_Scor
     c_score_cutoff = get_score_cutoff_f64(score_cutoff, scorer_flags)
 
     cdef optional[ListMatchElem[double]] result = extractOne_list_impl[double](
-        kwargs, scorer_flags, scorer, proc_query, proc_choices, c_score_cutoff)
-
-    if result:
-        return (<object>result.value().choice.obj, result.value().score, result.value().index)
-    return None
-
-
-cdef inline extractOne_list_u64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, const RF_Kwargs* kwargs):
-    proc_query = move(RF_StringWrapper(conv_sequence(query)))
-    proc_choices = preprocess_list(choices, processor)
-    c_score_cutoff = get_score_cutoff_u64(score_cutoff, scorer_flags)
-
-    cdef optional[ListMatchElem[uint64_t]] result = extractOne_list_impl[uint64_t](
         kwargs, scorer_flags, scorer, proc_query, proc_choices, c_score_cutoff)
 
     if result:
@@ -292,10 +262,6 @@ cdef inline extractOne_list(query, choices, RF_Scorer* scorer, const RF_ScorerFl
 
     if flags & RF_SCORER_FLAG_RESULT_F64:
         return extractOne_list_f64(
-            query, choices, scorer, scorer_flags, processor, score_cutoff, kwargs
-        )
-    elif flags & RF_SCORER_FLAG_RESULT_U64:
-        return extractOne_list_u64(
             query, choices, scorer, scorer_flags, processor, score_cutoff, kwargs
         )
     elif flags & RF_SCORER_FLAG_RESULT_I64:
@@ -334,8 +300,8 @@ cdef inline py_extractOne_dict(query, choices, scorer, processor, double score_c
 
 
 cdef inline py_extractOne_list(query, choices, scorer, processor, double score_cutoff, dict kwargs):
-    cdef size_t result_index = 0
-    cdef size_t i
+    cdef int64_t result_index = 0
+    cdef int64_t i
     result_score = -1
     result_choice = None
 
@@ -528,7 +494,7 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
         return py_extractOne_list(query, choices, scorer, processor, score_cutoff, kwargs)
 
 
-cdef inline extract_dict_f64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, size_t limit, score_cutoff, const RF_Kwargs* kwargs):
+cdef inline extract_dict_f64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, int64_t limit, score_cutoff, const RF_Kwargs* kwargs):
     proc_query = move(RF_StringWrapper(conv_sequence(query)))
     proc_choices = preprocess_dict(choices, processor)
 
@@ -556,35 +522,7 @@ cdef inline extract_dict_f64(query, choices, RF_Scorer* scorer, const RF_ScorerF
     return result_list
 
 
-cdef inline extract_dict_u64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, size_t limit, score_cutoff, const RF_Kwargs* kwargs):
-    proc_query = move(RF_StringWrapper(conv_sequence(query)))
-    proc_choices = preprocess_dict(choices, processor)
-
-    cdef vector[DictMatchElem[uint64_t]] results = extract_dict_impl[uint64_t](
-        kwargs, scorer_flags, scorer, proc_query, proc_choices,
-        get_score_cutoff_u64(score_cutoff, scorer_flags))
-
-    # due to score_cutoff not always completely filled
-    if limit > results.size():
-        limit = results.size()
-
-    if limit >= results.size():
-        algorithm.sort(results.begin(), results.end(), ExtractComp(scorer_flags))
-    else:
-        algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractComp(scorer_flags))
-        results.resize(limit)
-
-    # copy elements into Python List
-    result_list = PyList_New(<Py_ssize_t>limit)
-    for i in range(limit):
-        result_item = (<object>results[i].choice.obj, results[i].score, <object>results[i].key.obj)
-        Py_INCREF(result_item)
-        PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
-
-    return result_list
-
-
-cdef inline extract_dict_i64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, size_t limit, score_cutoff, const RF_Kwargs* kwargs):
+cdef inline extract_dict_i64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, int64_t limit, score_cutoff, const RF_Kwargs* kwargs):
     proc_query = move(RF_StringWrapper(conv_sequence(query)))
     proc_choices = preprocess_dict(choices, processor)
 
@@ -612,15 +550,11 @@ cdef inline extract_dict_i64(query, choices, RF_Scorer* scorer, const RF_ScorerF
     return result_list
 
 
-cdef inline extract_dict(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, size_t limit, score_cutoff, const RF_Kwargs* kwargs):
+cdef inline extract_dict(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, int64_t limit, score_cutoff, const RF_Kwargs* kwargs):
     flags = dereference(scorer_flags).flags
 
     if flags & RF_SCORER_FLAG_RESULT_F64:
         return extract_dict_f64(
-            query, choices, scorer, scorer_flags, processor, limit, score_cutoff, kwargs
-        )
-    elif flags & RF_SCORER_FLAG_RESULT_U64:
-        return extract_dict_u64(
             query, choices, scorer, scorer_flags, processor, limit, score_cutoff, kwargs
         )
     elif flags & RF_SCORER_FLAG_RESULT_I64:
@@ -631,7 +565,7 @@ cdef inline extract_dict(query, choices, RF_Scorer* scorer, const RF_ScorerFlags
     raise ValueError("scorer does not properly use the C-API")
 
 
-cdef inline extract_list_f64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, size_t limit, score_cutoff, const RF_Kwargs* kwargs):
+cdef inline extract_list_f64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, int64_t limit, score_cutoff, const RF_Kwargs* kwargs):
     proc_query = move(RF_StringWrapper(conv_sequence(query)))
     proc_choices = preprocess_list(choices, processor)
 
@@ -659,35 +593,7 @@ cdef inline extract_list_f64(query, choices, RF_Scorer* scorer, const RF_ScorerF
     return result_list
 
 
-cdef inline extract_list_u64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, size_t limit, score_cutoff, const RF_Kwargs* kwargs):
-    proc_query = move(RF_StringWrapper(conv_sequence(query)))
-    proc_choices = preprocess_list(choices, processor)
-
-    cdef vector[ListMatchElem[uint64_t]] results = extract_list_impl[uint64_t](
-        kwargs, scorer_flags, scorer, proc_query, proc_choices,
-        get_score_cutoff_u64(score_cutoff, scorer_flags))
-
-    # due to score_cutoff not always completely filled
-    if limit > results.size():
-        limit = results.size()
-
-    if limit >= results.size():
-        algorithm.sort(results.begin(), results.end(), ExtractComp(scorer_flags))
-    else:
-        algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractComp(scorer_flags))
-        results.resize(limit)
-
-    # copy elements into Python List
-    result_list = PyList_New(<Py_ssize_t>limit)
-    for i in range(limit):
-        result_item = (<object>results[i].choice.obj, results[i].score, results[i].index)
-        Py_INCREF(result_item)
-        PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
-
-    return result_list
-
-
-cdef inline extract_list_i64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, size_t limit, score_cutoff, const RF_Kwargs* kwargs):
+cdef inline extract_list_i64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, int64_t limit, score_cutoff, const RF_Kwargs* kwargs):
     proc_query = move(RF_StringWrapper(conv_sequence(query)))
     proc_choices = preprocess_list(choices, processor)
 
@@ -715,15 +621,11 @@ cdef inline extract_list_i64(query, choices, RF_Scorer* scorer, const RF_ScorerF
     return result_list
 
 
-cdef inline extract_list(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, size_t limit, score_cutoff, const RF_Kwargs* kwargs):
+cdef inline extract_list(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, int64_t limit, score_cutoff, const RF_Kwargs* kwargs):
     flags = dereference(scorer_flags).flags
 
     if flags & RF_SCORER_FLAG_RESULT_F64:
         return extract_list_f64(
-            query, choices, scorer, scorer_flags, processor, limit, score_cutoff, kwargs
-        )
-    elif flags & RF_SCORER_FLAG_RESULT_U64:
-        return extract_list_u64(
             query, choices, scorer, scorer_flags, processor, limit, score_cutoff, kwargs
         )
     elif flags & RF_SCORER_FLAG_RESULT_I64:
@@ -734,7 +636,7 @@ cdef inline extract_list(query, choices, RF_Scorer* scorer, const RF_ScorerFlags
     raise ValueError("scorer does not properly use the C-API")
 
 
-cdef inline py_extract_dict(query, choices, scorer, processor, size_t limit, double score_cutoff, dict kwargs):
+cdef inline py_extract_dict(query, choices, scorer, processor, int64_t limit, double score_cutoff, dict kwargs):
     cdef object score = None
     cdef list result_list = []
 
@@ -753,10 +655,10 @@ cdef inline py_extract_dict(query, choices, scorer, processor, size_t limit, dou
     return heapq.nlargest(limit, result_list, key=lambda i: i[1])
 
 
-cdef inline py_extract_list(query, choices, scorer, processor, size_t limit, double score_cutoff, dict kwargs):
+cdef inline py_extract_list(query, choices, scorer, processor, int64_t limit, double score_cutoff, dict kwargs):
     cdef object score = None
     cdef list result_list = []
-    cdef size_t i
+    cdef int64_t i
 
     for i, choice in enumerate(choices):
         if choice is None:
@@ -982,44 +884,6 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
             if result:
                 yield (choice, result.value(), choice_key)
 
-    def extract_iter_dict_u64():
-        """
-        implementation of extract_iter for dict, scorer using RapidFuzz C-API with the result type
-        uint64_t
-        """
-        cdef RF_String proc_str
-        cdef uint64_t c_score_cutoff = get_score_cutoff_u64(score_cutoff, &scorer_flags)
-        query_proc = RF_StringWrapper(conv_sequence(query))
-
-        cdef RF_ScorerFunc scorer_func
-        dereference(scorer_context).scorer_func_init(
-            &scorer_func, &kwargs_context.kwargs, 1, &query_proc.string
-        )
-        cdef RF_ScorerWrapper ScorerFunc = RF_ScorerWrapper(scorer_func)
-        cdef optional[uint64_t] result
-
-        for choice_key, choice in choices.items():
-            if choice is None:
-                continue
-
-            # use RapidFuzz C-Api
-            if processor_context != NULL and processor_context.version == 1:
-                processor_context.preprocess(choice, &proc_str)
-                choice_proc = RF_StringWrapper(proc_str)
-            elif processor is not None:
-                proc_choice = processor(choice)
-                if proc_choice is None:
-                    continue
-
-                choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-            else:
-                choice_proc = RF_StringWrapper(conv_sequence(choice))
-
-            result = extract_iter_impl[uint64_t](&ScorerFunc, &scorer_flags, choice_proc, c_score_cutoff)
-
-            if result:
-                yield (choice, result.value(), choice_key)
-
     def extract_iter_dict_i64():
         """
         implementation of extract_iter for dict, scorer using RapidFuzz C-API with the result type
@@ -1096,44 +960,6 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
             if result:
                 yield (choice, result.value(), i)
 
-    def extract_iter_list_u64():
-        """
-        implementation of extract_iter for list, scorer using RapidFuzz C-API with the result type
-        uint64_t
-        """
-        cdef RF_String proc_str
-        cdef uint64_t c_score_cutoff = get_score_cutoff_u64(score_cutoff, &scorer_flags)
-        query_proc = RF_StringWrapper(conv_sequence(query))
-
-        cdef RF_ScorerFunc scorer_func
-        dereference(scorer_context).scorer_func_init(
-            &scorer_func, &kwargs_context.kwargs, 1, &query_proc.string
-        )
-        cdef RF_ScorerWrapper ScorerFunc = RF_ScorerWrapper(scorer_func)
-        cdef optional[uint64_t] result
-
-        for i, choice in enumerate(choices):
-            if choice is None:
-                continue
-
-            # use RapidFuzz C-Api
-            if processor_context != NULL and processor_context.version == 1:
-                processor_context.preprocess(choice, &proc_str)
-                choice_proc = RF_StringWrapper(proc_str)
-            elif processor is not None:
-                proc_choice = processor(choice)
-                if proc_choice is None:
-                    continue
-
-                choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
-            else:
-                choice_proc = RF_StringWrapper(conv_sequence(choice))
-
-            result = extract_iter_impl[uint64_t](&ScorerFunc, &scorer_flags, choice_proc, c_score_cutoff)
-
-            if result:
-                yield (choice, result.value(), i)
-
     def extract_iter_list_i64():
         """
         implementation of extract_iter for list, scorer using RapidFuzz C-API with the result type
@@ -1198,7 +1024,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
           - type of choices = list
           - scorer = python function
         """
-        cdef size_t i
+        cdef int64_t i
         cdef double c_score_cutoff = score_cutoff
 
         for i, choice in enumerate(choices):
@@ -1243,18 +1069,12 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
             if scorer_flags.flags & RF_SCORER_FLAG_RESULT_F64:
                 yield from extract_iter_dict_f64()
                 return
-            elif scorer_flags.flags & RF_SCORER_FLAG_RESULT_U64:
-                yield from extract_iter_dict_u64()
-                return
             elif scorer_flags.flags & RF_SCORER_FLAG_RESULT_I64:
                 yield from extract_iter_dict_i64()
                 return
         else:
             if scorer_flags.flags & RF_SCORER_FLAG_RESULT_F64:
                 yield from extract_iter_list_f64()
-                return
-            elif scorer_flags.flags & RF_SCORER_FLAG_RESULT_U64:
-                yield from extract_iter_list_u64()
                 return
             elif scorer_flags.flags & RF_SCORER_FLAG_RESULT_I64:
                 yield from extract_iter_list_i64()

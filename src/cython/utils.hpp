@@ -29,7 +29,7 @@ uint32_t UnicodeDefaultProcess(uint32_t ch);
  * @return returns the processed string
  */
 template <typename CharT>
-size_t default_process(CharT* str, size_t len)
+int64_t default_process(CharT* str, int64_t len)
 {
     /* mapping converting
      * - non alphanumeric characters to whitespace (32)
@@ -74,7 +74,7 @@ size_t default_process(CharT* str, size_t len)
         len--;
     }
 
-    size_t prefix = 0;
+    int64_t prefix = 0;
     while (len > 0 && str[prefix] == ' ') {
         len--;
         prefix++;
@@ -88,11 +88,11 @@ size_t default_process(CharT* str, size_t len)
 }
 
 template <typename CharT>
-std::basic_string<CharT> default_process(rapidfuzz::basic_string_view<CharT> s)
+std::basic_string<CharT> default_process(std::basic_string<CharT> s)
 {
     std::basic_string<CharT> str(s);
 
-    size_t len = default_process(&str[0], str.size());
+    int64_t len = default_process(&str[0], str.size());
     str.resize(len);
     return str;
 }
