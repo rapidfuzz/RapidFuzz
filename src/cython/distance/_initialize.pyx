@@ -184,27 +184,6 @@ cdef class Editops:
         x.editops = self.editops.inverse()
         return x
 
-    def reverse(self):
-        """
-        Reverse order of Editops
-
-        Returns
-        -------
-        editops : Editops
-            inverted Editops
-
-        Examples
-        --------
-        >>> from rapidfuzz.distance import Levenshtein
-        >>> Levenshtein.editops('spam', 'park')
-        [('delete', 0, 0), ('replace', 3, 2), ('insert', 4, 3)]
-        >>> Levenshtein.editops('spam', 'park').reverse()
-        [('insert', 4, 3), ('replace', 3, 2), ('delete', 0, 0)]
-        """
-        cdef Editops x = Editops.__new__(Editops)
-        x.editops = self.editops.reverse()
-        return x
-
     @property
     def src_len(self):
         return self.editops.get_src_len()
@@ -230,34 +209,10 @@ cdef class Editops:
     def __len__(self):
         return self.editops.size()
 
-    def __setitem__(self, int index, tuple value):
-        cdef int64_t src_pos, dest_pos
-
-        if index < 0:
-            index += self.editops.size()
-
-        if index < 0 or index >= self.editops.size():
-            raise IndexError("Editops index out of range")
-
-        edit_type, src_pos, dest_pos = value
-
-        self.editops[index] = RfEditOp(
-            str_to_edit_type(edit_type),
-            src_pos, dest_pos
-        )
-
     def __getitem__(self, key):
-        cdef int index, start, stop, step
-        cdef Editops x
+        cdef int index
 
-        if isinstance(key, slice):
-            start = <slice>key.start if <slice>key.start is not None else 0
-            stop = <slice>key.stop if <slice>key.stop is not None else self.editops.size()
-            step = <slice>key.step if <slice>key.step is not None else 1
-            x = Editops.__new__(Editops)
-            x.editops = self.editops.slice(start, stop, step)
-            return x
-        elif isinstance(key, int):
+        if isinstance(key, int):
             index = key
             if index < 0:
                 index += self.editops.size()
@@ -271,7 +226,7 @@ cdef class Editops:
                 self.editops[index].dest_pos
             )
         else:
-            raise TypeError("Expected slice or index")
+            raise TypeError("Expected index")
 
     def __repr__(self):
         return "[" + ", ".join(repr(op) for op in self) + "]"
@@ -376,30 +331,6 @@ cdef class Opcodes:
         x.opcodes = self.opcodes.inverse()
         return x
 
-
-    def reverse(self):
-        """
-        Reverse order of Opcodes
-
-        Returns
-        -------
-        opcodes : Opcodes
-            inverted Opcodes
-
-        Examples
-        --------
-        >>> from rapidfuzz.distance import Levenshtein
-        >>> Levenshtein.opcodes('spam', 'park')
-        [('delete', 0, 1, 0, 0), ('equal', 1, 3, 0, 2), ('replace', 3, 4, 2, 3),
-         ('insert', 4, 4, 3, 4)]
-        >>> Levenshtein.opcodes('spam', 'park').reverse()
-        [('insert', 4, 4, 3, 4), ('replace', 3, 4, 2, 3), ('equal', 1, 3, 0, 2),
-         ('delete', 0, 1, 0, 0)]
-        """
-        cdef Opcodes x = Opcodes.__new__(Opcodes)
-        x.opcodes = self.opcodes.reverse()
-        return x
-
     @property
     def src_len(self):
         return self.opcodes.get_src_len()
@@ -425,34 +356,10 @@ cdef class Opcodes:
     def __len__(self):
         return self.opcodes.size()
 
-    def __setitem__(self, int index, tuple value):
-        cdef int64_t src_begin, src_end, dest_begin, dest_end
-
-        if index < 0:
-            index += self.opcodes.size()
-
-        if index < 0 or index >= self.opcodes.size():
-            raise IndexError("Opcodes index out of range")
-
-        edit_type, src_begin, src_end, dest_begin, dest_end = value
-
-        self.opcodes[index] = RfOpcode(
-            str_to_edit_type(edit_type),
-            src_begin, src_end, dest_begin, dest_end
-        )
-
     def __getitem__(self, key):
-        cdef int index, start, stop, step
-        cdef Opcodes x
+        cdef int index
 
-        if isinstance(key, slice):
-            start = <slice>key.start if <slice>key.start is not None else 0
-            stop = <slice>key.stop if <slice>key.stop is not None else self.opcodes.size()
-            step = <slice>key.step if <slice>key.step is not None else 1
-            x = Opcodes.__new__(Opcodes)
-            x.opcodes = self.opcodes.slice(start, stop, step)
-            return x
-        elif isinstance(key, int):
+        if isinstance(key, int):
             index = key
             if index < 0:
                 index += self.opcodes.size()
@@ -468,7 +375,7 @@ cdef class Opcodes:
                 self.opcodes[index].dest_end
             )
         else:
-            raise TypeError("Expected slice or index")
+            raise TypeError("Expected index")
 
     def __repr__(self):
         return "[" + ", ".join(repr(op) for op in self) + "]"

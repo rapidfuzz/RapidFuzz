@@ -31,6 +31,8 @@
 - improve performance and memory usage of `rapidfuzz.string_metric.levenshtein_editops`
   - memory usage is reduced by 33%
   - performance is improved by around 10%-20%
+- significantly improve performance of  `rapidfuzz.string_metric.levenshtein` for `max <= 31`
+  using a banded implementation
 
 ### [1.9.1] - 2021-12-13
 #### Fixed

@@ -28,14 +28,17 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
         int64_t replace_cost
 
 cdef extern from "edit_based.hpp":
-    double normalized_levenshtein_func( const RF_String&, const RF_String&, int64_t, int64_t, int64_t, double) nogil except +
-
-    int64_t levenshtein_func(const RF_String&, const RF_String&, int64_t, int64_t, int64_t, int64_t) nogil except +
+    double levenshtein_normalized_distance_func(  const RF_String&, const RF_String&, int64_t, int64_t, int64_t, double) nogil except +
+    int64_t levenshtein_distance_func(            const RF_String&, const RF_String&, int64_t, int64_t, int64_t, int64_t) nogil except +
+    double levenshtein_normalized_similarity_func(const RF_String&, const RF_String&, int64_t, int64_t, int64_t, double) nogil except +
+    int64_t levenshtein_similarity_func(          const RF_String&, const RF_String&, int64_t, int64_t, int64_t, int64_t) nogil except +
 
     RfEditops levenshtein_editops_func(const RF_String&, const RF_String&) nogil except +
 
-    bool LevenshteinInit(           RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool NormalizedLevenshteinInit( RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool LevenshteinDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool LevenshteinNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool LevenshteinSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool LevenshteinNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
 
 cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except *:
     cdef RF_Preprocessor* preprocess_context = NULL
@@ -78,8 +81,8 @@ def distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
         comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : int, optional
         Maximum distance between s1 and s2, that is
-        considered as a result. If the distance is bigger than max,
-        max + 1 is returned instead. Default is None, which deactivates
+        considered as a result. If the distance is bigger than score_cutoff,
+        score_cutoff + 1 is returned instead. Default is None, which deactivates
         this behaviour.
 
     Returns
@@ -232,7 +235,198 @@ def distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
         raise ValueError("score_cutoff has to be >= 0")
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
-    return levenshtein_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
+    return levenshtein_distance_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
+
+
+def similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
+    """
+    Calculates the levenshtein similarity in the range [max, 0] using custom
+    costs for insertion, deletion and substitution.
+
+    This is calculated as ``max - distance``, where max is the maximal possible
+    Levenshtein distance given the lengths of the sequences s1/s2 and the weights.
+
+    Parameters
+    ----------
+    s1 : Sequence[Hashable]
+        First string to compare.
+    s2 : Sequence[Hashable]
+        Second string to compare.
+    weights : Tuple[int, int, int] or None, optional
+        The weights for the three operations in the form
+        (insertion, deletion, substitution). Default is (1, 1, 1),
+        which gives all three operations a weight of 1.
+    processor: callable, optional
+        Optional callable that is used to preprocess the strings before
+        comparing them. Default is None, which deactivates this behaviour.
+    score_cutoff : int, optional
+        Maximum distance between s1 and s2, that is
+        considered as a result. If the distance is smaller than score_cutoff,
+        0 is returned instead. Default is None, which deactivates
+        this behaviour.
+
+    Returns
+    -------
+    similarity : int
+        similarity between s1 and s2
+
+    Raises
+    ------
+    ValueError
+        If unsupported weights are provided a ValueError is thrown
+
+    See Also
+    --------
+    Levenshtein.distance : Levenshtein distance
+    """
+    cdef RF_StringWrapper s1_proc, s2_proc
+    cdef int64_t insertion, deletion, substitution
+    insertion = deletion = substitution = 1
+    if weights is not None:
+        insertion, deletion, substitution = weights
+
+    cdef int64_t c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+
+    if c_score_cutoff < 0:
+        raise ValueError("score_cutoff has to be >= 0")
+
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
+    return levenshtein_similarity_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
+
+
+def normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
+    """
+    Calculates a normalized levenshtein similarity in the range [1, 0] using custom
+    costs for insertion, deletion and substitution.
+
+    This is calculated as ``distance / max``, where max is the maximal possible
+    Levenshtein distance given the lengths of the sequences s1/s2 and the weights.
+
+    Parameters
+    ----------
+    s1 : Sequence[Hashable]
+        First string to compare.
+    s2 : Sequence[Hashable]
+        Second string to compare.
+    weights : Tuple[int, int, int] or None, optional
+        The weights for the three operations in the form
+        (insertion, deletion, substitution). Default is (1, 1, 1),
+        which gives all three operations a weight of 1.
+    processor: callable, optional
+        Optional callable that is used to preprocess the strings before
+        comparing them. Default is None, which deactivates this behaviour.
+    score_cutoff : float, optional
+        Optional argument for a score threshold as a float between 0 and 1.0.
+        For norm_dist > score_cutoff 1.0 is returned instead. Default is 1.0,
+        which deactivates this behaviour.
+
+    Returns
+    -------
+    norm_dist : float
+        normalized distance between s1 and s2 as a float between 1.0 and 0.0
+
+    Raises
+    ------
+    ValueError
+        If unsupported weights are provided a ValueError is thrown
+
+    See Also
+    --------
+    Levenshtein.distance : Levenshtein distance
+    """
+    cdef RF_StringWrapper s1_proc, s2_proc
+    if s1 is None or s2 is None:
+        return 0
+
+    cdef int64_t insertion, deletion, substitution
+    insertion = deletion = substitution = 1
+    if weights is not None:
+        insertion, deletion, substitution = weights
+
+    cdef double c_score_cutoff = 1.0 if score_cutoff is None else score_cutoff
+
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
+    return levenshtein_normalized_distance_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
+
+
+def normalized_similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
+    """
+    Calculates a normalized levenshtein similarity in the range [0, 1] using custom
+    costs for insertion, deletion and substitution.
+
+    This is calculated as ``1 - normalized_distance``
+
+    Parameters
+    ----------
+    s1 : Sequence[Hashable]
+        First string to compare.
+    s2 : Sequence[Hashable]
+        Second string to compare.
+    weights : Tuple[int, int, int] or None, optional
+        The weights for the three operations in the form
+        (insertion, deletion, substitution). Default is (1, 1, 1),
+        which gives all three operations a weight of 1.
+    processor: callable, optional
+        Optional callable that is used to preprocess the strings before
+        comparing them. Default is None, which deactivates this behaviour.
+    score_cutoff : float, optional
+        Optional argument for a score threshold as a float between 0 and 1.0.
+        For ratio < score_cutoff 0 is returned instead. Default is 0,
+        which deactivates this behaviour.
+
+    Returns
+    -------
+    similarity : float
+        similarity between s1 and s2 as a float between 0 and 1.0
+
+    Raises
+    ------
+    ValueError
+        If unsupported weights are provided a ValueError is thrown
+
+    See Also
+    --------
+    Levenshtein.normalized_distance : normalized Levenshtein distance
+
+    Examples
+    --------
+    Find the normalized Levenshtein distance between two strings:
+
+    >>> from rapidfuzz.algorithm.edit_based import Levenshtein
+    >>> Levenshtein.normalized_similarity("lewenstein", "levenshtein")
+    0.81818181818181
+
+    Setting a score_cutoff allows the implementation to select
+    a more efficient implementation:
+
+    >>> Levenshtein.normalized_similarity("lewenstein", "levenshtein", score_cutoff=0.85)
+    0.0
+
+    It is possible to select different weights by passing a `weight`
+    tuple.
+
+    >>> Levenshtein.normalized_similarity("lewenstein", "levenshtein", weights=(1,1,2))
+    0.85714285714285
+
+     When a different processor is used s1 and s2 do not have to be strings
+
+    >>> Levenshtein.normalized_similarity(["lewenstein"], ["levenshtein"], processor=lambda s: s[0])
+    0.81818181818181
+    """
+    cdef RF_StringWrapper s1_proc, s2_proc
+    if s1 is None or s2 is None:
+        return 0
+
+    cdef int64_t insertion, deletion, substitution
+    insertion = deletion = substitution = 1
+    if weights is not None:
+        insertion, deletion, substitution = weights
+
+    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
+    return levenshtein_normalized_similarity_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
+
 
 def editops(s1, s2, *, processor=None):
     """
@@ -278,6 +472,7 @@ def editops(s1, s2, *, processor=None):
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     ops.editops = levenshtein_editops_func(s1_proc.string, s2_proc.string)
     return ops
+
 
 def opcodes(s1, s2, *, processor=None):
     """
@@ -330,104 +525,6 @@ def opcodes(s1, s2, *, processor=None):
     ops.editops = levenshtein_editops_func(s1_proc.string, s2_proc.string)
     return ops.as_opcodes()
 
-def normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
-    """
-    Calculates a normalized levenshtein distance using custom
-    costs for insertion, deletion and substitution.
-
-    Parameters
-    ----------
-    s1 : Sequence[Hashable]
-        First string to compare.
-    s2 : Sequence[Hashable]
-        Second string to compare.
-    weights : Tuple[int, int, int] or None, optional
-        The weights for the three operations in the form
-        (insertion, deletion, substitution). Default is (1, 1, 1),
-        which gives all three operations a weight of 1.
-    processor: callable, optional
-        Optional callable that is used to preprocess the strings before
-        comparing them. Default is None, which deactivates this behaviour.
-    score_cutoff : float, optional
-        Optional argument for a score threshold as a float between 0 and 1.0.
-        For ratio < score_cutoff 0 is returned instead. Default is 0,
-        which deactivates this behaviour.
-
-    Returns
-    -------
-    similarity : float
-        similarity between s1 and s2 as a float between 0 and 1.0
-
-    Raises
-    ------
-    ValueError
-        If unsupported weights are provided a ValueError is thrown
-
-    See Also
-    --------
-    Levenshtein.distance : Levenshtein distance
-
-    Notes
-    -----
-    The normalization of the Levenshtein distance is performed in the following way:
-
-    .. math::
-      :nowrap:
-
-      \\begin{align*}
-        dist_{max} &= \\begin{cases}
-          min(len(s1), len(s2)) \cdot sub,       & \\text{if } sub \leq ins + del \\\\
-          len(s1) \cdot del + len(s2) \cdot ins, & \\text{otherwise}
-        \end{cases}\\\\[10pt]
-
-        dist_{max} &= \\begin{cases}
-          dist_{max} + (len(s1) - len(s2)) \cdot del, & \\text{if } len(s1) > len(s2) \\\\
-          dist_{max} + (len(s2) - len(s1)) \cdot ins, & \\text{if } len(s1) < len(s2) \\\\
-          dist_{max},                                 & \\text{if } len(s1) = len(s2)
-        \end{cases}\\\\[10pt]
-
-        ratio &= \\frac{distance(s1, s2)}{dist_{max}}
-      \end{align*}
-
-    Examples
-    --------
-    Find the normalized Levenshtein distance between two strings:
-
-    >>> from rapidfuzz.algorithm.edit_based import Levenshtein
-    >>> Levenshtein.normalized_distance("lewenstein", "levenshtein")
-    0.81818181818181
-
-    Setting a score_cutoff allows the implementation to select
-    a more efficient implementation:
-
-    >>> Levenshtein.normalized_distance("lewenstein", "levenshtein", score_cutoff=0.85)
-    0.0
-
-    It is possible to select different weights by passing a `weight`
-    tuple.
-
-    >>> Levenshtein.normalized_distance("lewenstein", "levenshtein", weights=(1,1,2))
-    0.85714285714285
-
-     When a different processor is used s1 and s2 do not have to be strings
-
-    >>> Levenshtein.normalized_distance(["lewenstein"], ["levenshtein"], processor=lambda s: s[0])
-    0.81818181818181
-    """
-    cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
-
-    cdef int64_t insertion, deletion, substitution
-    insertion = deletion = substitution = 1
-    if weights is not None:
-        insertion, deletion, substitution = weights
-
-    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
-
-    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
-    return normalized_levenshtein_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
-
 cdef void KwargsDeinit(RF_Kwargs* self):
     free(<void*>dereference(self).context)
 
@@ -446,7 +543,7 @@ cdef bool LevenshteinKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     dereference(self).dtor = KwargsDeinit
     return True
 
-cdef bool GetScorerFlagsLevenshtein(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>dereference(self).context
     dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64
     if dereference(weights).insert_cost == dereference(weights).delete_cost:
@@ -455,7 +552,25 @@ cdef bool GetScorerFlagsLevenshtein(const RF_Kwargs* self, RF_ScorerFlags* score
     dereference(scorer_flags).worst_score.i64 = INT64_MAX
     return True
 
-cdef bool GetScorerFlagsNormalizedLevenshtein(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>dereference(self).context
+    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64
+    if dereference(weights).insert_cost == dereference(weights).delete_cost:
+        dereference(scorer_flags).flags |= RF_SCORER_FLAG_SYMMETRIC
+    dereference(scorer_flags).optimal_score.i64 = INT64_MAX
+    dereference(scorer_flags).worst_score.i64 = 0
+    return True
+
+cdef bool GetScorerFlagsNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>dereference(self).context
+    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
+    if dereference(weights).insert_cost == dereference(weights).delete_cost:
+        dereference(scorer_flags).flags |= RF_SCORER_FLAG_SYMMETRIC
+    dereference(scorer_flags).optimal_score.f64 = 0
+    dereference(scorer_flags).worst_score.f64 = 1.0
+    return True
+
+cdef bool GetScorerFlagsNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>dereference(self).context
     dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
     if dereference(weights).insert_cost == dereference(weights).delete_cost:
@@ -464,17 +579,30 @@ cdef bool GetScorerFlagsNormalizedLevenshtein(const RF_Kwargs* self, RF_ScorerFl
     dereference(scorer_flags).worst_score.f64 = 0
     return True
 
-cdef RF_Scorer LevenshteinContext
-LevenshteinContext.version = SCORER_STRUCT_VERSION
-LevenshteinContext.kwargs_init = LevenshteinKwargsInit
-LevenshteinContext.get_scorer_flags = GetScorerFlagsLevenshtein
-LevenshteinContext.scorer_func_init = LevenshteinInit
-distance._RF_Scorer = PyCapsule_New(&LevenshteinContext, NULL, NULL)
+cdef RF_Scorer LevenshteinDistanceContext
+LevenshteinDistanceContext.version = SCORER_STRUCT_VERSION
+LevenshteinDistanceContext.kwargs_init = LevenshteinKwargsInit
+LevenshteinDistanceContext.get_scorer_flags = GetScorerFlagsDistance
+LevenshteinDistanceContext.scorer_func_init = LevenshteinDistanceInit
+distance._RF_Scorer = PyCapsule_New(&LevenshteinDistanceContext, NULL, NULL)
 
-cdef RF_Scorer NormalizedLevenshteinContext
-NormalizedLevenshteinContext.version = SCORER_STRUCT_VERSION
-NormalizedLevenshteinContext.kwargs_init = LevenshteinKwargsInit
-NormalizedLevenshteinContext.get_scorer_flags = GetScorerFlagsNormalizedLevenshtein
-NormalizedLevenshteinContext.scorer_func_init = NormalizedLevenshteinInit
-normalized_distance._RF_Scorer = PyCapsule_New(&NormalizedLevenshteinContext, NULL, NULL)
+cdef RF_Scorer LevenshteinSimilarityContext
+LevenshteinSimilarityContext.version = SCORER_STRUCT_VERSION
+LevenshteinSimilarityContext.kwargs_init = LevenshteinKwargsInit
+LevenshteinSimilarityContext.get_scorer_flags = GetScorerFlagsSimilarity
+LevenshteinSimilarityContext.scorer_func_init = LevenshteinSimilarityInit
+similarity._RF_Scorer = PyCapsule_New(&LevenshteinSimilarityContext, NULL, NULL)
 
+cdef RF_Scorer LevenshteinNormalizedDistanceContext
+LevenshteinNormalizedDistanceContext.version = SCORER_STRUCT_VERSION
+LevenshteinNormalizedDistanceContext.kwargs_init = LevenshteinKwargsInit
+LevenshteinNormalizedDistanceContext.get_scorer_flags = GetScorerFlagsNormalizedDistance
+LevenshteinNormalizedDistanceContext.scorer_func_init = LevenshteinNormalizedDistanceInit
+normalized_distance._RF_Scorer = PyCapsule_New(&LevenshteinNormalizedDistanceContext, NULL, NULL)
+
+cdef RF_Scorer LevenshteinNormalizedSimilarityContext
+LevenshteinNormalizedSimilarityContext.version = SCORER_STRUCT_VERSION
+LevenshteinNormalizedSimilarityContext.kwargs_init = LevenshteinKwargsInit
+LevenshteinNormalizedSimilarityContext.get_scorer_flags = GetScorerFlagsNormalizedSimilarity
+LevenshteinNormalizedSimilarityContext.scorer_func_init = LevenshteinNormalizedSimilarityInit
+normalized_distance._RF_Scorer = PyCapsule_New(&LevenshteinNormalizedSimilarityContext, NULL, NULL)
