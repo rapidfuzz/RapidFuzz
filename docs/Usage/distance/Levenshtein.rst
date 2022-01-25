@@ -1,5 +1,6 @@
 Levenshtein
-------------------------------
+-----------
+
 distance
 ~~~~~~~~
 .. autofunction:: rapidfuzz.distance.Levenshtein.distance

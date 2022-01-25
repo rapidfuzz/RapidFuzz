@@ -261,7 +261,7 @@ def similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
         comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : int, optional
         Maximum distance between s1 and s2, that is
-        considered as a result. If the distance is smaller than score_cutoff,
+        considered as a result. If the similarity is smaller than score_cutoff,
         0 is returned instead. Default is None, which deactivates
         this behaviour.
 
@@ -296,7 +296,7 @@ def similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
 
 def normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
     """
-    Calculates a normalized levenshtein similarity in the range [1, 0] using custom
+    Calculates a normalized levenshtein distance in the range [1, 0] using custom
     costs for insertion, deletion and substitution.
 
     This is calculated as ``distance / max``, where max is the maximal possible
@@ -345,6 +345,9 @@ def normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff
 
     cdef double c_score_cutoff = 1.0 if score_cutoff is None else score_cutoff
 
+    if c_score_cutoff < 0:
+        raise ValueError("score_cutoff has to be >= 0")
+
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return levenshtein_normalized_distance_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
 
@@ -371,13 +374,13 @@ def normalized_similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cuto
         comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 1.0.
-        For ratio < score_cutoff 0 is returned instead. Default is 0,
+        For norm_sim < score_cutoff 0 is returned instead. Default is 0,
         which deactivates this behaviour.
 
     Returns
     -------
-    similarity : float
-        similarity between s1 and s2 as a float between 0 and 1.0
+    norm_sim : float
+        normalized similarity between s1 and s2 as a float between 0 and 1.0
 
     Raises
     ------
@@ -390,7 +393,7 @@ def normalized_similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cuto
 
     Examples
     --------
-    Find the normalized Levenshtein distance between two strings:
+    Find the normalized Levenshtein similarity between two strings:
 
     >>> from rapidfuzz.algorithm.edit_based import Levenshtein
     >>> Levenshtein.normalized_similarity("lewenstein", "levenshtein")
@@ -423,6 +426,9 @@ def normalized_similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cuto
         insertion, deletion, substitution = weights
 
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+
+    if c_score_cutoff < 0:
+        raise ValueError("score_cutoff has to be >= 0")
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return levenshtein_normalized_similarity_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)

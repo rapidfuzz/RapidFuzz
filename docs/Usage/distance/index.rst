@@ -1,13 +1,13 @@
 distance
-==================
+========
 
-rapidfuzz.distance.Editops
-------------------------------
+Editops
+--------------------------
 .. autoclass:: rapidfuzz.distance.Editops
     :members:
 
-rapidfuzz.distance.Opcodes
-------------------------------
+Opcodes
+--------------------------
 .. autoclass:: rapidfuzz.distance.Opcodes
     :members:
 

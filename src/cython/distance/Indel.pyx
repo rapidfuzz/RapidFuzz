@@ -22,14 +22,18 @@ from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPo
 from cython.operator cimport dereference
 
 cdef extern from "edit_based.hpp":
-    double normalized_indel_func( const RF_String&, const RF_String&, double) nogil except +
+    double indel_normalized_distance_func(  const RF_String&, const RF_String&, double) nogil except +
+    int64_t indel_distance_func(            const RF_String&, const RF_String&, int64_t) nogil except +
+    double indel_normalized_similarity_func(const RF_String&, const RF_String&, double) nogil except +
+    int64_t indel_similarity_func(          const RF_String&, const RF_String&, int64_t) nogil except +
 
-    int64_t indel_func(const RF_String&, const RF_String&, int64_t) nogil except +
+    RfEditops indel_editops_func(const RF_String&, const RF_String&) nogil except +
 
-    RfEditops llcs_editops_func(const RF_String&, const RF_String&) nogil except +
+    bool IndelDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool IndelNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool IndelSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool IndelNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
 
-    bool IndelInit(           RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool NormalizedIndelInit( RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
 
 cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except *:
     cdef RF_Preprocessor* preprocess_context = NULL
@@ -51,7 +55,7 @@ cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc
             s2 = processor(s2)
             s2_proc[0] = RF_StringWrapper(conv_sequence(s2), s2)
 
-def distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
+def distance(s1, s2, *, processor=None, score_cutoff=None):
     """
     Calculates the minimum number of insertions and deletions
     required to change one sequence into the other. This is equivalent to the
@@ -68,8 +72,8 @@ def distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
         comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : int, optional
         Maximum distance between s1 and s2, that is
-        considered as a result. If the distance is bigger than max,
-        max + 1 is returned instead. Default is None, which deactivates
+        considered as a result. If the distance is bigger than score_cutoff,
+        score_cutoff + 1 is returned instead. Default is None, which deactivates
         this behaviour.
 
     Returns
@@ -152,13 +156,60 @@ def distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
         raise ValueError("score_cutoff has to be >= 0")
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
-    return indel_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+    return indel_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
-def normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
+
+def similarity(s1, s2, *, processor=None, score_cutoff=None):
     """
-    Calculates a normalized levenshtein distance using custom
-    costs for insertion, deletion and substitution.
+    Calculates the Indel similarity in the range [max, 0].
+
+    This is calculated as ``(len1 + len2) - distance``.
+
+    Parameters
+    ----------
+    s1 : Sequence[Hashable]
+        First string to compare.
+    s2 : Sequence[Hashable]
+        Second string to compare.
+    processor: callable, optional
+        Optional callable that is used to preprocess the strings before
+        comparing them. Default is None, which deactivates this behaviour.
+    score_cutoff : int, optional
+        Maximum distance between s1 and s2, that is
+        considered as a result. If the similarity is smaller than score_cutoff,
+        0 is returned instead. Default is None, which deactivates
+        this behaviour.
+
+    Returns
+    -------
+    similarity : int
+        similarity between s1 and s2
+
+    Raises
+    ------
+    ValueError
+        If unsupported weights are provided a ValueError is thrown
+
+    See Also
+    --------
+    Indel.distance : Indel distance
+    """
+    cdef RF_StringWrapper s1_proc, s2_proc
+    cdef int64_t c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+
+    if c_score_cutoff < 0:
+        raise ValueError("score_cutoff has to be >= 0")
+
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
+    return indel_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+
+
+def normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
+    """
+    Calculates a normalized levenshtein similarity in the range [1, 0].
+
+    This is calculated as ``distance / (len1 + len2)``.
 
     Parameters
     ----------
@@ -171,45 +222,77 @@ def normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff
         comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 1.0.
-        For ratio < score_cutoff 0 is returned instead. Default is 0,
+        For norm_dist > score_cutoff 1.0 is returned instead. Default is 1.0,
         which deactivates this behaviour.
 
     Returns
     -------
-    similarity : float
-        similarity between s1 and s2 as a float between 0 and 1.0
-
-    Raises
-    ------
-    ValueError
-        If unsupported weights are provided a ValueError is thrown
+    norm_dist : float
+        normalized distance between s1 and s2 as a float between 0 and 1.0
 
     See Also
     --------
     Indel.distance : Indel distance
+    """
+    cdef RF_StringWrapper s1_proc, s2_proc
+    if s1 is None or s2 is None:
+        return 0
 
-    Notes
-    -----
-    The normalization of the Indel distance is performed as
-    `distance(s1, s2) / (len(s1) + len(s2))`.
+    cdef double c_score_cutoff = 1.0 if score_cutoff is None else score_cutoff
+
+    if c_score_cutoff < 0:
+        raise ValueError("score_cutoff has to be >= 0")
+
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
+    return indel_normalized_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+
+
+def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
+    """
+    Calculates a normalized indel similarity in the range [0, 1].
+
+    This is calculated as ``1 - normalized_distance``
+
+    Parameters
+    ----------
+    s1 : Sequence[Hashable]
+        First string to compare.
+    s2 : Sequence[Hashable]
+        Second string to compare.
+    processor: callable, optional
+        Optional callable that is used to preprocess the strings before
+        comparing them. Default is None, which deactivates this behaviour.
+    score_cutoff : float, optional
+        Optional argument for a score threshold as a float between 0 and 1.0.
+        For norm_sim < score_cutoff 0 is returned instead. Default is 0,
+        which deactivates this behaviour.
+
+    Returns
+    -------
+    norm_sim : float
+        normalized similarity between s1 and s2 as a float between 0 and 1.0
+
+    See Also
+    --------
+    Indel.normalized_distance : Normalized Indel distance
 
     Examples
     --------
-    Find the normalized Indel distance between two strings:
+    Find the normalized Indel similarity between two strings:
 
     >>> from rapidfuzz.algorithm.edit_based import Indel
-    >>> Indel.normalized_distance("lewenstein", "levenshtein")
+    >>> Indel.normalized_similarity("lewenstein", "levenshtein")
     0.85714285714285
 
     Setting a score_cutoff allows the implementation to select
     a more efficient implementation:
 
-    >>> Indel.normalized_distance("lewenstein", "levenshtein", score_cutoff=0.9)
+    >>> Indel.normalized_similarity("lewenstein", "levenshtein", score_cutoff=0.9)
     0.0
 
     When a different processor is used s1 and s2 do not have to be strings
 
-    >>> Indel.normalized_distance(["lewenstein"], ["levenshtein"], processor=lambda s: s[0])
+    >>> Indel.normalized_similarity(["lewenstein"], ["levenshtein"], processor=lambda s: s[0])
     0.81818181818181
     """
     cdef RF_StringWrapper s1_proc, s2_proc
@@ -218,8 +301,11 @@ def normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff
 
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
 
+    if c_score_cutoff < 0:
+        raise ValueError("score_cutoff has to be >= 0")
+
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
-    return normalized_indel_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+    return indel_normalized_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 def editops(s1, s2, *, processor=None):
     """
@@ -264,7 +350,7 @@ def editops(s1, s2, *, processor=None):
     cdef Editops ops = Editops.__new__(Editops)
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
-    ops.editops = llcs_editops_func(s1_proc.string, s2_proc.string)
+    ops.editops = indel_editops_func(s1_proc.string, s2_proc.string)
     return ops
 
 def opcodes(s1, s2, *, processor=None):
@@ -316,7 +402,7 @@ def opcodes(s1, s2, *, processor=None):
     cdef Editops ops = Editops.__new__(Editops)
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
-    ops.editops = llcs_editops_func(s1_proc.string, s2_proc.string)
+    ops.editops = indel_editops_func(s1_proc.string, s2_proc.string)
     return ops.as_opcodes()
 
 
@@ -328,29 +414,54 @@ cdef bool NoKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     dereference(self).dtor = NULL
     return True
 
-cdef bool GetScorerFlagsIndel(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsIndelDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
     dereference(scorer_flags).optimal_score.i64 = 0
     dereference(scorer_flags).worst_score.i64 = INT64_MAX
     return True
 
-cdef bool GetScorerFlagsNormalizedIndel(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsIndelNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    dereference(scorer_flags).optimal_score.f64 = 0.0
+    dereference(scorer_flags).worst_score.f64 = 1
+    return True
+
+cdef bool GetScorerFlagsIndelSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    dereference(scorer_flags).optimal_score.i64 = INT64_MAX
+    dereference(scorer_flags).worst_score.i64 = 0
+    return True
+
+cdef bool GetScorerFlagsIndelNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     dereference(scorer_flags).optimal_score.f64 = 1.0
     dereference(scorer_flags).worst_score.f64 = 0
     return True
 
-cdef RF_Scorer IndelContext
-IndelContext.version = SCORER_STRUCT_VERSION
-IndelContext.kwargs_init = NoKwargsInit
-IndelContext.get_scorer_flags = GetScorerFlagsIndel
-IndelContext.scorer_func_init = IndelInit
-distance._RF_Scorer = PyCapsule_New(&IndelContext, NULL, NULL)
+cdef RF_Scorer IndelDistanceContext
+IndelDistanceContext.version = SCORER_STRUCT_VERSION
+IndelDistanceContext.kwargs_init = NoKwargsInit
+IndelDistanceContext.get_scorer_flags = GetScorerFlagsIndelDistance
+IndelDistanceContext.scorer_func_init = IndelDistanceInit
+distance._RF_Scorer = PyCapsule_New(&IndelDistanceContext, NULL, NULL)
 
-cdef RF_Scorer NormalizedIndelContext
-NormalizedIndelContext.version = SCORER_STRUCT_VERSION
-NormalizedIndelContext.kwargs_init = NoKwargsInit
-NormalizedIndelContext.get_scorer_flags = GetScorerFlagsNormalizedIndel
-NormalizedIndelContext.scorer_func_init = NormalizedIndelInit
-normalized_distance._RF_Scorer = PyCapsule_New(&NormalizedIndelContext, NULL, NULL)
+cdef RF_Scorer IndelNormalizedDistanceContext
+IndelNormalizedDistanceContext.version = SCORER_STRUCT_VERSION
+IndelNormalizedDistanceContext.kwargs_init = NoKwargsInit
+IndelNormalizedDistanceContext.get_scorer_flags = GetScorerFlagsIndelNormalizedDistance
+IndelNormalizedDistanceContext.scorer_func_init = IndelNormalizedDistanceInit
+normalized_distance._RF_Scorer = PyCapsule_New(&IndelNormalizedDistanceContext, NULL, NULL)
 
+cdef RF_Scorer IndelSimilarityContext
+IndelSimilarityContext.version = SCORER_STRUCT_VERSION
+IndelSimilarityContext.kwargs_init = NoKwargsInit
+IndelSimilarityContext.get_scorer_flags = GetScorerFlagsIndelSimilarity
+IndelSimilarityContext.scorer_func_init = IndelSimilarityInit
+similarity._RF_Scorer = PyCapsule_New(&IndelSimilarityContext, NULL, NULL)
+
+cdef RF_Scorer IndelNormalizedSimilarityContext
+IndelNormalizedSimilarityContext.version = SCORER_STRUCT_VERSION
+IndelNormalizedSimilarityContext.kwargs_init = NoKwargsInit
+IndelNormalizedSimilarityContext.get_scorer_flags = GetScorerFlagsIndelNormalizedSimilarity
+IndelNormalizedSimilarityContext.scorer_func_init = IndelNormalizedSimilarityInit
+normalized_similarity._RF_Scorer = PyCapsule_New(&IndelNormalizedSimilarityContext, NULL, NULL)

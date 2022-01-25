@@ -1,5 +1,5 @@
 Indel
-------------------------
+-----
 
 distance
 ~~~~~~~~
@@ -8,6 +8,14 @@ distance
 normalized_distance
 ~~~~~~~~~~~~~~~~~~~
 .. autofunction:: rapidfuzz.distance.Indel.normalized_distance
+
+similarity
+~~~~~~~~~~
+.. autofunction:: rapidfuzz.distance.Indel.similarity
+
+normalized_similarity
+~~~~~~~~~~~~~~~~~~~~~
+.. autofunction:: rapidfuzz.distance.Indel.normalized_similarity
 
 editops
 ~~~~~~~
