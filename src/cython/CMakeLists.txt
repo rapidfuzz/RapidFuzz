@@ -28,9 +28,7 @@ install(TARGETS cpp_string_metric LIBRARY DESTINATION src/rapidfuzz)
 add_cython_target(cpp_process CXX)
 add_library(cpp_process MODULE ${cpp_process})
 target_compile_features(cpp_process PUBLIC cxx_std_14)
-target_include_directories(cpp_process PRIVATE
-    ${RF_BASE_DIR}/extern/optional-lite/include
-    ${RF_CAPI_PATH} ${RF_BASE_DIR}/src/cython)
+target_include_directories(cpp_process PRIVATE ${RF_CAPI_PATH} ${RF_BASE_DIR}/src/cython)
 target_link_libraries(cpp_process rapidfuzz::rapidfuzz)
 python_extension_module(cpp_process)
 install(TARGETS cpp_process LIBRARY DESTINATION src/rapidfuzz)
@@ -38,9 +36,7 @@ install(TARGETS cpp_process LIBRARY DESTINATION src/rapidfuzz)
 add_cython_target(cpp_process_cdist CXX)
 add_library(cpp_process_cdist MODULE ${cpp_process_cdist})
 target_compile_features(cpp_process_cdist PUBLIC cxx_std_14)
-target_include_directories(cpp_process_cdist PRIVATE
-    ${RF_BASE_DIR}/extern/optional-lite/include
-    ${RF_CAPI_PATH} ${RF_BASE_DIR}/src/cython ${NumPy_INCLUDE_DIR})
+target_include_directories(cpp_process_cdist PRIVATE ${RF_CAPI_PATH} ${RF_BASE_DIR}/src/cython ${NumPy_INCLUDE_DIR})
 target_link_libraries(cpp_process_cdist Taskflow rapidfuzz::rapidfuzz)
 python_extension_module(cpp_process_cdist)
 install(TARGETS cpp_process_cdist LIBRARY DESTINATION src/rapidfuzz)

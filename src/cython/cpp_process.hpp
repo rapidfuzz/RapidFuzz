@@ -1,6 +1,5 @@
 #pragma once
 #include "cpp_common.hpp"
-#include "nonstd/optional.hpp"
 
 template <typename T>
 struct ListMatchElem
@@ -165,95 +164,6 @@ T get_optimal_score(const RF_ScorerFlags* scorer_flags)
     }
 }
 
-
-template <typename T>
-nonstd::optional<DictMatchElem<T>> extractOne_dict_impl(
-    const RF_Kwargs* kwargs, const RF_ScorerFlags* scorer_flags, RF_Scorer* scorer,
-    const RF_StringWrapper& query, const std::vector<DictStringElem>& choices, T score_cutoff)
-{
-    nonstd::optional<DictMatchElem<T>> result = nonstd::nullopt;;
-
-    RF_ScorerFunc scorer_func;
-    PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, 1, &query.string));
-    RF_ScorerWrapper ScorerFunc(scorer_func);
-
-    bool lowest_score_worst = is_lowest_score_worst<T>(scorer_flags);
-    T optimal_score = get_optimal_score<T>(scorer_flags);
-
-    for (const auto& choice : choices)
-    {
-        T score;
-        ScorerFunc.call(&choice.proc_val.string, score_cutoff, &score);
-
-        if (lowest_score_worst)
-        {
-            if (score >= score_cutoff && (!result || score > result->score))
-            {
-                result = DictMatchElem<T>(score, choice.index, choice.val, choice.key);
-            }
-        }
-        else
-        {
-            if (score <= score_cutoff && (!result || score < result->score))
-            {
-                result = DictMatchElem<T>(score, choice.index, choice.val, choice.key);
-            }
-        }
-
-        if (score == optimal_score)
-        {
-            break;
-        }
-    }
-
-    return result;
-}
-
-
-template <typename T>
-nonstd::optional<ListMatchElem<T>> extractOne_list_impl(
-    const RF_Kwargs* kwargs, const RF_ScorerFlags* scorer_flags, RF_Scorer* scorer,
-    const RF_StringWrapper& query, const std::vector<ListStringElem>& choices, T score_cutoff)
-{
-    nonstd::optional<ListMatchElem<T>> result = nonstd::nullopt;
-
-    RF_ScorerFunc scorer_func;
-    PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, 1, &query.string));
-    RF_ScorerWrapper ScorerFunc(scorer_func);
-
-    bool lowest_score_worst = is_lowest_score_worst<T>(scorer_flags);
-    T optimal_score = get_optimal_score<T>(scorer_flags);
-
-    for (const auto& choice : choices)
-    {
-        T score;
-        ScorerFunc.call(&choice.proc_val.string, score_cutoff, &score);
-
-        if (lowest_score_worst)
-        {
-            if (score >= score_cutoff && (!result || score > result->score))
-            {
-                result = ListMatchElem<T>(score, choice.index, choice.val);
-            }
-        }
-        else
-        {
-            if (score <= score_cutoff && (!result || score < result->score))
-            {
-                result = ListMatchElem<T>(score, choice.index, choice.val);
-            }
-        }
-
-        if (score == optimal_score)
-        {
-            break;
-        }
-    }
-
-    return result;
-}
-
-
 template <typename T>
 std::vector<DictMatchElem<T>> extract_dict_impl(
     const RF_Kwargs* kwargs, const RF_ScorerFlags* scorer_flags, RF_Scorer* scorer,
@@ -329,38 +239,4 @@ std::vector<ListMatchElem<T>> extract_list_impl(
     }
 
     return results;
-}
-
-template <typename T>
-nonstd::optional<T> extract_iter_impl(
-    const RF_ScorerWrapper* ScorerFunc, const RF_ScorerFlags* scorer_flags,
-    const RF_StringWrapper& choice, T score_cutoff)
-{
-    bool lowest_score_worst = is_lowest_score_worst<T>(scorer_flags);
-
-    T score;
-    ScorerFunc->call(&choice.string, score_cutoff, &score);
-
-    if (lowest_score_worst)
-    {
-        if (score >= score_cutoff)
-        {
-            return score;
-        }
-        else
-        {
-            return nonstd::nullopt;
-        }
-    }
-    else
-    {
-        if (score <= score_cutoff)
-        {
-            return score;
-        }
-        else
-        {
-            return nonstd::nullopt;
-        }
-    }
 }
