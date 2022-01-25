@@ -49,28 +49,99 @@ cdef EditType str_to_edit_type(edit_type) except *:
     else:
         raise ValueError("Invalid Edit Type")
 
-cdef RfEditops list_to_editops(ops) except *:
+cdef RfEditops list_to_editops(ops, Py_ssize_t src_len, Py_ssize_t dest_len) except *:
     cdef RfEditops result
-    result.reserve(len(ops))
+    cdef Py_ssize_t i
+    cdef EditType edit_type
+    cdef int64_t src_pos, dest_pos
+    cdef Py_ssize_t ops_len = len(ops)
+    if not ops_len:
+        return result
+    
+    if len(ops[0]) == 5:
+        return RfEditops(list_to_opcodes(ops, src_len, dest_len))
+
+    result.set_src_len(src_len)
+    result.set_dest_len(dest_len)
+    result.reserve(ops_len)
     for op in ops:
         if len(op) != 3:
-            raise TypeError("Expected list of 3-tuples")
-        result.emplace_back(
-            str_to_edit_type(op[0]), <int64_t>op[1], <int64_t>op[2]
-        )
+            raise TypeError("Expected list of 3-tuples, or a list of 5-tuples")
+        
+        edit_type = str_to_edit_type(op[0])
+        src_pos = op[1]
+        dest_pos = op[2]
+
+        if src_pos > src_len or dest_pos > dest_len:
+            raise ValueError("List of edit operations invalid")
+        
+        if edit_type == EditType.Insert:
+            if src_pos == src_len:
+                raise ValueError("List of edit operations invalid")
+        elif edit_type == EditType.Delete:
+            if dest_pos == dest_len:
+                raise ValueError("List of edit operations invalid")
+
+        result.emplace_back(edit_type, src_pos, dest_pos)
+
+    # validate order of editops
+    for i in range(0, ops_len - 1):
+        if result[i + 1].src_pos < result[i].src_pos or result[i + 1].dest_pos < result[i].dest_pos:
+            raise ValueError("List of edit operations out of order")
+
     return result
 
-cdef RfOpcodes list_to_opcodes(ops) except *:
+cdef RfOpcodes list_to_opcodes(ops, Py_ssize_t src_len, Py_ssize_t dest_len) except *:
     cdef RfOpcodes result
-    result.reserve(len(ops))
+    cdef Py_ssize_t i
+    cdef EditType edit_type
+    cdef int64_t src_begin, src_end, dest_begin, dest_end
+    cdef Py_ssize_t ops_len = len(ops)
+    if not ops_len:
+        return result
+
+    if len(ops[0]) == 3:
+        return RfOpcodes(list_to_editops(ops, src_len, dest_len))
+
+    result.set_src_len(src_len)
+    result.set_dest_len(dest_len)
+    result.reserve(ops_len)
     for op in ops:
         if len(op) != 5:
-            raise TypeError("Expected list of 5-tuples")
-        result.emplace_back(
-            str_to_edit_type(op[0]),
-            <int64_t>op[1], <int64_t>op[2],
-            <int64_t>op[3], <int64_t>op[4]
-        )
+            raise TypeError("Expected list of 3-tuples, or a list of 5-tuples")
+
+        edit_type = str_to_edit_type(op[0])
+        src_begin = op[1]
+        src_end = op[2]
+        dest_begin = op[3]
+        dest_end = op[4]
+
+        if src_end > src_len or dest_end > dest_len:
+            raise ValueError("List of edit operations invalid")
+        elif src_end < src_begin or dest_end < dest_begin:
+            raise ValueError("List of edit operations invalid")
+
+        if edit_type == EditType.None or edit_type == EditType.Replace:
+            if src_end - src_begin != dest_end - dest_begin or src_begin == src_end:
+                raise ValueError("List of edit operations invalid")
+        if edit_type == EditType.Insert:
+            if src_begin != src_end or dest_begin == dest_end:
+                raise ValueError("List of edit operations invalid")
+        elif edit_type == EditType.Delete:
+            if src_begin == src_end or dest_begin != dest_end:
+                raise ValueError("List of edit operations invalid")
+
+        result.emplace_back(edit_type, src_begin, src_end, dest_begin, dest_end)
+
+    # check if edit operations span the complete string
+    if result[0].src_begin != 0 or result[0].dest_begin != 0:
+        raise ValueError("List of edit operations does not start at position 0")
+    if result.back().src_end != src_len or result.back().dest_end != dest_len:
+        raise ValueError("List of edit operations does not end at the string ends")
+    for i in range(0, ops_len - 1):
+        if result[i + 1].src_begin != result[i].src_end or result[i + 1].dest_begin != result[i].dest_end:
+            raise ValueError("List of edit operations is not continuous")
+
     return result
 
 cdef list editops_to_list(const RfEditops& ops):
@@ -110,9 +181,7 @@ cdef class Editops:
 
     def __init__(self, editops=None, src_len=0, dest_len=0):
         if editops is not None:
-            self.editops = list_to_editops(editops)
-        self.editops.set_src_len(src_len)
-        self.editops.set_dest_len(dest_len)
+            self.editops = list_to_editops(editops, src_len, dest_len)
 
     @classmethod
     def from_opcodes(cls, Opcodes opcodes):
@@ -254,9 +323,7 @@ cdef class Opcodes:
 
     def __init__(self, opcodes=None, src_len=0, dest_len=0):
         if opcodes is not None:
-            self.opcodes = list_to_opcodes(opcodes)
-        self.opcodes.set_src_len(src_len)
-        self.opcodes.set_dest_len(dest_len)
+            self.opcodes = list_to_opcodes(opcodes, src_len, dest_len)
 
     @classmethod
     def from_editops(cls, Editops editops):

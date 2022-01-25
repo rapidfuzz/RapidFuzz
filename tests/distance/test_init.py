@@ -99,6 +99,25 @@ def test_opcode_inversion():
     assert ops.inverse().as_list() == [('equal', 0, 1, 0, 1), ('insert', 1, 1, 1, 2),
         ('replace', 1, 2, 2, 3), ('equal', 2, 5, 3, 6), ('delete', 5, 8, 6, 6), ('equal', 8, 9, 6, 7)]
 
+def test_list_initialization():
+    """
+    test whether list initialization works correctly
+    """
+    ops = Levenshtein.opcodes("aaabaaa", "abbaaabba")
+    ops2 = Opcodes(ops.as_list(), ops.src_len, ops.dest_len)
+    assert ops == ops2
+
+    ops = Levenshtein.editops("aaabaaa", "abbaaabba")
+    ops2 = Editops(ops.as_list(), ops.src_len, ops.dest_len)
+    assert ops == ops2
+
+    ops = Levenshtein.opcodes("aaabaaa", "abbaaabba")
+    ops2 = Editops(ops.as_list(), ops.src_len, ops.dest_len)
+    assert ops.as_editops() == ops2
+
+    ops = Levenshtein.editops("aaabaaa", "abbaaabba")
+    ops2 = Opcodes(ops.as_list(), ops.src_len, ops.dest_len)
+    assert ops.as_opcodes() == ops2
 
 if __name__ == '__main__':
     unittest.main()
