@@ -1,5 +1,5 @@
-fuzz module
-===========
+rapidfuzz.fuzz
+==============
 
 ratio
 -----

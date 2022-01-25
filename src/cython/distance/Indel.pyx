@@ -108,14 +108,14 @@ def distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
 
     - If the length of the shorter string is ≤ 64 after removing the common affix
       Hyyrös' lcs algorithm is used, which calculates the Indel distance in
-      parallel. The algorithm is described by [1]_ and is extended with support
+      parallel. The algorithm is described by [5]_ and is extended with support
       for UTF32 in this implementation. The time complexity of this
       algorithm is ``O(N)``.
 
     - If the length of the shorter string is ≥ 64 after removing the common affix
       a blockwise implementation of the Hyyrös' lcs algorithm is used, which calculates
       the Levenshtein distance in parallel (64 characters at a time).
-      The algorithm is described by [1]_. The time complexity of this
+      The algorithm is described by [5]_. The time complexity of this
       algorithm is ``O([N/64]M)``.
 
     The following image shows a benchmark of the Indel distance in RapidFuzz
@@ -128,7 +128,7 @@ def distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
 
     References
     ----------
-    .. [4] Hyyrö, Heikki. "Bit-Parallel LCS-length Computation Revisited"
+    .. [5] Hyyrö, Heikki. "Bit-Parallel LCS-length Computation Revisited"
            Proc. 15th Australasian Workshop on Combinatorial Algorithms (AWOCA 2004).
 
     Examples
@@ -243,11 +243,11 @@ def editops(s1, s2, *, processor=None):
     Notes
     -----
     The alignment is calculated using an algorithm of Heikki Hyyrö, which is
-    described [1]_. It has a time complexity and memory usage of ``O([N/64] * M)``.
+    described [6]_. It has a time complexity and memory usage of ``O([N/64] * M)``.
 
     References
     ----------
-    .. [1] Hyyrö, Heikki. "A Note on Bit-Parallel Alignment Computation."
+    .. [6] Hyyrö, Heikki. "A Note on Bit-Parallel Alignment Computation."
            Stringology (2004).
 
     Examples
@@ -289,11 +289,11 @@ def opcodes(s1, s2, *, processor=None):
     Notes
     -----
     The alignment is calculated using an algorithm of Heikki Hyyrö, which is
-    described [1]_. It has a time complexity and memory usage of ``O([N/64] * M)``.
+    described [7]_. It has a time complexity and memory usage of ``O([N/64] * M)``.
 
     References
     ----------
-    .. [1] Hyyrö, Heikki. "A Note on Bit-Parallel Alignment Computation."
+    .. [7] Hyyrö, Heikki. "A Note on Bit-Parallel Alignment Computation."
            Stringology (2004).
 
     Examples

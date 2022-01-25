@@ -450,11 +450,11 @@ def editops(s1, s2, *, processor=None):
     Notes
     -----
     The alignment is calculated using an algorithm of Heikki Hyyrö, which is
-    described [1]_. It has a time complexity and memory usage of ``O([N/64] * M)``.
+    described [8]_. It has a time complexity and memory usage of ``O([N/64] * M)``.
 
     References
     ----------
-    .. [1] Hyyrö, Heikki. "A Note on Bit-Parallel Alignment Computation."
+    .. [8] Hyyrö, Heikki. "A Note on Bit-Parallel Alignment Computation."
            Stringology (2004).
 
     Examples
@@ -496,11 +496,11 @@ def opcodes(s1, s2, *, processor=None):
     Notes
     -----
     The alignment is calculated using an algorithm of Heikki Hyyrö, which is
-    described [1]_. It has a time complexity and memory usage of ``O([N/64] * M)``.
+    described [9]_. It has a time complexity and memory usage of ``O([N/64] * M)``.
 
     References
     ----------
-    .. [1] Hyyrö, Heikki. "A Note on Bit-Parallel Alignment Computation."
+    .. [9] Hyyrö, Heikki. "A Note on Bit-Parallel Alignment Computation."
            Stringology (2004).
 
     Examples

@@ -1,37 +1,25 @@
-.. RapidFuzz documentation master file, created by
-   sphinx-quickstart on Fri Jan  1 19:02:29 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Welcome to RapidFuzz's documentation!
 =====================================
 
 .. toctree::
    :maxdepth: 2
-   :caption: Installation:
 
-   installation
+   Installation
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Usage:
+   :maxdepth: 3
 
-   fuzz
-   string_metric
-   process
-   utils
+   Usage/index
 
 .. toctree::
    :maxdepth: 1
-   :caption: Contributing:
 
-   contributing
+   Contributing
 
 .. toctree::
    :maxdepth: 2
-   :caption: License:
 
-   license
+   License
 
 Indices and tables
 ==================

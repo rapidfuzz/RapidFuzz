@@ -1,5 +1,5 @@
-utils module
-==============
+rapidfuzz.utils
+===============
 
 default_process
 ---------------

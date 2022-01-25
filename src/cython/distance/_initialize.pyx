@@ -174,9 +174,10 @@ cdef class Editops:
     Each tuple is of the form (tag, src_pos, dest_pos).
 
     The tags are strings, with these meanings:
-    'replace':  s1[src_pos] should be replaced by s2[dest_pos]
-    'delete':   s1[src_pos] should be deleted.
-    'insert':   s2[dest_pos] should be inserted at s1[src_pos].
+
+    'replace': s1[src_pos] should be replaced by s2[dest_pos]
+    'delete':  s1[src_pos] should be deleted
+    'insert':  s2[dest_pos] should be inserted at s1[src_pos]
     """
 
     def __init__(self, editops=None, src_len=0, dest_len=0):
@@ -308,15 +309,14 @@ cdef class Opcodes:
     tuple preceding it, and likewise for j1 == the previous j2.
 
     The tags are strings, with these meanings:
-    'replace':  s1[i1:i2] should be replaced by s2[j1:j2]
-    'delete':   s1[i1:i2] should be deleted.
-                Note that j1==j2 in this case.
-    'insert':   s2[j1:j2] should be inserted at s1[i1:i1].
-                Note that i1==i2 in this case.
-    'equal':    s1[i1:i2] == s2[j1:j2]
+
+    'replace': s1[i1:i2] should be replaced by s2[j1:j2]
+    'delete':  s1[i1:i2] should be deleted. Note that j1==j2 in this case.
+    'insert':  s2[j1:j2] should be inserted at s1[i1:i1]. Note that i1==i2 in this case.
+    'equal':   s1[i1:i2] == s2[j1:j2]
 
     Note
-    --------
+    ----
     Opcodes uses tuples similar to difflib's SequenceMatcher to make them
     interoperable
     """

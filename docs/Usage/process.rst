@@ -1,5 +1,5 @@
-process module
-==============
+rapidfuzz.process
+=================
 
 cdist
 ----------

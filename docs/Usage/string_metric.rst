@@ -1,5 +1,5 @@
-string_metric module
-====================
+rapidfuzz.string_metric
+=======================
 
 levenshtein
 -----------

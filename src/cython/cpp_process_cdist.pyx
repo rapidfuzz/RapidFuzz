@@ -207,10 +207,12 @@ def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, 
     scorer : Callable, optional
         Optional callable that is used to calculate the matching score between
         the query and each choice. This can be:
+
         - a scorer using the RapidFuzz C-API like the builtin scorers in RapidFuzz,
           which can return a distance or similarity between two strings. Further details can be found here.
         - a Python function which returns a similarity between two strings in the range 0-100. This is not
           recommended, since it is far slower than a scorer using the RapidFuzz C-API.
+
         fuzz.ratio is used by default.
     processor : Callable, optional
         Optional callable that is used to preprocess the strings before
@@ -224,11 +226,13 @@ def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, 
     dtype : data-type, optional
         The desired data-type for the result array.Depending on the scorer type the following
         dtypes are supported:
+
         - similarity:
-            - np.float32, np.float64
-            - np.uint8 -> stores fixed point representation of the result scaled to a range 0-100
+          - np.float32, np.float64
+          - np.uint8 -> stores fixed point representation of the result scaled to a range 0-100
         - distance:
-            - np.int8, np.int16, np.int32, np.int64
+          - np.int8, np.int16, np.int32, np.int64
+
         If not given, then the type will be np.float32 for similarities and np.int32 for distances.
     workers : int, optional
         The calculation is subdivided into workers sections and evaluated in parallel.
