@@ -119,5 +119,9 @@ def test_list_initialization():
     ops2 = Opcodes(ops.as_list(), ops.src_len, ops.dest_len)
     assert ops.as_opcodes() == ops2
 
+    ops = Levenshtein.editops("skdsakldsakdlasda", "djkajkdfkdgkhdfjrmecsidjf")
+    ops2 = Opcodes(ops.as_list(), ops.src_len, ops.dest_len)
+    assert ops.as_opcodes() == ops2
+
 if __name__ == '__main__':
     unittest.main()

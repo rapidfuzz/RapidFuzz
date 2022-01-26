@@ -75,12 +75,10 @@ cdef RfEditops list_to_editops(ops, Py_ssize_t src_len, Py_ssize_t dest_len) exc
         if src_pos > src_len or dest_pos > dest_len:
             raise ValueError("List of edit operations invalid")
         
-        if edit_type == EditType.Insert:
-            if src_pos == src_len:
-                raise ValueError("List of edit operations invalid")
-        elif edit_type == EditType.Delete:
-            if dest_pos == dest_len:
-                raise ValueError("List of edit operations invalid")
+        if src_pos == src_len and edit_type != EditType.Insert:
+            raise ValueError("List of edit operations invalid")
+        elif dest_pos == dest_len and edit_type != EditType.Delete:
+            raise ValueError("List of edit operations invalid")
 
         result.emplace_back(edit_type, src_pos, dest_pos)
 
