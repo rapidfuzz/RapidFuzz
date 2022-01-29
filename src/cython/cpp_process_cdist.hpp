@@ -6,7 +6,18 @@
 #include <exception>
 #include <atomic>
 
-void set_score(PyArrayObject* matrix, int dtype, npy_intp row, npy_intp col, double score)
+int64_t any_round(double score)
+{
+    return std::llround(score);
+}
+
+int64_t any_round(int64_t score)
+{
+    return score;
+}
+
+template <typename T>
+void set_score(PyArrayObject* matrix, int dtype, npy_intp row, npy_intp col, T score)
 {
     void* data = PyArray_GETPTR2(matrix, row, col);
     switch (dtype)
@@ -18,110 +29,28 @@ void set_score(PyArrayObject* matrix, int dtype, npy_intp row, npy_intp col, dou
         *((double*)data) = score;
         break;
     case NPY_INT8:
-        *((int8_t*)data) = (int8_t)std::llround(score);
+        *((int8_t*)data) = (int8_t)any_round(score);
         break;
     case NPY_INT16:
-        *((int16_t*)data) = (int16_t)std::llround(score);
+        *((int16_t*)data) = (int16_t)any_round(score);
         break;
     case NPY_INT32:
-        *((int32_t*)data) = (int32_t)std::llround(score);
+        *((int32_t*)data) = (int32_t)any_round(score);
         break;
     case NPY_INT64:
-        *((int64_t*)data) = (int64_t)std::llround(score);
+        *((int64_t*)data) = any_round(score);
         break;
     case NPY_UINT8:
-        *((uint8_t*)data) = (uint8_t)std::llround(score);
+        *((uint8_t*)data) = (uint8_t)any_round(score);
         break;
     case NPY_UINT16:
-        *((uint16_t*)data) = (uint16_t)std::llround(score);
+        *((uint16_t*)data) = (uint16_t)any_round(score);
         break;
     case NPY_UINT32:
-        *((uint32_t*)data) = (uint32_t)std::llround(score);
+        *((uint32_t*)data) = (uint32_t)any_round(score);
         break;
     case NPY_UINT64:
-        *((uint64_t*)data) = (uint64_t)std::llround(score);
-        break;
-    default:
-        assert(false);
-        break;
-    }
-}
-
-void set_score(PyArrayObject* matrix, int dtype, npy_intp row, npy_intp col, int64_t score)
-{
-    void* data = PyArray_GETPTR2(matrix, row, col);
-    switch (dtype)
-    {
-    case NPY_FLOAT32:
-        *((float*)data) = (float)score;
-        break;
-    case NPY_FLOAT64:
-        *((double*)data) = (double)score;
-        break;
-    case NPY_INT8:
-        *((int8_t*)data) = (int8_t)score;
-        break;
-    case NPY_INT16:
-        *((int16_t*)data) = (int16_t)score;
-        break;
-    case NPY_INT32:
-        *((int32_t*)data) = (int32_t)score;
-        break;
-    case NPY_INT64:
-        *((int64_t*)data) = (int64_t)score;
-        break;
-    case NPY_UINT8:
-        *((uint8_t*)data) = (uint8_t)score;
-        break;
-    case NPY_UINT16:
-        *((uint16_t*)data) = (uint16_t)score;
-        break;
-    case NPY_UINT32:
-        *((uint32_t*)data) = (uint32_t)score;
-        break;
-    case NPY_UINT64:
-        *((uint64_t*)data) = (uint64_t)score;
-        break;
-    default:
-        assert(false);
-        break;
-    }
-}
-
-void set_score(PyArrayObject* matrix, int dtype, npy_intp row, npy_intp col, uint64_t score)
-{
-    void* data = PyArray_GETPTR2(matrix, row, col);
-    switch (dtype)
-    {
-    case NPY_FLOAT32:
-        *((float*)data) = (float)score;
-        break;
-    case NPY_FLOAT64:
-        *((double*)data) = (double)score;
-        break;
-    case NPY_INT8:
-        *((int8_t*)data) = (int8_t)score;
-        break;
-    case NPY_INT16:
-        *((int16_t*)data) = (int16_t)score;
-        break;
-    case NPY_INT32:
-        *((int32_t*)data) = (int32_t)score;
-        break;
-    case NPY_INT64:
-        *((int64_t*)data) = (int64_t)score;
-        break;
-    case NPY_UINT8:
-        *((uint8_t*)data) = (uint8_t)score;
-        break;
-    case NPY_UINT16:
-        *((uint16_t*)data) = (uint16_t)score;
-        break;
-    case NPY_UINT32:
-        *((uint32_t*)data) = (uint32_t)score;
-        break;
-    case NPY_UINT64:
-        *((uint64_t*)data) = (uint64_t)score;
+        *((uint64_t*)data) = (uint64_t)any_round(score);
         break;
     default:
         assert(false);

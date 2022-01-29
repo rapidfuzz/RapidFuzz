@@ -130,11 +130,11 @@ struct RF_ScorerWrapper {
     }
 
     void call(const RF_String* str, double score_cutoff, double* result) const {
-        PyErr2RuntimeExn(scorer_func.call.f64(&scorer_func, str, score_cutoff, result));
+        PyErr2RuntimeExn(scorer_func.call.f64(&scorer_func, str, 1, score_cutoff, result));
     }
 
     void call(const RF_String* str, int64_t score_cutoff, int64_t* result) const {
-        PyErr2RuntimeExn(scorer_func.call.i64(&scorer_func, str, score_cutoff, result));
+        PyErr2RuntimeExn(scorer_func.call.i64(&scorer_func, str, 1, score_cutoff, result));
     }
 };
 

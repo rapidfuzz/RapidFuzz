@@ -3,10 +3,14 @@
 #include <jaro_winkler/jaro_winkler.hpp>
 
 template<typename CachedScorer, typename T>
-static inline bool legacy_normalized_similarity_func_wrapper(const RF_ScorerFunc* self, const RF_String* str, T score_cutoff, T* result)
+static inline bool legacy_normalized_similarity_func_wrapper(const RF_ScorerFunc* self, const RF_String* str, int64_t str_count, T score_cutoff, T* result)
 {
     CachedScorer& scorer = *(CachedScorer*)self->context;
     try {
+        if (str_count != 1)
+        {
+            throw std::logic_error("Only str_count == 1 supported");
+        }
         *result = visit(*str, [&](auto first, auto last){
             return scorer.normalized_similarity(first, last, score_cutoff) * 100.0;
         });

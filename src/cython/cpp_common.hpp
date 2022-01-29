@@ -328,10 +328,14 @@ static void scorer_deinit(RF_ScorerFunc* self)
 }
 
 template<typename CachedScorer, typename T>
-static inline bool distance_func_wrapper(const RF_ScorerFunc* self, const RF_String* str, T score_cutoff, T* result)
+static inline bool distance_func_wrapper(const RF_ScorerFunc* self, const RF_String* str, int64_t str_count, T score_cutoff, T* result)
 {
     CachedScorer& scorer = *(CachedScorer*)self->context;
     try {
+        if (str_count != 1)
+        {
+            throw std::logic_error("Only str_count == 1 supported");
+        }
         *result = visit(*str, [&](auto first, auto last){
             return scorer.distance(first, last, score_cutoff);
         });
@@ -345,10 +349,14 @@ static inline bool distance_func_wrapper(const RF_ScorerFunc* self, const RF_Str
 }
 
 template<typename CachedScorer, typename T>
-static inline bool normalized_distance_func_wrapper(const RF_ScorerFunc* self, const RF_String* str, T score_cutoff, T* result)
+static inline bool normalized_distance_func_wrapper(const RF_ScorerFunc* self, const RF_String* str, int64_t str_count, T score_cutoff, T* result)
 {
     CachedScorer& scorer = *(CachedScorer*)self->context;
     try {
+        if (str_count != 1)
+        {
+            throw std::logic_error("Only str_count == 1 supported");
+        }
         *result = visit(*str, [&](auto first, auto last){
             return scorer.normalized_distance(first, last, score_cutoff);
         });
@@ -362,10 +370,14 @@ static inline bool normalized_distance_func_wrapper(const RF_ScorerFunc* self, c
 }
 
 template<typename CachedScorer, typename T>
-static inline bool similarity_func_wrapper(const RF_ScorerFunc* self, const RF_String* str, T score_cutoff, T* result)
+static inline bool similarity_func_wrapper(const RF_ScorerFunc* self, const RF_String* str, int64_t str_count, T score_cutoff, T* result)
 {
     CachedScorer& scorer = *(CachedScorer*)self->context;
     try {
+        if (str_count != 1)
+        {
+            throw std::logic_error("Only str_count == 1 supported");
+        }
         *result = visit(*str, [&](auto first, auto last){
             return scorer.similarity(first, last, score_cutoff);
         });
@@ -378,25 +390,15 @@ static inline bool similarity_func_wrapper(const RF_ScorerFunc* self, const RF_S
     return true;
 }
 
-// todo cleanup
-typedef bool (*func_f64) (const struct _RF_ScorerFunc* self, const RF_String* str, double score_cutoff, double* result);
-typedef bool (*func_i64) (const struct _RF_ScorerFunc* self, const RF_String* str, int64_t score_cutoff, int64_t* result);
-
-void assign_callback(RF_ScorerFunc& context, func_f64 func)
-{
-    context.call.f64 = func;
-}
-
-void assign_callback(RF_ScorerFunc& context, func_i64 func)
-{
-    context.call.i64 = func;
-}
-
 template<typename CachedScorer, typename T>
-static inline bool normalized_similarity_func_wrapper(const RF_ScorerFunc* self, const RF_String* str, T score_cutoff, T* result)
+static inline bool normalized_similarity_func_wrapper(const RF_ScorerFunc* self, const RF_String* str, int64_t str_count, T score_cutoff, T* result)
 {
     CachedScorer& scorer = *(CachedScorer*)self->context;
     try {
+        if (str_count != 1)
+        {
+            throw std::logic_error("Only str_count == 1 supported");
+        }
         *result = visit(*str, [&](auto first, auto last){
             return scorer.normalized_similarity(first, last, score_cutoff);
         });
@@ -407,6 +409,20 @@ static inline bool normalized_similarity_func_wrapper(const RF_ScorerFunc* self,
       return false;
     }
     return true;
+}
+
+// todo cleanup
+typedef bool (*func_f64) (const struct _RF_ScorerFunc*, const RF_String*, int64_t, double, double*);
+typedef bool (*func_i64) (const struct _RF_ScorerFunc*, const RF_String*, int64_t, int64_t, int64_t*);
+
+void assign_callback(RF_ScorerFunc& context, func_f64 func)
+{
+    context.call.f64 = func;
+}
+
+void assign_callback(RF_ScorerFunc& context, func_i64 func)
+{
+    context.call.i64 = func;
 }
 
 template<template <typename> class CachedScorer, typename T, typename InputIt1, typename ...Args>

@@ -8,7 +8,7 @@ from rapidfuzz_capi cimport (
     RF_String, RF_Scorer, RF_ScorerFunc, RF_Kwargs,
     SCORER_STRUCT_VERSION, RF_Preprocessor,
     RF_ScorerFlags,
-    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_MULTI_STRING, RF_SCORER_FLAG_SYMMETRIC
+    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_SYMMETRIC
 )
 
 from cpp_common cimport (
