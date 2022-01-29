@@ -81,11 +81,6 @@ def distance(s1, s2, *, processor=None, score_cutoff=None):
     distance : int
         distance between s1 and s2
 
-    Raises
-    ------
-    ValueError
-        If unsupported weights are provided a ValueError is thrown
-
     Notes
     -----
     The following implementation is used with a worst-case performance of ``O([N/64]M)``.
@@ -185,11 +180,6 @@ def similarity(s1, s2, *, processor=None, score_cutoff=None):
     -------
     similarity : int
         similarity between s1 and s2
-
-    Raises
-    ------
-    ValueError
-        If unsupported weights are provided a ValueError is thrown
 
     See Also
     --------

@@ -1,6 +1,13 @@
 # distutils: language=c++
 # cython: language_level=3, binding=True, linetrace=True
 
+"""
+The Levenshtein (edit) distance is a string metric to measure the
+difference between two strings/sequences s1 and s2.
+It's defined as the minimum number of insertions, deletions or
+substitutions required to transform s1 into s2.
+"""
+
 from _initialize import Editops
 from _initialize cimport Editops, RfEditops
 from array import array
@@ -94,114 +101,6 @@ def distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
     ------
     ValueError
         If unsupported weights are provided a ValueError is thrown
-
-    Notes
-    -----
-    Depending on the input parameters different optimized implementation are used
-    to improve the performance.
-
-    Insertion = Deletion = Substitution:
-      This is known as uniform Levenshtein distance and is the distance most commonly
-      referred to as Levenshtein distance. The following implementation is used
-      with a worst-case performance of ``O([N/64]M)``.
-
-      - if max is 0 the similarity can be calculated using a direct comparision,
-        since no difference between the strings is allowed.  The time complexity of
-        this algorithm is ``O(N)``.
-
-      - A common prefix/suffix of the two compared strings does not affect
-        the Levenshtein distance, so the affix is removed before calculating the
-        similarity.
-
-      - If max is ≤ 3 the mbleven algorithm is used. This algorithm
-        checks all possible edit operations that are possible under
-        the threshold `max`. The time complexity of this algorithm is ``O(N)``.
-
-      - If the length of the shorter string is ≤ 64 after removing the common affix
-        Hyyrös' algorithm is used, which calculates the Levenshtein distance in
-        parallel. The algorithm is described by [1]_. The time complexity of this
-        algorithm is ``O(N)``.
-
-      - If the length of the shorter string is ≥ 64 after removing the common affix
-        a blockwise implementation of Myers' algorithm is used, which calculates
-        the Levenshtein distance in parallel (64 characters at a time).
-        The algorithm is described by [3]_. The time complexity of this
-        algorithm is ``O([N/64]M)``.
-
-    The following image shows a benchmark of the Levenshtein distance in multiple
-    Python libraries. All of them are implemented either in C/C++ or Cython.
-    The graph shows, that python-Levenshtein is the only library with a time
-    complexity of ``O(NM)``, while all other libraries have a time complexity of
-    ``O([N/64]M)``. Especially for long strings RapidFuzz is a lot faster than
-    all the other tested libraries.
-
-    .. image:: img/uniform_levenshtein.svg
-
-
-    Insertion = Deletion, Substitution >= Insertion + Deletion:
-      Since every Substitution can be performed as Insertion + Deletion, this variant
-      of the Levenshtein distance only uses Insertions and Deletions. Therefore this
-      variant is often referred to as InDel-Distance.  The following implementation
-      is used with a worst-case performance of ``O([N/64]M)``.
-
-      - if max is 0 the similarity can be calculated using a direct comparision,
-        since no difference between the strings is allowed.  The time complexity of
-        this algorithm is ``O(N)``.
-
-      - if max is 1 and the two strings have a similar length, the similarity can be
-        calculated using a direct comparision aswell, since a substitution would cause
-        a edit distance higher than max. The time complexity of this algorithm
-        is ``O(N)``.
-
-      - A common prefix/suffix of the two compared strings does not affect
-        the Levenshtein distance, so the affix is removed before calculating the
-        similarity.
-
-      - If max is ≤ 4 the mbleven algorithm is used. This algorithm
-        checks all possible edit operations that are possible under
-        the threshold `max`. As a difference to the normal Levenshtein distance this
-        algorithm can even be used up to a threshold of 4 here, since the higher weight
-        of substitutions decreases the amount of possible edit operations.
-        The time complexity of this algorithm is ``O(N)``.
-
-      - If the length of the shorter string is ≤ 64 after removing the common affix
-        Hyyrös' lcs algorithm is used, which calculates the Indel distance in
-        parallel. The algorithm is described by [4]_ and is extended with support
-        for UTF32 in this implementation. The time complexity of this
-        algorithm is ``O(N)``.
-
-      - If the length of the shorter string is ≥ 64 after removing the common affix
-        a blockwise implementation of the Hyyrös' lcs algorithm is used, which calculates
-        the Levenshtein distance in parallel (64 characters at a time).
-        The algorithm is described by [4]_. The time complexity of this
-        algorithm is ``O([N/64]M)``.
-
-    The following image shows a benchmark of the Indel distance in RapidFuzz
-    and python-Levenshtein. Similar to the normal Levenshtein distance
-    python-Levenshtein uses a implementation with a time complexity of ``O(NM)``,
-    while RapidFuzz has a time complexity of ``O([N/64]M)``.
-
-    .. image:: img/indel_levenshtein.svg
-
-
-    Other weights:
-      The implementation for other weights is based on Wagner-Fischer.
-      It has a performance of ``O(N * M)`` and has a memory usage of ``O(N)``.
-      Further details can be found in [2]_.
-
-    References
-    ----------
-    .. [1] Hyyrö, Heikki. "A Bit-Vector Algorithm for Computing
-           Levenshtein and Damerau Edit Distances."
-           Nordic Journal of Computing, Volume 10 (2003): 29-39.
-    .. [2] Wagner, Robert & Fischer, Michael
-           "The String-to-String Correction Problem."
-           J. ACM. 21. (1974): 168-173
-    .. [3] Myers, Gene. "A fast bit-vector algorithm for approximate
-           string matching based on dynamic programming."
-           Journal of the ACM (JACM) 46.3 (1999): 395-415.
-    .. [4] Hyyrö, Heikki. "Bit-Parallel LCS-length Computation Revisited"
-           Proc. 15th Australasian Workshop on Combinatorial Algorithms (AWOCA 2004).
 
     Examples
     --------
@@ -411,7 +310,7 @@ def normalized_similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cuto
     >>> Levenshtein.normalized_similarity("lewenstein", "levenshtein", weights=(1,1,2))
     0.85714285714285
 
-     When a different processor is used s1 and s2 do not have to be strings
+    When a different processor is used s1 and s2 do not have to be strings
 
     >>> Levenshtein.normalized_similarity(["lewenstein"], ["levenshtein"], processor=lambda s: s[0])
     0.81818181818181

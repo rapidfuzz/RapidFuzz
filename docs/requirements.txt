@@ -1,0 +1,5 @@
+Sphinx
+furo
+numpy
+sphinxcontrib-bibtex
+m2r2

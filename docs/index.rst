@@ -1,29 +1,18 @@
-Welcome to RapidFuzz's documentation!
-=====================================
+RapidFuzz
+=========
 
 .. toctree::
-   :maxdepth: 2
+   :hidden:
 
    Installation
-
-.. toctree::
-   :maxdepth: 3
-
    Usage/index
 
 .. toctree::
-   :maxdepth: 1
+   :caption: Development
+   :hidden:
 
-   Contributing
-
-.. toctree::
-   :maxdepth: 2
-
+   Contributing/index
+   changelog_link
    License
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   References
+   GitHub Repository <https://github.com/maxbachmann/RapidFuzz>
