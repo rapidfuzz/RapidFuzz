@@ -9,36 +9,37 @@ on:
       - published
 
 jobs:
-  build_wheels_windows:
-    name: Build wheel on ${{ matrix.os }}/auto/${{matrix.python_tag}}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        python_tag: ["cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*"]
-        os: [windows-latest]
-    env:
-      CIBW_BUILD: ${{matrix.python_tag}}
-      CIBW_TEST_REQUIRES: pytest hypothesis pandas
-      CIBW_TEST_COMMAND: pytest {package}/tests
-      CIBW_BUILD_VERBOSITY: 3
-
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-
-      - uses: actions/setup-python@v2
-
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.3.1
-        with:
-          output-dir: wheelhouse
-
-      - name: Upload wheels
-        uses: actions/upload-artifact@v2
-        with:
-          path: ./wheelhouse/*.whl
+  # todo windowns build broken on scikit-build 0.13.0
+  #build_wheels_windows:
+  #  name: Build wheel on ${{ matrix.os }}/auto/${{matrix.python_tag}}
+  #  runs-on: ${{ matrix.os }}
+  #  strategy:
+  #    fail-fast: false
+  #    matrix:
+  #      python_tag: ["cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*"]
+  #      os: [windows-latest]
+  #  env:
+  #    CIBW_BUILD: ${{matrix.python_tag}}
+  #    CIBW_TEST_REQUIRES: pytest hypothesis pandas
+  #    CIBW_TEST_COMMAND: pytest {package}/tests
+  #    CIBW_BUILD_VERBOSITY: 3
+  #
+  #  steps:
+  #    - uses: actions/checkout@v2
+  #      with:
+  #        submodules: 'true'
+  #
+  #    - uses: actions/setup-python@v2
+  #
+  #    - name: Build wheels
+  #      uses: pypa/cibuildwheel@v2.3.1
+  #      with:
+  #        output-dir: wheelhouse
+  #
+  #    - name: Upload wheels
+  #      uses: actions/upload-artifact@v2
+  #      with:
+  #        path: ./wheelhouse/*.whl
 
   build_wheels_macos:
     name: Build wheel on ${{ matrix.os }}/auto/${{matrix.python_tag}}
@@ -197,7 +198,7 @@ jobs:
 
   deploy-wheels:
     if: github.event_name == 'release' && github.event.action == 'published'
-    needs: [build_wheels_windows, build_wheels_macos, build_wheels_apple_silicon, build_wheels_manylinux, build_sdist]
+    needs: [build_wheels_macos, build_wheels_apple_silicon, build_wheels_manylinux, build_sdist]
     name: deploy wheels to pypi
     runs-on: ubuntu-18.04
 

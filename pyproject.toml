@@ -2,7 +2,7 @@
 requires = [
     "setuptools",
     "wheel",
-    "scikit-build",
+    "scikit-build==0.13.0",
     "cmake",
     "ninja",
     "oldest-supported-numpy",
