@@ -1,6 +1,9 @@
 Hamming
 -------
 
+Functions
+^^^^^^^^^
+
 distance
 ~~~~~~~~
 .. autofunction:: rapidfuzz.distance.Hamming.distance

@@ -173,10 +173,6 @@ def similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
     ------
     ValueError
         If unsupported weights are provided a ValueError is thrown
-
-    See Also
-    --------
-    Levenshtein.distance : Levenshtein distance
     """
     cdef RF_StringWrapper s1_proc, s2_proc
     cdef int64_t insertion, deletion, substitution
@@ -228,10 +224,6 @@ def normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff
     ------
     ValueError
         If unsupported weights are provided a ValueError is thrown
-
-    See Also
-    --------
-    Levenshtein.distance : Levenshtein distance
     """
     cdef RF_StringWrapper s1_proc, s2_proc
     if s1 is None or s2 is None:
@@ -285,10 +277,6 @@ def normalized_similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cuto
     ------
     ValueError
         If unsupported weights are provided a ValueError is thrown
-
-    See Also
-    --------
-    Levenshtein.normalized_distance : normalized Levenshtein distance
 
     Examples
     --------

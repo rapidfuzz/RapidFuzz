@@ -121,10 +121,6 @@ def similarity(s1, s2, *, processor=None, score_cutoff=None):
     ------
     ValueError
         If s1 and s2 have a different length
-
-    See Also
-    --------
-    Hamming.distance : Hamming distance
     """
     cdef int64_t c_score_cutoff = INT64_MAX if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
@@ -162,10 +158,6 @@ def normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
     -------
     norm_dist : float
         normalized distance between s1 and s2 as a float between 0 and 1.0
-
-    See Also
-    --------
-    Hamming.distance : Hamming distance
     """
     cdef RF_StringWrapper s1_proc, s2_proc
     if s1 is None or s2 is None:
@@ -204,10 +196,6 @@ def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     -------
     norm_sim : float
         normalized similarity between s1 and s2 as a float between 0 and 1.0
-
-    See Also
-    --------
-    Hamming.normalized_distance : Normalized Hamming distance
     """
     cdef RF_StringWrapper s1_proc, s2_proc
     if s1 is None or s2 is None:
