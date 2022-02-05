@@ -9,48 +9,79 @@ on:
       - published
 
 jobs:
-  # todo windowns build broken on scikit-build 0.13.0
-  #build_wheels_windows:
-  #  name: Build wheel on ${{ matrix.os }}/auto/${{matrix.python_tag}}
-  #  runs-on: ${{ matrix.os }}
-  #  strategy:
-  #    fail-fast: false
-  #    matrix:
-  #      python_tag: ["cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*"]
-  #      os: [windows-latest]
-  #  env:
-  #    CIBW_BUILD: ${{matrix.python_tag}}
-  #    CIBW_TEST_REQUIRES: pytest hypothesis pandas
-  #    CIBW_TEST_COMMAND: pytest {package}/tests
-  #    CIBW_BUILD_VERBOSITY: 3
-  #
-  #  steps:
-  #    - uses: actions/checkout@v2
-  #      with:
-  #        submodules: 'true'
-  #
-  #    - uses: actions/setup-python@v2
-  #
-  #    - name: Build wheels
-  #      uses: pypa/cibuildwheel@v2.3.1
-  #      with:
-  #        output-dir: wheelhouse
-  #
-  #    - name: Upload wheels
-  #      uses: actions/upload-artifact@v2
-  #      with:
-  #        path: ./wheelhouse/*.whl
-
-  build_wheels_macos:
-    name: Build wheel on ${{ matrix.os }}/auto/${{matrix.python_tag}}
-    runs-on: ${{ matrix.os }}
+  build_wheels_windows:
+    name: Build wheel on windows-latest/${{matrix.arch}}/${{matrix.python_tag}}
+    runs-on: windows-latest
     strategy:
       fail-fast: false
       matrix:
-        python_tag: ["cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*"]
-        os: [macos-latest]
+        arch: [auto32, auto64]
+        python_tag: ["cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*", "pp37-*", "pp38-*"]
+        exclude:
+          # PyPy only supports x86_64 on Windows
+          - arch: auto32
+            python_tag: "pp37-*"
+          - arch: auto32
+            python_tag: "pp38-*"
+
+          # PyPy Windows is currently broken in scikit-build
+          - arch: auto64
+            python_tag: "pp37-*"
+          - arch: auto64
+            python_tag: "pp38-*"
     env:
       CIBW_BUILD: ${{matrix.python_tag}}
+      CIBW_ARCHS: ${{matrix.arch}}
+      ARCH_MAPPING: "{ 'auto32': 'x86', 'auto64': 'x86_64' }"
+      CIBW_TEST_REQUIRES: pytest hypothesis pandas
+      CIBW_TEST_COMMAND: pytest {package}/tests
+      CIBW_BUILD_VERBOSITY: 3
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+
+      - uses: actions/setup-python@v2
+
+      - name: Activate MSVC vars on Windows
+        uses: ilammy/msvc-dev-cmd@v1
+        if: runner.os == 'Windows'
+        with:
+          arch: ${{ fromJson(env.ARCH_MAPPING)[env.CIBW_ARCHS] }}
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.3.1
+        with:
+          output-dir: wheelhouse
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v2
+        with:
+          path: ./wheelhouse/*.whl
+
+  build_wheels_macos:
+    name: Build wheel on macos-latest/${{matrix.arch}}/${{matrix.python_tag}}
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64, arm64, universal2]
+        python_tag: ["cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*"]
+        exclude:
+          # MacOS Arm only supported since Python 3.8
+          - arch: arm64
+            python_tag: "cp36-*"
+          - arch: arm64
+            python_tag: "cp37-*"
+          - arch: universal2
+            python_tag: "cp36-*"
+          - arch: universal2
+            python_tag: "cp37-*"
+    env:
+      CIBW_BUILD: ${{matrix.python_tag}}
+      CIBW_ARCHS: ${{matrix.arch}}
+      CIBW_TEST_SKIP: "*-macosx_{arm64,universal2}"
       CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_COMMAND: pytest {package}/tests
       CIBW_BUILD_VERBOSITY: 3
@@ -72,36 +103,7 @@ jobs:
         with:
           path: ./wheelhouse/*.whl
 
-  build_wheels_apple_silicon:
-    name: Build wheel on macos-latest/universal2+arm64/${{matrix.python_tag}}
-    runs-on: macos-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python_tag: ["cp38-*", "cp39-*", "cp310-*"]
-    env:
-      CIBW_BUILD: ${{matrix.python_tag}}
-      CIBW_ARCHS_MACOS: "universal2 arm64"
-      CIBW_BUILD_VERBOSITY: 3
-
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-
-      - uses: actions/setup-python@v2
-
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.3.1
-        with:
-          output-dir: wheelhouse
-
-      - name: Upload wheels
-        uses: actions/upload-artifact@v2
-        with:
-          path: ./wheelhouse/*.whl
-
-  build_wheels_manylinux:
+  build_wheels_linux:
     name: Build wheels on ubuntu-latest/${{matrix.arch}}/${{matrix.python_tag}}
     runs-on: ubuntu-latest
     strategy:
@@ -110,7 +112,7 @@ jobs:
         # disable s390x and ppc64le wheels while they are not provided by numpy
         # arch: [auto, aarch64, ppc64le, s390x]
         arch: [auto, aarch64]
-        python_tag: [ "cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*"]
+        python_tag: [ "cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*", "pp37-*", "pp38-*"]
     env:
       CIBW_ARCHS_LINUX: ${{matrix.arch}}
       CIBW_BUILD: ${{matrix.python_tag}}
@@ -140,41 +142,6 @@ jobs:
         with:
           path: ./wheelhouse/*.whl
 
-  # Scikit-build fails to build on pypy
-  #build_wheels_pypy:
-  #  name: Build wheel on ${{ matrix.os }}/auto/${{matrix.python_tag}}
-  #  runs-on: ${{ matrix.os }}
-  #  strategy:
-  #    fail-fast: false
-  #    matrix:
-  #      # numpy ships no wheels for pypy on mac os
-  #      os: [ubuntu-latest, windows-latest]
-  #      python_tag: ["pp37-*", "pp38-*"]
-  #  env:
-  #    CIBW_BUILD: ${{matrix.python_tag}}
-  #    # activate tests when the fix for
-  #    # https://foss.heptapod.net/pypy/pypy/-/issues/3413 is released
-  #    CIBW_TEST_REQUIRES: pytest hypothesis pandas
-  #    CIBW_TEST_COMMAND: pytest {package}/tests
-  #    CIBW_BUILD_VERBOSITY: 3
-  #
-  #  steps:
-  #    - uses: actions/checkout@v2
-  #      with:
-  #        submodules: 'true'
-  #
-  #    - uses: actions/setup-python@v2
-  #
-  #    - name: Build wheels
-  #      uses: pypa/cibuildwheel@v2.3.1
-  #      with:
-  #        output-dir: wheelhouse
-  #
-  #    - name: Upload wheels
-  #      uses: actions/upload-artifact@v2
-  #      with:
-  #        path: ./wheelhouse/*.whl
-
   build_sdist:
     name: Build source distribution
     runs-on: ubuntu-latest
@@ -198,7 +165,7 @@ jobs:
 
   deploy-wheels:
     if: github.event_name == 'release' && github.event.action == 'published'
-    needs: [build_wheels_macos, build_wheels_apple_silicon, build_wheels_manylinux, build_sdist]
+    needs: [build_wheels_windows, build_wheels_macos, build_wheels_linux, build_sdist]
     name: deploy wheels to pypi
     runs-on: ubuntu-18.04
 
