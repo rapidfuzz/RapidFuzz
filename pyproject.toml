@@ -4,7 +4,7 @@ requires = [
     "wheel",
     "scikit-build>=0.13.0",
     "cmake",
-    "ninja",
+    "ninja; platform_system!='Windows'",
     "oldest-supported-numpy",
     "Cython==3.0.0a10",
     "rapidfuzz_capi==1.0.5"

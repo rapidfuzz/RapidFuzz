@@ -32,7 +32,6 @@ jobs:
     env:
       CIBW_BUILD: ${{matrix.python_tag}}
       CIBW_ARCHS: ${{matrix.arch}}
-      ARCH_MAPPING: "{ 'auto32': 'x86', 'auto64': 'x86_64' }"
       CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_COMMAND: pytest {package}/tests
       CIBW_BUILD_VERBOSITY: 3
@@ -43,12 +42,6 @@ jobs:
           submodules: 'true'
 
       - uses: actions/setup-python@v2
-
-      - name: Activate MSVC vars on Windows
-        uses: ilammy/msvc-dev-cmd@v1
-        if: runner.os == 'Windows'
-        with:
-          arch: ${{ fromJson(env.ARCH_MAPPING)[env.CIBW_ARCHS] }}
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.3.1
