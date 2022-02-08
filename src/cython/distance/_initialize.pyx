@@ -85,7 +85,7 @@ cdef RfOpcodes list_to_opcodes(ops, Py_ssize_t src_len, Py_ssize_t dest_len) exc
     cdef RfOpcodes result
     cdef Py_ssize_t i
     cdef EditType edit_type
-    cdef int64_t src_begin, src_end, dest_begin, dest_end
+    cdef int64_t src_start, src_end, dest_start, dest_end
     cdef Py_ssize_t ops_len = len(ops)
     if not ops_len:
         return result
@@ -101,27 +101,27 @@ cdef RfOpcodes list_to_opcodes(ops, Py_ssize_t src_len, Py_ssize_t dest_len) exc
             raise TypeError("Expected list of 3-tuples, or a list of 5-tuples")
 
         edit_type = str_to_edit_type(op[0])
-        src_begin = op[1]
+        src_start = op[1]
         src_end = op[2]
-        dest_begin = op[3]
+        dest_start = op[3]
         dest_end = op[4]
 
         if src_end > src_len or dest_end > dest_len:
             raise ValueError("List of edit operations invalid")
-        elif src_end < src_begin or dest_end < dest_begin:
+        elif src_end < src_start or dest_end < dest_start:
             raise ValueError("List of edit operations invalid")
 
         if edit_type == EditType.None or edit_type == EditType.Replace:
-            if src_end - src_begin != dest_end - dest_begin or src_begin == src_end:
+            if src_end - src_start != dest_end - dest_start or src_start == src_end:
                 raise ValueError("List of edit operations invalid")
         if edit_type == EditType.Insert:
-            if src_begin != src_end or dest_begin == dest_end:
+            if src_start != src_end or dest_start == dest_end:
                 raise ValueError("List of edit operations invalid")
         elif edit_type == EditType.Delete:
-            if src_begin == src_end or dest_begin != dest_end:
+            if src_start == src_end or dest_start != dest_end:
                 raise ValueError("List of edit operations invalid")
 
-        result.emplace_back(edit_type, src_begin, src_end, dest_begin, dest_end)
+        result.emplace_back(edit_type, src_start, src_end, dest_start, dest_end)
 
     # check if edit operations span the complete string
     if result[0].src_begin != 0 or result[0].dest_begin != 0:
@@ -157,17 +157,50 @@ cdef list opcodes_to_list(const RfOpcodes& ops):
 
     return result_list
 
-
-cdef class Editops:
+cdef class Editop:
     """
-    List like object of 3-tuples describing how to turn s1 into s2.
-    Each tuple is of the form (tag, src_pos, dest_pos).
+    Tuple like object describing an edit operation.
+    It is in the form (tag, src_pos, dest_pos)
 
     The tags are strings, with these meanings:
 
-    'replace': s1[src_pos] should be replaced by s2[dest_pos]
-    'delete':  s1[src_pos] should be deleted
-    'insert':  s2[dest_pos] should be inserted at s1[src_pos]
+    'replace': src[src_pos] should be replaced by dest[dest_pos]
+    'delete':  src[src_pos] should be deleted
+    'insert':  dest[dest_pos] should be inserted at src[src_pos]
+    """
+    cdef public str tag
+    cdef public Py_ssize_t src_pos
+    cdef public Py_ssize_t dest_pos
+
+    def __init__(self, tag, src_pos, dest_pos):
+        self.tag = tag
+        self.src_pos = src_pos
+        self.dest_pos = dest_pos
+
+    def __len__(self):
+        return 3
+
+    def __eq__(self, other):
+        if len(other) != 3:
+            return False
+
+        return (other[0] == self.tag
+            and other[1] == self.src_pos
+            and other[2] == self.dest_pos)
+
+    def __getitem__(self, i):
+        if i==0 or i==-3: return self.tag
+        if i==1 or i==-2: return self.src_pos
+        if i==2 or i==-1: return self.dest_pos
+
+        raise IndexError('Editop index out of range')
+
+    def __repr__(self):
+        return f"Editop(tag={self.tag}, src_pos={self.src_pos}, dest_pos={self.dest_pos})"
+
+cdef class Editops:
+    """
+    List like object of Editos describing how to turn s1 into s2.
     """
 
     def __init__(self, editops=None, src_len=0, dest_len=0):
@@ -236,9 +269,14 @@ cdef class Editops:
         --------
         >>> from rapidfuzz.distance import Levenshtein
         >>> Levenshtein.editops('spam', 'park')
-        [('delete', 0, 0), ('replace', 3, 2), ('insert', 4, 3)]
+        [Editop(tag=delete, src_pos=0, dest_pos=0),
+         Editop(tag=replace, src_pos=3, dest_pos=2),
+         Editop(tag=insert, src_pos=4, dest_pos=3)]
+
         >>> Levenshtein.editops('spam', 'park').inverse()
-        [('insert', 0, 0), ('replace', 2, 3), ('delete', 3, 4)]
+        [Editop(tag=insert, src_pos=0, dest_pos=0),
+         Editop(tag=replace, src_pos=2, dest_pos=3),
+         Editop(tag=delete, src_pos=3, dest_pos=4)]
         """
         cdef Editops x = Editops.__new__(Editops)
         x.editops = self.editops.inverse()
@@ -280,7 +318,7 @@ cdef class Editops:
             if index < 0 or index >= self.editops.size():
                 raise IndexError("Editops index out of range")
 
-            return (
+            return Editop(
                 edit_type_to_str(self.editops[index].type),
                 self.editops[index].src_pos,
                 self.editops[index].dest_pos
@@ -291,24 +329,67 @@ cdef class Editops:
     def __repr__(self):
         return "[" + ", ".join(repr(op) for op in self) + "]"
 
-cdef class Opcodes:
+cdef class Opcode:
     """
-    List like object of 5-tuples describing how to turn s1 into s2.
-    Each tuple is of the form (tag, i1, i2, j1, j2). The first tuple
-    has i1 == j1 == 0, and remaining tuples have i1 == the i2 from the
-    tuple preceding it, and likewise for j1 == the previous j2.
+    Tuple like object describing an edit operation.
+    It is in the form (tag, src_start, src_end, dest_start, dest_end)
 
     The tags are strings, with these meanings:
 
-    'replace': s1[i1:i2] should be replaced by s2[j1:j2]
-    'delete':  s1[i1:i2] should be deleted. Note that j1==j2 in this case.
-    'insert':  s2[j1:j2] should be inserted at s1[i1:i1]. Note that i1==i2 in this case.
-    'equal':   s1[i1:i2] == s2[j1:j2]
+    'replace': src[src_start:src_end] should be replaced by dest[dest_start:dest_end]
+    'delete':  src[src_start:src_end] should be deleted. Note that dest_start==dest_end in this case.
+    'insert':  dest[dest_start:dest_end] should be inserted at src[src_start:src_start]. Note that src_start==src_end in this case.
+    'equal':   src[src_start:src_end] == dest[dest_start:dest_end]
 
     Note
     ----
-    Opcodes uses tuples similar to difflib's SequenceMatcher to make them
+    Opcode is compatible with the tuples returned by difflib's SequenceMatcher to make them
     interoperable
+    """
+    cdef public str tag
+    cdef public Py_ssize_t src_start
+    cdef public Py_ssize_t src_end
+    cdef public Py_ssize_t dest_start
+    cdef public Py_ssize_t dest_end
+
+    def __init__(self, tag, src_start, src_end, dest_start, dest_end):
+        self.tag = tag
+        self.src_start = src_start
+        self.src_end = src_end
+        self.dest_start = dest_start
+        self.dest_end = dest_end
+
+    def __len__(self):
+        return 5
+
+    def __eq__(self, other):
+        if len(other) != 5:
+            return False
+
+        return (other[0] == self.tag
+            and other[1] == self.src_start
+            and other[2] == self.src_end
+            and other[3] == self.dest_start
+            and other[4] == self.dest_end)
+
+    def __getitem__(self, i):
+        if i==0 or i==-5: return self.tag
+        if i==1 or i==-4: return self.src_start
+        if i==2 or i==-3: return self.src_end
+        if i==3 or i==-2: return self.dest_start
+        if i==4 or i==-1: return self.dest_end
+
+        raise IndexError('Opcode index out of range')
+
+    def __repr__(self):
+        return f"Opcode(tag={self.tag}, src_start={self.src_start}, src_end={self.src_end}, dest_start={self.dest_start}, dest_end={self.dest_end})"
+
+cdef class Opcodes:
+    """
+    List like object of Opcodes describing how to turn s1 into s2.
+    The first Opcode has src_start == dest_start == 0, and remaining tuples
+    have src_start == the src_end from the tuple preceding it,
+    and likewise for dest_start == the previous dest_end.
     """
 
     def __init__(self, opcodes=None, src_len=0, dest_len=0):
@@ -378,11 +459,16 @@ cdef class Opcodes:
         --------
         >>> from rapidfuzz.distance import Levenshtein
         >>> Levenshtein.opcodes('spam', 'park')
-        [('delete', 0, 1, 0, 0), ('equal', 1, 3, 0, 2), ('replace', 3, 4, 2, 3),
-         ('insert', 4, 4, 3, 4)]
+        [Opcode(tag=delete, src_start=0, src_end=1, dest_start=0, dest_end=0),
+         Opcode(tag=equal, src_start=1, src_end=3, dest_start=0, dest_end=2),
+         Opcode(tag=replace, src_start=3, src_end=4, dest_start=2, dest_end=3),
+         Opcode(tag=insert, src_start=4, src_end=4, dest_start=3, dest_end=4)]
+
         >>> Levenshtein.opcodes('spam', 'park').inverse()
-        [('insert', 0, 0, 0, 1), ('equal', 0, 2, 1, 3), ('replace', 2, 3, 3, 4),
-         ('delete', 3, 4, 4, 4)]
+        [Opcode(tag=insert, src_start=0, src_end=0, dest_start=0, dest_end=1),
+         Opcode(tag=equal, src_start=0, src_end=2, dest_start=1, dest_end=3),
+         Opcode(tag=replace, src_start=2, src_end=3, dest_start=3, dest_end=4),
+         Opcode(tag=delete, src_start=3, src_end=4, dest_start=4, dest_end=4)]
         """
         cdef Opcodes x = Opcodes.__new__(Opcodes)
         x.opcodes = self.opcodes.inverse()
@@ -424,7 +510,7 @@ cdef class Opcodes:
             if index < 0 or index >= self.opcodes.size():
                 raise IndexError("Opcodes index out of range")
 
-            return (
+            return Opcode(
                 edit_type_to_str(self.opcodes[index].type),
                 self.opcodes[index].src_begin,
                 self.opcodes[index].src_end,
