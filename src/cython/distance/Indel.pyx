@@ -85,7 +85,7 @@ def distance(s1, s2, *, processor=None, score_cutoff=None):
     --------
     Find the Indel distance between two strings:
 
-    >>> from rapidfuzz.algorithm.edit_based import Indel
+    >>> from rapidfuzz.distance import Indel
     >>> Indel.distance("lewenstein", "levenshtein")
     3
 
@@ -209,7 +209,7 @@ def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     --------
     Find the normalized Indel similarity between two strings:
 
-    >>> from rapidfuzz.algorithm.edit_based import Indel
+    >>> from rapidfuzz.distance import Indel
     >>> Indel.normalized_similarity("lewenstein", "levenshtein")
     0.85714285714285
 
@@ -267,7 +267,7 @@ def editops(s1, s2, *, processor=None):
 
     Examples
     --------
-    >>> from rapidfuzz.algorithm.edit_based import Indel
+    >>> from rapidfuzz.distance import Indel
     >>> for tag, src_pos, dest_pos in Indel.editops("qabxcd", "abycdf"):
     ...    print(("%7s s1[%d] s2[%d]" % (tag, src_pos, dest_pos)))
      delete s1[0] s2[0]
@@ -313,7 +313,7 @@ def opcodes(s1, s2, *, processor=None):
 
     Examples
     --------
-    >>> from rapidfuzz.algorithm.edit_based import Indel
+    >>> from rapidfuzz.distance import Indel
 
     >>> a = "qabxcd"
     >>> b = "abycdf"

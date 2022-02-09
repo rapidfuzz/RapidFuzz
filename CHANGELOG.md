@@ -1,5 +1,9 @@
 ## Changelog
 
+### [2.1.0] - Unreleased
+#### Fixed
+- fix type hints
+
 ### [2.0.0] - 2022-01-09
 #### Added
 - added C-Api which can be used to extend RapidFuzz from different Python modules using any

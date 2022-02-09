@@ -106,7 +106,7 @@ def distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
     --------
     Find the Levenshtein distance between two strings:
 
-    >>> from rapidfuzz.algorithm.edit_based import Levenshtein
+    >>> from rapidfuzz.distance import Levenshtein
     >>> Levenshtein.distance("lewenstein", "levenshtein")
     2
 
@@ -282,7 +282,7 @@ def normalized_similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cuto
     --------
     Find the normalized Levenshtein similarity between two strings:
 
-    >>> from rapidfuzz.algorithm.edit_based import Levenshtein
+    >>> from rapidfuzz.distance import Levenshtein
     >>> Levenshtein.normalized_similarity("lewenstein", "levenshtein")
     0.81818181818181
 
@@ -352,7 +352,7 @@ def editops(s1, s2, *, processor=None):
 
     Examples
     --------
-    >>> from rapidfuzz.algorithm.edit_based import Levenshtein
+    >>> from rapidfuzz.distance import Levenshtein
     >>> for tag, src_pos, dest_pos in Levenshtein.editops("qabxcd", "abycdf"):
     ...    print(("%7s s1[%d] s2[%d]" % (tag, src_pos, dest_pos)))
      delete s1[1] s2[0]
@@ -398,7 +398,7 @@ def opcodes(s1, s2, *, processor=None):
 
     Examples
     --------
-    >>> from rapidfuzz.algorithm.edit_based import Levenshtein
+    >>> from rapidfuzz.distance import Levenshtein
     
     >>> a = "qabxcd"
     >>> b = "abycdf"
