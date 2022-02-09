@@ -10,10 +10,3 @@ from rapidfuzz.cpp_string_metric import (
     jaro_similarity,
     jaro_winkler_similarity
 )
-
-import warnings
-
-warnings.warn(
-    "This module is deprecated. Use the replacements in rapidfuzz.distance instead",
-    DeprecationWarning
-)

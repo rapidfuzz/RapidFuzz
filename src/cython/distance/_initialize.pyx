@@ -164,9 +164,15 @@ cdef class Editop:
 
     The tags are strings, with these meanings:
 
-    'replace': src[src_pos] should be replaced by dest[dest_pos]
-    'delete':  src[src_pos] should be deleted
-    'insert':  dest[dest_pos] should be inserted at src[src_pos]
+    +-----------+---------------------------------------------------+
+    | tag       | explanation                                       |
+    +===========+===================================================+
+    | 'replace' | src[src_pos] should be replaced by dest[dest_pos] |
+    +-----------+---------------------------------------------------+
+    | 'delete'  | src[src_pos] should be deleted                    |
+    +-----------+---------------------------------------------------+
+    | 'insert'  | dest[dest_pos] should be inserted at src[src_pos] |
+    +-----------+---------------------------------------------------+
     """
     cdef public str tag
     cdef public Py_ssize_t src_pos
@@ -336,10 +342,21 @@ cdef class Opcode:
 
     The tags are strings, with these meanings:
 
-    'replace': src[src_start:src_end] should be replaced by dest[dest_start:dest_end]
-    'delete':  src[src_start:src_end] should be deleted. Note that dest_start==dest_end in this case.
-    'insert':  dest[dest_start:dest_end] should be inserted at src[src_start:src_start]. Note that src_start==src_end in this case.
-    'equal':   src[src_start:src_end] == dest[dest_start:dest_end]
+    +-----------+-----------------------------------------------------+
+    | tag       | explanation                                         |
+    +===========+=====================================================+
+    | 'replace' | src[src_start:src_end] should be                    |
+    |           | replaced by dest[dest_start:dest_end]               |
+    +-----------+-----------------------------------------------------+
+    | 'delete'  | src[src_start:src_end] should be deleted.           |
+    |           | Note that dest_start==dest_end in this case.        |
+    +-----------+-----------------------------------------------------+
+    | 'insert'  | dest[dest_start:dest_end] should be inserted        |
+    |           | at src[src_start:src_start].                        |
+    |           | Note that src_start==src_end in this case.          |
+    +-----------+-----------------------------------------------------+
+    | 'equal'   | src[src_start:src_end] == dest[dest_start:dest_end] |
+    +-----------+-----------------------------------------------------+
 
     Note
     ----

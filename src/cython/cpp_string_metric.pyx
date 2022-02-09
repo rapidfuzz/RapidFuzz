@@ -106,113 +106,9 @@ def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
     ValueError
         If unsupported weights are provided a ValueError is thrown
 
-    Notes
-    -----
-    Depending on the input parameters different optimized implementation are used
-    to improve the performance.
-
-    Insertion = Deletion = Substitution:
-      This is known as uniform Levenshtein distance and is the distance most commonly
-      referred to as Levenshtein distance. The following implementation is used
-      with a worst-case performance of ``O([N/64]M)``.
-
-      - if max is 0 the similarity can be calculated using a direct comparision,
-        since no difference between the strings is allowed.  The time complexity of
-        this algorithm is ``O(N)``.
-
-      - A common prefix/suffix of the two compared strings does not affect
-        the Levenshtein distance, so the affix is removed before calculating the
-        similarity.
-
-      - If max is ≤ 3 the mbleven algorithm is used. This algorithm
-        checks all possible edit operations that are possible under
-        the threshold `max`. The time complexity of this algorithm is ``O(N)``.
-
-      - If the length of the shorter string is ≤ 64 after removing the common affix
-        Hyyrös' algorithm is used, which calculates the Levenshtein distance in
-        parallel. The algorithm is described by [1]_. The time complexity of this
-        algorithm is ``O(N)``.
-
-      - If the length of the shorter string is ≥ 64 after removing the common affix
-        a blockwise implementation of Myers' algorithm is used, which calculates
-        the Levenshtein distance in parallel (64 characters at a time).
-        The algorithm is described by [3]_. The time complexity of this
-        algorithm is ``O([N/64]M)``.
-
-    The following image shows a benchmark of the Levenshtein distance in multiple
-    Python libraries. All of them are implemented either in C/C++ or Cython.
-    The graph shows, that python-Levenshtein is the only library with a time
-    complexity of ``O(NM)``, while all other libraries have a time complexity of
-    ``O([N/64]M)``. Especially for long strings RapidFuzz is a lot faster than
-    all the other tested libraries.
-
-    .. image:: img/uniform_levenshtein.svg
-
-
-    Insertion = Deletion, Substitution >= Insertion + Deletion:
-      Since every Substitution can be performed as Insertion + Deletion, this variant
-      of the Levenshtein distance only uses Insertions and Deletions. Therefore this
-      variant is often referred to as InDel-Distance.  The following implementation
-      is used with a worst-case performance of ``O([N/64]M)``.
-
-      - if max is 0 the similarity can be calculated using a direct comparision,
-        since no difference between the strings is allowed.  The time complexity of
-        this algorithm is ``O(N)``.
-
-      - if max is 1 and the two strings have a similar length, the similarity can be
-        calculated using a direct comparision aswell, since a substitution would cause
-        a edit distance higher than max. The time complexity of this algorithm
-        is ``O(N)``.
-
-      - A common prefix/suffix of the two compared strings does not affect
-        the Levenshtein distance, so the affix is removed before calculating the
-        similarity.
-
-      - If max is ≤ 4 the mbleven algorithm is used. This algorithm
-        checks all possible edit operations that are possible under
-        the threshold `max`. As a difference to the normal Levenshtein distance this
-        algorithm can even be used up to a threshold of 4 here, since the higher weight
-        of substitutions decreases the amount of possible edit operations.
-        The time complexity of this algorithm is ``O(N)``.
-
-      - If the length of the shorter string is ≤ 64 after removing the common affix
-        Hyyrös' lcs algorithm is used, which calculates the InDel distance in
-        parallel. The algorithm is described by [4]_ and is extended with support
-        for UTF32 in this implementation. The time complexity of this
-        algorithm is ``O(N)``.
-
-      - If the length of the shorter string is ≥ 64 after removing the common affix
-        a blockwise implementation of the Hyyrös' lcs algorithm is used, which calculates
-        the Levenshtein distance in parallel (64 characters at a time).
-        The algorithm is described by [4]_. The time complexity of this
-        algorithm is ``O([N/64]M)``.
-
-    The following image shows a benchmark of the InDel distance in RapidFuzz
-    and python-Levenshtein. Similar to the normal Levenshtein distance
-    python-Levenshtein uses a implementation with a time complexity of ``O(NM)``,
-    while RapidFuzz has a time complexity of ``O([N/64]M)``.
-
-    .. image:: img/indel_levenshtein.svg
-
-
-    Other weights:
-      The implementation for other weights is based on Wagner-Fischer.
-      It has a performance of ``O(N * M)`` and has a memory usage of ``O(N)``.
-      Further details can be found in [2]_.
-
-    References
-    ----------
-    .. [1] Hyyrö, Heikki. "A Bit-Vector Algorithm for Computing
-           Levenshtein and Damerau Edit Distances."
-           Nordic Journal of Computing, Volume 10 (2003): 29-39.
-    .. [2] Wagner, Robert & Fischer, Michael
-           "The String-to-String Correction Problem."
-           J. ACM. 21. (1974): 168-173
-    .. [3] Myers, Gene. "A fast bit-vector algorithm for approximate
-           string matching based on dynamic programming."
-           Journal of the ACM (JACM) 46.3 (1999): 395-415.
-    .. [4] Hyyrö, Heikki. "Bit-Parallel LCS-length Computation Revisited"
-           Proc. 15th Australasian Workshop on Combinatorial Algorithms (AWOCA 2004).
+    .. deprecated:: 2.0.0
+        Use :func:`rapidfuzz.distance.Levenshtein.distance` instead.
+        This function will be removed in v3.0.0.
 
     Examples
     --------
@@ -289,15 +185,9 @@ def levenshtein_editops(s1, s2, *, processor=None):
     editops : list[]
         edit operations required to turn s1 into s2
 
-    Notes
-    -----
-    The alignment is calculated using an algorithm of Heikki Hyyrö, which is
-    described [1]_. It has a time complexity and memory usage of ``O([N/64] * M)``.
-
-    References
-    ----------
-    .. [1] Hyyrö, Heikki. "A Note on Bit-Parallel Alignment Computation."
-           Stringology (2004).
+    .. deprecated:: 2.0.0
+        Use :func:`rapidfuzz.distance.Levenshtein.editops` instead.
+        This function will be removed in v3.0.0.
 
     Examples
     --------
@@ -348,31 +238,13 @@ def normalized_levenshtein(s1, s2, *, weights=(1,1,1), processor=None, score_cut
     ValueError
         If unsupported weights are provided a ValueError is thrown
 
+    .. deprecated:: 2.0.0
+        Use :func:`rapidfuzz.distance.Levenshtein.normalized_similarity` instead.
+        This function will be removed in v3.0.0.
+
     See Also
     --------
     levenshtein : Levenshtein distance
-
-    Notes
-    -----
-    The normalization of the Levenshtein distance is performed in the following way:
-
-    .. math::
-      :nowrap:
-
-      \\begin{align*}
-        dist_{max} &= \\begin{cases}
-          min(len(s1), len(s2)) \cdot sub,       & \\text{if } sub \leq ins + del \\\\
-          len(s1) \cdot del + len(s2) \cdot ins, & \\text{otherwise}
-        \end{cases}\\\\[10pt]
-
-        dist_{max} &= \\begin{cases}
-          dist_{max} + (len(s1) - len(s2)) \cdot del, & \\text{if } len(s1) > len(s2) \\\\
-          dist_{max} + (len(s2) - len(s1)) \cdot ins, & \\text{if } len(s1) < len(s2) \\\\
-          dist_{max},                                 & \\text{if } len(s1) = len(s2)
-        \end{cases}\\\\[10pt]
-
-        ratio &= 100 \cdot \\frac{distance(s1, s2)}{dist_{max}}
-      \end{align*}
 
     Examples
     --------
@@ -445,6 +317,10 @@ def hamming(s1, s2, *, processor=None, max=None):
     ------
     ValueError
         If s1 and s2 have a different length
+
+    .. deprecated:: 2.0.0
+        Use :func:`rapidfuzz.distance.Hamming.distance` instead.
+        This function will be removed in v3.0.0.
     """
     cdef int64_t c_max = INT64_MAX if max is None else max
     cdef RF_StringWrapper s1_proc, s2_proc
@@ -487,6 +363,10 @@ def normalized_hamming(s1, s2, *, processor=None, score_cutoff=None):
     See Also
     --------
     hamming : Hamming distance
+
+    .. deprecated:: 2.0.0
+        Use :func:`rapidfuzz.distance.Hamming.normalized_similarity` instead.
+        This function will be removed in v3.0.0.
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
@@ -521,6 +401,9 @@ def jaro_similarity(s1, s2, *, processor=None, score_cutoff=None):
     similarity : float
         similarity between s1 and s2 as a float between 0 and 100
 
+    .. deprecated:: 2.0.0
+        Use :func:`rapidfuzz.distance.Jaro.similarity` instead.
+        This function will be removed in v3.0.0.
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
@@ -562,6 +445,10 @@ def jaro_winkler_similarity(s1, s2, *, double prefix_weight=0.1, processor=None,
     ------
     ValueError
         If prefix_weight is invalid
+
+    .. deprecated:: 2.0.0
+        Use :func:`rapidfuzz.distance.JaroWinkler.similarity` instead.
+        This function will be removed in v3.0.0.
     """
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
