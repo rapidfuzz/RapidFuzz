@@ -136,7 +136,7 @@ Here are some examples on the usage of processors in RapidFuzz:
 ("Dallas Cowboys", 90, 3)
 ```
 
-The full documentation of processors can be found [here](https://maxbachmann.github.io/RapidFuzz/process.html)
+The full documentation of processors can be found [here](https://maxbachmann.github.io/RapidFuzz/Usage/process.html)
 
 ## Benchmark
 
