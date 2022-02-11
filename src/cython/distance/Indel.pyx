@@ -234,7 +234,7 @@ def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
         raise ValueError("score_cutoff has to be >= 0")
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
-    return indel_normalized_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+    return indel_normalized_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 def editops(s1, s2, *, processor=None):
     """

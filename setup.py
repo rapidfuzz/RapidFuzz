@@ -6,7 +6,7 @@ with open('README.md', 'rt', encoding="utf8") as f:
 
 setup(
     name="rapidfuzz",
-    version="2.0.0",
+    version="2.0.1",
     extras_require={'full': ['numpy']},
     url="https://github.com/maxbachmann/RapidFuzz",
     author="Max Bachmann",

@@ -1,10 +1,11 @@
 ## Changelog
 
-### [2.1.0] - Unreleased
+### [2.0.1] - 2022-02-11
 #### Fixed
 - fix type hints
+- Indel.normalized_similarity mistakenly used the implementation of Indel.normalized_distance
 
-### [2.0.0] - 2022-01-09
+### [2.0.0] - 2022-02-09
 #### Added
 - added C-Api which can be used to extend RapidFuzz from different Python modules using any
   programming language which allows the usage of C-Apis (C/C++/Rust)
