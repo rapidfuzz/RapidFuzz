@@ -1,5 +1,12 @@
 ## Changelog
 
+### [2.0.2] - 2022-02-12
+#### Fixed
+- fix type hints
+- Add back transpiled cython files to the sdist to simplify builds in package builders
+  like FreeBSD port build or conda-forge
+
+
 ### [2.0.1] - 2022-02-11
 #### Fixed
 - fix type hints
