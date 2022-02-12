@@ -9,7 +9,7 @@ include src/rapidfuzz/**/*.pyi
 include src/rapidfuzz/py.typed
 
 recursive-include src/cython CMakeLists.txt
-recursive-include src/cython *.hpp *.h *.cpp *.pyx *.pxd
+recursive-include src/cython *.hpp *.h *.cpp *.cxx *.pyx *.pxd
 
 include extern/rapidfuzz-cpp/LICENSE
 include extern/rapidfuzz-cpp/CMakeLists.txt
