@@ -1,5 +1,7 @@
 from typing import Tuple, List, Union
 
+from . import Hamming, Indel, Jaro, JaroWinkler, Levenshtein
+
 _AnyOpList = Union[
     List[Union[Editop, Tuple[str, int, int]]],
     List[Union[Opcode, Tuple[str, int, int, int, int]]]
