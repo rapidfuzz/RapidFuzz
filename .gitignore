@@ -24,6 +24,6 @@ bench_results/
 # Hypothesis results
 .hypothesis/
 
-# Cython
-src/*.cpp
+# Cython generated files
+*.cxx
 

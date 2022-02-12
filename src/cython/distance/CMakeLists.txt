@@ -1,7 +1,16 @@
-# should use target_include_directories once this is supported by scikit-build
-include_directories(${RF_BASE_DIR}/src/cython)
+function(create_cython_target _name)
+    if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/${_name}.cxx)
+        set(${_name} ${CMAKE_CURRENT_LIST_DIR}/${_name}.cxx PARENT_SCOPE)
+    else()
+        find_package(Cython REQUIRED)
+        # should use target_include_directories once this is supported by scikit-build
+        include_directories(${RF_BASE_DIR}/src/cython)
+        add_cython_target(${_name} CXX)
+        set(${_name} ${_name} PARENT_SCOPE)
+    endif()
+endfunction(create_cython_target)
 
-add_cython_target(_initialize CXX)
+create_cython_target(_initialize)
 add_library(_initialize MODULE ${_initialize})
 target_compile_features(_initialize PUBLIC cxx_std_14)
 target_include_directories(_initialize PRIVATE ${RF_CAPI_PATH} ${RF_BASE_DIR}/src/cython ${RF_BASE_DIR}/src/cython/distance)
@@ -9,7 +18,7 @@ target_link_libraries(_initialize PRIVATE rapidfuzz::rapidfuzz jaro_winkler::jar
 python_extension_module(_initialize)
 install(TARGETS _initialize LIBRARY DESTINATION src/rapidfuzz/distance)
 
-add_cython_target(Hamming CXX)
+create_cython_target(Hamming)
 add_library(Hamming MODULE ${Hamming})
 target_compile_features(Hamming PUBLIC cxx_std_14)
 target_include_directories(Hamming PRIVATE ${RF_CAPI_PATH} ${RF_BASE_DIR}/src/cython ${RF_BASE_DIR}/src/cython/distance)
@@ -17,7 +26,7 @@ target_link_libraries(Hamming PRIVATE rapidfuzz::rapidfuzz jaro_winkler::jaro_wi
 python_extension_module(Hamming)
 install(TARGETS Hamming LIBRARY DESTINATION src/rapidfuzz/distance)
 
-add_cython_target(Levenshtein CXX)
+create_cython_target(Levenshtein)
 add_library(Levenshtein MODULE ${Levenshtein})
 target_compile_features(Levenshtein PUBLIC cxx_std_14)
 target_include_directories(Levenshtein PRIVATE ${RF_CAPI_PATH} ${RF_BASE_DIR}/src/cython ${RF_BASE_DIR}/src/cython/distance)
@@ -25,7 +34,7 @@ target_link_libraries(Levenshtein PRIVATE rapidfuzz::rapidfuzz jaro_winkler::jar
 python_extension_module(Levenshtein)
 install(TARGETS Levenshtein LIBRARY DESTINATION src/rapidfuzz/distance)
 
-add_cython_target(Indel CXX)
+create_cython_target(Indel)
 add_library(Indel MODULE ${Indel})
 target_compile_features(Indel PUBLIC cxx_std_14)
 target_include_directories(Indel PRIVATE ${RF_CAPI_PATH} ${RF_BASE_DIR}/src/cython ${RF_BASE_DIR}/src/cython/distance)
@@ -33,7 +42,7 @@ target_link_libraries(Indel PRIVATE rapidfuzz::rapidfuzz jaro_winkler::jaro_wink
 python_extension_module(Indel)
 install(TARGETS Indel LIBRARY DESTINATION src/rapidfuzz/distance)
 
-add_cython_target(Jaro CXX)
+create_cython_target(Jaro)
 add_library(Jaro MODULE ${Jaro})
 target_compile_features(Jaro PUBLIC cxx_std_14)
 target_include_directories(Jaro PRIVATE ${RF_CAPI_PATH} ${RF_BASE_DIR}/src/cython ${RF_BASE_DIR}/src/cython/distance)
@@ -41,7 +50,7 @@ target_link_libraries(Jaro PRIVATE rapidfuzz::rapidfuzz jaro_winkler::jaro_winkl
 python_extension_module(Jaro)
 install(TARGETS Jaro LIBRARY DESTINATION src/rapidfuzz/distance)
 
-add_cython_target(JaroWinkler CXX)
+create_cython_target(JaroWinkler)
 add_library(JaroWinkler MODULE ${JaroWinkler})
 target_compile_features(JaroWinkler PUBLIC cxx_std_14)
 target_include_directories(JaroWinkler PRIVATE ${RF_CAPI_PATH} ${RF_BASE_DIR}/src/cython ${RF_BASE_DIR}/src/cython/distance)

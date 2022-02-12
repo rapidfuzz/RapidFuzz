@@ -6,9 +6,34 @@ on:
       - main
 
 jobs:
+  no_cython_install:
+    name: "Test install with generated cython files"
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - uses: "actions/checkout@v2"
+        with:
+          submodules: 'true'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest hypothesis pandas mypy rapidfuzz_capi Cython==3.0.0a10
+
+      - name: Generate cython
+        run: |
+          chmod +x ./src/cython/generate.sh
+          ./src/cython/generate.sh
+
+      - name: build
+        run: |
+          pip install build; python -m build --sdist
+          # test whether tarball contains all files required for compiling
+          pip install dist/rapidfuzz-*.tar.gz
+
   tests:
     name: "Python ${{ matrix.python-version }}"
-    runs-on: "ubuntu-latest"
+    runs-on: ${{matrix.os}}
     strategy:
       fail-fast: false
       matrix:
@@ -30,9 +55,7 @@ jobs:
 
       - name: build
         run: |
-          pip install build; python -m build --sdist
-          # test whether tarball contains all files required for compiling
-          pip install dist/rapidfuzz-*.tar.gz
+          pip install .
 
       - name: Test type stubs
         if: matrix.python-version != '3.6'

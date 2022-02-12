@@ -678,10 +678,10 @@ cdef inline extract_dict_f64(query, choices, RF_Scorer* scorer, const RF_ScorerF
         get_score_cutoff_f64(score_cutoff, scorer_flags))
 
     # due to score_cutoff not always completely filled
-    if limit > results.size():
-        limit = results.size()
+    if limit > <int64_t>results.size():
+        limit = <int64_t>results.size()
 
-    if limit >= results.size():
+    if limit >= <int64_t>results.size():
         algorithm.sort(results.begin(), results.end(), ExtractComp(scorer_flags))
     else:
         algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractComp(scorer_flags))
@@ -706,10 +706,10 @@ cdef inline extract_dict_i64(query, choices, RF_Scorer* scorer, const RF_ScorerF
         get_score_cutoff_i64(score_cutoff, scorer_flags))
 
     # due to score_cutoff not always completely filled
-    if limit > results.size():
-        limit = results.size()
+    if limit > <int64_t>results.size():
+        limit = <int64_t>results.size()
 
-    if limit >= results.size():
+    if limit >= <int64_t>results.size():
         algorithm.sort(results.begin(), results.end(), ExtractComp(scorer_flags))
     else:
         algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractComp(scorer_flags))
@@ -749,10 +749,10 @@ cdef inline extract_list_f64(query, choices, RF_Scorer* scorer, const RF_ScorerF
         get_score_cutoff_f64(score_cutoff, scorer_flags))
 
     # due to score_cutoff not always completely filled
-    if limit > results.size():
-        limit = results.size()
+    if limit > <int64_t>results.size():
+        limit = <int64_t>results.size()
 
-    if limit >= results.size():
+    if limit >= <int64_t>results.size():
         algorithm.sort(results.begin(), results.end(), ExtractComp(scorer_flags))
     else:
         algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractComp(scorer_flags))
@@ -777,10 +777,10 @@ cdef inline extract_list_i64(query, choices, RF_Scorer* scorer, const RF_ScorerF
         get_score_cutoff_i64(score_cutoff, scorer_flags))
 
     # due to score_cutoff not always completely filled
-    if limit > results.size():
-        limit = results.size()
+    if limit > <int64_t>results.size():
+        limit = <int64_t>results.size()
 
-    if limit >= results.size():
+    if limit >= <int64_t>results.size():
         algorithm.sort(results.begin(), results.end(), ExtractComp(scorer_flags))
     else:
         algorithm.partial_sort(results.begin(), results.begin() + <ptrdiff_t>limit, results.end(), ExtractComp(scorer_flags))

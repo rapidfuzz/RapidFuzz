@@ -250,7 +250,7 @@ def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, 
         of the two collections of inputs.
     """
 
-    cdef RF_Scorer* scorer_context
+    cdef RF_Scorer* scorer_context = NULL
     cdef RF_ScorerFlags scorer_flags
 
     if processor is True:

@@ -19,7 +19,6 @@ endif()
 find_package(NumPy REQUIRED)
 find_package(PythonExtensions REQUIRED)
 find_package(Python COMPONENTS Interpreter Development)
-find_package(Cython REQUIRED)
 
 set(RF_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 

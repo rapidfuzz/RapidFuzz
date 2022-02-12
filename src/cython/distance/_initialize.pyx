@@ -194,7 +194,7 @@ cdef class Editop:
             and other[1] == self.src_pos
             and other[2] == self.dest_pos)
 
-    def __getitem__(self, i):
+    def __getitem__(self, Py_ssize_t i):
         if i==0 or i==-3: return self.tag
         if i==1 or i==-2: return self.src_pos
         if i==2 or i==-1: return self.dest_pos
@@ -314,14 +314,14 @@ cdef class Editops:
         return self.editops.size()
 
     def __getitem__(self, key):
-        cdef int index
+        cdef Py_ssize_t index
 
         if isinstance(key, int):
             index = key
             if index < 0:
-                index += self.editops.size()
+                index += <Py_ssize_t>self.editops.size()
 
-            if index < 0 or index >= self.editops.size():
+            if index < 0 or index >= <Py_ssize_t>self.editops.size():
                 raise IndexError("Editops index out of range")
 
             return Editop(
@@ -389,7 +389,7 @@ cdef class Opcode:
             and other[3] == self.dest_start
             and other[4] == self.dest_end)
 
-    def __getitem__(self, i):
+    def __getitem__(self, Py_ssize_t i):
         if i==0 or i==-5: return self.tag
         if i==1 or i==-4: return self.src_start
         if i==2 or i==-3: return self.src_end
@@ -517,14 +517,14 @@ cdef class Opcodes:
         return self.opcodes.size()
 
     def __getitem__(self, key):
-        cdef int index
+        cdef Py_ssize_t index
 
         if isinstance(key, int):
             index = key
             if index < 0:
-                index += self.opcodes.size()
+                index += <Py_ssize_t>self.opcodes.size()
 
-            if index < 0 or index >= self.opcodes.size():
+            if index < 0 or index >= <Py_ssize_t>self.opcodes.size():
                 raise IndexError("Opcodes index out of range")
 
             return Opcode(
