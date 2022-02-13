@@ -1,6 +1,12 @@
 from typing import Tuple, List, Union
 
-from . import Hamming, Indel, Jaro, JaroWinkler, Levenshtein
+from . import (
+    Hamming as Hamming,
+    Indel as Indel,
+    Jaro as Jaro,
+    JaroWinkler as JaroWinkler,
+    Levenshtein as Levenshtein
+)
 
 _AnyOpList = Union[
     List[Union[Editop, Tuple[str, int, int]]],

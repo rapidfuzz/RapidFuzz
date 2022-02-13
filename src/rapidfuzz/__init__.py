@@ -6,9 +6,9 @@ __license__ = "MIT"
 __version__ = "2.0.2"
 
 from rapidfuzz import (
-    process,
-    distance,
-    fuzz,
-    string_metric,
-    utils
+    process as process,
+    distance as distance,
+    fuzz as fuzz,
+    string_metric as string_metric,
+    utils as utils
 )
