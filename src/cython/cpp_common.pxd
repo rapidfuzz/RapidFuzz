@@ -31,6 +31,16 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
         int64_t src_pos
         int64_t dest_pos
 
+    cdef cppclass RfScoreAlignment "rapidfuzz::ScoreAlignment"[T]:
+        T score
+        int64_t src_start
+        int64_t src_end
+        int64_t dest_start
+        int64_t dest_end
+
+        RfScoreAlignment()
+        RfScoreAlignment(T score, int64_t src_start, int64_t src_end, int64_t dest_start, int64_t dest_end)
+
     cdef cppclass RfOpcodes "rapidfuzz::Opcodes"
 
     cdef cppclass RfEditops "rapidfuzz::Editops":

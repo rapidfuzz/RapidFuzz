@@ -6,8 +6,12 @@ ratio
 .. autofunction:: rapidfuzz.fuzz.ratio
 
 partial_ratio
----------------
+-------------
 .. autofunction:: rapidfuzz.fuzz.partial_ratio
+
+partial_ratio_alignment
+-----------------------
+.. autofunction:: rapidfuzz.fuzz.partial_ratio_alignment
 
 token_set_ratio
 ---------------

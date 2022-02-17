@@ -1,5 +1,6 @@
 from typing import Callable, Hashable, Sequence, Optional, Union, overload, TypeVar
 from rapidfuzz.utils import default_process
+from rapidfuzz.distance import ScoreAlignment
 
 _StringType = Sequence[Hashable]
 S1 = TypeVar("S1")
@@ -14,6 +15,11 @@ def partial_ratio(
     s1: S1, s2: S2, *,
     processor: Optional[Callable[..., _StringType]] = None,
     score_cutoff: Optional[float] = 0) -> float: ...
+
+def partial_ratio_alignment(
+    s1: S1, s2: S2, *,
+    processor: Optional[Callable[..., _StringType]] = None,
+    score_cutoff: Optional[float] = 0) -> ScoreAlignment: ...
 
 def token_sort_ratio(
     s1: S1, s2: S2, *,

@@ -23,6 +23,12 @@ static inline bool PartialRatioInit(RF_ScorerFunc* self, const RF_Kwargs*, int64
     return similarity_init<fuzz::CachedPartialRatio, double>(self, str_count, str);
 }
 
+rapidfuzz::ScoreAlignment<double> partial_ratio_alignment_func(const RF_String& s1, const RF_String& s2, double score_cutoff)
+{
+    return visitor(s1, s2, [&](auto first1, auto last1, auto first2, auto last2) {
+        return fuzz::partial_ratio_alignment(first1, last1, first2, last2, score_cutoff);
+    });
+}
 
 static inline double token_sort_ratio_func(const RF_String& s1, const RF_String& s2, double score_cutoff)
 {

@@ -7,6 +7,7 @@ from array import array
 import sys
 
 from rapidfuzz import fuzz, utils
+from rapidfuzz.distance import ScoreAlignment
 
 scorers = [
     fuzz.ratio,
@@ -93,6 +94,18 @@ class RatioTest(unittest.TestCase):
         str1 = u'a'*65
         str2 = u'a' + chr(256) + u'a'*63
         self.assertAlmostEqual(fuzz.partial_ratio(str1, str2), 98.46153, places=4)
+
+    def testPartialRatioAlignment(self):
+        a = "a certain string"
+        s = "certain"
+        self.assertEqual(
+            fuzz.partial_ratio_alignment(s, a),
+            ScoreAlignment(100, 0, len(s), 2, 2 + len(s))
+        )
+        self.assertEqual(
+            fuzz.partial_ratio_alignment(a, s),
+            ScoreAlignment(100, 2, 2 + len(s), 0, len(s))
+        )
 
 def test_empty_string():
     """

@@ -1,4 +1,4 @@
-from typing import Tuple, List, Union
+from typing import Tuple, List, Union, Any
 
 from . import (
     Hamming as Hamming,
@@ -111,5 +111,22 @@ class Opcodes:
     def dest_len(self, value: int) -> None: ...
 
     def __getitem__(self, key: int) -> Opcode: ...
+
+    def __repr__(self) -> str: ...
+
+class ScoreAlignment:
+    score : Union[int, float]
+    src_start : int
+    src_end : int
+    dest_start : int
+    dest_end : int
+
+    def __init__(self, score : Union[int, float], src_start : int, src_end : int, dest_start : int, dest_end : int) -> None: ...
+
+    def __len__(self) -> int: ...
+
+    def __eq__(self, other: object) -> bool: ...
+
+    def __getitem__(self, i: int) -> Union[int, float]: ...
 
     def __repr__(self) -> str: ...

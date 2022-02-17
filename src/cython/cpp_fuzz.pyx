@@ -4,6 +4,8 @@
 from array import array
 from rapidfuzz.utils import default_process
 
+from .distance._initialize import ScoreAlignment
+
 from rapidfuzz_capi cimport (
     RF_String, RF_Scorer, RF_ScorerFunc, RF_Kwargs,
     SCORER_STRUCT_VERSION, RF_Preprocessor,
@@ -13,7 +15,7 @@ from rapidfuzz_capi cimport (
 
 from cpp_common cimport (
     RF_StringWrapper, is_valid_string, convert_string, hash_array, hash_sequence,
-    conv_sequence
+    conv_sequence, RfScoreAlignment
 )
 
 from libc.stdint cimport uint32_t, int64_t
@@ -35,6 +37,8 @@ cdef extern from "cpp_fuzz.hpp":
     double partial_token_ratio_func(      const RF_String&, const RF_String&, double) nogil except +
     double WRatio_func(                   const RF_String&, const RF_String&, double) nogil except +
     double QRatio_func(                   const RF_String&, const RF_String&, double) nogil except +
+
+    RfScoreAlignment[double] partial_ratio_alignment_func(const RF_String&, const RF_String&, double) nogil except +
 
     bool RatioInit(                 RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
     bool PartialRatioInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
@@ -190,6 +194,56 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return partial_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+
+
+def partial_ratio_alignment(s1, s2, *, processor=None, score_cutoff=None):
+    """
+    Searches for the optimal alignment of the shorter string in the
+    longer string and returns the fuzz.ratio and the corresponding
+    alignment.
+
+    Parameters
+    ----------
+    s1 : Sequence[Hashable]
+        First string to compare.
+    s2 : Sequence[Hashable]
+        Second string to compare.
+    processor: callable, optional
+        Optional callable that is used to preprocess the strings before
+        comparing them. Default is None, which deactivates this behaviour.
+    score_cutoff : float, optional
+        Optional argument for a score threshold as a float between 0 and 100.
+        For ratio < score_cutoff 0 is returned instead. Default is 0,
+        which deactivates this behaviour.
+
+    Returns
+    -------
+    alignment : ScoreAlignment
+        alignment between s1 and s2 with the score as a float between 0 and 100
+
+    Examples
+    --------
+    >>> s1 = "a certain string"
+    >>> s2 = "cetain"
+    >>> res = fuzz.partial_ratio_alignment(s1, s2)
+    >>> res
+    ScoreAlignment(score=83.33333333333334, src_start=2, src_end=8, dest_start=0, dest_end=6)
+    
+    Using the alignment information it is possible to calculate the same fuzz.ratio
+
+    >>> fuzz.ratio(s1[res.src_start:res.src_end], s2[res.dest_start:res.dest_end])
+    83.33333333333334
+    """
+    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
+    cdef RF_StringWrapper s1_proc, s2_proc
+
+    if s1 is None or s2 is None:
+        return 0
+
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
+    res = partial_ratio_alignment_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+
+    return ScoreAlignment(res.score, res.src_start, res.src_end, res.dest_start, res.dest_end)
 
 
 def token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):

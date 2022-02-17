@@ -7,3 +7,10 @@ cdef class Editops:
 
 cdef class Opcodes:
     cdef RfOpcodes opcodes
+
+cdef class ScoreAlignment:
+    cdef public object score
+    cdef public Py_ssize_t src_start
+    cdef public Py_ssize_t src_end
+    cdef public Py_ssize_t dest_start
+    cdef public Py_ssize_t dest_end

@@ -4,6 +4,7 @@
 from rapidfuzz.cpp_fuzz import (
     ratio,
     partial_ratio,
+    partial_ratio_alignment,
     token_sort_ratio,
     partial_token_sort_ratio,
     token_set_ratio,
