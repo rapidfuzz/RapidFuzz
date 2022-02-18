@@ -1,11 +1,20 @@
 ## Changelog
 
+### [2.0.3] - 2022-02-18
+####
+- Added fuzz.partial_ratio_alignment, which returns the result of fuzz.partial_ratio
+  combined with the alignment this result stems from
+
+#### Fixed
+- Fix Indel distance returning incorrect result when using score_cutoff=1, when the strings
+  are not equal. This affected other scorers like fuzz.WRatio, which use the Indel distance
+  as well.
+
 ### [2.0.2] - 2022-02-12
 #### Fixed
 - fix type hints
 - Add back transpiled cython files to the sdist to simplify builds in package builders
   like FreeBSD port build or conda-forge
-
 
 ### [2.0.1] - 2022-02-11
 #### Fixed

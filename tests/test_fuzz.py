@@ -107,6 +107,14 @@ class RatioTest(unittest.TestCase):
             ScoreAlignment(100, 2, 2 + len(s), 0, len(s))
         )
 
+    def testIssue196(self):
+        """
+        fuzz.WRatio did not work correctly with score_cutoffs
+        """
+        self.assertAlmostEqual(fuzz.WRatio('South Korea', 'North Korea'), 81.81818, places=4)
+        assert fuzz.WRatio('South Korea', 'North Korea', score_cutoff=85.4) == 0.0
+        assert fuzz.WRatio('South Korea', 'North Korea', score_cutoff=85.5) == 0.0
+
 def test_empty_string():
     """
     when both strings are empty this is either a perfect match or no match
