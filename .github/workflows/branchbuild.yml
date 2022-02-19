@@ -62,6 +62,11 @@ jobs:
         run: |
           python -m mypy.stubtest rapidfuzz --ignore-missing-stub
 
+      - name: Test with pytest and backtrace in case of SegFault
+        if: runner.os == 'Linux'
+        run: |
+          tools/seg_wrapper.sh pytest tests
       - name: Test with pytest
+        if: runner.os != 'Linux'
         run: |
           pytest tests

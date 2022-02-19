@@ -34,6 +34,7 @@ jobs:
       CIBW_ARCHS: ${{matrix.arch}}
       CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_COMMAND: pytest {package}/tests
+      CIBW_TEST_COMMAND_LINUX: "{package}/tools/seg_wrapper.sh pytest {package}/tests"
       CIBW_BUILD_VERBOSITY: 3
 
     steps:
@@ -77,6 +78,7 @@ jobs:
       CIBW_TEST_SKIP: "*-macosx_{arm64,universal2}"
       CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_COMMAND: pytest {package}/tests
+      CIBW_TEST_COMMAND_LINUX: "{package}/tools/seg_wrapper.sh pytest {package}/tests"
       CIBW_BUILD_VERBOSITY: 3
 
     steps:
@@ -113,6 +115,7 @@ jobs:
       CIBW_TEST_SKIP: "*-manylinux_{aarch64,ppc64le,s390x}"
       CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_COMMAND: pytest {package}/tests
+      CIBW_TEST_COMMAND_LINUX: "{package}/tools/seg_wrapper.sh pytest {package}/tests"
       CIBW_BUILD_VERBOSITY: 3
 
     steps:
@@ -167,9 +170,9 @@ jobs:
         run: |
           python -m mypy.stubtest rapidfuzz --ignore-missing-stub
 
-      - name: Test with pytest
+      - name: Test with pytest and backtrace in case of SegFault
         run: |
-          pytest tests
+          tools/seg_wrapper.sh pytest tests
 
       - uses: actions/upload-artifact@v2
         with:
