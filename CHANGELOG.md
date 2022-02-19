@@ -1,7 +1,7 @@
 ## Changelog
 
 ### [2.0.3] - 2022-02-18
-####
+#### Added
 - Added fuzz.partial_ratio_alignment, which returns the result of fuzz.partial_ratio
   combined with the alignment this result stems from
 
