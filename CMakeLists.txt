@@ -10,8 +10,6 @@ endif()
 
 project(rapidfuzz LANGUAGES C CXX)
 
-set(CMAKE_BUILD_TYPE RelWithDebInfo)
-
 if (MSVC)
     add_compile_options(/W4)
 else()

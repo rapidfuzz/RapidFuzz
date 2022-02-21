@@ -1,5 +1,10 @@
 ## Changelog
 
+### [2.0.4] - 2022-02-21
+#### Fixed
+- fix binary size increase due to debug symbols
+- fix segmentation fault in `Levenshtein.editops`
+
 ### [2.0.3] - 2022-02-18
 #### Added
 - Added fuzz.partial_ratio_alignment, which returns the result of fuzz.partial_ratio
