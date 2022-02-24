@@ -20,7 +20,9 @@ def test_editops_get_index():
     """
     test __getitem__ with index of Editops
     """
-    ops = Levenshtein.editops("aaabaaa", "abbaaabba")
+    ops = Editops([('delete', 1, 1), ('replace', 2, 1),
+        ('insert', 6, 5), ('insert', 6, 6), ('insert', 6, 7)], 7, 9)
+
     ops_list = [('delete', 1, 1), ('replace', 2, 1),
         ('insert', 6, 5), ('insert', 6, 6), ('insert', 6, 7)]
 
@@ -45,9 +47,9 @@ def test_editops_inversion():
     """
     test correct inversion of Editops
     """
-    ops = Levenshtein.editops("aaabaaa", "abbaaabba")
-    assert ops.as_list() == [('delete', 1, 1), ('replace', 2, 1),
-        ('insert', 6, 5), ('insert', 6, 6), ('insert', 6, 7)]
+    ops = Editops([('delete', 1, 1), ('replace', 2, 1),
+        ('insert', 6, 5), ('insert', 6, 6), ('insert', 6, 7)], 7, 9)
+
     assert ops.inverse().as_list() == [('insert', 1, 1), ('replace', 1, 2),
         ('delete', 5, 6), ('delete', 6, 6), ('delete', 7, 6)]
 
@@ -65,7 +67,9 @@ def test_opcode_get_index():
     """
     test __getitem__ with index of Opcodes
     """
-    ops = Levenshtein.opcodes("aaabaaa", "abbaaabba")
+    ops = Opcodes([('equal', 0, 1, 0, 1), ('delete', 1, 2, 1, 1),
+        ('replace', 2, 3, 1, 2), ('equal', 3, 6, 2, 5), ('insert', 6, 6, 5, 8), ('equal', 6, 7, 8, 9)], 7, 9)
+
     ops_list = [('equal', 0, 1, 0, 1), ('delete', 1, 2, 1, 1),
         ('replace', 2, 3, 1, 2), ('equal', 3, 6, 2, 5), ('insert', 6, 6, 5, 8), ('equal', 6, 7, 8, 9)]
 
@@ -92,8 +96,7 @@ def test_opcode_inversion():
     """
     test correct inversion of Opcodes
     """
-    ops = Levenshtein.opcodes("aaabaaa", "abbaaabba")
-    assert ops == Opcodes([('equal', 0, 1, 0, 1), ('delete', 1, 2, 1, 1),
+    ops = Opcodes([('equal', 0, 1, 0, 1), ('delete', 1, 2, 1, 1),
         ('replace', 2, 3, 1, 2), ('equal', 3, 6, 2, 5), ('insert', 6, 6, 5, 8), ('equal', 6, 7, 8, 9)], 7, 9)
 
     assert ops.inverse().as_list() == [('equal', 0, 1, 0, 1), ('insert', 1, 1, 1, 2),
