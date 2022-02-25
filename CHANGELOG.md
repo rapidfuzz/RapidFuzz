@@ -1,5 +1,9 @@
 ## Changelog
 
+### [2.0.5] - 2022-02-25
+#### Fixed
+- fix signed integer overflow inside hashmap implementation
+
 ### [2.0.4] - 2022-02-21
 #### Fixed
 - fix binary size increase due to debug symbols
