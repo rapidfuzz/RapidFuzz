@@ -1,1 +1,1 @@
-from jarowinkler.Jaro import similarity
+from jarowinkler import jaro_similarity as similarity

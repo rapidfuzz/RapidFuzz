@@ -4,6 +4,8 @@
 #### Fixed
 - fix incorrect population of sys.modules which lead to submodules overshadowing
   other imports
+#### Changed
+- moved JaroWinkler and Jaro into a separate package
 
 ### [2.0.5] - 2022-02-25
 #### Fixed

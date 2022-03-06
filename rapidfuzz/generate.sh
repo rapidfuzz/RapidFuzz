@@ -16,6 +16,4 @@ generate_cython cpp_utils
 generate_cython distance/_initialize
 generate_cython distance/Hamming
 generate_cython distance/Indel
-generate_cython distance/Jaro
-generate_cython distance/JaroWinkler
 generate_cython distance/Levenshtein

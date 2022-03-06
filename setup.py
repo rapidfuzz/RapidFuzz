@@ -7,10 +7,11 @@ with open('README.md', 'rt', encoding="utf8") as f:
 setup(
     name="rapidfuzz",
     version="2.0.5",
+    install_requires=["jarowinkler >= 1.0.0, < 1.1.0"],
     extras_require={'full': ['numpy']},
     url="https://github.com/maxbachmann/RapidFuzz",
     author="Max Bachmann",
-    author_email="contact@maxbachmann.de",
+    author_email="pypi@maxbachmann.de",
     description="rapid fuzzy string matching",
     long_description=readme,
     long_description_content_type="text/markdown",
