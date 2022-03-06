@@ -1,5 +1,10 @@
 ## Changelog
 
+### [2.0.6] - 2022-03-06
+#### Fixed
+- fix incorrect population of sys.modules which lead to submodules overshadowing
+  other imports
+
 ### [2.0.5] - 2022-02-25
 #### Fixed
 - fix signed integer overflow inside hashmap implementation

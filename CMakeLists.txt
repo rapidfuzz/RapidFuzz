@@ -29,5 +29,5 @@ add_subdirectory(extern/taskflow)
 add_subdirectory(extern/rapidfuzz-cpp)
 add_subdirectory(extern/jarowinkler-cpp)
 
-add_subdirectory(src/cython)
-add_subdirectory(src/cython/distance)
+add_subdirectory(rapidfuzz)
+add_subdirectory(rapidfuzz/distance)

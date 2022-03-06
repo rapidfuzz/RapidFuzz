@@ -27,9 +27,6 @@ setup(
     ],
 
     packages=["rapidfuzz", "rapidfuzz/distance"],
-    package_dir={'':'src'},
-    zip_safe=True,
-    include_package_data=True,
     python_requires=">=3.6",
 
     cmake_args=[f'-DRF_CAPI_PATH:STRING={rapidfuzz_capi.get_include()}']
