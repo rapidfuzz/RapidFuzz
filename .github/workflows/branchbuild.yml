@@ -18,7 +18,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest hypothesis pandas mypy rapidfuzz_capi Cython==3.0.0a10
+          pip install numpy rapidfuzz_capi Cython==3.0.0a10
 
       - name: Generate cython
         run: |
@@ -59,6 +59,8 @@ jobs:
 
       - name: Test type stubs
         if: matrix.python-version != '3.6'
+        # prevent import from rapidfuzz
+        working-directory: .github
         run: |
           python -m mypy.stubtest rapidfuzz --ignore-missing-stub
 

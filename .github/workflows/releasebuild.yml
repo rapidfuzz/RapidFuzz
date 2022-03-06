@@ -167,6 +167,8 @@ jobs:
           pip install dist/rapidfuzz-*.tar.gz
 
       - name: Test type stubs
+        # prevent import from rapidfuzz
+        working-directory: .github
         run: |
           python -m mypy.stubtest rapidfuzz --ignore-missing-stub
 

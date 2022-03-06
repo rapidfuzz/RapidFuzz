@@ -7,7 +7,7 @@ with open('README.md', 'rt', encoding="utf8") as f:
 setup(
     name="rapidfuzz",
     version="2.0.5",
-    install_requires=["jarowinkler >= 1.0.0, < 1.1.0"],
+    install_requires=["jarowinkler >= 1.0.1, < 1.1.0"],
     extras_require={'full': ['numpy']},
     url="https://github.com/maxbachmann/RapidFuzz",
     author="Max Bachmann",
@@ -28,6 +28,10 @@ setup(
     ],
 
     packages=["rapidfuzz", "rapidfuzz/distance"],
+    package_data={
+        "rapidfuzz": ["*.pyi", "py.typed"],
+        "rapidfuzz/distance": ["*.pyi"]
+    },
     python_requires=">=3.6",
 
     cmake_args=[f'-DRF_CAPI_PATH:STRING={rapidfuzz_capi.get_include()}']
