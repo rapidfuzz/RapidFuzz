@@ -1,8 +1,8 @@
 # distutils: language=c++
 # cython: language_level=3, binding=True, linetrace=True
 
-from _initialize import Editops
-from _initialize cimport Editops, RfEditops
+from ._initialize import Editops
+from ._initialize cimport Editops, RfEditops
 from array import array
 
 from rapidfuzz_capi cimport (
