@@ -25,7 +25,7 @@ set(RF_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(TF_BUILD_CUDA OFF CACHE BOOL "Enables build of CUDA code")
 set(TF_BUILD_TESTS OFF CACHE BOOL "Enables build of tests")
 set(TF_BUILD_EXAMPLES OFF CACHE BOOL "Enables build of examples")
-add_subdirectory(extern/taskflow)
+add_subdirectory(extern/taskflow EXCLUDE_FROM_ALL)
 add_subdirectory(extern/rapidfuzz-cpp)
 add_subdirectory(extern/jarowinkler-cpp)
 

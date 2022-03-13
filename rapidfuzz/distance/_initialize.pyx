@@ -30,6 +30,7 @@ cdef str edit_type_to_str(EditType edit_type):
         return "equal"
 
 cdef EditType str_to_edit_type(edit_type) except *:
+    # todo fix compiler warning about potentially uninitialized return value
     if edit_type == "insert":
         return EditType.Insert
     elif edit_type == "delete":

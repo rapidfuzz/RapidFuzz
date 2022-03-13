@@ -28,7 +28,3 @@ include extern/taskflow/taskflow/nstd/variant.hpp
 include extern/taskflow/taskflow/utility/*
 include extern/taskflow/taskflow/declarations.hpp
 include extern/taskflow/taskflow/taskflow.hpp
-
-include extern/optional-lite/LICENSE.txt
-include extern/optional-lite/CMakeLists.txt
-include extern/optional-lite/include/nonstd/optional.hpp
