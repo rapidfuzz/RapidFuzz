@@ -1,5 +1,9 @@
 ## Changelog
 
+### [2.0.7] - 2022-03-13
+#### Fixed
+- Do not include installations of jaro_winkler and taskflow in wheels
+
 ### [2.0.6] - 2022-03-06
 #### Fixed
 - fix incorrect population of sys.modules which lead to submodules overshadowing
