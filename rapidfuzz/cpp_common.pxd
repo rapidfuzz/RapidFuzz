@@ -235,3 +235,27 @@ cdef inline int64_t get_score_cutoff_i64(score_cutoff, const RF_ScorerFlags* sco
                 raise TypeError(f"score_cutoff has to be in the range of {optimal_score} - {worst_score}")
 
     return c_score_cutoff
+
+cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc, object default) except *:
+    cdef RF_Preprocessor* preprocess_context = NULL
+
+    if processor is True:
+        # todo: deprecate
+        processor = default
+
+    if not processor:
+        s1_proc[0] = RF_StringWrapper(conv_sequence(s1))
+        s2_proc[0] = RF_StringWrapper(conv_sequence(s2))
+    else:
+        processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+        if PyCapsule_IsValid(processor_capsule, NULL):
+            preprocess_context = <RF_Preprocessor*>PyCapsule_GetPointer(processor_capsule, NULL)
+
+        if preprocess_context != NULL and preprocess_context.version == 1:
+            preprocess_context.preprocess(s1, &(s1_proc[0].string))
+            preprocess_context.preprocess(s2, &(s2_proc[0].string))
+        else:
+            s1 = processor(s1)
+            s1_proc[0] = RF_StringWrapper(conv_sequence(s1), s1)
+            s2 = processor(s2)
+            s2_proc[0] = RF_StringWrapper(conv_sequence(s2), s2)

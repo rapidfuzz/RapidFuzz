@@ -1,16 +1,16 @@
 # distutils: language=c++
 # cython: language_level=3, binding=True, linetrace=True
 
-from array import array
-from rapidfuzz.utils import default_process
-
 from rapidfuzz_capi cimport (
     RF_String, RF_Scorer, RF_Kwargs, RF_ScorerFunc, RF_Preprocess, RF_KwargsInit,
     SCORER_STRUCT_VERSION, RF_Preprocessor,
     RF_ScorerFlags,
     RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_I64, RF_SCORER_FLAG_SYMMETRIC
 )
-from cpp_common cimport RF_StringWrapper, conv_sequence
+# required for preprocess_strings
+from rapidfuzz.utils import default_process
+from array import array
+from cpp_common cimport RF_StringWrapper, preprocess_strings
 
 from libcpp cimport bool
 from libcpp.utility cimport move
@@ -46,30 +46,6 @@ cdef extern from "cpp_string_metric.hpp":
     bool NormalizedHammingInit(     RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
     bool JaroSimilarityInit(        RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
     bool JaroWinklerSimilarityInit( RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-
-cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except *:
-    cdef RF_Preprocessor* preprocess_context = NULL
-
-    if processor is True:
-        # todo: deprecate
-        processor = default_process
-
-    if not processor:
-        s1_proc[0] = RF_StringWrapper(conv_sequence(s1))
-        s2_proc[0] = RF_StringWrapper(conv_sequence(s2))
-    else:
-        processor_capsule = getattr(processor, '_RF_Preprocess', processor)
-        if PyCapsule_IsValid(processor_capsule, NULL):
-            preprocess_context = <RF_Preprocessor*>PyCapsule_GetPointer(processor_capsule, NULL)
-
-        if preprocess_context != NULL and preprocess_context.version == 1:
-            preprocess_context.preprocess(s1, &(s1_proc[0].string))
-            preprocess_context.preprocess(s2, &(s2_proc[0].string))
-        else:
-            s1 = processor(s1)
-            s1_proc[0] = RF_StringWrapper(conv_sequence(s1), s1)
-            s2 = processor(s2)
-            s2_proc[0] = RF_StringWrapper(conv_sequence(s2), s2)
 
 def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
     """
@@ -138,7 +114,7 @@ def levenshtein(s1, s2, *, weights=(1,1,1), processor=None, max=None):
 
     cdef int64_t c_max = INT64_MAX if max is None else max
 
-    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
     return levenshtein_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_max)
 
 cdef str levenshtein_edit_type_to_str(EditType edit_type):
@@ -200,7 +176,7 @@ def levenshtein_editops(s1, s2, *, processor=None):
     """
     cdef RF_StringWrapper s1_proc, s2_proc
 
-    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
     return levenshtein_editops_to_list(
         levenshtein_editops_func(s1_proc.string, s2_proc.string)
     )
@@ -282,7 +258,7 @@ def normalized_levenshtein(s1, s2, *, weights=(1,1,1), processor=None, score_cut
 
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
 
-    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
     return normalized_levenshtein_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
 
 
@@ -328,7 +304,7 @@ def hamming(s1, s2, *, processor=None, max=None):
     if s1 is None or s2 is None:
         return 0
 
-    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
     return hamming_func(s1_proc.string, s2_proc.string, c_max)
 
 
@@ -374,7 +350,7 @@ def normalized_hamming(s1, s2, *, processor=None, score_cutoff=None):
     if s1 is None or s2 is None:
         return 0
 
-    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
     return normalized_hamming_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
@@ -411,7 +387,7 @@ def jaro_similarity(s1, s2, *, processor=None, score_cutoff=None):
     if s1 is None or s2 is None:
         return 0
 
-    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
     return jaro_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
@@ -456,7 +432,7 @@ def jaro_winkler_similarity(s1, s2, *, double prefix_weight=0.1, processor=None,
     if s1 is None or s2 is None:
         return 0
 
-    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
     return jaro_winkler_similarity_func(s1_proc.string, s2_proc.string, prefix_weight, c_score_cutoff)
 
 cdef void KwargsDeinit(RF_Kwargs* self):

@@ -1,15 +1,16 @@
 # distutils: language=c++
 # cython: language_level=3, binding=True, linetrace=True
 
-from array import array
-
 from rapidfuzz_capi cimport (
     RF_String, RF_Scorer, RF_Kwargs, RF_ScorerFunc, RF_Preprocess,
     SCORER_STRUCT_VERSION, RF_Preprocessor,
     RF_ScorerFlags,
     RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_I64, RF_SCORER_FLAG_SYMMETRIC
 )
-from cpp_common cimport RF_StringWrapper, conv_sequence
+
+# required for preprocess_strings
+from array import array
+from cpp_common cimport RF_StringWrapper, preprocess_strings
 from libc.stdint cimport INT64_MAX, int64_t
 
 from libcpp cimport bool
@@ -26,26 +27,6 @@ cdef extern from "edit_based.hpp":
     bool HammingNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
     bool HammingSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
     bool HammingNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-
-cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except *:
-    cdef RF_Preprocessor* preprocess_context = NULL
-
-    if processor is None:
-        s1_proc[0] = RF_StringWrapper(conv_sequence(s1))
-        s2_proc[0] = RF_StringWrapper(conv_sequence(s2))
-    else:
-        processor_capsule = getattr(processor, '_RF_Preprocess', processor)
-        if PyCapsule_IsValid(processor_capsule, NULL):
-            preprocess_context = <RF_Preprocessor*>PyCapsule_GetPointer(processor_capsule, NULL)
-
-        if preprocess_context != NULL and preprocess_context.version == 1:
-            preprocess_context.preprocess(s1, &(s1_proc[0].string))
-            preprocess_context.preprocess(s2, &(s2_proc[0].string))
-        else:
-            s1 = processor(s1)
-            s1_proc[0] = RF_StringWrapper(conv_sequence(s1), s1)
-            s2 = processor(s2)
-            s2_proc[0] = RF_StringWrapper(conv_sequence(s2), s2)
 
 def distance(s1, s2, *, processor=None, score_cutoff=None):
     """
@@ -88,7 +69,7 @@ def distance(s1, s2, *, processor=None, score_cutoff=None):
     if s1 is None or s2 is None:
         return 0
 
-    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
     return hamming_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 def similarity(s1, s2, *, processor=None, score_cutoff=None):
@@ -131,7 +112,7 @@ def similarity(s1, s2, *, processor=None, score_cutoff=None):
     if s1 is None or s2 is None:
         return 0
 
-    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
     return hamming_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 def normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
@@ -168,7 +149,7 @@ def normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
     if c_score_cutoff < 0:
         raise ValueError("score_cutoff has to be >= 0")
 
-    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
     return hamming_normalized_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
@@ -205,7 +186,7 @@ def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     if c_score_cutoff < 0:
         raise ValueError("score_cutoff has to be >= 0")
 
-    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
     return hamming_normalized_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
