@@ -156,6 +156,51 @@ static inline bool IndelNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_K
     return normalized_similarity_init<rapidfuzz::CachedIndel, double>(self, str_count, str);
 }
 
+/* LCSseq */
+static inline int64_t lcs_seq_distance_func(const RF_String& s1, const RF_String& s2, int64_t max)
+{
+    return visitor(s1, s2, [&](auto first1, auto last1, auto first2, auto last2) {
+        return rapidfuzz::lcs_seq_distance(first1, last1, first2, last2, max);
+    });
+}
+static inline bool LCSseqDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str)
+{
+    return distance_init<rapidfuzz::CachedLCSseq, int64_t>(self, str_count, str);
+}
+
+static inline double lcs_seq_normalized_distance_func(const RF_String& s1, const RF_String& s2, double score_cutoff)
+{
+    return visitor(s1, s2, [&](auto first1, auto last1, auto first2, auto last2) {
+        return rapidfuzz::lcs_seq_normalized_distance(first1, last1, first2, last2, score_cutoff);
+    });
+}
+static inline bool LCSseqNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str)
+{
+    return normalized_distance_init<rapidfuzz::CachedLCSseq, double>(self, str_count, str);
+}
+
+static inline int64_t lcs_seq_similarity_func(const RF_String& s1, const RF_String& s2, int64_t max)
+{
+    return visitor(s1, s2, [&](auto first1, auto last1, auto first2, auto last2) {
+        return rapidfuzz::lcs_seq_similarity(first1, last1, first2, last2, max);
+    });
+}
+static inline bool LCSseqSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str)
+{
+    return similarity_init<rapidfuzz::CachedLCSseq, int64_t>(self, str_count, str);
+}
+
+static inline double lcs_seq_normalized_similarity_func(const RF_String& s1, const RF_String& s2, double score_cutoff)
+{
+    return visitor(s1, s2, [&](auto first1, auto last1, auto first2, auto last2) {
+        return rapidfuzz::lcs_seq_normalized_similarity(first1, last1, first2, last2, score_cutoff);
+    });
+}
+static inline bool LCSseqNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str)
+{
+    return normalized_similarity_init<rapidfuzz::CachedLCSseq, double>(self, str_count, str);
+}
+
 static inline double jaro_similarity_func(const RF_String& s1, const RF_String& s2, double score_cutoff)
 {
     return visitor(s1, s2, [&](auto first1, auto last1, auto first2, auto last2) {
@@ -192,5 +237,13 @@ static inline rapidfuzz::Editops indel_editops_func(
 {
     return visitor(s1, s2, [](auto first1, auto last1, auto first2, auto last2) {
         return rapidfuzz::indel_editops(first1, last1, first2, last2);
+    });
+}
+
+static inline rapidfuzz::Editops lcs_seq_editops_func(
+    const RF_String& s1, const RF_String& s2)
+{
+    return visitor(s1, s2, [](auto first1, auto last1, auto first2, auto last2) {
+        return rapidfuzz::lcs_seq_editops(first1, last1, first2, last2);
     });
 }

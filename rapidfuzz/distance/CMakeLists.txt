@@ -41,3 +41,11 @@ target_include_directories(Indel PRIVATE ${RF_CAPI_PATH} ${RF_BASE_DIR}/rapidfuz
 target_link_libraries(Indel PRIVATE rapidfuzz::rapidfuzz jaro_winkler::jaro_winkler)
 python_extension_module(Indel)
 install(TARGETS Indel LIBRARY DESTINATION rapidfuzz/distance)
+
+create_cython_target(LCSseq)
+add_library(LCSseq MODULE ${LCSseq})
+target_compile_features(LCSseq PUBLIC cxx_std_14)
+target_include_directories(LCSseq PRIVATE ${RF_CAPI_PATH} ${RF_BASE_DIR}/rapidfuzz ${RF_BASE_DIR}/rapidfuzz/distance)
+target_link_libraries(LCSseq PRIVATE rapidfuzz::rapidfuzz jaro_winkler::jaro_winkler)
+python_extension_module(LCSseq)
+install(TARGETS LCSseq LIBRARY DESTINATION rapidfuzz/distance)

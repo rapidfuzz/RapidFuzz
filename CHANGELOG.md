@@ -1,5 +1,9 @@
 ## Changelog
 
+### [2.1.0] -
+#### Added
+- add longest common subsequence
+
 ### [2.0.7] - 2022-03-13
 #### Fixed
 - Do not include installations of jaro_winkler and taskflow in wheels

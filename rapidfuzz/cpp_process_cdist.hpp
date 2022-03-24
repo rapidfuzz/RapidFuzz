@@ -26,7 +26,7 @@ void set_score(PyArrayObject* matrix, int dtype, npy_intp row, npy_intp col, T s
         *((float*)data) = (float)score;
         break;
     case NPY_FLOAT64:
-        *((double*)data) = score;
+        *((double*)data) = (double)score;
         break;
     case NPY_INT8:
         *((int8_t*)data) = (int8_t)any_round(score);

@@ -1,3 +1,6 @@
+# distutils: language=c++
+# cython: language_level=3, binding=True, linetrace=True
+
 from libcpp.vector cimport vector
 from libcpp cimport bool
 from cpp_common cimport RfEditops, RfOpcodes

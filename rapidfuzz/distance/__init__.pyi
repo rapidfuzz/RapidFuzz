@@ -5,7 +5,8 @@ from . import (
     Indel as Indel,
     Jaro as Jaro,
     JaroWinkler as JaroWinkler,
-    Levenshtein as Levenshtein
+    Levenshtein as Levenshtein,
+    LCSseq as LCSseq
 )
 
 _AnyOpList = Union[

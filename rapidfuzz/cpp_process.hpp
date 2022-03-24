@@ -98,7 +98,7 @@ struct RF_ScorerWrapper {
     RF_ScorerFunc scorer_func;
 
     RF_ScorerWrapper()
-      : scorer_func({nullptr, nullptr, nullptr}) {}
+      : scorer_func({nullptr, {nullptr}, nullptr}) {}
     explicit RF_ScorerWrapper(RF_ScorerFunc scorer_func_)
       : scorer_func(scorer_func_) {}
 
@@ -108,7 +108,7 @@ struct RF_ScorerWrapper {
     RF_ScorerWrapper(RF_ScorerWrapper&& other)
      : scorer_func(other.scorer_func)
     {
-        other.scorer_func = {nullptr, nullptr, nullptr};
+        other.scorer_func = {nullptr, {nullptr}, nullptr};
     }
 
     RF_ScorerWrapper& operator=(RF_ScorerWrapper&& other) {
@@ -118,7 +118,7 @@ struct RF_ScorerWrapper {
             }
 
             scorer_func = other.scorer_func;
-            other.scorer_func = {nullptr, nullptr, nullptr};
+            other.scorer_func = {nullptr, {nullptr}, nullptr};
       }
       return *this;
     };
