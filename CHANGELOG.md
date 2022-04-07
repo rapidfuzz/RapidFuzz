@@ -1,6 +1,9 @@
 ## Changelog
 
-### [2.1.0] -
+### [2.0.8] - 2022-04-07
+#### Fixed
+- fix incorrect score_cutoff handling in token_set_ratio and token_ratio
+
 #### Added
 - add longest common subsequence
 

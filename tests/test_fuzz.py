@@ -115,6 +115,7 @@ class RatioTest(unittest.TestCase):
         assert fuzz.WRatio('South Korea', 'North Korea', score_cutoff=85.4) == 0.0
         assert fuzz.WRatio('South Korea', 'North Korea', score_cutoff=85.5) == 0.0
 
+
 def test_empty_string():
     """
     when both strings are empty this is either a perfect match or no match
