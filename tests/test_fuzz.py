@@ -5,6 +5,7 @@ import unittest
 import pytest
 from array import array
 import sys
+import math
 
 from rapidfuzz import fuzz, utils
 from rapidfuzz.distance import ScoreAlignment
@@ -115,7 +116,6 @@ class RatioTest(unittest.TestCase):
         assert fuzz.WRatio('South Korea', 'North Korea', score_cutoff=85.4) == 0.0
         assert fuzz.WRatio('South Korea', 'North Korea', score_cutoff=85.5) == 0.0
 
-
 def test_empty_string():
     """
     when both strings are empty this is either a perfect match or no match
@@ -203,6 +203,16 @@ def test_custom_processor(scorer):
     s3 = ["different string", "CitiFields", "2012-05-11", "9pm"]
     assert scorer(s1, s2, processor=lambda event: event[0]) == 100
     assert scorer(s2, s3, processor=lambda event: event[0]) != 100
+
+
+@pytest.mark.parametrize("scorer", scorers)
+def testIssue206(scorer):
+    """
+    test correct behavior of score_cutoff
+    """
+    score1 = scorer('South Korea', 'North Korea')
+    score2 = scorer('South Korea', 'North Korea', score_cutoff=score1 - 0.0001)
+    assert score1 == score2
 
 
 @pytest.mark.parametrize("scorer", scorers)
