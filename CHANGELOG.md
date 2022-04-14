@@ -1,5 +1,10 @@
 ## Changelog
 
+### [2.0.9] - 2022-04-07
+#### Fixed
+- Add missing Cython code in sdist
+- consider float imprecision in score_cutoff (see #210)
+
 ### [2.0.8] - 2022-04-07
 #### Fixed
 - fix incorrect score_cutoff handling in token_set_ratio and token_ratio
