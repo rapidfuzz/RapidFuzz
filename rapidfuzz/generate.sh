@@ -16,4 +16,5 @@ generate_cython cpp_utils
 generate_cython distance/_initialize
 generate_cython distance/Hamming
 generate_cython distance/Indel
+generate_cython distance/LCSseq
 generate_cython distance/Levenshtein
