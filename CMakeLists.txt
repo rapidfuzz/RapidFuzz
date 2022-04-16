@@ -65,7 +65,7 @@ else()
     FetchContent_MakeAvailable(rapidfuzz)
 endif()
 
-find_package(JaroWinkler 1.0.0 EXACT QUIET)
+find_package(JaroWinkler 1.0.1 EXACT QUIET)
 if (JaroWinkler_FOUND)
     message("Using system supplied version of JaroWinkler")
 else()
@@ -73,7 +73,7 @@ else()
     FetchContent_Declare(
         JaroWinkler
         GIT_REPOSITORY https://github.com/maxbachmann/jarowinkler-cpp.git
-        GIT_TAG 7f4db33652e34e1322508de6bd6d5440ad624823 # v1.0.0
+        GIT_TAG 08e738aff2ab20b1557642fdbf59ebc585e285dd # v1.0.1
         GIT_SHALLOW TRUE
     )
     FetchContent_MakeAvailable(JaroWinkler)
