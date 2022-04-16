@@ -56,15 +56,15 @@ jobs:
           cmake --build .
           sudo cmake --build . --target install
 
-      - name: Install taskflow
-        run: |
-          git clone https://github.com/taskflow/taskflow.git
-          cd taskflow
-          git checkout v2.7.0
-          mkdir build && cd build
-          cmake .. -DTF_BUILD_TESTS=0 -DTF_BUILD_EXAMPLES=0
-          cmake --build .
-          sudo cmake --build . --target install
+      # - name: Install taskflow
+      #   run: |
+      #     git clone https://github.com/taskflow/taskflow.git
+      #     cd taskflow
+      #     git checkout v2.7.0
+      #     mkdir build && cd build
+      #     cmake .. -DTF_BUILD_TESTS=0 -DTF_BUILD_EXAMPLES=0
+      #     cmake --build .
+      #     sudo cmake --build . --target install
 
       - name: build
         run: |
