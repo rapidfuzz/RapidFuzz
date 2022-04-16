@@ -19,15 +19,65 @@ endif()
 find_package(NumPy REQUIRED)
 find_package(PythonExtensions REQUIRED)
 find_package(Python COMPONENTS Interpreter Development)
+include(FetchContent)
 
 set(RF_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-set(TF_BUILD_CUDA OFF CACHE BOOL "Enables build of CUDA code")
-set(TF_BUILD_TESTS OFF CACHE BOOL "Enables build of tests")
-set(TF_BUILD_EXAMPLES OFF CACHE BOOL "Enables build of examples")
-add_subdirectory(extern/taskflow EXCLUDE_FROM_ALL)
-add_subdirectory(extern/rapidfuzz-cpp)
-add_subdirectory(extern/jarowinkler-cpp)
+# todo this appears to be broken somehow
+# results in linker errors
+find_package(Taskflow 2.7.0 EXACT QUIET)
+if (Taskflow_FOUND)
+    message("Using system supplied version of Taskflow")
+else()
+    message("Using FetchContent to load Taskflow")
+    set(TF_BUILD_CUDA OFF CACHE BOOL "Enables build of CUDA code")
+    set(TF_BUILD_TESTS OFF CACHE BOOL "Enables build of tests")
+    set(TF_BUILD_EXAMPLES OFF CACHE BOOL "Enables build of examples")
+    FetchContent_Declare(
+        Taskflow
+        GIT_REPOSITORY https://github.com/taskflow/taskflow.git
+        # v2.7.0 is the last version supporting C++14. Newer versions
+        # can be used once the project uses C++17 as well
+        GIT_TAG f69ae7ce714baab30051b0edbc2f091ceba77916 # v2.7.0
+        GIT_SHALLOW TRUE
+    )
+    # Taskflow installs itself even when included as subdirectory
+    # workaround this by reimplementing FetchContent_MakeAvailable with
+    # EXCLUDE_FROM_ALL
+    FetchContent_GetProperties(Taskflow)
+    if(NOT Taskflow_POPULATED)
+        FetchContent_Populate(Taskflow)
+        add_subdirectory(${taskflow_SOURCE_DIR} ${taskflow_BINARY_DIR} EXCLUDE_FROM_ALL)
+    endif()
+endif()
+
+find_package(rapidfuzz 1.0.1 EXACT QUIET)
+if (rapidfuzz_FOUND)
+    message("Using system supplied version of rapidfuzz-cpp")
+else()
+    message("Using FetchContent to load rapidfuzz-cpp")
+    FetchContent_Declare(
+        rapidfuzz
+        GIT_REPOSITORY https://github.com/maxbachmann/rapidfuzz-cpp.git
+        GIT_TAG 6642000b428b952de0fdf4d1f4be34e0b7b1eca3 # v1.0.1
+        GIT_SHALLOW TRUE
+    )
+    FetchContent_MakeAvailable(rapidfuzz)
+endif()
+
+find_package(jaro_winkler 1.0.0 EXACT QUIET)
+if (jaro_winkler_FOUND)
+    message("Using system supplied version of jaro_winkler")
+else()
+    message("Using FetchContent to load jaro_winkler")
+    FetchContent_Declare(
+        jaro_winkler
+        GIT_REPOSITORY https://github.com/maxbachmann/jarowinkler-cpp.git
+        GIT_TAG 7f4db33652e34e1322508de6bd6d5440ad624823 # v1.0.0
+        GIT_SHALLOW TRUE
+    )
+    FetchContent_MakeAvailable(jaro_winkler)
+endif()
 
 add_subdirectory(rapidfuzz)
 add_subdirectory(rapidfuzz/distance)

@@ -12,8 +12,6 @@ jobs:
 
     steps:
       - uses: "actions/checkout@v2"
-        with:
-          submodules: 'true'
 
       - name: Install dependencies
         run: |
@@ -29,7 +27,38 @@ jobs:
         run: |
           pip install build; python -m build --sdist
           # test whether tarball contains all files required for compiling
-          pip install dist/rapidfuzz-*.tar.gz
+          pip install dist/rapidfuzz-*.tar.gz -v
+
+  system_install:
+    name: "Test installation using system supplied libs"
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - uses: "actions/checkout@v2"
+
+      - name: Install rapidfuzz-cpp
+        run: |
+          git clone https://github.com/maxbachmann/rapidfuzz-cpp.git
+          cd rapidfuzz-cpp
+          git checkout v1.0.1
+          mkdir build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          cmake --build .
+          sudo cmake --build . --target install
+
+      - name: Install jarowinkler-cpp
+        run: |
+          git clone https://github.com/maxbachmann/jarowinkler-cpp.git
+          cd jarowinkler-cpp
+          git checkout v1.0.0
+          mkdir build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          cmake --build .
+          sudo cmake --build . --target install
+
+      - name: build
+        run: |
+          pip install . -v
 
   tests:
     name: "Python ${{ matrix.python-version }}"
@@ -42,8 +71,6 @@ jobs:
 
     steps:
       - uses: "actions/checkout@v2"
-        with:
-          submodules: 'true'
       - uses: "actions/setup-python@v2"
         with:
           python-version: "${{ matrix.python-version }}"
@@ -55,7 +82,7 @@ jobs:
 
       - name: build
         run: |
-          pip install .
+          pip install . -v
 
       - name: Test type stubs
         if: matrix.python-version != '3.6'

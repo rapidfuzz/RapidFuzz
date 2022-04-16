@@ -10,21 +10,3 @@ include rapidfuzz/py.typed
 
 recursive-include rapidfuzz CMakeLists.txt
 recursive-include rapidfuzz *.hpp *.h *.cpp *.cxx *.pyx *.pxd
-
-include extern/rapidfuzz-cpp/LICENSE
-include extern/rapidfuzz-cpp/CMakeLists.txt
-recursive-include extern/rapidfuzz-cpp/rapidfuzz *.hpp *.impl
-
-include extern/jarowinkler-cpp/LICENSE
-include extern/jarowinkler-cpp/CMakeLists.txt
-recursive-include extern/jarowinkler-cpp/jaro_winkler *.hpp
-
-include extern/taskflow/LICENSE
-include extern/taskflow/CMakeLists.txt
-include extern/taskflow/TaskflowConfig.cmake.in
-include extern/taskflow/taskflow/algorithm/*
-include extern/taskflow/taskflow/core/*
-include extern/taskflow/taskflow/nstd/variant.hpp
-include extern/taskflow/taskflow/utility/*
-include extern/taskflow/taskflow/declarations.hpp
-include extern/taskflow/taskflow/taskflow.hpp
