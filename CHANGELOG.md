@@ -1,5 +1,13 @@
 ## Changelog
 
+### [2.0.10] - 2022-04-17
+#### Fixed
+- Do not include installations of jaro_winkler in wheels (regression from 2.0.7)
+
+#### Changed
+- Allow installation from system installed versions of `rapidfuzz-cpp`, `jarowinkler-cpp`
+  and `taskflow`
+
 ### [2.0.9] - 2022-04-07
 #### Fixed
 - Add missing Cython code in sdist
@@ -20,6 +28,7 @@
 #### Fixed
 - fix incorrect population of sys.modules which lead to submodules overshadowing
   other imports
+
 #### Changed
 - moved JaroWinkler and Jaro into a separate package
 
