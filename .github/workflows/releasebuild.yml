@@ -16,19 +16,23 @@ jobs:
       fail-fast: false
       matrix:
         arch: [auto32, auto64]
-        python_tag: ["cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*", "pp37-*", "pp38-*"]
+        python_tag: ["cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*", "pp37-*", "pp38-*", "pp39-*"]
         exclude:
           # PyPy only supports x86_64 on Windows
           - arch: auto32
             python_tag: "pp37-*"
           - arch: auto32
             python_tag: "pp38-*"
+          - arch: auto32
+            python_tag: "pp39-*"
 
           # PyPy Windows is currently broken in scikit-build
           - arch: auto64
             python_tag: "pp37-*"
           - arch: auto64
             python_tag: "pp38-*"
+          - arch: auto64
+            python_tag: "pp39-*"
     env:
       CIBW_BUILD: ${{matrix.python_tag}}
       CIBW_ARCHS: ${{matrix.arch}}
@@ -42,7 +46,7 @@ jobs:
       - uses: actions/setup-python@v2
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.3.1
+        uses: pypa/cibuildwheel@v2.4.0
         with:
           output-dir: wheelhouse
 
@@ -83,7 +87,7 @@ jobs:
       - uses: actions/setup-python@v2
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.3.1
+        uses: pypa/cibuildwheel@v2.4.0
         with:
           output-dir: wheelhouse
 
@@ -101,7 +105,7 @@ jobs:
         # disable s390x and ppc64le wheels while they are not provided by numpy
         # arch: [auto, aarch64, ppc64le, s390x]
         arch: [auto, aarch64]
-        python_tag: [ "cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*", "pp37-*", "pp38-*"]
+        python_tag: [ "cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*", "pp37-*", "pp38-*", "pp39-*"]
     env:
       CIBW_ARCHS_LINUX: ${{matrix.arch}}
       CIBW_BUILD: ${{matrix.python_tag}}
@@ -120,7 +124,7 @@ jobs:
         name: Set up QEMU
 
       - name: Build wheel
-        uses: pypa/cibuildwheel@v2.3.1
+        uses: pypa/cibuildwheel@v2.4.0
         with:
           output-dir: wheelhouse
 
