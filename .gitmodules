@@ -1,9 +1,0 @@
-[submodule "extern/rapidfuzz-cpp"]
-	path = extern/rapidfuzz-cpp
-	url = ../../maxbachmann/rapidfuzz-cpp.git
-[submodule "extern/taskflow"]
-	path = extern/taskflow
-	url = ../../taskflow/taskflow.git
-[submodule "extern/jarowinkler-cpp"]
-	path = extern/jarowinkler-cpp
-	url = ../../maxbachmann/jarowinkler-cpp
