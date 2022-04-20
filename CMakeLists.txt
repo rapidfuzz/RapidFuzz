@@ -23,7 +23,10 @@ include(FetchContent)
 
 set(RF_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-find_package(Taskflow 2.7.0...<4.0.0 QUIET)
+find_package(Taskflow 3.0.0 QUIET)
+if (NOT Taskflow_FOUND)
+    find_package(Taskflow 2.7.0 QUIET)
+endif()
 if (Taskflow_FOUND)
     message("Using system supplied version of Taskflow")
 else()
