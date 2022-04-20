@@ -23,9 +23,7 @@ include(FetchContent)
 
 set(RF_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-# todo this appears to be broken somehow
-# results in linker errors
-find_package(Taskflow 2.7.0 EXACT QUIET)
+find_package(Taskflow 2.7.0...<4.0.0 QUIET)
 if (Taskflow_FOUND)
     message("Using system supplied version of Taskflow")
 else()
@@ -52,7 +50,7 @@ else()
     add_library(Taskflow::Taskflow ALIAS Taskflow)
 endif()
 
-find_package(rapidfuzz 1.0.1 EXACT QUIET)
+find_package(rapidfuzz 1.0.1 QUIET)
 if (rapidfuzz_FOUND)
     message("Using system supplied version of rapidfuzz-cpp")
 else()
@@ -66,7 +64,7 @@ else()
     FetchContent_MakeAvailable(rapidfuzz)
 endif()
 
-find_package(jaro_winkler 1.0.0 EXACT QUIET)
+find_package(jaro_winkler 1.0.0 QUIET)
 if (jaro_winkler_FOUND)
     message("Using system supplied version of jaro_winkler")
 else()
