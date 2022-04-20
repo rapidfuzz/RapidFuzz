@@ -70,6 +70,27 @@ jobs:
         run: |
           pip install . -v
 
+  system_install2:
+    name: "Test installation using newest version of Taskflow"
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - uses: "actions/checkout@v2"
+
+      - name: Install taskflow
+        run: |
+          git clone https://github.com/taskflow/taskflow.git
+          cd taskflow
+          git checkout v3.3.0
+          mkdir build && cd build
+          cmake .. -DTF_BUILD_TESTS=0 -DTF_BUILD_EXAMPLES=0
+          cmake --build .
+          sudo cmake --build . --target install
+
+      - name: build
+        run: |
+          pip install . -v
+
   tests:
     name: "Python ${{ matrix.python-version }}"
     runs-on: ${{matrix.os}}
