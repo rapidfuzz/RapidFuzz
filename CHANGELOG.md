@@ -1,5 +1,9 @@
 ## Changelog
 
+### [2.0.11] - 2022-04-23
+#### Changed
+- relax version requirements of dependencies to simplify packaging
+
 ### [2.0.10] - 2022-04-17
 #### Fixed
 - Do not include installations of jaro_winkler in wheels (regression from 2.0.7)
