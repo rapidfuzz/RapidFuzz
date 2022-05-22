@@ -1,0 +1,5 @@
+
+bool LCSseqSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count, const RF_String* str);
+bool LCSseqNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count, const RF_String* str);
+bool LCSseqDistanceInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count, const RF_String* str);
+bool LCSseqNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count, const RF_String* str);

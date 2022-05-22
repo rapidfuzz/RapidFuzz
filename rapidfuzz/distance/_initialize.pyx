@@ -11,7 +11,6 @@ from libc.stdint cimport uint32_t, int64_t
 from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.ref cimport Py_INCREF
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
-from cython.operator cimport dereference
 
 cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
     cdef struct LevenshteinWeightTable:

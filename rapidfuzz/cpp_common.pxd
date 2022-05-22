@@ -8,7 +8,6 @@ from libcpp.utility cimport pair
 from libcpp cimport bool
 from libcpp.utility cimport move
 from cpython.object cimport PyObject
-from cython.operator cimport dereference
 from libcpp.vector cimport vector
 from cpython.pycapsule cimport PyCapsule_IsValid, PyCapsule_GetPointer
 
@@ -201,8 +200,8 @@ cdef inline RF_String conv_sequence(seq) except *:
         return move(hash_sequence(seq))
 
 cdef inline double get_score_cutoff_f64(score_cutoff, const RF_ScorerFlags* scorer_flags) except *:
-    worst_score = dereference(scorer_flags).worst_score.f64
-    optimal_score = dereference(scorer_flags).optimal_score.f64
+    worst_score = scorer_flags.worst_score.f64
+    optimal_score = scorer_flags.optimal_score.f64
     c_score_cutoff = worst_score
 
     if score_cutoff is not None:
@@ -219,8 +218,8 @@ cdef inline double get_score_cutoff_f64(score_cutoff, const RF_ScorerFlags* scor
     return c_score_cutoff
 
 cdef inline int64_t get_score_cutoff_i64(score_cutoff, const RF_ScorerFlags* scorer_flags) except *:
-    worst_score = dereference(scorer_flags).worst_score.i64
-    optimal_score = dereference(scorer_flags).optimal_score.i64
+    worst_score = scorer_flags.worst_score.i64
+    optimal_score = scorer_flags.optimal_score.i64
     c_score_cutoff = worst_score
 
     if score_cutoff is not None:

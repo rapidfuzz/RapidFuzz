@@ -20,7 +20,6 @@ from libc.stdint cimport INT64_MAX, uint32_t, int64_t
 from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.ref cimport Py_INCREF
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
-from cython.operator cimport dereference
 
 cdef extern from "edit_based.hpp":
     double indel_normalized_distance_func(  const RF_String&, const RF_String&, double) nogil except +
@@ -319,32 +318,32 @@ cdef bool NoKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     if len(kwargs):
         raise TypeError("Got unexpected keyword arguments: ", ", ".join(kwargs.keys()))
 
-    dereference(self).context = NULL
-    dereference(self).dtor = NULL
+    self.context = NULL
+    self.dtor = NULL
     return True
 
 cdef bool GetScorerFlagsIndelDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.i64 = 0
-    dereference(scorer_flags).worst_score.i64 = INT64_MAX
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.i64 = 0
+    scorer_flags.worst_score.i64 = INT64_MAX
     return True
 
 cdef bool GetScorerFlagsIndelNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 0.0
-    dereference(scorer_flags).worst_score.f64 = 1
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 0.0
+    scorer_flags.worst_score.f64 = 1
     return True
 
 cdef bool GetScorerFlagsIndelSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.i64 = INT64_MAX
-    dereference(scorer_flags).worst_score.i64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.i64 = INT64_MAX
+    scorer_flags.worst_score.i64 = 0
     return True
 
 cdef bool GetScorerFlagsIndelNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 1.0
-    dereference(scorer_flags).worst_score.f64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 1.0
+    scorer_flags.worst_score.f64 = 0
     return True
 
 cdef RF_Scorer IndelDistanceContext

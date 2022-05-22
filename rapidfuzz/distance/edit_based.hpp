@@ -1,7 +1,12 @@
 #pragma once
 #include "cpp_common.hpp"
-#include <iostream>
 #include <jaro_winkler/jaro_winkler.hpp>
+
+#ifdef __x86_64__
+    #include "../FeatureDetector/CpuInfo.hpp"
+    #include "../simd/sse2/edit_based_sse2.hpp"
+    #include "../simd/avx2/edit_based_avx2.hpp"
+#endif
 
 /* Levenshtein */
 static inline int64_t levenshtein_distance_func(const RF_String& s1, const RF_String& s2,
@@ -163,9 +168,25 @@ static inline int64_t lcs_seq_distance_func(const RF_String& s1, const RF_String
         return rapidfuzz::lcs_seq_distance(first1, last1, first2, last2, max);
     });
 }
-static inline bool LCSseqDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str)
+static inline bool LCSseqDistanceInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count, const RF_String* str)
 {
+#ifdef __x86_64__
+    if (CpuInfo::supports(CPU_FEATURE_AVX2))
+        return Avx2::LCSseqDistanceInit(self, kwargs, str_count, str);
+
+    if (CpuInfo::supports(CPU_FEATURE_SSE2))
+        return Sse2::LCSseqDistanceInit(self, kwargs, str_count, str);
+#endif
+
     return distance_init<rapidfuzz::CachedLCSseq, int64_t>(self, str_count, str);
+}
+static inline bool LCSseqDistanceMultiStringSupport()
+{
+#ifdef __x86_64__
+    return CpuInfo::supports(CPU_FEATURE_AVX2) || CpuInfo::supports(CPU_FEATURE_SSE2);
+#else
+    return false;
+#endif
 }
 
 static inline double lcs_seq_normalized_distance_func(const RF_String& s1, const RF_String& s2, double score_cutoff)
@@ -174,9 +195,25 @@ static inline double lcs_seq_normalized_distance_func(const RF_String& s1, const
         return rapidfuzz::lcs_seq_normalized_distance(first1, last1, first2, last2, score_cutoff);
     });
 }
-static inline bool LCSseqNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str)
+static inline bool LCSseqNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count, const RF_String* str)
 {
+#ifdef __x86_64__
+    if (CpuInfo::supports(CPU_FEATURE_AVX2))
+        return Avx2::LCSseqNormalizedDistanceInit(self, kwargs, str_count, str);
+
+    if (CpuInfo::supports(CPU_FEATURE_SSE2))
+        return Sse2::LCSseqNormalizedDistanceInit(self, kwargs, str_count, str);
+#endif
+
     return normalized_distance_init<rapidfuzz::CachedLCSseq, double>(self, str_count, str);
+}
+static inline bool LCSseqNormalizedDistanceMultiStringSupport()
+{
+#ifdef __x86_64__
+    return CpuInfo::supports(CPU_FEATURE_AVX2) || CpuInfo::supports(CPU_FEATURE_SSE2);
+#else
+    return false;
+#endif
 }
 
 static inline int64_t lcs_seq_similarity_func(const RF_String& s1, const RF_String& s2, int64_t max)
@@ -185,9 +222,25 @@ static inline int64_t lcs_seq_similarity_func(const RF_String& s1, const RF_Stri
         return rapidfuzz::lcs_seq_similarity(first1, last1, first2, last2, max);
     });
 }
-static inline bool LCSseqSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str)
+static inline bool LCSseqSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count, const RF_String* str)
 {
+#ifdef __x86_64__
+    if (CpuInfo::supports(CPU_FEATURE_AVX2))
+        return Avx2::LCSseqSimilarityInit(self, kwargs, str_count, str);
+
+    if (CpuInfo::supports(CPU_FEATURE_SSE2))
+        return Sse2::LCSseqSimilarityInit(self, kwargs, str_count, str);
+#endif
+
     return similarity_init<rapidfuzz::CachedLCSseq, int64_t>(self, str_count, str);
+}
+static inline bool LCSseqSimilarityMultiStringSupport()
+{
+#ifdef __x86_64__
+    return CpuInfo::supports(CPU_FEATURE_AVX2) || CpuInfo::supports(CPU_FEATURE_SSE2);
+#else
+    return false;
+#endif
 }
 
 static inline double lcs_seq_normalized_similarity_func(const RF_String& s1, const RF_String& s2, double score_cutoff)
@@ -196,9 +249,25 @@ static inline double lcs_seq_normalized_similarity_func(const RF_String& s1, con
         return rapidfuzz::lcs_seq_normalized_similarity(first1, last1, first2, last2, score_cutoff);
     });
 }
-static inline bool LCSseqNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str)
+static inline bool LCSseqNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count, const RF_String* str)
 {
+#ifdef __x86_64__
+    if (CpuInfo::supports(CPU_FEATURE_AVX2))
+        return Avx2::LCSseqNormalizedSimilarityInit(self, kwargs, str_count, str);
+
+    if (CpuInfo::supports(CPU_FEATURE_SSE2))
+        return Sse2::LCSseqNormalizedSimilarityInit(self, kwargs, str_count, str);
+#endif
+
     return normalized_similarity_init<rapidfuzz::CachedLCSseq, double>(self, str_count, str);
+}
+static inline bool LCSseqNormalizedSimilarityMultiStringSupport()
+{
+#ifdef __x86_64__
+    return CpuInfo::supports(CPU_FEATURE_AVX2) || CpuInfo::supports(CPU_FEATURE_SSE2);
+#else
+    return false;
+#endif
 }
 
 static inline double jaro_similarity_func(const RF_String& s1, const RF_String& s2, double score_cutoff)

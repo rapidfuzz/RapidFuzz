@@ -17,7 +17,6 @@ from cpp_common cimport RF_StringWrapper, preprocess_strings, RfScoreAlignment
 
 from libc.stdint cimport uint32_t, int64_t
 from libcpp cimport bool
-from cython.operator cimport dereference
 
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
 
@@ -545,68 +544,68 @@ cdef bool NoKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     if len(kwargs):
         raise TypeError("Got unexpected keyword arguments: ", ", ".join(kwargs.keys()))
 
-    dereference(self).context = NULL
-    dereference(self).dtor = NULL
+    self.context = NULL
+    self.dtor = NULL
     return True
 
 cdef bool GetScorerFlagsRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 100
+    scorer_flags.worst_score.f64 = 0
     return True
 
 cdef bool GetScorerFlagsPartialRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64
+    scorer_flags.optimal_score.f64 = 100
+    scorer_flags.worst_score.f64 = 0
     return True
 
 cdef bool GetScorerFlagsTokenSortRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 100
+    scorer_flags.worst_score.f64 = 0
     return True
 
 cdef bool GetScorerFlagsTokenSetRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 100
+    scorer_flags.worst_score.f64 = 0
     return True
 
 cdef bool GetScorerFlagsTokenRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 100
+    scorer_flags.worst_score.f64 = 0
     return True
 
 cdef bool GetScorerFlagsPartialTokenSortRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64
+    scorer_flags.optimal_score.f64 = 100
+    scorer_flags.worst_score.f64 = 0
     return True
 
 cdef bool GetScorerFlagsPartialTokenSetRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64
+    scorer_flags.optimal_score.f64 = 100
+    scorer_flags.worst_score.f64 = 0
     return True
 
 cdef bool GetScorerFlagsPartialTokenRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64
+    scorer_flags.optimal_score.f64 = 100
+    scorer_flags.worst_score.f64 = 0
     return True
 
 cdef bool GetScorerFlagsWRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64
+    scorer_flags.optimal_score.f64 = 100
+    scorer_flags.worst_score.f64 = 0
     return True
 
 cdef bool GetScorerFlagsQRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 100
+    scorer_flags.worst_score.f64 = 0
     return True
 
 cdef RF_Scorer RatioContext

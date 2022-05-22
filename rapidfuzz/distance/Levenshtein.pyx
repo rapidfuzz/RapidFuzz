@@ -27,7 +27,6 @@ from libc.stdint cimport INT64_MAX, uint32_t, int64_t
 from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.ref cimport Py_INCREF
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
-from cython.operator cimport dereference
 
 cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
     cdef struct LevenshteinWeightTable:
@@ -400,7 +399,7 @@ def opcodes(s1, s2, *, processor=None):
     return ops.as_opcodes()
 
 cdef void KwargsDeinit(RF_Kwargs* self):
-    free(<void*>dereference(self).context)
+    free(<void*>self.context)
 
 cdef bool LevenshteinKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     cdef int64_t insertion, deletion, substitution
@@ -410,47 +409,47 @@ cdef bool LevenshteinKwargsInit(RF_Kwargs* self, dict kwargs) except False:
         raise MemoryError
 
     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
-    dereference(weights).insert_cost = insertion
-    dereference(weights).delete_cost = deletion
-    dereference(weights).replace_cost = substitution
-    dereference(self).context = weights
-    dereference(self).dtor = KwargsDeinit
+    weights.insert_cost = insertion
+    weights.delete_cost = deletion
+    weights.replace_cost = substitution
+    self.context = weights
+    self.dtor = KwargsDeinit
     return True
 
 cdef bool GetScorerFlagsDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>dereference(self).context
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64
-    if dereference(weights).insert_cost == dereference(weights).delete_cost:
-        dereference(scorer_flags).flags |= RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.i64 = 0
-    dereference(scorer_flags).worst_score.i64 = INT64_MAX
+    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>self.context
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64
+    if weights.insert_cost == weights.delete_cost:
+        scorer_flags.flags |= RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.i64 = 0
+    scorer_flags.worst_score.i64 = INT64_MAX
     return True
 
 cdef bool GetScorerFlagsSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>dereference(self).context
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64
-    if dereference(weights).insert_cost == dereference(weights).delete_cost:
-        dereference(scorer_flags).flags |= RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.i64 = INT64_MAX
-    dereference(scorer_flags).worst_score.i64 = 0
+    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>self.context
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64
+    if weights.insert_cost == weights.delete_cost:
+        scorer_flags.flags |= RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.i64 = INT64_MAX
+    scorer_flags.worst_score.i64 = 0
     return True
 
 cdef bool GetScorerFlagsNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>dereference(self).context
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
-    if dereference(weights).insert_cost == dereference(weights).delete_cost:
-        dereference(scorer_flags).flags |= RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 0
-    dereference(scorer_flags).worst_score.f64 = 1.0
+    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>self.context
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64
+    if weights.insert_cost == weights.delete_cost:
+        scorer_flags.flags |= RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 0
+    scorer_flags.worst_score.f64 = 1.0
     return True
 
 cdef bool GetScorerFlagsNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>dereference(self).context
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
-    if dereference(weights).insert_cost == dereference(weights).delete_cost:
-        dereference(scorer_flags).flags |= RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 1.0
-    dereference(scorer_flags).worst_score.f64 = 0
+    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>self.context
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64
+    if weights.insert_cost == weights.delete_cost:
+        scorer_flags.flags |= RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 1.0
+    scorer_flags.worst_score.f64 = 0
     return True
 
 cdef RF_Scorer LevenshteinDistanceContext

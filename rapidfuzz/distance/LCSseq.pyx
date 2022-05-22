@@ -8,7 +8,8 @@ from rapidfuzz_capi cimport (
     RF_String, RF_Scorer, RF_Kwargs, RF_ScorerFunc, RF_Preprocess, RF_KwargsInit,
     SCORER_STRUCT_VERSION, RF_Preprocessor,
     RF_ScorerFlags,
-    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_I64, RF_SCORER_FLAG_SYMMETRIC
+    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_I64, RF_SCORER_FLAG_SYMMETRIC,
+    RF_SCORER_FLAG_MULTI_STRING_INIT
 )
 # required for preprocess_strings
 from array import array
@@ -20,7 +21,6 @@ from libc.stdint cimport INT64_MAX, uint32_t, int64_t
 from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.ref cimport Py_INCREF
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
-from cython.operator cimport dereference
 
 cdef extern from "edit_based.hpp":
     double lcs_seq_normalized_distance_func(  const RF_String&, const RF_String&, double) nogil except +
@@ -34,6 +34,11 @@ cdef extern from "edit_based.hpp":
     bool LCSseqNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
     bool LCSseqSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
     bool LCSseqNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+
+    bool LCSseqDistanceMultiStringSupport() nogil
+    bool LCSseqNormalizedDistanceMultiStringSupport() nogil
+    bool LCSseqSimilarityMultiStringSupport() nogil
+    bool LCSseqNormalizedSimilarityMultiStringSupport() nogil
 
 def distance(s1, s2, *, processor=None, score_cutoff=None):
     """
@@ -317,32 +322,44 @@ cdef bool NoKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     if len(kwargs):
         raise TypeError("Got unexpected keyword arguments: ", ", ".join(kwargs.keys()))
 
-    dereference(self).context = NULL
-    dereference(self).dtor = NULL
+    self.context = NULL
+    self.dtor = NULL
     return True
 
 cdef bool GetScorerFlagsLCSseqDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.i64 = 0
-    dereference(scorer_flags).worst_score.i64 = INT64_MAX
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    if LCSseqDistanceMultiStringSupport():
+        scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
+
+    scorer_flags.optimal_score.i64 = 0
+    scorer_flags.worst_score.i64 = INT64_MAX
     return True
 
 cdef bool GetScorerFlagsLCSseqNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 0.0
-    dereference(scorer_flags).worst_score.f64 = 1
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    if LCSseqNormalizedDistanceMultiStringSupport():
+        scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
+
+    scorer_flags.optimal_score.f64 = 0.0
+    scorer_flags.worst_score.f64 = 1
     return True
 
 cdef bool GetScorerFlagsLCSseqSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.i64 = INT64_MAX
-    dereference(scorer_flags).worst_score.i64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    if LCSseqSimilarityMultiStringSupport():
+        scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
+
+    scorer_flags.optimal_score.i64 = INT64_MAX
+    scorer_flags.worst_score.i64 = 0
     return True
 
 cdef bool GetScorerFlagsLCSseqNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 1.0
-    dereference(scorer_flags).worst_score.f64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    if LCSseqNormalizedSimilarityMultiStringSupport():
+        scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
+
+    scorer_flags.optimal_score.f64 = 1.0
+    scorer_flags.worst_score.f64 = 0
     return True
 
 cdef RF_Scorer LCSseqDistanceContext

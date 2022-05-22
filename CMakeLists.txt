@@ -1,3 +1,6 @@
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 cmake_minimum_required(VERSION 3.12.0)
 
 cmake_policy(SET CMP0054 NEW)
@@ -61,7 +64,7 @@ else()
     FetchContent_Declare(
         rapidfuzz
         GIT_REPOSITORY https://github.com/maxbachmann/rapidfuzz-cpp.git
-        GIT_TAG 6642000b428b952de0fdf4d1f4be34e0b7b1eca3 # v1.0.1
+        GIT_TAG 4ba979c52be69e4f4ffdd85bceb866bf966bf167 # v1.0.2
         GIT_SHALLOW TRUE
     )
     FetchContent_MakeAvailable(rapidfuzz)

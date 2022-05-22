@@ -11,7 +11,6 @@ from libc.math cimport floor
 from libc.stdint cimport uint32_t, uint64_t, int64_t
 
 cimport cython
-from cython.operator cimport dereference
 
 from cpp_common cimport (
     PyObjectWrapper, RF_StringWrapper, RF_KwargsWrapper,
@@ -37,9 +36,9 @@ from cpython.object cimport PyObject
 np.import_array()
 
 cdef extern from "cpp_process_cdist.hpp":
-    object cdist_single_list_impl[T](  const RF_Kwargs*, RF_Scorer*,
+    object cdist_single_list_impl[T](  const RF_ScorerFlags*, const RF_Kwargs*, RF_Scorer*,
         const vector[RF_StringWrapper]&, int, int, T) except +
-    object cdist_two_lists_impl[T](    const RF_Kwargs*, RF_Scorer*,
+    object cdist_two_lists_impl[T](    const RF_ScorerFlags*, const RF_Kwargs*, RF_Scorer*,
         const vector[RF_StringWrapper]&, const vector[RF_StringWrapper]&, int, int, T) except +
 
     void set_score(PyArrayObject*, int, npy_intp, npy_intp, double)
@@ -128,10 +127,11 @@ cdef inline int dtype_to_type_num_i64(dtype) except -1:
 cdef cdist_two_lists(queries, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, dtype, int c_workers, const RF_Kwargs* kwargs):
     proc_queries = preprocess(queries, processor)
     proc_choices = preprocess(choices, processor)
-    flags = dereference(scorer_flags).flags
+    flags = scorer_flags.flags
 
     if flags & RF_SCORER_FLAG_RESULT_F64:
         return cdist_two_lists_impl(
+            scorer_flags,
             kwargs, scorer, proc_queries, proc_choices,
             dtype_to_type_num_f64(dtype),
             c_workers,
@@ -139,6 +139,7 @@ cdef cdist_two_lists(queries, choices, RF_Scorer* scorer, const RF_ScorerFlags* 
 
     elif flags & RF_SCORER_FLAG_RESULT_I64:
         return cdist_two_lists_impl(
+            scorer_flags,
             kwargs, scorer, proc_queries, proc_choices,
             dtype_to_type_num_i64(dtype),
             c_workers,
@@ -148,10 +149,11 @@ cdef cdist_two_lists(queries, choices, RF_Scorer* scorer, const RF_ScorerFlags* 
 
 cdef cdist_single_list(queries, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, dtype, int c_workers, const RF_Kwargs* kwargs):
     proc_queries = preprocess(queries, processor)
-    flags = dereference(scorer_flags).flags
+    flags = scorer_flags.flags
 
     if flags & RF_SCORER_FLAG_RESULT_F64:
         return cdist_single_list_impl(
+            scorer_flags,
             kwargs, scorer, proc_queries,
             dtype_to_type_num_f64(dtype),
             c_workers,
@@ -159,6 +161,7 @@ cdef cdist_single_list(queries, RF_Scorer* scorer, const RF_ScorerFlags* scorer_
 
     elif flags & RF_SCORER_FLAG_RESULT_I64:
         return cdist_single_list_impl(
+            scorer_flags,
             kwargs, scorer, proc_queries,
             dtype_to_type_num_i64(dtype),
             c_workers,
@@ -264,10 +267,10 @@ def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, 
         scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
 
     if scorer_context:
-        if dereference(scorer_context).version == 1:
+        if scorer_context.version == 1:
             kwargs_context = RF_KwargsWrapper()
-            dereference(scorer_context).kwargs_init(&kwargs_context.kwargs, kwargs)
-            dereference(scorer_context).get_scorer_flags(&kwargs_context.kwargs, &scorer_flags)
+            scorer_context.kwargs_init(&kwargs_context.kwargs, kwargs)
+            scorer_context.get_scorer_flags(&kwargs_context.kwargs, &scorer_flags)
 
             # scorer(queries[i], choices[j]) == scorer(queries[j], choices[i])
             if scorer_flags.flags & RF_SCORER_FLAG_SYMMETRIC and queries is choices:

@@ -5,7 +5,8 @@ from rapidfuzz_capi cimport (
     RF_String, RF_Scorer, RF_Kwargs, RF_ScorerFunc, RF_Preprocess, RF_KwargsInit,
     SCORER_STRUCT_VERSION, RF_Preprocessor,
     RF_ScorerFlags,
-    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_I64, RF_SCORER_FLAG_SYMMETRIC
+    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_I64, RF_SCORER_FLAG_SYMMETRIC,
+    RF_SCORER_FLAG_MULTI_STRING_INIT
 )
 # required for preprocess_strings
 from rapidfuzz.utils import default_process
@@ -20,7 +21,6 @@ from libc.stdint cimport INT64_MAX, uint32_t, int64_t
 from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.ref cimport Py_INCREF
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
-from cython.operator cimport dereference
 from cpp_common cimport RfEditops, RfEditOp, EditType
 
 cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
@@ -436,7 +436,7 @@ def jaro_winkler_similarity(s1, s2, *, double prefix_weight=0.1, processor=None,
     return jaro_winkler_similarity_func(s1_proc.string, s2_proc.string, prefix_weight, c_score_cutoff)
 
 cdef void KwargsDeinit(RF_Kwargs* self):
-    free(<void*>dereference(self).context)
+    free(<void*>self.context)
 
 cdef bool LevenshteinKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     cdef int64_t insertion, deletion, substitution
@@ -446,11 +446,11 @@ cdef bool LevenshteinKwargsInit(RF_Kwargs* self, dict kwargs) except False:
         raise MemoryError
 
     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
-    dereference(weights).insert_cost = insertion
-    dereference(weights).delete_cost = deletion
-    dereference(weights).replace_cost = substitution
-    dereference(self).context = weights
-    dereference(self).dtor = KwargsDeinit
+    weights.insert_cost = insertion
+    weights.delete_cost = deletion
+    weights.replace_cost = substitution
+    self.context = weights
+    self.dtor = KwargsDeinit
     return True
 
 cdef bool JaroWinklerKwargsInit(RF_Kwargs* self, dict kwargs) except False:
@@ -460,58 +460,58 @@ cdef bool JaroWinklerKwargsInit(RF_Kwargs* self, dict kwargs) except False:
         raise MemoryError
 
     prefix_weight[0] = kwargs.get("prefix_weight", 0.1)
-    dereference(self).context = prefix_weight
-    dereference(self).dtor = KwargsDeinit
+    self.context = prefix_weight
+    self.dtor = KwargsDeinit
     return True
 
 cdef bool NoKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     if len(kwargs):
         raise TypeError("Got unexpected keyword arguments: ", ", ".join(kwargs.keys()))
 
-    dereference(self).context = NULL
-    dereference(self).dtor = NULL
+    self.context = NULL
+    self.dtor = NULL
     return True
 
 cdef bool GetScorerFlagsLevenshtein(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>dereference(self).context
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64
-    if dereference(weights).insert_cost == dereference(weights).delete_cost:
-        dereference(scorer_flags).flags |= RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.i64 = 0
-    dereference(scorer_flags).worst_score.i64 = INT64_MAX
+    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>self.context
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64
+    if weights.insert_cost == weights.delete_cost:
+        scorer_flags.flags |= RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.i64 = 0
+    scorer_flags.worst_score.i64 = INT64_MAX
     return True
 
 cdef bool GetScorerFlagsNormalizedLevenshtein(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>dereference(self).context
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
-    if dereference(weights).insert_cost == dereference(weights).delete_cost:
-        dereference(scorer_flags).flags |= RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
+    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>self.context
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64
+    if weights.insert_cost == weights.delete_cost:
+        scorer_flags.flags |= RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 100
+    scorer_flags.worst_score.f64 = 0
     return True
 
 cdef bool GetScorerFlagsHamming(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.i64 = 0
-    dereference(scorer_flags).worst_score.i64 = INT64_MAX
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.i64 = 0
+    scorer_flags.worst_score.i64 = INT64_MAX
     return True
 
 cdef bool GetScorerFlagsNormalizedHamming(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 100
+    scorer_flags.worst_score.f64 = 0
     return True
 
 cdef bool GetScorerFlagsJaroSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 100
+    scorer_flags.worst_score.f64 = 0
     return True
 
 cdef bool GetScorerFlagsJaroWinklerSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 100
+    scorer_flags.worst_score.f64 = 0
     return True
 
 
