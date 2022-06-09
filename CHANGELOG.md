@@ -1,5 +1,10 @@
 ## Changelog
 
+### [2.0.12] - 2022-*
+#### Changed
+- add tests to sdist
+- remove cython dependency for sdist
+  
 ### [2.0.11] - 2022-04-23
 #### Changed
 - relax version requirements of dependencies to simplify packaging

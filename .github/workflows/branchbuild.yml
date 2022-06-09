@@ -25,6 +25,7 @@ jobs:
 
       - name: build
         run: |
+          git apply ./tools/sdist.patch
           pip install build; python -m build --sdist
           # test whether tarball contains all files required for compiling
           pip install dist/rapidfuzz-*.tar.gz -v

@@ -10,3 +10,4 @@ include rapidfuzz/py.typed
 
 recursive-include rapidfuzz CMakeLists.txt
 recursive-include rapidfuzz *.hpp *.h *.cpp *.cxx *.pyx *.pxd
+recursive-include tests *

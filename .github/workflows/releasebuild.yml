@@ -153,6 +153,7 @@ jobs:
 
       - name: Build sdist
         run: |
+          git apply ./tools/sdist.patch
           pip install build
           python -m build --sdist
           # test whether tarball contains all files required for compiling
