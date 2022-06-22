@@ -1,6 +1,10 @@
 ## Changelog
 
-### [2.0.12] - 2022-*
+### [2.0.13] - 2022-06-22
+#### Changed
+- use system version of cmake on arm platforms, since the cmake package fails to compile
+
+### [2.0.12] - 2022-06-22
 #### Changed
 - add tests to sdist
 - remove cython dependency for sdist
