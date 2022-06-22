@@ -3,7 +3,7 @@ rapid string matching library
 """
 __author__ = "Max Bachmann"
 __license__ = "MIT"
-__version__ = "2.0.11"
+__version__ = "2.0.12"
 
 from rapidfuzz import (
     process,

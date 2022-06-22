@@ -6,8 +6,8 @@ with open('README.md', 'rt', encoding="utf8") as f:
 
 setup(
     name="rapidfuzz",
-    version="2.0.11",
-    install_requires=["jarowinkler >= 1.0.2, < 1.1.0"],
+    version="2.0.12",
+    install_requires=["jarowinkler >= 1.0.3, < 1.1.0"],
     extras_require={'full': ['numpy']},
     url="https://github.com/maxbachmann/RapidFuzz",
     author="Max Bachmann",
