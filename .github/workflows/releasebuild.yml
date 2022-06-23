@@ -43,6 +43,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
       - uses: actions/setup-python@v2
 
       - name: Build wheels
@@ -84,6 +86,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
       - uses: actions/setup-python@v2
 
       - name: Build wheels
@@ -118,6 +122,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
       - uses: actions/setup-python@v2
 
       - uses: docker/setup-qemu-action@v1
@@ -138,6 +144,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
       - uses: actions/setup-python@v2
 
       - name: Install dependencies

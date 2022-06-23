@@ -1,5 +1,13 @@
 ## Changelog
 
+### [2.0.14] - 2022-06-
+#### Fixed
+- fix unlimited recursion in LCSseq when used in combination with the process module
+
+#### Changed
+- add fallback implementations of `taskflow`, `rapidfuzz-cpp` and `jarowinkler-cpp`
+  back to wheel, since some package building systems like piwheels can't clone sources
+
 ### [2.0.13] - 2022-06-22
 #### Changed
 - use system version of cmake on arm platforms, since the cmake package fails to compile
