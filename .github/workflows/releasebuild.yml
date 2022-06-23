@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - test
   release:
     types:
       - published
@@ -16,7 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: [auto32, auto64]
-        python_tag: ["cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*", "pp37-*", "pp38-*", "pp39-*"]
+        python_tag: ["pp38-*", "pp39-*"]
         exclude:
           # PyPy only supports x86_64 on Windows
           - arch: auto32
@@ -25,14 +26,6 @@ jobs:
             python_tag: "pp38-*"
           - arch: auto32
             python_tag: "pp39-*"
-
-          # PyPy Windows is currently broken in scikit-build
-          - arch: auto64
-            python_tag: "pp37-*"
-          - arch: auto64
-            python_tag: "pp38-*"
-          - arch: auto64
-            python_tag: "pp39-*"
     env:
       CIBW_BUILD: ${{matrix.python_tag}}
       CIBW_ARCHS: ${{matrix.arch}}
@@ -56,144 +49,3 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           path: ./wheelhouse/*.whl
-
-  build_wheels_macos:
-    name: Build wheel on macos-latest/${{matrix.arch}}/${{matrix.python_tag}}
-    runs-on: macos-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [x86_64, arm64, universal2]
-        python_tag: ["cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*"]
-        exclude:
-          # MacOS Arm only supported since Python 3.8
-          - arch: arm64
-            python_tag: "cp36-*"
-          - arch: arm64
-            python_tag: "cp37-*"
-          - arch: universal2
-            python_tag: "cp36-*"
-          - arch: universal2
-            python_tag: "cp37-*"
-    env:
-      CIBW_BUILD: ${{matrix.python_tag}}
-      CIBW_ARCHS: ${{matrix.arch}}
-      CIBW_TEST_SKIP: "*-macosx_{arm64,universal2}"
-      CIBW_TEST_REQUIRES: pytest hypothesis pandas
-      CIBW_TEST_COMMAND: pytest {package}/tests
-      CIBW_TEST_COMMAND_LINUX: "{package}/tools/seg_wrapper.sh pytest {package}/tests"
-      CIBW_BUILD_VERBOSITY: 3
-
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-      - uses: actions/setup-python@v2
-
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.4.0
-        with:
-          output-dir: wheelhouse
-
-      - name: Upload wheels
-        uses: actions/upload-artifact@v2
-        with:
-          path: ./wheelhouse/*.whl
-
-  build_wheels_linux:
-    name: Build wheels on ubuntu-latest/${{matrix.arch}}/${{matrix.python_tag}}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        # disable s390x and ppc64le wheels while they are not provided by numpy
-        # arch: [auto, aarch64, ppc64le, s390x]
-        arch: [auto, aarch64]
-        python_tag: [ "cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*", "pp37-*", "pp38-*", "pp39-*"]
-    env:
-      CIBW_ARCHS_LINUX: ${{matrix.arch}}
-      CIBW_BUILD: ${{matrix.python_tag}}
-      CIBW_SKIP: "*musllinux_*"
-      CIBW_TEST_SKIP: "*-manylinux_{aarch64,ppc64le,s390x}"
-      CIBW_TEST_REQUIRES: pytest hypothesis pandas
-      CIBW_TEST_COMMAND: pytest {package}/tests
-      CIBW_TEST_COMMAND_LINUX: "{package}/tools/seg_wrapper.sh pytest {package}/tests"
-      CIBW_BUILD_VERBOSITY: 3
-
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-      - uses: actions/setup-python@v2
-
-      - uses: docker/setup-qemu-action@v1
-        name: Set up QEMU
-
-      - name: Build wheel
-        uses: pypa/cibuildwheel@v2.4.0
-        with:
-          output-dir: wheelhouse
-
-      - name: Upload wheels
-        uses: actions/upload-artifact@v2
-        with:
-          path: ./wheelhouse/*.whl
-
-  build_sdist:
-    name: Build source distribution
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-      - uses: actions/setup-python@v2
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest hypothesis pandas mypy rapidfuzz_capi Cython==3.0.0a10
-
-      # The cythonized files allow installation from the sdist without cython
-      - name: Generate cython
-        run: |
-          chmod +x ./rapidfuzz/generate.sh
-          ./rapidfuzz/generate.sh
-
-      - name: Build sdist
-        run: |
-          git apply ./tools/sdist.patch
-          pip install build
-          python -m build --sdist
-          # test whether tarball contains all files required for compiling
-          pip install dist/rapidfuzz-*.tar.gz
-
-      - name: Test type stubs
-        # prevent import from rapidfuzz
-        working-directory: .github
-        run: |
-          python -m mypy.stubtest rapidfuzz --ignore-missing-stub
-
-      - name: Test with pytest and backtrace in case of SegFault
-        run: |
-          tools/seg_wrapper.sh pytest tests
-
-      - uses: actions/upload-artifact@v2
-        with:
-          path: dist/*.tar.gz
-
-  deploy-wheels:
-    if: github.event_name == 'release' && github.event.action == 'published'
-    needs: [build_wheels_windows, build_wheels_macos, build_wheels_linux, build_sdist]
-    name: deploy wheels to pypi
-    runs-on: ubuntu-18.04
-
-    steps:
-      - uses: actions/download-artifact@v2
-        with:
-          name: artifact
-          path: dist
-
-      - uses: pypa/gh-action-pypi-publish@master
-        with:
-          user: __token__
-          password: ${{ secrets.pypi_password }}
