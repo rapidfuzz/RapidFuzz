@@ -1,6 +1,6 @@
 ## Changelog
 
-### [2.0.14] - 2022-06-
+### [2.0.14] - 2022-06-23
 #### Fixed
 - fix unlimited recursion in LCSseq when used in combination with the process module
 
