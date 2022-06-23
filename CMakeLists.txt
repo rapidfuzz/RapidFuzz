@@ -17,7 +17,7 @@ else()
 endif()
 
 set(Python_FIND_IMPLEMENTATIONS CPython PyPy)
-find_package(Python REQUIRED COMPONENTS Interpreter Development)
+find_package(Python 3.6 REQUIRED COMPONENTS Interpreter Development)
 include(FetchContent)
 
 set(RF_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
