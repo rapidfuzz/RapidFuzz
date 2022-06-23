@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12.0)
+cmake_minimum_required(VERSION 3.18.0)
 
 cmake_policy(SET CMP0054 NEW)
 set(SKBUILD_LINK_LIBRARIES_KEYWORD PRIVATE)
@@ -16,8 +16,8 @@ else()
     add_compile_options(-Wall -Wextra -pedantic)
 endif()
 
-find_package(PythonExtensions REQUIRED)
-find_package(Python COMPONENTS Interpreter Development)
+set(Python_FIND_IMPLEMENTATIONS CPython PyPy)
+find_package(Python REQUIRED COMPONENTS Interpreter Development)
 include(FetchContent)
 
 set(RF_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
