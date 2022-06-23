@@ -17,7 +17,6 @@ else()
 endif()
 
 find_package(PythonExtensions REQUIRED)
-find_package(Python COMPONENTS Interpreter Development)
 include(FetchContent)
 
 set(RF_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
