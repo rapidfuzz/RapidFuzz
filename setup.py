@@ -1,5 +1,6 @@
 from skbuild import setup
 import rapidfuzz_capi
+import numpy as np
 
 with open('README.md', 'rt', encoding="utf8") as f:
     readme = f.read()
@@ -34,5 +35,5 @@ setup(
     },
     python_requires=">=3.6",
 
-    cmake_args=[f'-DRF_CAPI_PATH:STRING={rapidfuzz_capi.get_include()}']
+    cmake_args=[f'-DRF_CAPI_PATH:STRING={rapidfuzz_capi.get_include()}', f'-DNumPy_INCLUDE_DIR:STRING={np.get_include()}']
 )

@@ -16,7 +16,6 @@ else()
     add_compile_options(-Wall -Wextra -pedantic)
 endif()
 
-find_package(NumPy REQUIRED)
 find_package(PythonExtensions REQUIRED)
 find_package(Python COMPONENTS Interpreter Development)
 include(FetchContent)
