@@ -1,5 +1,9 @@
 ## Changelog
 
+### [2.0.15] - 2022-06-24
+#### Fixed
+- fix integer wraparound in partial_ratio/partial_ratio_alignment
+
 ### [2.0.14] - 2022-06-23
 #### Fixed
 - fix unlimited recursion in LCSseq when used in combination with the process module

@@ -22,7 +22,7 @@ copyright = '2021, Max Bachmann'
 author = 'Max Bachmann'
 
 # The full version, including alpha/beta/rc tags
-release = '2.0.14'
+release = '2.0.15'
 
 
 # -- General configuration ---------------------------------------------------

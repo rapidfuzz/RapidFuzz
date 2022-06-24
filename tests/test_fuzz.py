@@ -116,6 +116,16 @@ class RatioTest(unittest.TestCase):
         assert fuzz.WRatio('South Korea', 'North Korea', score_cutoff=85.4) == 0.0
         assert fuzz.WRatio('South Korea', 'North Korea', score_cutoff=85.5) == 0.0
 
+    def testIssue231(self):
+        str1 = "er merkantilismus förderte handel und verkehr mit teils marktkonformen, teils dirigistischen maßnahmen."
+        str2 = "ils marktkonformen, teils dirigistischen maßnahmen. an der schwelle zum 19. jahrhundert entstand ein neu"
+
+        alignment = fuzz.partial_ratio_alignment(str1, str2)
+        self.assertEqual(alignment.src_start, 0)
+        self.assertEqual(alignment.src_end, 103)
+        self.assertEqual(alignment.dest_start, 0)
+        self.assertEqual(alignment.dest_end, 103)
+
 def test_empty_string():
     """
     when both strings are empty this is either a perfect match or no match
