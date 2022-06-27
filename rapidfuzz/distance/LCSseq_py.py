@@ -43,7 +43,7 @@ def similarity(s1, s2, *, processor=None, score_cutoff=None):
         u = S & Matches
         S = (S + u) | (S - u)
 
-    res = bin(x)[-len(s1) :].count("0")
+    res = bin(S)[-len(s1) :].count("0")
     return res if (score_cutoff is None or res >= score_cutoff) else 0
 
 

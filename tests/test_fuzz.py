@@ -7,8 +7,113 @@ from array import array
 import sys
 import math
 
-from rapidfuzz import fuzz, utils
+from rapidfuzz import fuzz_py, fuzz_cpp, utils
 from rapidfuzz.distance import ScoreAlignment
+
+
+class fuzz:
+    @staticmethod
+    def ratio(s1, s2, *, processor=None, score_cutoff=0):
+        dist1 = fuzz_cpp.ratio(s1, s2, processor=processor, score_cutoff=score_cutoff)
+        dist2 = fuzz_py.ratio(s1, s2, processor=processor, score_cutoff=score_cutoff)
+        assert dist1 == dist2
+        return dist1
+
+    @staticmethod
+    def partial_ratio(s1, s2, *, processor=None, score_cutoff=0):
+        dist1 = fuzz_cpp.partial_ratio(
+            s1, s2, processor=processor, score_cutoff=score_cutoff
+        )
+        dist2 = fuzz_py.partial_ratio(
+            s1, s2, processor=processor, score_cutoff=score_cutoff
+        )
+        assert dist1 == dist2
+        return dist1
+
+    @staticmethod
+    def token_sort_ratio(s1, s2, *, processor=utils.default_process, score_cutoff=0):
+        dist1 = fuzz_cpp.token_sort_ratio(
+            s1, s2, processor=processor, score_cutoff=score_cutoff
+        )
+        dist2 = fuzz_py.token_sort_ratio(
+            s1, s2, processor=processor, score_cutoff=score_cutoff
+        )
+        assert dist1 == dist2
+        return dist1
+
+    @staticmethod
+    def token_set_ratio(s1, s2, *, processor=utils.default_process, score_cutoff=0):
+        dist1 = fuzz_cpp.token_set_ratio(
+            s1, s2, processor=processor, score_cutoff=score_cutoff
+        )
+        dist2 = fuzz_py.token_set_ratio(
+            s1, s2, processor=processor, score_cutoff=score_cutoff
+        )
+        assert dist1 == dist2
+        return dist1
+
+    @staticmethod
+    def token_ratio(s1, s2, *, processor=utils.default_process, score_cutoff=0):
+        dist1 = fuzz_cpp.token_ratio(
+            s1, s2, processor=processor, score_cutoff=score_cutoff
+        )
+        dist2 = fuzz_py.token_ratio(
+            s1, s2, processor=processor, score_cutoff=score_cutoff
+        )
+        assert dist1 == dist2
+        return dist1
+
+    @staticmethod
+    def partial_token_sort_ratio(
+        s1, s2, *, processor=utils.default_process, score_cutoff=0
+    ):
+        dist1 = fuzz_cpp.partial_token_sort_ratio(
+            s1, s2, processor=processor, score_cutoff=score_cutoff
+        )
+        dist2 = fuzz_py.partial_token_sort_ratio(
+            s1, s2, processor=processor, score_cutoff=score_cutoff
+        )
+        assert dist1 == dist2
+        return dist1
+
+    @staticmethod
+    def partial_token_set_ratio(
+        s1, s2, *, processor=utils.default_process, score_cutoff=0
+    ):
+        dist1 = fuzz_cpp.partial_token_set_ratio(
+            s1, s2, processor=processor, score_cutoff=score_cutoff
+        )
+        dist2 = fuzz_py.partial_token_set_ratio(
+            s1, s2, processor=processor, score_cutoff=score_cutoff
+        )
+        assert dist1 == dist2
+        return dist1
+
+    @staticmethod
+    def partial_token_ratio(s1, s2, *, processor=utils.default_process, score_cutoff=0):
+        dist1 = fuzz_cpp.partial_token_ratio(
+            s1, s2, processor=processor, score_cutoff=score_cutoff
+        )
+        dist2 = fuzz_py.partial_token_ratio(
+            s1, s2, processor=processor, score_cutoff=score_cutoff
+        )
+        assert dist1 == dist2
+        return dist1
+
+    @staticmethod
+    def WRatio(s1, s2, *, processor=utils.default_process, score_cutoff=0):
+        dist1 = fuzz_cpp.WRatio(s1, s2, processor=processor, score_cutoff=score_cutoff)
+        dist2 = fuzz_py.WRatio(s1, s2, processor=processor, score_cutoff=score_cutoff)
+        assert dist1 == dist2
+        return dist1
+
+    @staticmethod
+    def QRatio(s1, s2, *, processor=utils.default_process, score_cutoff=0):
+        dist1 = fuzz_cpp.QRatio(s1, s2, processor=processor, score_cutoff=score_cutoff)
+        dist2 = fuzz_py.QRatio(s1, s2, processor=processor, score_cutoff=score_cutoff)
+        assert dist1 == dist2
+        return dist1
+
 
 scorers = [
     fuzz.ratio,
@@ -22,9 +127,6 @@ scorers = [
     fuzz.WRatio,
     fuzz.QRatio,
 ]
-
-if sys.version_info < (3, 0, 0):
-    chr = unichr
 
 
 class RatioTest(unittest.TestCase):
@@ -97,7 +199,7 @@ class RatioTest(unittest.TestCase):
 
     def testIssue90(self):
         self.assertAlmostEqual(
-            fuzz.partial_ratio("ax b", "a b a c b"), 85.71428, places=4
+            fuzz_cpp.partial_ratio("ax b", "a b a c b"), 85.71428, places=4
         )
 
     def testIssue138(self):
@@ -109,11 +211,11 @@ class RatioTest(unittest.TestCase):
         a = "a certain string"
         s = "certain"
         self.assertEqual(
-            fuzz.partial_ratio_alignment(s, a),
+            fuzz_cpp.partial_ratio_alignment(s, a),
             ScoreAlignment(100, 0, len(s), 2, 2 + len(s)),
         )
         self.assertEqual(
-            fuzz.partial_ratio_alignment(a, s),
+            fuzz_cpp.partial_ratio_alignment(a, s),
             ScoreAlignment(100, 2, 2 + len(s), 0, len(s)),
         )
 
@@ -131,7 +233,7 @@ class RatioTest(unittest.TestCase):
         str1 = "er merkantilismus förderte handel und verkehr mit teils marktkonformen, teils dirigistischen maßnahmen."
         str2 = "ils marktkonformen, teils dirigistischen maßnahmen. an der schwelle zum 19. jahrhundert entstand ein neu"
 
-        alignment = fuzz.partial_ratio_alignment(str1, str2)
+        alignment = fuzz_cpp.partial_ratio_alignment(str1, str2)
         self.assertEqual(alignment.src_start, 0)
         self.assertEqual(alignment.src_end, 103)
         self.assertEqual(alignment.dest_start, 0)

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
 
-from rapidfuzz.distance import Levenshtein, Hamming, Jaro, JaroWinkler
+from rapidfuzz.distance import Levenshtein_py, Hamming_py, Jaro, JaroWinkler
 
 
 def levenshtein(s1, s2, *, weights=(1, 1, 1), processor=None, max=None):
@@ -63,7 +63,7 @@ def levenshtein(s1, s2, *, weights=(1, 1, 1), processor=None, max=None):
     >>> levenshtein("lewenstein", "levenshtein", weights=(1,1,2))
     3
     """
-    return Levenshtein.distance(
+    return Levenshtein_py.distance(
         s1, s2, weights=weights, processor=processor, score_cutoff=max
     )
 
@@ -106,7 +106,7 @@ def levenshtein_editops(s1, s2, *, processor=None):
     replace s1[3] s2[2]
      insert s1[6] s2[5]
     """
-    return Levenshtein.editops(s1, s2, processor=processor)
+    return Levenshtein_py.editops(s1, s2, processor=processor)
 
 
 def normalized_levenshtein(
@@ -178,7 +178,7 @@ def normalized_levenshtein(
     81.81818181818181
     """
     return (
-        Levenshtein.normalized_similarity(
+        Levenshtein_py.normalized_similarity(
             s1, s2, weights=weights, processor=processor, score_cutoff=score_cutoff
         )
         * 100
@@ -221,7 +221,7 @@ def hamming(s1, s2, *, processor=None, max=None):
         Use :func:`rapidfuzz.distance.Hamming.distance` instead.
         This function will be removed in v3.0.0.
     """
-    return Hamming.distance(s1, s2, processor=processor, score_cutoff=max)
+    return Hamming_py.distance(s1, s2, processor=processor, score_cutoff=max)
 
 
 def normalized_hamming(s1, s2, *, processor=None, score_cutoff=None):
@@ -261,7 +261,7 @@ def normalized_hamming(s1, s2, *, processor=None, score_cutoff=None):
         This function will be removed in v3.0.0.
     """
     return (
-        Hamming.normalized_similarity(
+        Hamming_py.normalized_similarity(
             s1, s2, processor=processor, score_cutoff=score_cutoff
         )
         * 100

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
 
-from .Indel import distance as indel_distance
+from .Indel_py import distance as indel_distance
 
 
 def _levenshtein_maximum(s1, s2, weights):

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
 
-from .LCSseq import similarity as lcs_seq_similarity
+from .LCSseq_py import similarity as lcs_seq_similarity
 
 
 def distance(s1, s2, *, processor=None, score_cutoff=None):
