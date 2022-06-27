@@ -23,23 +23,23 @@ from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPo
 from cython.operator cimport dereference
 
 cdef extern from "edit_based.hpp":
-    double lcs_seq_normalized_distance_func(  const RF_String&, const RF_String&, double) nogil except +
-    int64_t lcs_seq_distance_func(            const RF_String&, const RF_String&, int64_t) nogil except +
-    double lcs_seq_normalized_similarity_func(const RF_String&, const RF_String&, double) nogil except +
-    int64_t lcs_seq_similarity_func(          const RF_String&, const RF_String&, int64_t) nogil except +
+    double indel_normalized_distance_func(  const RF_String&, const RF_String&, double) nogil except +
+    int64_t indel_distance_func(            const RF_String&, const RF_String&, int64_t) nogil except +
+    double indel_normalized_similarity_func(const RF_String&, const RF_String&, double) nogil except +
+    int64_t indel_similarity_func(          const RF_String&, const RF_String&, int64_t) nogil except +
 
-    RfEditops lcs_seq_editops_func(const RF_String&, const RF_String&) nogil except +
+    RfEditops indel_editops_func(const RF_String&, const RF_String&) nogil except +
 
-    bool LCSseqDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool LCSseqNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool LCSseqSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool LCSseqNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool IndelDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool IndelNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool IndelSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool IndelNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
 
 def distance(s1, s2, *, processor=None, score_cutoff=None):
     """
-    Calculates the LCS distance in the range [0, max].
-
-    This is calculated as ``max(len1, len2) - similarity``.
+    Calculates the minimum number of insertions and deletions
+    required to change one sequence into the other. This is equivalent to the
+    Levenshtein distance with a substitution weight of 2.
 
     Parameters
     ----------
@@ -63,16 +63,16 @@ def distance(s1, s2, *, processor=None, score_cutoff=None):
 
     Examples
     --------
-    Find the LCS distance between two strings:
+    Find the Indel distance between two strings:
 
-    >>> from rapidfuzz.distance import LCSseq
-    >>> LCSseq.distance("lewenstein", "levenshtein")
-    2
+    >>> from rapidfuzz.distance import Indel
+    >>> Indel.distance("lewenstein", "levenshtein")
+    3
 
     Setting a maximum distance allows the implementation to select
     a more efficient implementation:
 
-    >>> LCSseq.distance("lewenstein", "levenshtein", score_cutoff=1)
+    >>> Indel.distance("lewenstein", "levenshtein", score_cutoff=1)
     2
 
     """
@@ -82,13 +82,15 @@ def distance(s1, s2, *, processor=None, score_cutoff=None):
         raise ValueError("score_cutoff has to be >= 0")
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
-    return lcs_seq_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+    return indel_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
 
 def similarity(s1, s2, *, processor=None, score_cutoff=None):
     """
-    Calculates the length of the longest common subsequence
+    Calculates the Indel similarity in the range [max, 0].
+
+    This is calculated as ``(len1 + len2) - distance``.
 
     Parameters
     ----------
@@ -117,14 +119,14 @@ def similarity(s1, s2, *, processor=None, score_cutoff=None):
         raise ValueError("score_cutoff has to be >= 0")
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
-    return lcs_seq_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+    return indel_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
 def normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
     """
-    Calculates a normalized LCS similarity in the range [1, 0].
+    Calculates a normalized levenshtein similarity in the range [1, 0].
 
-    This is calculated as ``distance / max(len1, len2)``.
+    This is calculated as ``distance / (len1 + len2)``.
 
     Parameters
     ----------
@@ -155,12 +157,12 @@ def normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
         raise ValueError("score_cutoff has to be >= 0")
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
-    return lcs_seq_normalized_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+    return indel_normalized_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
 def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     """
-    Calculates a normalized LCS similarity in the range [0, 1].
+    Calculates a normalized indel similarity in the range [0, 1].
 
     This is calculated as ``1 - normalized_distance``
 
@@ -185,22 +187,22 @@ def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
 
     Examples
     --------
-    Find the normalized LCS similarity between two strings:
+    Find the normalized Indel similarity between two strings:
 
-    >>> from rapidfuzz.distance import LCSseq
-    >>> LCSseq.normalized_similarity("lewenstein", "levenshtein")
-    0.8181818181818181
+    >>> from rapidfuzz.distance import Indel
+    >>> Indel.normalized_similarity("lewenstein", "levenshtein")
+    0.85714285714285
 
     Setting a score_cutoff allows the implementation to select
     a more efficient implementation:
 
-    >>> LCSseq.normalized_similarity("lewenstein", "levenshtein", score_cutoff=0.9)
+    >>> Indel.normalized_similarity("lewenstein", "levenshtein", score_cutoff=0.9)
     0.0
 
     When a different processor is used s1 and s2 do not have to be strings
 
-    >>> LCSseq.normalized_similarity(["lewenstein"], ["levenshtein"], processor=lambda s: s[0])
-    0.81818181818181
+    >>> Indel.normalized_similarity(["lewenstein"], ["levenshtein"], processor=lambda s: s[0])
+    0.8571428571428572
     """
     cdef RF_StringWrapper s1_proc, s2_proc
     if s1 is None or s2 is None:
@@ -212,7 +214,7 @@ def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
         raise ValueError("score_cutoff has to be >= 0")
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
-    return lcs_seq_normalized_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+    return indel_normalized_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 def editops(s1, s2, *, processor=None):
     """
@@ -245,8 +247,8 @@ def editops(s1, s2, *, processor=None):
 
     Examples
     --------
-    >>> from rapidfuzz.distance import LCSseq
-    >>> for tag, src_pos, dest_pos in LCSseq.editops("qabxcd", "abycdf"):
+    >>> from rapidfuzz.distance import Indel
+    >>> for tag, src_pos, dest_pos in Indel.editops("qabxcd", "abycdf"):
     ...    print(("%7s s1[%d] s2[%d]" % (tag, src_pos, dest_pos)))
      delete s1[0] s2[0]
      delete s1[3] s2[2]
@@ -257,7 +259,7 @@ def editops(s1, s2, *, processor=None):
     cdef Editops ops = Editops.__new__(Editops)
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
-    ops.editops = lcs_seq_editops_func(s1_proc.string, s2_proc.string)
+    ops.editops = indel_editops_func(s1_proc.string, s2_proc.string)
     return ops
 
 def opcodes(s1, s2, *, processor=None):
@@ -291,11 +293,11 @@ def opcodes(s1, s2, *, processor=None):
 
     Examples
     --------
-    >>> from rapidfuzz.distance import LCSseq
+    >>> from rapidfuzz.distance import Indel
 
     >>> a = "qabxcd"
     >>> b = "abycdf"
-    >>> for tag, i1, i2, j1, j2 in LCSseq.opcodes(a, b):
+    >>> for tag, i1, i2, j1, j2 in Indel.opcodes(a, b):
     ...    print(("%7s a[%d:%d] (%s) b[%d:%d] (%s)" %
     ...           (tag, i1, i2, a[i1:i2], j1, j2, b[j1:j2])))
      delete a[0:1] (q) b[0:0] ()
@@ -309,7 +311,7 @@ def opcodes(s1, s2, *, processor=None):
     cdef Editops ops = Editops.__new__(Editops)
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
-    ops.editops = lcs_seq_editops_func(s1_proc.string, s2_proc.string)
+    ops.editops = indel_editops_func(s1_proc.string, s2_proc.string)
     return ops.as_opcodes()
 
 
@@ -321,54 +323,82 @@ cdef bool NoKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     dereference(self).dtor = NULL
     return True
 
-cdef bool GetScorerFlagsLCSseqDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsIndelDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
     dereference(scorer_flags).optimal_score.i64 = 0
     dereference(scorer_flags).worst_score.i64 = INT64_MAX
     return True
 
-cdef bool GetScorerFlagsLCSseqNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsIndelNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     dereference(scorer_flags).optimal_score.f64 = 0.0
     dereference(scorer_flags).worst_score.f64 = 1
     return True
 
-cdef bool GetScorerFlagsLCSseqSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsIndelSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
     dereference(scorer_flags).optimal_score.i64 = INT64_MAX
     dereference(scorer_flags).worst_score.i64 = 0
     return True
 
-cdef bool GetScorerFlagsLCSseqNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsIndelNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     dereference(scorer_flags).optimal_score.f64 = 1.0
     dereference(scorer_flags).worst_score.f64 = 0
     return True
 
-cdef RF_Scorer LCSseqDistanceContext
-LCSseqDistanceContext.version = SCORER_STRUCT_VERSION
-LCSseqDistanceContext.kwargs_init = NoKwargsInit
-LCSseqDistanceContext.get_scorer_flags = GetScorerFlagsLCSseqDistance
-LCSseqDistanceContext.scorer_func_init = LCSseqDistanceInit
-distance._RF_Scorer = PyCapsule_New(&LCSseqDistanceContext, NULL, NULL)
+cdef RF_Scorer IndelDistanceContext
+IndelDistanceContext.version = SCORER_STRUCT_VERSION
+IndelDistanceContext.kwargs_init = NoKwargsInit
+IndelDistanceContext.get_scorer_flags = GetScorerFlagsIndelDistance
+IndelDistanceContext.scorer_func_init = IndelDistanceInit
+distance._RF_Scorer = PyCapsule_New(&IndelDistanceContext, NULL, NULL)
 
-cdef RF_Scorer LCSseqNormalizedDistanceContext
-LCSseqNormalizedDistanceContext.version = SCORER_STRUCT_VERSION
-LCSseqNormalizedDistanceContext.kwargs_init = NoKwargsInit
-LCSseqNormalizedDistanceContext.get_scorer_flags = GetScorerFlagsLCSseqNormalizedDistance
-LCSseqNormalizedDistanceContext.scorer_func_init = LCSseqNormalizedDistanceInit
-normalized_distance._RF_Scorer = PyCapsule_New(&LCSseqNormalizedDistanceContext, NULL, NULL)
+cdef RF_Scorer IndelNormalizedDistanceContext
+IndelNormalizedDistanceContext.version = SCORER_STRUCT_VERSION
+IndelNormalizedDistanceContext.kwargs_init = NoKwargsInit
+IndelNormalizedDistanceContext.get_scorer_flags = GetScorerFlagsIndelNormalizedDistance
+IndelNormalizedDistanceContext.scorer_func_init = IndelNormalizedDistanceInit
+normalized_distance._RF_Scorer = PyCapsule_New(&IndelNormalizedDistanceContext, NULL, NULL)
 
-cdef RF_Scorer LCSseqSimilarityContext
-LCSseqSimilarityContext.version = SCORER_STRUCT_VERSION
-LCSseqSimilarityContext.kwargs_init = NoKwargsInit
-LCSseqSimilarityContext.get_scorer_flags = GetScorerFlagsLCSseqSimilarity
-LCSseqSimilarityContext.scorer_func_init = LCSseqSimilarityInit
-similarity._RF_Scorer = PyCapsule_New(&LCSseqSimilarityContext, NULL, NULL)
+cdef RF_Scorer IndelSimilarityContext
+IndelSimilarityContext.version = SCORER_STRUCT_VERSION
+IndelSimilarityContext.kwargs_init = NoKwargsInit
+IndelSimilarityContext.get_scorer_flags = GetScorerFlagsIndelSimilarity
+IndelSimilarityContext.scorer_func_init = IndelSimilarityInit
+similarity._RF_Scorer = PyCapsule_New(&IndelSimilarityContext, NULL, NULL)
 
-cdef RF_Scorer LCSseqNormalizedSimilarityContext
-LCSseqNormalizedSimilarityContext.version = SCORER_STRUCT_VERSION
-LCSseqNormalizedSimilarityContext.kwargs_init = NoKwargsInit
-LCSseqNormalizedSimilarityContext.get_scorer_flags = GetScorerFlagsLCSseqNormalizedSimilarity
-LCSseqNormalizedSimilarityContext.scorer_func_init = LCSseqNormalizedSimilarityInit
-normalized_similarity._RF_Scorer = PyCapsule_New(&LCSseqNormalizedSimilarityContext, NULL, NULL)
+cdef RF_Scorer IndelNormalizedSimilarityContext
+IndelNormalizedSimilarityContext.version = SCORER_STRUCT_VERSION
+IndelNormalizedSimilarityContext.kwargs_init = NoKwargsInit
+IndelNormalizedSimilarityContext.get_scorer_flags = GetScorerFlagsIndelNormalizedSimilarity
+IndelNormalizedSimilarityContext.scorer_func_init = IndelNormalizedSimilarityInit
+normalized_similarity._RF_Scorer = PyCapsule_New(&IndelNormalizedSimilarityContext, NULL, NULL)
+
+def _GetScorerFlagsDistance(**kwargs):
+    return {"optimal_score": 0, "worst_score": 2**63 - 1}
+
+
+def _GetScorerFlagsSimilarity(**kwargs):
+    return {"optimal_score": 2**63 - 1, "worst_score": 0}
+
+
+def _GetScorerFlagsNormalizedDistance(**kwargs):
+    return {"optimal_score": 0, "worst_score": 1}
+
+
+def _GetScorerFlagsNormalizedSimilarity(**kwargs):
+    return {"optimal_score": 1, "worst_score": 0}
+
+
+distance._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsDistance}
+
+similarity._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+
+normalized_distance._RF_ScorerPy = {
+    "get_scorer_flags": _GetScorerFlagsNormalizedDistance
+}
+
+normalized_similarity._RF_ScorerPy = {
+    "get_scorer_flags": _GetScorerFlagsNormalizedSimilarity
+}

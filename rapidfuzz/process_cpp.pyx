@@ -30,7 +30,7 @@ from rapidfuzz_capi cimport (
 )
 from cpython.pycapsule cimport PyCapsule_IsValid, PyCapsule_GetPointer
 
-cdef extern from "cpp_process.hpp":
+cdef extern from "process_cpp.hpp":
     cdef cppclass ExtractComp:
         ExtractComp()
         ExtractComp(const RF_ScorerFlags* scorer_flags)
@@ -447,8 +447,17 @@ cdef inline extractOne_list(query, choices, RF_Scorer* scorer, const RF_ScorerFl
     raise ValueError("scorer does not properly use the C-API")
 
 
-cdef inline py_extractOne_dict(query, choices, scorer, processor, double score_cutoff, dict kwargs):
-    result_score = -1
+cdef inline get_scorer_flags_py(scorer, dict kwargs):
+    params = getattr(scorer, '_RF_ScorerPy', None)
+    if params is not None:
+        flags = params["get_scorer_flags"](**kwargs)
+        return (flags["worst_score"], flags["optimal_score"])
+    return (0, 100)
+
+cdef inline py_extractOne_dict(query, choices, scorer, processor, double score_cutoff, worst_score, optimal_score, dict kwargs):
+    cdef bool lowest_score_worst = optimal_score > worst_score
+    cdef bool result_found = False
+    result_score = 0
     result_choice = None
     result_key = None
 
@@ -461,23 +470,35 @@ cdef inline py_extractOne_dict(query, choices, scorer, processor, double score_c
         else:
             score = scorer(query, choice, **kwargs)
 
-        if score >= score_cutoff and score > result_score:
-            score_cutoff = score
-            kwargs["score_cutoff"] = score
-            result_score = score
-            result_choice = choice
-            result_key = choice_key
+        if lowest_score_worst:
+            if score >= score_cutoff and (not result_found or score > result_score):
+                score_cutoff = score
+                kwargs["score_cutoff"] = score
+                result_score = score
+                result_choice = choice
+                result_key = choice_key
+                result_found = True
+        else:
+            if score <= score_cutoff and (not result_found or score < result_score):
+                score_cutoff = score
+                kwargs["score_cutoff"] = score
+                result_score = score
+                result_choice = choice
+                result_key = choice_key
+                result_found = True
 
-            if score_cutoff == 100:
-                break
+        if score == optimal_score:
+            break
 
     return (result_choice, result_score, result_key) if result_choice is not None else None
 
 
-cdef inline py_extractOne_list(query, choices, scorer, processor, double score_cutoff, dict kwargs):
+cdef inline py_extractOne_list(query, choices, scorer, processor, double score_cutoff, worst_score, optimal_score, dict kwargs):
+    cdef bool lowest_score_worst = optimal_score > worst_score
+    cdef bool result_found = False
     cdef int64_t result_index = 0
     cdef int64_t i
-    result_score = -1
+    result_score = 0
     result_choice = None
 
     for i, choice in enumerate(choices):
@@ -489,15 +510,25 @@ cdef inline py_extractOne_list(query, choices, scorer, processor, double score_c
         else:
             score = scorer(query, choice, **kwargs)
 
-        if score >= score_cutoff and score > result_score:
-            score_cutoff = score
-            kwargs["score_cutoff"] = score
-            result_score = score
-            result_choice = choice
-            result_index = i
+        if lowest_score_worst:
+            if score >= score_cutoff and (not result_found or score > result_score):
+                score_cutoff = score
+                kwargs["score_cutoff"] = score
+                result_score = score
+                result_choice = choice
+                result_index = i
+                result_found = True
+        else:
+            if score <= score_cutoff and (not result_found or score < result_score):
+                score_cutoff = score
+                kwargs["score_cutoff"] = score
+                result_score = score
+                result_choice = choice
+                result_index = i
+                result_found = True
 
-            if score_cutoff == 100:
-                break
+        if score == optimal_score:
+            break
 
     return (result_choice, result_score, result_index) if result_choice is not None else None
 
@@ -654,19 +685,18 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
                 processor, score_cutoff, &kwargs_context.kwargs)
 
 
+    worst_score, optimal_score = get_scorer_flags_py(scorer, kwargs)
     # the scorer has to be called through Python
     if score_cutoff is None:
-        score_cutoff = 0
-    elif score_cutoff < 0 or score_cutoff > 100:
-        raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
+        score_cutoff = worst_score
 
     kwargs["processor"] = None
     kwargs["score_cutoff"] = score_cutoff
 
     if hasattr(choices, "items"):
-        return py_extractOne_dict(query, choices, scorer, processor, score_cutoff, kwargs)
+        return py_extractOne_dict(query, choices, scorer, processor, score_cutoff, worst_score, optimal_score, kwargs)
     else:
-        return py_extractOne_list(query, choices, scorer, processor, score_cutoff, kwargs)
+        return py_extractOne_list(query, choices, scorer, processor, score_cutoff, worst_score, optimal_score, kwargs)
 
 
 cdef inline extract_dict_f64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, int64_t limit, score_cutoff, const RF_Kwargs* kwargs):
@@ -811,7 +841,8 @@ cdef inline extract_list(query, choices, RF_Scorer* scorer, const RF_ScorerFlags
     raise ValueError("scorer does not properly use the C-API")
 
 
-cdef inline py_extract_dict(query, choices, scorer, processor, int64_t limit, double score_cutoff, dict kwargs):
+cdef inline py_extract_dict(query, choices, scorer, processor, int64_t limit, double score_cutoff, worst_score, optimal_score, dict kwargs):
+    cdef bool lowest_score_worst = optimal_score > worst_score
     cdef object score = None
     cdef list result_list = []
 
@@ -824,13 +855,18 @@ cdef inline py_extract_dict(query, choices, scorer, processor, int64_t limit, do
         else:
             score = scorer(query, choice, **kwargs)
 
-        if score >= score_cutoff:
-            result_list.append((choice, score, choice_key))
+        if lowest_score_worst:
+            if score >= score_cutoff:
+                result_list.append((choice, score, choice_key))
+        else:
+            if score <= score_cutoff:
+                result_list.append((choice, score, choice_key))
 
     return heapq.nlargest(limit, result_list, key=lambda i: i[1])
 
 
-cdef inline py_extract_list(query, choices, scorer, processor, int64_t limit, double score_cutoff, dict kwargs):
+cdef inline py_extract_list(query, choices, scorer, processor, int64_t limit, double score_cutoff, worst_score, optimal_score, dict kwargs):
+    cdef bool lowest_score_worst = optimal_score > worst_score
     cdef object score = None
     cdef list result_list = []
     cdef int64_t i
@@ -844,8 +880,12 @@ cdef inline py_extract_list(query, choices, scorer, processor, int64_t limit, do
         else:
             score = scorer(query, choice, **kwargs)
 
-        if score >= score_cutoff:
-            result_list.append((choice, score, i))
+        if lowest_score_worst:
+            if score >= score_cutoff:
+                result_list.append((choice, score, i))
+        else:
+            if score <= score_cutoff:
+                result_list.append((choice, score, i))
 
     return heapq.nlargest(limit, result_list, key=lambda i: i[1])
 
@@ -946,19 +986,18 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
                 processor, limit, score_cutoff, &kwargs_context.kwargs)
 
 
+    worst_score, optimal_score = get_scorer_flags_py(scorer, kwargs)
     # the scorer has to be called through Python
     if score_cutoff is None:
-        score_cutoff = 0
-    elif score_cutoff < 0 or score_cutoff > 100:
-        raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
+        score_cutoff = worst_score
 
     kwargs["processor"] = None
     kwargs["score_cutoff"] = score_cutoff
 
     if hasattr(choices, "items"):
-        return py_extract_dict(query, choices, scorer, processor, limit, score_cutoff, kwargs)
+        return py_extract_dict(query, choices, scorer, processor, limit, score_cutoff, worst_score, optimal_score, kwargs)
     else:
-        return py_extract_list(query, choices, scorer, processor, limit, score_cutoff, kwargs)
+        return py_extract_list(query, choices, scorer, processor, limit, score_cutoff, worst_score, optimal_score, kwargs)
 
 
 def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):
@@ -1189,13 +1228,13 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
                 if score <= c_score_cutoff:
                     yield (choice, score, i)
 
-    def py_extract_iter_dict():
+    def py_extract_iter_dict(worst_score, optimal_score):
         """
         implementation of extract_iter for:
           - type of choices = dict
           - scorer = python function
         """
-        cdef double c_score_cutoff = score_cutoff
+        cdef bool lowest_score_worst = optimal_score > worst_score
 
         for choice_key, choice in choices.items():
             if choice is None:
@@ -1206,17 +1245,21 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
             else:
                 score = scorer(query, choice, **kwargs)
 
-            if score >= c_score_cutoff:
-                yield (choice, score, choice_key)
+            if lowest_score_worst:
+                if score >= score_cutoff:
+                    yield (choice, score, choice_key)
+            else:
+                if score <= score_cutoff:
+                    yield (choice, score, choice_key)
 
-    def py_extract_iter_list():
+    def py_extract_iter_list(worst_score, optimal_score):
         """
         implementation of extract_iter for:
           - type of choices = list
           - scorer = python function
         """
+        cdef bool lowest_score_worst = optimal_score > worst_score
         cdef int64_t i
-        cdef double c_score_cutoff = score_cutoff
 
         for i, choice in enumerate(choices):
             if choice is None:
@@ -1227,8 +1270,12 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
             else:
                 score = scorer(query, choice, **kwargs)
 
-            if score >= c_score_cutoff:
-                yield(choice, score, i)
+            if lowest_score_worst:
+                if score >= score_cutoff:
+                    yield (choice, score, i)
+            else:
+                if score <= score_cutoff:
+                    yield (choice, score, i)
 
     if query is None:
         # finish generator
@@ -1273,14 +1320,15 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
 
         raise ValueError("scorer does not properly use the C-API")
 
+    worst_score, optimal_score = get_scorer_flags_py(scorer, kwargs)
     # the scorer has to be called through Python
     if score_cutoff is None:
-        score_cutoff = 0.0
+        score_cutoff = worst_score
 
     kwargs["processor"] = None
     kwargs["score_cutoff"] = score_cutoff
 
     if hasattr(choices, "items"):
-        yield from py_extract_iter_dict()
+        yield from py_extract_iter_dict(worst_score, optimal_score)
     else:
-        yield from py_extract_iter_list()
+        yield from py_extract_iter_list(worst_score, optimal_score)

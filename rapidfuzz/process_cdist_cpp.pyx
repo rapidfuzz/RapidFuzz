@@ -36,7 +36,7 @@ from cpython.object cimport PyObject
 
 np.import_array()
 
-cdef extern from "cpp_process_cdist.hpp":
+cdef extern from "process_cdist_cpp.hpp":
     object cdist_single_list_impl[T](  const RF_Kwargs*, RF_Scorer*,
         const vector[RF_StringWrapper]&, int, int, T) except +
     object cdist_two_lists_impl[T](    const RF_Kwargs*, RF_Scorer*,

@@ -6,6 +6,7 @@ import pytest
 
 from rapidfuzz.distance import Levenshtein, Editops, Opcodes
 
+
 def test_editops_comparision():
     """
     test comparision with Editops
@@ -16,15 +17,30 @@ def test_editops_comparision():
     assert ops == ops.copy()
     assert not (ops != ops.copy())
 
+
 def test_editops_get_index():
     """
     test __getitem__ with index of Editops
     """
-    ops = Editops([('delete', 1, 1), ('replace', 2, 1),
-        ('insert', 6, 5), ('insert', 6, 6), ('insert', 6, 7)], 7, 9)
+    ops = Editops(
+        [
+            ("delete", 1, 1),
+            ("replace", 2, 1),
+            ("insert", 6, 5),
+            ("insert", 6, 6),
+            ("insert", 6, 7),
+        ],
+        7,
+        9,
+    )
 
-    ops_list = [('delete', 1, 1), ('replace', 2, 1),
-        ('insert', 6, 5), ('insert', 6, 6), ('insert', 6, 7)]
+    ops_list = [
+        ("delete", 1, 1),
+        ("replace", 2, 1),
+        ("insert", 6, 5),
+        ("insert", 6, 6),
+        ("insert", 6, 7),
+    ]
 
     assert ops[0] == ops_list[0]
     assert ops[1] == ops_list[1]
@@ -43,15 +59,31 @@ def test_editops_get_index():
     with pytest.raises(IndexError):
         ops[-6]
 
+
 def test_editops_inversion():
     """
     test correct inversion of Editops
     """
-    ops = Editops([('delete', 1, 1), ('replace', 2, 1),
-        ('insert', 6, 5), ('insert', 6, 6), ('insert', 6, 7)], 7, 9)
+    ops = Editops(
+        [
+            ("delete", 1, 1),
+            ("replace", 2, 1),
+            ("insert", 6, 5),
+            ("insert", 6, 6),
+            ("insert", 6, 7),
+        ],
+        7,
+        9,
+    )
 
-    assert ops.inverse().as_list() == [('insert', 1, 1), ('replace', 1, 2),
-        ('delete', 5, 6), ('delete', 6, 6), ('delete', 7, 6)]
+    assert ops.inverse().as_list() == [
+        ("insert", 1, 1),
+        ("replace", 1, 2),
+        ("delete", 5, 6),
+        ("delete", 6, 6),
+        ("delete", 7, 6),
+    ]
+
 
 def test_opcodes_comparision():
     """
@@ -63,15 +95,32 @@ def test_opcodes_comparision():
     assert ops == ops.copy()
     assert not (ops != ops.copy())
 
+
 def test_opcode_get_index():
     """
     test __getitem__ with index of Opcodes
     """
-    ops = Opcodes([('equal', 0, 1, 0, 1), ('delete', 1, 2, 1, 1),
-        ('replace', 2, 3, 1, 2), ('equal', 3, 6, 2, 5), ('insert', 6, 6, 5, 8), ('equal', 6, 7, 8, 9)], 7, 9)
+    ops = Opcodes(
+        [
+            ("equal", 0, 1, 0, 1),
+            ("delete", 1, 2, 1, 1),
+            ("replace", 2, 3, 1, 2),
+            ("equal", 3, 6, 2, 5),
+            ("insert", 6, 6, 5, 8),
+            ("equal", 6, 7, 8, 9),
+        ],
+        7,
+        9,
+    )
 
-    ops_list = [('equal', 0, 1, 0, 1), ('delete', 1, 2, 1, 1),
-        ('replace', 2, 3, 1, 2), ('equal', 3, 6, 2, 5), ('insert', 6, 6, 5, 8), ('equal', 6, 7, 8, 9)]
+    ops_list = [
+        ("equal", 0, 1, 0, 1),
+        ("delete", 1, 2, 1, 1),
+        ("replace", 2, 3, 1, 2),
+        ("equal", 3, 6, 2, 5),
+        ("insert", 6, 6, 5, 8),
+        ("equal", 6, 7, 8, 9),
+    ]
 
     assert ops[0] == ops_list[0]
     assert ops[1] == ops_list[1]
@@ -92,15 +141,33 @@ def test_opcode_get_index():
     with pytest.raises(IndexError):
         ops[-7]
 
+
 def test_opcode_inversion():
     """
     test correct inversion of Opcodes
     """
-    ops = Opcodes([('equal', 0, 1, 0, 1), ('delete', 1, 2, 1, 1),
-        ('replace', 2, 3, 1, 2), ('equal', 3, 6, 2, 5), ('insert', 6, 6, 5, 8), ('equal', 6, 7, 8, 9)], 7, 9)
+    ops = Opcodes(
+        [
+            ("equal", 0, 1, 0, 1),
+            ("delete", 1, 2, 1, 1),
+            ("replace", 2, 3, 1, 2),
+            ("equal", 3, 6, 2, 5),
+            ("insert", 6, 6, 5, 8),
+            ("equal", 6, 7, 8, 9),
+        ],
+        7,
+        9,
+    )
 
-    assert ops.inverse().as_list() == [('equal', 0, 1, 0, 1), ('insert', 1, 1, 1, 2),
-        ('replace', 1, 2, 2, 3), ('equal', 2, 5, 3, 6), ('delete', 5, 8, 6, 6), ('equal', 8, 9, 6, 7)]
+    assert ops.inverse().as_list() == [
+        ("equal", 0, 1, 0, 1),
+        ("insert", 1, 1, 1, 2),
+        ("replace", 1, 2, 2, 3),
+        ("equal", 2, 5, 3, 6),
+        ("delete", 5, 8, 6, 6),
+        ("equal", 8, 9, 6, 7),
+    ]
+
 
 def test_list_initialization():
     """
@@ -126,5 +193,6 @@ def test_list_initialization():
     ops2 = Opcodes(ops.as_list(), ops.src_len, ops.dest_len)
     assert ops.as_opcodes() == ops2
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

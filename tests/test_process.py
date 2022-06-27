@@ -7,6 +7,7 @@ import pytest
 from rapidfuzz import process, fuzz, utils
 import pandas as pd
 
+
 class ProcessTest(unittest.TestCase):
     def setUp(self):
         self.baseball_strings = [
@@ -20,30 +21,36 @@ class ProcessTest(unittest.TestCase):
         self.assertRaises(TypeError, process.extractOne)
         self.assertRaises(TypeError, process.extractOne, 1)
         self.assertRaises(TypeError, process.extractOne, 1, [])
-        self.assertRaises(TypeError, process.extractOne, '', [1])
-        self.assertRaises(TypeError, process.extractOne, '', {1:1})
+        self.assertRaises(TypeError, process.extractOne, "", [1])
+        self.assertRaises(TypeError, process.extractOne, "", {1: 1})
 
     def testExtractExceptions(self):
         self.assertRaises(TypeError, process.extract)
         self.assertRaises(TypeError, process.extract, 1)
         self.assertRaises(TypeError, process.extract, 1, [])
-        self.assertRaises(TypeError, process.extract, '', [1])
-        self.assertRaises(TypeError, process.extract, '', {1:1})
+        self.assertRaises(TypeError, process.extract, "", [1])
+        self.assertRaises(TypeError, process.extract, "", {1: 1})
 
     def testExtractIterExceptions(self):
         self.assertRaises(TypeError, process.extract_iter)
         self.assertRaises(TypeError, process.extract_iter, 1)
-        self.assertRaises(TypeError,
+        self.assertRaises(
+            TypeError,
             lambda *args, **kwargs: next(process.extract_iter(*args, **kwargs)),
-            1, []
+            1,
+            [],
         )
-        self.assertRaises(TypeError,
+        self.assertRaises(
+            TypeError,
             lambda *args, **kwargs: next(process.extract_iter(*args, **kwargs)),
-            '', [1]
+            "",
+            [1],
         )
-        self.assertRaises(TypeError,
+        self.assertRaises(
+            TypeError,
             lambda *args, **kwargs: next(process.extract_iter(*args, **kwargs)),
-            '', {1:1}
+            "",
+            {1: 1},
         )
 
     def testGetBestChoice1(self):
@@ -109,14 +116,14 @@ class ProcessTest(unittest.TestCase):
             "new york mets vs chicago cubs",
             "chicago cubs at new york mets",
             "atlanta braves vs pittsbugh pirates",
-            "new york yankees vs boston red sox"
+            "new york yankees vs boston red sox",
         ]
 
         choices_mapping = {
             1: "new york mets vs chicago cubs",
             2: "chicago cubs at new york mets",
             3: "atlanta braves vs pittsbugh pirates",
-            4: "new york yankees vs boston red sox"
+            4: "new york yankees vs boston red sox",
         }
 
         # in this hypothetical example we care about ordering, so we use quick ratio
@@ -149,7 +156,7 @@ class ProcessTest(unittest.TestCase):
             "new york mets vs chicago cubs",
             "chicago cubs at new york mets",
             "atlanta braves vs pittsbugh pirates",
-            "new york yankees vs boston red sox"
+            "new york yankees vs boston red sox",
         ]
 
         query = "los angeles dodgers vs san francisco giants"
@@ -168,7 +175,7 @@ class ProcessTest(unittest.TestCase):
             "new york mets vs chicago cubs",
             "chicago cubs at new york mets",
             "atlanta braves vs pittsbugh pirates",
-            "new york yankees vs boston red sox"
+            "new york yankees vs boston red sox",
         ]
 
         query = "new york mets vs chicago cubs"
@@ -212,7 +219,7 @@ class ProcessTest(unittest.TestCase):
             "new york mets vs chicago cubs",
             "new york yankees vs boston red sox",
             "",
-            ""
+            "",
         ]
 
         query = "new york mets at chicago cubs"
@@ -226,7 +233,7 @@ class ProcessTest(unittest.TestCase):
             "new york mets vs chicago cubs",
             "new york yankees vs boston red sox",
             None,
-            None
+            None,
         ]
 
         query = "new york mets at chicago cubs"
@@ -236,22 +243,45 @@ class ProcessTest(unittest.TestCase):
 
     def testIssue81(self):
         # this mostly tests whether this segfaults due to incorrect ref counting
-        choices = pd.Series(['test color brightness', 'test lemon', 'test lavender'], index=[67478, 67479, 67480])
+        choices = pd.Series(
+            ["test color brightness", "test lemon", "test lavender"],
+            index=[67478, 67479, 67480],
+        )
         matches = process.extract("test", choices)
-        assert matches == [('test color brightness', 90.0, 67478), ('test lemon', 90.0, 67479), ('test lavender', 90.0, 67480)]
+        assert matches == [
+            ("test color brightness", 90.0, 67478),
+            ("test lemon", 90.0, 67479),
+            ("test lavender", 90.0, 67480),
+        ]
 
 
 def custom_scorer(s1, s2, processor=None, score_cutoff=0):
     return fuzz.ratio(s1, s2, processor=processor, score_cutoff=score_cutoff)
 
+
 @pytest.mark.parametrize("processor", [False, None, lambda s: s])
 @pytest.mark.parametrize("scorer", [fuzz.ratio, custom_scorer])
 def test_extractOne_case_sensitive(processor, scorer):
-    assert process.extractOne("new york mets", ["new", "new YORK mets"], processor=processor, scorer=scorer)[1] != 100
+    assert (
+        process.extractOne(
+            "new york mets",
+            ["new", "new YORK mets"],
+            processor=processor,
+            scorer=scorer,
+        )[1]
+        != 100
+    )
+
 
 @pytest.mark.parametrize("scorer", [fuzz.ratio, custom_scorer])
 def test_extractOne_use_first_match(scorer):
-    assert process.extractOne("new york mets", ["new york mets", "new york mets"], scorer=scorer)[2] == 0
+    assert (
+        process.extractOne(
+            "new york mets", ["new york mets", "new york mets"], scorer=scorer
+        )[2]
+        == 0
+    )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

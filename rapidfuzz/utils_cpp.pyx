@@ -11,7 +11,7 @@ from cpython.pycapsule cimport PyCapsule_New
 from libcpp cimport bool
 from array import array
 
-cdef extern from "cpp_utils.hpp":
+cdef extern from "utils_cpp.hpp":
     object default_process_impl(object) nogil except +
     void validate_string(object py_str, const char* err) except +
     RF_String default_process_func(RF_String sentence) except +

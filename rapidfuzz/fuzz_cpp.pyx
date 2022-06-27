@@ -23,7 +23,7 @@ from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPo
 
 from array import array
 
-cdef extern from "cpp_fuzz.hpp":
+cdef extern from "fuzz_cpp.hpp":
     double ratio_func(                    const RF_String&, const RF_String&, double) nogil except +
     double partial_ratio_func(            const RF_String&, const RF_String&, double) nogil except +
     double token_sort_ratio_func(         const RF_String&, const RF_String&, double) nogil except +
@@ -678,3 +678,27 @@ QRatioContext.kwargs_init = NoKwargsInit
 QRatioContext.get_scorer_flags = GetScorerFlagsQRatio
 QRatioContext.scorer_func_init = QRatioInit
 QRatio._RF_Scorer = PyCapsule_New(&QRatioContext, NULL, NULL)
+
+def _GetScorerFlagsSimilarity(**kwargs):
+    return {"optimal_score": 100, "worst_score": 0}
+
+
+ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+
+partial_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+
+token_sort_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+
+partial_token_sort_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+
+token_set_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+
+partial_token_set_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+
+token_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+
+partial_token_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+
+WRatio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+
+QRatio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}

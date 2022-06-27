@@ -480,3 +480,31 @@ LevenshteinNormalizedSimilarityContext.kwargs_init = LevenshteinKwargsInit
 LevenshteinNormalizedSimilarityContext.get_scorer_flags = GetScorerFlagsNormalizedSimilarity
 LevenshteinNormalizedSimilarityContext.scorer_func_init = LevenshteinNormalizedSimilarityInit
 normalized_distance._RF_Scorer = PyCapsule_New(&LevenshteinNormalizedSimilarityContext, NULL, NULL)
+
+def _GetScorerFlagsDistance(**kwargs):
+    return {"optimal_score": 0, "worst_score": 2**63 - 1}
+
+
+def _GetScorerFlagsSimilarity(**kwargs):
+    return {"optimal_score": 2**63 - 1, "worst_score": 0}
+
+
+def _GetScorerFlagsNormalizedDistance(**kwargs):
+    return {"optimal_score": 0, "worst_score": 1}
+
+
+def _GetScorerFlagsNormalizedSimilarity(**kwargs):
+    return {"optimal_score": 1, "worst_score": 0}
+
+
+distance._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsDistance}
+
+similarity._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+
+normalized_distance._RF_ScorerPy = {
+    "get_scorer_flags": _GetScorerFlagsNormalizedDistance
+}
+
+normalized_similarity._RF_ScorerPy = {
+    "get_scorer_flags": _GetScorerFlagsNormalizedSimilarity
+}

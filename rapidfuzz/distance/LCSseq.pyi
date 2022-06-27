@@ -1,4 +1,4 @@
-from typing import Callable, Hashable, Sequence, Optional, Union, TypeVar
+from typing import Callable, Hashable, Sequence, Optional, TypeVar
 from rapidfuzz.distance import Editops, Opcodes
 
 _StringType = Sequence[Hashable]

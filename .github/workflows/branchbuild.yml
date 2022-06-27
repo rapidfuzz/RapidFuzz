@@ -12,6 +12,8 @@ jobs:
 
     steps:
       - uses: "actions/checkout@v2"
+        with:
+          submodules: 'true'
 
       - name: Install dependencies
         run: |
@@ -36,6 +38,8 @@ jobs:
 
     steps:
       - uses: "actions/checkout@v2"
+        with:
+          submodules: 'true'
 
       - name: Install rapidfuzz-cpp
         run: |
@@ -77,6 +81,8 @@ jobs:
 
     steps:
       - uses: "actions/checkout@v2"
+        with:
+          submodules: 'true'
 
       - name: Install taskflow
         run: |
@@ -103,6 +109,8 @@ jobs:
 
     steps:
       - uses: "actions/checkout@v2"
+        with:
+          submodules: 'true'
       - uses: "actions/setup-python@v2"
         with:
           python-version: "${{ matrix.python-version }}"

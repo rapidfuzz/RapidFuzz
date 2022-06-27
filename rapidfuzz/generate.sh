@@ -7,14 +7,14 @@ generate_cython()
   echo "Generated $curdir/$1.cxx"
 }
 
-generate_cython cpp_fuzz
-generate_cython cpp_process_cdist
-generate_cython cpp_process
-generate_cython cpp_string_metric
-generate_cython cpp_utils
+generate_cython fuzz_cpp
+generate_cython process_cdist_cpp
+generate_cython process_cpp
+generate_cython string_metric_cpp
+generate_cython utils_cpp
 
 generate_cython distance/_initialize
-generate_cython distance/Hamming
-generate_cython distance/Indel
-generate_cython distance/LCSseq
-generate_cython distance/Levenshtein
+generate_cython distance/Hamming_cpp
+generate_cython distance/Indel_cpp
+generate_cython distance/LCSseq_cpp
+generate_cython distance/Levenshtein_cpp

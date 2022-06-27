@@ -1,4 +1,4 @@
-from typing import Callable, Hashable, Sequence, Optional, Union, overload, TypeVar
+from typing import Callable, Hashable, Sequence, Optional, TypeVar
 from rapidfuzz.utils import default_process
 from rapidfuzz.distance import ScoreAlignment
 
