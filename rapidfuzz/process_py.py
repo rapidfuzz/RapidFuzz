@@ -101,10 +101,16 @@ def extract_iter(
             continue
 
         if processor is None:
-            score = scorer(query, choice, processor=None, score_cutoff=score_cutoff)
+            score = scorer(
+                query, choice, processor=None, score_cutoff=score_cutoff, **kwargs
+            )
         else:
             score = scorer(
-                query, processor(choice), processor=None, score_cutoff=score_cutoff
+                query,
+                processor(choice),
+                processor=None,
+                score_cutoff=score_cutoff,
+                **kwargs
             )
 
         if lowest_score_worst:
@@ -267,10 +273,16 @@ def extractOne(
             continue
 
         if processor is None:
-            score = scorer(query, choice, processor=None, score_cutoff=score_cutoff)
+            score = scorer(
+                query, choice, processor=None, score_cutoff=score_cutoff, **kwargs
+            )
         else:
             score = scorer(
-                query, processor(choice), processor=None, score_cutoff=score_cutoff
+                query,
+                processor(choice),
+                processor=None,
+                score_cutoff=score_cutoff,
+                **kwargs
             )
 
         if lowest_score_worst:

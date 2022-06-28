@@ -1,9 +1,24 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
 import numpy as np
-from rapidfuzz.fuzz import ratio
+from rapidfuzz.fuzz_py import ratio
 
-# todo link to c api docs
+
+def _dtype_to_type_num(dtype, scorer, **kwargs):
+    if dtype is not None:
+        return dtype
+
+    params = getattr(scorer, "_RF_ScorerPy", None)
+    if params is not None:
+        flags = params["get_scorer_flags"](**kwargs)
+        if flags["flags"] & (1 << 6):
+            return np.int32
+        else:
+            return np.float32
+
+    return np.float32
+
+
 def cdist(
     queries,
     choices,
@@ -69,4 +84,39 @@ def cdist(
         Returns a matrix of dtype with the distance/similarity between each pair
         of the two collections of inputs.
     """
-    raise NotImplementedError
+    dtype = _dtype_to_type_num(dtype, scorer, **kwargs)
+    results = np.zeros((len(queries), len(choices)), dtype=dtype)
+
+    if queries is choices:
+        if processor is None:
+            proc_queries = queries
+        else:
+            proc_queries = [processor(x) for x in queries]
+
+        for i, query in enumerate(proc_queries):
+            results[i, i] = scorer(
+                query, query, processor=None, score_cutoff=score_cutoff, **kwargs
+            )
+            for j in range(i + 1, len(proc_queries)):
+                results[i, j] = results[j, i] = scorer(
+                    query,
+                    proc_queries[j],
+                    processor=None,
+                    score_cutoff=score_cutoff,
+                    **kwargs
+                )
+    else:
+        if processor is None:
+            proc_queries = queries
+            proc_choices = choices
+        else:
+            proc_queries = [processor(x) for x in queries]
+            proc_choices = [processor(x) for x in choices]
+
+        for i, query in enumerate(proc_queries):
+            for j, choice in enumerate(proc_choices):
+                results[i, j] = scorer(
+                    query, choice, processor=None, score_cutoff=score_cutoff, **kwargs
+                )
+
+    return results

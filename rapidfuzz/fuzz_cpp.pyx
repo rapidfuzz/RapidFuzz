@@ -683,7 +683,7 @@ QRatioContext.scorer_func_init = QRatioInit
 QRatio._RF_Scorer = PyCapsule_New(&QRatioContext, NULL, NULL)
 
 def _GetScorerFlagsSimilarity(**kwargs):
-    return {"optimal_score": 100, "worst_score": 0}
+    return {"optimal_score": 100, "worst_score": 0, "flags": (1 << 5)}
 
 
 ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
