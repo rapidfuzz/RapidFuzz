@@ -36,7 +36,7 @@ def partial_ratio_alignment(
     *,
     processor: Optional[Callable[..., _StringType]] = None,
     score_cutoff: Optional[float] = 0
-) -> ScoreAlignment: ...
+) -> Optional[ScoreAlignment]: ...
 @_attr_decorator
 def token_sort_ratio(
     s1: S1,

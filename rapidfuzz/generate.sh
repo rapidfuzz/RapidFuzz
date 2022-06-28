@@ -13,7 +13,7 @@ generate_cython process_cpp
 generate_cython string_metric_cpp
 generate_cython utils_cpp
 
-generate_cython distance/_initialize
+generate_cython distance/_initialize_cpp
 generate_cython distance/Hamming_cpp
 generate_cython distance/Indel_cpp
 generate_cython distance/LCSseq_cpp

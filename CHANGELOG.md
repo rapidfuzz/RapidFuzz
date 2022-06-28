@@ -5,8 +5,10 @@
 - added pure python fallback for alll implementations with the following exceptions:
   - no support for any sequences of hashables. Only strings supported so far
   - *.editops / *.opcodes not supported yet
-  - fuzz.partial_ratio_alignment not supported yet
   - process.cdist not implemented yet
+
+#### Fixed
+- fuzz.partial_ratio_alignment ignored the score_cutoff
 
 ### [2.0.15] - 2022-06-24
 #### Fixed

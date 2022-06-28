@@ -1,7 +1,7 @@
 # distutils: language=c++
 # cython: language_level=3, binding=True, linetrace=True
 
-from .distance._initialize import ScoreAlignment
+from .distance._initialize_cpp import ScoreAlignment
 
 from rapidfuzz_capi cimport (
     RF_String, RF_Scorer, RF_ScorerFunc, RF_Kwargs,
@@ -186,12 +186,12 @@ def partial_ratio_alignment(s1, s2, *, processor=None, score_cutoff=None):
         comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
-        For ratio < score_cutoff 0 is returned instead. Default is 0,
+        For ratio < score_cutoff None is returned instead. Default is 0,
         which deactivates this behaviour.
 
     Returns
     -------
-    alignment : ScoreAlignment
+    alignment : ScoreAlignment, optional
         alignment between s1 and s2 with the score as a float between 0 and 100
 
     Examples
@@ -211,12 +211,15 @@ def partial_ratio_alignment(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
 
     if s1 is None or s2 is None:
-        return 0
+        return None
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
     res = partial_ratio_alignment_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
-    return ScoreAlignment(res.score, res.src_start, res.src_end, res.dest_start, res.dest_end)
+    if res.score >= c_score_cutoff:
+        return ScoreAlignment(res.score, res.src_start, res.src_end, res.dest_start, res.dest_end)
+    else:
+        return None
 
 
 def token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):

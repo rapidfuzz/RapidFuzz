@@ -5,38 +5,50 @@ S1 = TypeVar("S1")
 S2 = TypeVar("S2")
 
 def levenshtein(
-    s1: S1, s2: S2, *,
-    weights: Optional[Tuple[int, int, int]] = (1,1,1),
+    s1: S1,
+    s2: S2,
+    *,
+    weights: Optional[Tuple[int, int, int]] = (1, 1, 1),
     processor: Optional[Callable[..., _StringType]] = None,
-    max: Optional[int] = None) -> int: ...
-
+    max: Optional[int] = None
+) -> int: ...
 def normalized_levenshtein(
-    s1: S1, s2: S2, *,
-    weights: Optional[Tuple[int, int, int]] = (1,1,1),
+    s1: S1,
+    s2: S2,
+    *,
+    weights: Optional[Tuple[int, int, int]] = (1, 1, 1),
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0) -> float: ...
-
+    score_cutoff: Optional[float] = 0
+) -> float: ...
 def levenshtein_editops(
-    s1: S1, s2: S2, *,
-    processor: Optional[Callable[..., _StringType]] = None) -> List[Tuple[str, int, int]]: ...
-
+    s1: S1, s2: S2, *, processor: Optional[Callable[..., _StringType]] = None
+) -> List[Tuple[str, int, int]]: ...
 def hamming(
-    s1: S1, s2: S2, *,
+    s1: S1,
+    s2: S2,
+    *,
     processor: Optional[Callable[..., _StringType]] = None,
-    max: Optional[int] = None) -> int: ...
-
+    max: Optional[int] = None
+) -> int: ...
 def normalized_hamming(
-    s1: S1, s2: S2, *,
+    s1: S1,
+    s2: S2,
+    *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0) -> float: ...
-
+    score_cutoff: Optional[float] = 0
+) -> float: ...
 def jaro_similarity(
-    s1: S1, s2: S2, *,
+    s1: S1,
+    s2: S2,
+    *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0) -> float: ...
-
+    score_cutoff: Optional[float] = 0
+) -> float: ...
 def jaro_winkler_similarity(
-    s1: S1, s2: S2, *,
+    s1: S1,
+    s2: S2,
+    *,
     prefix_weight: float = 0.1,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0) -> float: ...
+    score_cutoff: Optional[float] = 0
+) -> float: ...

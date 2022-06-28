@@ -1,8 +1,8 @@
 # distutils: language=c++
 # cython: language_level=3, binding=True, linetrace=True
 
-from ._initialize import Editops
-from ._initialize cimport Editops, RfEditops
+from ._initialize_cpp import Editops
+from ._initialize_cpp cimport Editops, RfEditops
 
 from rapidfuzz_capi cimport (
     RF_String, RF_Scorer, RF_Kwargs, RF_ScorerFunc, RF_Preprocess, RF_KwargsInit,

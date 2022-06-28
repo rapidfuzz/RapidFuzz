@@ -25,6 +25,13 @@ class fuzz:
         return dist1
 
     @staticmethod
+    def partial_ratio_alignment(*args, **kwargs):
+        dist1 = fuzz_cpp.partial_ratio_alignment(*args, **kwargs)
+        dist2 = fuzz_py.partial_ratio_alignment(*args, **kwargs)
+        assert dist1 == dist2
+        return dist1
+
+    @staticmethod
     def token_sort_ratio(*args, **kwargs):
         dist1 = fuzz_cpp.token_sort_ratio(*args, **kwargs)
         dist2 = fuzz_py.token_sort_ratio(*args, **kwargs)
@@ -190,12 +197,18 @@ class RatioTest(unittest.TestCase):
         a = "a certain string"
         s = "certain"
         self.assertEqual(
-            fuzz_cpp.partial_ratio_alignment(s, a),
+            fuzz.partial_ratio_alignment(s, a),
             ScoreAlignment(100, 0, len(s), 2, 2 + len(s)),
         )
         self.assertEqual(
-            fuzz_cpp.partial_ratio_alignment(a, s),
+            fuzz.partial_ratio_alignment(a, s),
             ScoreAlignment(100, 2, 2 + len(s), 0, len(s)),
+        )
+        self.assertEqual(fuzz.partial_ratio_alignment(None, "test"), None)
+        self.assertEqual(fuzz.partial_ratio_alignment("test", None), None)
+
+        self.assertEqual(
+            fuzz.partial_ratio_alignment("test", "tesx", score_cutoff=90), None
         )
 
     def testIssue196(self):
@@ -212,7 +225,7 @@ class RatioTest(unittest.TestCase):
         str1 = "er merkantilismus förderte handel und verkehr mit teils marktkonformen, teils dirigistischen maßnahmen."
         str2 = "ils marktkonformen, teils dirigistischen maßnahmen. an der schwelle zum 19. jahrhundert entstand ein neu"
 
-        alignment = fuzz_cpp.partial_ratio_alignment(str1, str2)
+        alignment = fuzz.partial_ratio_alignment(str1, str2)
         self.assertEqual(alignment.src_start, 0)
         self.assertEqual(alignment.src_end, 103)
         self.assertEqual(alignment.dest_start, 0)
