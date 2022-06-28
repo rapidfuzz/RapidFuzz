@@ -56,6 +56,8 @@ def ratio(s1, s2, *, processor=None, score_cutoff=None):
 
     if processor is True:
         processor = default_process
+    elif processor is False:
+        processor = None
 
     if score_cutoff is not None:
         score_cutoff /= 100
@@ -228,6 +230,8 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
 
     if processor is True:
         processor = default_process
+    elif processor is False:
+        processor = None
 
     if processor is not None:
         s1 = processor(s1)
@@ -237,6 +241,9 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
         score_cutoff /= 100
     else:
         score_cutoff = 0
+
+    if not s1 and not s2:
+        return 100
 
     if len(s1) <= len(s2):
         shorter = s1
@@ -329,6 +336,8 @@ def token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
 
     if processor is True:
         processor = default_process
+    elif processor is False:
+        processor = None
 
     if processor is not None:
         s1 = processor(s1)
@@ -379,6 +388,8 @@ def token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
 
     if processor is True:
         processor = default_process
+    elif processor is False:
+        processor = None
 
     if processor is not None:
         s1 = processor(s1)
@@ -470,6 +481,8 @@ def token_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
 
     if processor is True:
         processor = default_process
+    elif processor is False:
+        processor = None
 
     if processor is not None:
         s1 = processor(s1)
@@ -514,6 +527,8 @@ def partial_token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=
 
     if processor is True:
         processor = default_process
+    elif processor is False:
+        processor = None
 
     if processor is not None:
         s1 = processor(s1)
@@ -557,6 +572,8 @@ def partial_token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=N
 
     if processor is True:
         processor = default_process
+    elif processor is False:
+        processor = None
 
     if processor is not None:
         s1 = processor(s1)
@@ -611,6 +628,8 @@ def partial_token_ratio(s1, s2, *, processor=default_process, score_cutoff=None)
 
     if processor is True:
         processor = default_process
+    elif processor is False:
+        processor = None
 
     if processor is not None and processor:
         s1 = processor(s1)
@@ -686,6 +705,8 @@ def WRatio(s1, s2, *, processor=default_process, score_cutoff=None):
 
     if processor is True:
         processor = default_process
+    elif processor is False:
+        processor = None
 
     if processor is not None:
         s1 = processor(s1)
@@ -762,6 +783,8 @@ def QRatio(s1, s2, *, processor=default_process, score_cutoff=None):
 
     if processor is True:
         processor = default_process
+    elif processor is False:
+        processor = None
 
     if processor is not None:
         s1 = processor(s1)
