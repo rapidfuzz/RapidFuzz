@@ -43,37 +43,67 @@ class ProcessTest(unittest.TestCase):
         ]
 
     def testExtractOneExceptions(self):
-        self.assertRaises(TypeError, process.extractOne)
-        self.assertRaises(TypeError, process.extractOne, 1)
-        self.assertRaises(TypeError, process.extractOne, 1, [])
-        self.assertRaises(TypeError, process.extractOne, "", [1])
-        self.assertRaises(TypeError, process.extractOne, "", {1: 1})
+        self.assertRaises(TypeError, process_cpp.extractOne)
+        self.assertRaises(TypeError, process_py.extractOne)
+        self.assertRaises(TypeError, process_cpp.extractOne, 1)
+        self.assertRaises(TypeError, process_py.extractOne, 1)
+        self.assertRaises(TypeError, process_cpp.extractOne, 1, [])
+        self.assertRaises(TypeError, process_py.extractOne, 1, [])
+        self.assertRaises(TypeError, process_cpp.extractOne, "", [1])
+        self.assertRaises(TypeError, process_py.extractOne, "", [1])
+        self.assertRaises(TypeError, process_cpp.extractOne, "", {1: 1})
+        self.assertRaises(TypeError, process_py.extractOne, "", {1: 1})
 
     def testExtractExceptions(self):
-        self.assertRaises(TypeError, process.extract)
-        self.assertRaises(TypeError, process.extract, 1)
-        self.assertRaises(TypeError, process.extract, 1, [])
-        self.assertRaises(TypeError, process.extract, "", [1])
-        self.assertRaises(TypeError, process.extract, "", {1: 1})
+        self.assertRaises(TypeError, process_cpp.extract)
+        self.assertRaises(TypeError, process_py.extract)
+        self.assertRaises(TypeError, process_cpp.extract, 1)
+        self.assertRaises(TypeError, process_py.extract, 1)
+        self.assertRaises(TypeError, process_cpp.extract, 1, [])
+        self.assertRaises(TypeError, process_py.extract, 1, [])
+        self.assertRaises(TypeError, process_cpp.extract, "", [1])
+        self.assertRaises(TypeError, process_py.extract, "", [1])
+        self.assertRaises(TypeError, process_cpp.extract, "", {1: 1})
+        self.assertRaises(TypeError, process_py.extract, "", {1: 1})
 
     def testExtractIterExceptions(self):
-        self.assertRaises(TypeError, process.extract_iter)
-        self.assertRaises(TypeError, process.extract_iter, 1)
+        self.assertRaises(TypeError, process_cpp.extract_iter)
+        self.assertRaises(TypeError, process_py.extract_iter)
+        self.assertRaises(TypeError, process_cpp.extract_iter, 1)
+        self.assertRaises(TypeError, process_py.extract_iter, 1)
         self.assertRaises(
             TypeError,
-            lambda *args, **kwargs: next(process.extract_iter(*args, **kwargs)),
+            lambda *args, **kwargs: next(process_cpp.extract_iter(*args, **kwargs)),
             1,
             [],
         )
         self.assertRaises(
             TypeError,
-            lambda *args, **kwargs: next(process.extract_iter(*args, **kwargs)),
+            lambda *args, **kwargs: next(process_py.extract_iter(*args, **kwargs)),
+            1,
+            [],
+        )
+        self.assertRaises(
+            TypeError,
+            lambda *args, **kwargs: next(process_cpp.extract_iter(*args, **kwargs)),
             "",
             [1],
         )
         self.assertRaises(
             TypeError,
-            lambda *args, **kwargs: next(process.extract_iter(*args, **kwargs)),
+            lambda *args, **kwargs: next(process_py.extract_iter(*args, **kwargs)),
+            "",
+            [1],
+        )
+        self.assertRaises(
+            TypeError,
+            lambda *args, **kwargs: next(process_cpp.extract_iter(*args, **kwargs)),
+            "",
+            {1: 1},
+        )
+        self.assertRaises(
+            TypeError,
+            lambda *args, **kwargs: next(process_py.extract_iter(*args, **kwargs)),
             "",
             {1: 1},
         )
