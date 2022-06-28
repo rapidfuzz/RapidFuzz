@@ -1,10 +1,115 @@
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021 Max Bachmann
-# distutils: language=c++
-# cython: language_level=3, binding=True, linetrace=True
+# Copyright (C) 2022 Max Bachmann
 
 from rapidfuzz.utils import default_process
 from rapidfuzz.fuzz import WRatio
+import heapq
+
+
+def _get_scorer_flags_py(scorer, kwargs):
+    params = getattr(scorer, "_RF_ScorerPy", None)
+    if params is not None:
+        flags = params["get_scorer_flags"](**kwargs)
+        return (flags["worst_score"], flags["optimal_score"])
+    return (0, 100)
+
+
+def extract_iter(
+    query,
+    choices,
+    *,
+    scorer=WRatio,
+    processor=default_process,
+    score_cutoff=None,
+    **kwargs
+):
+    """
+    Find the best match in a list of choices
+
+    Parameters
+    ----------
+    query : Sequence[Hashable]
+        string we want to find
+    choices : Iterable[Sequence[Hashable]] | Mapping[Sequence[Hashable]]
+        list of all strings the query should be compared with or dict with a mapping
+        {<result>: <string to compare>}
+    scorer : Callable, optional
+        Optional callable that is used to calculate the matching score between
+        the query and each choice. This can be any of the scorers included in RapidFuzz
+        (both scorers that calculate the edit distance or the normalized edit distance), or
+        a custom function, which returns a normalized edit distance.
+        fuzz.WRatio is used by default.
+    processor : Callable, optional
+        Optional callable that reformats the strings.
+        utils.default_process is used by default, which lowercases the strings and trims whitespace
+    score_cutoff : Any, optional
+        Optional argument for a score threshold. When an edit distance is used this represents the maximum
+        edit distance and matches with a `distance <= score_cutoff` are ignored. When a
+        normalized edit distance is used this represents the minimal similarity
+        and matches with a `similarity >= score_cutoff` are ignored. For edit distances this defaults to
+        -1, while for normalized edit distances this defaults to 0.0, which deactivates this behaviour.
+    **kwargs : Any, optional
+        any other named parameters are passed to the scorer. This can be used to pass
+        e.g. weights to string_metric.levenshtein
+
+    Yields
+    -------
+    Tuple[Sequence[Hashable], Any, Any]
+        Yields similarity between the query and each choice in form of a Tuple with 3 elements.
+        The values stored in the tuple depend on the types of the input arguments.
+
+        * The first element is always the current `choice`, which is the value thats compared to the query.
+
+        * The second value represents the similarity calculated by the scorer. This can be:
+
+          * An edit distance (distance is 0 for a perfect match and > 0 for non perfect matches).
+            In this case only choices which have a `distance <= max` are yielded.
+            An example of a scorer with this behavior is `string_metric.levenshtein`.
+          * A normalized edit distance (similarity is a score between 0 and 100, with 100 being a perfect match).
+            In this case only choices which have a `similarity >= score_cutoff` are yielded.
+            An example of a scorer with this behavior is `string_metric.normalized_levenshtein`.
+
+          Note, that for all scorers, which are not provided by RapidFuzz, only normalized edit distances are supported.
+
+        * The third parameter depends on the type of the `choices` argument it is:
+
+          * The `index of choice` when choices is a simple iterable like a list
+          * The `key of choice` when choices is a mapping like a dict, or a pandas Series
+
+    """
+    worst_score, optimal_score = _get_scorer_flags_py(scorer, kwargs)
+    lowest_score_worst = optimal_score > worst_score
+
+    if query is None:
+        return
+
+    if processor is True:
+        processor = default_process
+    elif processor is False:
+        processor = None
+
+    # preprocess the query
+    if processor is not None:
+        query = processor(query)
+
+    choices_iter = choices.items() if hasattr(choices, "items") else enumerate(choices)
+    for key, choice in choices_iter:
+        if choice is None:
+            continue
+
+        if processor is None:
+            score = scorer(
+                query, processor(choice), processor=None, score_cutoff=score_cutoff
+            )
+        else:
+            score = scorer(query, choice, processor=None, score_cutoff=score_cutoff)
+
+        if lowest_score_worst:
+            if score >= score_cutoff:
+                yield (choice, score, key)
+        else:
+            if score <= score_cutoff:
+                yield (choice, score, key)
 
 
 def extractOne(
@@ -133,7 +238,48 @@ def extractOne(
     None
 
     """
-    raise NotImplementedError
+    worst_score, optimal_score = _get_scorer_flags_py(scorer, kwargs)
+    lowest_score_worst = optimal_score > worst_score
+
+    if query is None:
+        return None
+
+    if processor is True:
+        processor = default_process
+    elif processor is False:
+        processor = None
+
+    # preprocess the query
+    if processor is not None:
+        query = processor(query)
+
+    result = None
+
+    choices_iter = choices.items() if hasattr(choices, "items") else enumerate(choices)
+    for key, choice in choices_iter:
+        if choice is None:
+            continue
+
+        if processor is None:
+            score = scorer(
+                query, processor(choice), processor=None, score_cutoff=score_cutoff
+            )
+        else:
+            score = scorer(query, choice, processor=None, score_cutoff=score_cutoff)
+
+        if lowest_score_worst:
+            if score >= score_cutoff and (result is None or score > result[1]):
+                score_cutoff = score
+                result = (choice, score, key)
+        else:
+            if score <= score_cutoff and (result is None or score < result[1]):
+                score_cutoff = score
+                result = (choice, score, key)
+
+        if score == optimal_score:
+            break
+
+    return result
 
 
 def extract(
@@ -206,70 +352,16 @@ def extract(
         has the `highest similarity`/`smallest distance`.
 
     """
-    raise NotImplementedError
+    worst_score, optimal_score = _get_scorer_flags_py(scorer, kwargs)
+    lowest_score_worst = optimal_score > worst_score
 
+    if limit is None:
+        limit = len(choices)
 
-def extract_iter(
-    query,
-    choices,
-    *,
-    scorer=WRatio,
-    processor=default_process,
-    score_cutoff=None,
-    **kwargs
-):
-    """
-    Find the best match in a list of choices
-
-    Parameters
-    ----------
-    query : Sequence[Hashable]
-        string we want to find
-    choices : Iterable[Sequence[Hashable]] | Mapping[Sequence[Hashable]]
-        list of all strings the query should be compared with or dict with a mapping
-        {<result>: <string to compare>}
-    scorer : Callable, optional
-        Optional callable that is used to calculate the matching score between
-        the query and each choice. This can be any of the scorers included in RapidFuzz
-        (both scorers that calculate the edit distance or the normalized edit distance), or
-        a custom function, which returns a normalized edit distance.
-        fuzz.WRatio is used by default.
-    processor : Callable, optional
-        Optional callable that reformats the strings.
-        utils.default_process is used by default, which lowercases the strings and trims whitespace
-    score_cutoff : Any, optional
-        Optional argument for a score threshold. When an edit distance is used this represents the maximum
-        edit distance and matches with a `distance <= score_cutoff` are ignored. When a
-        normalized edit distance is used this represents the minimal similarity
-        and matches with a `similarity >= score_cutoff` are ignored. For edit distances this defaults to
-        -1, while for normalized edit distances this defaults to 0.0, which deactivates this behaviour.
-    **kwargs : Any, optional
-        any other named parameters are passed to the scorer. This can be used to pass
-        e.g. weights to string_metric.levenshtein
-
-    Yields
-    -------
-    Tuple[Sequence[Hashable], Any, Any]
-        Yields similarity between the query and each choice in form of a Tuple with 3 elements.
-        The values stored in the tuple depend on the types of the input arguments.
-
-        * The first element is always the current `choice`, which is the value thats compared to the query.
-
-        * The second value represents the similarity calculated by the scorer. This can be:
-
-          * An edit distance (distance is 0 for a perfect match and > 0 for non perfect matches).
-            In this case only choices which have a `distance <= max` are yielded.
-            An example of a scorer with this behavior is `string_metric.levenshtein`.
-          * A normalized edit distance (similarity is a score between 0 and 100, with 100 being a perfect match).
-            In this case only choices which have a `similarity >= score_cutoff` are yielded.
-            An example of a scorer with this behavior is `string_metric.normalized_levenshtein`.
-
-          Note, that for all scorers, which are not provided by RapidFuzz, only normalized edit distances are supported.
-
-        * The third parameter depends on the type of the `choices` argument it is:
-
-          * The `index of choice` when choices is a simple iterable like a list
-          * The `key of choice` when choices is a mapping like a dict, or a pandas Series
-
-    """
-    raise NotImplementedError
+    result_iter = extract_iter(
+        query, choices, processor=processor, scorer=scorer, score_cutoff=score_cutoff
+    )
+    if lowest_score_worst:
+        return heapq.nlargest(limit, result_iter, key=lambda i: i[1])
+    else:
+        return heapq.nsmallest(limit, result_iter, key=lambda i: i[1])

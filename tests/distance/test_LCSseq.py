@@ -9,46 +9,30 @@ def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
 
 class LCSseq:
     @staticmethod
-    def distance(s1, s2, *, processor=None, score_cutoff=None):
-        dist1 = LCSseq_cpp.distance(
-            s1, s2, processor=processor, score_cutoff=score_cutoff
-        )
-        dist2 = LCSseq_py.distance(
-            s1, s2, processor=processor, score_cutoff=score_cutoff
-        )
+    def distance(*args, **kwargs):
+        dist1 = LCSseq_cpp.distance(*args, **kwargs)
+        dist2 = LCSseq_py.distance(*args, **kwargs)
         assert dist1 == dist2
         return dist1
 
     @staticmethod
-    def similarity(s1, s2, *, processor=None, score_cutoff=None):
-        dist1 = LCSseq_cpp.similarity(
-            s1, s2, processor=processor, score_cutoff=score_cutoff
-        )
-        dist2 = LCSseq_py.similarity(
-            s1, s2, processor=processor, score_cutoff=score_cutoff
-        )
+    def similarity(*args, **kwargs):
+        dist1 = LCSseq_cpp.similarity(*args, **kwargs)
+        dist2 = LCSseq_py.similarity(*args, **kwargs)
         assert dist1 == dist2
         return dist1
 
     @staticmethod
-    def normalized_distance(s1, s2, processor=None, *, score_cutoff=None):
-        dist1 = LCSseq_cpp.normalized_distance(
-            s1, s2, processor=processor, score_cutoff=score_cutoff
-        )
-        dist2 = LCSseq_py.normalized_distance(
-            s1, s2, processor=processor, score_cutoff=score_cutoff
-        )
+    def normalized_distance(*args, **kwargs):
+        dist1 = LCSseq_cpp.normalized_distance(*args, **kwargs)
+        dist2 = LCSseq_py.normalized_distance(*args, **kwargs)
         assert isclose(dist1, dist2)
         return dist1
 
     @staticmethod
-    def normalized_similarity(s1, s2, processor=None, *, score_cutoff=None):
-        dist1 = LCSseq_cpp.normalized_similarity(
-            s1, s2, processor=processor, score_cutoff=score_cutoff
-        )
-        dist2 = LCSseq_py.normalized_similarity(
-            s1, s2, processor=processor, score_cutoff=score_cutoff
-        )
+    def normalized_similarity(*args, **kwargs):
+        dist1 = LCSseq_cpp.normalized_similarity(*args, **kwargs)
+        dist2 = LCSseq_py.normalized_similarity(*args, **kwargs)
         assert isclose(dist1, dist2)
         return dist1
 

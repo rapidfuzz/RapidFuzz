@@ -4,8 +4,33 @@
 import unittest
 import pytest
 
-from rapidfuzz import process, fuzz, utils
+from rapidfuzz import process_py, process_cpp, fuzz
 import pandas as pd
+
+
+class process:
+    @staticmethod
+    def extract_iter(*args, **kwargs):
+        res1 = process_cpp.extract_iter(*args, **kwargs)
+        res2 = process_py.extract_iter(*args, **kwargs)
+
+        for elem1, elem2 in zip(res1, res2, strict=True):
+            assert elem1 == elem2
+            yield elem1
+
+    @staticmethod
+    def extractOne(*args, **kwargs):
+        res1 = process_cpp.extractOne(*args, **kwargs)
+        res2 = process_py.extractOne(*args, **kwargs)
+        assert res1 == res2
+        return res1
+
+    @staticmethod
+    def extract(*args, **kwargs):
+        res1 = process_cpp.extractOne(*args, **kwargs)
+        res2 = process_py.extractOne(*args, **kwargs)
+        assert res1 == res2
+        return res1
 
 
 class ProcessTest(unittest.TestCase):

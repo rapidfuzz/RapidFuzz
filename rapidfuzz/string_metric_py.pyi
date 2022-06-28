@@ -11,17 +11,17 @@ from typing import (
 )
 from typing_extensions import Protocol
 
-class _ScorerAttributes(Protocol):
+class ScorerAttributes(Protocol):
     _RF_ScorerPy: Dict
 
-def _attr_decorator(func: Any) -> _ScorerAttributes:
+def attr_decorator(func: Any) -> ScorerAttributes:
     return func
 
 _StringType = Sequence[Hashable]
 S1 = TypeVar("S1")
 S2 = TypeVar("S2")
 
-@_attr_decorator
+@attr_decorator
 def levenshtein(
     s1: S1,
     s2: S2,
@@ -30,7 +30,7 @@ def levenshtein(
     processor: Optional[Callable[..., _StringType]] = None,
     max: Optional[int] = None
 ) -> int: ...
-@_attr_decorator
+@attr_decorator
 def normalized_levenshtein(
     s1: S1,
     s2: S2,
@@ -39,11 +39,11 @@ def normalized_levenshtein(
     processor: Optional[Callable[..., _StringType]] = None,
     score_cutoff: Optional[float] = 0
 ) -> float: ...
-@_attr_decorator
+@attr_decorator
 def levenshtein_editops(
     s1: S1, s2: S2, *, processor: Optional[Callable[..., _StringType]] = None
 ) -> List[Tuple[str, int, int]]: ...
-@_attr_decorator
+@attr_decorator
 def hamming(
     s1: S1,
     s2: S2,
@@ -51,7 +51,7 @@ def hamming(
     processor: Optional[Callable[..., _StringType]] = None,
     max: Optional[int] = None
 ) -> int: ...
-@_attr_decorator
+@attr_decorator
 def normalized_hamming(
     s1: S1,
     s2: S2,
@@ -59,7 +59,7 @@ def normalized_hamming(
     processor: Optional[Callable[..., _StringType]] = None,
     score_cutoff: Optional[float] = 0
 ) -> float: ...
-@_attr_decorator
+@attr_decorator
 def jaro_similarity(
     s1: S1,
     s2: S2,
@@ -67,7 +67,7 @@ def jaro_similarity(
     processor: Optional[Callable[..., _StringType]] = None,
     score_cutoff: Optional[float] = 0
 ) -> float: ...
-@_attr_decorator
+@attr_decorator
 def jaro_winkler_similarity(
     s1: S1,
     s2: S2,

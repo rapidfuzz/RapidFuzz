@@ -13,50 +13,30 @@ def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
 
 class Levenshtein:
     @staticmethod
-    def distance(s1, s2, *, processor=None, weights=(1, 1, 1), score_cutoff=None):
-        dist1 = Levenshtein_cpp.distance(
-            s1, s2, processor=processor, weights=weights, score_cutoff=score_cutoff
-        )
-        dist2 = Levenshtein_py.distance(
-            s1, s2, processor=processor, weights=weights, score_cutoff=score_cutoff
-        )
+    def distance(*args, **kwargs):
+        dist1 = Levenshtein_cpp.distance(*args, **kwargs)
+        dist2 = Levenshtein_py.distance(*args, **kwargs)
         assert dist1 == dist2
         return dist1
 
     @staticmethod
-    def similarity(s1, s2, *, processor=None, weights=(1, 1, 1), score_cutoff=None):
-        dist1 = Levenshtein_cpp.similarity(
-            s1, s2, processor=processor, weights=weights, score_cutoff=score_cutoff
-        )
-        dist2 = Levenshtein_py.similarity(
-            s1, s2, processor=processor, weights=weights, score_cutoff=score_cutoff
-        )
+    def similarity(*args, **kwargs):
+        dist1 = Levenshtein_cpp.similarity(*args, **kwargs)
+        dist2 = Levenshtein_py.similarity(*args, **kwargs)
         assert dist1 == dist2
         return dist1
 
     @staticmethod
-    def normalized_distance(
-        s1, s2, *, processor=None, weights=(1, 1, 1), score_cutoff=None
-    ):
-        dist1 = Levenshtein_cpp.normalized_distance(
-            s1, s2, processor=processor, weights=weights, score_cutoff=score_cutoff
-        )
-        dist2 = Levenshtein_py.normalized_distance(
-            s1, s2, processor=processor, weights=weights, score_cutoff=score_cutoff
-        )
+    def normalized_distance(*args, **kwargs):
+        dist1 = Levenshtein_cpp.normalized_distance(*args, **kwargs)
+        dist2 = Levenshtein_py.normalized_distance(*args, **kwargs)
         assert isclose(dist1, dist2)
         return dist1
 
     @staticmethod
-    def normalized_similarity(
-        s1, s2, *, processor=None, weights=(1, 1, 1), score_cutoff=None
-    ):
-        dist1 = Levenshtein_cpp.normalized_similarity(
-            s1, s2, processor=processor, weights=weights, score_cutoff=score_cutoff
-        )
-        dist2 = Levenshtein_py.normalized_similarity(
-            s1, s2, processor=processor, weights=weights, score_cutoff=score_cutoff
-        )
+    def normalized_similarity(*args, **kwargs):
+        dist1 = Levenshtein_cpp.normalized_similarity(*args, **kwargs)
+        dist2 = Levenshtein_py.normalized_similarity(*args, **kwargs)
         assert isclose(dist1, dist2)
         return dist1
 

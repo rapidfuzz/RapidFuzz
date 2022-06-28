@@ -862,7 +862,10 @@ cdef inline py_extract_dict(query, choices, scorer, processor, int64_t limit, do
             if score <= score_cutoff:
                 result_list.append((choice, score, choice_key))
 
-    return heapq.nlargest(limit, result_list, key=lambda i: i[1])
+    if lowest_score_worst:
+        return heapq.nlargest(limit, result_list, key=lambda i: i[1])
+    else:
+        return heapq.nsmallest(limit, result_list, key=lambda i: i[1])
 
 
 cdef inline py_extract_list(query, choices, scorer, processor, int64_t limit, double score_cutoff, worst_score, optimal_score, dict kwargs):
@@ -887,7 +890,10 @@ cdef inline py_extract_list(query, choices, scorer, processor, int64_t limit, do
             if score <= score_cutoff:
                 result_list.append((choice, score, i))
 
-    return heapq.nlargest(limit, result_list, key=lambda i: i[1])
+    if lowest_score_worst:
+        return heapq.nlargest(limit, result_list, key=lambda i: i[1])
+    else:
+        return heapq.nsmallest(limit, result_list, key=lambda i: i[1])
 
 
 def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5, score_cutoff=None, **kwargs):
