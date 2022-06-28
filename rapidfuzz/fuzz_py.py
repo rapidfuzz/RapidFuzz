@@ -1,52 +1,20 @@
-# distutils: language=c++
-# cython: language_level=3, binding=True, linetrace=True
-
-from .distance._initialize import ScoreAlignment
-
-from rapidfuzz_capi cimport (
-    RF_String, RF_Scorer, RF_ScorerFunc, RF_Kwargs,
-    SCORER_STRUCT_VERSION, RF_Preprocessor,
-    RF_ScorerFlags,
-    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_SYMMETRIC
+# SPDX-License-Identifier: MIT
+# Copyright (C) 2022 Max Bachmann
+from rapidfuzz.utils_py import default_process
+from rapidfuzz.distance.Indel_py import (
+    normalized_similarity as indel_normalized_similarity,
+    _block_normalized_similarity as indel_block_normalized_similarity,
+    distance as indel_distance,
 )
+from math import ceil
+from difflib import SequenceMatcher
+from .distance._initialize_py import ScoreAlignment
 
-# required for preprocess_strings
-from rapidfuzz.utils import default_process
-from array import array
-from cpp_common cimport RF_StringWrapper, preprocess_strings, RfScoreAlignment
 
-from libc.stdint cimport uint32_t, int64_t
-from libcpp cimport bool
-from cython.operator cimport dereference
+def _norm_distance(dist, lensum, score_cutoff):
+    score = (100 - 100 * dist / lensum) if lensum else 100
+    return score if score >= score_cutoff else 0
 
-from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
-
-from array import array
-
-cdef extern from "cpp_fuzz.hpp":
-    double ratio_func(                    const RF_String&, const RF_String&, double) nogil except +
-    double partial_ratio_func(            const RF_String&, const RF_String&, double) nogil except +
-    double token_sort_ratio_func(         const RF_String&, const RF_String&, double) nogil except +
-    double token_set_ratio_func(          const RF_String&, const RF_String&, double) nogil except +
-    double token_ratio_func(              const RF_String&, const RF_String&, double) nogil except +
-    double partial_token_sort_ratio_func( const RF_String&, const RF_String&, double) nogil except +
-    double partial_token_set_ratio_func(  const RF_String&, const RF_String&, double) nogil except +
-    double partial_token_ratio_func(      const RF_String&, const RF_String&, double) nogil except +
-    double WRatio_func(                   const RF_String&, const RF_String&, double) nogil except +
-    double QRatio_func(                   const RF_String&, const RF_String&, double) nogil except +
-
-    RfScoreAlignment[double] partial_ratio_alignment_func(const RF_String&, const RF_String&, double) nogil except +
-
-    bool RatioInit(                 RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool PartialRatioInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool TokenSortRatioInit(        RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool TokenSetRatioInit(         RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool TokenRatioInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool PartialTokenSortRatioInit( RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool PartialTokenSetRatioInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool PartialTokenRatioInit(     RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool WRatioInit(                RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool QRatioInit(                RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
 
 def ratio(s1, s2, *, processor=None, score_cutoff=None):
     """
@@ -84,14 +52,132 @@ def ratio(s1, s2, *, processor=None, score_cutoff=None):
     >>> fuzz.ratio("this is a test", "this is a test!")
     96.55171966552734
     """
-    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
-    cdef RF_StringWrapper s1_proc, s2_proc
-
     if s1 is None or s2 is None:
         return 0
 
-    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
-    return ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+    if processor is True:
+        processor = default_process
+    elif processor is False:
+        processor = None
+
+    if score_cutoff is not None:
+        score_cutoff /= 100
+
+    score = indel_normalized_similarity(
+        s1, s2, processor=processor, score_cutoff=score_cutoff
+    )
+    return score * 100
+
+
+def _partial_ratio_short_needle(s1, s2, score_cutoff):
+    """
+    implementation of partial_ratio for needles <= 64. assumes s1 is already the
+    shorter string
+    """
+    s1_char_set = set(s1)
+    len1 = len(s1)
+    len2 = len(s2)
+
+    res = ScoreAlignment(0, 0, len1, 0, len1)
+
+    block = {}
+    block_get = block.get
+    x = 1
+    for ch1 in s1:
+        block[ch1] = block_get(ch1, 0) | x
+        x <<= 1
+
+    for i in range(1, len1):
+        substr_last = s2[i - 1]
+        if substr_last not in s1_char_set:
+            continue
+
+        # todo cache map
+        ls_ratio = indel_block_normalized_similarity(
+            block, s1, s2[:i], score_cutoff=score_cutoff
+        )
+        if ls_ratio > res.score:
+            res.score = score_cutoff = ls_ratio
+            res.dest_start = 0
+            res.dest_end = i
+            if res.score == 1:
+                res.score = 100
+                return res
+
+    for i in range(len2 - len1):
+        substr_last = s2[i + len1 - 1]
+        if substr_last not in s1_char_set:
+            continue
+
+        # todo cache map
+        ls_ratio = indel_block_normalized_similarity(
+            block, s1, s2[i : i + len1], score_cutoff=score_cutoff
+        )
+        if ls_ratio > res.score:
+            res.score = score_cutoff = ls_ratio
+            res.dest_start = i
+            res.dest_end = i + len1
+            if res.score == 1:
+                res.score = 100
+                return res
+
+    for i in range(len2 - len1, len2):
+        substr_first = s2[i]
+        if substr_first not in s1_char_set:
+            continue
+
+        # todo cache map
+        ls_ratio = indel_block_normalized_similarity(
+            block, s1, s2[i:], score_cutoff=score_cutoff
+        )
+        if ls_ratio > res.score:
+            res.score = score_cutoff = ls_ratio
+            res.dest_start = i
+            res.dest_end = len2
+            if res.score == 1:
+                res.score = 100
+                return res
+
+    res.score *= 100
+    return res
+
+
+def _partial_ratio_long_needle(s1, s2, score_cutoff):
+    """
+    implementation of partial_ratio for needles <= 64. assumes s1 is already the
+    shorter string
+    """
+    blocks = SequenceMatcher(None, s1, s2, False).get_matching_blocks()
+    len1 = len(s1)
+    len2 = len(s2)
+    res = ScoreAlignment(0, 0, len1, 0, len1)
+
+    mblock = {}
+    mblock_get = mblock.get
+    x = 1
+    for ch1 in s1:
+        mblock[ch1] = mblock_get(ch1, 0) | x
+        x <<= 1
+
+    for block in blocks:
+        long_start = block[1] - block[0] if (block[1] - block[0]) > 0 else 0
+        long_end = long_start + len(s1)
+        long_substr = s2[long_start:long_end]
+
+        ls_ratio = indel_block_normalized_similarity(
+            mblock, s1, long_substr, score_cutoff=score_cutoff
+        )
+
+        if ls_ratio > res.score:
+            res.score = score_cutoff = ls_ratio
+            res.dest_start = long_start
+            res.dest_end = min(long_end, len2)
+            if res.score == 1:
+                res.score = 100
+                return res
+
+    res.score *= 100
+    return res
 
 
 def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
@@ -159,14 +245,35 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
     >>> fuzz.partial_ratio("this is a test", "this is a test!")
     100.0
     """
-    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
-    cdef RF_StringWrapper s1_proc, s2_proc
-
     if s1 is None or s2 is None:
         return 0
 
-    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
-    return partial_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+    if processor is True:
+        processor = default_process
+    elif processor is False:
+        processor = None
+
+    if processor is not None:
+        s1 = processor(s1)
+        s2 = processor(s2)
+
+    if score_cutoff is None:
+        score_cutoff = 0
+
+    if not s1 and not s2:
+        return 100
+
+    if len(s1) <= len(s2):
+        shorter = s1
+        longer = s2
+    else:
+        shorter = s2
+        longer = s1
+
+    if len(shorter) <= 64:
+        return _partial_ratio_short_needle(shorter, longer, score_cutoff / 100).score
+    else:
+        return _partial_ratio_long_needle(shorter, longer, score_cutoff / 100).score
 
 
 def partial_ratio_alignment(s1, s2, *, processor=None, score_cutoff=None):
@@ -186,12 +293,12 @@ def partial_ratio_alignment(s1, s2, *, processor=None, score_cutoff=None):
         comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
-        For ratio < score_cutoff 0 is returned instead. Default is 0,
+        For ratio < score_cutoff None is returned instead. Default is 0,
         which deactivates this behaviour.
 
     Returns
     -------
-    alignment : ScoreAlignment
+    alignment : ScoreAlignment, optional
         alignment between s1 and s2 with the score as a float between 0 and 100
 
     Examples
@@ -201,22 +308,51 @@ def partial_ratio_alignment(s1, s2, *, processor=None, score_cutoff=None):
     >>> res = fuzz.partial_ratio_alignment(s1, s2)
     >>> res
     ScoreAlignment(score=83.33333333333334, src_start=2, src_end=8, dest_start=0, dest_end=6)
-    
+
     Using the alignment information it is possible to calculate the same fuzz.ratio
 
     >>> fuzz.ratio(s1[res.src_start:res.src_end], s2[res.dest_start:res.dest_end])
     83.33333333333334
     """
-    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
-    cdef RF_StringWrapper s1_proc, s2_proc
-
     if s1 is None or s2 is None:
-        return 0
+        return None
 
-    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
-    res = partial_ratio_alignment_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+    if processor is True:
+        processor = default_process
+    elif processor is False:
+        processor = None
 
-    return ScoreAlignment(res.score, res.src_start, res.src_end, res.dest_start, res.dest_end)
+    if processor is not None:
+        s1 = processor(s1)
+        s2 = processor(s2)
+
+    if score_cutoff is None:
+        score_cutoff = 0
+
+    if not s1 and not s2:
+        return ScoreAlignment(100.0, 0, 0, 0, 0)
+
+    if len(s1) <= len(s2):
+        shorter = s1
+        longer = s2
+    else:
+        shorter = s2
+        longer = s1
+
+    if len(shorter) <= 64:
+        res = _partial_ratio_short_needle(shorter, longer, score_cutoff / 100)
+    else:
+        res = _partial_ratio_long_needle(shorter, longer, score_cutoff / 100)
+
+    if res.score < score_cutoff:
+        return None
+
+    if len(s1) <= len(s2):
+        return res
+    else:
+        return ScoreAlignment(
+            res.score, res.dest_start, res.dest_end, res.src_start, res.src_end
+        )
 
 
 def token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
@@ -251,14 +387,21 @@ def token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     >>> fuzz.token_sort_ratio("fuzzy wuzzy was a bear", "wuzzy fuzzy was a bear")
     100.0
     """
-    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
-    cdef RF_StringWrapper s1_proc, s2_proc
-
     if s1 is None or s2 is None:
         return 0
 
-    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
-    return token_sort_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+    if processor is True:
+        processor = default_process
+    elif processor is False:
+        processor = None
+
+    if processor is not None:
+        s1 = processor(s1)
+        s2 = processor(s2)
+
+    sorted_s1 = " ".join(sorted(s1.split()))
+    sorted_s2 = " ".join(sorted(s2.split()))
+    return ratio(sorted_s1, sorted_s2, score_cutoff=score_cutoff)
 
 
 def token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
@@ -296,14 +439,69 @@ def token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     >>> fuzz.token_set_ratio("fuzzy was a bear", "fuzzy fuzzy was a bear")
     100.0
     """
-    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
-    cdef RF_StringWrapper s1_proc, s2_proc
-
     if s1 is None or s2 is None:
         return 0
 
-    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
-    return token_set_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+    if processor is True:
+        processor = default_process
+    elif processor is False:
+        processor = None
+
+    if processor is not None:
+        s1 = processor(s1)
+        s2 = processor(s2)
+
+    if score_cutoff is None:
+        score_cutoff = 0
+
+    tokens_a = set(s1.split())
+    tokens_b = set(s2.split())
+
+    # in FuzzyWuzzy this returns 0. For sake of compatibility return 0 here as well
+    # see https://github.com/maxbachmann/RapidFuzz/issues/110
+    if not tokens_a or not tokens_b:
+        return 0
+
+    intersect = tokens_a.intersection(tokens_b)
+    diff_ab = tokens_a.difference(tokens_b)
+    diff_ba = tokens_b.difference(tokens_a)
+
+    if not intersect and (not diff_ab or not diff_ba):
+        return 100
+
+    diff_ab_joined = " ".join(sorted(diff_ab))
+    diff_ba_joined = " ".join(sorted(diff_ba))
+
+    ab_len = len(diff_ab_joined)
+    ba_len = len(diff_ba_joined)
+    # todo is length sum without joining faster?
+    sect_len = len(" ".join(intersect))
+
+    # string length sect+ab <-> sect and sect+ba <-> sect
+    sect_ab_len = sect_len + (sect_len != 0) + ab_len
+    sect_ba_len = sect_len + (sect_len != 0) + ba_len
+
+    result = 0
+    cutoff_distance = ceil((sect_ab_len + sect_ba_len) * (1 - score_cutoff / 100))
+    dist = indel_distance(diff_ab_joined, diff_ba_joined, score_cutoff=cutoff_distance)
+
+    if dist <= cutoff_distance:
+        result = _norm_distance(dist, sect_ab_len + sect_ba_len, score_cutoff)
+
+    # exit early since the other ratios are 0
+    if not sect_len:
+        return result
+
+    # levenshtein distance sect+ab <-> sect and sect+ba <-> sect
+    # since only sect is similar in them the distance can be calculated based on
+    # the length difference
+    sect_ab_dist = (sect_len != 0) + ab_len
+    sect_ab_ratio = _norm_distance(sect_ab_dist, sect_len + sect_ab_len, score_cutoff)
+
+    sect_ba_dist = (sect_len != 0) + ba_len
+    sect_ba_ratio = _norm_distance(sect_ba_dist, sect_len + sect_ba_len, score_cutoff)
+
+    return max(result, sect_ab_ratio, sect_ba_ratio)
 
 
 def token_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
@@ -334,14 +532,23 @@ def token_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     -----
     .. image:: img/token_ratio.svg
     """
-    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
-    cdef RF_StringWrapper s1_proc, s2_proc
-
     if s1 is None or s2 is None:
         return 0
 
-    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
-    return token_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+    if processor is True:
+        processor = default_process
+    elif processor is False:
+        processor = None
+
+    if processor is not None:
+        s1 = processor(s1)
+        s2 = processor(s2)
+
+    # todo write combined implementation
+    return max(
+        token_set_ratio(s1, s2, processor=None, score_cutoff=score_cutoff),
+        token_sort_ratio(s1, s2, processor=None, score_cutoff=score_cutoff),
+    )
 
 
 def partial_token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
@@ -371,14 +578,21 @@ def partial_token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=
     -----
     .. image:: img/partial_token_sort_ratio.svg
     """
-    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
-    cdef RF_StringWrapper s1_proc, s2_proc
-
     if s1 is None or s2 is None:
         return 0
 
-    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
-    return partial_token_sort_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+    if processor is True:
+        processor = default_process
+    elif processor is False:
+        processor = None
+
+    if processor is not None:
+        s1 = processor(s1)
+        s2 = processor(s2)
+
+    sorted_s1 = " ".join(sorted(s1.split()))
+    sorted_s2 = " ".join(sorted(s2.split()))
+    return partial_ratio(sorted_s1, sorted_s2, score_cutoff=score_cutoff)
 
 
 def partial_token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
@@ -409,17 +623,32 @@ def partial_token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=N
     -----
     .. image:: img/partial_token_set_ratio.svg
     """
-    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
-    cdef RF_StringWrapper s1_proc, s2_proc
-
     if s1 is None or s2 is None:
         return 0
 
     if processor is True:
         processor = default_process
+    elif processor is False:
+        processor = None
 
-    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
-    return partial_token_set_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+    if processor is not None:
+        s1 = processor(s1)
+        s2 = processor(s2)
+
+    tokens_a = set(s1.split())
+    tokens_b = set(s2.split())
+    # in FuzzyWuzzy this returns 0. For sake of compatibility return 0 here as well
+    # see https://github.com/maxbachmann/RapidFuzz/issues/110
+    if not tokens_a or not tokens_b:
+        return 0
+
+    # exit early when there is a common word in both sequences
+    if tokens_a.intersection(tokens_b):
+        return 100
+
+    diff_ab = " ".join(sorted(tokens_a.difference(tokens_b)))
+    diff_ba = " ".join(sorted(tokens_b.difference(tokens_a)))
+    return partial_ratio(diff_ab, diff_ba, score_cutoff=score_cutoff)
 
 
 def partial_token_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
@@ -450,14 +679,52 @@ def partial_token_ratio(s1, s2, *, processor=default_process, score_cutoff=None)
     -----
     .. image:: img/partial_token_ratio.svg
     """
-    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
-    cdef RF_StringWrapper s1_proc, s2_proc
-
     if s1 is None or s2 is None:
         return 0
 
-    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
-    return partial_token_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+    if processor is True:
+        processor = default_process
+    elif processor is False:
+        processor = None
+
+    if processor is not None and processor:
+        s1 = processor(s1)
+        s2 = processor(s2)
+
+    if score_cutoff is None:
+        score_cutoff = 0
+
+    tokens_split_a = s1.split()
+    tokens_split_b = s2.split()
+    tokens_a = set(tokens_split_a)
+    tokens_b = set(tokens_split_b)
+
+    # exit early when there is a common word in both sequences
+    if tokens_a.intersection(tokens_b):
+        return 100
+
+    diff_ab = tokens_a.difference(tokens_b)
+    diff_ba = tokens_b.difference(tokens_a)
+
+    result = partial_ratio(
+        " ".join(sorted(tokens_split_a)),
+        " ".join(sorted(tokens_split_b)),
+        score_cutoff=score_cutoff,
+    )
+
+    # do not calculate the same partial_ratio twice
+    if len(tokens_split_a) == len(diff_ab) and len(tokens_split_b) == len(diff_ba):
+        return result
+
+    score_cutoff = max(score_cutoff, result)
+    return max(
+        result,
+        partial_ratio(
+            " ".join(sorted(diff_ab)),
+            " ".join(sorted(diff_ba)),
+            score_cutoff=score_cutoff,
+        ),
+    )
 
 
 def WRatio(s1, s2, *, processor=default_process, score_cutoff=None):
@@ -487,17 +754,55 @@ def WRatio(s1, s2, *, processor=default_process, score_cutoff=None):
     -----
     .. image:: img/WRatio.svg
     """
-    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
-    cdef RF_StringWrapper s1_proc, s2_proc
+    UNBASE_SCALE = 0.95
 
     if s1 is None or s2 is None:
         return 0
 
     if processor is True:
         processor = default_process
+    elif processor is False:
+        processor = None
 
-    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
-    return WRatio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+    if processor is not None:
+        s1 = processor(s1)
+        s2 = processor(s2)
+
+    # in FuzzyWuzzy this returns 0. For sake of compatibility return 0 here as well
+    # see https://github.com/maxbachmann/RapidFuzz/issues/110
+    if not s1 or not s2:
+        return 0
+
+    if score_cutoff is None:
+        score_cutoff = 0
+
+    len1 = len(s1)
+    len2 = len(s2)
+    len_ratio = len1 / len2 if len1 > len2 else len2 / len1
+
+    end_ratio = ratio(s1, s2, score_cutoff=score_cutoff)
+    if len_ratio < 1.5:
+        score_cutoff = max(score_cutoff, end_ratio) / UNBASE_SCALE
+        return max(
+            end_ratio,
+            token_ratio(s1, s2, score_cutoff=score_cutoff, processor=None)
+            * UNBASE_SCALE,
+        )
+
+    PARTIAL_SCALE = 0.9 if len_ratio < 8.0 else 0.6
+    score_cutoff = max(score_cutoff, end_ratio) / PARTIAL_SCALE
+    end_ratio = max(
+        end_ratio, partial_ratio(s1, s2, score_cutoff=score_cutoff) * PARTIAL_SCALE
+    )
+
+    score_cutoff = max(score_cutoff, end_ratio) / UNBASE_SCALE
+    return max(
+        end_ratio,
+        partial_token_ratio(s1, s2, score_cutoff=score_cutoff, processor=None)
+        * UNBASE_SCALE
+        * PARTIAL_SCALE,
+    )
+
 
 def QRatio(s1, s2, *, processor=default_process, score_cutoff=None):
     """
@@ -529,152 +834,45 @@ def QRatio(s1, s2, *, processor=default_process, score_cutoff=None):
     >>> fuzz.QRatio("this is a test", "THIS is a test!")
     100.0
     """
-    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
-    cdef RF_StringWrapper s1_proc, s2_proc
-
     if s1 is None or s2 is None:
         return 0
 
     if processor is True:
         processor = default_process
+    elif processor is False:
+        processor = None
 
-    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
-    return QRatio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+    if processor is not None:
+        s1 = processor(s1)
+        s2 = processor(s2)
+    # in FuzzyWuzzy this returns 0. For sake of compatibility return 0 here as well
+    # see https://github.com/maxbachmann/RapidFuzz/issues/110
+    if not s1 or not s2:
+        return 0
 
-cdef bool NoKwargsInit(RF_Kwargs* self, dict kwargs) except False:
-    if len(kwargs):
-        raise TypeError("Got unexpected keyword arguments: ", ", ".join(kwargs.keys()))
+    return ratio(s1, s2, score_cutoff=score_cutoff)
 
-    dereference(self).context = NULL
-    dereference(self).dtor = NULL
-    return True
 
-cdef bool GetScorerFlagsRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
-    return True
+def _GetScorerFlagsSimilarity(**kwargs):
+    return {"optimal_score": 100, "worst_score": 0, "flags": (1 << 5)}
 
-cdef bool GetScorerFlagsPartialRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
-    return True
 
-cdef bool GetScorerFlagsTokenSortRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
-    return True
+ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
 
-cdef bool GetScorerFlagsTokenSetRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
-    return True
+partial_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
 
-cdef bool GetScorerFlagsTokenRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
-    return True
+token_sort_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
 
-cdef bool GetScorerFlagsPartialTokenSortRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
-    return True
+partial_token_sort_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
 
-cdef bool GetScorerFlagsPartialTokenSetRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
-    return True
+token_set_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
 
-cdef bool GetScorerFlagsPartialTokenRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
-    return True
+partial_token_set_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
 
-cdef bool GetScorerFlagsWRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
-    return True
+token_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
 
-cdef bool GetScorerFlagsQRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
-    return True
+partial_token_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
 
-cdef RF_Scorer RatioContext
-RatioContext.version = SCORER_STRUCT_VERSION
-RatioContext.kwargs_init = NoKwargsInit
-RatioContext.get_scorer_flags = GetScorerFlagsRatio
-RatioContext.scorer_func_init = RatioInit
-ratio._RF_Scorer = PyCapsule_New(&RatioContext, NULL, NULL)
+WRatio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
 
-cdef RF_Scorer PartialRatioContext
-PartialRatioContext.version = SCORER_STRUCT_VERSION
-PartialRatioContext.kwargs_init = NoKwargsInit
-PartialRatioContext.get_scorer_flags = GetScorerFlagsPartialRatio
-PartialRatioContext.scorer_func_init = PartialRatioInit
-partial_ratio._RF_Scorer = PyCapsule_New(&PartialRatioContext, NULL, NULL)
-
-cdef RF_Scorer TokenSortRatioContext
-TokenSortRatioContext.version = SCORER_STRUCT_VERSION
-TokenSortRatioContext.kwargs_init = NoKwargsInit
-TokenSortRatioContext.get_scorer_flags = GetScorerFlagsTokenSortRatio
-TokenSortRatioContext.scorer_func_init = TokenSortRatioInit
-token_sort_ratio._RF_Scorer = PyCapsule_New(&TokenSortRatioContext, NULL, NULL)
-
-cdef RF_Scorer TokenSetRatioContext
-TokenSetRatioContext.version = SCORER_STRUCT_VERSION
-TokenSetRatioContext.kwargs_init = NoKwargsInit
-TokenSetRatioContext.get_scorer_flags = GetScorerFlagsTokenSetRatio
-TokenSetRatioContext.scorer_func_init = TokenSetRatioInit
-token_set_ratio._RF_Scorer = PyCapsule_New(&TokenSetRatioContext, NULL, NULL)
-
-cdef RF_Scorer TokenRatioContext
-TokenRatioContext.version = SCORER_STRUCT_VERSION
-TokenRatioContext.kwargs_init = NoKwargsInit
-TokenRatioContext.get_scorer_flags = GetScorerFlagsTokenRatio
-TokenRatioContext.scorer_func_init = TokenRatioInit
-token_ratio._RF_Scorer = PyCapsule_New(&TokenRatioContext, NULL, NULL)
-
-cdef RF_Scorer PartialTokenSortRatioContext
-PartialTokenSortRatioContext.version = SCORER_STRUCT_VERSION
-PartialTokenSortRatioContext.kwargs_init = NoKwargsInit
-PartialTokenSortRatioContext.get_scorer_flags = GetScorerFlagsPartialTokenSortRatio
-PartialTokenSortRatioContext.scorer_func_init = PartialTokenSortRatioInit
-partial_token_sort_ratio._RF_Scorer = PyCapsule_New(&PartialTokenSortRatioContext, NULL, NULL)
-
-cdef RF_Scorer PartialTokenSetRatioContext
-PartialTokenSetRatioContext.version = SCORER_STRUCT_VERSION
-PartialTokenSetRatioContext.kwargs_init = NoKwargsInit
-PartialTokenSetRatioContext.get_scorer_flags = GetScorerFlagsPartialTokenSetRatio
-PartialTokenSetRatioContext.scorer_func_init = PartialTokenSetRatioInit
-partial_token_set_ratio._RF_Scorer = PyCapsule_New(&PartialTokenSetRatioContext, NULL, NULL)
-
-cdef RF_Scorer PartialTokenRatioContext
-PartialTokenRatioContext.version = SCORER_STRUCT_VERSION
-PartialTokenRatioContext.kwargs_init = NoKwargsInit
-PartialTokenRatioContext.get_scorer_flags = GetScorerFlagsPartialTokenRatio
-PartialTokenRatioContext.scorer_func_init = PartialTokenRatioInit
-partial_token_ratio._RF_Scorer = PyCapsule_New(&PartialTokenRatioContext, NULL, NULL)
-
-cdef RF_Scorer WRatioContext
-WRatioContext.version = SCORER_STRUCT_VERSION
-WRatioContext.kwargs_init = NoKwargsInit
-WRatioContext.get_scorer_flags = GetScorerFlagsWRatio
-WRatioContext.scorer_func_init = WRatioInit
-WRatio._RF_Scorer = PyCapsule_New(&WRatioContext, NULL, NULL)
-
-cdef RF_Scorer QRatioContext
-QRatioContext.version = SCORER_STRUCT_VERSION
-QRatioContext.kwargs_init = NoKwargsInit
-QRatioContext.get_scorer_flags = GetScorerFlagsQRatio
-QRatioContext.scorer_func_init = QRatioInit
-QRatio._RF_Scorer = PyCapsule_New(&QRatioContext, NULL, NULL)
+QRatio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}

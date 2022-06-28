@@ -29,7 +29,7 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
         int64_t delete_cost
         int64_t replace_cost
 
-cdef extern from "cpp_string_metric.hpp":
+cdef extern from "string_metric_cpp.hpp":
     double normalized_levenshtein_func( const RF_String&, const RF_String&, int64_t, int64_t, int64_t, double) nogil except +
     double normalized_hamming_func(     const RF_String&, const RF_String&, double) nogil except +
     double jaro_similarity_func(        const RF_String&, const RF_String&, double) nogil except +
@@ -557,3 +557,23 @@ JaroWinklerSimilarityContext.kwargs_init = JaroWinklerKwargsInit
 JaroWinklerSimilarityContext.get_scorer_flags = GetScorerFlagsJaroWinklerSimilarity
 JaroWinklerSimilarityContext.scorer_func_init = JaroWinklerSimilarityInit
 jaro_winkler_similarity._RF_Scorer = PyCapsule_New(&JaroWinklerSimilarityContext, NULL, NULL)
+
+def _GetScorerFlagsDistance(**kwargs):
+    return {"optimal_score": 0, "worst_score": 2**63 - 1}
+
+
+def _GetScorerFlagsSimilarity(**kwargs):
+    return {"optimal_score": 100, "worst_score": 0}
+
+
+levenshtein._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsDistance}
+
+normalized_levenshtein._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+
+hamming._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsDistance}
+
+normalized_hamming._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+
+jaro_similarity._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+
+jaro_winkler_similarity._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}

@@ -4,11 +4,89 @@
 import unittest
 import pytest
 from array import array
-import sys
-import math
 
-from rapidfuzz import fuzz, utils
+from rapidfuzz import fuzz_py, fuzz_cpp, utils
 from rapidfuzz.distance import ScoreAlignment
+
+
+class fuzz:
+    @staticmethod
+    def ratio(*args, **kwargs):
+        dist1 = fuzz_cpp.ratio(*args, **kwargs)
+        dist2 = fuzz_py.ratio(*args, **kwargs)
+        assert dist1 == dist2
+        return dist1
+
+    @staticmethod
+    def partial_ratio(*args, **kwargs):
+        dist1 = fuzz_cpp.partial_ratio(*args, **kwargs)
+        dist2 = fuzz_py.partial_ratio(*args, **kwargs)
+        assert dist1 == dist2
+        return dist1
+
+    @staticmethod
+    def partial_ratio_alignment(*args, **kwargs):
+        dist1 = fuzz_cpp.partial_ratio_alignment(*args, **kwargs)
+        dist2 = fuzz_py.partial_ratio_alignment(*args, **kwargs)
+        assert dist1 == dist2
+        return dist1
+
+    @staticmethod
+    def token_sort_ratio(*args, **kwargs):
+        dist1 = fuzz_cpp.token_sort_ratio(*args, **kwargs)
+        dist2 = fuzz_py.token_sort_ratio(*args, **kwargs)
+        assert dist1 == dist2
+        return dist1
+
+    @staticmethod
+    def token_set_ratio(*args, **kwargs):
+        dist1 = fuzz_cpp.token_set_ratio(*args, **kwargs)
+        dist2 = fuzz_py.token_set_ratio(*args, **kwargs)
+        assert dist1 == dist2
+        return dist1
+
+    @staticmethod
+    def token_ratio(*args, **kwargs):
+        dist1 = fuzz_cpp.token_ratio(*args, **kwargs)
+        dist2 = fuzz_py.token_ratio(*args, **kwargs)
+        assert dist1 == dist2
+        return dist1
+
+    @staticmethod
+    def partial_token_sort_ratio(*args, **kwargs):
+        dist1 = fuzz_cpp.partial_token_sort_ratio(*args, **kwargs)
+        dist2 = fuzz_py.partial_token_sort_ratio(*args, **kwargs)
+        assert dist1 == dist2
+        return dist1
+
+    @staticmethod
+    def partial_token_set_ratio(*args, **kwargs):
+        dist1 = fuzz_cpp.partial_token_set_ratio(*args, **kwargs)
+        dist2 = fuzz_py.partial_token_set_ratio(*args, **kwargs)
+        assert dist1 == dist2
+        return dist1
+
+    @staticmethod
+    def partial_token_ratio(*args, **kwargs):
+        dist1 = fuzz_cpp.partial_token_ratio(*args, **kwargs)
+        dist2 = fuzz_py.partial_token_ratio(*args, **kwargs)
+        assert dist1 == dist2
+        return dist1
+
+    @staticmethod
+    def WRatio(*args, **kwargs):
+        dist1 = fuzz_cpp.WRatio(*args, **kwargs)
+        dist2 = fuzz_py.WRatio(*args, **kwargs)
+        assert dist1 == dist2
+        return dist1
+
+    @staticmethod
+    def QRatio(*args, **kwargs):
+        dist1 = fuzz_cpp.QRatio(*args, **kwargs)
+        dist2 = fuzz_py.QRatio(*args, **kwargs)
+        assert dist1 == dist2
+        return dist1
+
 
 scorers = [
     fuzz.ratio,
@@ -20,11 +98,22 @@ scorers = [
     fuzz.partial_token_set_ratio,
     fuzz.partial_token_ratio,
     fuzz.WRatio,
-    fuzz.QRatio
+    fuzz.QRatio,
 ]
 
-if sys.version_info < (3,0,0):
-    chr = unichr
+cpp_scorers = [
+    fuzz_cpp.ratio,
+    fuzz_cpp.partial_ratio,
+    fuzz_cpp.token_sort_ratio,
+    fuzz_cpp.token_set_ratio,
+    fuzz_cpp.token_ratio,
+    fuzz_cpp.partial_token_sort_ratio,
+    fuzz_cpp.partial_token_set_ratio,
+    fuzz_cpp.partial_token_ratio,
+    fuzz_cpp.WRatio,
+    fuzz_cpp.QRatio,
+]
+
 
 class RatioTest(unittest.TestCase):
     s1 = "new york mets"
@@ -50,10 +139,10 @@ class RatioTest(unittest.TestCase):
         self.assertEqual(fuzz.partial_token_sort_ratio(self.s4, self.s5), 100)
 
     def testTokenSetRatio(self):
-        self.assertEqual(fuzz.token_set_ratio(self.s4, self.s5),100)
+        self.assertEqual(fuzz.token_set_ratio(self.s4, self.s5), 100)
 
     def testPartialTokenSetRatio(self):
-        self.assertEqual(fuzz.partial_token_set_ratio(self.s4, self.s5),100)
+        self.assertEqual(fuzz.partial_token_set_ratio(self.s4, self.s5), 100)
 
     def testQuickRatioEqual(self):
         self.assertEqual(fuzz.QRatio(self.s1, self.s1a), 100)
@@ -85,15 +174,23 @@ class RatioTest(unittest.TestCase):
         self.assertEqual(fuzz.WRatio(self.s1, self.s1a), 100)
 
     def testIssue76(self):
-        self.assertAlmostEqual(fuzz.partial_ratio("physics 2 vid", "study physics physics 2"), 81.81818, places=4)
-        self.assertEqual(fuzz.partial_ratio("physics 2 vid", "study physics physics 2 video"), 100)
+        self.assertAlmostEqual(
+            fuzz.partial_ratio("physics 2 vid", "study physics physics 2"),
+            81.81818,
+            places=4,
+        )
+        self.assertEqual(
+            fuzz.partial_ratio("physics 2 vid", "study physics physics 2 video"), 100
+        )
 
     def testIssue90(self):
-        self.assertAlmostEqual(fuzz.partial_ratio("ax b", "a b a c b"), 85.71428, places=4)
+        self.assertAlmostEqual(
+            fuzz_cpp.partial_ratio("ax b", "a b a c b"), 85.71428, places=4
+        )
 
     def testIssue138(self):
-        str1 = u'a'*65
-        str2 = u'a' + chr(256) + u'a'*63
+        str1 = "a" * 65
+        str2 = "a" + chr(256) + "a" * 63
         self.assertAlmostEqual(fuzz.partial_ratio(str1, str2), 98.46153, places=4)
 
     def testPartialRatioAlignment(self):
@@ -101,20 +198,28 @@ class RatioTest(unittest.TestCase):
         s = "certain"
         self.assertEqual(
             fuzz.partial_ratio_alignment(s, a),
-            ScoreAlignment(100, 0, len(s), 2, 2 + len(s))
+            ScoreAlignment(100, 0, len(s), 2, 2 + len(s)),
         )
         self.assertEqual(
             fuzz.partial_ratio_alignment(a, s),
-            ScoreAlignment(100, 2, 2 + len(s), 0, len(s))
+            ScoreAlignment(100, 2, 2 + len(s), 0, len(s)),
+        )
+        self.assertEqual(fuzz.partial_ratio_alignment(None, "test"), None)
+        self.assertEqual(fuzz.partial_ratio_alignment("test", None), None)
+
+        self.assertEqual(
+            fuzz.partial_ratio_alignment("test", "tesx", score_cutoff=90), None
         )
 
     def testIssue196(self):
         """
         fuzz.WRatio did not work correctly with score_cutoffs
         """
-        self.assertAlmostEqual(fuzz.WRatio('South Korea', 'North Korea'), 81.81818, places=4)
-        assert fuzz.WRatio('South Korea', 'North Korea', score_cutoff=85.4) == 0.0
-        assert fuzz.WRatio('South Korea', 'North Korea', score_cutoff=85.5) == 0.0
+        self.assertAlmostEqual(
+            fuzz.WRatio("South Korea", "North Korea"), 81.81818, places=4
+        )
+        assert fuzz.WRatio("South Korea", "North Korea", score_cutoff=85.4) == 0.0
+        assert fuzz.WRatio("South Korea", "North Korea", score_cutoff=85.5) == 0.0
 
     def testIssue231(self):
         str1 = "er merkantilismus förderte handel und verkehr mit teils marktkonformen, teils dirigistischen maßnahmen."
@@ -125,6 +230,7 @@ class RatioTest(unittest.TestCase):
         self.assertEqual(alignment.src_end, 103)
         self.assertEqual(alignment.dest_start, 0)
         self.assertEqual(alignment.dest_end, 103)
+
 
 def test_empty_string():
     """
@@ -158,15 +264,17 @@ def test_invalid_input(scorer):
     with pytest.raises(TypeError):
         scorer(1, 1)
 
-@pytest.mark.parametrize("scorer", scorers)
+
+@pytest.mark.parametrize("scorer", cpp_scorers)
 def test_array(scorer):
     """
     arrays should be supported and treated in a compatible way to strings
     """
-    if sys.version_info[0] > 2:
-        assert scorer(array('u', RatioTest.s3), array('u', RatioTest.s3))
-        assert scorer(RatioTest.s3,             array('u', RatioTest.s3))
-        assert scorer(array('u', RatioTest.s3), RatioTest.s3)
+    # todo add support in pure python implementation
+    assert scorer(array("u", RatioTest.s3), array("u", RatioTest.s3))
+    assert scorer(RatioTest.s3, array("u", RatioTest.s3))
+    assert scorer(array("u", RatioTest.s3), RatioTest.s3)
+
 
 @pytest.mark.parametrize("scorer", scorers)
 def test_none_string(scorer):
@@ -176,19 +284,22 @@ def test_none_string(scorer):
     assert scorer("test", None) == 0
     assert scorer(None, "test") == 0
 
+
 @pytest.mark.parametrize("scorer", scorers)
 def test_simple_unicode_tests(scorer):
     """
     some very simple tests using unicode with scorers
     to catch relatively obvious implementation errors
     """
-    s1 = u"ÁÄ"
+    s1 = "ÁÄ"
     s2 = "ABCD"
     assert scorer(s1, s2) == 0
     assert scorer(s1, s1) == 100
 
 
-@pytest.mark.parametrize("processor", [True, utils.default_process, lambda s: utils.default_process(s)])
+@pytest.mark.parametrize(
+    "processor", [True, utils.default_process, lambda s: utils.default_process(s)]
+)
 @pytest.mark.parametrize("scorer", scorers)
 def test_scorer_case_insensitive(processor, scorer):
     """
@@ -220,8 +331,8 @@ def testIssue206(scorer):
     """
     test correct behavior of score_cutoff
     """
-    score1 = scorer('South Korea', 'North Korea')
-    score2 = scorer('South Korea', 'North Korea', score_cutoff=score1 - 0.0001)
+    score1 = scorer("South Korea", "North Korea")
+    score2 = scorer("South Korea", "North Korea", score_cutoff=score1 - 0.0001)
     assert score1 == score2
 
 
@@ -233,5 +344,6 @@ def test_help(scorer):
     """
     help(scorer)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

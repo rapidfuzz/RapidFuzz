@@ -7,5 +7,5 @@ from rapidfuzz import (
     distance as distance,
     fuzz as fuzz,
     string_metric as string_metric,
-    utils as utils
+    utils as utils,
 )

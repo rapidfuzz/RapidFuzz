@@ -1,5 +1,15 @@
 ## Changelog
 
+### [2.1.0] - 2022-
+#### Added
+- added pure python fallback for all implementations with the following exceptions:
+  - no support for sequences of hashables. Only strings supported so far
+  - *.editops / *.opcodes functions not implemented yet
+  - process.cdist does not support multithreading
+
+#### Fixed
+- fuzz.partial_ratio_alignment ignored the score_cutoff
+
 ### [2.0.15] - 2022-06-24
 #### Fixed
 - fix integer wraparound in partial_ratio/partial_ratio_alignment

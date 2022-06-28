@@ -1,4 +1,7 @@
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021 Max Bachmann
+# Copyright (C) 2022 Max Bachmann
 
-from rapidfuzz.cpp_utils import default_process
+try:
+    from rapidfuzz.utils_cpp import default_process
+except ImportError:
+    from rapidfuzz.utils_py import default_process

@@ -4,8 +4,34 @@
 import unittest
 import pytest
 
-from rapidfuzz import process, fuzz, utils
+from rapidfuzz import process_py, process_cpp, fuzz
 import pandas as pd
+
+
+class process:
+    @staticmethod
+    def extract_iter(*args, **kwargs):
+        res1 = process_cpp.extract_iter(*args, **kwargs)
+        res2 = process_py.extract_iter(*args, **kwargs)
+
+        for elem1, elem2 in zip(res1, res2, strict=True):
+            assert elem1 == elem2
+            yield elem1
+
+    @staticmethod
+    def extractOne(*args, **kwargs):
+        res1 = process_cpp.extractOne(*args, **kwargs)
+        res2 = process_py.extractOne(*args, **kwargs)
+        assert res1 == res2
+        return res1
+
+    @staticmethod
+    def extract(*args, **kwargs):
+        res1 = process_cpp.extract(*args, **kwargs)
+        res2 = process_py.extract(*args, **kwargs)
+        assert res1 == res2
+        return res1
+
 
 class ProcessTest(unittest.TestCase):
     def setUp(self):
@@ -17,33 +43,69 @@ class ProcessTest(unittest.TestCase):
         ]
 
     def testExtractOneExceptions(self):
-        self.assertRaises(TypeError, process.extractOne)
-        self.assertRaises(TypeError, process.extractOne, 1)
-        self.assertRaises(TypeError, process.extractOne, 1, [])
-        self.assertRaises(TypeError, process.extractOne, '', [1])
-        self.assertRaises(TypeError, process.extractOne, '', {1:1})
+        self.assertRaises(TypeError, process_cpp.extractOne)
+        self.assertRaises(TypeError, process_py.extractOne)
+        self.assertRaises(TypeError, process_cpp.extractOne, 1)
+        self.assertRaises(TypeError, process_py.extractOne, 1)
+        self.assertRaises(TypeError, process_cpp.extractOne, 1, [])
+        self.assertRaises(TypeError, process_py.extractOne, 1, [])
+        self.assertRaises(TypeError, process_cpp.extractOne, "", [1])
+        self.assertRaises(TypeError, process_py.extractOne, "", [1])
+        self.assertRaises(TypeError, process_cpp.extractOne, "", {1: 1})
+        self.assertRaises(TypeError, process_py.extractOne, "", {1: 1})
 
     def testExtractExceptions(self):
-        self.assertRaises(TypeError, process.extract)
-        self.assertRaises(TypeError, process.extract, 1)
-        self.assertRaises(TypeError, process.extract, 1, [])
-        self.assertRaises(TypeError, process.extract, '', [1])
-        self.assertRaises(TypeError, process.extract, '', {1:1})
+        self.assertRaises(TypeError, process_cpp.extract)
+        self.assertRaises(TypeError, process_py.extract)
+        self.assertRaises(TypeError, process_cpp.extract, 1)
+        self.assertRaises(TypeError, process_py.extract, 1)
+        self.assertRaises(TypeError, process_cpp.extract, 1, [])
+        self.assertRaises(TypeError, process_py.extract, 1, [])
+        self.assertRaises(TypeError, process_cpp.extract, "", [1])
+        self.assertRaises(TypeError, process_py.extract, "", [1])
+        self.assertRaises(TypeError, process_cpp.extract, "", {1: 1})
+        self.assertRaises(TypeError, process_py.extract, "", {1: 1})
 
     def testExtractIterExceptions(self):
-        self.assertRaises(TypeError, process.extract_iter)
-        self.assertRaises(TypeError, process.extract_iter, 1)
-        self.assertRaises(TypeError,
-            lambda *args, **kwargs: next(process.extract_iter(*args, **kwargs)),
-            1, []
+        self.assertRaises(TypeError, process_cpp.extract_iter)
+        self.assertRaises(TypeError, process_py.extract_iter)
+        self.assertRaises(TypeError, process_cpp.extract_iter, 1)
+        self.assertRaises(TypeError, process_py.extract_iter, 1)
+        self.assertRaises(
+            TypeError,
+            lambda *args, **kwargs: next(process_cpp.extract_iter(*args, **kwargs)),
+            1,
+            [],
         )
-        self.assertRaises(TypeError,
-            lambda *args, **kwargs: next(process.extract_iter(*args, **kwargs)),
-            '', [1]
+        self.assertRaises(
+            TypeError,
+            lambda *args, **kwargs: next(process_py.extract_iter(*args, **kwargs)),
+            1,
+            [],
         )
-        self.assertRaises(TypeError,
-            lambda *args, **kwargs: next(process.extract_iter(*args, **kwargs)),
-            '', {1:1}
+        self.assertRaises(
+            TypeError,
+            lambda *args, **kwargs: next(process_cpp.extract_iter(*args, **kwargs)),
+            "",
+            [1],
+        )
+        self.assertRaises(
+            TypeError,
+            lambda *args, **kwargs: next(process_py.extract_iter(*args, **kwargs)),
+            "",
+            [1],
+        )
+        self.assertRaises(
+            TypeError,
+            lambda *args, **kwargs: next(process_cpp.extract_iter(*args, **kwargs)),
+            "",
+            {1: 1},
+        )
+        self.assertRaises(
+            TypeError,
+            lambda *args, **kwargs: next(process_py.extract_iter(*args, **kwargs)),
+            "",
+            {1: 1},
         )
 
     def testGetBestChoice1(self):
@@ -109,14 +171,14 @@ class ProcessTest(unittest.TestCase):
             "new york mets vs chicago cubs",
             "chicago cubs at new york mets",
             "atlanta braves vs pittsbugh pirates",
-            "new york yankees vs boston red sox"
+            "new york yankees vs boston red sox",
         ]
 
         choices_mapping = {
             1: "new york mets vs chicago cubs",
             2: "chicago cubs at new york mets",
             3: "atlanta braves vs pittsbugh pirates",
-            4: "new york yankees vs boston red sox"
+            4: "new york yankees vs boston red sox",
         }
 
         # in this hypothetical example we care about ordering, so we use quick ratio
@@ -149,7 +211,7 @@ class ProcessTest(unittest.TestCase):
             "new york mets vs chicago cubs",
             "chicago cubs at new york mets",
             "atlanta braves vs pittsbugh pirates",
-            "new york yankees vs boston red sox"
+            "new york yankees vs boston red sox",
         ]
 
         query = "los angeles dodgers vs san francisco giants"
@@ -168,7 +230,7 @@ class ProcessTest(unittest.TestCase):
             "new york mets vs chicago cubs",
             "chicago cubs at new york mets",
             "atlanta braves vs pittsbugh pirates",
-            "new york yankees vs boston red sox"
+            "new york yankees vs boston red sox",
         ]
 
         query = "new york mets vs chicago cubs"
@@ -212,7 +274,7 @@ class ProcessTest(unittest.TestCase):
             "new york mets vs chicago cubs",
             "new york yankees vs boston red sox",
             "",
-            ""
+            "",
         ]
 
         query = "new york mets at chicago cubs"
@@ -226,7 +288,7 @@ class ProcessTest(unittest.TestCase):
             "new york mets vs chicago cubs",
             "new york yankees vs boston red sox",
             None,
-            None
+            None,
         ]
 
         query = "new york mets at chicago cubs"
@@ -236,22 +298,45 @@ class ProcessTest(unittest.TestCase):
 
     def testIssue81(self):
         # this mostly tests whether this segfaults due to incorrect ref counting
-        choices = pd.Series(['test color brightness', 'test lemon', 'test lavender'], index=[67478, 67479, 67480])
+        choices = pd.Series(
+            ["test color brightness", "test lemon", "test lavender"],
+            index=[67478, 67479, 67480],
+        )
         matches = process.extract("test", choices)
-        assert matches == [('test color brightness', 90.0, 67478), ('test lemon', 90.0, 67479), ('test lavender', 90.0, 67480)]
+        assert matches == [
+            ("test color brightness", 90.0, 67478),
+            ("test lemon", 90.0, 67479),
+            ("test lavender", 90.0, 67480),
+        ]
 
 
 def custom_scorer(s1, s2, processor=None, score_cutoff=0):
     return fuzz.ratio(s1, s2, processor=processor, score_cutoff=score_cutoff)
 
+
 @pytest.mark.parametrize("processor", [False, None, lambda s: s])
 @pytest.mark.parametrize("scorer", [fuzz.ratio, custom_scorer])
 def test_extractOne_case_sensitive(processor, scorer):
-    assert process.extractOne("new york mets", ["new", "new YORK mets"], processor=processor, scorer=scorer)[1] != 100
+    assert (
+        process.extractOne(
+            "new york mets",
+            ["new", "new YORK mets"],
+            processor=processor,
+            scorer=scorer,
+        )[1]
+        != 100
+    )
+
 
 @pytest.mark.parametrize("scorer", [fuzz.ratio, custom_scorer])
 def test_extractOne_use_first_match(scorer):
-    assert process.extractOne("new york mets", ["new york mets", "new york mets"], scorer=scorer)[2] == 0
+    assert (
+        process.extractOne(
+            "new york mets", ["new york mets", "new york mets"], scorer=scorer
+        )[2]
+        == 0
+    )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
