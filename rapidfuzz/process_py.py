@@ -88,6 +88,9 @@ def extract_iter(
     elif processor is False:
         processor = None
 
+    if score_cutoff is None:
+        score_cutoff = worst_score
+
     # preprocess the query
     if processor is not None:
         query = processor(query)
@@ -248,6 +251,9 @@ def extractOne(
         processor = default_process
     elif processor is False:
         processor = None
+
+    if score_cutoff is None:
+        score_cutoff = worst_score
 
     # preprocess the query
     if processor is not None:
