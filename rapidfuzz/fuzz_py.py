@@ -450,9 +450,8 @@ def partial_token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=N
     if not tokens_a or not tokens_b:
         return 0
 
-    intersect = tokens_a.intersection(tokens_b)
     # exit early when there is a common word in both sequences
-    if not intersect:
+    if tokens_a.intersection(tokens_b):
         return 100
 
     diff_ab = " ".join(sorted(tokens_a.difference(tokens_b)))
@@ -632,7 +631,17 @@ def QRatio(s1, s2, *, processor=default_process, score_cutoff=None):
     >>> fuzz.QRatio("this is a test", "THIS is a test!")
     100.0
     """
-    return ratio(s1, s2, processor=processor, score_cutoff=score_cutoff)
+    if s1 is None or s2 is None:
+        return 0
+    if processor is not None:
+        s1 = processor(s1)
+        s2 = processor(s2)
+    # in FuzzyWuzzy this returns 0. For sake of compatibility return 0 here as well
+    # see https://github.com/maxbachmann/RapidFuzz/issues/110
+    if not s1 or not s2:
+        return 0
+
+    return ratio(s1, s2, score_cutoff=score_cutoff)
 
 
 def _GetScorerFlagsSimilarity(**kwargs):
