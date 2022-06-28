@@ -52,6 +52,7 @@ def ratio(s1, s2, *, processor=None, score_cutoff=None):
     """
     if s1 is None or s2 is None:
         return 0
+
     if score_cutoff is not None:
         score_cutoff /= 100
 
@@ -128,6 +129,10 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
     """
     if s1 is None or s2 is None:
         return 0
+
+    if processor is True:
+        processor = default_process
+
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -227,6 +232,10 @@ def token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     """
     if s1 is None or s2 is None:
         return 0
+
+    if processor is True:
+        processor = default_process
+
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -273,6 +282,10 @@ def token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     """
     if s1 is None or s2 is None:
         return 0
+
+    if processor is True:
+        processor = default_process
+
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -360,6 +373,10 @@ def token_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     """
     if s1 is None or s2 is None:
         return 0
+
+    if processor is True:
+        processor = default_process
+
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -400,6 +417,10 @@ def partial_token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=
     """
     if s1 is None or s2 is None:
         return 0
+
+    if processor is True:
+        processor = default_process
+
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -439,6 +460,10 @@ def partial_token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=N
     """
     if s1 is None or s2 is None:
         return 0
+
+    if processor is True:
+        processor = default_process
+
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -489,7 +514,11 @@ def partial_token_ratio(s1, s2, *, processor=default_process, score_cutoff=None)
     """
     if s1 is None or s2 is None:
         return 0
-    if processor is not None:
+
+    if processor is True:
+        processor = default_process
+
+    if processor is not None and processor:
         s1 = processor(s1)
         s2 = processor(s2)
 
@@ -501,9 +530,8 @@ def partial_token_ratio(s1, s2, *, processor=default_process, score_cutoff=None)
     tokens_a = set(tokens_split_a)
     tokens_b = set(tokens_split_b)
 
-    intersect = tokens_a.intersection(tokens_b)
     # exit early when there is a common word in both sequences
-    if not intersect:
+    if tokens_a.intersection(tokens_b):
         return 100
 
     diff_ab = tokens_a.difference(tokens_b)
@@ -561,6 +589,10 @@ def WRatio(s1, s2, *, processor=default_process, score_cutoff=None):
 
     if s1 is None or s2 is None:
         return 0
+
+    if processor is True:
+        processor = default_process
+
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -633,6 +665,10 @@ def QRatio(s1, s2, *, processor=default_process, score_cutoff=None):
     """
     if s1 is None or s2 is None:
         return 0
+
+    if processor is True:
+        processor = default_process
+
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
