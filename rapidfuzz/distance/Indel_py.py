@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
 
-from .LCSseq_py import similarity as lcs_seq_similarity
+from .LCSseq_py import (
+    similarity as lcs_seq_similarity,
+    _block_similarity as lcs_seq_block_similarity,
+)
 
 
 def distance(s1, s2, *, processor=None, score_cutoff=None):
@@ -51,6 +54,13 @@ def distance(s1, s2, *, processor=None, score_cutoff=None):
 
     maximum = len(s1) + len(s2)
     lcs_sim = lcs_seq_similarity(s1, s2)
+    dist = maximum - 2 * lcs_sim
+    return dist if (score_cutoff is None or dist <= score_cutoff) else score_cutoff + 1
+
+
+def _block_distance(block, s1, s2, score_cutoff=None):
+    maximum = len(s1) + len(s2)
+    lcs_sim = lcs_seq_block_similarity(block, s1, s2)
     dist = maximum - 2 * lcs_sim
     return dist if (score_cutoff is None or dist <= score_cutoff) else score_cutoff + 1
 
@@ -126,6 +136,13 @@ def normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
     return norm_dist if (score_cutoff is None or norm_dist <= score_cutoff) else 1
 
 
+def _block_normalized_distance(block, s1, s2, score_cutoff=None):
+    maximum = len(s1) + len(s2)
+    dist = _block_distance(block, s1, s2)
+    norm_dist = dist / maximum if maximum else 0
+    return norm_dist if (score_cutoff is None or norm_dist <= score_cutoff) else 1
+
+
 def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     """
     Calculates a normalized indel similarity in the range [0, 1].
@@ -175,6 +192,12 @@ def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
         s2 = processor(s2)
 
     norm_dist = normalized_distance(s1, s2)
+    norm_sim = 1.0 - norm_dist
+    return norm_sim if (score_cutoff is None or norm_sim >= score_cutoff) else 0
+
+
+def _block_normalized_similarity(block, s1, s2, score_cutoff=None):
+    norm_dist = _block_normalized_distance(block, s1, s2)
     norm_sim = 1.0 - norm_dist
     return norm_sim if (score_cutoff is None or norm_sim >= score_cutoff) else 0
 

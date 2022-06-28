@@ -3,6 +3,7 @@
 from rapidfuzz.utils_py import default_process
 from rapidfuzz.distance.Indel_py import (
     normalized_similarity as indel_normalized_similarity,
+    _block_normalized_similarity as indel_block_normalized_similarity,
     distance as indel_distance,
 )
 from math import ceil
@@ -62,6 +63,98 @@ def ratio(s1, s2, *, processor=None, score_cutoff=None):
     score = indel_normalized_similarity(
         s1, s2, processor=processor, score_cutoff=score_cutoff
     )
+    return score * 100
+
+
+def _partial_ratio_short_needle(s1, s2, score_cutoff):
+    """
+    implementation of partial_ratio for needles <= 64. assumes s1 is already the
+    shorter string
+    """
+    s1_char_set = set(s1)
+    len1 = len(s1)
+    len2 = len(s2)
+
+    score = 0
+
+    block = {}
+    block_get = block.get
+    x = 1
+    for ch1 in s1:
+        block[ch1] = block_get(ch1, 0) | x
+        x <<= 1
+
+    for i in range(1, len1):
+        substr_last = s2[i - 1]
+        if substr_last not in s1_char_set:
+            continue
+
+        # todo cache map
+        ls_ratio = indel_block_normalized_similarity(
+            block, s1, s2[:i], score_cutoff=score_cutoff
+        )
+        if ls_ratio > score:
+            score = score_cutoff = ls_ratio
+            if score == 1:
+                return 100
+
+    for i in range(len2 - len1):
+        substr_last = s2[i + len1 - 1]
+        if substr_last not in s1_char_set:
+            continue
+
+        # todo cache map
+        ls_ratio = indel_block_normalized_similarity(
+            block, s1, s2[i : i + len1], score_cutoff=score_cutoff
+        )
+        if ls_ratio > score:
+            score = score_cutoff = ls_ratio
+            if score == 1:
+                return 100
+
+    for i in range(len2 - len1, len2):
+        substr_first = s2[i]
+        if substr_first not in s1_char_set:
+            continue
+
+        # todo cache map
+        ls_ratio = indel_block_normalized_similarity(
+            block, s1, s2[i:], score_cutoff=score_cutoff
+        )
+        if ls_ratio > score:
+            score = score_cutoff = ls_ratio
+            if score == 1:
+                return 100
+
+    return score * 100
+
+
+def _partial_ratio_long_needle(s1, s2, score_cutoff):
+    """
+    implementation of partial_ratio for needles <= 64. assumes s1 is already the
+    shorter string
+    """
+    blocks = SequenceMatcher(None, s1, s2, False).get_matching_blocks()
+    score = 0
+
+    mblock = {}
+    mblock_get = mblock.get
+    x = 1
+    for ch1 in s1:
+        mblock[ch1] = mblock_get(ch1, 0) | x
+        x <<= 1
+
+    for block in blocks:
+        long_start = block[1] - block[0] if (block[1] - block[0]) > 0 else 0
+        long_end = long_start + len(s1)
+        long_substr = s2[long_start:long_end]
+        score = max(
+            score,
+            indel_block_normalized_similarity(
+                mblock, s1, long_substr, score_cutoff=score_cutoff
+            ),
+        )
+
     return score * 100
 
 
@@ -140,6 +233,11 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
         s1 = processor(s1)
         s2 = processor(s2)
 
+    if score_cutoff is not None:
+        score_cutoff /= 100
+    else:
+        score_cutoff = 0
+
     if len(s1) <= len(s2):
         shorter = s1
         longer = s2
@@ -147,17 +245,10 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
         shorter = s2
         longer = s1
 
-    # todo match behavior of C++ implementation for shorter sequences
-    # and evaluate performance
-    blocks = SequenceMatcher(None, shorter, longer, False).get_matching_blocks()
-    score = 0
-    for block in blocks:
-        long_start = block[1] - block[0] if (block[1] - block[0]) > 0 else 0
-        long_end = long_start + len(shorter)
-        long_substr = longer[long_start:long_end]
-        score = max(score, ratio(shorter, long_substr, score_cutoff=score_cutoff))
-
-    return score
+    if len(shorter) <= 64:
+        return _partial_ratio_short_needle(shorter, longer, score_cutoff)
+    else:
+        return _partial_ratio_long_needle(shorter, longer, score_cutoff)
 
 
 def partial_ratio_alignment(s1, s2, *, processor=None, score_cutoff=None):

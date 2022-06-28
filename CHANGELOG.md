@@ -6,7 +6,7 @@
   - no support for any sequences of hashables. Only strings supported so far
   - *.editops / *.opcodes not supported yet
   - fuzz.partial_ratio_alignment not supported yet
-  - fuzz.partial_ratio currently has a slightly different behavior for needle lengths <=64
+  - process module not implemented yet
 
 ### [2.0.15] - 2022-06-24
 #### Fixed

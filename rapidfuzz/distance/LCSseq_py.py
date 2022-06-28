@@ -51,6 +51,23 @@ def similarity(s1, s2, *, processor=None, score_cutoff=None):
     return res if (score_cutoff is None or res >= score_cutoff) else 0
 
 
+def _block_similarity(block, s1, s2, score_cutoff=None):
+    if not s1:
+        return 0
+
+    S = (1 << len(s1)) - 1
+    block_get = block.get
+
+    for ch2 in s2:
+        Matches = block_get(ch2, 0)
+        u = S & Matches
+        S = (S + u) | (S - u)
+
+    # calculate the equivalent of popcount(~S) in C. This breaks for len(s1) == 0
+    res = bin(S)[-len(s1) :].count("0")
+    return res if (score_cutoff is None or res >= score_cutoff) else 0
+
+
 def distance(s1, s2, *, processor=None, score_cutoff=None):
     """
     Calculates the LCS distance in the range [0, max].
