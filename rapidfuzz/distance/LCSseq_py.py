@@ -30,6 +30,9 @@ def similarity(s1, s2, *, processor=None, score_cutoff=None):
         s1 = processor(s1)
         s2 = processor(s2)
 
+    if not s1:
+        return 0
+
     S = (1 << len(s1)) - 1
     block = {}
     block_get = block.get
@@ -43,6 +46,7 @@ def similarity(s1, s2, *, processor=None, score_cutoff=None):
         u = S & Matches
         S = (S + u) | (S - u)
 
+    # calculate the equivalent of popcount(~S) in C. This breaks for len(s1) == 0
     res = bin(S)[-len(s1) :].count("0")
     return res if (score_cutoff is None or res >= score_cutoff) else 0
 

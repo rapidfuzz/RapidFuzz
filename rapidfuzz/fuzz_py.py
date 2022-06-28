@@ -50,14 +50,15 @@ def ratio(s1, s2, *, processor=None, score_cutoff=None):
     >>> fuzz.ratio("this is a test", "this is a test!")
     96.55171966552734
     """
+    if s1 is None or s2 is None:
+        return 0
     if score_cutoff is not None:
         score_cutoff /= 100
-    return (
-        indel_normalized_similarity(
-            s1, s2, processor=processor, score_cutoff=score_cutoff
-        )
-        * 100
+
+    score = indel_normalized_similarity(
+        s1, s2, processor=processor, score_cutoff=score_cutoff
     )
+    return score * 100
 
 
 def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
@@ -125,6 +126,8 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
     >>> fuzz.partial_ratio("this is a test", "this is a test!")
     100.0
     """
+    if s1 is None or s2 is None:
+        return 0
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -222,6 +225,8 @@ def token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     >>> fuzz.token_sort_ratio("fuzzy wuzzy was a bear", "wuzzy fuzzy was a bear")
     100.0
     """
+    if s1 is None or s2 is None:
+        return 0
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -266,10 +271,12 @@ def token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     >>> fuzz.token_set_ratio("fuzzy was a bear", "fuzzy fuzzy was a bear")
     100.0
     """
+    if s1 is None or s2 is None:
+        return 0
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
-    
+
     if score_cutoff is None:
         score_cutoff = 0
 
@@ -351,6 +358,8 @@ def token_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     -----
     .. image:: img/token_ratio.svg
     """
+    if s1 is None or s2 is None:
+        return 0
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -389,6 +398,8 @@ def partial_token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=
     -----
     .. image:: img/partial_token_sort_ratio.svg
     """
+    if s1 is None or s2 is None:
+        return 0
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -426,6 +437,8 @@ def partial_token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=N
     -----
     .. image:: img/partial_token_set_ratio.svg
     """
+    if s1 is None or s2 is None:
+        return 0
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -475,10 +488,12 @@ def partial_token_ratio(s1, s2, *, processor=default_process, score_cutoff=None)
     -----
     .. image:: img/partial_token_ratio.svg
     """
+    if s1 is None or s2 is None:
+        return 0
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
-    
+
     if score_cutoff is None:
         score_cutoff = 0
 
@@ -544,6 +559,12 @@ def WRatio(s1, s2, *, processor=default_process, score_cutoff=None):
     .. image:: img/WRatio.svg
     """
     UNBASE_SCALE = 0.95
+
+    if s1 is None or s2 is None:
+        return 0
+    if processor is not None:
+        s1 = processor(s1)
+        s2 = processor(s2)
 
     # in FuzzyWuzzy this returns 0. For sake of compatibility return 0 here as well
     # see https://github.com/maxbachmann/RapidFuzz/issues/110

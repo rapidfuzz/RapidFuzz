@@ -26,5 +26,5 @@ def default_process(sentence):
     processed_string : str
         processed string
     """
-    string_out = _alnum_regex.sub(" ", s)
+    string_out = _alnum_regex.sub(" ", sentence)
     return string_out.strip().lower()
