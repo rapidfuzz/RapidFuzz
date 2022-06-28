@@ -27,8 +27,8 @@ class process:
 
     @staticmethod
     def extract(*args, **kwargs):
-        res1 = process_cpp.extractOne(*args, **kwargs)
-        res2 = process_py.extractOne(*args, **kwargs)
+        res1 = process_cpp.extract(*args, **kwargs)
+        res2 = process_py.extract(*args, **kwargs)
         assert res1 == res2
         return res1
 
