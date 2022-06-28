@@ -53,6 +53,9 @@ def ratio(s1, s2, *, processor=None, score_cutoff=None):
     if s1 is None or s2 is None:
         return 0
 
+    if processor is True:
+        processor = default_process
+
     if score_cutoff is not None:
         score_cutoff /= 100
 
