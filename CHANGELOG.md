@@ -12,6 +12,7 @@
 - fix implementation of Hamming.normalized_similarity
 - fix default score_cutoff of Hamming.similarity
 - fix implementation of LCSseq.distance when used in the process module
+- treat hash for -1 and -2 as different
 
 ### [2.0.15] - 2022-06-24
 #### Fixed

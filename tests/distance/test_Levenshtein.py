@@ -60,6 +60,7 @@ def test_cross_type_matching():
     assert Levenshtein.distance("aaaa", ["a", "a", "a", "a"]) == 0
     # todo add support in pure python
     assert Levenshtein_cpp.distance("aaaa", [ord("a"), ord("a"), "a", "a"]) == 0
+    assert Levenshtein_cpp.distance([0, -1], [0, -2]) == 1
 
 
 def test_word_error_rate():
