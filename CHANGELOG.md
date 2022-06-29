@@ -1,5 +1,9 @@
 ## Changelog
 
+### [2.1.1] - 2022-06-30
+#### Changed
+- allow installation without the C++ extension if it fails to compile
+
 ### [2.1.0] - 2022-06-29
 #### Added
 - added pure python fallback for all implementations with the following exceptions:
