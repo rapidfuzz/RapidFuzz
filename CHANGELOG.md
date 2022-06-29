@@ -1,6 +1,6 @@
 ## Changelog
 
-### [2.1.0] - 2022-
+### [2.1.0] - 2022-06-29
 #### Added
 - added pure python fallback for all implementations with the following exceptions:
   - no support for sequences of hashables. Only strings supported so far
