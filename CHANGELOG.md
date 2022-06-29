@@ -9,6 +9,9 @@
 
 #### Fixed
 - fuzz.partial_ratio_alignment ignored the score_cutoff
+- fix implementation of Hamming.normalized_similarity
+- fix default score_cutoff of Hamming.similarity
+- fix implementation of LCSseq.distance when used in the process module
 
 ### [2.0.15] - 2022-06-24
 #### Fixed

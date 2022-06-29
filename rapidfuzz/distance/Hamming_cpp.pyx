@@ -103,7 +103,7 @@ def similarity(s1, s2, *, processor=None, score_cutoff=None):
     ValueError
         If s1 and s2 have a different length
     """
-    cdef int64_t c_score_cutoff = INT64_MAX if score_cutoff is None else score_cutoff
+    cdef int64_t c_score_cutoff = 0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
     if c_score_cutoff < 0:
@@ -187,7 +187,7 @@ def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
         raise ValueError("score_cutoff has to be >= 0")
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
-    return hamming_normalized_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+    return hamming_normalized_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
 cdef bool NoKwargsInit(RF_Kwargs* self, dict kwargs) except False:
