@@ -3,6 +3,8 @@
 ### [2.1.1] - 2022-06-30
 #### Changed
 - allow installation without the C++ extension if it fails to compile
+- allow selection of implementation via the environment variable `RAPIDFUZZ_IMPLEMENTATION`
+  which can be set to "cpp" or "python"
 
 ### [2.1.0] - 2022-06-29
 #### Added

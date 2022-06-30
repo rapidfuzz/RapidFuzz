@@ -1,16 +1,10 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
-try:
-    from .Hamming_cpp import (
-        distance,
-        similarity,
-        normalized_distance,
-        normalized_similarity,
-    )
-except ImportError:
-    from .Hamming_py import (
-        distance,
-        similarity,
-        normalized_distance,
-        normalized_similarity,
-    )
+
+from rapidfuzz.utils import _fallback_import
+
+_mod = "rapidfuzz.distance.Hamming"
+distance = _fallback_import(_mod, "distance")
+similarity = _fallback_import(_mod, "similarity")
+normalized_distance = _fallback_import(_mod, "normalized_distance")
+normalized_similarity = _fallback_import(_mod, "normalized_similarity")
