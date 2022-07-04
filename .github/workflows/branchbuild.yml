@@ -22,8 +22,8 @@ jobs:
 
       - name: Generate cython
         run: |
-          chmod +x ./rapidfuzz/generate.sh
-          ./rapidfuzz/generate.sh
+          chmod +x ./src/rapidfuzz/generate.sh
+          ./src/rapidfuzz/generate.sh
 
       - name: build
         run: |
