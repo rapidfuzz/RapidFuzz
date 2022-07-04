@@ -20,7 +20,7 @@ find_package(PythonExtensions REQUIRED)
 find_package(Python COMPONENTS Interpreter Development)
 include(FetchContent)
 
-set(RF_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(RF_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 find_package(Taskflow 3.0.0 QUIET)
 if (NOT Taskflow_FOUND)
@@ -53,5 +53,5 @@ else()
     add_subdirectory(extern/jarowinkler-cpp)
 endif()
 
-add_subdirectory(rapidfuzz)
-add_subdirectory(rapidfuzz/distance)
+add_subdirectory(src/rapidfuzz)
+add_subdirectory(src/rapidfuzz/distance)

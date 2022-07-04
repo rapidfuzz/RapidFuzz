@@ -11,8 +11,8 @@ with open('README.md', 'rt', encoding="utf8") as f:
 
 setup_args = {
     "name": "rapidfuzz",
-    "version": "2.1.1",
-    "install_requires": ["jarowinkler >= 1.0.3, < 1.1.0"],
+    "version": "2.1.2",
+    "install_requires": ["jarowinkler >= 1.1.0, < 2.0.0"],
     "extras_require": {'full': ['numpy']},
     "url": "https://github.com/maxbachmann/RapidFuzz",
     "author": "Max Bachmann",
@@ -33,9 +33,13 @@ setup_args = {
     ],
 
     "packages": ["rapidfuzz", "rapidfuzz/distance"],
+    "package_dir": {
+        'rapidfuzz': 'src/rapidfuzz',
+        "rapidfuzz/distance": 'src/rapidfuzz/distance'
+    },
     "package_data": {
-        "rapidfuzz": ["*.pyi", "py.typed"],
-        "rapidfuzz/distance": ["*.pyi"]
+        "src/rapidfuzz": ["*.pyi", "py.typed"],
+        "src/rapidfuzz/distance": ["*.pyi"]
     },
     "python_requires": ">=3.6"
 }

@@ -1,5 +1,9 @@
 ## Changelog
 
+### [2.1.2] - 2022-07-04
+#### Changed
+- change src layout to make package import from root directory possible
+
 ### [2.1.1] - 2022-06-30
 #### Changed
 - allow installation without the C++ extension if it fails to compile
