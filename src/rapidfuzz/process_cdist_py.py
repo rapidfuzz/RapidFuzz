@@ -53,10 +53,7 @@ def cdist(
         Optional callable that is used to preprocess the strings before
         comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : Any, optional
-        Optional argument for a score threshold. When an edit distance is used this represents the maximum
-        edit distance and matches with a `distance <= score_cutoff` are inserted as -1. When a
-        normalized edit distance is used this represents the minimal similarity
-        and matches with a `similarity >= score_cutoff` are inserted as 0.
+        Optional argument for a score threshold to be passed to the scorer.
         Default is None, which deactivates this behaviour.
     dtype : data-type, optional
         The desired data-type for the result array.Depending on the scorer type the following

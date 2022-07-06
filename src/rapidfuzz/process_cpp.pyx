@@ -558,8 +558,7 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
         Optional argument for a score threshold. When an edit distance is used this represents the maximum
         edit distance and matches with a `distance <= score_cutoff` are ignored. When a
         normalized edit distance is used this represents the minimal similarity
-        and matches with a `similarity >= score_cutoff` are ignored. For edit distances this defaults to
-        -1, while for normalized edit distances this defaults to 0.0, which deactivates this behaviour.
+        and matches with a `similarity >= score_cutoff` are ignored. Default is None, which deactivates this behaviour.
     **kwargs : Any, optional
         any other named parameters are passed to the scorer. This can be used to pass
         e.g. weights to string_metric.levenshtein
@@ -923,8 +922,7 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
         Optional argument for a score threshold. When an edit distance is used this represents the maximum
         edit distance and matches with a `distance <= score_cutoff` are ignored. When a
         normalized edit distance is used this represents the minimal similarity
-        and matches with a `similarity >= score_cutoff` are ignored. For edit distances this defaults to
-        -1, while for normalized edit distances this defaults to 0.0, which deactivates this behaviour.
+        and matches with a `similarity >= score_cutoff` are ignored. Default is None, which deactivates this behaviour.
     **kwargs : Any, optional
         any other named parameters are passed to the scorer. This can be used to pass
         e.g. weights to string_metric.levenshtein
@@ -1030,8 +1028,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         Optional argument for a score threshold. When an edit distance is used this represents the maximum
         edit distance and matches with a `distance <= score_cutoff` are ignored. When a
         normalized edit distance is used this represents the minimal similarity
-        and matches with a `similarity >= score_cutoff` are ignored. For edit distances this defaults to
-        -1, while for normalized edit distances this defaults to 0.0, which deactivates this behaviour.
+        and matches with a `similarity >= score_cutoff` are ignored. Default is None, which deactivates this behaviour.
     **kwargs : Any, optional
         any other named parameters are passed to the scorer. This can be used to pass
         e.g. weights to string_metric.levenshtein

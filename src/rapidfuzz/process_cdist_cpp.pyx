@@ -178,11 +178,6 @@ cdef cdist_py(queries, choices, scorer, processor, score_cutoff, dtype, workers,
     c_dtype = dtype_to_type_num_f64(dtype)
     matrix = PyArray_SimpleNew(2, dims, c_dtype)
 
-    if score_cutoff is None:
-        score_cutoff = 0
-    elif score_cutoff < 0 or score_cutoff > 100:
-        raise TypeError("score_cutoff has to be in the range of 0.0 - 100.0")
-
     kwargs["processor"] = None
     kwargs["score_cutoff"] = score_cutoff
 
@@ -218,10 +213,7 @@ def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, 
         Optional callable that is used to preprocess the strings before
         comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : Any, optional
-        Optional argument for a score threshold. When an edit distance is used this represents the maximum
-        edit distance and matches with a `distance <= score_cutoff` are inserted as -1. When a
-        normalized edit distance is used this represents the minimal similarity
-        and matches with a `similarity >= score_cutoff` are inserted as 0.
+        Optional argument for a score threshold to be passed to the scorer.
         Default is None, which deactivates this behaviour.
     dtype : data-type, optional
         The desired data-type for the result array.Depending on the scorer type the following
