@@ -57,7 +57,7 @@
 - Allow installation from system installed versions of `rapidfuzz-cpp`, `jarowinkler-cpp`
   and `taskflow`
 
-## Added
+#### Added
 - Added PyPy3.9 wheels on Linux
 
 ### [2.0.9] - 2022-04-07
