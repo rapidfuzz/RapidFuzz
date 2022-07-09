@@ -4,9 +4,8 @@ include CMakeLists.txt
 include README.md
 include LICENSE
 include pyproject.toml
-include src/rapidfuzz/*.pyi
-include src/rapidfuzz/**/*.pyi
 include src/rapidfuzz/py.typed
+recursive-include src/rapidfuzz *.pyi
 
 recursive-include src/rapidfuzz CMakeLists.txt
 recursive-include src/rapidfuzz *.hpp *.h *.cpp *.cxx *.pyx *.pxd

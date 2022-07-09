@@ -32,14 +32,14 @@ setup_args = {
         "License :: OSI Approved :: MIT License"
     ],
 
-    "packages": ["rapidfuzz", "rapidfuzz/distance"],
+    "packages": ["rapidfuzz", "rapidfuzz.distance"],
     "package_dir": {
         'rapidfuzz': 'src/rapidfuzz',
-        "rapidfuzz/distance": 'src/rapidfuzz/distance'
+        "rapidfuzz.distance": 'src/rapidfuzz/distance'
     },
     "package_data": {
-        "src/rapidfuzz": ["*.pyi", "py.typed"],
-        "src/rapidfuzz/distance": ["*.pyi"]
+        "rapidfuzz": ["*.pyi", "py.typed"],
+        "rapidfuzz.distance": ["*.pyi"]
     },
     "python_requires": ">=3.6"
 }
