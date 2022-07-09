@@ -35,7 +35,6 @@ setup_args = {
     "packages": ["rapidfuzz", "rapidfuzz.distance"],
     "package_dir": {
         'rapidfuzz': 'src/rapidfuzz',
-        "rapidfuzz.distance": 'src/rapidfuzz/distance'
     },
     "package_data": {
         "rapidfuzz": ["*.pyi", "py.typed"],
