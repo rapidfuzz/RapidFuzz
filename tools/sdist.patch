@@ -1,9 +1,9 @@
 diff --git a/pyproject.toml b/pyproject.toml
-index cf7722b..fbf0759 100644
+index 15b6c69..568eada 100644
 --- a/pyproject.toml
 +++ b/pyproject.toml
-@@ -5,7 +5,6 @@ requires = [
-     "cmake; platform_machine not in 'armv7l|armv6l|arm64|aarch64'",
+@@ -4,7 +4,6 @@ requires = [
+     "scikit-build>=0.13.0",
      "ninja; platform_system!='Windows' and platform_machine not in 'armv7l|armv6l|arm64|aarch64'",
      "oldest-supported-numpy",
 -    "Cython==3.0.0a10",

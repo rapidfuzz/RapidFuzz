@@ -1,4 +1,5 @@
 import os
+import setuptools
 
 def show_message(*lines):
     print("=" * 74)
@@ -45,12 +46,18 @@ setup_args = {
 
 def run_setup(with_binary):
     if with_binary:
+        import platform
         from skbuild import setup
         import rapidfuzz_capi
         import numpy as np
 
+        setup_requires = []
+        if platform.machine() not in {"armv7l", "armv6l", "arm64", "aarch64"}:
+            setup_requires.append("cmake"),
+
         setup(
             **setup_args,
+            setup_requires=setup_requires,
             cmake_args=[
                 f'-DRF_CAPI_PATH:STRING={rapidfuzz_capi.get_include()}',
                 f'-DNumPy_INCLUDE_DIR:STRING={np.get_include()}'
@@ -71,6 +78,8 @@ if packaging:
 else:
     try:
         run_setup(True)
+    except setuptools.build_meta.SetupRequirementsError as e:
+        raise ValueError
     except:
         show_message(
             "WARNING: The C extension could not be compiled, speedups"
