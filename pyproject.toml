@@ -4,7 +4,6 @@ requires = [
     "scikit-build>=0.13.0",
     "cmake; platform_machine not in 'armv7l|armv6l|arm64|aarch64'",
     "ninja; platform_system!='Windows' and platform_machine not in 'armv7l|armv6l|arm64|aarch64'",
-    "oldest-supported-numpy",
     "Cython==3.0.0a10",
     "rapidfuzz_capi==1.0.5",
     "typing_extensions"

@@ -1,6 +1,5 @@
 #pragma once
 #include "process_cpp.hpp"
-#include "numpy/ndarraytypes.h"
 #include "taskflow/taskflow.hpp"
 #include "rapidfuzz_capi.h"
 #include <exception>
@@ -16,47 +15,153 @@ int64_t any_round(int64_t score)
     return score;
 }
 
-template <typename T>
-void set_score(PyArrayObject* matrix, int dtype, npy_intp row, npy_intp col, T score)
+enum class MatrixType
 {
-    void* data = PyArray_GETPTR2(matrix, row, col);
-    switch (dtype)
+    UNDEFINED,
+    FLOAT32,
+    FLOAT64,
+    INT8,
+    INT16,
+    INT32,
+    INT64,
+    UINT8,
+    UINT16,
+    UINT32,
+    UINT64,
+};
+
+struct Matrix
+{
+    MatrixType m_dtype;
+    size_t m_rows;
+    size_t m_cols;
+    void* m_matrix;
+
+    Matrix() : m_dtype(MatrixType::FLOAT32), m_rows(0), m_cols(0), m_matrix(nullptr) {}
+
+    Matrix(MatrixType dtype, size_t rows, size_t cols)
+        : m_dtype(dtype), m_rows(rows), m_cols(cols)
     {
-    case NPY_FLOAT32:
-        *((float*)data) = (float)score;
-        break;
-    case NPY_FLOAT64:
-        *((double*)data) = (double)score;
-        break;
-    case NPY_INT8:
-        *((int8_t*)data) = (int8_t)any_round(score);
-        break;
-    case NPY_INT16:
-        *((int16_t*)data) = (int16_t)any_round(score);
-        break;
-    case NPY_INT32:
-        *((int32_t*)data) = (int32_t)any_round(score);
-        break;
-    case NPY_INT64:
-        *((int64_t*)data) = any_round(score);
-        break;
-    case NPY_UINT8:
-        *((uint8_t*)data) = (uint8_t)any_round(score);
-        break;
-    case NPY_UINT16:
-        *((uint16_t*)data) = (uint16_t)any_round(score);
-        break;
-    case NPY_UINT32:
-        *((uint32_t*)data) = (uint32_t)any_round(score);
-        break;
-    case NPY_UINT64:
-        *((uint64_t*)data) = (uint64_t)any_round(score);
-        break;
-    default:
-        assert(false);
-        break;
+        
+        m_matrix = malloc(get_dtype_size() * m_rows * m_cols);
+        if (m_matrix == nullptr)
+            throw std::bad_alloc();
     }
-}
+
+    Matrix(const Matrix& other) : m_dtype(other.m_dtype), m_rows(other.m_rows), m_cols(other.m_cols) 
+    {
+        m_matrix = malloc(get_dtype_size() * m_rows * m_cols);
+        if (m_matrix == nullptr)
+            throw std::bad_alloc();
+
+        memcpy(m_matrix, other.m_matrix, get_dtype_size() * m_rows * m_cols);
+    }
+
+    Matrix(Matrix&& other) noexcept : m_dtype(MatrixType::FLOAT32), m_rows(0), m_cols(0), m_matrix(nullptr)
+    {
+        other.swap(*this);
+    }
+
+    Matrix& operator=(Matrix other)
+    {
+        other.swap(*this);
+        return *this;
+    }
+
+    void swap(Matrix& rhs) noexcept
+    {
+        using std::swap;
+        swap(m_rows, rhs.m_rows);
+        swap(m_cols, rhs.m_cols);
+        swap(m_dtype, rhs.m_dtype);
+        swap(m_matrix, rhs.m_matrix);
+    }
+
+    ~Matrix()
+    {
+        free(m_matrix);
+    }
+
+    int get_dtype_size()
+    {
+        switch(m_dtype)
+        {
+        case MatrixType::FLOAT32: return 4;
+        case MatrixType::FLOAT64: return 8;
+        case MatrixType::INT8: return 1;
+        case MatrixType::INT16: return 2;
+        case MatrixType::INT32: return 4;
+        case MatrixType::INT64: return 8;
+        case MatrixType::UINT8: return 1;
+        case MatrixType::UINT16: return 2;
+        case MatrixType::UINT32: return 4;
+        case MatrixType::UINT64: return 8;
+        default:
+            throw std::invalid_argument("invalid dtype");
+        }
+    }
+
+    const char* get_format()
+    {
+        switch(m_dtype)
+        {
+        case MatrixType::FLOAT32: return "f";
+        case MatrixType::FLOAT64: return "d";
+        case MatrixType::INT8: return "b";
+        case MatrixType::INT16: return "h";
+        case MatrixType::INT32: return "i";
+        case MatrixType::INT64: return "q";
+        case MatrixType::UINT8: return "B";
+        case MatrixType::UINT16: return "H";
+        case MatrixType::UINT32: return "I";
+        case MatrixType::UINT64: return "Q";
+        default:
+            throw std::invalid_argument("invalid dtype");
+        }
+    }
+
+    template <typename T>
+    void set(size_t row, size_t col, T score)
+    {
+        void* data = (char*)m_matrix + get_dtype_size() * (row * m_cols + col);
+        switch(m_dtype)
+        {
+        case MatrixType::FLOAT32:
+            *((float*)data) = (float)score;
+            break;
+        case MatrixType::FLOAT64:
+            *((double*)data) = (double)score;
+            break;
+        case MatrixType::INT8:
+            *((int8_t*)data) = (int8_t)any_round(score);
+            break;
+        case MatrixType::INT16:
+            *((int16_t*)data) = (int16_t)any_round(score);
+            break;
+        case MatrixType::INT32:
+            *((int32_t*)data) = (int32_t)any_round(score);
+            break;
+        case MatrixType::INT64:
+            *((int64_t*)data) = any_round(score);
+            break;
+        case MatrixType::UINT8:
+            *((uint8_t*)data) = (uint8_t)any_round(score);
+            break;
+        case MatrixType::UINT16:
+            *((uint16_t*)data) = (uint16_t)any_round(score);
+            break;
+        case MatrixType::UINT32:
+            *((uint32_t*)data) = (uint32_t)any_round(score);
+            break;
+        case MatrixType::UINT64:
+            *((uint64_t*)data) = (uint64_t)any_round(score);
+            break;
+        default:
+            assert(false);
+            break;
+        }
+    }
+};
 
 template <typename Func>
 void run_parallel(int workers, int64_t rows, Func&& func)
@@ -106,19 +211,13 @@ void run_parallel(int workers, int64_t rows, Func&& func)
 }
 
 template <typename T>
-static PyObject* cdist_single_list_impl(
+static Matrix cdist_single_list_impl(
     const RF_Kwargs* kwargs, RF_Scorer* scorer,
-    const std::vector<RF_StringWrapper>& queries, int dtype, int workers, T score_cutoff)
+    const std::vector<RF_StringWrapper>& queries, MatrixType dtype, int workers, T score_cutoff)
 {
-    std::int64_t rows = queries.size();
-    std::int64_t cols = queries.size();
-    npy_intp dims[] = {(npy_intp)rows, (npy_intp)cols};
-    PyArrayObject* matrix = (PyArrayObject*)PyArray_SimpleNew(2, dims, dtype);
-
-    if (matrix == NULL)
-    {
-        return NULL;
-    }
+    int64_t rows = queries.size();
+    int64_t cols = queries.size();
+    Matrix matrix(dtype, static_cast<size_t>(rows), static_cast<size_t>(cols));
 
     std::exception_ptr exception = nullptr;
 
@@ -134,13 +233,13 @@ Py_BEGIN_ALLOW_THREADS
 
                 T score;
                 ScorerFunc.call(&queries[row].string, score_cutoff, &score);
-                set_score(matrix, dtype, row, row, score);
+                matrix.set(row, row, score);
 
                 for (int64_t col = row + 1; col < cols; ++col)
                 {
                     ScorerFunc.call(&queries[col].string, score_cutoff, &score);
-                    set_score(matrix, dtype, row, col, score);
-                    set_score(matrix, dtype, col, row, score);
+                    matrix.set(row, col, score);
+                    matrix.set(col, row, score);
                 }
             }
         });
@@ -155,23 +254,17 @@ Py_END_ALLOW_THREADS
         std::rethrow_exception(exception);
     }
 
-    return (PyObject*)matrix;
+    return matrix;
 }
 
 template <typename T>
-static PyObject* cdist_two_lists_impl(
+static Matrix cdist_two_lists_impl(
     const RF_Kwargs* kwargs, RF_Scorer* scorer,
-    const std::vector<RF_StringWrapper>& queries, const std::vector<RF_StringWrapper>& choices, int dtype, int workers, T score_cutoff)
+    const std::vector<RF_StringWrapper>& queries, const std::vector<RF_StringWrapper>& choices, MatrixType dtype, int workers, T score_cutoff)
 {
-    std::int64_t rows = queries.size();
-    std::int64_t cols = choices.size();
-    npy_intp dims[] = {(npy_intp)rows, (npy_intp)cols};
-    PyArrayObject* matrix = (PyArrayObject*)PyArray_SimpleNew(2, dims, dtype);
-
-    if (matrix == NULL)
-    {
-        return NULL;
-    }
+    int64_t rows = queries.size();
+    int64_t cols = choices.size();
+    Matrix matrix(dtype, static_cast<size_t>(rows), static_cast<size_t>(cols));
 
     std::exception_ptr exception = nullptr;
 
@@ -189,7 +282,7 @@ Py_BEGIN_ALLOW_THREADS
                 {
                     T score;
                     ScorerFunc.call(&choices[col].string, score_cutoff, &score);
-                    set_score(matrix, dtype, row, col, score);
+                    matrix.set(row, col, score);
                 }
             }
         });
@@ -204,5 +297,5 @@ Py_END_ALLOW_THREADS
         std::rethrow_exception(exception);
     }
 
-    return (PyObject*)matrix;
+    return matrix;
 }

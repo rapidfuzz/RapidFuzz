@@ -1,5 +1,12 @@
 ## Changelog
 
+### [2.1.4] - 2022-07-
+#### Changed
+- changed internal implementation of cdist to remove build dependency to numpy
+
+#### Added
+- added wheels for musllinux and manylinux ppc64le, s390x
+
 ### [2.1.3] - 2022-07-09
 #### Fixed
 - fix missing type stubs

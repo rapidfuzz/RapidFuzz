@@ -47,13 +47,11 @@ def run_setup(with_binary):
     if with_binary:
         from skbuild import setup
         import rapidfuzz_capi
-        import numpy as np
 
         setup(
             **setup_args,
             cmake_args=[
-                f'-DRF_CAPI_PATH:STRING={rapidfuzz_capi.get_include()}',
-                f'-DNumPy_INCLUDE_DIR:STRING={np.get_include()}'
+                f'-DRF_CAPI_PATH:STRING={rapidfuzz_capi.get_include()}'
             ]
         )
     else:
