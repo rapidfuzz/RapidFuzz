@@ -8,83 +8,89 @@ from array import array
 from rapidfuzz import fuzz_py, fuzz_cpp, utils
 from rapidfuzz.distance import ScoreAlignment
 
+def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
+    return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
 class fuzz:
     @staticmethod
     def ratio(*args, **kwargs):
         dist1 = fuzz_cpp.ratio(*args, **kwargs)
         dist2 = fuzz_py.ratio(*args, **kwargs)
-        assert dist1 == dist2
+        assert isclose(dist1, dist2)
         return dist1
 
     @staticmethod
     def partial_ratio(*args, **kwargs):
         dist1 = fuzz_cpp.partial_ratio(*args, **kwargs)
         dist2 = fuzz_py.partial_ratio(*args, **kwargs)
-        assert dist1 == dist2
+        assert isclose(dist1, dist2)
         return dist1
 
     @staticmethod
     def partial_ratio_alignment(*args, **kwargs):
         dist1 = fuzz_cpp.partial_ratio_alignment(*args, **kwargs)
         dist2 = fuzz_py.partial_ratio_alignment(*args, **kwargs)
-        assert dist1 == dist2
+        if dist1 is None or dist2 is None:
+            assert dist1 == dist2
+        else:
+            assert isclose(dist1[0], dist2[0])
+            assert list(dist1)[1:] == list(dist2)[1:]
         return dist1
 
     @staticmethod
     def token_sort_ratio(*args, **kwargs):
         dist1 = fuzz_cpp.token_sort_ratio(*args, **kwargs)
         dist2 = fuzz_py.token_sort_ratio(*args, **kwargs)
-        assert dist1 == dist2
+        assert isclose(dist1, dist2)
         return dist1
 
     @staticmethod
     def token_set_ratio(*args, **kwargs):
         dist1 = fuzz_cpp.token_set_ratio(*args, **kwargs)
         dist2 = fuzz_py.token_set_ratio(*args, **kwargs)
-        assert dist1 == dist2
+        assert isclose(dist1, dist2)
         return dist1
 
     @staticmethod
     def token_ratio(*args, **kwargs):
         dist1 = fuzz_cpp.token_ratio(*args, **kwargs)
         dist2 = fuzz_py.token_ratio(*args, **kwargs)
-        assert dist1 == dist2
+        assert isclose(dist1, dist2)
         return dist1
 
     @staticmethod
     def partial_token_sort_ratio(*args, **kwargs):
         dist1 = fuzz_cpp.partial_token_sort_ratio(*args, **kwargs)
         dist2 = fuzz_py.partial_token_sort_ratio(*args, **kwargs)
-        assert dist1 == dist2
+        assert isclose(dist1, dist2)
         return dist1
 
     @staticmethod
     def partial_token_set_ratio(*args, **kwargs):
         dist1 = fuzz_cpp.partial_token_set_ratio(*args, **kwargs)
         dist2 = fuzz_py.partial_token_set_ratio(*args, **kwargs)
-        assert dist1 == dist2
+        assert isclose(dist1, dist2)
         return dist1
 
     @staticmethod
     def partial_token_ratio(*args, **kwargs):
         dist1 = fuzz_cpp.partial_token_ratio(*args, **kwargs)
         dist2 = fuzz_py.partial_token_ratio(*args, **kwargs)
-        assert dist1 == dist2
+        assert isclose(dist1, dist2)
         return dist1
 
     @staticmethod
     def WRatio(*args, **kwargs):
         dist1 = fuzz_cpp.WRatio(*args, **kwargs)
         dist2 = fuzz_py.WRatio(*args, **kwargs)
-        assert dist1 == dist2
+        assert isclose(dist1, dist2)
         return dist1
 
     @staticmethod
     def QRatio(*args, **kwargs):
         dist1 = fuzz_cpp.QRatio(*args, **kwargs)
         dist2 = fuzz_py.QRatio(*args, **kwargs)
-        assert dist1 == dist2
+        assert isclose(dist1, dist2)
         return dist1
 
 

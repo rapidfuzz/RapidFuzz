@@ -11,7 +11,7 @@ with open('README.md', 'rt', encoding="utf8") as f:
 
 setup_args = {
     "name": "rapidfuzz",
-    "version": "2.1.3",
+    "version": "2.1.4",
     "install_requires": ["jarowinkler >= 1.1.0, < 2.0.0"],
     "extras_require": {'full': ['numpy']},
     "url": "https://github.com/maxbachmann/RapidFuzz",
@@ -47,13 +47,11 @@ def run_setup(with_binary):
     if with_binary:
         from skbuild import setup
         import rapidfuzz_capi
-        import numpy as np
 
         setup(
             **setup_args,
             cmake_args=[
-                f'-DRF_CAPI_PATH:STRING={rapidfuzz_capi.get_include()}',
-                f'-DNumPy_INCLUDE_DIR:STRING={np.get_include()}'
+                f'-DRF_CAPI_PATH:STRING={rapidfuzz_capi.get_include()}'
             ]
         )
     else:
