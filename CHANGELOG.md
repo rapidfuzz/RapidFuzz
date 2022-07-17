@@ -1,5 +1,10 @@
 ## Changelog
 
+### [2.2.0] - 2022-07-
+#### Changed
+- added in-tree build backend to install cmake and ninja only when it is not installed yet
+  and only when wheels are available
+
 ### [2.1.4] - 2022-07-17
 #### Changed
 - changed internal implementation of cdist to remove build dependency to numpy
