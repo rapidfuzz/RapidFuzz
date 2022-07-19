@@ -1,6 +1,6 @@
 ## Changelog
 
-### [2.2.0] - 2022-07-
+### [2.2.0] - 2022-07-19
 #### Changed
 - added in-tree build backend to install cmake and ninja only when it is not installed yet
   and only when wheels are available
