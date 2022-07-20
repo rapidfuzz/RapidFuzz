@@ -18,78 +18,78 @@ from rapidfuzz.fuzz import WRatio, ratio
 
 _StringType = Sequence[Hashable]
 _AnyStringType = TypeVar("_AnyStringType", bound=_StringType)
-S1 = TypeVar("S1")
-S2 = TypeVar("S2")
+_S1 = TypeVar("_S1")
+_S2 = TypeVar("_S2")
 _ResultType = Union[int, float]
 
 @overload
 def extractOne(
-    query: S1,
-    choices: Iterable[S2],
+    query: _S1,
+    choices: Iterable[_S2],
     *,
     scorer: Callable[..., _ResultType] = WRatio,
     processor: Optional[Callable[..., _StringType]] = None,
     score_cutoff: Optional[_ResultType] = None,
     **kwargs: Any
-) -> Tuple[S2, _ResultType, int]: ...
+) -> Tuple[_S2, _ResultType, int]: ...
 @overload
 def extractOne(
-    query: S1,
-    choices: Mapping[Any, S2],
+    query: _S1,
+    choices: Mapping[Any, _S2],
     *,
     scorer: Callable[..., _ResultType] = WRatio,
     processor: Optional[Callable[..., _StringType]] = None,
     score_cutoff: Optional[_ResultType] = None,
     **kwargs: Any
-) -> Tuple[S2, _ResultType, Any]: ...
+) -> Tuple[_S2, _ResultType, Any]: ...
 @overload
 def extract(
-    query: S1,
-    choices: Collection[S2],
+    query: _S1,
+    choices: Collection[_S2],
     *,
     scorer: Callable[..., _ResultType] = WRatio,
     processor: Optional[Callable[..., _StringType]] = None,
     limit: Optional[int] = None,
     score_cutoff: Optional[_ResultType] = None,
     **kwargs: Any
-) -> List[Tuple[S2, _ResultType, int]]: ...
+) -> List[Tuple[_S2, _ResultType, int]]: ...
 @overload
 def extract(
-    query: S1,
-    choices: Mapping[Any, S2],
+    query: _S1,
+    choices: Mapping[Any, _S2],
     *,
     scorer: Callable[..., _ResultType] = WRatio,
     processor: Optional[Callable[..., _StringType]] = None,
     score_cutoff: Optional[_ResultType] = None,
     **kwargs: Any
-) -> List[Tuple[S2, _ResultType, Any]]: ...
+) -> List[Tuple[_S2, _ResultType, Any]]: ...
 @overload
 def extract_iter(
-    query: S1,
-    choices: Iterable[S2],
+    query: _S1,
+    choices: Iterable[_S2],
     *,
     scorer: Callable[..., _ResultType] = WRatio,
     processor: Optional[Callable[..., _StringType]] = None,
     score_cutoff: Optional[_ResultType] = None,
     **kwargs: Any
-) -> Generator[Tuple[S2, _ResultType, int], None, None]: ...
+) -> Generator[Tuple[_S2, _ResultType, int], None, None]: ...
 @overload
 def extract_iter(
-    query: S1,
-    choices: Mapping[Any, S2],
+    query: _S1,
+    choices: Mapping[Any, _S2],
     *,
     scorer: Callable[..., _ResultType] = WRatio,
     processor: Optional[Callable[..., _StringType]] = None,
     score_cutoff: Optional[_ResultType] = None,
     **kwargs: Any
-) -> Generator[Tuple[S2, _ResultType, Any], None, None]: ...
+) -> Generator[Tuple[_S2, _ResultType, Any], None, None]: ...
 
 try:
     import numpy as np
 
     def cdist(
-        queries: Iterable[S1],
-        choices: Iterable[S2],
+        queries: Iterable[_S1],
+        choices: Iterable[_S2],
         *,
         scorer: Callable[..., _ResultType] = ratio,
         processor: Optional[Callable[..., _StringType]] = None,

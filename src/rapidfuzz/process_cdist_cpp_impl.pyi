@@ -11,8 +11,8 @@ from typing import (
 from rapidfuzz.fuzz import ratio
 
 _StringType = Sequence[Hashable]
-S1 = TypeVar("S1")
-S2 = TypeVar("S2")
+_S1 = TypeVar("_S1")
+_S2 = TypeVar("_S2")
 _ResultType = Union[int, float]
 
 FLOAT32: int
@@ -30,8 +30,8 @@ try:
     import numpy as np
 
     def cdist(
-        queries: Iterable[S1],
-        choices: Iterable[S2],
+        queries: Iterable[_S1],
+        choices: Iterable[_S2],
         *,
         scorer: Callable[..., _ResultType] = ratio,
         processor: Optional[Callable[..., _StringType]] = None,
