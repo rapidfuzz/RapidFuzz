@@ -4,6 +4,9 @@
 #### Changed
 - merge adjacent similar blocks in `rapidfuzz.distance.Opcodes`
 
+#### Fixed
+- fix usage of `eval(repr(Editop))` and `eval(repr(Opcode))`
+
 ### [2.2.0] - 2022-07-19
 #### Changed
 - added in-tree build backend to install cmake and ninja only when it is not installed yet

@@ -211,7 +211,7 @@ cdef class Editop:
         raise IndexError('Editop index out of range')
 
     def __repr__(self):
-        return f"Editop(tag={self.tag}, src_pos={self.src_pos}, dest_pos={self.dest_pos})"
+        return f"Editop(tag='{self.tag}', src_pos={self.src_pos}, dest_pos={self.dest_pos})"
 
 cdef class Editops:
     """
@@ -408,7 +408,7 @@ cdef class Opcode:
         raise IndexError('Opcode index out of range')
 
     def __repr__(self):
-        return f"Opcode(tag={self.tag}, src_start={self.src_start}, src_end={self.src_end}, dest_start={self.dest_start}, dest_end={self.dest_end})"
+        return f"Opcode(tag='{self.tag}', src_start={self.src_start}, src_end={self.src_end}, dest_start={self.dest_start}, dest_end={self.dest_end})"
 
 cdef class Opcodes:
     """
