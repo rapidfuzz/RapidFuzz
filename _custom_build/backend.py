@@ -65,12 +65,13 @@ def _ninja_required():
         print("Ninja is part of the MSVC installation on Windows")
         return False
 
-    try:
-        _subprocess.check_output(["ninja", '--version'])
-        print("Using System version of Ninja")
-        return False
-    except (OSError, _subprocess.CalledProcessError):
-        pass
+    for generator in ("ninja", "make"):
+        try:
+            _subprocess.check_output([generator, '--version'])
+            print(f"Using System version of {generator}")
+            return False
+        except (OSError, _subprocess.CalledProcessError):
+            pass
 
     for tag in _sys_tags():
         if tag.platform in ninja_wheels:
