@@ -4,7 +4,7 @@
 import unittest
 import pytest
 
-from rapidfuzz.distance import Levenshtein, Editops, Opcodes
+from rapidfuzz.distance import Levenshtein, Editops, Opcodes, Editop, Opcode
 
 
 def test_editops_comparision():
@@ -192,6 +192,19 @@ def test_list_initialization():
     ops = Levenshtein.editops("skdsakldsakdlasda", "djkajkdfkdgkhdfjrmecsidjf")
     ops2 = Opcodes(ops.as_list(), ops.src_len, ops.dest_len)
     assert ops.as_opcodes() == ops2
+
+
+def test_merge_adjacent_blocks():
+    """
+    test whether adjacent blocks are merged
+    """
+    ops1 = [Opcode(tag="equal", src_start=0, src_end=3, dest_start=0, dest_end=3)]
+    ops2 = [
+        Opcode(tag="equal", src_start=0, src_end=1, dest_start=0, dest_end=1),
+        Opcode(tag="equal", src_start=1, src_end=3, dest_start=1, dest_end=3),
+    ]
+    assert Opcodes(ops1, 3, 3) == Opcodes(ops2, 3, 3)
+    assert Opcodes(ops2, 3, 3) == Opcodes(ops2, 3, 3).as_editops().as_opcodes()
 
 
 if __name__ == "__main__":

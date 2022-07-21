@@ -122,6 +122,13 @@ cdef RfOpcodes list_to_opcodes(ops, Py_ssize_t src_len, Py_ssize_t dest_len) exc
             if src_start == src_end or dest_start != dest_end:
                 raise ValueError("List of edit operations invalid")
 
+        # merge similar adjacent blocks
+        if not result.empty():
+            if result.back().type == edit_type and result.back().src_end == src_start and result.back().dest_end == dest_start:
+                result.back().src_end = src_end
+                result.back().dest_end = dest_end
+                continue
+
         result.emplace_back(edit_type, src_start, src_end, dest_start, dest_end)
 
     # check if edit operations span the complete string
@@ -129,10 +136,11 @@ cdef RfOpcodes list_to_opcodes(ops, Py_ssize_t src_len, Py_ssize_t dest_len) exc
         raise ValueError("List of edit operations does not start at position 0")
     if result.back().src_end != src_len or result.back().dest_end != dest_len:
         raise ValueError("List of edit operations does not end at the string ends")
-    for i in range(0, ops_len - 1):
+    for i in range(0, result.size() - 1):
         if result[i + 1].src_begin != result[i].src_end or result[i + 1].dest_begin != result[i].dest_end:
             raise ValueError("List of edit operations is not continuous")
 
+    result.shrink_to_fit()
     return result
 
 cdef list editops_to_list(const RfEditops& ops):

@@ -86,6 +86,8 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
         void emplace_back(...)
         void reserve(int64_t) except +
         RfOpcode& back() except +
+        void shrink_to_fit() except +
+        bint empty()
 
 cdef extern from "cpp_common.hpp":
     cdef cppclass RF_StringWrapper:

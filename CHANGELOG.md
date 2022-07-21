@@ -1,5 +1,9 @@
 ## Changelog
 
+### [2.3.0] - 2022-07-
+#### Changed
+- merge adjacent similar blocks in `rapidfuzz.distance.Opcodes`
+
 ### [2.2.0] - 2022-07-19
 #### Changed
 - added in-tree build backend to install cmake and ninja only when it is not installed yet
