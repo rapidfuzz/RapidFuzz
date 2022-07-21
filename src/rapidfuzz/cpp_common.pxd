@@ -44,6 +44,60 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
     cdef cppclass RfOpcodes "rapidfuzz::Opcodes"
 
     cdef cppclass RfEditops "rapidfuzz::Editops":
+        ctypedef size_t size_type
+        ctypedef ptrdiff_t difference_type
+
+        cppclass iterator:
+            iterator() except +
+            iterator(iterator&) except +
+            RfEditOp& operator*()
+            iterator operator++()
+            iterator operator--()
+            iterator operator++(int)
+            iterator operator--(int)
+            iterator operator+(size_type)
+            iterator operator-(size_type)
+            difference_type operator-(iterator)
+            difference_type operator-(const_iterator)
+            bint operator==(iterator)
+            bint operator==(const_iterator)
+            bint operator!=(iterator)
+            bint operator!=(const_iterator)
+            bint operator<(iterator)
+            bint operator<(const_iterator)
+            bint operator>(iterator)
+            bint operator>(const_iterator)
+            bint operator<=(iterator)
+            bint operator<=(const_iterator)
+            bint operator>=(iterator)
+            bint operator>=(const_iterator)
+        cppclass const_iterator:
+            const_iterator() except +
+            const_iterator(iterator&) except +
+            const_iterator(const_iterator&) except +
+            operator=(iterator&) except +
+            const RfEditOp& operator*()
+            const_iterator operator++()
+            const_iterator operator--()
+            const_iterator operator++(int)
+            const_iterator operator--(int)
+            const_iterator operator+(size_type)
+            const_iterator operator-(size_type)
+            difference_type operator-(iterator)
+            difference_type operator-(const_iterator)
+            bint operator==(iterator)
+            bint operator==(const_iterator)
+            bint operator!=(iterator)
+            bint operator!=(const_iterator)
+            bint operator<(iterator)
+            bint operator<(const_iterator)
+            bint operator>(iterator)
+            bint operator>(const_iterator)
+            bint operator<=(iterator)
+            bint operator<=(const_iterator)
+            bint operator>=(iterator)
+            bint operator>=(const_iterator)
+
         RfEditops() except +
         RfEditops(int64_t) except +
         RfEditops(const RfEditops&) except +
@@ -61,6 +115,9 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
         void emplace_back(...)
         void reserve(int64_t) except +
 
+        iterator begin()
+        iterator erase(iterator)
+
     ctypedef struct RfOpcode "rapidfuzz::Opcode":
         EditType type
         int64_t src_begin
@@ -69,6 +126,60 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
         int64_t dest_end
 
     cdef cppclass RfOpcodes "rapidfuzz::Opcodes":
+        ctypedef size_t size_type
+        ctypedef ptrdiff_t difference_type
+
+        cppclass iterator:
+            iterator() except +
+            iterator(iterator&) except +
+            RfOpcode& operator*()
+            iterator operator++()
+            iterator operator--()
+            iterator operator++(int)
+            iterator operator--(int)
+            iterator operator+(size_type)
+            iterator operator-(size_type)
+            difference_type operator-(iterator)
+            difference_type operator-(const_iterator)
+            bint operator==(iterator)
+            bint operator==(const_iterator)
+            bint operator!=(iterator)
+            bint operator!=(const_iterator)
+            bint operator<(iterator)
+            bint operator<(const_iterator)
+            bint operator>(iterator)
+            bint operator>(const_iterator)
+            bint operator<=(iterator)
+            bint operator<=(const_iterator)
+            bint operator>=(iterator)
+            bint operator>=(const_iterator)
+        cppclass const_iterator:
+            const_iterator() except +
+            const_iterator(iterator&) except +
+            const_iterator(const_iterator&) except +
+            operator=(iterator&) except +
+            const RfOpcode& operator*()
+            const_iterator operator++()
+            const_iterator operator--()
+            const_iterator operator++(int)
+            const_iterator operator--(int)
+            const_iterator operator+(size_type)
+            const_iterator operator-(size_type)
+            difference_type operator-(iterator)
+            difference_type operator-(const_iterator)
+            bint operator==(iterator)
+            bint operator==(const_iterator)
+            bint operator!=(iterator)
+            bint operator!=(const_iterator)
+            bint operator<(iterator)
+            bint operator<(const_iterator)
+            bint operator>(iterator)
+            bint operator>(const_iterator)
+            bint operator<=(iterator)
+            bint operator<=(const_iterator)
+            bint operator>=(iterator)
+            bint operator>=(const_iterator)
+
         RfOpcodes() except +
         RfOpcodes(int64_t) except +
         RfOpcodes(const RfOpcodes&) except +
@@ -88,6 +199,9 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
         RfOpcode& back() except +
         void shrink_to_fit() except +
         bint empty()
+
+        iterator begin()
+        iterator erase(iterator)
 
 cdef extern from "cpp_common.hpp":
     cdef cppclass RF_StringWrapper:

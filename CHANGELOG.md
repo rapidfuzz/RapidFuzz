@@ -1,8 +1,11 @@
 ## Changelog
 
 ### [2.3.0] - 2022-07-
+#### Added
+- add support for deletions from `Editops`/`Opcodes`
+
 #### Changed
-- merge adjacent similar blocks in `rapidfuzz.distance.Opcodes`
+- merge adjacent similar blocks in `Opcodes`
 
 #### Fixed
 - fix usage of `eval(repr(Editop))` and `eval(repr(Opcode))`

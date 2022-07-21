@@ -207,5 +207,22 @@ def test_merge_adjacent_blocks():
     assert Opcodes(ops2, 3, 3) == Opcodes(ops2, 3, 3).as_editops().as_opcodes()
 
 
+def test_deletions():
+    """
+    test whether deletions from Editops / Opcodes are possible
+    """
+    ops = [
+        Opcode(tag="equal", src_start=0, src_end=1, dest_start=0, dest_end=1),
+        Opcode(tag="replace", src_start=1, src_end=3, dest_start=1, dest_end=3),
+    ]
+    opcodes = Opcodes(ops, 3, 3)
+    del opcodes[0]
+    assert opcodes[0] == ops[1]
+
+    editops = Editops(ops, 3, 3)
+    editop = editops[1]
+    del editops[0]
+    assert editops[0] == editop
+
 if __name__ == "__main__":
     unittest.main()
