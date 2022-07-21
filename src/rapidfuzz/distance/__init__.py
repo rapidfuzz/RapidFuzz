@@ -9,5 +9,6 @@ Editops = _fallback_import(_mod, "Editops")
 Opcode = _fallback_import(_mod, "Opcode")
 Opcodes = _fallback_import(_mod, "Opcodes")
 ScoreAlignment = _fallback_import(_mod, "ScoreAlignment")
+MatchingBlock = _fallback_import(_mod, "MatchingBlock")
 
 from . import Hamming, Indel, Jaro, JaroWinkler, Levenshtein, LCSseq

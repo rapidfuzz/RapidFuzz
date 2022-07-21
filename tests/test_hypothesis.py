@@ -174,6 +174,14 @@ FULL_SCORERS = [fuzz.ratio, fuzz.WRatio, fuzz.QRatio]
 
 PROCESSORS = [lambda x: x, utils.default_process]
 
+@given(s1=st.text(), s2=st.text())
+@settings(max_examples=100, deadline=None)
+def test_matching_blocks(s1, s2):
+    """
+    test correct matching block conversion
+    """
+    ops = Levenshtein_cpp.editops(s1, s2)
+    assert ops.as_matching_blocks() == ops.as_opcodes().as_matching_blocks()
 
 @given(s1=st.text(), s2=st.text())
 @settings(max_examples=100, deadline=None)

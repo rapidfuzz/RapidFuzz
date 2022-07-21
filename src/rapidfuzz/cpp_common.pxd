@@ -114,8 +114,12 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
         RfEditops reverse()
         void emplace_back(...)
         void reserve(int64_t) except +
+        void shrink_to_fit() except +
 
         iterator begin()
+        iterator end()
+        const_iterator cbegin()
+        const_iterator cend()
         iterator erase(iterator)
 
     ctypedef struct RfOpcode "rapidfuzz::Opcode":
@@ -201,6 +205,9 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
         bint empty()
 
         iterator begin()
+        iterator end()
+        const_iterator cbegin()
+        const_iterator cend()
         iterator erase(iterator)
 
 cdef extern from "cpp_common.hpp":

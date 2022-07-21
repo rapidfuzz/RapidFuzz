@@ -50,7 +50,7 @@ cdef RfEditops list_to_editops(ops, Py_ssize_t src_len, Py_ssize_t dest_len) exc
     cdef Py_ssize_t ops_len = len(ops)
     if not ops_len:
         return result
-    
+
     if len(ops[0]) == 5:
         return RfEditops(list_to_opcodes(ops, src_len, dest_len))
 
@@ -60,18 +60,22 @@ cdef RfEditops list_to_editops(ops, Py_ssize_t src_len, Py_ssize_t dest_len) exc
     for op in ops:
         if len(op) != 3:
             raise TypeError("Expected list of 3-tuples, or a list of 5-tuples")
-        
+
         edit_type = str_to_edit_type(op[0])
         src_pos = op[1]
         dest_pos = op[2]
 
         if src_pos > src_len or dest_pos > dest_len:
             raise ValueError("List of edit operations invalid")
-        
+
         if src_pos == src_len and edit_type != EditType.Insert:
             raise ValueError("List of edit operations invalid")
         elif dest_pos == dest_len and edit_type != EditType.Delete:
             raise ValueError("List of edit operations invalid")
+
+        # keep operations are not relevant in editops
+        if edit_type == EditType.None:
+            continue
 
         result.emplace_back(edit_type, src_pos, dest_pos)
 
@@ -80,6 +84,7 @@ cdef RfEditops list_to_editops(ops, Py_ssize_t src_len, Py_ssize_t dest_len) exc
         if result[i + 1].src_pos < result[i].src_pos or result[i + 1].dest_pos < result[i].dest_pos:
             raise ValueError("List of edit operations out of order")
 
+    result.shrink_to_fit()
     return result
 
 cdef RfOpcodes list_to_opcodes(ops, Py_ssize_t src_len, Py_ssize_t dest_len) except *:
@@ -164,6 +169,114 @@ cdef list opcodes_to_list(const RfOpcodes& ops):
         Py_INCREF(result_item)
         PyList_SET_ITEM(result_list, <Py_ssize_t>i, result_item)
 
+    return result_list
+
+cdef class MatchingBlock:
+    cdef public size_t a
+    cdef public size_t b
+    cdef public size_t size
+
+    def __cinit__(self, size_t a, size_t b, size_t size):
+        self.a = a
+        self.b = b
+        self.size = size
+
+    def __len__(self):
+        return 3
+
+    def __eq__(self, other):
+        if len(other) != 3:
+            return False
+
+        return (other[0] == self.a
+            and other[1] == self.b
+            and other[2] == self.size)
+
+    def __getitem__(self, Py_ssize_t i):
+        if i==0 or i==-3: return self.a
+        if i==1 or i==-2: return self.b
+        if i==2 or i==-1: return self.size
+
+        raise IndexError('MatchingBlock index out of range')
+
+    def __repr__(self):
+        return f"MatchingBlock(a={self.a}, b={self.b}, size={self.size})"
+
+cdef list editops_to_matching_blocks(const RfEditops& ops):
+    cdef MatchingBlock result_item
+    cdef Py_ssize_t block_num = 0
+    cdef size_t i = 0
+    cdef size_t j = 0
+    cdef size_t src_pos = 0
+    cdef size_t dest_pos = 0
+    for i in range(ops.size()):
+        if src_pos < ops[i].src_pos or dest_pos < ops[i].dest_pos:
+            block_num += 1
+            src_pos = ops[i].src_pos
+            dest_pos = ops[i].dest_pos
+
+        if ops[i].type == EditType.Replace:
+            src_pos += 1
+            dest_pos += 1
+        elif ops[i].type == EditType.Delete:
+            src_pos += 1
+        elif ops[i].type == EditType.Insert:
+            dest_pos += 1
+
+    if src_pos < ops.get_src_len() or dest_pos < ops.get_dest_len():
+        block_num += 1
+
+    cdef list result_list = PyList_New(block_num + 1)
+    src_pos = 0
+    dest_pos = 0
+    for i in range(ops.size()):
+        if src_pos < ops[i].src_pos or dest_pos < ops[i].dest_pos:
+            result_item = MatchingBlock(src_pos, dest_pos, ops[i].src_pos - src_pos)
+            Py_INCREF(result_item)
+            PyList_SET_ITEM(result_list, <Py_ssize_t>j, result_item)
+            j += 1
+            src_pos = ops[i].src_pos
+            dest_pos = ops[i].dest_pos
+
+        if ops[i].type == EditType.Replace:
+            src_pos += 1
+            dest_pos += 1
+        elif ops[i].type == EditType.Delete:
+            src_pos += 1
+        elif ops[i].type == EditType.Insert:
+            dest_pos += 1
+
+    if src_pos < ops.get_src_len() or dest_pos < ops.get_dest_len():
+        result_item = MatchingBlock(src_pos, dest_pos, ops.get_src_len() - src_pos)
+        Py_INCREF(result_item)
+        PyList_SET_ITEM(result_list, <Py_ssize_t>j, result_item)
+        j += 1
+
+    result_item = MatchingBlock(ops.get_src_len(), ops.get_dest_len(), 0)
+    Py_INCREF(result_item)
+    PyList_SET_ITEM(result_list, <Py_ssize_t>block_num, result_item)
+    return result_list
+
+cdef list opcodes_to_matching_blocks(const RfOpcodes& ops):
+    cdef MatchingBlock result_item
+    cdef Py_ssize_t block_num = 0
+    cdef size_t i = 0
+    cdef size_t j = 0
+    for i in range(ops.size()):
+        if ops[i].type == EditType.None:
+            block_num += 1
+
+    cdef list result_list = PyList_New(block_num + 1)
+    for i in range(ops.size()):
+        if ops[i].type == EditType.None:
+            result_item = MatchingBlock(ops[i].src_begin, ops[i].dest_begin, ops[i].src_end - ops[i].src_begin)
+            Py_INCREF(result_item)
+            PyList_SET_ITEM(result_list, <Py_ssize_t>j, result_item)
+            j += 1
+
+    result_item = MatchingBlock(ops.get_src_len(), ops.get_dest_len(), 0)
+    Py_INCREF(result_item)
+    PyList_SET_ITEM(result_list, <Py_ssize_t>block_num, result_item)
     return result_list
 
 cdef class Editop:
@@ -253,6 +366,17 @@ cdef class Editops:
         cdef Opcodes opcodes = Opcodes.__new__(Opcodes)
         opcodes.opcodes = RfOpcodes(self.editops)
         return opcodes
+
+    def as_matching_blocks(self):
+        """
+        Convert to matching blocks
+
+        Returns
+        -------
+        matching blocks : list[MatchingBlock]
+            Editops converted to matching blocks
+        """
+        return editops_to_matching_blocks(self.editops)
 
     def as_list(self):
         """
@@ -453,7 +577,7 @@ cdef class Opcodes:
 
     def as_editops(self):
         """
-        Convert Opcodes to Editops
+        Convert to Editops
 
         Returns
         -------
@@ -463,6 +587,17 @@ cdef class Opcodes:
         cdef Editops editops = Editops.__new__(Editops)
         editops.editops = RfEditops(self.opcodes)
         return editops
+
+    def as_matching_blocks(self):
+        """
+        Convert to matching blocks
+
+        Returns
+        -------
+        matching blocks : list[MatchingBlock]
+            Opcodes converted to matching blocks
+        """
+        return opcodes_to_matching_blocks(self.opcodes)
 
     def as_list(self):
         """
