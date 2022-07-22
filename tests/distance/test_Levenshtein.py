@@ -4,7 +4,7 @@
 import unittest
 
 from rapidfuzz import process
-from rapidfuzz.distance import Levenshtein_cpp, Levenshtein_py
+from rapidfuzz.distance import Opcodes, Opcode, Levenshtein_cpp, Levenshtein_py
 
 
 def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
@@ -124,6 +124,15 @@ def test_Editops():
     ops = Levenshtein_cpp.editops("aaabaaa", "abbaaabba")
     assert ops.src_len == 7
     assert ops.dest_len == 9
+
+
+def test_Opcodes():
+    """
+    basic test for Levenshtein_cpp.opcodes
+    """
+    assert Levenshtein_cpp.opcodes("", "abc") == Opcodes(
+        [Opcode(tag="insert", src_start=0, src_end=0, dest_start=0, dest_end=3)], 0, 3
+    )
 
 
 def test_mbleven():
