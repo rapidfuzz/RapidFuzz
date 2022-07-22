@@ -96,6 +96,8 @@ cdef RfOpcodes list_to_opcodes(ops, Py_ssize_t src_len, Py_ssize_t dest_len) exc
     cdef int64_t src_start, src_end, dest_start, dest_end
     cdef Py_ssize_t ops_len = len(ops)
     if not ops_len:
+        if src_len or dest_len:
+            raise ValueError("List of edit operations does not span the whole sequence")
         return result
 
     if len(ops[0]) == 3:

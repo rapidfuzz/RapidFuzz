@@ -10,6 +10,7 @@
 #### Fixed
 - fix usage of `eval(repr(Editop))` and `eval(repr(Opcode))`
 - fix opcode conversion for empty source sequence
+- fix validation for empty Opcode list passed into `Opcodes.__init__`
 
 ### [2.2.0] - 2022-07-19
 #### Changed

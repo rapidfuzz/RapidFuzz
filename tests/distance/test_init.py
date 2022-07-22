@@ -168,6 +168,11 @@ def test_opcode_inversion():
         ("equal", 8, 9, 6, 7),
     ]
 
+    with pytest.raises(ValueError):
+        Opcodes([], 0, 3)
+
+    assert Opcodes([], 0, 0).as_list() == []
+
 
 def test_list_initialization():
     """
@@ -205,6 +210,7 @@ def test_merge_adjacent_blocks():
     ]
     assert Opcodes(ops1, 3, 3) == Opcodes(ops2, 3, 3)
     assert Opcodes(ops2, 3, 3) == Opcodes(ops2, 3, 3).as_editops().as_opcodes()
+
 
 if __name__ == "__main__":
     unittest.main()
