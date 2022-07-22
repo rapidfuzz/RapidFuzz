@@ -211,7 +211,8 @@ cdef list editops_to_matching_blocks(const RfEditops& ops):
     cdef size_t dest_pos = 0
     for i in range(ops.size()):
         if src_pos < ops[i].src_pos or dest_pos < ops[i].dest_pos:
-            block_num += 1
+            if min(ops[i].src_pos - src_pos, ops[i].dest_pos - dest_pos) > 0:
+                block_num += 1
             src_pos = ops[i].src_pos
             dest_pos = ops[i].dest_pos
 
@@ -224,17 +225,20 @@ cdef list editops_to_matching_blocks(const RfEditops& ops):
             dest_pos += 1
 
     if src_pos < ops.get_src_len() or dest_pos < ops.get_dest_len():
-        block_num += 1
+        if min(ops.get_src_len() - src_pos, ops.get_dest_len() - dest_pos) > 0:
+            block_num += 1
 
     cdef list result_list = PyList_New(block_num + 1)
     src_pos = 0
     dest_pos = 0
     for i in range(ops.size()):
         if src_pos < ops[i].src_pos or dest_pos < ops[i].dest_pos:
-            result_item = MatchingBlock(src_pos, dest_pos, ops[i].src_pos - src_pos)
-            Py_INCREF(result_item)
-            PyList_SET_ITEM(result_list, <Py_ssize_t>j, result_item)
-            j += 1
+            length = min(ops[i].src_pos - src_pos, ops[i].dest_pos - dest_pos)
+            if length > 0:
+                result_item = MatchingBlock(src_pos, dest_pos, length)
+                Py_INCREF(result_item)
+                PyList_SET_ITEM(result_list, <Py_ssize_t>j, result_item)
+                j += 1
             src_pos = ops[i].src_pos
             dest_pos = ops[i].dest_pos
 
@@ -247,10 +251,12 @@ cdef list editops_to_matching_blocks(const RfEditops& ops):
             dest_pos += 1
 
     if src_pos < ops.get_src_len() or dest_pos < ops.get_dest_len():
-        result_item = MatchingBlock(src_pos, dest_pos, ops.get_src_len() - src_pos)
-        Py_INCREF(result_item)
-        PyList_SET_ITEM(result_list, <Py_ssize_t>j, result_item)
-        j += 1
+        length = min(ops.get_src_len() - src_pos, ops.get_dest_len() - dest_pos)
+        if length > 0:
+            result_item = MatchingBlock(src_pos, dest_pos, length)
+            Py_INCREF(result_item)
+            PyList_SET_ITEM(result_list, <Py_ssize_t>j, result_item)
+            j += 1
 
     result_item = MatchingBlock(ops.get_src_len(), ops.get_dest_len(), 0)
     Py_INCREF(result_item)
@@ -264,15 +270,18 @@ cdef list opcodes_to_matching_blocks(const RfOpcodes& ops):
     cdef size_t j = 0
     for i in range(ops.size()):
         if ops[i].type == EditType.None:
-            block_num += 1
+            if min(ops[i].src_end - ops[i].src_begin, ops[i].dest_end - ops[i].dest_begin) > 0:
+                block_num += 1
 
     cdef list result_list = PyList_New(block_num + 1)
     for i in range(ops.size()):
         if ops[i].type == EditType.None:
-            result_item = MatchingBlock(ops[i].src_begin, ops[i].dest_begin, ops[i].src_end - ops[i].src_begin)
-            Py_INCREF(result_item)
-            PyList_SET_ITEM(result_list, <Py_ssize_t>j, result_item)
-            j += 1
+            length = min(ops[i].src_end - ops[i].src_begin, ops[i].dest_end - ops[i].dest_begin)
+            if length > 0:
+                result_item = MatchingBlock(ops[i].src_begin, ops[i].dest_begin, length)
+                Py_INCREF(result_item)
+                PyList_SET_ITEM(result_list, <Py_ssize_t>j, result_item)
+                j += 1
 
     result_item = MatchingBlock(ops.get_src_len(), ops.get_dest_len(), 0)
     Py_INCREF(result_item)

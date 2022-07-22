@@ -9,7 +9,7 @@ import hypothesis.strategies as st
 
 import random
 
-from rapidfuzz.distance import Levenshtein, Editops, Opcodes, Editop, Opcode
+from rapidfuzz.distance import Levenshtein, Editops, Opcodes, Editop, Opcode, MatchingBlock
 
 
 def test_editops_comparision():
@@ -238,6 +238,17 @@ def test_merge_adjacent_blocks():
     assert Opcodes(ops1, 3, 3) == Opcodes(ops2, 3, 3)
     assert Opcodes(ops2, 3, 3) == Opcodes(ops2, 3, 3).as_editops().as_opcodes()
 
+def test_empty_matching_blocks():
+    """
+    test behavior for empty matching blocks
+    """
+    assert Editops([], 0, 0).as_matching_blocks() == [MatchingBlock(a=0, b=0, size=0)]
+    assert Editops([], 0, 3).as_matching_blocks() == [MatchingBlock(a=0, b=3, size=0)]
+    assert Editops([], 3, 0).as_matching_blocks() == [MatchingBlock(a=3, b=0, size=0)]
+
+    assert Opcodes([], 0, 0).as_matching_blocks() == [MatchingBlock(a=0, b=0, size=0)]
+    assert Opcodes([], 0, 3).as_matching_blocks() == [MatchingBlock(a=0, b=3, size=0)]
+    assert Opcodes([], 3, 0).as_matching_blocks() == [MatchingBlock(a=3, b=0, size=0)]
 
 @given(s1=st.text(), s2=st.text())
 @settings(max_examples=100, deadline=None)
