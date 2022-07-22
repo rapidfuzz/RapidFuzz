@@ -2,15 +2,13 @@
 # cython: language_level=3, binding=True, linetrace=True
 
 from rapidfuzz_capi cimport (
-    RF_String, RF_Scorer, RF_Kwargs, RF_ScorerFunc, RF_Preprocess,
-    SCORER_STRUCT_VERSION, RF_Preprocessor,
-    RF_ScorerFlags,
+    RF_String, RF_Scorer, RF_Kwargs, RF_ScorerFunc, RF_Preprocess, RF_ScorerFlags,
     RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_I64, RF_SCORER_FLAG_SYMMETRIC
 )
 
 # required for preprocess_strings
 from array import array
-from cpp_common cimport RF_StringWrapper, preprocess_strings
+from cpp_common cimport RF_StringWrapper, preprocess_strings, NoKwargsInit, CreateScorerContext
 from libc.stdint cimport INT64_MAX, int64_t
 
 from libcpp cimport bool
@@ -190,14 +188,6 @@ def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     return hamming_normalized_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
-cdef bool NoKwargsInit(RF_Kwargs* self, dict kwargs) except False:
-    if len(kwargs):
-        raise TypeError("Got unexpected keyword arguments: ", ", ".join(kwargs.keys()))
-
-    dereference(self).context = NULL
-    dereference(self).dtor = NULL
-    return True
-
 cdef bool GetScorerFlagsHammingDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
     dereference(scorer_flags).optimal_score.i64 = 0
@@ -222,32 +212,16 @@ cdef bool GetScorerFlagsHammingNormalizedSimilarity(const RF_Kwargs* self, RF_Sc
     dereference(scorer_flags).worst_score.f64 = 0
     return True
 
-cdef RF_Scorer HammingDistanceContext
-HammingDistanceContext.version = SCORER_STRUCT_VERSION
-HammingDistanceContext.kwargs_init = NoKwargsInit
-HammingDistanceContext.get_scorer_flags = GetScorerFlagsHammingDistance
-HammingDistanceContext.scorer_func_init = HammingDistanceInit
+cdef RF_Scorer HammingDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsHammingDistance, HammingDistanceInit)
 distance._RF_Scorer = PyCapsule_New(&HammingDistanceContext, NULL, NULL)
 
-cdef RF_Scorer HammingNormalizedDistanceContext
-HammingNormalizedDistanceContext.version = SCORER_STRUCT_VERSION
-HammingNormalizedDistanceContext.kwargs_init = NoKwargsInit
-HammingNormalizedDistanceContext.get_scorer_flags = GetScorerFlagsHammingNormalizedDistance
-HammingNormalizedDistanceContext.scorer_func_init = HammingNormalizedDistanceInit
+cdef RF_Scorer HammingNormalizedDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsHammingNormalizedDistance, HammingNormalizedDistanceInit)
 normalized_distance._RF_Scorer = PyCapsule_New(&HammingNormalizedDistanceContext, NULL, NULL)
 
-cdef RF_Scorer HammingSimilarityContext
-HammingSimilarityContext.version = SCORER_STRUCT_VERSION
-HammingSimilarityContext.kwargs_init = NoKwargsInit
-HammingSimilarityContext.get_scorer_flags = GetScorerFlagsHammingSimilarity
-HammingSimilarityContext.scorer_func_init = HammingSimilarityInit
+cdef RF_Scorer HammingSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsHammingSimilarity, HammingSimilarityInit)
 similarity._RF_Scorer = PyCapsule_New(&HammingSimilarityContext, NULL, NULL)
 
-cdef RF_Scorer HammingNormalizedSimilarityContext
-HammingNormalizedSimilarityContext.version = SCORER_STRUCT_VERSION
-HammingNormalizedSimilarityContext.kwargs_init = NoKwargsInit
-HammingNormalizedSimilarityContext.get_scorer_flags = GetScorerFlagsHammingNormalizedSimilarity
-HammingNormalizedSimilarityContext.scorer_func_init = HammingNormalizedSimilarityInit
+cdef RF_Scorer HammingNormalizedSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsHammingNormalizedSimilarity, HammingNormalizedSimilarityInit)
 normalized_similarity._RF_Scorer = PyCapsule_New(&HammingNormalizedDistanceContext, NULL, NULL)
 
 def _GetScorerFlagsDistance(**kwargs):

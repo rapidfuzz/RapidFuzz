@@ -4,22 +4,21 @@
 from .distance._initialize_cpp import ScoreAlignment
 
 from rapidfuzz_capi cimport (
-    RF_String, RF_Scorer, RF_ScorerFunc, RF_Kwargs,
-    SCORER_STRUCT_VERSION, RF_Preprocessor,
-    RF_ScorerFlags,
+    RF_String, RF_Scorer, RF_ScorerFunc, RF_Kwargs, RF_ScorerFlags,
     RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_SYMMETRIC
 )
 
 # required for preprocess_strings
 from rapidfuzz.utils import default_process
 from array import array
-from cpp_common cimport RF_StringWrapper, preprocess_strings, RfScoreAlignment
+from cpp_common cimport (
+    RF_StringWrapper, preprocess_strings, RfScoreAlignment, NoKwargsInit,
+    CreateScorerContext, CreateScorerContextPy, AddScorerContext
+)
 
 from libc.stdint cimport uint32_t, int64_t
 from libcpp cimport bool
 from cython.operator cimport dereference
-
-from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
 
 from array import array
 
@@ -544,164 +543,50 @@ def QRatio(s1, s2, *, processor=default_process, score_cutoff=None):
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
     return QRatio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
-cdef bool NoKwargsInit(RF_Kwargs* self, dict kwargs) except False:
-    if len(kwargs):
-        raise TypeError("Got unexpected keyword arguments: ", ", ".join(kwargs.keys()))
 
-    dereference(self).context = NULL
-    dereference(self).dtor = NULL
-    return True
-
-cdef bool GetScorerFlagsRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsFuzzSymmetric(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     dereference(scorer_flags).optimal_score.f64 = 100
     dereference(scorer_flags).worst_score.f64 = 0
     return True
 
-cdef bool GetScorerFlagsPartialRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsFuzz(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
     dereference(scorer_flags).optimal_score.f64 = 100
     dereference(scorer_flags).worst_score.f64 = 0
     return True
-
-cdef bool GetScorerFlagsTokenSortRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
-    return True
-
-cdef bool GetScorerFlagsTokenSetRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
-    return True
-
-cdef bool GetScorerFlagsTokenRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
-    return True
-
-cdef bool GetScorerFlagsPartialTokenSortRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
-    return True
-
-cdef bool GetScorerFlagsPartialTokenSetRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
-    return True
-
-cdef bool GetScorerFlagsPartialTokenRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
-    return True
-
-cdef bool GetScorerFlagsWRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
-    return True
-
-cdef bool GetScorerFlagsQRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
-    return True
-
-cdef RF_Scorer RatioContext
-RatioContext.version = SCORER_STRUCT_VERSION
-RatioContext.kwargs_init = NoKwargsInit
-RatioContext.get_scorer_flags = GetScorerFlagsRatio
-RatioContext.scorer_func_init = RatioInit
-ratio._RF_Scorer = PyCapsule_New(&RatioContext, NULL, NULL)
-
-cdef RF_Scorer PartialRatioContext
-PartialRatioContext.version = SCORER_STRUCT_VERSION
-PartialRatioContext.kwargs_init = NoKwargsInit
-PartialRatioContext.get_scorer_flags = GetScorerFlagsPartialRatio
-PartialRatioContext.scorer_func_init = PartialRatioInit
-partial_ratio._RF_Scorer = PyCapsule_New(&PartialRatioContext, NULL, NULL)
-
-cdef RF_Scorer TokenSortRatioContext
-TokenSortRatioContext.version = SCORER_STRUCT_VERSION
-TokenSortRatioContext.kwargs_init = NoKwargsInit
-TokenSortRatioContext.get_scorer_flags = GetScorerFlagsTokenSortRatio
-TokenSortRatioContext.scorer_func_init = TokenSortRatioInit
-token_sort_ratio._RF_Scorer = PyCapsule_New(&TokenSortRatioContext, NULL, NULL)
-
-cdef RF_Scorer TokenSetRatioContext
-TokenSetRatioContext.version = SCORER_STRUCT_VERSION
-TokenSetRatioContext.kwargs_init = NoKwargsInit
-TokenSetRatioContext.get_scorer_flags = GetScorerFlagsTokenSetRatio
-TokenSetRatioContext.scorer_func_init = TokenSetRatioInit
-token_set_ratio._RF_Scorer = PyCapsule_New(&TokenSetRatioContext, NULL, NULL)
-
-cdef RF_Scorer TokenRatioContext
-TokenRatioContext.version = SCORER_STRUCT_VERSION
-TokenRatioContext.kwargs_init = NoKwargsInit
-TokenRatioContext.get_scorer_flags = GetScorerFlagsTokenRatio
-TokenRatioContext.scorer_func_init = TokenRatioInit
-token_ratio._RF_Scorer = PyCapsule_New(&TokenRatioContext, NULL, NULL)
-
-cdef RF_Scorer PartialTokenSortRatioContext
-PartialTokenSortRatioContext.version = SCORER_STRUCT_VERSION
-PartialTokenSortRatioContext.kwargs_init = NoKwargsInit
-PartialTokenSortRatioContext.get_scorer_flags = GetScorerFlagsPartialTokenSortRatio
-PartialTokenSortRatioContext.scorer_func_init = PartialTokenSortRatioInit
-partial_token_sort_ratio._RF_Scorer = PyCapsule_New(&PartialTokenSortRatioContext, NULL, NULL)
-
-cdef RF_Scorer PartialTokenSetRatioContext
-PartialTokenSetRatioContext.version = SCORER_STRUCT_VERSION
-PartialTokenSetRatioContext.kwargs_init = NoKwargsInit
-PartialTokenSetRatioContext.get_scorer_flags = GetScorerFlagsPartialTokenSetRatio
-PartialTokenSetRatioContext.scorer_func_init = PartialTokenSetRatioInit
-partial_token_set_ratio._RF_Scorer = PyCapsule_New(&PartialTokenSetRatioContext, NULL, NULL)
-
-cdef RF_Scorer PartialTokenRatioContext
-PartialTokenRatioContext.version = SCORER_STRUCT_VERSION
-PartialTokenRatioContext.kwargs_init = NoKwargsInit
-PartialTokenRatioContext.get_scorer_flags = GetScorerFlagsPartialTokenRatio
-PartialTokenRatioContext.scorer_func_init = PartialTokenRatioInit
-partial_token_ratio._RF_Scorer = PyCapsule_New(&PartialTokenRatioContext, NULL, NULL)
-
-cdef RF_Scorer WRatioContext
-WRatioContext.version = SCORER_STRUCT_VERSION
-WRatioContext.kwargs_init = NoKwargsInit
-WRatioContext.get_scorer_flags = GetScorerFlagsWRatio
-WRatioContext.scorer_func_init = WRatioInit
-WRatio._RF_Scorer = PyCapsule_New(&WRatioContext, NULL, NULL)
-
-cdef RF_Scorer QRatioContext
-QRatioContext.version = SCORER_STRUCT_VERSION
-QRatioContext.kwargs_init = NoKwargsInit
-QRatioContext.get_scorer_flags = GetScorerFlagsQRatio
-QRatioContext.scorer_func_init = QRatioInit
-QRatio._RF_Scorer = PyCapsule_New(&QRatioContext, NULL, NULL)
 
 def _GetScorerFlagsSimilarity(**kwargs):
     return {"optimal_score": 100, "worst_score": 0, "flags": (1 << 5)}
 
+cdef dict FuzzContextPy = CreateScorerContextPy(_GetScorerFlagsSimilarity)
 
-ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+cdef RF_Scorer RatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzzSymmetric, RatioInit)
+AddScorerContext(ratio, FuzzContextPy, &RatioContext)
 
-partial_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+cdef RF_Scorer PartialRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, PartialRatioInit)
+AddScorerContext(partial_ratio, FuzzContextPy, &PartialRatioContext)
 
-token_sort_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+cdef RF_Scorer TokenSortRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzzSymmetric, TokenSortRatioInit)
+AddScorerContext(token_sort_ratio, FuzzContextPy, &TokenSortRatioContext)
 
-partial_token_sort_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+cdef RF_Scorer TokenSetRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzzSymmetric, TokenSetRatioInit)
+AddScorerContext(token_set_ratio, FuzzContextPy, &TokenSetRatioContext)
 
-token_set_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+cdef RF_Scorer TokenRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzzSymmetric, TokenRatioInit)
+AddScorerContext(token_ratio, FuzzContextPy, &TokenRatioContext)
 
-partial_token_set_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+cdef RF_Scorer PartialTokenSortRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, PartialTokenSortRatioInit)
+AddScorerContext(partial_token_sort_ratio, FuzzContextPy, &PartialTokenSortRatioContext)
 
-token_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+cdef RF_Scorer PartialTokenSetRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, PartialTokenSetRatioInit)
+AddScorerContext(partial_token_set_ratio, FuzzContextPy, &PartialTokenSetRatioContext)
 
-partial_token_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+cdef RF_Scorer PartialTokenRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, PartialTokenRatioInit)
+AddScorerContext(partial_token_ratio, FuzzContextPy, &PartialTokenRatioContext)
 
-WRatio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+cdef RF_Scorer WRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, WRatioInit)
+AddScorerContext(WRatio, FuzzContextPy, &WRatioContext)
 
-QRatio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
+cdef RF_Scorer QRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzzSymmetric, QRatioInit)
+AddScorerContext(QRatio, FuzzContextPy, &QRatioContext)

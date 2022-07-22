@@ -12,14 +12,12 @@ from ._initialize_cpp import Editops
 from ._initialize_cpp cimport Editops, RfEditops
 
 from rapidfuzz_capi cimport (
-    RF_String, RF_Scorer, RF_Kwargs, RF_ScorerFunc, RF_Preprocess, RF_KwargsInit,
-    SCORER_STRUCT_VERSION, RF_Preprocessor,
-    RF_ScorerFlags,
+    RF_String, RF_Scorer, RF_Kwargs, RF_ScorerFunc, RF_Preprocess, RF_ScorerFlags,
     RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_I64, RF_SCORER_FLAG_SYMMETRIC
 )
 # required for preprocess_strings
 from array import array
-from cpp_common cimport RF_StringWrapper, preprocess_strings
+from cpp_common cimport RF_StringWrapper, preprocess_strings, CreateScorerContext
 
 from libcpp cimport bool
 from libc.stdlib cimport malloc, free
@@ -453,32 +451,16 @@ cdef bool GetScorerFlagsNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFla
     dereference(scorer_flags).worst_score.f64 = 0
     return True
 
-cdef RF_Scorer LevenshteinDistanceContext
-LevenshteinDistanceContext.version = SCORER_STRUCT_VERSION
-LevenshteinDistanceContext.kwargs_init = LevenshteinKwargsInit
-LevenshteinDistanceContext.get_scorer_flags = GetScorerFlagsDistance
-LevenshteinDistanceContext.scorer_func_init = LevenshteinDistanceInit
+cdef RF_Scorer LevenshteinDistanceContext = CreateScorerContext(LevenshteinKwargsInit, GetScorerFlagsDistance, LevenshteinDistanceInit)
 distance._RF_Scorer = PyCapsule_New(&LevenshteinDistanceContext, NULL, NULL)
 
-cdef RF_Scorer LevenshteinSimilarityContext
-LevenshteinSimilarityContext.version = SCORER_STRUCT_VERSION
-LevenshteinSimilarityContext.kwargs_init = LevenshteinKwargsInit
-LevenshteinSimilarityContext.get_scorer_flags = GetScorerFlagsSimilarity
-LevenshteinSimilarityContext.scorer_func_init = LevenshteinSimilarityInit
+cdef RF_Scorer LevenshteinSimilarityContext = CreateScorerContext(LevenshteinKwargsInit, GetScorerFlagsSimilarity, LevenshteinSimilarityInit)
 similarity._RF_Scorer = PyCapsule_New(&LevenshteinSimilarityContext, NULL, NULL)
 
-cdef RF_Scorer LevenshteinNormalizedDistanceContext
-LevenshteinNormalizedDistanceContext.version = SCORER_STRUCT_VERSION
-LevenshteinNormalizedDistanceContext.kwargs_init = LevenshteinKwargsInit
-LevenshteinNormalizedDistanceContext.get_scorer_flags = GetScorerFlagsNormalizedDistance
-LevenshteinNormalizedDistanceContext.scorer_func_init = LevenshteinNormalizedDistanceInit
+cdef RF_Scorer LevenshteinNormalizedDistanceContext = CreateScorerContext(LevenshteinKwargsInit, GetScorerFlagsNormalizedDistance, LevenshteinNormalizedDistanceInit)
 normalized_distance._RF_Scorer = PyCapsule_New(&LevenshteinNormalizedDistanceContext, NULL, NULL)
 
-cdef RF_Scorer LevenshteinNormalizedSimilarityContext
-LevenshteinNormalizedSimilarityContext.version = SCORER_STRUCT_VERSION
-LevenshteinNormalizedSimilarityContext.kwargs_init = LevenshteinKwargsInit
-LevenshteinNormalizedSimilarityContext.get_scorer_flags = GetScorerFlagsNormalizedSimilarity
-LevenshteinNormalizedSimilarityContext.scorer_func_init = LevenshteinNormalizedSimilarityInit
+cdef RF_Scorer LevenshteinNormalizedSimilarityContext = CreateScorerContext(LevenshteinKwargsInit, GetScorerFlagsNormalizedSimilarity, LevenshteinNormalizedSimilarityInit)
 normalized_distance._RF_Scorer = PyCapsule_New(&LevenshteinNormalizedSimilarityContext, NULL, NULL)
 
 def _GetScorerFlagsDistance(**kwargs):

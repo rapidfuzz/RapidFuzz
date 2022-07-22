@@ -5,14 +5,12 @@ from ._initialize_cpp import Editops
 from ._initialize_cpp cimport Editops, RfEditops
 
 from rapidfuzz_capi cimport (
-    RF_String, RF_Scorer, RF_Kwargs, RF_ScorerFunc, RF_Preprocess, RF_KwargsInit,
-    SCORER_STRUCT_VERSION, RF_Preprocessor,
-    RF_ScorerFlags,
+    RF_String, RF_Scorer, RF_Kwargs, RF_ScorerFunc, RF_Preprocess, RF_ScorerFlags,
     RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_I64, RF_SCORER_FLAG_SYMMETRIC
 )
 # required for preprocess_strings
 from array import array
-from cpp_common cimport RF_StringWrapper, preprocess_strings
+from cpp_common cimport RF_StringWrapper, preprocess_strings, NoKwargsInit, CreateScorerContext
 
 from libcpp cimport bool
 from libc.stdlib cimport malloc, free
@@ -83,7 +81,6 @@ def distance(s1, s2, *, processor=None, score_cutoff=None):
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
     return lcs_seq_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
-
 
 
 def similarity(s1, s2, *, processor=None, score_cutoff=None):
@@ -313,14 +310,6 @@ def opcodes(s1, s2, *, processor=None):
     return ops.as_opcodes()
 
 
-cdef bool NoKwargsInit(RF_Kwargs* self, dict kwargs) except False:
-    if len(kwargs):
-        raise TypeError("Got unexpected keyword arguments: ", ", ".join(kwargs.keys()))
-
-    dereference(self).context = NULL
-    dereference(self).dtor = NULL
-    return True
-
 cdef bool GetScorerFlagsLCSseqDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
     dereference(scorer_flags).optimal_score.i64 = 0
@@ -345,32 +334,16 @@ cdef bool GetScorerFlagsLCSseqNormalizedSimilarity(const RF_Kwargs* self, RF_Sco
     dereference(scorer_flags).worst_score.f64 = 0
     return True
 
-cdef RF_Scorer LCSseqDistanceContext
-LCSseqDistanceContext.version = SCORER_STRUCT_VERSION
-LCSseqDistanceContext.kwargs_init = NoKwargsInit
-LCSseqDistanceContext.get_scorer_flags = GetScorerFlagsLCSseqDistance
-LCSseqDistanceContext.scorer_func_init = LCSseqDistanceInit
+cdef RF_Scorer LCSseqDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsLCSseqDistance, LCSseqDistanceInit)
 distance._RF_Scorer = PyCapsule_New(&LCSseqDistanceContext, NULL, NULL)
 
-cdef RF_Scorer LCSseqNormalizedDistanceContext
-LCSseqNormalizedDistanceContext.version = SCORER_STRUCT_VERSION
-LCSseqNormalizedDistanceContext.kwargs_init = NoKwargsInit
-LCSseqNormalizedDistanceContext.get_scorer_flags = GetScorerFlagsLCSseqNormalizedDistance
-LCSseqNormalizedDistanceContext.scorer_func_init = LCSseqNormalizedDistanceInit
+cdef RF_Scorer LCSseqNormalizedDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsLCSseqNormalizedDistance, LCSseqNormalizedDistanceInit)
 normalized_distance._RF_Scorer = PyCapsule_New(&LCSseqNormalizedDistanceContext, NULL, NULL)
 
-cdef RF_Scorer LCSseqSimilarityContext
-LCSseqSimilarityContext.version = SCORER_STRUCT_VERSION
-LCSseqSimilarityContext.kwargs_init = NoKwargsInit
-LCSseqSimilarityContext.get_scorer_flags = GetScorerFlagsLCSseqSimilarity
-LCSseqSimilarityContext.scorer_func_init = LCSseqSimilarityInit
+cdef RF_Scorer LCSseqSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsLCSseqSimilarity, LCSseqSimilarityInit)
 similarity._RF_Scorer = PyCapsule_New(&LCSseqSimilarityContext, NULL, NULL)
 
-cdef RF_Scorer LCSseqNormalizedSimilarityContext
-LCSseqNormalizedSimilarityContext.version = SCORER_STRUCT_VERSION
-LCSseqNormalizedSimilarityContext.kwargs_init = NoKwargsInit
-LCSseqNormalizedSimilarityContext.get_scorer_flags = GetScorerFlagsLCSseqNormalizedSimilarity
-LCSseqNormalizedSimilarityContext.scorer_func_init = LCSseqNormalizedSimilarityInit
+cdef RF_Scorer LCSseqNormalizedSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsLCSseqNormalizedSimilarity, LCSseqNormalizedSimilarityInit)
 normalized_similarity._RF_Scorer = PyCapsule_New(&LCSseqNormalizedSimilarityContext, NULL, NULL)
 
 def _GetScorerFlagsDistance(**kwargs):

@@ -5,14 +5,12 @@ from ._initialize_cpp import Editops
 from ._initialize_cpp cimport Editops, RfEditops
 
 from rapidfuzz_capi cimport (
-    RF_String, RF_Scorer, RF_Kwargs, RF_ScorerFunc, RF_Preprocess, RF_KwargsInit,
-    SCORER_STRUCT_VERSION, RF_Preprocessor,
-    RF_ScorerFlags,
+    RF_String, RF_Scorer, RF_Kwargs, RF_ScorerFunc, RF_Preprocess, RF_ScorerFlags,
     RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_I64, RF_SCORER_FLAG_SYMMETRIC
 )
 # required for preprocess_strings
 from array import array
-from cpp_common cimport RF_StringWrapper, preprocess_strings
+from cpp_common cimport RF_StringWrapper, preprocess_strings, NoKwargsInit, CreateScorerContext
 
 from libcpp cimport bool
 from libc.stdlib cimport malloc, free
@@ -315,14 +313,6 @@ def opcodes(s1, s2, *, processor=None):
     return ops.as_opcodes()
 
 
-cdef bool NoKwargsInit(RF_Kwargs* self, dict kwargs) except False:
-    if len(kwargs):
-        raise TypeError("Got unexpected keyword arguments: ", ", ".join(kwargs.keys()))
-
-    dereference(self).context = NULL
-    dereference(self).dtor = NULL
-    return True
-
 cdef bool GetScorerFlagsIndelDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
     dereference(scorer_flags).optimal_score.i64 = 0
@@ -347,32 +337,16 @@ cdef bool GetScorerFlagsIndelNormalizedSimilarity(const RF_Kwargs* self, RF_Scor
     dereference(scorer_flags).worst_score.f64 = 0
     return True
 
-cdef RF_Scorer IndelDistanceContext
-IndelDistanceContext.version = SCORER_STRUCT_VERSION
-IndelDistanceContext.kwargs_init = NoKwargsInit
-IndelDistanceContext.get_scorer_flags = GetScorerFlagsIndelDistance
-IndelDistanceContext.scorer_func_init = IndelDistanceInit
+cdef RF_Scorer IndelDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsIndelDistance, IndelDistanceInit)
 distance._RF_Scorer = PyCapsule_New(&IndelDistanceContext, NULL, NULL)
 
-cdef RF_Scorer IndelNormalizedDistanceContext
-IndelNormalizedDistanceContext.version = SCORER_STRUCT_VERSION
-IndelNormalizedDistanceContext.kwargs_init = NoKwargsInit
-IndelNormalizedDistanceContext.get_scorer_flags = GetScorerFlagsIndelNormalizedDistance
-IndelNormalizedDistanceContext.scorer_func_init = IndelNormalizedDistanceInit
+cdef RF_Scorer IndelNormalizedDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsIndelNormalizedDistance, IndelNormalizedDistanceInit)
 normalized_distance._RF_Scorer = PyCapsule_New(&IndelNormalizedDistanceContext, NULL, NULL)
 
-cdef RF_Scorer IndelSimilarityContext
-IndelSimilarityContext.version = SCORER_STRUCT_VERSION
-IndelSimilarityContext.kwargs_init = NoKwargsInit
-IndelSimilarityContext.get_scorer_flags = GetScorerFlagsIndelSimilarity
-IndelSimilarityContext.scorer_func_init = IndelSimilarityInit
+cdef RF_Scorer IndelSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsIndelSimilarity, IndelSimilarityInit)
 similarity._RF_Scorer = PyCapsule_New(&IndelSimilarityContext, NULL, NULL)
 
-cdef RF_Scorer IndelNormalizedSimilarityContext
-IndelNormalizedSimilarityContext.version = SCORER_STRUCT_VERSION
-IndelNormalizedSimilarityContext.kwargs_init = NoKwargsInit
-IndelNormalizedSimilarityContext.get_scorer_flags = GetScorerFlagsIndelNormalizedSimilarity
-IndelNormalizedSimilarityContext.scorer_func_init = IndelNormalizedSimilarityInit
+cdef RF_Scorer IndelNormalizedSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsIndelNormalizedSimilarity, IndelNormalizedSimilarityInit)
 normalized_similarity._RF_Scorer = PyCapsule_New(&IndelNormalizedSimilarityContext, NULL, NULL)
 
 def _GetScorerFlagsDistance(**kwargs):

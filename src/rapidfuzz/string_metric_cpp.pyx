@@ -2,15 +2,13 @@
 # cython: language_level=3, binding=True, linetrace=True
 
 from rapidfuzz_capi cimport (
-    RF_String, RF_Scorer, RF_Kwargs, RF_ScorerFunc, RF_Preprocess, RF_KwargsInit,
-    SCORER_STRUCT_VERSION, RF_Preprocessor,
-    RF_ScorerFlags,
+    RF_String, RF_Scorer, RF_Kwargs, RF_ScorerFunc, RF_Preprocess, RF_ScorerFlags,
     RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_I64, RF_SCORER_FLAG_SYMMETRIC
 )
 # required for preprocess_strings
 from rapidfuzz.utils import default_process
 from array import array
-from cpp_common cimport RF_StringWrapper, preprocess_strings
+from cpp_common cimport RfEditops, RfEditOp, EditType, RF_StringWrapper, preprocess_strings, NoKwargsInit, CreateScorerContext
 
 from libcpp cimport bool
 from libcpp.utility cimport move
@@ -21,7 +19,6 @@ from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.ref cimport Py_INCREF
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
 from cython.operator cimport dereference
-from cpp_common cimport RfEditops, RfEditOp, EditType
 
 cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
     cdef struct LevenshteinWeightTable:
@@ -464,14 +461,6 @@ cdef bool JaroWinklerKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     dereference(self).dtor = KwargsDeinit
     return True
 
-cdef bool NoKwargsInit(RF_Kwargs* self, dict kwargs) except False:
-    if len(kwargs):
-        raise TypeError("Got unexpected keyword arguments: ", ", ".join(kwargs.keys()))
-
-    dereference(self).context = NULL
-    dereference(self).dtor = NULL
-    return True
-
 cdef bool GetScorerFlagsLevenshtein(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>dereference(self).context
     dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64
@@ -515,47 +504,22 @@ cdef bool GetScorerFlagsJaroWinklerSimilarity(const RF_Kwargs* self, RF_ScorerFl
     return True
 
 
-cdef RF_Scorer LevenshteinContext
-LevenshteinContext.version = SCORER_STRUCT_VERSION
-LevenshteinContext.kwargs_init = LevenshteinKwargsInit
-LevenshteinContext.get_scorer_flags = GetScorerFlagsLevenshtein
-LevenshteinContext.scorer_func_init = LevenshteinInit
+cdef RF_Scorer LevenshteinContext = CreateScorerContext(LevenshteinKwargsInit, GetScorerFlagsLevenshtein, LevenshteinInit)
 levenshtein._RF_Scorer = PyCapsule_New(&LevenshteinContext, NULL, NULL)
 
-cdef RF_Scorer NormalizedLevenshteinContext
-NormalizedLevenshteinContext.version = SCORER_STRUCT_VERSION
-NormalizedLevenshteinContext.kwargs_init = LevenshteinKwargsInit
-NormalizedLevenshteinContext.get_scorer_flags = GetScorerFlagsNormalizedLevenshtein
-NormalizedLevenshteinContext.scorer_func_init = NormalizedLevenshteinInit
+cdef RF_Scorer NormalizedLevenshteinContext = CreateScorerContext(LevenshteinKwargsInit, GetScorerFlagsNormalizedLevenshtein, NormalizedLevenshteinInit)
 normalized_levenshtein._RF_Scorer = PyCapsule_New(&NormalizedLevenshteinContext, NULL, NULL)
 
-cdef RF_Scorer HammingContext
-HammingContext.version = SCORER_STRUCT_VERSION
-HammingContext.kwargs_init = NoKwargsInit
-HammingContext.get_scorer_flags = GetScorerFlagsHamming
-HammingContext.scorer_func_init = HammingInit
+cdef RF_Scorer HammingContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsHamming, HammingInit)
 hamming._RF_Scorer = PyCapsule_New(&HammingContext, NULL, NULL)
 
-cdef RF_Scorer NormalizedHammingContext
-NormalizedHammingContext.version = SCORER_STRUCT_VERSION
-NormalizedHammingContext.kwargs_init = NoKwargsInit
-NormalizedHammingContext.get_scorer_flags = GetScorerFlagsNormalizedHamming
-NormalizedHammingContext.scorer_func_init = NormalizedHammingInit
+cdef RF_Scorer NormalizedHammingContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsNormalizedHamming, NormalizedHammingInit)
 normalized_hamming._RF_Scorer = PyCapsule_New(&NormalizedHammingContext, NULL, NULL)
 
-cdef RF_Scorer JaroSimilarityContext
-JaroSimilarityContext.version = SCORER_STRUCT_VERSION
-JaroSimilarityContext.kwargs_init = NoKwargsInit
-JaroSimilarityContext.get_scorer_flags = GetScorerFlagsJaroSimilarity
-JaroSimilarityContext.scorer_func_init = JaroSimilarityInit
+cdef RF_Scorer JaroSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsJaroSimilarity, JaroSimilarityInit)
 jaro_similarity._RF_Scorer = PyCapsule_New(&JaroSimilarityContext, NULL, NULL)
 
-
-cdef RF_Scorer JaroWinklerSimilarityContext
-JaroWinklerSimilarityContext.version = SCORER_STRUCT_VERSION
-JaroWinklerSimilarityContext.kwargs_init = JaroWinklerKwargsInit
-JaroWinklerSimilarityContext.get_scorer_flags = GetScorerFlagsJaroWinklerSimilarity
-JaroWinklerSimilarityContext.scorer_func_init = JaroWinklerSimilarityInit
+cdef RF_Scorer JaroWinklerSimilarityContext = CreateScorerContext(JaroWinklerKwargsInit, GetScorerFlagsJaroWinklerSimilarity, JaroWinklerSimilarityInit)
 jaro_winkler_similarity._RF_Scorer = PyCapsule_New(&JaroWinklerSimilarityContext, NULL, NULL)
 
 def _GetScorerFlagsDistance(**kwargs):

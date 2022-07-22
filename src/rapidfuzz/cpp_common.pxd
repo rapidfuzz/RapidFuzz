@@ -10,11 +10,12 @@ from libcpp.utility cimport move
 from cpython.object cimport PyObject
 from cython.operator cimport dereference
 from libcpp.vector cimport vector
-from cpython.pycapsule cimport PyCapsule_IsValid, PyCapsule_GetPointer
+from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
 
 from rapidfuzz_capi cimport (
-    RF_Scorer, RF_StringType, RF_String, RF_Kwargs,
-    RF_ScorerFlags, RF_Preprocessor
+    RF_Scorer, RF_StringType, RF_String, RF_Kwargs, RF_KwargsInit,
+    SCORER_STRUCT_VERSION, 
+    RF_ScorerFlags, RF_Preprocessor, RF_GetScorerFlags, RF_ScorerFuncInit
 )
 
 from array import array
@@ -387,3 +388,27 @@ cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc
             s1_proc[0] = RF_StringWrapper(conv_sequence(s1), s1)
             s2 = processor(s2)
             s2_proc[0] = RF_StringWrapper(conv_sequence(s2), s2)
+
+cdef inline bool NoKwargsInit(RF_Kwargs* self, dict kwargs) except False:
+    if len(kwargs):
+        raise TypeError("Got unexpected keyword arguments: ", ", ".join(kwargs.keys()))
+
+    dereference(self).context = NULL
+    dereference(self).dtor = NULL
+    return True
+
+cdef inline RF_Scorer CreateScorerContext(RF_KwargsInit kwargs_init, RF_GetScorerFlags get_scorer_flags, RF_ScorerFuncInit scorer_func_init):
+    cdef RF_Scorer context
+    context.version = SCORER_STRUCT_VERSION
+    context.kwargs_init = kwargs_init
+    context.get_scorer_flags = get_scorer_flags
+    context.scorer_func_init = scorer_func_init
+    return context
+
+cdef inline dict CreateScorerContextPy(get_scorer_flags):
+    return {"get_scorer_flags": get_scorer_flags}
+
+cdef inline bool AddScorerContext(func, py_context, RF_Scorer* c_context) except False:
+    func._RF_Scorer = PyCapsule_New(c_context, NULL, NULL)
+    func._RF_ScorerPy = py_context
+    return True
