@@ -4,6 +4,11 @@
 import unittest
 import pytest
 
+from hypothesis import given, settings
+import hypothesis.strategies as st
+
+import random
+
 from rapidfuzz.distance import Levenshtein, Editops, Opcodes, Editop, Opcode
 
 
@@ -168,11 +173,33 @@ def test_opcode_inversion():
         ("equal", 8, 9, 6, 7),
     ]
 
-    with pytest.raises(ValueError):
-        Opcodes([], 0, 3)
+def test_editops_empty():
+    """
+    test behavior of conversion between empty list and Editops
+    """
+    ops = Opcodes([], 0, 0)
+    assert ops.as_list() == []
+    assert ops.src_len == 0
+    assert ops.dest_len == 0
 
-    assert Opcodes([], 0, 0).as_list() == []
+    ops = Opcodes([], 0,3)
+    assert ops.as_list() == [Opcode(tag='equal', src_start=0, src_end=0, dest_start=0, dest_end=3)]
+    assert ops.src_len == 0
+    assert ops.dest_len == 3
 
+def test_editops_empty():
+    """
+    test behavior of conversion between empty list and Opcodes
+    """
+    ops = Editops([], 0, 0)
+    assert ops.as_list() == []
+    assert ops.src_len == 0
+    assert ops.dest_len == 0
+
+    ops = Editops([], 0,3)
+    assert ops.as_list() == []
+    assert ops.src_len == 0
+    assert ops.dest_len == 3
 
 def test_list_initialization():
     """
@@ -210,6 +237,22 @@ def test_merge_adjacent_blocks():
     ]
     assert Opcodes(ops1, 3, 3) == Opcodes(ops2, 3, 3)
     assert Opcodes(ops2, 3, 3) == Opcodes(ops2, 3, 3).as_editops().as_opcodes()
+
+
+@given(s1=st.text(), s2=st.text())
+@settings(max_examples=100, deadline=None)
+def test_editops_reversible(s1, s2):
+    """
+    test whether conversions between editops and opcodes are reversible
+    """
+    ops = Levenshtein.editops(s1, s2)
+    assert ops == ops.as_opcodes().as_editops()
+    ops_list = ops.as_list()
+    while ops_list:
+        del ops_list[random.randrange(len(ops_list))]
+        ops2 = Editops(ops_list, ops.src_len, ops.dest_len)
+        assert Opcodes(ops_list, ops.src_len, ops.dest_len) == ops2.as_opcodes()
+        assert ops2 == ops2.as_opcodes().as_editops()
 
 
 if __name__ == "__main__":

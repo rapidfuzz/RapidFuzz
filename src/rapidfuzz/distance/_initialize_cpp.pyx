@@ -48,14 +48,15 @@ cdef RfEditops list_to_editops(ops, Py_ssize_t src_len, Py_ssize_t dest_len) exc
     cdef EditType edit_type
     cdef int64_t src_pos, dest_pos
     cdef Py_ssize_t ops_len = len(ops)
+    result.set_src_len(src_len)
+    result.set_dest_len(dest_len)
+
     if not ops_len:
         return result
 
     if len(ops[0]) == 5:
         return RfEditops(list_to_opcodes(ops, src_len, dest_len))
 
-    result.set_src_len(src_len)
-    result.set_dest_len(dest_len)
     result.reserve(ops_len)
     for op in ops:
         if len(op) != 3:
@@ -95,12 +96,7 @@ cdef RfOpcodes list_to_opcodes(ops, Py_ssize_t src_len, Py_ssize_t dest_len) exc
     cdef EditType edit_type
     cdef int64_t src_start, src_end, dest_start, dest_end
     cdef Py_ssize_t ops_len = len(ops)
-    if not ops_len:
-        if src_len or dest_len:
-            raise ValueError("List of edit operations does not span the whole sequence")
-        return result
-
-    if len(ops[0]) == 3:
+    if not ops_len or len(ops[0]) == 3:
         return RfOpcodes(list_to_editops(ops, src_len, dest_len))
 
     result.set_src_len(src_len)
