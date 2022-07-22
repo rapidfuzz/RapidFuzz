@@ -446,6 +446,16 @@ cdef class Editops:
     def __len__(self):
         return self.editops.size()
 
+    def __delitem__(self, item):
+        cdef Py_ssize_t index = item
+        if index < 0:
+            index += <Py_ssize_t>self.editops.size()
+
+        if index < 0 or index >= <Py_ssize_t>self.editops.size():
+            raise IndexError("Editops index out of range")
+
+        self.editops.erase(self.editops.begin() + index)
+
     def __getitem__(self, key):
         cdef Py_ssize_t index
 
@@ -466,7 +476,7 @@ cdef class Editops:
             raise TypeError("Expected index")
 
     def __repr__(self):
-        return "[" + ", ".join(repr(op) for op in self) + "]"
+        return "Editops([" + ", ".join(repr(op) for op in self) + f"], src_len={self.editops.get_src_len()}, dest_len={self.editops.get_dest_len()})"
 
 cdef class Opcode:
     """
@@ -682,7 +692,7 @@ cdef class Opcodes:
             raise TypeError("Expected index")
 
     def __repr__(self):
-        return "[" + ", ".join(repr(op) for op in self) + "]"
+        return "Opcodes([" + ", ".join(repr(op) for op in self) + f"], src_len={self.editops.get_src_len()}, dest_len={self.editops.get_dest_len()})"
 
 
 cdef class ScoreAlignment:

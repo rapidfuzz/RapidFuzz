@@ -3,12 +3,13 @@
 ### [2.3.0] - 2022-07-
 #### Added
 - add `as_matching_blocks` to `Editops`/`Opcodes`
+- add support for deletions from `Editops`
 
 #### Changed
 - merge adjacent similar blocks in `Opcodes`
 
 #### Fixed
-- fix usage of `eval(repr(Editop))` and `eval(repr(Opcode))`
+- fix usage of `eval(repr(Editop))`, `eval(repr(Editops))`, `eval(repr(Opcode))` and `eval(repr(Opcodes))`
 - fix opcode conversion for empty source sequence
 - fix validation for empty Opcode list passed into `Opcodes.__init__`
 

@@ -247,12 +247,10 @@ def test_editops_reversible(s1, s2):
     """
     ops = Levenshtein.editops(s1, s2)
     assert ops == ops.as_opcodes().as_editops()
-    ops_list = ops.as_list()
-    while ops_list:
-        del ops_list[random.randrange(len(ops_list))]
-        ops2 = Editops(ops_list, ops.src_len, ops.dest_len)
-        assert Opcodes(ops_list, ops.src_len, ops.dest_len) == ops2.as_opcodes()
-        assert ops2 == ops2.as_opcodes().as_editops()
+    while ops:
+        del ops[random.randrange(len(ops))]
+        assert Opcodes(ops.as_list(), ops.src_len, ops.dest_len) == ops.as_opcodes()
+        assert ops == ops.as_opcodes().as_editops()
 
 
 if __name__ == "__main__":
