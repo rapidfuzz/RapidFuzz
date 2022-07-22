@@ -457,6 +457,24 @@ cdef class Editops:
 
         return editops_apply(self.editops, convert_string(source_string), convert_string(destination_string))
 
+    def remove_subsequence(self, Editops subsequence):
+        """
+        remove a subsequence
+
+        Parameters
+        ----------
+        subsequence : Editops
+            subsequence to remove (has to be a subset of editops)
+
+        Returns
+        -------
+        sequence : Editops
+            a copy of the editops without the subsequence
+        """
+        cdef Editops x = Editops.__new__(Editops)
+        x.editops = self.editops.remove_subsequence(subsequence.editops)
+        return x
+
     @property
     def src_len(self):
         return self.editops.get_src_len()
@@ -750,7 +768,7 @@ cdef class Opcodes:
             raise TypeError("Expected index")
 
     def __repr__(self):
-        return "Opcodes([" + ", ".join(repr(op) for op in self) + f"], src_len={self.editops.get_src_len()}, dest_len={self.editops.get_dest_len()})"
+        return "Opcodes([" + ", ".join(repr(op) for op in self) + f"], src_len={self.opcodes.get_src_len()}, dest_len={self.opcodes.get_dest_len()})"
 
 
 cdef class ScoreAlignment:
