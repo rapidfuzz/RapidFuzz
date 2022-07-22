@@ -83,6 +83,8 @@ cdef RfEditops list_to_editops(ops, Py_ssize_t src_len, Py_ssize_t dest_len) exc
     for i in range(0, ops_len - 1):
         if result[i + 1].src_pos < result[i].src_pos or result[i + 1].dest_pos < result[i].dest_pos:
             raise ValueError("List of edit operations out of order")
+        if result[i + 1].src_pos == result[i].src_pos and result[i + 1].dest_pos == result[i].dest_pos:
+            raise ValueError("Duplicated edit operation")
 
     result.shrink_to_fit()
     return result
