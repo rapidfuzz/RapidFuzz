@@ -9,7 +9,14 @@ import hypothesis.strategies as st
 
 import random
 
-from rapidfuzz.distance import Levenshtein, Editops, Opcodes, Editop, Opcode, MatchingBlock
+from rapidfuzz.distance import (
+    Levenshtein,
+    Editops,
+    Opcodes,
+    Editop,
+    Opcode,
+    MatchingBlock,
+)
 
 
 def test_editops_comparision():
@@ -173,6 +180,7 @@ def test_opcode_inversion():
         ("equal", 8, 9, 6, 7),
     ]
 
+
 def test_editops_empty():
     """
     test behavior of conversion between empty list and Editops
@@ -182,10 +190,13 @@ def test_editops_empty():
     assert ops.src_len == 0
     assert ops.dest_len == 0
 
-    ops = Opcodes([], 0,3)
-    assert ops.as_list() == [Opcode(tag='equal', src_start=0, src_end=0, dest_start=0, dest_end=3)]
+    ops = Opcodes([], 0, 3)
+    assert ops.as_list() == [
+        Opcode(tag="equal", src_start=0, src_end=0, dest_start=0, dest_end=3)
+    ]
     assert ops.src_len == 0
     assert ops.dest_len == 3
+
 
 def test_editops_empty():
     """
@@ -196,10 +207,11 @@ def test_editops_empty():
     assert ops.src_len == 0
     assert ops.dest_len == 0
 
-    ops = Editops([], 0,3)
+    ops = Editops([], 0, 3)
     assert ops.as_list() == []
     assert ops.src_len == 0
     assert ops.dest_len == 3
+
 
 def test_list_initialization():
     """
@@ -238,6 +250,7 @@ def test_merge_adjacent_blocks():
     assert Opcodes(ops1, 3, 3) == Opcodes(ops2, 3, 3)
     assert Opcodes(ops2, 3, 3) == Opcodes(ops2, 3, 3).as_editops().as_opcodes()
 
+
 def test_empty_matching_blocks():
     """
     test behavior for empty matching blocks
@@ -249,6 +262,7 @@ def test_empty_matching_blocks():
     assert Opcodes([], 0, 0).as_matching_blocks() == [MatchingBlock(a=0, b=0, size=0)]
     assert Opcodes([], 0, 3).as_matching_blocks() == [MatchingBlock(a=0, b=3, size=0)]
     assert Opcodes([], 3, 0).as_matching_blocks() == [MatchingBlock(a=3, b=0, size=0)]
+
 
 @given(s1=st.text(), s2=st.text())
 @settings(max_examples=100, deadline=None)

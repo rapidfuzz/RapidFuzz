@@ -128,33 +128,6 @@ def extract_iter_scorer(s1, s2, scorer, processor=None, **kwargs):
     )[0][1]
 
 
-def apply_editops(s1, s2, ops):
-    new_str = ""
-    s1_pos = 0
-    for op in ops:
-        j = op[1] - s1_pos
-        while j:
-            new_str += s1[s1_pos]
-            s1_pos += 1
-            j -= 1
-
-        if op[0] == "delete":
-            s1_pos += 1
-        elif op[0] == "insert":
-            new_str += s2[op[2]]
-        elif op[0] == "replace":
-            new_str += s2[op[2]]
-            s1_pos += 1
-
-    j = len(s1) - s1_pos
-    while j:
-        new_str += s1[s1_pos]
-        s1_pos += 1
-        j -= 1
-
-    return new_str
-
-
 HYPOTHESIS_ALPHABET = ascii_letters + digits + punctuation
 
 SCORERS = [
@@ -174,6 +147,7 @@ FULL_SCORERS = [fuzz.ratio, fuzz.WRatio, fuzz.QRatio]
 
 PROCESSORS = [lambda x: x, utils.default_process]
 
+
 @given(s1=st.text(), s2=st.text())
 @settings(max_examples=100, deadline=None)
 def test_matching_blocks(s1, s2):
@@ -191,7 +165,7 @@ def test_levenshtein_editops(s1, s2):
     test Levenshtein.editops with any sizes
     """
     ops = Levenshtein_cpp.editops(s1, s2)
-    assert apply_editops(s1, s2, ops) == s2
+    assert ops.apply(s1, s2) == s2
 
 
 @given(s1=st.text(min_size=65), s2=st.text(min_size=65))
@@ -201,7 +175,7 @@ def test_levenshtein_editops_block(s1, s2):
     test Levenshtein.editops for long strings
     """
     ops = Levenshtein_cpp.editops(s1, s2)
-    assert apply_editops(s1, s2, ops) == s2
+    assert ops.apply(s1, s2) == s2
 
 
 @given(s1=st.text(), s2=st.text())
@@ -211,7 +185,7 @@ def test_indel_editops(s1, s2):
     test Indel.editops with any sizes
     """
     ops = Indel_cpp.editops(s1, s2)
-    assert apply_editops(s1, s2, ops) == s2
+    assert ops.apply(s1, s2) == s2
 
 
 @given(s1=st.text(min_size=65), s2=st.text(min_size=65))
@@ -221,7 +195,7 @@ def test_indel_editops_block(s1, s2):
     test Indel.editops for long strings
     """
     ops = Indel_cpp.editops(s1, s2)
-    assert apply_editops(s1, s2, ops) == s2
+    assert ops.apply(s1, s2) == s2
 
 
 @given(s1=st.text(max_size=64), s2=st.text())

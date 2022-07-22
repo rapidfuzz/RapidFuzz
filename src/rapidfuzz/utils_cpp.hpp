@@ -2,7 +2,7 @@
 #include "cpp_common.hpp"
 #include "utils.hpp"
 
-PyObject* default_process_impl(PyObject* sentence) {
+static inline PyObject* default_process_impl(PyObject* sentence) {
     RF_String c_sentence = convert_string(sentence);
 
     switch (c_sentence.kind) {

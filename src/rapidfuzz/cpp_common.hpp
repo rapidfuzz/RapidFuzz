@@ -1,5 +1,6 @@
 #pragma once
 #include "Python.h"
+#include <cstdint>
 #define RAPIDFUZZ_PYTHON
 #include <rapidfuzz/fuzz.hpp>
 #include <rapidfuzz/distance.hpp>
@@ -610,4 +611,20 @@ std::vector<T> vector_slice(const std::vector<T>& vec, int start, int stop, int 
     }
 
     return new_vec;
+}
+
+static inline PyObject* opcodes_apply(const rapidfuzz::Opcodes& ops, const RF_String& s1, const RF_String& s2)
+{
+    return visitor(s1, s2, [&](auto first1, auto last1, auto first2, auto last2) {
+        auto proc_str = rapidfuzz::opcodes_apply<uint32_t>(ops, first1, last1, first2, last2);
+        return PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, proc_str.data(), (Py_ssize_t)proc_str.size());
+    });
+}
+
+static inline PyObject* editops_apply(const rapidfuzz::Editops& ops, const RF_String& s1, const RF_String& s2)
+{
+    return visitor(s1, s2, [&](auto first1, auto last1, auto first2, auto last2) {
+        auto proc_str = rapidfuzz::editops_apply<uint32_t>(ops, first1, last1, first2, last2);
+        return PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, proc_str.data(), (Py_ssize_t)proc_str.size());
+    });
 }

@@ -1,7 +1,8 @@
 # distutils: language=c++
 # cython: language_level=3, binding=True, linetrace=True
 
-from cpp_common cimport vector_slice, RfEditOp, RfOpcode, EditType
+from rapidfuzz_capi cimport RF_String
+from cpp_common cimport vector_slice, RfEditOp, RfOpcode, EditType, is_valid_string, convert_string
 
 from libcpp cimport bool
 from libcpp.vector cimport vector
@@ -18,6 +19,10 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
         int64_t insert_cost
         int64_t delete_cost
         int64_t replace_cost
+
+cdef extern from "cpp_common.hpp":
+    object opcodes_apply(const RfOpcodes& ops, const RF_String& s1, const RF_String& s2) nogil except +
+    object editops_apply(const RfEditops& ops, const RF_String& s1, const RF_String& s2) nogil except +
 
 cdef str edit_type_to_str(EditType edit_type):
     if edit_type == EditType.Insert:
@@ -430,6 +435,28 @@ cdef class Editops:
         x.editops = self.editops.inverse()
         return x
 
+    def apply(self, source_string, destination_string):
+        """
+        apply editops to source_string
+
+        Parameters
+        ----------
+        source_string : str | bytes
+            string to apply editops to
+        destination_string : str | bytes
+            string to use for replacements / insertions into source_string
+
+        Returns
+        -------
+        mod_string : str
+            modified source_string
+
+        """
+        if not (is_valid_string(source_string) and is_valid_string(destination_string)):
+            raise TypeError("expected strings or bytes object")
+
+        return editops_apply(self.editops, convert_string(source_string), convert_string(destination_string))
+
     @property
     def src_len(self):
         return self.editops.get_src_len()
@@ -653,6 +680,28 @@ cdef class Opcodes:
         cdef Opcodes x = Opcodes.__new__(Opcodes)
         x.opcodes = self.opcodes.inverse()
         return x
+
+    def apply(self, source_string, destination_string):
+        """
+        apply opcodes to source_string
+
+        Parameters
+        ----------
+        source_string : str | bytes
+            string to apply opcodes to
+        destination_string : str | bytes
+            string to use for replacements / insertions into source_string
+
+        Returns
+        -------
+        mod_string : str
+            modified source_string
+
+        """
+        if not (is_valid_string(source_string) and is_valid_string(destination_string)):
+            raise TypeError("expected strings or bytes object")
+
+        return opcodes_apply(self.opcodes, convert_string(source_string), convert_string(destination_string))
 
     @property
     def src_len(self):

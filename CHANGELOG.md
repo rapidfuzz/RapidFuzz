@@ -4,6 +4,7 @@
 #### Added
 - add `as_matching_blocks` to `Editops`/`Opcodes`
 - add support for deletions from `Editops`
+- add `Editops.apply`/`Opcodes.apply`
 
 #### Changed
 - merge adjacent similar blocks in `Opcodes`
