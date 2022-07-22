@@ -1,6 +1,6 @@
 ## Changelog
 
-### [2.3.0] - 2022-07-
+### [2.3.0] - 2022-07-23
 #### Added
 - add `as_matching_blocks` to `Editops`/`Opcodes`
 - add support for deletions from `Editops`
