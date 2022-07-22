@@ -446,16 +446,6 @@ cdef class Editops:
     def __len__(self):
         return self.editops.size()
 
-    def __delitem__(self, item):
-        cdef Py_ssize_t index = item
-        if index < 0:
-            index += <Py_ssize_t>self.editops.size()
-
-        if index < 0 or index >= <Py_ssize_t>self.editops.size():
-            raise IndexError("Editops index out of range")
-
-        self.editops.erase(self.editops.begin() + index)
-
     def __getitem__(self, key):
         cdef Py_ssize_t index
 
@@ -669,16 +659,6 @@ cdef class Opcodes:
 
     def __len__(self):
         return self.opcodes.size()
-
-    def __delitem__(self, item):
-        cdef Py_ssize_t index = item
-        if index < 0:
-            index += <Py_ssize_t>self.opcodes.size()
-
-        if index < 0 or index >= <Py_ssize_t>self.opcodes.size():
-            raise IndexError("Opcodes index out of range")
-
-        self.opcodes.erase(self.opcodes.begin() + index)
 
     def __getitem__(self, key):
         cdef Py_ssize_t index
