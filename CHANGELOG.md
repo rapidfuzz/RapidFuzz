@@ -1,5 +1,11 @@
 ## Changelog
 
+### [2.4.0] - 2022-
+#### Performance
+- improve performance and memory usage of `Levenshtein.editops`
+  - memory usage is reduced from O(NM) to O(N)
+  - performance is improved for long sequences
+
 ### [2.3.0] - 2022-07-23
 #### Added
 - add `as_matching_blocks` to `Editops`/`Opcodes`
