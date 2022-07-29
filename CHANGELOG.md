@@ -1,5 +1,9 @@
 ## Changelog
 
+### [2.4.1] - 2022-07-29
+#### Fixed
+- fix version number
+
 ### [2.4.0] - 2022-07-29
 #### Fixed
 - fix banded Levenshtein implementation
