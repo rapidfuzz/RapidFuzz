@@ -172,6 +172,14 @@ The following graph shows how many elements are processed per second with each o
 <img src="https://raw.githubusercontent.com/maxbachmann/RapidFuzz/main/docs/img/extractOne.svg?sanitize=true" alt="Benchmark extractOne">
 
 
+## Support the project
+
+If you are using RapidFuzz for your work and feel like giving a bit of your own benefit back to support the project, consider sending us money through GitHub Sponsors or PayPal that we can use to buy us free time for the maintenance of this great library, to fix bugs in the software, review and integrate code contributions, to improve its features and documentation, or to just take a deep breath and have a cup of tea every once in a while. Thank you for your support.
+
+Support the project through [GitHub Sponsors]() or via [PayPal](https://www.paypal.com/donate/?hosted_button_id=VGWQBBD5CTWJU):
+
+[![](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=VGWQBBD5CTWJU).
+
 ## License
 RapidFuzz is licensed under the MIT license since I believe that everyone should be able to use it without being forced to adopt the GPL license. Thats why the library is based on an older version of fuzzywuzzy that was MIT licensed as well.
 This old version of fuzzywuzzy can be found [here](https://github.com/seatgeek/fuzzywuzzy/tree/4bf28161f7005f3aa9d4d931455ac55126918df7).

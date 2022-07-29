@@ -37,7 +37,7 @@ else()
     add_library(Taskflow::Taskflow ALIAS Taskflow)
 endif()
 
-find_package(rapidfuzz 1.0.5 QUIET)
+find_package(rapidfuzz 1.1.0 QUIET)
 if (rapidfuzz_FOUND)
     message("Using system supplied version of rapidfuzz-cpp")
 else()

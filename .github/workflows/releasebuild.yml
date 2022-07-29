@@ -36,6 +36,7 @@ jobs:
     env:
       CIBW_BUILD: ${{matrix.python_tag}}
       CIBW_ARCHS: ${{matrix.arch}}
+      CIBW_TEST_SKIP: "*-win32"
       CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_COMMAND: pytest {package}/tests
       CIBW_TEST_COMMAND_LINUX: "{package}/tools/seg_wrapper.sh pytest {package}/tests"
@@ -139,7 +140,7 @@ jobs:
     env:
       CIBW_ARCHS_LINUX: ${{matrix.arch}}
       CIBW_BUILD: ${{matrix.python_tag}}
-      CIBW_TEST_SKIP: "{*_{aarch64,ppc64le,s390x},*musllinux_*}"
+      CIBW_TEST_SKIP: "{*_{aarch64,ppc64le,s390x,i686},*musllinux_*,pp38-*}"
       CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_COMMAND: pytest {package}/tests
       CIBW_TEST_COMMAND_LINUX: "{package}/tools/seg_wrapper.sh pytest {package}/tests"

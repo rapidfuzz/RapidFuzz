@@ -1,6 +1,9 @@
 ## Changelog
 
-### [2.4.0] - 2022-
+### [2.4.0] - 2022-07-29
+#### Fixed
+- fix banded Levenshtein implementation
+
 #### Performance
 - improve performance and memory usage of `Levenshtein.editops`
   - memory usage is reduced from O(NM) to O(N)
