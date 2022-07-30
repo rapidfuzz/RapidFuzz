@@ -1,5 +1,9 @@
 ## Changelog
 
+### [2.4.2] - 2022-07-30
+#### Fixed
+- add missing symbol to pure Python which made the usage impossible
+
 ### [2.4.1] - 2022-07-29
 #### Fixed
 - fix version number
