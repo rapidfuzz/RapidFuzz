@@ -6,7 +6,7 @@ index 1f4d4d6..1f94979 100644
  requires = [
      "setuptools>=42",
      "scikit-build>=0.13.0",
--    "Cython==3.0.0a10",
+-    "Cython==3.0.0a11",
      "rapidfuzz_capi==1.0.5"
  ]
  build-backend = "backend"
