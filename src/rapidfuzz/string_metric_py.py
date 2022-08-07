@@ -295,7 +295,7 @@ def jaro_similarity(s1, s2, *, processor=None, score_cutoff=None):
         Use :func:`rapidfuzz.distance.Jaro.similarity` instead.
         This function will be removed in v3.0.0.
     """
-    return Jaro.similarity(s1, s2, processor=processor, score_cutoff=score_cutoff)
+    return Jaro.similarity(s1, s2, processor=processor, score_cutoff=score_cutoff) * 100
 
 
 def jaro_winkler_similarity(
@@ -335,12 +335,15 @@ def jaro_winkler_similarity(
         Use :func:`rapidfuzz.distance.JaroWinkler.similarity` instead.
         This function will be removed in v3.0.0.
     """
-    return JaroWinkler.similarity(
-        s1,
-        s2,
-        prefix_weight=prefix_weight,
-        processor=processor,
-        score_cutoff=score_cutoff,
+    return (
+        JaroWinkler.similarity(
+            s1,
+            s2,
+            prefix_weight=prefix_weight,
+            processor=processor,
+            score_cutoff=score_cutoff,
+        )
+        * 100
     )
 
 

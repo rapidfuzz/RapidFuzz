@@ -1,5 +1,11 @@
 ## Changelog
 
+### [2.5.0] - 2022-08-
+
+#### Fixed
+- fix value range of `jaro_similarity`/`jaro_winkler_similarity` in the pure Python mode
+  for the string_metric module
+
 ### [2.4.2] - 2022-07-30
 #### Fixed
 - add missing symbol to pure Python which made the usage impossible
