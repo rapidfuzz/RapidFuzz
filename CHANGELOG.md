@@ -1,10 +1,10 @@
 ## Changelog
 
-### [2.5.0] - 2022-08-
-
+### [2.4.3] - 2022-08-08
 #### Fixed
 - fix value range of `jaro_similarity`/`jaro_winkler_similarity` in the pure Python mode
   for the string_metric module
+- fix missing atomix symbol on arm 32 bit
 
 ### [2.4.2] - 2022-07-30
 #### Fixed
