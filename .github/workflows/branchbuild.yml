@@ -1,9 +1,9 @@
-name: Build
+name: Test Build
 
 on:
   push:
-    branches-ignore:
-      - main
+    paths-ignore:
+      - 'docs/**'
 
 jobs:
   no_cython_install:
