@@ -178,23 +178,27 @@ std::vector<DictMatchElem<T>> extract_dict_impl(
 
     bool lowest_score_worst = is_lowest_score_worst<T>(scorer_flags);
 
-    for (const auto& choice : choices)
+    for (size_t i = 0; i < choices.size(); ++i)
     {
+        if (i % 1000 == 0)
+            if (PyErr_CheckSignals() != 0)
+                throw std::runtime_error("");
+
         T score;
-        ScorerFunc.call(&choice.proc_val.string, score_cutoff, &score);
+        ScorerFunc.call(&choices[i].proc_val.string, score_cutoff, &score);
 
         if (lowest_score_worst)
         {
             if (score >= score_cutoff)
             {
-                results.emplace_back(score, choice.index, choice.val, choice.key);
+                results.emplace_back(score, choices[i].index, choices[i].val, choices[i].key);
             }
         }
         else
         {
             if (score <= score_cutoff)
             {
-                results.emplace_back(score, choice.index, choice.val, choice.key);
+                results.emplace_back(score, choices[i].index, choices[i].val, choices[i].key);
             }
         }
     }
@@ -217,23 +221,27 @@ std::vector<ListMatchElem<T>> extract_list_impl(
 
     bool lowest_score_worst = is_lowest_score_worst<T>(scorer_flags);
 
-    for (const auto& choice : choices)
+    for (size_t i = 0; i < choices.size(); ++i)
     {
+        if (i % 1000 == 0)
+            if (PyErr_CheckSignals() != 0)
+                throw std::runtime_error("");
+
         T score;
-        ScorerFunc.call(&choice.proc_val.string, score_cutoff, &score);
+        ScorerFunc.call(&choices[i].proc_val.string, score_cutoff, &score);
 
         if (lowest_score_worst)
         {
             if (score >= score_cutoff)
             {
-                results.emplace_back(score, choice.index, choice.val);
+                results.emplace_back(score, choices[i].index, choices[i].val);
             }
         }
         else
         {
             if (score <= score_cutoff)
             {
-                results.emplace_back(score, choice.index, choice.val);
+                results.emplace_back(score, choices[i].index, choices[i].val);
             }
         }
     }

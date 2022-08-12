@@ -14,6 +14,7 @@ from libc.math cimport floor
 from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.ref cimport Py_INCREF
 from cython.operator cimport dereference
+from cpython.exc cimport PyErr_CheckSignals
 
 from cpp_common cimport (
     PyObjectWrapper, RF_StringWrapper, RF_KwargsWrapper,
@@ -187,7 +188,7 @@ cdef inline vector[ListStringElem] preprocess_list(queries, processor) except *:
 cdef inline extractOne_dict_f64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, const RF_Kwargs* kwargs):
     cdef RF_String proc_str
     cdef double score
-    cdef Py_ssize_t i
+    cdef Py_ssize_t i = 0
     cdef RF_Preprocessor* processor_context = NULL
     if processor:
         processor_capsule = getattr(processor, '_RF_Preprocess', processor)
@@ -210,6 +211,9 @@ cdef inline extractOne_dict_f64(query, choices, RF_Scorer* scorer, const RF_Scor
     result_choice = None
 
     for choice_key, choice in choices.items():
+        if i % 1000 == 0:
+            PyErr_CheckSignals()
+        i += 1
         if choice is None:
             continue
 
@@ -246,7 +250,7 @@ cdef inline extractOne_dict_f64(query, choices, RF_Scorer* scorer, const RF_Scor
 cdef inline extractOne_dict_i64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, const RF_Kwargs* kwargs):
     cdef RF_String proc_str
     cdef int64_t score
-    cdef Py_ssize_t i
+    cdef Py_ssize_t i = 0
     cdef RF_Preprocessor* processor_context = NULL
     if processor:
         processor_capsule = getattr(processor, '_RF_Preprocess', processor)
@@ -269,6 +273,9 @@ cdef inline extractOne_dict_i64(query, choices, RF_Scorer* scorer, const RF_Scor
     result_choice = None
 
     for choice_key, choice in choices.items():
+        if i % 1000 == 0:
+            PyErr_CheckSignals()
+        i += 1
         if choice is None:
             continue
 
@@ -342,6 +349,8 @@ cdef inline extractOne_list_f64(query, choices, RF_Scorer* scorer, const RF_Scor
     result_choice = None
 
     for i, choice in enumerate(choices):
+        if i % 1000 == 0:
+            PyErr_CheckSignals()
         if choice is None:
             continue
 
@@ -400,6 +409,8 @@ cdef inline extractOne_list_i64(query, choices, RF_Scorer* scorer, const RF_Scor
     result_choice = None
 
     for i, choice in enumerate(choices):
+        if i % 1000 == 0:
+            PyErr_CheckSignals()
         if choice is None:
             continue
 
