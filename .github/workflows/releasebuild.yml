@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: [auto32, auto64]
-        python_tag: ["cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*", "pp37-*", "pp38-*", "pp39-*"]
+        python_tag: ["cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*", "cp311-*", "pp37-*", "pp38-*", "pp39-*"]
         exclude:
           # PyPy only supports x86_64 on Windows
           - arch: auto32
@@ -48,7 +48,7 @@ jobs:
       - uses: actions/setup-python@v2
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.4.0
+        uses: pypa/cibuildwheel@v2.9.0
         with:
           output-dir: wheelhouse
 
@@ -64,7 +64,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: [x86_64, arm64, universal2]
-        python_tag: ["cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*", "pp37-*", "pp38-*", "pp39-*"]
+        python_tag: ["cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*", "cp311-*", "pp37-*", "pp38-*", "pp39-*"]
         exclude:
           # MacOS Arm only supported since Python 3.8
           - arch: arm64
@@ -105,7 +105,7 @@ jobs:
       - uses: actions/setup-python@v2
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.4.0
+        uses: pypa/cibuildwheel@v2.9.0
         with:
           output-dir: wheelhouse
 
@@ -121,7 +121,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: [auto, aarch64, ppc64le, s390x]
-        python_tag: [ "cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*", "pp37-*", "pp38-*", "pp39-*"]
+        python_tag: [ "cp36-*", "cp37-*", "cp38-*", "cp39-*", "cp310-*", "cp311-*", "pp37-*", "pp38-*", "pp39-*"]
         exclude:
           # PyPy builds not available for these platforms
           - arch: ppc64le
@@ -155,7 +155,7 @@ jobs:
         name: Set up QEMU
 
       - name: Build wheel
-        uses: pypa/cibuildwheel@v2.4.0
+        uses: pypa/cibuildwheel@v2.9.0
         with:
           output-dir: wheelhouse
 

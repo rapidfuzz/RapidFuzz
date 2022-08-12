@@ -1,5 +1,9 @@
 ## Changelog
 
+### [2.4.4] - 2022-08-12
+#### Changed
+- Added support for Python3.11
+
 ### [2.4.3] - 2022-08-08
 #### Fixed
 - fix value range of `jaro_similarity`/`jaro_winkler_similarity` in the pure Python mode
