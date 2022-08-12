@@ -1,5 +1,9 @@
 ## Changelog
 
+### [2.5.0] - 2022-08-
+#### Fixed
+- fix default scorer used by cdist to use C++ implementation if possible
+
 ### [2.4.4] - 2022-08-12
 #### Changed
 - Added support for Python3.11

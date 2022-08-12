@@ -14,7 +14,7 @@ from rapidfuzz.process_cdist_cpp_impl import (
     cdist as _cdist,
 )
 
-from rapidfuzz.fuzz_py import ratio
+from rapidfuzz.fuzz import ratio
 
 # numpy is required to use cdist
 try:
