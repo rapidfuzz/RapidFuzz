@@ -1,6 +1,11 @@
 ## Changelog
 
 ### [2.5.0] - 2022-08-
+#### Added
+- added support for KeyboardInterrupt in processor module
+  It might still take a bit until the KeyboardInterrupt is registered, but
+  no longer runs all text comparisions after pressing `Ctrl + C`
+
 #### Fixed
 - fix default scorer used by cdist to use C++ implementation if possible
 

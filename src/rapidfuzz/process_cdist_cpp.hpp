@@ -4,6 +4,8 @@
 #include "rapidfuzz_capi.h"
 #include <exception>
 #include <atomic>
+#include <chrono>
+using namespace std::chrono_literals;
 
 int64_t any_round(double score)
 {
@@ -42,13 +44,13 @@ struct Matrix
     Matrix(MatrixType dtype, size_t rows, size_t cols)
         : m_dtype(dtype), m_rows(rows), m_cols(cols)
     {
-        
+
         m_matrix = malloc(get_dtype_size() * m_rows * m_cols);
         if (m_matrix == nullptr)
             throw std::bad_alloc();
     }
 
-    Matrix(const Matrix& other) : m_dtype(other.m_dtype), m_rows(other.m_rows), m_cols(other.m_cols) 
+    Matrix(const Matrix& other) : m_dtype(other.m_dtype), m_rows(other.m_rows), m_cols(other.m_cols)
     {
         m_matrix = malloc(get_dtype_size() * m_rows * m_cols);
         if (m_matrix == nullptr)
@@ -163,13 +165,34 @@ struct Matrix
     }
 };
 
+bool KeyboardInterruptOccured(PyThreadState*& save)
+{
+    PyEval_RestoreThread(save);
+    bool res = PyErr_CheckSignals() != 0;
+    save = PyEval_SaveThread();
+    return res;
+}
+
 template <typename Func>
 void run_parallel(int workers, int64_t rows, Func&& func)
 {
+    PyThreadState* save = PyEval_SaveThread();
+
     /* for these cases spawning threads causes to much overhead to be worth it */
     if (workers == 0 || workers == 1)
     {
-        func(0, rows);
+        for (int64_t row = 0; row < rows; ++row)
+        {
+            if (KeyboardInterruptOccured(save))
+            {
+                PyEval_RestoreThread(save);
+                throw std::runtime_error("");
+            }
+
+            func(row, row + 1);
+        }
+
+        PyEval_RestoreThread(save);
         return;
     }
 
@@ -203,11 +226,22 @@ void run_parallel(int workers, int64_t rows, Func&& func)
         }
     });
 
-    executor.run(taskflow).get();
-
-    if (exception) {
-        std::rethrow_exception(exception);
+    auto future = executor.run(taskflow);
+    while (future.wait_for(1s) != std::future_status::ready)
+    {
+        if (KeyboardInterruptOccured(save))
+        {
+            exceptions_occured.fetch_add(1);
+            future.wait();
+            PyEval_RestoreThread(save);
+            /* exception already set */
+            throw std::runtime_error("");
+        }
     }
+    PyEval_RestoreThread(save);
+
+    if (exception)
+        std::rethrow_exception(exception);
 }
 
 template <typename T>
@@ -219,40 +253,25 @@ static Matrix cdist_single_list_impl(
     int64_t cols = queries.size();
     Matrix matrix(dtype, static_cast<size_t>(rows), static_cast<size_t>(cols));
 
-    std::exception_ptr exception = nullptr;
+    run_parallel(workers, rows, [&] (std::int64_t row, std::int64_t row_end) {
+        for (; row < row_end; ++row)
+        {
+            RF_ScorerFunc scorer_func;
+            PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, 1, &queries[row].string));
+            RF_ScorerWrapper ScorerFunc(scorer_func);
 
-Py_BEGIN_ALLOW_THREADS
-    try
-    {
-        run_parallel(workers, rows, [&] (std::int64_t row, std::int64_t row_end) {
-            for (; row < row_end; ++row)
+            T score;
+            ScorerFunc.call(&queries[row].string, score_cutoff, &score);
+            matrix.set(row, row, score);
+
+            for (int64_t col = row + 1; col < cols; ++col)
             {
-                RF_ScorerFunc scorer_func;
-                PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, 1, &queries[row].string));
-                RF_ScorerWrapper ScorerFunc(scorer_func);
-
-                T score;
-                ScorerFunc.call(&queries[row].string, score_cutoff, &score);
-                matrix.set(row, row, score);
-
-                for (int64_t col = row + 1; col < cols; ++col)
-                {
-                    ScorerFunc.call(&queries[col].string, score_cutoff, &score);
-                    matrix.set(row, col, score);
-                    matrix.set(col, row, score);
-                }
+                ScorerFunc.call(&queries[col].string, score_cutoff, &score);
+                matrix.set(row, col, score);
+                matrix.set(col, row, score);
             }
-        });
-    }
-    catch(...)
-    {
-        exception = std::current_exception();
-    }
-Py_END_ALLOW_THREADS
-
-    if (exception) {
-        std::rethrow_exception(exception);
-    }
+        }
+    });
 
     return matrix;
 }
@@ -266,36 +285,21 @@ static Matrix cdist_two_lists_impl(
     int64_t cols = choices.size();
     Matrix matrix(dtype, static_cast<size_t>(rows), static_cast<size_t>(cols));
 
-    std::exception_ptr exception = nullptr;
+    run_parallel(workers, rows, [&] (std::int64_t row, std::int64_t row_end) {
+        for (; row < row_end; ++row)
+        {
+            RF_ScorerFunc scorer_func;
+            PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, 1, &queries[row].string));
+            RF_ScorerWrapper ScorerFunc(scorer_func);
 
-Py_BEGIN_ALLOW_THREADS
-    try
-    {
-        run_parallel(workers, rows, [&] (std::int64_t row, std::int64_t row_end) {
-            for (; row < row_end; ++row)
+            for (int64_t col = 0; col < cols; ++col)
             {
-                RF_ScorerFunc scorer_func;
-                PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, 1, &queries[row].string));
-                RF_ScorerWrapper ScorerFunc(scorer_func);
-
-                for (int64_t col = 0; col < cols; ++col)
-                {
-                    T score;
-                    ScorerFunc.call(&choices[col].string, score_cutoff, &score);
-                    matrix.set(row, col, score);
-                }
+                T score;
+                ScorerFunc.call(&choices[col].string, score_cutoff, &score);
+                matrix.set(row, col, score);
             }
-        });
-    }
-    catch(...)
-    {
-        exception = std::current_exception();
-    }
-Py_END_ALLOW_THREADS
-
-    if (exception) {
-        std::rethrow_exception(exception);
-    }
+        }
+    });
 
     return matrix;
 }
