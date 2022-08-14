@@ -210,7 +210,7 @@ jobs:
     if: github.event_name == 'release' && github.event.action == 'published'
     needs: [build_wheels_windows, build_wheels_macos, build_wheels_linux, build_sdist]
     name: deploy wheels to pypi
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/download-artifact@v2
@@ -218,7 +218,7 @@ jobs:
           name: artifact
           path: dist
 
-      - uses: pypa/gh-action-pypi-publish@master
+      - uses: pypa/gh-action-pypi-publish@v1.5.1
         with:
           user: __token__
           password: ${{ secrets.pypi_password }}
