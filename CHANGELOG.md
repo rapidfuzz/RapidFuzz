@@ -1,6 +1,6 @@
 ## Changelog
 
-### [2.5.0] - 2022-08-
+### [2.5.0] - 2022-08-14
 #### Added
 - added support for KeyboardInterrupt in processor module
   It might still take a bit until the KeyboardInterrupt is registered, but
