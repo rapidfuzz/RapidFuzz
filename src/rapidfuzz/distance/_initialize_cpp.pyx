@@ -2,7 +2,7 @@
 # cython: language_level=3, binding=True, linetrace=True
 
 from rapidfuzz_capi cimport RF_String
-from cpp_common cimport vector_slice, RfEditOp, RfOpcode, EditType, is_valid_string, convert_string
+from cpp_common cimport RfEditOp, RfOpcode, EditType, is_valid_string, convert_string
 
 from libcpp cimport bool
 from libcpp.vector cimport vector

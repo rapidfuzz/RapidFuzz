@@ -194,7 +194,6 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
         RfOpcode& operator[](int64_t pos) except +
         int64_t size()
         RfOpcodes inverse() except +
-        RfOpcodes slice(int, int, int) except +
         int64_t get_src_len()
         void set_src_len(int64_t)
         int64_t get_dest_len()
@@ -238,8 +237,6 @@ cdef extern from "cpp_common.hpp":
     int is_valid_string(object py_str) except +
     RF_String convert_string(object py_str)
     void validate_string(object py_str, const char* err) except +
-
-    vector[T] vector_slice[T](const vector[T]& vec, int start, int stop, int step) except +
 
 cdef inline uint64_t rf_hash(val) except *:
     if val == -1:
