@@ -5,7 +5,7 @@
 
 <p align="center">
   <a href="https://github.com/maxbachmann/RapidFuzz/actions">
-    <img src="https://github.com/maxbachmann/RapidFuzz/workflows/Build/badge.svg"
+    <img src="https://github.com/maxbachmann/RapidFuzz/workflows/Test%20Build/badge.svg"
          alt="Continous Integration">
   </a>
   <a href="https://pypi.org/project/rapidfuzz/">
