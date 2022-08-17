@@ -1,5 +1,9 @@
 ## Changelog
 
+### [2.6.0] - 2022-08-
+#### Fixed
+- fix hashing for custom classes
+
 ### [2.5.0] - 2022-08-14
 #### Added
 - added support for KeyboardInterrupt in processor module

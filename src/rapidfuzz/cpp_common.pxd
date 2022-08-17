@@ -238,11 +238,6 @@ cdef extern from "cpp_common.hpp":
     RF_String convert_string(object py_str)
     void validate_string(object py_str, const char* err) except +
 
-cdef inline uint64_t rf_hash(val) except *:
-    if val == -1:
-        return <uint64_t>-1
-    return <uint64_t>hash(val)
-
 cdef inline RF_String hash_array(arr) except *:
     # TODO on Cpython this does not require any copies
     cdef RF_String s_proc
@@ -283,7 +278,7 @@ cdef inline RF_String hash_array(arr) except *:
         else: # float/double are hashed
             s_proc.kind = RF_StringType.RF_UINT64
             for i in range(s_proc.length):
-                (<uint64_t*>s_proc.data)[i] = rf_hash(arr[i])
+                (<uint64_t*>s_proc.data)[i] = <uint64_t>hash(arr[i])
     except Exception as e:
         free(s_proc.data)
         s_proc.data = NULL
@@ -309,8 +304,10 @@ cdef inline RF_String hash_sequence(seq) except *:
             # this is required so e.g. a list of char can be compared to a string
             if isinstance(elem, str) and len(elem) == 1:
                 (<uint64_t*>s_proc.data)[i] = <uint64_t><Py_UCS4>elem
+            elif isinstance(elem, int) and elem == -1:
+                (<uint64_t*>s_proc.data)[i] = <uint64_t>-1
             else:
-                (<uint64_t*>s_proc.data)[i] = rf_hash(elem)
+                (<uint64_t*>s_proc.data)[i] = <uint64_t>hash(elem)
     except Exception as e:
         free(s_proc.data)
         s_proc.data = NULL

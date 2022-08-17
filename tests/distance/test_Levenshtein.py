@@ -10,6 +10,18 @@ from rapidfuzz.distance import Opcodes, Opcode, Levenshtein_cpp, Levenshtein_py
 def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
     return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
+class CustomHashable:
+    def __init__(self, string):
+        self._string = string
+
+    def __eq__(self, other):
+        raise NotImplementedError
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __hash__(self):
+        return hash(self._string)
 
 class Levenshtein:
     @staticmethod
@@ -61,6 +73,7 @@ def test_cross_type_matching():
     # todo add support in pure python
     assert Levenshtein_cpp.distance("aaaa", [ord("a"), ord("a"), "a", "a"]) == 0
     assert Levenshtein_cpp.distance([0, -1], [0, -2]) == 1
+    assert Levenshtein_cpp.distance([CustomHashable("aa"), CustomHashable("aa")], [CustomHashable("aa"), CustomHashable("bb")]) == 1
 
 
 def test_word_error_rate():
