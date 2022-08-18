@@ -5,7 +5,7 @@
 - fix hashing for custom classes
 
 #### Added
-- add support for slicing in `Editops.__getitem__`
+- add support for slicing in `Editops.__getitem__`/`Editops.__delitem__`
 
 ### [2.5.0] - 2022-08-14
 #### Added

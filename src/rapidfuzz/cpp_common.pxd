@@ -109,6 +109,7 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
         RfEditops inverse() except +
         RfEditops remove_subsequence(const RfEditops& subsequence) except +
         RfEditops slice(int, int, int) except +
+        void remove_slice(int, int, int) except +
         int64_t get_src_len()
         void set_src_len(int64_t)
         int64_t get_dest_len()

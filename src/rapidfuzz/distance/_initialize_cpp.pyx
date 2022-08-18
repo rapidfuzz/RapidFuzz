@@ -500,15 +500,27 @@ cdef class Editops:
     def __len__(self):
         return self.editops.size()
 
-    def __delitem__(self, item):
-        cdef Py_ssize_t index = item
-        if index < 0:
-            index += <Py_ssize_t>self.editops.size()
+    def __delitem__(self, key):
+        cdef Py_ssize_t index
+        cdef Py_ssize_t start, stop, step
 
-        if index < 0 or index >= <Py_ssize_t>self.editops.size():
-            raise IndexError("Editops index out of range")
+        if isinstance(key, int):
+            index = key
+            if index < 0:
+                index += <Py_ssize_t>self.editops.size()
 
-        self.editops.erase(self.editops.begin() + index)
+            if index < 0 or index >= <Py_ssize_t>self.editops.size():
+                raise IndexError("Editops index out of range")
+
+            self.editops.erase(self.editops.begin() + index)
+        elif isinstance(key, slice):
+            start, stop, step = key.indices(<Py_ssize_t>self.editops.size())
+            if step < 0:
+                raise ValueError("step sizes below 0 lead to an invalid order of editops")
+
+            self.editops.remove_slice(start, stop, step)
+        else:
+            raise TypeError("Expected index or slice")
 
     def __getitem__(self, key):
         cdef Py_ssize_t index
@@ -535,7 +547,7 @@ cdef class Editops:
             (<Editops>x).editops = self.editops.slice(start, stop, step)
             return x
         else:
-            raise TypeError("Expected index")
+            raise TypeError("Expected index or slice")
 
     def __repr__(self):
         return "Editops([" + ", ".join(repr(op) for op in self) + f"], src_len={self.editops.get_src_len()}, dest_len={self.editops.get_dest_len()})"

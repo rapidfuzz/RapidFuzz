@@ -71,6 +71,7 @@ def test_editops_get_index():
     with pytest.raises(IndexError):
         ops[-6]
 
+
 def test_editops_get_slice():
     """
     test __getitem__ with slice of Editops
@@ -109,6 +110,53 @@ def test_editops_get_slice():
 
     with pytest.raises(ValueError):
         ops[::-1]
+
+
+def test_editops_del_slice():
+    """
+    test __delitem__ with slice of Editops
+    """
+    ops = Editops(
+        [
+            ("delete", 1, 1),
+            ("replace", 2, 1),
+            ("insert", 6, 5),
+            ("insert", 6, 6),
+            ("insert", 6, 7),
+        ],
+        7,
+        9,
+    )
+
+    ops_list = [
+        ("delete", 1, 1),
+        ("replace", 2, 1),
+        ("insert", 6, 5),
+        ("insert", 6, 6),
+        ("insert", 6, 7),
+    ]
+
+    def del_test(key):
+        _ops = ops[::]
+        _ops_list = ops_list[::]
+        del _ops[key]
+        del _ops_list[key]
+        assert _ops.as_list() == _ops_list
+
+    del_test(slice(None, 4, None))
+    del_test(slice(1, None, None))
+    del_test(slice(1, 4, None))
+    del_test(slice(None, 4, 2))
+    del_test(slice(1, None, 2))
+    del_test(slice(1, 4, 2))
+
+    del_test(slice(None, -1, None))
+    del_test(slice(-4, None, None))
+    del_test(slice(-4, -1, None))
+    del_test(slice(None, -1, 2))
+    del_test(slice(-4, None, 2))
+    del_test(slice(-4, -1, 2))
+
 
 def test_editops_inversion():
     """
