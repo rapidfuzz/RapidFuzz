@@ -4,6 +4,9 @@
 #### Fixed
 - fix hashing for custom classes
 
+#### Added
+- add support for slicing in `Editops.__getitem__`
+
 ### [2.5.0] - 2022-08-14
 #### Added
 - added support for KeyboardInterrupt in processor module

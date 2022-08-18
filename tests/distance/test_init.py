@@ -71,6 +71,44 @@ def test_editops_get_index():
     with pytest.raises(IndexError):
         ops[-6]
 
+def test_editops_get_slice():
+    """
+    test __getitem__ with slice of Editops
+    """
+    ops = Editops(
+        [
+            ("delete", 1, 1),
+            ("replace", 2, 1),
+            ("insert", 6, 5),
+            ("insert", 6, 6),
+            ("insert", 6, 7),
+        ],
+        7,
+        9,
+    )
+
+    ops_list = [
+        ("delete", 1, 1),
+        ("replace", 2, 1),
+        ("insert", 6, 5),
+        ("insert", 6, 6),
+        ("insert", 6, 7),
+    ]
+
+    assert ops[::].as_list() == ops_list[::]
+    assert ops[::] is not ops
+    assert ops[1:].as_list() == ops_list[1:]
+    assert ops[:3].as_list() == ops_list[:3]
+    assert ops[1:3].as_list() == ops_list[1:3]
+    assert ops[:-1].as_list() == ops_list[:-1]
+    assert ops[-3:].as_list() == ops_list[-3:]
+    assert ops[-3:-1].as_list() == ops_list[-3:-1]
+
+    with pytest.raises(ValueError):
+        ops[::0]
+
+    with pytest.raises(ValueError):
+        ops[::-1]
 
 def test_editops_inversion():
     """

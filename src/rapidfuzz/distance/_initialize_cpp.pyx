@@ -512,6 +512,7 @@ cdef class Editops:
 
     def __getitem__(self, key):
         cdef Py_ssize_t index
+        cdef Py_ssize_t start, stop, step
 
         if isinstance(key, int):
             index = key
@@ -526,6 +527,13 @@ cdef class Editops:
                 self.editops[index].src_pos,
                 self.editops[index].dest_pos
             )
+        elif isinstance(key, slice):
+            start, stop, step = key.indices(<Py_ssize_t>self.editops.size())
+            if step < 0:
+                raise ValueError("step sizes below 0 lead to an invalid order of editops")
+            x = Editops.__new__(Editops)
+            (<Editops>x).editops = self.editops.slice(start, stop, step)
+            return x
         else:
             raise TypeError("Expected index")
 
