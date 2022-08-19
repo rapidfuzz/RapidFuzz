@@ -2,6 +2,53 @@
 # Copyright (C) 2022 Max Bachmann
 
 
+def _damerau_levenshtein_distance_zhao(s1, s2):
+    maxVal = max(len(s1), len(s2)) + 1
+    last_row_id = {}
+    last_row_id_get = last_row_id.get
+    size = len(s2) + 2
+    FR = [maxVal] * size
+    R1 = [maxVal] * size
+    R = [x for x in range(size)]
+    R[-1] = maxVal
+
+    for i in range(1, len(s1) + 1):
+        R, R1 = R1, R
+        last_col_id = -1
+        last_i2l1 = R[0]
+        R[0] = i
+        T = maxVal
+
+        for j in range(1, len(s2) + 1):
+            diag = R1[j - 1] + (s1[i - 1] != s2[j - 1])
+            left = R[j - 1] + 1
+            up = R1[j] + 1
+            temp = min(diag, left, up)
+
+            if s1[i - 1] == s2[j - 1]:
+                last_col_id = j  # last occurence of s1_i
+                FR[j] = R1[j - 2]  # save H_k-1,j-2
+                T = last_i2l1  # save H_i-2,l-1
+            else:
+                k = last_row_id_get(s2[j - 1], -1)
+                l = last_col_id
+
+                if (j - l) == 1:
+                    transpose = FR[j] + (i - k)
+                    temp = min(temp, transpose)
+                elif (i - k) == 1:
+                    transpose = T + (j - l)
+                    temp = min(temp, transpose)
+
+            last_i2l1 = R[j]
+            R[j] = temp
+
+        last_row_id[s1[i - 1]] = i
+
+    dist = R[len(s2)]
+    return dist
+
+
 def distance(s1, s2, *, processor=None, score_cutoff=None):
     """
     Calculates the minimum number of insertions and deletions
@@ -33,21 +80,15 @@ def distance(s1, s2, *, processor=None, score_cutoff=None):
     Find the Damerau Levenshtein distance between two strings:
 
     >>> from rapidfuzz.distance import DamerauLevenshtein
-    >>> DamerauLevenshtein.distance("lewenstein", "levenshtein")
-    3
-
-    Setting a maximum distance allows the implementation to select
-    a more efficient implementation:
-
-    >>> DamerauLevenshtein.distance("lewenstein", "levenshtein", score_cutoff=1)
+    >>> DamerauLevenshtein.distance("CA", "ABC")
     2
-
     """
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
 
-    raise NotImplementedError
+    dist = _damerau_levenshtein_distance_zhao(s1, s2)
+    return dist if (score_cutoff is None or dist <= score_cutoff) else score_cutoff + 1
 
 
 def similarity(s1, s2, *, processor=None, score_cutoff=None):
@@ -145,25 +186,6 @@ def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     -------
     norm_sim : float
         normalized similarity between s1 and s2 as a float between 0 and 1.0
-
-    Examples
-    --------
-    Find the normalized Damerau Levenshtein similarity between two strings:
-
-    >>> from rapidfuzz.distance import DamerauLevenshtein
-    >>> DamerauLevenshtein.normalized_similarity("lewenstein", "levenshtein")
-    0.85714285714285
-
-    Setting a score_cutoff allows the implementation to select
-    a more efficient implementation:
-
-    >>> DamerauLevenshtein.normalized_similarity("lewenstein", "levenshtein", score_cutoff=0.9)
-    0.0
-
-    When a different processor is used s1 and s2 do not have to be strings
-
-    >>> DamerauLevenshtein.normalized_similarity(["lewenstein"], ["levenshtein"], processor=lambda s: s[0])
-    0.8571428571428572
     """
     if processor is not None:
         s1 = processor(s1)

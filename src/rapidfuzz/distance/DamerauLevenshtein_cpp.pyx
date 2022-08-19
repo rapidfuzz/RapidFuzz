@@ -62,15 +62,8 @@ def distance(s1, s2, *, processor=None, score_cutoff=None):
     Find the Damerau Levenshtein distance between two strings:
 
     >>> from rapidfuzz.distance import DamerauLevenshtein
-    >>> DamerauLevenshtein.distance("lewenstein", "levenshtein")
-    3
-
-    Setting a maximum distance allows the implementation to select
-    a more efficient implementation:
-
-    >>> DamerauLevenshtein.distance("lewenstein", "levenshtein", score_cutoff=1)
+    >>> DamerauLevenshtein.distance("CA", "ABC")
     2
-
     """
     cdef RF_StringWrapper s1_proc, s2_proc
     cdef int64_t c_score_cutoff = INT64_MAX if score_cutoff is None else score_cutoff
@@ -180,25 +173,6 @@ def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     -------
     norm_sim : float
         normalized similarity between s1 and s2 as a float between 0 and 1.0
-
-    Examples
-    --------
-    Find the normalized Damerau Levenshtein similarity between two strings:
-
-    >>> from rapidfuzz.distance import DamerauLevenshtein
-    >>> DamerauLevenshtein.normalized_similarity("lewenstein", "levenshtein")
-    0.85714285714285
-
-    Setting a score_cutoff allows the implementation to select
-    a more efficient implementation:
-
-    >>> DamerauLevenshtein.normalized_similarity("lewenstein", "levenshtein", score_cutoff=0.9)
-    0.0
-
-    When a different processor is used s1 and s2 do not have to be strings
-
-    >>> DamerauLevenshtein.normalized_similarity(["lewenstein"], ["levenshtein"], processor=lambda s: s[0])
-    0.8571428571428572
     """
     cdef RF_StringWrapper s1_proc, s2_proc
     if s1 is None or s2 is None:
