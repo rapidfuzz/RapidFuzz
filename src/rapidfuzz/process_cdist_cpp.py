@@ -49,6 +49,7 @@ def _dtype_to_type_num(dtype):
 
     raise TypeError("unsupported dtype")
 
+
 def cdist(
     queries,
     choices,

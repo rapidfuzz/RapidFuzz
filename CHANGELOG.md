@@ -6,6 +6,7 @@
 
 #### Added
 - add support for slicing in `Editops.__getitem__`/`Editops.__delitem__`
+- add `DamerauLevenshtein` module
 
 ### [2.5.0] - 2022-08-14
 #### Added

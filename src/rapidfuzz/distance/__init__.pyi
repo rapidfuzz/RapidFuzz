@@ -7,6 +7,7 @@ from . import (
     JaroWinkler as JaroWinkler,
     Levenshtein as Levenshtein,
     LCSseq as LCSseq,
+    DamerauLevenshtein as DamerauLevenshtein
 )
 
 _AnyOpList = Union[

@@ -34,6 +34,15 @@ target_link_libraries(Levenshtein_cpp PRIVATE rapidfuzz::rapidfuzz jaro_winkler:
 python_extension_module(Levenshtein_cpp)
 install(TARGETS Levenshtein_cpp LIBRARY DESTINATION src/rapidfuzz/distance)
 
+create_cython_target(DamerauLevenshtein_cpp)
+add_library(DamerauLevenshtein_cpp MODULE ${DamerauLevenshtein_cpp})
+target_compile_features(DamerauLevenshtein_cpp PUBLIC cxx_std_14)
+target_include_directories(DamerauLevenshtein_cpp PRIVATE ${RF_CAPI_PATH} ${RF_BASE_DIR}/rapidfuzz ${RF_BASE_DIR}/rapidfuzz/distance)
+target_link_libraries(DamerauLevenshtein_cpp PRIVATE rapidfuzz::rapidfuzz jaro_winkler::jaro_winkler)
+python_extension_module(DamerauLevenshtein_cpp)
+install(TARGETS DamerauLevenshtein_cpp LIBRARY DESTINATION src/rapidfuzz/distance)
+
+
 create_cython_target(Indel_cpp)
 add_library(Indel_cpp MODULE ${Indel_cpp})
 target_compile_features(Indel_cpp PUBLIC cxx_std_14)

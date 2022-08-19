@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
 
+
 class MatchingBlock:
     def __init__(self, a, b, size):
         self.a = a
@@ -14,19 +15,21 @@ class MatchingBlock:
         if len(other) != 3:
             return False
 
-        return (other[0] == self.a
-            and other[1] == self.b
-            and other[2] == self.size)
+        return other[0] == self.a and other[1] == self.b and other[2] == self.size
 
     def __getitem__(self, i):
-        if i==0 or i==-3: return self.a
-        if i==1 or i==-2: return self.b
-        if i==2 or i==-1: return self.size
+        if i == 0 or i == -3:
+            return self.a
+        if i == 1 or i == -2:
+            return self.b
+        if i == 2 or i == -1:
+            return self.size
 
-        raise IndexError('MatchingBlock index out of range')
+        raise IndexError("MatchingBlock index out of range")
 
     def __repr__(self):
         return f"MatchingBlock(a={self.a}, b={self.b}, size={self.size})"
+
 
 class Editop:
     """
