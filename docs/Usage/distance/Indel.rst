@@ -30,12 +30,6 @@ opcodes
 
 Performance
 ^^^^^^^^^^^
-Since the Levenshtein module uses different implementations based on the weights
-used, this leads to different performance characteristics. The following sections
-show the performance for the different possible weights.
-
-Indel
-~~~~~
 The following image shows a benchmark of the Indel distance in RapidFuzz
 and python-Levenshtein. Similar to the normal Levenshtein distance
 python-Levenshtein uses an implementation with a time complexity of ``O(NM)``,

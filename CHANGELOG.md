@@ -1,6 +1,6 @@
 ## Changelog
 
-### [2.6.0] - 2022-08-
+### [2.6.0] - 2022-08-20
 #### Fixed
 - fix hashing for custom classes
 

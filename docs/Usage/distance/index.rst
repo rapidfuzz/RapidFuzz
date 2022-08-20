@@ -25,6 +25,7 @@ Opcodes
    :maxdepth: 1
 
    Levenshtein
+   DamerauLevenshtein
    Indel
    Hamming
    Jaro
