@@ -119,6 +119,9 @@ class Editops:
         """
         raise NotImplementedError
 
+    def as_matching_blocks(self):
+        raise NotImplementedError
+
     def as_list(self):
         """
         Convert Editops to a list of tuples.
@@ -158,6 +161,9 @@ class Editops:
         """
         raise NotImplementedError
 
+    def apply(self, source_string, destination_string):
+        raise NotImplementedError
+
     @property
     def src_len(self):
         raise NotImplementedError
@@ -178,6 +184,9 @@ class Editops:
         raise NotImplementedError
 
     def __len__(self):
+        raise NotImplementedError
+
+    def __delitem__(self) -> None:
         raise NotImplementedError
 
     def __getitem__(self, key):
@@ -295,6 +304,9 @@ class Opcodes:
         """
         raise NotImplementedError
 
+    def as_matching_blocks(self):
+        raise NotImplementedError
+
     def as_list(self):
         """
         Convert Opcodes to a list of tuples, which is compatible
@@ -335,6 +347,12 @@ class Opcodes:
          Opcode(tag=replace, src_start=2, src_end=3, dest_start=3, dest_end=4),
          Opcode(tag=delete, src_start=3, src_end=4, dest_start=4, dest_end=4)]
         """
+        raise NotImplementedError
+
+    def remove_subsequence(self, subsequence):
+        raise NotImplementedError
+
+    def apply(self, source_string, destination_string):
         raise NotImplementedError
 
     @property

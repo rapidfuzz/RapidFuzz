@@ -126,8 +126,6 @@ jobs:
 
       - name: Test type stubs
         if: matrix.python-version != '3.6'
-        # prevent import from rapidfuzz
-        working-directory: .github
         run: |
           python -m mypy.stubtest rapidfuzz --ignore-missing-stub
 

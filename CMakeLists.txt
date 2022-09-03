@@ -11,7 +11,7 @@ endif()
 project(rapidfuzz LANGUAGES C CXX)
 
 if (MSVC)
-    add_compile_options(/W4)
+    add_compile_options(/W4 /bigobj)
 else()
     add_compile_options(-Wall -Wextra -pedantic)
 endif()
