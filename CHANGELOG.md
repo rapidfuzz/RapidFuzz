@@ -1,5 +1,9 @@
 ## Changelog
 
+### [2.6.1] - 2022-09-03
+#### Fixed
+- fix incorrect results of partial_ratio for long needles (#257)
+
 ### [2.6.0] - 2022-08-20
 #### Fixed
 - fix hashing for custom classes

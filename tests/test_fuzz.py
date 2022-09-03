@@ -353,5 +353,14 @@ def test_help(scorer):
     help(scorer)
 
 
+def testIssue257():
+    s1 = "aaaaaaaaaaaaaaaaaaaaaaaabacaaaaaaaabaaabaaaaaaaababbbbbbbbbbabbcb"
+    s2 = "aaaaaaaaaaaaaaaaaaaaaaaababaaaaaaaabaaabaaaaaaaababbbbbbbbbbabbcb"
+    score = fuzz.partial_ratio(s1, s2)
+    assert isclose(score, 98.46153846153847)
+    score = fuzz.partial_ratio(s2, s1)
+    assert isclose(score, 98.46153846153847)
+
+
 if __name__ == "__main__":
     unittest.main()
