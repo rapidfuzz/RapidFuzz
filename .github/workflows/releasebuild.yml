@@ -81,7 +81,6 @@ jobs:
       CIBW_TEST_SKIP: "*-win32"
       CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_COMMAND: pytest {package}/tests
-      CIBW_TEST_COMMAND_LINUX: "{package}/tools/seg_wrapper.sh pytest {package}/tests"
       CIBW_BUILD_VERBOSITY: 3
 
     steps:
@@ -142,7 +141,6 @@ jobs:
       CIBW_TEST_SKIP: "{*-macosx_{arm64,universal2},pp*-macosx_*}"
       CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_COMMAND: pytest {package}/tests
-      CIBW_TEST_COMMAND_LINUX: "{package}/tools/seg_wrapper.sh pytest {package}/tests"
       CIBW_BUILD_VERBOSITY: 3
 
     steps:
@@ -193,7 +191,7 @@ jobs:
       CIBW_TEST_SKIP: "{*_{aarch64,ppc64le,s390x,i686},*musllinux_*,pp38-*}"
       CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_COMMAND: pytest {package}/tests
-      CIBW_TEST_COMMAND_LINUX: "{package}/tools/seg_wrapper.sh pytest {package}/tests"
+      # CIBW_TEST_COMMAND: "{package}/tools/seg_wrapper.sh pytest {package}/tests"
       CIBW_BUILD_VERBOSITY: 3
 
     steps:

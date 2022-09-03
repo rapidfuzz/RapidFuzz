@@ -29,18 +29,18 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
 
     ctypedef struct RfEditOp "rapidfuzz::EditOp":
         EditType type
-        int64_t src_pos
-        int64_t dest_pos
+        size_t src_pos
+        size_t dest_pos
 
     cdef cppclass RfScoreAlignment "rapidfuzz::ScoreAlignment"[T]:
         T score
-        int64_t src_start
-        int64_t src_end
-        int64_t dest_start
-        int64_t dest_end
+        size_t src_start
+        size_t src_end
+        size_t dest_start
+        size_t dest_end
 
         RfScoreAlignment()
-        RfScoreAlignment(T score, int64_t src_start, int64_t src_end, int64_t dest_start, int64_t dest_end)
+        RfScoreAlignment(T score, size_t src_start, size_t src_end, size_t dest_start, size_t dest_end)
 
     cdef cppclass RfOpcodes "rapidfuzz::Opcodes"
 
@@ -100,23 +100,23 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
             bint operator>=(const_iterator)
 
         RfEditops() except +
-        RfEditops(int64_t) except +
+        RfEditops(size_t) except +
         RfEditops(const RfEditops&) except +
         RfEditops(const RfOpcodes&) except +
         bool operator==(const RfEditops&)
-        RfEditOp& operator[](int64_t pos) except +
-        int64_t size()
+        RfEditOp& operator[](size_t pos) except +
+        size_t size()
         RfEditops inverse() except +
         RfEditops remove_subsequence(const RfEditops& subsequence) except +
         RfEditops slice(int, int, int) except +
         void remove_slice(int, int, int) except +
-        int64_t get_src_len()
-        void set_src_len(int64_t)
-        int64_t get_dest_len()
-        void set_dest_len(int64_t)
+        size_t get_src_len()
+        void set_src_len(size_t)
+        size_t get_dest_len()
+        void set_dest_len(size_t)
         RfEditops reverse()
         void emplace_back(...)
-        void reserve(int64_t) except +
+        void reserve(size_t) except +
         void shrink_to_fit() except +
 
         iterator begin()
@@ -127,10 +127,10 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
 
     ctypedef struct RfOpcode "rapidfuzz::Opcode":
         EditType type
-        int64_t src_begin
-        int64_t src_end
-        int64_t dest_begin
-        int64_t dest_end
+        size_t src_begin
+        size_t src_end
+        size_t dest_begin
+        size_t dest_end
 
     cdef cppclass RfOpcodes "rapidfuzz::Opcodes":
         ctypedef size_t size_type
@@ -188,20 +188,20 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
             bint operator>=(const_iterator)
 
         RfOpcodes() except +
-        RfOpcodes(int64_t) except +
+        RfOpcodes(size_t) except +
         RfOpcodes(const RfOpcodes&) except +
         RfOpcodes(const RfEditops&) except +
         bool operator==(const RfOpcodes&)
-        RfOpcode& operator[](int64_t pos) except +
-        int64_t size()
+        RfOpcode& operator[](size_t pos) except +
+        size_t size()
         RfOpcodes inverse() except +
-        int64_t get_src_len()
-        void set_src_len(int64_t)
-        int64_t get_dest_len()
-        void set_dest_len(int64_t)
+        size_t get_src_len()
+        void set_src_len(size_t)
+        size_t get_dest_len()
+        void set_dest_len(size_t)
         RfOpcodes reverse()
         void emplace_back(...)
-        void reserve(int64_t) except +
+        void reserve(size_t) except +
         RfOpcode& back() except +
         void shrink_to_fit() except +
         bint empty()

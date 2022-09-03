@@ -51,7 +51,7 @@ cdef RfEditops list_to_editops(ops, Py_ssize_t src_len, Py_ssize_t dest_len) exc
     cdef RfEditops result
     cdef Py_ssize_t i
     cdef EditType edit_type
-    cdef int64_t src_pos, dest_pos
+    cdef size_t src_pos, dest_pos
     cdef Py_ssize_t ops_len = len(ops)
     result.set_src_len(src_len)
     result.set_dest_len(dest_len)
@@ -99,7 +99,7 @@ cdef RfOpcodes list_to_opcodes(ops, Py_ssize_t src_len, Py_ssize_t dest_len) exc
     cdef RfOpcodes result
     cdef Py_ssize_t i
     cdef EditType edit_type
-    cdef int64_t src_start, src_end, dest_start, dest_end
+    cdef size_t src_start, src_end, dest_start, dest_end
     cdef Py_ssize_t ops_len = len(ops)
     if not ops_len or len(ops[0]) == 3:
         return RfOpcodes(list_to_editops(ops, src_len, dest_len))
@@ -154,7 +154,7 @@ cdef RfOpcodes list_to_opcodes(ops, Py_ssize_t src_len, Py_ssize_t dest_len) exc
     return result
 
 cdef list editops_to_list(const RfEditops& ops):
-    cdef int64_t op_count = ops.size()
+    cdef size_t op_count = ops.size()
     cdef list result_list = PyList_New(<Py_ssize_t>op_count)
     for i in range(op_count):
         result_item = (edit_type_to_str(ops[i].type), ops[i].src_pos, ops[i].dest_pos)
@@ -164,7 +164,7 @@ cdef list editops_to_list(const RfEditops& ops):
     return result_list
 
 cdef list opcodes_to_list(const RfOpcodes& ops):
-    cdef int64_t op_count = ops.size()
+    cdef size_t op_count = ops.size()
     cdef list result_list = PyList_New(<Py_ssize_t>op_count)
     for i in range(op_count):
         result_item = (
