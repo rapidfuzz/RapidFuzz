@@ -2,6 +2,7 @@ ColumnLimit: 110
 IndentWidth: 4
 AccessModifierOffset: -4
 
+
 AllowShortIfStatementsOnASingleLine: true
 PointerAlignment: Left
 AllowShortBlocksOnASingleLine: Always
