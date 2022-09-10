@@ -1,7 +1,6 @@
 #pragma once
 #include "cpp_common.hpp"
 #include <iostream>
-#include <jaro_winkler/jaro_winkler.hpp>
 
 /* Levenshtein */
 static inline int64_t levenshtein_distance_func(const RF_String& s1, const RF_String& s2, int64_t insertion,
