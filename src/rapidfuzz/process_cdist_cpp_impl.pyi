@@ -1,13 +1,4 @@
-from typing import (
-    Any,
-    Callable,
-    Hashable,
-    Sequence,
-    Iterable,
-    Optional,
-    Union,
-    TypeVar
-)
+from typing import Any, Callable, Hashable, Sequence, Iterable, Optional, Union, TypeVar
 from rapidfuzz.fuzz import ratio
 
 _StringType = Sequence[Hashable]

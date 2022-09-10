@@ -10,7 +10,8 @@ def levenshtein(
     *,
     weights: Optional[Tuple[int, int, int]] = (1, 1, 1),
     processor: Optional[Callable[..., _StringType]] = None,
-    max: Optional[int] = None
+    max: Optional[int] = None,
+    score_cutoff: Optional[int] = None
 ) -> int: ...
 def normalized_levenshtein(
     s1: _S1,
@@ -28,7 +29,8 @@ def hamming(
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    max: Optional[int] = None
+    max: Optional[int] = None,
+    score_cutoff: Optional[int] = None
 ) -> int: ...
 def normalized_hamming(
     s1: _S1,

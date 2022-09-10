@@ -308,7 +308,7 @@ def normalized_similarity(
     return norm_sim if (score_cutoff is None or norm_sim >= score_cutoff) else 0
 
 
-def editops(s1, s2, *, processor=None):
+def editops(s1, s2, *, processor=None, score_hint=None):
     """
     Return Editops describing how to turn s1 into s2.
 
@@ -321,6 +321,10 @@ def editops(s1, s2, *, processor=None):
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
         comparing them. Default is None, which deactivates this behaviour.
+    score_hint : int, optional
+        Expected edit distance between s1 and s2. This is used to select a
+        faster implementation. If the edit distance is bigger than `score_hint`,
+        it is doubled until the distance is smaller than `score_hint`.
 
     Returns
     -------
@@ -349,7 +353,7 @@ def editops(s1, s2, *, processor=None):
     raise NotImplementedError
 
 
-def opcodes(s1, s2, *, processor=None):
+def opcodes(s1, s2, *, processor=None, score_hint=None):
     """
     Return Opcodes describing how to turn s1 into s2.
 
@@ -362,6 +366,10 @@ def opcodes(s1, s2, *, processor=None):
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
         comparing them. Default is None, which deactivates this behaviour.
+    score_hint : int, optional
+        Expected edit distance between s1 and s2. This is used to select a
+        faster implementation. If the edit distance is bigger than `score_hint`,
+        it is doubled until the distance is smaller than `score_hint`.
 
     Returns
     -------

@@ -5,7 +5,7 @@ from rapidfuzz.distance import Levenshtein, Hamming, Jaro, JaroWinkler
 import warnings
 
 
-def levenshtein(s1, s2, *, weights=(1, 1, 1), processor=None, max=None):
+def levenshtein(s1, s2, *, weights=(1, 1, 1), processor=None, max=None, score_cutoff=None):
     """
     Calculates the minimum number of insertions, deletions, and substitutions
     required to change one sequence into the other according to Levenshtein with custom
@@ -67,10 +67,11 @@ def levenshtein(s1, s2, *, weights=(1, 1, 1), processor=None, max=None):
     warnings.warn(
         "This function will be remove in v3.0.0. Use rapidfuzz.distance.Levenshtein.distance instead.",
         DeprecationWarning,
-        stacklevel=2
+        stacklevel=2,
     )
+    score_cutoff = score_cutoff or max
     return Levenshtein.distance(
-        s1, s2, weights=weights, processor=processor, score_cutoff=max
+        s1, s2, weights=weights, processor=processor, score_cutoff=score_cutoff
     )
 
 
@@ -115,9 +116,9 @@ def levenshtein_editops(s1, s2, *, processor=None):
     warnings.warn(
         "This function will be remove in v3.0.0. Use rapidfuzz.distance.Levenshtein.editops instead.",
         DeprecationWarning,
-        stacklevel=2
+        stacklevel=2,
     )
-    return Levenshtein.editops(s1, s2, processor=processor)
+    return Levenshtein.editops(s1, s2, processor=processor).as_list()
 
 
 def normalized_levenshtein(
@@ -191,7 +192,7 @@ def normalized_levenshtein(
     warnings.warn(
         "This function will be remove in v3.0.0. Use rapidfuzz.distance.Levenshtein.normalized_similarity instead.",
         DeprecationWarning,
-        stacklevel=2
+        stacklevel=2,
     )
     return (
         Levenshtein.normalized_similarity(
@@ -201,7 +202,7 @@ def normalized_levenshtein(
     )
 
 
-def hamming(s1, s2, *, processor=None, max=None):
+def hamming(s1, s2, *, processor=None, max=None, score_cutoff=None):
     """
     Calculates the Hamming distance between two strings.
     The hamming distance is defined as the number of positions
@@ -240,9 +241,10 @@ def hamming(s1, s2, *, processor=None, max=None):
     warnings.warn(
         "This function will be remove in v3.0.0. Use rapidfuzz.distance.Hamming.distance instead.",
         DeprecationWarning,
-        stacklevel=2
+        stacklevel=2,
     )
-    return Hamming.distance(s1, s2, processor=processor, score_cutoff=max)
+    score_cutoff = score_cutoff or max
+    return Hamming.distance(s1, s2, processor=processor, score_cutoff=score_cutoff)
 
 
 def normalized_hamming(s1, s2, *, processor=None, score_cutoff=None):
@@ -284,7 +286,7 @@ def normalized_hamming(s1, s2, *, processor=None, score_cutoff=None):
     warnings.warn(
         "This function will be remove in v3.0.0. Use rapidfuzz.distance.Hamming.normalized_similarity instead.",
         DeprecationWarning,
-        stacklevel=2
+        stacklevel=2,
     )
     return (
         Hamming.normalized_similarity(
@@ -324,7 +326,7 @@ def jaro_similarity(s1, s2, *, processor=None, score_cutoff=None):
     warnings.warn(
         "This function will be remove in v3.0.0. Use rapidfuzz.distance.Jaro.similarity instead.",
         DeprecationWarning,
-        stacklevel=2
+        stacklevel=2,
     )
     return Jaro.similarity(s1, s2, processor=processor, score_cutoff=score_cutoff) * 100
 
@@ -369,7 +371,7 @@ def jaro_winkler_similarity(
     warnings.warn(
         "This function will be remove in v3.0.0. Use rapidfuzz.distance.JaroWinkler.similarity instead.",
         DeprecationWarning,
-        stacklevel=2
+        stacklevel=2,
     )
     return (
         JaroWinkler.similarity(

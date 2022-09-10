@@ -161,6 +161,9 @@ class Editops:
         """
         raise NotImplementedError
 
+    def remove_subsequence(self, subsequence):
+        raise NotImplementedError
+
     def apply(self, source_string, destination_string):
         raise NotImplementedError
 
@@ -186,7 +189,7 @@ class Editops:
     def __len__(self):
         raise NotImplementedError
 
-    def __delitem__(self) -> None:
+    def __delitem__(self, item) -> None:
         raise NotImplementedError
 
     def __getitem__(self, key):
@@ -347,9 +350,6 @@ class Opcodes:
          Opcode(tag=replace, src_start=2, src_end=3, dest_start=3, dest_end=4),
          Opcode(tag=delete, src_start=3, src_end=4, dest_start=4, dest_end=4)]
         """
-        raise NotImplementedError
-
-    def remove_subsequence(self, subsequence):
         raise NotImplementedError
 
     def apply(self, source_string, destination_string):
