@@ -45,13 +45,5 @@ else()
     add_subdirectory(extern/rapidfuzz-cpp)
 endif()
 
-find_package(jaro_winkler 1.0.1 QUIET)
-if (jaro_winkler_FOUND)
-    message("Using system supplied version of jaro_winkler")
-else()
-    message("Using packaged version of jaro_winkler")
-    add_subdirectory(extern/jarowinkler-cpp)
-endif()
-
 add_subdirectory(src/rapidfuzz)
 add_subdirectory(src/rapidfuzz/distance)

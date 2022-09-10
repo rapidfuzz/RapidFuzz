@@ -1,5 +1,19 @@
 ## Changelog
 
+### [2.7.0] - 2022-09-11
+#### Performance
+- improve performance of `Levenshtein.distance`/`Levenshtein.editops` for
+  long sequences.
+
+#### Added
+- add `score_hint` parameter to `Levenshtein.editops` which allows the use of a
+  faster implementation
+
+#### Changed
+- all functions in the `string_metric` module do now raise a deprecation warning.
+  They are now only wrappers for their replacement functions, which makes them slower
+  when used with the process module
+
 ### [2.6.1] - 2022-09-03
 #### Fixed
 - fix incorrect results of partial_ratio for long needles (#257)

@@ -51,16 +51,6 @@ jobs:
           cmake --build .
           sudo cmake --build . --target install
 
-      - name: Install jarowinkler-cpp
-        run: |
-          git clone https://github.com/maxbachmann/jarowinkler-cpp.git
-          cd jarowinkler-cpp
-          git checkout v1.0.0
-          mkdir build && cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release
-          cmake --build .
-          sudo cmake --build . --target install
-
       - name: Install taskflow
         run: |
           git clone https://github.com/taskflow/taskflow.git

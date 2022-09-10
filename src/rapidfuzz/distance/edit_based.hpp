@@ -279,33 +279,6 @@ static inline bool LCSseqNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_
     return normalized_similarity_init<rapidfuzz::CachedLCSseq, double>(self, str_count, str);
 }
 
-static inline double jaro_similarity_func(const RF_String& s1, const RF_String& s2, double score_cutoff)
-{
-    return visitor(s1, s2, [&](auto first1, auto last1, auto first2, auto last2) {
-        return jaro_winkler::jaro_similarity(first1, last1, first2, last2, score_cutoff);
-    });
-}
-static inline bool JaroSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
-                                      const RF_String* str)
-{
-    return similarity_init<jaro_winkler::CachedJaroSimilarity, double>(self, str_count, str);
-}
-
-static inline double jaro_winkler_similarity_func(const RF_String& s1, const RF_String& s2,
-                                                  double prefix_weight, double score_cutoff)
-{
-    return visitor(s1, s2, [&](auto first1, auto last1, auto first2, auto last2) {
-        return jaro_winkler::jaro_winkler_similarity(first1, last1, first2, last2, prefix_weight,
-                                                     score_cutoff);
-    });
-}
-static inline bool JaroWinklerSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count,
-                                             const RF_String* str)
-{
-    return similarity_init<jaro_winkler::CachedJaroWinklerSimilarity, double>(self, str_count, str,
-                                                                              *(double*)(kwargs->context));
-}
-
 static inline rapidfuzz::Editops levenshtein_editops_func(const RF_String& s1, const RF_String& s2, int64_t score_hint)
 {
     return visitor(s1, s2, [&](auto first1, auto last1, auto first2, auto last2) {
