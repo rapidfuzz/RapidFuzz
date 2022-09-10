@@ -39,7 +39,7 @@ cdef extern from "edit_based.hpp":
     double levenshtein_normalized_similarity_func(const RF_String&, const RF_String&, int64_t, int64_t, int64_t, double) nogil except +
     int64_t levenshtein_similarity_func(          const RF_String&, const RF_String&, int64_t, int64_t, int64_t, int64_t) nogil except +
 
-    RfEditops levenshtein_editops_func(const RF_String&, const RF_String&) nogil except +
+    RfEditops levenshtein_editops_func(const RF_String&, const RF_String&, int64_t) nogil except +
 
     bool LevenshteinDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
     bool LevenshteinNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
@@ -300,7 +300,7 @@ def normalized_similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cuto
     return levenshtein_normalized_similarity_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
 
 
-def editops(s1, s2, *, processor=None):
+def editops(s1, s2, *, processor=None, score_hint=None):
     """
     Return Editops describing how to turn s1 into s2.
 
@@ -313,6 +313,10 @@ def editops(s1, s2, *, processor=None):
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
         comparing them. Default is None, which deactivates this behaviour.
+    score_hint : int, optional
+        Expected edit distance between s1 and s2. This is used to select a
+        faster implementation. If the edit distance is bigger than `score_hint`,
+        it is doubled until the distance is smaller than `score_hint`.
 
     Returns
     -------
@@ -341,12 +345,17 @@ def editops(s1, s2, *, processor=None):
     cdef RF_StringWrapper s1_proc, s2_proc
     cdef Editops ops = Editops.__new__(Editops)
 
+    cdef int64_t c_score_hint = INT64_MAX if score_hint is None else score_hint
+
+    if c_score_hint < 0:
+        raise ValueError("score_hint has to be >= 0")
+
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
-    ops.editops = levenshtein_editops_func(s1_proc.string, s2_proc.string)
+    ops.editops = levenshtein_editops_func(s1_proc.string, s2_proc.string, c_score_hint)
     return ops
 
 
-def opcodes(s1, s2, *, processor=None):
+def opcodes(s1, s2, *, processor=None, score_hint=None):
     """
     Return Opcodes describing how to turn s1 into s2.
 
@@ -359,6 +368,10 @@ def opcodes(s1, s2, *, processor=None):
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
         comparing them. Default is None, which deactivates this behaviour.
+    score_hint : int, optional
+        Expected edit distance between s1 and s2. This is used to select a
+        faster implementation. If the edit distance is bigger than `score_hint`,
+        it is doubled until the distance is smaller than `score_hint`.
 
     Returns
     -------
@@ -393,8 +406,13 @@ def opcodes(s1, s2, *, processor=None):
     cdef RF_StringWrapper s1_proc, s2_proc
     cdef Editops ops = Editops.__new__(Editops)
 
+    cdef int64_t c_score_hint = INT64_MAX if score_hint is None else score_hint
+
+    if c_score_hint < 0:
+        raise ValueError("score_hint has to be >= 0")
+
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
-    ops.editops = levenshtein_editops_func(s1_proc.string, s2_proc.string)
+    ops.editops = levenshtein_editops_func(s1_proc.string, s2_proc.string, c_score_hint)
     return ops.as_opcodes()
 
 cdef void KwargsDeinit(RF_Kwargs* self):

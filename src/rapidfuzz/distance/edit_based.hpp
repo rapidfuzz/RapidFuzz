@@ -306,10 +306,10 @@ static inline bool JaroWinklerSimilarityInit(RF_ScorerFunc* self, const RF_Kwarg
                                                                               *(double*)(kwargs->context));
 }
 
-static inline rapidfuzz::Editops levenshtein_editops_func(const RF_String& s1, const RF_String& s2)
+static inline rapidfuzz::Editops levenshtein_editops_func(const RF_String& s1, const RF_String& s2, int64_t score_hint)
 {
-    return visitor(s1, s2, [](auto first1, auto last1, auto first2, auto last2) {
-        return rapidfuzz::levenshtein_editops(first1, last1, first2, last2);
+    return visitor(s1, s2, [&](auto first1, auto last1, auto first2, auto last2) {
+        return rapidfuzz::levenshtein_editops(first1, last1, first2, last2, score_hint);
     });
 }
 
