@@ -80,7 +80,7 @@ conda install -c conda-forge rapidfuzz
 ```
 
 ### from git
-RapidFuzz can be installed directly from the source distribution by cloning the repository. This requires a C++14 capable compiler.
+RapidFuzz can be installed directly from the source distribution by cloning the repository. This requires a C++17 capable compiler.
 
 ```bash
 git clone --recursive https://github.com/maxbachmann/rapidfuzz.git

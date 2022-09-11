@@ -1,11 +1,14 @@
 ## Changelog
 
-### [2.8.0] - 2022-09-
+### [2.8.0] - 2022-09-11
 #### Fixed
 - `fuzz.partial_ratio` did not find the optimal alignment in some edge cases (#219)
 
 #### Performance
 - improve performance of `fuzz.partial_ratio`
+
+#### Changed
+- increased minimum C++ version to C++17 (see #255)
 
 ### [2.7.0] - 2022-09-11
 #### Performance
