@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
-from rapidfuzz.process_cdist_cpp_impl import (
+from rapidfuzz.process_cpp_impl import (
     FLOAT32 as _FLOAT32,
     FLOAT64 as _FLOAT64,
     INT8 as _INT8,
@@ -12,9 +12,12 @@ from rapidfuzz.process_cdist_cpp_impl import (
     UINT32 as _UINT32,
     UINT64 as _UINT64,
     cdist as _cdist,
+    extract as extract,
+    extractOne as extractOne,
+    extract_iter as extract_iter
 )
 
-from rapidfuzz.fuzz import ratio
+from rapidfuzz.fuzz import ratio as _ratio
 
 # numpy is required to use cdist
 try:
@@ -54,7 +57,7 @@ def cdist(
     queries,
     choices,
     *,
-    scorer=ratio,
+    scorer=_ratio,
     processor=None,
     score_cutoff=None,
     dtype=None,

@@ -8,8 +8,7 @@ generate_cython()
 }
 
 generate_cython fuzz_cpp
-generate_cython process_cdist_cpp_impl
-generate_cython process_cpp
+generate_cython process_cpp_impl
 generate_cython utils_cpp
 
 generate_cython distance/_initialize_cpp
