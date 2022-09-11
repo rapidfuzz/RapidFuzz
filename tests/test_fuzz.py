@@ -237,7 +237,7 @@ class RatioTest(unittest.TestCase):
         self.assertEqual(alignment.src_start, 0)
         self.assertEqual(alignment.src_end, 103)
         self.assertEqual(alignment.dest_start, 0)
-        self.assertEqual(alignment.dest_end, 103)
+        self.assertEqual(alignment.dest_end, 51)
 
 
 def test_empty_string():

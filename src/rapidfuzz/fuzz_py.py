@@ -7,7 +7,6 @@ from rapidfuzz.distance.Indel_py import (
     distance as indel_distance,
 )
 from math import ceil
-from difflib import SequenceMatcher
 from .distance._initialize_py import ScoreAlignment
 
 
@@ -142,44 +141,6 @@ def _partial_ratio_short_needle(s1, s2, score_cutoff):
     return res
 
 
-def _partial_ratio_long_needle(s1, s2, score_cutoff):
-    """
-    implementation of partial_ratio for needles <= 64. assumes s1 is already the
-    shorter string
-    """
-    blocks = SequenceMatcher(None, s1, s2, False).get_matching_blocks()
-    len1 = len(s1)
-    len2 = len(s2)
-    res = ScoreAlignment(0, 0, len1, 0, len1)
-
-    mblock = {}
-    mblock_get = mblock.get
-    x = 1
-    for ch1 in s1:
-        mblock[ch1] = mblock_get(ch1, 0) | x
-        x <<= 1
-
-    for block in blocks:
-        long_start = block[1] - block[0] if (block[1] - block[0]) > 0 else 0
-        long_end = long_start + len(s1)
-        long_substr = s2[long_start:long_end]
-
-        ls_ratio = indel_block_normalized_similarity(
-            mblock, s1, long_substr, score_cutoff=score_cutoff
-        )
-
-        if ls_ratio > res.score:
-            res.score = score_cutoff = ls_ratio
-            res.dest_start = long_start
-            res.dest_end = min(long_end, len2)
-            if res.score == 1:
-                res.score = 100
-                return res
-
-    res.score *= 100
-    return res
-
-
 def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
     """
     Searches for the optimal alignment of the shorter string in the
@@ -270,10 +231,7 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
         shorter = s2
         longer = s1
 
-    if len(shorter) <= 64:
-        return _partial_ratio_short_needle(shorter, longer, score_cutoff / 100).score
-    else:
-        return _partial_ratio_long_needle(shorter, longer, score_cutoff / 100).score
+    return _partial_ratio_short_needle(shorter, longer, score_cutoff / 100).score
 
 
 def partial_ratio_alignment(s1, s2, *, processor=None, score_cutoff=None):
@@ -339,11 +297,7 @@ def partial_ratio_alignment(s1, s2, *, processor=None, score_cutoff=None):
         shorter = s2
         longer = s1
 
-    if len(shorter) <= 64:
-        res = _partial_ratio_short_needle(shorter, longer, score_cutoff / 100)
-    else:
-        res = _partial_ratio_long_needle(shorter, longer, score_cutoff / 100)
-
+    res = _partial_ratio_short_needle(shorter, longer, score_cutoff / 100)
     if res.score < score_cutoff:
         return None
 
