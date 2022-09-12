@@ -1,5 +1,11 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
+"""
+The Levenshtein (edit) distance is a string metric to measure the
+difference between two strings/sequences s1 and s2.
+It's defined as the minimum number of insertions, deletions or
+substitutions required to transform s1 into s2.
+"""
 
 from rapidfuzz._utils import (
     fallback_import as _fallback_import,

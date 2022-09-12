@@ -4,11 +4,11 @@
 from rapidfuzz._utils import fallback_import as _fallback_import
 
 _mod = "rapidfuzz.distance._initialize"
-Editop = _fallback_import(_mod, "Editop")
-Editops = _fallback_import(_mod, "Editops")
-Opcode = _fallback_import(_mod, "Opcode")
-Opcodes = _fallback_import(_mod, "Opcodes")
-ScoreAlignment = _fallback_import(_mod, "ScoreAlignment")
-MatchingBlock = _fallback_import(_mod, "MatchingBlock")
+Editop = _fallback_import(_mod, "Editop", False)
+Editops = _fallback_import(_mod, "Editops", False)
+Opcode = _fallback_import(_mod, "Opcode", False)
+Opcodes = _fallback_import(_mod, "Opcodes", False)
+ScoreAlignment = _fallback_import(_mod, "ScoreAlignment", False)
+MatchingBlock = _fallback_import(_mod, "MatchingBlock", False)
 
 from . import Hamming, Indel, Jaro, JaroWinkler, Levenshtein, LCSseq, DamerauLevenshtein

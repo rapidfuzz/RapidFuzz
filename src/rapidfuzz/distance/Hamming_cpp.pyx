@@ -27,37 +27,6 @@ cdef extern from "edit_based.hpp":
     bool HammingNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
 
 def distance(s1, s2, *, processor=None, score_cutoff=None):
-    """
-    Calculates the Hamming distance between two strings.
-    The hamming distance is defined as the number of positions
-    where the two strings differ. It describes the minimum
-    amount of substitutions required to transform s1 into s2.
-
-    Parameters
-    ----------
-    s1 : Sequence[Hashable]
-        First string to compare.
-    s2 : Sequence[Hashable]
-        Second string to compare.
-    processor: callable, optional
-        Optional callable that is used to preprocess the strings before
-        comparing them. Default is None, which deactivates this behaviour.
-    score_cutoff : int or None, optional
-        Maximum distance between s1 and s2, that is
-        considered as a result. If the distance is bigger than score_cutoff,
-        score_cutoff + 1 is returned instead. Default is None, which deactivates
-        this behaviour.
-
-    Returns
-    -------
-    distance : int
-        distance between s1 and s2
-
-    Raises
-    ------
-    ValueError
-        If s1 and s2 have a different length
-    """
     cdef int64_t c_score_cutoff = INT64_MAX if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
@@ -71,36 +40,6 @@ def distance(s1, s2, *, processor=None, score_cutoff=None):
     return hamming_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 def similarity(s1, s2, *, processor=None, score_cutoff=None):
-    """
-    Calculates the Hamming similarity between two strings.
-    
-    This is calculated as ``len1 - distance``.
-
-    Parameters
-    ----------
-    s1 : Sequence[Hashable]
-        First string to compare.
-    s2 : Sequence[Hashable]
-        Second string to compare.
-    processor: callable, optional
-        Optional callable that is used to preprocess the strings before
-        comparing them. Default is None, which deactivates this behaviour.
-    score_cutoff : int, optional
-        Maximum distance between s1 and s2, that is
-        considered as a result. If the similarity is smaller than score_cutoff,
-        0 is returned instead. Default is None, which deactivates
-        this behaviour.
-
-    Returns
-    -------
-    distance : int
-        distance between s1 and s2
-
-    Raises
-    ------
-    ValueError
-        If s1 and s2 have a different length
-    """
     cdef int64_t c_score_cutoff = 0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
@@ -114,30 +53,6 @@ def similarity(s1, s2, *, processor=None, score_cutoff=None):
     return hamming_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 def normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
-    """
-    Calculates a normalized levenshtein similarity in the range [1, 0].
-
-    This is calculated as ``distance / (len1 + len2)``.
-
-    Parameters
-    ----------
-    s1 : Sequence[Hashable]
-        First string to compare.
-    s2 : Sequence[Hashable]
-        Second string to compare.
-    processor: callable, optional
-        Optional callable that is used to preprocess the strings before
-        comparing them. Default is None, which deactivates this behaviour.
-    score_cutoff : float, optional
-        Optional argument for a score threshold as a float between 0 and 1.0.
-        For norm_dist > score_cutoff 1.0 is returned instead. Default is 1.0,
-        which deactivates this behaviour.
-
-    Returns
-    -------
-    norm_dist : float
-        normalized distance between s1 and s2 as a float between 0 and 1.0
-    """
     cdef RF_StringWrapper s1_proc, s2_proc
     if s1 is None or s2 is None:
         return 0
@@ -152,30 +67,6 @@ def normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
 
 
 def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
-    """
-    Calculates a normalized hamming similarity in the range [0, 1].
-
-    This is calculated as ``1 - normalized_distance``
-
-    Parameters
-    ----------
-    s1 : Sequence[Hashable]
-        First string to compare.
-    s2 : Sequence[Hashable]
-        Second string to compare.
-    processor: callable, optional
-        Optional callable that is used to preprocess the strings before
-        comparing them. Default is None, which deactivates this behaviour.
-    score_cutoff : float, optional
-        Optional argument for a score threshold as a float between 0 and 1.0.
-        For norm_sim < score_cutoff 0 is returned instead. Default is 0,
-        which deactivates this behaviour.
-
-    Returns
-    -------
-    norm_sim : float
-        normalized similarity between s1 and s2 as a float between 0 and 1.0
-    """
     cdef RF_StringWrapper s1_proc, s2_proc
     if s1 is None or s2 is None:
         return 0

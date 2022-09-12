@@ -1,13 +1,6 @@
 # distutils: language=c++
 # cython: language_level=3, binding=True, linetrace=True
 
-"""
-The Levenshtein (edit) distance is a string metric to measure the
-difference between two strings/sequences s1 and s2.
-It's defined as the minimum number of insertions, deletions or
-substitutions required to transform s1 into s2.
-"""
-
 from ._initialize_cpp import Editops
 from ._initialize_cpp cimport Editops, RfEditops
 
@@ -21,10 +14,8 @@ from cpp_common cimport RF_StringWrapper, preprocess_strings, CreateScorerContex
 
 from libcpp cimport bool
 from libc.stdlib cimport malloc, free
-from libc.stdint cimport INT64_MAX, uint32_t, int64_t
-from cpython.list cimport PyList_New, PyList_SET_ITEM
-from cpython.ref cimport Py_INCREF
-from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
+from libc.stdint cimport INT64_MAX, int64_t
+from cpython.pycapsule cimport PyCapsule_New
 from cython.operator cimport dereference
 
 cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
@@ -46,164 +37,65 @@ cdef extern from "edit_based.hpp":
     bool LevenshteinSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
     bool LevenshteinNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
 
+cdef int64_t get_score_cutoff_i64(score_cutoff, int64_t default) except -1:
+    cdef int64_t c_score_cutoff = default
+    if score_cutoff is None:
+        return c_score_cutoff
+
+    c_score_cutoff = score_cutoff
+    if c_score_cutoff < 0:
+        raise ValueError("score_cutoff has to be >= 0")
+
+    return c_score_cutoff
+
+cdef double get_score_cutoff_f64(score_cutoff, double default) except -1:
+    cdef double c_score_cutoff = default
+    if score_cutoff is None:
+        return c_score_cutoff
+
+    c_score_cutoff = score_cutoff
+    if c_score_cutoff < 0:
+        raise ValueError("score_cutoff has to be >= 0")
+
+    return c_score_cutoff
+
+cdef int64_t get_score_hint_i64(score_hint, int64_t default) except -1:
+    cdef int64_t c_score_hint = default
+    if score_hint is None:
+        return c_score_hint
+
+    c_score_hint = score_hint
+    if c_score_hint < 0:
+        raise ValueError("score_hint has to be >= 0")
+
+    return c_score_hint
+
+
 def distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
-    """
-    Calculates the minimum number of insertions, deletions, and substitutions
-    required to change one sequence into the other according to Levenshtein with custom
-    costs for insertion, deletion and substitution
-
-    Parameters
-    ----------
-    s1 : Sequence[Hashable]
-        First string to compare.
-    s2 : Sequence[Hashable]
-        Second string to compare.
-    weights : Tuple[int, int, int] or None, optional
-        The weights for the three operations in the form
-        (insertion, deletion, substitution). Default is (1, 1, 1),
-        which gives all three operations a weight of 1.
-    processor: callable, optional
-        Optional callable that is used to preprocess the strings before
-        comparing them. Default is None, which deactivates this behaviour.
-    score_cutoff : int, optional
-        Maximum distance between s1 and s2, that is
-        considered as a result. If the distance is bigger than score_cutoff,
-        score_cutoff + 1 is returned instead. Default is None, which deactivates
-        this behaviour.
-
-    Returns
-    -------
-    distance : int
-        distance between s1 and s2
-
-    Raises
-    ------
-    ValueError
-        If unsupported weights are provided a ValueError is thrown
-
-    Examples
-    --------
-    Find the Levenshtein distance between two strings:
-
-    >>> from rapidfuzz.distance import Levenshtein
-    >>> Levenshtein.distance("lewenstein", "levenshtein")
-    2
-
-    Setting a maximum distance allows the implementation to select
-    a more efficient implementation:
-
-    >>> Levenshtein.distance("lewenstein", "levenshtein", score_cutoff=1)
-    2
-
-    It is possible to select different weights by passing a `weight`
-    tuple.
-
-    >>> Levenshtein.distance("lewenstein", "levenshtein", weights=(1,1,2))
-    3
-    """
     cdef RF_StringWrapper s1_proc, s2_proc
     cdef int64_t insertion, deletion, substitution
     insertion = deletion = substitution = 1
     if weights is not None:
         insertion, deletion, substitution = weights
 
-    cdef int64_t c_score_cutoff = INT64_MAX if score_cutoff is None else score_cutoff
-
-    if c_score_cutoff < 0:
-        raise ValueError("score_cutoff has to be >= 0")
-
+    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, INT64_MAX)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
     return levenshtein_distance_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
 
 
 def similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
-    """
-    Calculates the levenshtein similarity in the range [max, 0] using custom
-    costs for insertion, deletion and substitution.
-
-    This is calculated as ``max - distance``, where max is the maximal possible
-    Levenshtein distance given the lengths of the sequences s1/s2 and the weights.
-
-    Parameters
-    ----------
-    s1 : Sequence[Hashable]
-        First string to compare.
-    s2 : Sequence[Hashable]
-        Second string to compare.
-    weights : Tuple[int, int, int] or None, optional
-        The weights for the three operations in the form
-        (insertion, deletion, substitution). Default is (1, 1, 1),
-        which gives all three operations a weight of 1.
-    processor: callable, optional
-        Optional callable that is used to preprocess the strings before
-        comparing them. Default is None, which deactivates this behaviour.
-    score_cutoff : int, optional
-        Maximum distance between s1 and s2, that is
-        considered as a result. If the similarity is smaller than score_cutoff,
-        0 is returned instead. Default is None, which deactivates
-        this behaviour.
-
-    Returns
-    -------
-    similarity : int
-        similarity between s1 and s2
-
-    Raises
-    ------
-    ValueError
-        If unsupported weights are provided a ValueError is thrown
-    """
     cdef RF_StringWrapper s1_proc, s2_proc
     cdef int64_t insertion, deletion, substitution
     insertion = deletion = substitution = 1
     if weights is not None:
         insertion, deletion, substitution = weights
 
-    cdef int64_t c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
-
-    if c_score_cutoff < 0:
-        raise ValueError("score_cutoff has to be >= 0")
-
+    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, 0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
     return levenshtein_similarity_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
 
 
 def normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
-    """
-    Calculates a normalized levenshtein distance in the range [1, 0] using custom
-    costs for insertion, deletion and substitution.
-
-    This is calculated as ``distance / max``, where max is the maximal possible
-    Levenshtein distance given the lengths of the sequences s1/s2 and the weights.
-
-    Parameters
-    ----------
-    s1 : Sequence[Hashable]
-        First string to compare.
-    s2 : Sequence[Hashable]
-        Second string to compare.
-    weights : Tuple[int, int, int] or None, optional
-        The weights for the three operations in the form
-        (insertion, deletion, substitution). Default is (1, 1, 1),
-        which gives all three operations a weight of 1.
-    processor: callable, optional
-        Optional callable that is used to preprocess the strings before
-        comparing them. Default is None, which deactivates this behaviour.
-    score_cutoff : float, optional
-        Optional argument for a score threshold as a float between 0 and 1.0.
-        For norm_dist > score_cutoff 1.0 is returned instead. Default is 1.0,
-        which deactivates this behaviour.
-
-    Returns
-    -------
-    norm_dist : float
-        normalized distance between s1 and s2 as a float between 1.0 and 0.0
-
-    Raises
-    ------
-    ValueError
-        If unsupported weights are provided a ValueError is thrown
-    """
     cdef RF_StringWrapper s1_proc, s2_proc
     if s1 is None or s2 is None:
         return 0
@@ -213,75 +105,12 @@ def normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff
     if weights is not None:
         insertion, deletion, substitution = weights
 
-    cdef double c_score_cutoff = 1.0 if score_cutoff is None else score_cutoff
-
-    if c_score_cutoff < 0:
-        raise ValueError("score_cutoff has to be >= 0")
-
+    cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 1.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
     return levenshtein_normalized_distance_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
 
 
 def normalized_similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
-    """
-    Calculates a normalized levenshtein similarity in the range [0, 1] using custom
-    costs for insertion, deletion and substitution.
-
-    This is calculated as ``1 - normalized_distance``
-
-    Parameters
-    ----------
-    s1 : Sequence[Hashable]
-        First string to compare.
-    s2 : Sequence[Hashable]
-        Second string to compare.
-    weights : Tuple[int, int, int] or None, optional
-        The weights for the three operations in the form
-        (insertion, deletion, substitution). Default is (1, 1, 1),
-        which gives all three operations a weight of 1.
-    processor: callable, optional
-        Optional callable that is used to preprocess the strings before
-        comparing them. Default is None, which deactivates this behaviour.
-    score_cutoff : float, optional
-        Optional argument for a score threshold as a float between 0 and 1.0.
-        For norm_sim < score_cutoff 0 is returned instead. Default is 0,
-        which deactivates this behaviour.
-
-    Returns
-    -------
-    norm_sim : float
-        normalized similarity between s1 and s2 as a float between 0 and 1.0
-
-    Raises
-    ------
-    ValueError
-        If unsupported weights are provided a ValueError is thrown
-
-    Examples
-    --------
-    Find the normalized Levenshtein similarity between two strings:
-
-    >>> from rapidfuzz.distance import Levenshtein
-    >>> Levenshtein.normalized_similarity("lewenstein", "levenshtein")
-    0.81818181818181
-
-    Setting a score_cutoff allows the implementation to select
-    a more efficient implementation:
-
-    >>> Levenshtein.normalized_similarity("lewenstein", "levenshtein", score_cutoff=0.85)
-    0.0
-
-    It is possible to select different weights by passing a `weight`
-    tuple.
-
-    >>> Levenshtein.normalized_similarity("lewenstein", "levenshtein", weights=(1,1,2))
-    0.85714285714285
-
-    When a different processor is used s1 and s2 do not have to be strings
-
-    >>> Levenshtein.normalized_similarity(["lewenstein"], ["levenshtein"], processor=lambda s: s[0])
-    0.81818181818181
-    """
     cdef RF_StringWrapper s1_proc, s2_proc
     if s1 is None or s2 is None:
         return 0
@@ -291,64 +120,15 @@ def normalized_similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cuto
     if weights is not None:
         insertion, deletion, substitution = weights
 
-    cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
-
-    if c_score_cutoff < 0:
-        raise ValueError("score_cutoff has to be >= 0")
-
+    cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
     return levenshtein_normalized_similarity_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
 
 
 def editops(s1, s2, *, processor=None, score_hint=None):
-    """
-    Return Editops describing how to turn s1 into s2.
-
-    Parameters
-    ----------
-    s1 : Sequence[Hashable]
-        First string to compare.
-    s2 : Sequence[Hashable]
-        Second string to compare.
-    processor: callable, optional
-        Optional callable that is used to preprocess the strings before
-        comparing them. Default is None, which deactivates this behaviour.
-    score_hint : int, optional
-        Expected edit distance between s1 and s2. This is used to select a
-        faster implementation. If the edit distance is bigger than `score_hint`,
-        it is doubled until the distance is smaller than `score_hint`.
-
-    Returns
-    -------
-    editops : Editops
-        edit operations required to turn s1 into s2
-
-    Notes
-    -----
-    The alignment is calculated using an algorithm of Heikki Hyyrö, which is
-    described [8]_. It has a time complexity and memory usage of ``O([N/64] * M)``.
-
-    References
-    ----------
-    .. [8] Hyyrö, Heikki. "A Note on Bit-Parallel Alignment Computation."
-           Stringology (2004).
-
-    Examples
-    --------
-    >>> from rapidfuzz.distance import Levenshtein
-    >>> for tag, src_pos, dest_pos in Levenshtein.editops("qabxcd", "abycdf"):
-    ...    print(("%7s s1[%d] s2[%d]" % (tag, src_pos, dest_pos)))
-     delete s1[1] s2[0]
-    replace s1[3] s2[2]
-     insert s1[6] s2[5]
-    """
     cdef RF_StringWrapper s1_proc, s2_proc
     cdef Editops ops = Editops.__new__(Editops)
-
-    cdef int64_t c_score_hint = INT64_MAX if score_hint is None else score_hint
-
-    if c_score_hint < 0:
-        raise ValueError("score_hint has to be >= 0")
+    cdef int64_t c_score_hint = get_score_hint_i64(score_hint, INT64_MAX)
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
     ops.editops = levenshtein_editops_func(s1_proc.string, s2_proc.string, c_score_hint)
@@ -356,60 +136,9 @@ def editops(s1, s2, *, processor=None, score_hint=None):
 
 
 def opcodes(s1, s2, *, processor=None, score_hint=None):
-    """
-    Return Opcodes describing how to turn s1 into s2.
-
-    Parameters
-    ----------
-    s1 : Sequence[Hashable]
-        First string to compare.
-    s2 : Sequence[Hashable]
-        Second string to compare.
-    processor: callable, optional
-        Optional callable that is used to preprocess the strings before
-        comparing them. Default is None, which deactivates this behaviour.
-    score_hint : int, optional
-        Expected edit distance between s1 and s2. This is used to select a
-        faster implementation. If the edit distance is bigger than `score_hint`,
-        it is doubled until the distance is smaller than `score_hint`.
-
-    Returns
-    -------
-    opcodes : Opcodes
-        edit operations required to turn s1 into s2
-
-    Notes
-    -----
-    The alignment is calculated using an algorithm of Heikki Hyyrö, which is
-    described [9]_. It has a time complexity and memory usage of ``O([N/64] * M)``.
-
-    References
-    ----------
-    .. [9] Hyyrö, Heikki. "A Note on Bit-Parallel Alignment Computation."
-           Stringology (2004).
-
-    Examples
-    --------
-    >>> from rapidfuzz.distance import Levenshtein
-    
-    >>> a = "qabxcd"
-    >>> b = "abycdf"
-    >>> for tag, i1, i2, j1, j2 in Levenshtein.opcodes("qabxcd", "abycdf"):
-    ...    print(("%7s a[%d:%d] (%s) b[%d:%d] (%s)" %
-    ...           (tag, i1, i2, a[i1:i2], j1, j2, b[j1:j2])))
-     delete a[0:1] (q) b[0:0] ()
-      equal a[1:3] (ab) b[0:2] (ab)
-    replace a[3:4] (x) b[2:3] (y)
-      equal a[4:6] (cd) b[3:5] (cd)
-     insert a[6:6] () b[5:6] (f)
-    """
     cdef RF_StringWrapper s1_proc, s2_proc
     cdef Editops ops = Editops.__new__(Editops)
-
-    cdef int64_t c_score_hint = INT64_MAX if score_hint is None else score_hint
-
-    if c_score_hint < 0:
-        raise ValueError("score_hint has to be >= 0")
+    cdef int64_t c_score_hint = get_score_hint_i64(score_hint, INT64_MAX)
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
     ops.editops = levenshtein_editops_func(s1_proc.string, s2_proc.string, c_score_hint)
