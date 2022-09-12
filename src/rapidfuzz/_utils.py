@@ -50,7 +50,7 @@ def fallback_import(module: str, name: str, set_attrs: bool = True):
         raise ImportError(
             f"cannot import name '{name}' from '{cpp_mod.__name}' ({cpp_mod.__file__})"
         )
-    
+
     # patch cpp function so help does not need to be duplicated
     if set_attrs:
         cpp_func.__name__ = py_func.__name__
