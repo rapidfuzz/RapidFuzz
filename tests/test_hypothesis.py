@@ -7,9 +7,42 @@ import hypothesis.strategies as st
 import pytest
 
 from rapidfuzz import fuzz, process, utils, string_metric
-from rapidfuzz.distance import Levenshtein_cpp, Levenshtein_py, Indel_cpp, Indel_py
+from rapidfuzz.distance import (
+    Levenshtein_cpp,
+    Levenshtein_py,
+    Levenshtein as _Levenshtein,
+    Indel_cpp,
+    Indel_py,
+    Indel as _Indel,
+)
 import random
 import numpy as np
+
+Levenshtein_cpp.distance._RF_ScorerPy = _Levenshtein.distance._RF_ScorerPy
+Levenshtein_cpp.normalized_distance._RF_ScorerPy = (
+    _Levenshtein.normalized_distance._RF_ScorerPy
+)
+Levenshtein_cpp.similarity._RF_ScorerPy = _Levenshtein.similarity._RF_ScorerPy
+Levenshtein_cpp.normalized_similarity._RF_ScorerPy = (
+    _Levenshtein.normalized_similarity._RF_ScorerPy
+)
+Levenshtein_py.distance._RF_ScorerPy = _Levenshtein.distance._RF_ScorerPy
+Levenshtein_py.normalized_distance._RF_ScorerPy = (
+    _Levenshtein.normalized_distance._RF_ScorerPy
+)
+Levenshtein_py.similarity._RF_ScorerPy = _Levenshtein.similarity._RF_ScorerPy
+Levenshtein_py.normalized_similarity._RF_ScorerPy = (
+    _Levenshtein.normalized_similarity._RF_ScorerPy
+)
+
+Indel_cpp.distance._RF_ScorerPy = _Indel.distance._RF_ScorerPy
+Indel_cpp.normalized_distance._RF_ScorerPy = _Indel.normalized_distance._RF_ScorerPy
+Indel_cpp.similarity._RF_ScorerPy = _Indel.similarity._RF_ScorerPy
+Indel_cpp.normalized_similarity._RF_ScorerPy = _Indel.normalized_similarity._RF_ScorerPy
+Indel_py.distance._RF_ScorerPy = _Indel.distance._RF_ScorerPy
+Indel_py.normalized_distance._RF_ScorerPy = _Indel.normalized_distance._RF_ScorerPy
+Indel_py.similarity._RF_ScorerPy = _Indel.similarity._RF_ScorerPy
+Indel_py.normalized_similarity._RF_ScorerPy = _Indel.normalized_similarity._RF_ScorerPy
 
 
 def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):

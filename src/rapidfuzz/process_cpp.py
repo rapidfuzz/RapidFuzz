@@ -14,19 +14,15 @@ from rapidfuzz.process_cpp_impl import (
     cdist as _cdist,
     extract as extract,
     extractOne as extractOne,
-    extract_iter as extract_iter
+    extract_iter as extract_iter,
 )
 
 from rapidfuzz.fuzz import ratio as _ratio
 
-# numpy is required to use cdist
-try:
-    import numpy as np
-except ImportError:
-    pass
-
 
 def _dtype_to_type_num(dtype):
+    import numpy as np
+
     if dtype is None:
         return None
     if dtype is np.int32:
@@ -115,6 +111,8 @@ def cdist(
         Returns a matrix of dtype with the distance/similarity between each pair
         of the two collections of inputs.
     """
+    import numpy as np
+
     dtype = _dtype_to_type_num(dtype)
     return np.asarray(
         _cdist(

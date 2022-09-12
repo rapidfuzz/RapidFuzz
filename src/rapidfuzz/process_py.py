@@ -5,10 +5,6 @@ from rapidfuzz.utils import default_process
 from rapidfuzz.fuzz import WRatio, ratio
 import heapq
 
-try:
-    import numpy as np
-except ImportError:
-    pass
 
 def _get_scorer_flags_py(scorer, kwargs):
     params = getattr(scorer, "_RF_ScorerPy", None)
@@ -387,6 +383,8 @@ def extract(
 
 
 def _dtype_to_type_num(dtype, scorer, **kwargs):
+    import numpy as np
+
     if dtype is not None:
         return dtype
 
@@ -463,6 +461,8 @@ def cdist(
         Returns a matrix of dtype with the distance/similarity between each pair
         of the two collections of inputs.
     """
+    import numpy as np
+
     dtype = _dtype_to_type_num(dtype, scorer, **kwargs)
     results = np.zeros((len(queries), len(choices)), dtype=dtype)
 

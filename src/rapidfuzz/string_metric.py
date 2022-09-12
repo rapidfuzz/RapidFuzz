@@ -5,7 +5,9 @@ from rapidfuzz.distance import Levenshtein, Hamming, Jaro, JaroWinkler
 import warnings
 
 
-def levenshtein(s1, s2, *, weights=(1, 1, 1), processor=None, max=None, score_cutoff=None):
+def levenshtein(
+    s1, s2, *, weights=(1, 1, 1), processor=None, max=None, score_cutoff=None
+):
     """
     Calculates the minimum number of insertions, deletions, and substitutions
     required to change one sequence into the other according to Levenshtein with custom
