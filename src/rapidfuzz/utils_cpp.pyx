@@ -17,25 +17,6 @@ cdef extern from "utils_cpp.hpp":
     RF_String default_process_func(RF_String sentence) except +
 
 def default_process(sentence):
-    """
-    This function preprocesses a string by:
-
-    * removing all non alphanumeric characters
-
-    * trimming whitespaces
-    
-    * converting all characters to lower case
-
-    Parameters
-    ----------
-    sentence : str
-        String to preprocess
-
-    Returns
-    -------
-    processed_string : str
-        processed string
-    """
     validate_string(sentence, "sentence must be a String")
     return default_process_impl(sentence)
 

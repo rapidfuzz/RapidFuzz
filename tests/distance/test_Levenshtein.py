@@ -4,7 +4,30 @@
 import unittest
 
 from rapidfuzz import process
-from rapidfuzz.distance import Opcodes, Opcode, Levenshtein_cpp, Levenshtein_py
+from rapidfuzz.distance import (
+    Opcodes,
+    Opcode,
+    Levenshtein_cpp,
+    Levenshtein_py,
+    Levenshtein as _Levenshtein,
+)
+
+Levenshtein_cpp.distance._RF_ScorerPy = _Levenshtein.distance._RF_ScorerPy
+Levenshtein_cpp.normalized_distance._RF_ScorerPy = (
+    _Levenshtein.normalized_distance._RF_ScorerPy
+)
+Levenshtein_cpp.similarity._RF_ScorerPy = _Levenshtein.similarity._RF_ScorerPy
+Levenshtein_cpp.normalized_similarity._RF_ScorerPy = (
+    _Levenshtein.normalized_similarity._RF_ScorerPy
+)
+Levenshtein_py.distance._RF_ScorerPy = _Levenshtein.distance._RF_ScorerPy
+Levenshtein_py.normalized_distance._RF_ScorerPy = (
+    _Levenshtein.normalized_distance._RF_ScorerPy
+)
+Levenshtein_py.similarity._RF_ScorerPy = _Levenshtein.similarity._RF_ScorerPy
+Levenshtein_py.normalized_similarity._RF_ScorerPy = (
+    _Levenshtein.normalized_similarity._RF_ScorerPy
+)
 
 
 def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):

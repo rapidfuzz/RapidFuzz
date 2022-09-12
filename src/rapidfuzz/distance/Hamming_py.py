@@ -155,32 +155,3 @@ def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     norm_sim = 1 - norm_dist
 
     return norm_sim if (score_cutoff is None or norm_dist >= score_cutoff) else 0.0
-
-
-def _GetScorerFlagsDistance(**kwargs):
-    return {"optimal_score": 0, "worst_score": 2**63 - 1, "flags": (1 << 6)}
-
-
-def _GetScorerFlagsSimilarity(**kwargs):
-    return {"optimal_score": 2**63 - 1, "worst_score": 0, "flags": (1 << 6)}
-
-
-def _GetScorerFlagsNormalizedDistance(**kwargs):
-    return {"optimal_score": 0, "worst_score": 1, "flags": (1 << 5)}
-
-
-def _GetScorerFlagsNormalizedSimilarity(**kwargs):
-    return {"optimal_score": 1, "worst_score": 0, "flags": (1 << 5)}
-
-
-distance._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsDistance}
-
-similarity._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
-
-normalized_distance._RF_ScorerPy = {
-    "get_scorer_flags": _GetScorerFlagsNormalizedDistance
-}
-
-normalized_similarity._RF_ScorerPy = {
-    "get_scorer_flags": _GetScorerFlagsNormalizedSimilarity
-}

@@ -2,7 +2,7 @@
 # cython: language_level=3, binding=True, linetrace=True
 
 from rapidfuzz.utils import default_process
-from rapidfuzz.fuzz import WRatio
+from rapidfuzz.fuzz import WRatio, ratio
 
 from libcpp cimport bool
 from libcpp.vector cimport vector
@@ -13,8 +13,12 @@ from libc.math cimport floor
 
 from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.ref cimport Py_INCREF
+cimport cython
 from cython.operator cimport dereference
 from cpython.exc cimport PyErr_CheckSignals
+from cpython cimport Py_buffer
+from cpython.buffer cimport PyBUF_ND, PyBUF_SIMPLE, PyBUF_F_CONTIGUOUS
+from cpython.object cimport PyObject
 
 from cpp_common cimport (
     PyObjectWrapper, RF_StringWrapper, RF_KwargsWrapper,
@@ -25,9 +29,10 @@ import heapq
 from array import array
 
 from rapidfuzz_capi cimport (
-    RF_Kwargs, RF_String, RF_Scorer, RF_ScorerFunc,
+    RF_Preprocess, RF_Kwargs, RF_String, RF_Scorer, RF_ScorerFunc,
     RF_Preprocessor, RF_ScorerFlags,
-    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_I64
+    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_I64,
+    RF_SCORER_FLAG_SYMMETRIC
 )
 from cpython.pycapsule cimport PyCapsule_IsValid, PyCapsule_GetPointer
 
@@ -83,6 +88,36 @@ cdef extern from "process_cpp.hpp":
 
     cdef bool is_lowest_score_worst[T](const RF_ScorerFlags* scorer_flags)
     cdef T get_optimal_score[T](const RF_ScorerFlags* scorer_flags)
+
+    cpdef enum class MatrixType:
+        UNDEFINED = 0
+        FLOAT32 = 1
+        FLOAT64 = 2
+        INT8 = 3
+        INT16 = 4
+        INT32 = 5
+        INT64 = 6
+        UINT8 = 7
+        UINT16 = 8
+        UINT32 = 9
+        UINT64 = 10
+
+    cdef cppclass RfMatrix "Matrix":
+        RfMatrix() except +
+        RfMatrix(MatrixType, size_t, size_t) except +
+        int get_dtype_size() except +
+        const char* get_format() except +
+        void set[T](size_t, size_t, T) except +
+
+        MatrixType m_dtype
+        size_t m_rows
+        size_t m_cols
+        void* m_matrix
+
+    RfMatrix cdist_single_list_impl[T](  const RF_Kwargs*, RF_Scorer*,
+        const vector[RF_StringWrapper]&, MatrixType, int, T) except +
+    RfMatrix cdist_two_lists_impl[T](    const RF_Kwargs*, RF_Scorer*,
+        const vector[RF_StringWrapper]&, const vector[RF_StringWrapper]&, MatrixType, int, T) except +
 
 cdef inline vector[DictStringElem] preprocess_dict(queries, processor) except *:
     cdef vector[DictStringElem] proc_queries
@@ -545,122 +580,6 @@ cdef inline py_extractOne_list(query, choices, scorer, processor, double score_c
 
 
 def extractOne(query, choices, *, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):
-    """
-    Find the best match in a list of choices. When multiple elements have the same similarity,
-    the first element is returned.
-
-    Parameters
-    ----------
-    query : Sequence[Hashable]
-        string we want to find
-    choices : Iterable[Sequence[Hashable]] | Mapping[Sequence[Hashable]]
-        list of all strings the query should be compared with or dict with a mapping
-        {<result>: <string to compare>}
-    scorer : Callable, optional
-        Optional callable that is used to calculate the matching score between
-        the query and each choice. This can be any of the scorers included in RapidFuzz
-        (both scorers that calculate the edit distance or the normalized edit distance), or
-        a custom function, which returns a normalized edit distance.
-        fuzz.WRatio is used by default.
-    processor : Callable, optional
-        Optional callable that reformats the strings.
-        utils.default_process is used by default, which lowercases the strings and trims whitespace
-    score_cutoff : Any, optional
-        Optional argument for a score threshold. When an edit distance is used this represents the maximum
-        edit distance and matches with a `distance <= score_cutoff` are ignored. When a
-        normalized edit distance is used this represents the minimal similarity
-        and matches with a `similarity >= score_cutoff` are ignored. Default is None, which deactivates this behaviour.
-    **kwargs : Any, optional
-        any other named parameters are passed to the scorer. This can be used to pass
-        e.g. weights to string_metric.levenshtein
-
-    Returns
-    -------
-    Tuple[Sequence[Hashable], Any, Any]
-        Returns the best match in form of a Tuple with 3 elements. The values stored in the
-        tuple depend on the types of the input arguments.
-
-        * The first element is always the `choice`, which is the value thats compared to the query.
-
-        * The second value represents the similarity calculated by the scorer. This can be:
-
-          * An edit distance (distance is 0 for a perfect match and > 0 for non perfect matches).
-            In this case only choices which have a `distance <= score_cutoff` are returned.
-            An example of a scorer with this behavior is `string_metric.levenshtein`.
-          * A normalized edit distance (similarity is a score between 0 and 100, with 100 being a perfect match).
-            In this case only choices which have a `similarity >= score_cutoff` are returned.
-            An example of a scorer with this behavior is `string_metric.normalized_levenshtein`.
-
-          Note, that for all scorers, which are not provided by RapidFuzz, only normalized edit distances are supported.
-
-        * The third parameter depends on the type of the `choices` argument it is:
-
-          * The `index of choice` when choices is a simple iterable like a list
-          * The `key of choice` when choices is a mapping like a dict, or a pandas Series
-
-    None
-        When no choice has a `similarity >= score_cutoff`/`distance <= score_cutoff` None is returned
-
-    Examples
-    --------
-
-    >>> from rapidfuzz.process import extractOne
-    >>> from rapidfuzz.string_metric import levenshtein, normalized_levenshtein
-    >>> from rapidfuzz.fuzz import ratio
-
-    extractOne can be used with normalized edit distances.
-
-    >>> extractOne("abcd", ["abce"], scorer=ratio)
-    ("abcd", 75.0, 1)
-    >>> extractOne("abcd", ["abce"], scorer=normalized_levenshtein)
-    ("abcd", 75.0, 1)
-
-    extractOne can be used with edit distances as well.
-
-    >>> extractOne("abcd", ["abce"], scorer=levenshtein)
-    ("abce", 1, 0)
-
-    additional settings of the scorer can be passed as keyword arguments to extractOne
-
-    >>> extractOne("abcd", ["abce"], scorer=levenshtein, weights=(1,1,2))
-    ("abcde", 2, 1)
-
-    when a mapping is used for the choices the key of the choice is returned instead of the List index
-
-    >>> extractOne("abcd", {"key": "abce"}, scorer=ratio)
-    ("abcd", 75.0, "key")
-
-    By default each string is preprocessed using `utils.default_process`, which lowercases the strings,
-    replaces non alphanumeric characters with whitespaces and trims whitespaces from start and end of them.
-    This behavior can be changed by passing a custom function, or None to disable the behavior. Preprocessing
-    can take a significant part of the runtime, so it makes sense to disable it, when it is not required.
-
-
-    >>> extractOne("abcd", ["abdD"], scorer=ratio)
-    ("abcD", 100.0, 0)
-    >>> extractOne("abcd", ["abdD"], scorer=ratio, processor=None)
-    ("abcD", 75.0, 0)
-    >>> extractOne("abcd", ["abdD"], scorer=ratio, processor=lambda s: s.upper())
-    ("abcD", 100.0, 0)
-
-    When only results with a similarity above a certain threshold are relevant, the parameter score_cutoff can be
-    used to filter out results with a lower similarity. This threshold is used by some of the scorers to exit early,
-    when they are sure, that the similarity is below the threshold.
-    For normalized edit distances all results with a similarity below score_cutoff are filtered out
-
-    >>> extractOne("abcd", ["abce"], scorer=ratio)
-    ("abce", 75.0, 0)
-    >>> extractOne("abcd", ["abce"], scorer=ratio, score_cutoff=80)
-    None
-
-    For edit distances all results with an edit distance above the score_cutoff are filtered out
-
-    >>> extractOne("abcd", ["abce"], scorer=levenshtein, weights=(1,1,2))
-    ("abce", 2, 0)
-    >>> extractOne("abcd", ["abce"], scorer=levenshtein, weights=(1,1,2), score_cutoff=1)
-    None
-
-    """
     cdef RF_Scorer* scorer_context = NULL
     cdef RF_ScorerFlags scorer_flags
 
@@ -907,65 +826,6 @@ cdef inline py_extract_list(query, choices, scorer, processor, int64_t limit, do
 
 
 def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5, score_cutoff=None, **kwargs):
-    """
-    Find the best matches in a list of choices. The list is sorted by the similarity.
-    When multiple choices have the same similarity, they are sorted by their index
-
-    Parameters
-    ----------
-    query : Sequence[Hashable]
-        string we want to find
-    choices : Collection[Sequence[Hashable]] | Mapping[Sequence[Hashable]]
-        list of all strings the query should be compared with or dict with a mapping
-        {<result>: <string to compare>}
-    scorer : Callable, optional
-        Optional callable that is used to calculate the matching score between
-        the query and each choice. This can be any of the scorers included in RapidFuzz
-        (both scorers that calculate the edit distance or the normalized edit distance), or
-        a custom function, which returns a normalized edit distance.
-        fuzz.WRatio is used by default.
-    processor : Callable, optional
-        Optional callable that reformats the strings.
-        utils.default_process is used by default, which lowercases the strings and trims whitespace
-    limit : int
-        maximum amount of results to return
-    score_cutoff : Any, optional
-        Optional argument for a score threshold. When an edit distance is used this represents the maximum
-        edit distance and matches with a `distance <= score_cutoff` are ignored. When a
-        normalized edit distance is used this represents the minimal similarity
-        and matches with a `similarity >= score_cutoff` are ignored. Default is None, which deactivates this behaviour.
-    **kwargs : Any, optional
-        any other named parameters are passed to the scorer. This can be used to pass
-        e.g. weights to string_metric.levenshtein
-
-    Returns
-    -------
-    List[Tuple[Sequence[Hashable], Any, Any]]
-        The return type is always a List of Tuples with 3 elements. However the values stored in the
-        tuple depend on the types of the input arguments.
-
-        * The first element is always the `choice`, which is the value thats compared to the query.
-
-        * The second value represents the similarity calculated by the scorer. This can be:
-
-          * An edit distance (distance is 0 for a perfect match and > 0 for non perfect matches).
-            In this case only choices which have a `distance <= max` are returned.
-            An example of a scorer with this behavior is `string_metric.levenshtein`.
-          * A normalized edit distance (similarity is a score between 0 and 100, with 100 being a perfect match).
-            In this case only choices which have a `similarity >= score_cutoff` are returned.
-            An example of a scorer with this behavior is `string_metric.normalized_levenshtein`.
-
-          Note, that for all scorers, which are not provided by RapidFuzz, only normalized edit distances are supported.
-
-        * The third parameter depends on the type of the `choices` argument it is:
-
-          * The `index of choice` when choices is a simple iterable like a list
-          * The `key of choice` when choices is a mapping like a dict, or a pandas Series
-
-        The list is sorted by `score_cutoff` or `max` depending on the scorer used. The first element in the list
-        has the `highest similarity`/`smallest distance`.
-
-    """
     cdef RF_Scorer* scorer_context = NULL
     cdef RF_ScorerFlags scorer_flags
 
@@ -1016,59 +876,6 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
 
 
 def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):
-    """
-    Find the best match in a list of choices
-
-    Parameters
-    ----------
-    query : Sequence[Hashable]
-        string we want to find
-    choices : Iterable[Sequence[Hashable]] | Mapping[Sequence[Hashable]]
-        list of all strings the query should be compared with or dict with a mapping
-        {<result>: <string to compare>}
-    scorer : Callable, optional
-        Optional callable that is used to calculate the matching score between
-        the query and each choice. This can be any of the scorers included in RapidFuzz
-        (both scorers that calculate the edit distance or the normalized edit distance), or
-        a custom function, which returns a normalized edit distance.
-        fuzz.WRatio is used by default.
-    processor : Callable, optional
-        Optional callable that reformats the strings.
-        utils.default_process is used by default, which lowercases the strings and trims whitespace
-    score_cutoff : Any, optional
-        Optional argument for a score threshold. When an edit distance is used this represents the maximum
-        edit distance and matches with a `distance <= score_cutoff` are ignored. When a
-        normalized edit distance is used this represents the minimal similarity
-        and matches with a `similarity >= score_cutoff` are ignored. Default is None, which deactivates this behaviour.
-    **kwargs : Any, optional
-        any other named parameters are passed to the scorer. This can be used to pass
-        e.g. weights to string_metric.levenshtein
-
-    Yields
-    -------
-    Tuple[Sequence[Hashable], Any, Any]
-        Yields similarity between the query and each choice in form of a Tuple with 3 elements.
-        The values stored in the tuple depend on the types of the input arguments.
-
-        * The first element is always the current `choice`, which is the value thats compared to the query.
-
-        * The second value represents the similarity calculated by the scorer. This can be:
-
-          * An edit distance (distance is 0 for a perfect match and > 0 for non perfect matches).
-            In this case only choices which have a `distance <= max` are yielded.
-            An example of a scorer with this behavior is `string_metric.levenshtein`.
-          * A normalized edit distance (similarity is a score between 0 and 100, with 100 being a perfect match).
-            In this case only choices which have a `similarity >= score_cutoff` are yielded.
-            An example of a scorer with this behavior is `string_metric.normalized_levenshtein`.
-
-          Note, that for all scorers, which are not provided by RapidFuzz, only normalized edit distances are supported.
-
-        * The third parameter depends on the type of the `choices` argument it is:
-
-          * The `index of choice` when choices is a simple iterable like a list
-          * The `key of choice` when choices is a mapping like a dict, or a pandas Series
-
-    """
     cdef RF_Scorer* scorer_context = NULL
     cdef RF_ScorerFlags scorer_flags
     cdef RF_Preprocessor* processor_context = NULL
@@ -1346,3 +1153,202 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         yield from py_extract_iter_dict(worst_score, optimal_score)
     else:
         yield from py_extract_iter_list(worst_score, optimal_score)
+
+
+FLOAT32 = MatrixType.FLOAT32
+FLOAT64 = MatrixType.FLOAT64
+INT8 = MatrixType.INT8
+INT16 = MatrixType.INT16
+INT32 = MatrixType.INT32
+INT64 = MatrixType.INT64
+UINT8 = MatrixType.UINT8
+UINT16 = MatrixType.UINT16
+UINT32 = MatrixType.UINT32
+UINT64 = MatrixType.UINT64
+
+cdef inline vector[PyObjectWrapper] preprocess_py(queries, processor) except *:
+    cdef vector[PyObjectWrapper] proc_queries
+    cdef int64_t queries_len = <int64_t>len(queries)
+    proc_queries.reserve(queries_len)
+
+    # processor None/False
+    if not processor:
+        for query in queries:
+            proc_queries.emplace_back(<PyObject*>query)
+    # processor has to be called through python
+    else:
+        for query in queries:
+            proc_query = processor(query)
+            proc_queries.emplace_back(<PyObject*>proc_query)
+
+    return move(proc_queries)
+
+cdef inline vector[RF_StringWrapper] preprocess(queries, processor) except *:
+    cdef vector[RF_StringWrapper] proc_queries
+    cdef int64_t queries_len = <int64_t>len(queries)
+    cdef RF_String proc_str
+    cdef RF_Preprocessor* processor_context = NULL
+    proc_queries.reserve(queries_len)
+
+    # No processor
+    if not processor:
+        for query in queries:
+            proc_queries.emplace_back(conv_sequence(query))
+    else:
+        processor_capsule = getattr(processor, '_RF_Preprocess', processor)
+        if PyCapsule_IsValid(processor_capsule, NULL):
+            processor_context = <RF_Preprocessor*>PyCapsule_GetPointer(processor_capsule, NULL)
+
+        # use RapidFuzz C-Api
+        if processor_context != NULL and processor_context.version == 1:
+            for query in queries:
+                processor_context.preprocess(query, &proc_str)
+                proc_queries.emplace_back(proc_str)
+
+        # Call Processor through Python
+        else:
+            for query in queries:
+                proc_query = processor(query)
+                proc_queries.emplace_back(conv_sequence(proc_query), <PyObject*>proc_query)
+
+    return move(proc_queries)
+
+cdef inline MatrixType dtype_to_type_num_f64(dtype) except MatrixType.UNDEFINED:
+    if dtype is None:
+        return MatrixType.FLOAT32
+    return <MatrixType>dtype
+
+cdef inline MatrixType dtype_to_type_num_i64(dtype) except MatrixType.UNDEFINED:
+    if dtype is None:
+        return MatrixType.INT32
+    return <MatrixType>dtype
+
+from cpython cimport Py_buffer
+from libcpp.vector cimport vector
+
+cdef class Matrix:
+    cdef Py_ssize_t shape[2]
+    cdef Py_ssize_t strides[2]
+    cdef RfMatrix matrix
+
+    def __getbuffer__(self, Py_buffer *buffer, int flags):
+        self.shape[0] = self.matrix.m_rows
+        self.shape[1] = self.matrix.m_cols
+        self.strides[1] = self.matrix.get_dtype_size()
+        self.strides[0] = self.matrix.m_cols * self.strides[1]
+
+        buffer.buf = <char *>self.matrix.m_matrix
+        buffer.format = <char *>self.matrix.get_format()
+        buffer.internal = NULL
+        buffer.itemsize = self.matrix.get_dtype_size()
+        buffer.len = self.matrix.m_rows * self.matrix.m_cols * self.matrix.get_dtype_size()
+        buffer.ndim = 2
+        buffer.obj = self
+        buffer.readonly = 0
+        buffer.shape = self.shape
+        buffer.strides = self.strides
+        buffer.suboffsets = NULL
+
+    def __releasebuffer__(self, Py_buffer *buffer):
+        pass
+
+cdef cdist_two_lists(queries, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, dtype, int c_workers, const RF_Kwargs* kwargs):
+    proc_queries = preprocess(queries, processor)
+    proc_choices = preprocess(choices, processor)
+    flags = dereference(scorer_flags).flags
+    cdef Matrix matrix = Matrix()
+
+    if flags & RF_SCORER_FLAG_RESULT_F64:
+        matrix.matrix = cdist_two_lists_impl(
+            kwargs, scorer, proc_queries, proc_choices,
+            dtype_to_type_num_f64(dtype),
+            c_workers,
+            get_score_cutoff_f64(score_cutoff, scorer_flags))
+
+    elif flags & RF_SCORER_FLAG_RESULT_I64:
+        matrix.matrix = cdist_two_lists_impl(
+            kwargs, scorer, proc_queries, proc_choices,
+            dtype_to_type_num_i64(dtype),
+            c_workers,
+            get_score_cutoff_i64(score_cutoff, scorer_flags))
+    else:
+        raise ValueError("scorer does not properly use the C-API")
+
+    return matrix
+
+cdef Matrix cdist_single_list(queries, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, dtype, int c_workers, const RF_Kwargs* kwargs):
+    proc_queries = preprocess(queries, processor)
+    flags = dereference(scorer_flags).flags
+    cdef Matrix matrix = Matrix()
+
+    if flags & RF_SCORER_FLAG_RESULT_F64:
+        matrix.matrix = cdist_single_list_impl(
+            kwargs, scorer, proc_queries,
+            dtype_to_type_num_f64(dtype),
+            c_workers,
+            get_score_cutoff_f64(score_cutoff, scorer_flags))
+
+    elif flags & RF_SCORER_FLAG_RESULT_I64:
+        matrix.matrix = cdist_single_list_impl(
+            kwargs, scorer, proc_queries,
+            dtype_to_type_num_i64(dtype),
+            c_workers,
+            get_score_cutoff_i64(score_cutoff, scorer_flags))
+    else:
+        raise ValueError("scorer does not properly use the C-API")
+
+    return matrix
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef cdist_py(queries, choices, scorer, processor, score_cutoff, dtype, workers, dict kwargs):
+    proc_queries = preprocess_py(queries, processor)
+    proc_choices = preprocess_py(choices, processor)
+    cdef double score
+    cdef Matrix matrix = Matrix()
+    c_dtype = dtype_to_type_num_f64(dtype)
+    matrix.matrix = RfMatrix(c_dtype, proc_queries.size(), proc_choices.size())
+
+    kwargs["processor"] = None
+    kwargs["score_cutoff"] = score_cutoff
+
+    for i in range(proc_queries.size()):
+        for j in range(proc_choices.size()):
+            score = scorer(<object>proc_queries[i].obj, <object>proc_choices[j].obj,**kwargs)
+            matrix.matrix.set(i, j, score)
+
+    return matrix
+
+
+def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, dtype=None, workers=1, **kwargs):
+    cdef RF_Scorer* scorer_context = NULL
+    cdef RF_ScorerFlags scorer_flags
+
+    if processor is True:
+        # todo: deprecate this
+        processor = default_process
+    elif processor is False:
+        processor = None
+
+    scorer_capsule = getattr(scorer, '_RF_Scorer', scorer)
+    if PyCapsule_IsValid(scorer_capsule, NULL):
+        scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
+
+    if scorer_context:
+        if dereference(scorer_context).version == 1:
+            kwargs_context = RF_KwargsWrapper()
+            dereference(scorer_context).kwargs_init(&kwargs_context.kwargs, kwargs)
+            dereference(scorer_context).get_scorer_flags(&kwargs_context.kwargs, &scorer_flags)
+
+            # scorer(queries[i], choices[j]) == scorer(queries[j], choices[i])
+            if scorer_flags.flags & RF_SCORER_FLAG_SYMMETRIC and queries is choices:
+                return cdist_single_list(
+                    queries, scorer_context, &scorer_flags, processor,
+                    score_cutoff, dtype, workers, &kwargs_context.kwargs)
+            else:
+                return cdist_two_lists(
+                    queries, choices, scorer_context, &scorer_flags, processor,
+                    score_cutoff, dtype, workers, &kwargs_context.kwargs)
+
+    return cdist_py(queries, choices, scorer, processor, score_cutoff, dtype, workers, kwargs)

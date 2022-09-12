@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2021 Max Bachmann
 
-from rapidfuzz.utils import _fallback_import
+from rapidfuzz._utils import fallback_import as _fallback_import
 
 _mod = "rapidfuzz.fuzz"
 ratio = _fallback_import(_mod, "ratio")
