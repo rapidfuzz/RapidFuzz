@@ -47,12 +47,12 @@ cdef EditType str_to_edit_type(edit_type) except *:
     else:
         raise ValueError("Invalid Edit Type")
 
-cdef RfEditops list_to_editops(ops, Py_ssize_t src_len, Py_ssize_t dest_len) except *:
+cdef RfEditops list_to_editops(ops, size_t src_len, size_t dest_len) except *:
     cdef RfEditops result
-    cdef Py_ssize_t i
+    cdef size_t i
     cdef EditType edit_type
     cdef size_t src_pos, dest_pos
-    cdef Py_ssize_t ops_len = len(ops)
+    cdef size_t ops_len = len(ops)
     result.set_src_len(src_len)
     result.set_dest_len(dest_len)
 
@@ -95,12 +95,12 @@ cdef RfEditops list_to_editops(ops, Py_ssize_t src_len, Py_ssize_t dest_len) exc
     result.shrink_to_fit()
     return result
 
-cdef RfOpcodes list_to_opcodes(ops, Py_ssize_t src_len, Py_ssize_t dest_len) except *:
+cdef RfOpcodes list_to_opcodes(ops, size_t src_len, size_t dest_len) except *:
     cdef RfOpcodes result
-    cdef Py_ssize_t i
+    cdef size_t i
     cdef EditType edit_type
     cdef size_t src_start, src_end, dest_start, dest_end
-    cdef Py_ssize_t ops_len = len(ops)
+    cdef size_t ops_len = len(ops)
     if not ops_len or len(ops[0]) == 3:
         return RfOpcodes(list_to_editops(ops, src_len, dest_len))
 
