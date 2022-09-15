@@ -298,3 +298,61 @@ static inline rapidfuzz::Editops lcs_seq_editops_func(const RF_String& s1, const
         return rapidfuzz::lcs_seq_editops(first1, last1, first2, last2);
     });
 }
+
+/* Damerau Levenshtein */
+static inline int64_t osa_distance_func(const RF_String& s1, const RF_String& s2, int64_t max)
+{
+    return visitor(s1, s2, [&](auto first1, auto last1, auto first2, auto last2) {
+        return rapidfuzz::osa_distance(
+            first1, last1, first2, last2, max);
+    });
+}
+
+static inline bool OSADistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                                  const RF_String* str)
+{
+    return distance_init<rapidfuzz::CachedOSA, int64_t>(self, str_count, str);
+}
+
+static inline double osa_normalized_distance_func(const RF_String& s1, const RF_String& s2,
+                                                                  double score_cutoff)
+{
+    return visitor(s1, s2, [&](auto first1, auto last1, auto first2, auto last2) {
+        return rapidfuzz::osa_normalized_distance(
+            first1, last1, first2, last2, score_cutoff);
+    });
+}
+static inline bool OSANormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*,
+                                                            int64_t str_count, const RF_String* str)
+{
+    return normalized_distance_init<rapidfuzz::CachedOSA, double>(self, str_count, str);
+}
+
+static inline int64_t osa_similarity_func(const RF_String& s1, const RF_String& s2,
+                                                          int64_t max)
+{
+    return visitor(s1, s2, [&](auto first1, auto last1, auto first2, auto last2) {
+        return rapidfuzz::osa_similarity(
+            first1, last1, first2, last2, max);
+    });
+}
+
+static inline bool OSASimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                             const RF_String* str)
+{
+    return similarity_init<rapidfuzz::CachedOSA, int64_t>(self, str_count, str);
+}
+
+static inline double osa_normalized_similarity_func(const RF_String& s1, const RF_String& s2,
+                                                                    double score_cutoff)
+{
+    return visitor(s1, s2, [&](auto first1, auto last1, auto first2, auto last2) {
+        return rapidfuzz::osa_normalized_similarity(first1, last1, first2,
+                                                                                  last2, score_cutoff);
+    });
+}
+static inline bool OSANormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*,
+                                                              int64_t str_count, const RF_String* str)
+{
+    return normalized_similarity_init<rapidfuzz::CachedOSA, double>(self, str_count, str);
+}

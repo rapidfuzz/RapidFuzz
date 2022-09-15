@@ -24,7 +24,7 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
         int64_t delete_cost
         int64_t replace_cost
 
-cdef extern from "edit_based.hpp":
+cdef extern from "metrics.hpp":
     # Levenshtein
     double levenshtein_normalized_distance_func(  const RF_String&, const RF_String&, int64_t, int64_t, int64_t, double) nogil except +
     int64_t levenshtein_distance_func(            const RF_String&, const RF_String&, int64_t, int64_t, int64_t, int64_t) nogil except +
@@ -85,6 +85,17 @@ cdef extern from "edit_based.hpp":
     bool HammingNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
     bool HammingSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
     bool HammingNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+
+    # Damerau Levenshtein
+    double osa_normalized_distance_func(  const RF_String&, const RF_String&, double) nogil except +
+    int64_t osa_distance_func(            const RF_String&, const RF_String&, int64_t) nogil except +
+    double osa_normalized_similarity_func(const RF_String&, const RF_String&, double) nogil except +
+    int64_t osa_similarity_func(          const RF_String&, const RF_String&, int64_t) nogil except +
+
+    bool OSADistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool OSANormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool OSASimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool OSANormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
 
 
 cdef int64_t get_score_cutoff_i64(score_cutoff, int64_t default) except -1:
@@ -587,3 +598,79 @@ hamming_similarity._RF_Scorer = PyCapsule_New(&HammingSimilarityContext, NULL, N
 
 cdef RF_Scorer HammingNormalizedSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsHammingNormalizedSimilarity, HammingNormalizedSimilarityInit)
 hamming_normalized_similarity._RF_Scorer = PyCapsule_New(&HammingNormalizedDistanceContext, NULL, NULL)
+
+def osa_distance(s1, s2, *, processor=None, score_cutoff=None):
+    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, INT64_MAX)
+    cdef RF_StringWrapper s1_proc, s2_proc
+
+    if s1 is None or s2 is None:
+        return 0
+
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
+    return osa_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+
+def osa_similarity(s1, s2, *, processor=None, score_cutoff=None):
+    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, 0)
+    cdef RF_StringWrapper s1_proc, s2_proc
+
+    if s1 is None or s2 is None:
+        return 0
+
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
+    return osa_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+
+def osa_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
+    cdef RF_StringWrapper s1_proc, s2_proc
+    if s1 is None or s2 is None:
+        return 0
+
+    cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 1.0)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
+    return osa_normalized_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+
+
+def osa_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
+    cdef RF_StringWrapper s1_proc, s2_proc
+    if s1 is None or s2 is None:
+        return 0
+
+    cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
+    return osa_normalized_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+
+
+cdef bool GetScorerFlagsOSADistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    dereference(scorer_flags).optimal_score.i64 = 0
+    dereference(scorer_flags).worst_score.i64 = INT64_MAX
+    return True
+
+cdef bool GetScorerFlagsOSANormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    dereference(scorer_flags).optimal_score.f64 = 0.0
+    dereference(scorer_flags).worst_score.f64 = 1.0
+    return True
+
+cdef bool GetScorerFlagsOSASimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    dereference(scorer_flags).optimal_score.i64 = INT64_MAX
+    dereference(scorer_flags).worst_score.i64 = 0
+    return True
+
+cdef bool GetScorerFlagsOSANormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    dereference(scorer_flags).optimal_score.f64 = 1.0
+    dereference(scorer_flags).worst_score.f64 = 0
+    return True
+
+cdef RF_Scorer OSADistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsOSADistance, OSADistanceInit)
+osa_distance._RF_Scorer = PyCapsule_New(&OSADistanceContext, NULL, NULL)
+
+cdef RF_Scorer OSANormalizedDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsOSANormalizedDistance, OSANormalizedDistanceInit)
+osa_normalized_distance._RF_Scorer = PyCapsule_New(&OSANormalizedDistanceContext, NULL, NULL)
+
+cdef RF_Scorer OSASimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsOSASimilarity, OSASimilarityInit)
+osa_similarity._RF_Scorer = PyCapsule_New(&OSASimilarityContext, NULL, NULL)
+
+cdef RF_Scorer OSANormalizedSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsOSANormalizedSimilarity, OSANormalizedSimilarityInit)
+osa_normalized_similarity._RF_Scorer = PyCapsule_New(&OSANormalizedDistanceContext, NULL, NULL)

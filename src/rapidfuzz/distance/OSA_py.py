@@ -1,57 +1,52 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
 
+def _osa_distance_hyrroe2003(s1, s2):
+    if not s1:
+        return len(s2)
 
-def _damerau_levenshtein_distance_zhao(s1, s2):
-    maxVal = max(len(s1), len(s2)) + 1
-    last_row_id = {}
-    last_row_id_get = last_row_id.get
-    size = len(s2) + 2
-    FR = [maxVal] * size
-    R1 = [maxVal] * size
-    R = [x for x in range(size)]
-    R[-1] = maxVal
+    VP = (1 << len(s1)) - 1
+    VN = 0
+    D0 = 0
+    PM_j_old = 0
+    currDist = len(s1)
+    mask = 1 << (len(s1) - 1)
 
-    for i in range(1, len(s1) + 1):
-        R, R1 = R1, R
-        last_col_id = -1
-        last_i2l1 = R[0]
-        R[0] = i
-        T = maxVal
+    block = {}
+    block_get = block.get
+    x = 1
+    for ch1 in s1:
+        block[ch1] = block_get(ch1, 0) | x
+        x <<= 1
 
-        for j in range(1, len(s2) + 1):
-            diag = R1[j - 1] + (s1[i - 1] != s2[j - 1])
-            left = R[j - 1] + 1
-            up = R1[j] + 1
-            temp = min(diag, left, up)
+    for ch2 in s2:
+        # Step 1: Computing D0
+        PM_j = block_get(ch2, 0)
+        TR = (((~D0) & PM_j) << 1) & PM_j_old
+        D0 = (((PM_j & VP) + VP) ^ VP) | PM_j | VN
+        D0 = D0 | TR
 
-            if s1[i - 1] == s2[j - 1]:
-                last_col_id = j  # last occurence of s1_i
-                FR[j] = R1[j - 2]  # save H_k-1,j-2
-                T = last_i2l1  # save H_i-2,l-1
-            else:
-                k = last_row_id_get(s2[j - 1], -1)
-                l = last_col_id
+        # Step 2: Computing HP and HN
+        HP = VN | ~(D0 | VP)
+        HN = D0 & VP
 
-                if (j - l) == 1:
-                    transpose = FR[j] + (i - k)
-                    temp = min(temp, transpose)
-                elif (i - k) == 1:
-                    transpose = T + (j - l)
-                    temp = min(temp, transpose)
+        # Step 3: Computing the value D[m,j]
+        currDist += (HP & mask) != 0
+        currDist -= (HN & mask) != 0
 
-            last_i2l1 = R[j]
-            R[j] = temp
+        # Step 4: Computing Vp and VN
+        HP = (HP << 1) | 1
+        HN = HN << 1
+        VP = HN | ~(D0 | HP)
+        VN = HP & D0
+        PM_j_old = PM_j
 
-        last_row_id[s1[i - 1]] = i
-
-    dist = R[len(s2)]
-    return dist
+    return currDist
 
 
 def distance(s1, s2, *, processor=None, score_cutoff=None):
     """
-    Calculates the Damerau-Levenshtein distance.
+    Calculates the optimal string alignment (OSA) distance.
 
     Parameters
     ----------
@@ -75,7 +70,7 @@ def distance(s1, s2, *, processor=None, score_cutoff=None):
 
     Examples
     --------
-    Find the Damerau-Levenshtein distance between two strings:
+    Find the Damerau Levenshtein distance between two strings:
 
     >>> from rapidfuzz.distance import DamerauLevenshtein
     >>> DamerauLevenshtein.distance("CA", "ABC")
@@ -85,13 +80,13 @@ def distance(s1, s2, *, processor=None, score_cutoff=None):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    dist = _damerau_levenshtein_distance_zhao(s1, s2)
+    dist = _osa_distance_hyrroe2003(s1, s2)
     return dist if (score_cutoff is None or dist <= score_cutoff) else score_cutoff + 1
 
 
 def similarity(s1, s2, *, processor=None, score_cutoff=None):
     """
-    Calculates the Damerau-Levenshtein similarity in the range [max, 0].
+    Calculates the optimal string alignment (OSA) similarity in the range [max, 0].
 
     This is calculated as ``max(len1, len2) - distance``.
 
@@ -127,7 +122,7 @@ def similarity(s1, s2, *, processor=None, score_cutoff=None):
 
 def normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
     """
-    Calculates a normalized Damerau-Levenshtein similarity in the range [1, 0].
+    Calculates a normalized optimal string alignment (OSA) similarity in the range [1, 0].
 
     This is calculated as ``distance / max(len1, len2)``.
 
@@ -162,7 +157,7 @@ def normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
 
 def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     """
-    Calculates a normalized Damerau-Levenshtein similarity in the range [0, 1].
+    Calculates a normalized optimal string alignment (OSA) similarity in the range [0, 1].
 
     This is calculated as ``1 - normalized_distance``
 

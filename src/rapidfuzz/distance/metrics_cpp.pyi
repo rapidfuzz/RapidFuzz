@@ -175,3 +175,32 @@ def damerau_levenshtein_normalized_similarity(
     processor: Optional[Callable[..., _StringType]] = None,
     score_cutoff: Optional[float] = 0
 ) -> float: ...
+def osa_distance(
+    s1: _S1,
+    s2: _S2,
+    *,
+    processor: Optional[Callable[..., _StringType]] = None,
+    score_cutoff: Optional[int] = None
+) -> int: ...
+def osa_normalized_distance(
+    s1: _S1,
+    s2: _S2,
+    *,
+    processor: Optional[Callable[..., _StringType]] = None,
+    score_cutoff: Optional[float] = 0
+) -> float: ...
+def osa_similarity(
+    s1: _S1,
+    s2: _S2,
+    *,
+    processor: Optional[Callable[..., _StringType]] = None,
+    score_cutoff: Optional[int] = None
+) -> int: ...
+def osa_normalized_similarity(
+    s1: _S1,
+    s2: _S2,
+    *,
+    processor: Optional[Callable[..., _StringType]] = None,
+    score_cutoff: Optional[float] = 0
+) -> float: ...
+
