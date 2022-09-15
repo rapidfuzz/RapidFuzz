@@ -1,5 +1,9 @@
 ## Changelog
 
+### [2.9.0] - 2022-09-16
+#### Added
+- add optimal string alignment (OSA)
+
 ### [2.8.0] - 2022-09-11
 #### Fixed
 - `fuzz.partial_ratio` did not find the optimal alignment in some edge cases (#219)
