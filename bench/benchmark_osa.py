@@ -1,6 +1,7 @@
 # todo combine benchmarks of scorers into common code base
 import timeit
 import pandas
+import numpy as np
 
 def benchmark(name, func, setup, lengths, count):
     print(f"starting {name}")
@@ -15,8 +16,8 @@ def benchmark(name, func, setup, lengths, count):
     return results
 
 setup ="""
-from rapidfuzz.distance.DamerauLevenshtein import distance
-from jellyfish import damerau_levenshtein_distance
+from rapidfuzz.distance.OSA import distance
+from pyxdameraulevenshtein import damerau_levenshtein_distance
 import string
 import random
 random.seed(18)
@@ -32,14 +33,14 @@ time_rapidfuzz = benchmark("rapidfuzz",
         '[distance(a, b) for b in b_list]',
         setup, lengths, count)
 
-time_jellyfish = benchmark("jellyfish",
+time_pyxdameraulevenshtein = benchmark("pyxdameraulevenshtein",
         '[damerau_levenshtein_distance(a, b) for b in b_list]',
-        setup, lengths, count)
+        setup, list(range(1,16,2)), count) + [np.NaN] * int((256-16)/2)
 
 df = pandas.DataFrame(data={
     "length": lengths,
     "rapidfuzz": time_rapidfuzz,
-    "jellyfish": time_jellyfish
+    "pyxdameraulevenshtein": time_pyxdameraulevenshtein
 })
 
-df.to_csv("results/levenshtein_damerau.csv", sep=',',index=False)
+df.to_csv("results/osa.csv", sep=',',index=False)

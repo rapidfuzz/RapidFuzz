@@ -24,9 +24,10 @@ Opcodes
 .. toctree::
    :maxdepth: 1
 
-   Levenshtein
    DamerauLevenshtein
-   Indel
    Hamming
+   Indel
    Jaro
    JaroWinkler
+   Levenshtein
+   OSA
