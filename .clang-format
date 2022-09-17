@@ -7,6 +7,7 @@ PointerAlignment: Left
 AllowShortBlocksOnASingleLine: Always
 AllowShortIfStatementsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: None
+AllowShortLambdasOnASingleLine: None
 BreakBeforeBraces: Custom
 AlwaysBreakTemplateDeclarations: true
 BraceWrapping:
@@ -26,4 +27,3 @@ BraceWrapping:
 AllowAllConstructorInitializersOnNextLine: true
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 AllowShortCaseLabelsOnASingleLine: true
-IndentPPDirectives: AfterHash

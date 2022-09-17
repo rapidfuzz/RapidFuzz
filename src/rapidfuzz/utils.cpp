@@ -16,11 +16,9 @@
 #define CASED_MASK 0x2000
 #define EXTENDED_CASE_MASK 0x4000
 
-constexpr static bool is_alnum(const unsigned short flags) {
-    return ((flags & ALPHA_MASK)
-      || (flags & DECIMAL_MASK)
-      || (flags & DIGIT_MASK)
-      || (flags & NUMERIC_MASK));
+constexpr static bool is_alnum(const unsigned short flags)
+{
+    return ((flags & ALPHA_MASK) || (flags & DECIMAL_MASK) || (flags & DIGIT_MASK) || (flags & NUMERIC_MASK));
 }
 
 typedef struct {
@@ -39,15 +37,14 @@ typedef struct {
 
 #include "unicodetype_db.h"
 
-static inline const _PyUnicode_TypeRecord * gettyperecord(uint32_t code)
+static inline const _PyUnicode_TypeRecord* gettyperecord(uint32_t code)
 {
     unsigned int index;
     if (code >= 0x110000)
         index = 0;
-    else
-    {
-        index = index1[(code>>SHIFT)];
-        index = index2[(index<<SHIFT)+(code&((1<<SHIFT)-1))];
+    else {
+        index = index1[(code >> SHIFT)];
+        index = index2[(index << SHIFT) + (code & ((1 << SHIFT) - 1))];
     }
 
     return &_PyUnicode_TypeRecords[index];
@@ -58,12 +55,10 @@ uint32_t UnicodeDefaultProcess(uint32_t ch)
     /* todo capital sigma not handled
      * see Python implementation
      */
-    const _PyUnicode_TypeRecord *ctype = gettyperecord(ch);
+    const _PyUnicode_TypeRecord* ctype = gettyperecord(ch);
 
     /* non alphanumeric characyers are replaces with whitespaces */
-    if (!is_alnum(ctype->flags)) {
-        return ' ';
-    }
+    if (!is_alnum(ctype->flags)) return ' ';
 
     if (ctype->flags & EXTENDED_CASE_MASK) {
         int index = ctype->lower & 0xFFFF;
