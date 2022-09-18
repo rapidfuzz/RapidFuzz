@@ -1,5 +1,15 @@
 ## Changelog
 
+### [2.10.0] - 2022-09-18
+#### Added
+- add editops to hamming distance
+
+#### Performance
+- strip common affix in osa distance
+
+#### Fixed
+- ignore missing pandas in Python3.11 tests
+
 ### [2.9.0] - 2022-09-16
 #### Added
 - add optimal string alignment (OSA)
@@ -151,7 +161,7 @@
 #### Changed
 - add tests to sdist
 - remove cython dependency for sdist
-  
+
 ### [2.0.11] - 2022-04-23
 #### Changed
 - relax version requirements of dependencies to simplify packaging
@@ -538,7 +548,7 @@ The old algorithm is used again until this bug is fixed.
 
 ### [0.11.2] - 2020-09-12
 #### Added
-- added rapidfuzz.\_\_author\_\_, rapidfuzz.\_\_license\_\_ and rapidfuzz.\_\_version\_\_ 
+- added rapidfuzz.\_\_author\_\_, rapidfuzz.\_\_license\_\_ and rapidfuzz.\_\_version\_\_
 
 ### [0.11.1] - 2020-09-01
 #### Fixed
@@ -546,7 +556,7 @@ The old algorithm is used again until this bug is fixed.
 
 ### [0.11.0] - 2020-08-22
 #### Changed
-- support for python 2.7 added #40 
+- support for python 2.7 added #40
 - add wheels for python2.7 (both pypy and cpython) on MacOS and Linux
 
 ### [0.10.0] - 2020-08-17

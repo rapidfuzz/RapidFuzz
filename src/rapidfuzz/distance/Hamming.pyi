@@ -1,4 +1,5 @@
 from typing import Callable, Hashable, Sequence, Optional, TypeVar
+from rapidfuzz.distance import Editops, Opcodes
 
 _StringType = Sequence[Hashable]
 _S1 = TypeVar("_S1")
@@ -32,3 +33,15 @@ def normalized_similarity(
     processor: Optional[Callable[..., _StringType]] = None,
     score_cutoff: Optional[float] = 0
 ) -> float: ...
+def editops(
+    s1: _S1,
+    s2: _S2,
+    *,
+    processor: Optional[Callable[..., _StringType]] = None
+) -> Editops: ...
+def opcodes(
+    s1: _S1,
+    s2: _S2,
+    *,
+    processor: Optional[Callable[..., _StringType]] = None
+) -> Opcodes: ...

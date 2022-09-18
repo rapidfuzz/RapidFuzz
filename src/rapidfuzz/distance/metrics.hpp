@@ -278,6 +278,13 @@ static inline bool LCSseqNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_
     return normalized_similarity_init<rapidfuzz::CachedLCSseq, double>(self, str_count, str);
 }
 
+static inline rapidfuzz::Editops hamming_editops_func(const RF_String& str1, const RF_String& str2)
+{
+    return visitor(str1, str2, [&](auto s1, auto s2) {
+        return rapidfuzz::hamming_editops(s1, s2);
+    });
+}
+
 static inline rapidfuzz::Editops levenshtein_editops_func(const RF_String& str1, const RF_String& str2,
                                                           int64_t score_hint)
 {

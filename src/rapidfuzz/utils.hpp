@@ -10,6 +10,7 @@
 #include <cwctype>
 #include <limits>
 #include <stdint.h>
+#include <string>
 
 uint32_t UnicodeDefaultProcess(uint32_t ch);
 

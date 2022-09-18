@@ -86,6 +86,8 @@ cdef extern from "metrics.hpp":
     bool HammingSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
     bool HammingNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
 
+    RfEditops hamming_editops_func(const RF_String&, const RF_String&) nogil except +
+
     # Damerau Levenshtein
     double osa_normalized_distance_func(  const RF_String&, const RF_String&, double) nogil except +
     int64_t osa_distance_func(            const RF_String&, const RF_String&, int64_t) nogil except +
@@ -561,6 +563,24 @@ def hamming_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
     return hamming_normalized_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+
+
+def hamming_editops(s1, s2, *, processor=None):
+    cdef RF_StringWrapper s1_proc, s2_proc
+    cdef Editops ops = Editops.__new__(Editops)
+
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
+    ops.editops = hamming_editops_func(s1_proc.string, s2_proc.string)
+    return ops
+
+
+def hamming_opcodes(s1, s2, *, processor=None):
+    cdef RF_StringWrapper s1_proc, s2_proc
+    cdef Editops ops = Editops.__new__(Editops)
+
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
+    ops.editops = hamming_editops_func(s1_proc.string, s2_proc.string)
+    return ops.as_opcodes()
 
 
 cdef bool GetScorerFlagsHammingDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:

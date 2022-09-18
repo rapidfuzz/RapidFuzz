@@ -147,6 +147,18 @@ def hamming_normalized_similarity(
     processor: Optional[Callable[..., _StringType]] = None,
     score_cutoff: Optional[float] = 0
 ) -> float: ...
+def hamming_editops(
+    s1: _S1,
+    s2: _S2,
+    *,
+    processor: Optional[Callable[..., _StringType]] = None
+) -> Editops: ...
+def hamming_opcodes(
+    s1: _S1,
+    s2: _S2,
+    *,
+    processor: Optional[Callable[..., _StringType]] = None
+) -> Opcodes: ...
 def damerau_levenshtein_distance(
     s1: _S1,
     s2: _S2,
@@ -203,4 +215,3 @@ def osa_normalized_similarity(
     processor: Optional[Callable[..., _StringType]] = None,
     score_cutoff: Optional[float] = 0
 ) -> float: ...
-

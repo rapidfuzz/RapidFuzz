@@ -1,5 +1,6 @@
 from typing import Callable, Hashable, Sequence, Optional, TypeVar, Any, Dict
 from typing_extensions import Protocol
+from rapidfuzz.distance import Editops, Opcodes
 
 class _ScorerAttributes(Protocol):
     _RF_ScorerPy: Dict
@@ -43,3 +44,15 @@ def normalized_similarity(
     processor: Optional[Callable[..., _StringType]] = None,
     score_cutoff: Optional[float] = 0
 ) -> float: ...
+def editops(
+    s1: _S1,
+    s2: _S2,
+    *,
+    processor: Optional[Callable[..., _StringType]] = None
+) -> Editops: ...
+def opcodes(
+    s1: _S1,
+    s2: _S2,
+    *,
+    processor: Optional[Callable[..., _StringType]] = None
+) -> Opcodes: ...

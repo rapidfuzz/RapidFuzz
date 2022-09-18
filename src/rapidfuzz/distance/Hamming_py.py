@@ -155,3 +155,46 @@ def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     norm_sim = 1 - norm_dist
 
     return norm_sim if (score_cutoff is None or norm_dist >= score_cutoff) else 0.0
+
+def editops(s1, s2, *, processor=None):
+    """
+    Return Editops describing how to turn s1 into s2.
+
+    Parameters
+    ----------
+    s1 : Sequence[Hashable]
+        First string to compare.
+    s2 : Sequence[Hashable]
+        Second string to compare.
+    processor: callable, optional
+        Optional callable that is used to preprocess the strings before
+        comparing them. Default is None, which deactivates this behaviour.
+
+    Returns
+    -------
+    editops : Editops
+        edit operations required to turn s1 into s2
+    """
+    raise NotImplementedError
+
+
+def opcodes(s1, s2, *, processor=None):
+    """
+    Return Opcodes describing how to turn s1 into s2.
+
+    Parameters
+    ----------
+    s1 : Sequence[Hashable]
+        First string to compare.
+    s2 : Sequence[Hashable]
+        Second string to compare.
+    processor: callable, optional
+        Optional callable that is used to preprocess the strings before
+        comparing them. Default is None, which deactivates this behaviour.
+
+    Returns
+    -------
+    opcodes : Opcodes
+        edit operations required to turn s1 into s2
+    """
+    raise NotImplementedError
