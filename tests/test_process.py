@@ -5,7 +5,6 @@ import unittest
 import pytest
 
 from rapidfuzz import process_py, process_cpp, fuzz
-import pandas as pd
 
 
 class process:
@@ -298,6 +297,7 @@ class ProcessTest(unittest.TestCase):
 
     def testIssue81(self):
         # this mostly tests whether this segfaults due to incorrect ref counting
+        pd = pytest.importorskip("pandas")
         choices = pd.Series(
             ["test color brightness", "test lemon", "test lavender"],
             index=[67478, 67479, 67480],
