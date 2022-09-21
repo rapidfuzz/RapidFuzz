@@ -14,9 +14,9 @@ endif()
 
 find_package(PythonExtensions REQUIRED)
 if(CMAKE_VERSION VERSION_LESS 3.18)
-    find_package(Python COMPONENTS Interpreter Development)
+    find_package(Python COMPONENTS Interpreter Development REQUIRED)
 else()
-    find_package(Python COMPONENTS Interpreter Development.Module)
+    find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
 endif()
 
 include(FetchContent)
