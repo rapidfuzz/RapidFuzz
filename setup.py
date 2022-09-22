@@ -12,7 +12,7 @@ with open('README.md', 'rt', encoding="utf8") as f:
 setup_args = {
     "name": "rapidfuzz",
     "version": "2.10.0",
-    "install_requires": ["jarowinkler >= 1.2.0, < 2.0.0"],
+    "install_requires": ["jarowinkler @ git+https://github.com/maxbachmann/JaroWinkler@FindPython"],
     "extras_require": {'full': ['numpy']},
     "url": "https://github.com/maxbachmann/RapidFuzz",
     "author": "Max Bachmann",
