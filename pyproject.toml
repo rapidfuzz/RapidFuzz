@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "setuptools>=42",
-    "scikit-build>=0.13.0",
+    "scikit-build @ git+https://github.com/scikit-build/scikit-build@master",
     "Cython==3.0.0a11",
     "rapidfuzz_capi==1.0.5"
 ]
