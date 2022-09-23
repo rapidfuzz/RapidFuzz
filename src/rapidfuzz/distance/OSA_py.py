@@ -70,11 +70,13 @@ def distance(s1, s2, *, processor=None, score_cutoff=None):
 
     Examples
     --------
-    Find the Damerau Levenshtein distance between two strings:
+    Find the OSA distance between two strings:
 
-    >>> from rapidfuzz.distance import DamerauLevenshtein
-    >>> DamerauLevenshtein.distance("CA", "ABC")
+    >>> from rapidfuzz.distance import OSA
+    >>> OSA.distance("CA", "AC")
     2
+    >>> OSA.distance("CA", "ABC")
+    3
     """
     if processor is not None:
         s1 = processor(s1)
