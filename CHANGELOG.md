@@ -1,5 +1,9 @@
 ## Changelog
 
+### [2.10.1] - 2022-09-25
+#### Changed
+- modernize cmake build to fix most conda-forge builds
+
 ### [2.10.0] - 2022-09-18
 #### Added
 - add editops to hamming distance
