@@ -72,7 +72,7 @@ jobs:
     env:
       CIBW_BUILD: ${{matrix.python_tag}}
       CIBW_ARCHS: ${{matrix.arch}}
-      CIBW_TEST_SKIP: "*-win32"
+      CIBW_TEST_SKIP: "{*-win32,pp37-*}"
       CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_COMMAND: pytest {package}/tests
       CIBW_BUILD_VERBOSITY: 3
