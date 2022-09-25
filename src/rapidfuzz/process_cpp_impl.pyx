@@ -14,7 +14,6 @@ from libc.math cimport floor
 from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.ref cimport Py_INCREF
 cimport cython
-from cython.operator cimport dereference
 from cpython.exc cimport PyErr_CheckSignals
 from cpython cimport Py_buffer
 from cpython.buffer cimport PyBUF_ND, PyBUF_SIMPLE, PyBUF_F_CONTIGUOUS
@@ -234,7 +233,7 @@ cdef inline extractOne_dict_f64(query, choices, RF_Scorer* scorer, const RF_Scor
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, scorer_flags)
 
     cdef RF_ScorerFunc scorer_func
-    dereference(scorer).scorer_func_init(&scorer_func, kwargs, 1, &proc_query.string)
+    scorer.scorer_func_init(&scorer_func, kwargs, 1, &proc_query.string)
     cdef RF_ScorerWrapper ScorerFunc = RF_ScorerWrapper(scorer_func)
 
     cdef bool lowest_score_worst = is_lowest_score_worst[double](scorer_flags)
@@ -296,7 +295,7 @@ cdef inline extractOne_dict_i64(query, choices, RF_Scorer* scorer, const RF_Scor
     cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, scorer_flags)
 
     cdef RF_ScorerFunc scorer_func
-    dereference(scorer).scorer_func_init(&scorer_func, kwargs, 1, &proc_query.string)
+    scorer.scorer_func_init(&scorer_func, kwargs, 1, &proc_query.string)
     cdef RF_ScorerWrapper ScorerFunc = RF_ScorerWrapper(scorer_func)
 
     cdef bool lowest_score_worst = is_lowest_score_worst[int64_t](scorer_flags)
@@ -345,7 +344,7 @@ cdef inline extractOne_dict_i64(query, choices, RF_Scorer* scorer, const RF_Scor
 
 
 cdef inline extractOne_dict(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, const RF_Kwargs* kwargs):
-    flags = dereference(scorer_flags).flags
+    flags = scorer_flags.flags
 
     if flags & RF_SCORER_FLAG_RESULT_F64:
         return extractOne_dict_f64(
@@ -372,7 +371,7 @@ cdef inline extractOne_list_f64(query, choices, RF_Scorer* scorer, const RF_Scor
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, scorer_flags)
 
     cdef RF_ScorerFunc scorer_func
-    dereference(scorer).scorer_func_init(&scorer_func, kwargs, 1, &proc_query.string)
+    scorer.scorer_func_init(&scorer_func, kwargs, 1, &proc_query.string)
     cdef RF_ScorerWrapper ScorerFunc = RF_ScorerWrapper(scorer_func)
 
     cdef bool lowest_score_worst = is_lowest_score_worst[double](scorer_flags)
@@ -432,7 +431,7 @@ cdef inline extractOne_list_i64(query, choices, RF_Scorer* scorer, const RF_Scor
     cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, scorer_flags)
 
     cdef RF_ScorerFunc scorer_func
-    dereference(scorer).scorer_func_init(&scorer_func, kwargs, 1, &proc_query.string)
+    scorer.scorer_func_init(&scorer_func, kwargs, 1, &proc_query.string)
     cdef RF_ScorerWrapper ScorerFunc = RF_ScorerWrapper(scorer_func)
 
     cdef bool lowest_score_worst = is_lowest_score_worst[int64_t](scorer_flags)
@@ -479,7 +478,7 @@ cdef inline extractOne_list_i64(query, choices, RF_Scorer* scorer, const RF_Scor
     return (result_choice, result_score, result_index) if result_found else None
 
 cdef inline extractOne_list(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, const RF_Kwargs* kwargs):
-    flags = dereference(scorer_flags).flags
+    flags = scorer_flags.flags
 
     if flags & RF_SCORER_FLAG_RESULT_F64:
         return extractOne_list_f64(
@@ -601,10 +600,10 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
     if PyCapsule_IsValid(scorer_capsule, NULL):
         scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
 
-    if scorer_context and dereference(scorer_context).version == 1:
+    if scorer_context and scorer_context.version == 1:
         kwargs_context = RF_KwargsWrapper()
-        dereference(scorer_context).kwargs_init(&kwargs_context.kwargs, kwargs)
-        dereference(scorer_context).get_scorer_flags(&kwargs_context.kwargs, &scorer_flags)
+        scorer_context.kwargs_init(&kwargs_context.kwargs, kwargs)
+        scorer_context.get_scorer_flags(&kwargs_context.kwargs, &scorer_flags)
 
         if hasattr(choices, "items"):
             return extractOne_dict(query, choices, scorer_context, &scorer_flags,
@@ -685,7 +684,7 @@ cdef inline extract_dict_i64(query, choices, RF_Scorer* scorer, const RF_ScorerF
 
 
 cdef inline extract_dict(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, int64_t limit, score_cutoff, const RF_Kwargs* kwargs):
-    flags = dereference(scorer_flags).flags
+    flags = scorer_flags.flags
 
     if flags & RF_SCORER_FLAG_RESULT_F64:
         return extract_dict_f64(
@@ -756,7 +755,7 @@ cdef inline extract_list_i64(query, choices, RF_Scorer* scorer, const RF_ScorerF
 
 
 cdef inline extract_list(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, int64_t limit, score_cutoff, const RF_Kwargs* kwargs):
-    flags = dereference(scorer_flags).flags
+    flags = scorer_flags.flags
 
     if flags & RF_SCORER_FLAG_RESULT_F64:
         return extract_list_f64(
@@ -848,10 +847,10 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
     if PyCapsule_IsValid(scorer_capsule, NULL):
         scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
 
-    if scorer_context and dereference(scorer_context).version == 1:
+    if scorer_context and scorer_context.version == 1:
         kwargs_context = RF_KwargsWrapper()
-        dereference(scorer_context).kwargs_init(&kwargs_context.kwargs, kwargs)
-        dereference(scorer_context).get_scorer_flags(&kwargs_context.kwargs, &scorer_flags)
+        scorer_context.kwargs_init(&kwargs_context.kwargs, kwargs)
+        scorer_context.get_scorer_flags(&kwargs_context.kwargs, &scorer_flags)
 
         if hasattr(choices, "items"):
             return extract_dict(query, choices, scorer_context, &scorer_flags,
@@ -891,7 +890,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         query_proc = RF_StringWrapper(conv_sequence(query))
 
         cdef RF_ScorerFunc scorer_func
-        dereference(scorer_context).scorer_func_init(
+        scorer_context.scorer_func_init(
             &scorer_func, &kwargs_context.kwargs, 1, &query_proc.string
         )
         cdef RF_ScorerWrapper ScorerFunc = RF_ScorerWrapper(scorer_func)
@@ -933,7 +932,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         query_proc = RF_StringWrapper(conv_sequence(query))
 
         cdef RF_ScorerFunc scorer_func
-        dereference(scorer_context).scorer_func_init(
+        scorer_context.scorer_func_init(
             &scorer_func, &kwargs_context.kwargs, 1, &query_proc.string
         )
         cdef RF_ScorerWrapper ScorerFunc = RF_ScorerWrapper(scorer_func)
@@ -975,7 +974,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         query_proc = RF_StringWrapper(conv_sequence(query))
 
         cdef RF_ScorerFunc scorer_func
-        dereference(scorer_context).scorer_func_init(
+        scorer_context.scorer_func_init(
             &scorer_func, &kwargs_context.kwargs, 1, &query_proc.string
         )
         cdef RF_ScorerWrapper ScorerFunc = RF_ScorerWrapper(scorer_func)
@@ -1017,7 +1016,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         query_proc = RF_StringWrapper(conv_sequence(query))
 
         cdef RF_ScorerFunc scorer_func
-        dereference(scorer_context).scorer_func_init(
+        scorer_context.scorer_func_init(
             &scorer_func, &kwargs_context.kwargs, 1, &query_proc.string
         )
         cdef RF_ScorerWrapper ScorerFunc = RF_ScorerWrapper(scorer_func)
@@ -1115,10 +1114,10 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
     if PyCapsule_IsValid(scorer_capsule, NULL):
         scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
 
-    if scorer_context and dereference(scorer_context).version == 1:
+    if scorer_context and scorer_context.version == 1:
         kwargs_context = RF_KwargsWrapper()
-        dereference(scorer_context).kwargs_init(&kwargs_context.kwargs, kwargs)
-        dereference(scorer_context).get_scorer_flags(&kwargs_context.kwargs, &scorer_flags)
+        scorer_context.kwargs_init(&kwargs_context.kwargs, kwargs)
+        scorer_context.get_scorer_flags(&kwargs_context.kwargs, &scorer_flags)
 
         processor_capsule = getattr(processor, '_RF_Preprocess', processor)
         if PyCapsule_IsValid(processor_capsule, NULL):
@@ -1255,7 +1254,7 @@ cdef class Matrix:
 cdef cdist_two_lists(queries, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, dtype, int c_workers, const RF_Kwargs* kwargs):
     proc_queries = preprocess(queries, processor)
     proc_choices = preprocess(choices, processor)
-    flags = dereference(scorer_flags).flags
+    flags = scorer_flags.flags
     cdef Matrix matrix = Matrix()
 
     if flags & RF_SCORER_FLAG_RESULT_F64:
@@ -1278,7 +1277,7 @@ cdef cdist_two_lists(queries, choices, RF_Scorer* scorer, const RF_ScorerFlags* 
 
 cdef Matrix cdist_single_list(queries, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, dtype, int c_workers, const RF_Kwargs* kwargs):
     proc_queries = preprocess(queries, processor)
-    flags = dereference(scorer_flags).flags
+    flags = scorer_flags.flags
     cdef Matrix matrix = Matrix()
 
     if flags & RF_SCORER_FLAG_RESULT_F64:
@@ -1336,10 +1335,10 @@ def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, 
         scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
 
     if scorer_context:
-        if dereference(scorer_context).version == 1:
+        if scorer_context.version == 1:
             kwargs_context = RF_KwargsWrapper()
-            dereference(scorer_context).kwargs_init(&kwargs_context.kwargs, kwargs)
-            dereference(scorer_context).get_scorer_flags(&kwargs_context.kwargs, &scorer_flags)
+            scorer_context.kwargs_init(&kwargs_context.kwargs, kwargs)
+            scorer_context.get_scorer_flags(&kwargs_context.kwargs, &scorer_flags)
 
             # scorer(queries[i], choices[j]) == scorer(queries[j], choices[i])
             if scorer_flags.flags & RF_SCORER_FLAG_SYMMETRIC and queries is choices:

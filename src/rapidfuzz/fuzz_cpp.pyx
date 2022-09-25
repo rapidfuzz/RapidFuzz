@@ -18,7 +18,6 @@ from cpp_common cimport (
 
 from libc.stdint cimport uint32_t, int64_t
 from libcpp cimport bool
-from cython.operator cimport dereference
 
 from array import array
 
@@ -182,15 +181,15 @@ def QRatio(s1, s2, *, processor=default_process, score_cutoff=None):
 
 
 cdef bool GetScorerFlagsFuzzSymmetric(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 100
+    scorer_flags.worst_score.f64 = 0
     return True
 
 cdef bool GetScorerFlagsFuzz(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
-    dereference(scorer_flags).optimal_score.f64 = 100
-    dereference(scorer_flags).worst_score.f64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64
+    scorer_flags.optimal_score.f64 = 100
+    scorer_flags.worst_score.f64 = 0
     return True
 
 def _GetScorerFlagsSimilarity(**kwargs):

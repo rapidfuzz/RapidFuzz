@@ -16,7 +16,6 @@ from libcpp cimport bool
 from libc.stdlib cimport malloc, free
 from libc.stdint cimport INT64_MAX, int64_t
 from cpython.pycapsule cimport PyCapsule_New
-from cython.operator cimport dereference
 
 cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
     cdef struct LevenshteinWeightTable:
@@ -208,7 +207,7 @@ def levenshtein_opcodes(s1, s2, *, processor=None, score_hint=None):
     return ops.as_opcodes()
 
 cdef void KwargsDeinit(RF_Kwargs* self):
-    free(<void*>dereference(self).context)
+    free(<void*>self.context)
 
 cdef bool LevenshteinKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     cdef int64_t insertion, deletion, substitution
@@ -218,47 +217,47 @@ cdef bool LevenshteinKwargsInit(RF_Kwargs* self, dict kwargs) except False:
         raise MemoryError
 
     insertion, deletion, substitution = kwargs.get("weights", (1, 1, 1))
-    dereference(weights).insert_cost = insertion
-    dereference(weights).delete_cost = deletion
-    dereference(weights).replace_cost = substitution
-    dereference(self).context = weights
-    dereference(self).dtor = KwargsDeinit
+    weights.insert_cost = insertion
+    weights.delete_cost = deletion
+    weights.replace_cost = substitution
+    self.context = weights
+    self.dtor = KwargsDeinit
     return True
 
 cdef bool GetScorerFlagsLevenshteinDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>dereference(self).context
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64
-    if dereference(weights).insert_cost == dereference(weights).delete_cost:
-        dereference(scorer_flags).flags |= RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.i64 = 0
-    dereference(scorer_flags).worst_score.i64 = INT64_MAX
+    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>self.context
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64
+    if weights.insert_cost == weights.delete_cost:
+        scorer_flags.flags |= RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.i64 = 0
+    scorer_flags.worst_score.i64 = INT64_MAX
     return True
 
 cdef bool GetScorerFlagsLevenshteinSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>dereference(self).context
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64
-    if dereference(weights).insert_cost == dereference(weights).delete_cost:
-        dereference(scorer_flags).flags |= RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.i64 = INT64_MAX
-    dereference(scorer_flags).worst_score.i64 = 0
+    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>self.context
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64
+    if weights.insert_cost == weights.delete_cost:
+        scorer_flags.flags |= RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.i64 = INT64_MAX
+    scorer_flags.worst_score.i64 = 0
     return True
 
 cdef bool GetScorerFlagsLevenshteinNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>dereference(self).context
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
-    if dereference(weights).insert_cost == dereference(weights).delete_cost:
-        dereference(scorer_flags).flags |= RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 0
-    dereference(scorer_flags).worst_score.f64 = 1.0
+    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>self.context
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64
+    if weights.insert_cost == weights.delete_cost:
+        scorer_flags.flags |= RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 0
+    scorer_flags.worst_score.f64 = 1.0
     return True
 
 cdef bool GetScorerFlagsLevenshteinNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>dereference(self).context
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64
-    if dereference(weights).insert_cost == dereference(weights).delete_cost:
-        dereference(scorer_flags).flags |= RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 1.0
-    dereference(scorer_flags).worst_score.f64 = 0
+    cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>self.context
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64
+    if weights.insert_cost == weights.delete_cost:
+        scorer_flags.flags |= RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 1.0
+    scorer_flags.worst_score.f64 = 0
     return True
 
 cdef RF_Scorer LevenshteinDistanceContext = CreateScorerContext(LevenshteinKwargsInit, GetScorerFlagsLevenshteinDistance, LevenshteinDistanceInit)
@@ -308,27 +307,27 @@ def damerau_levenshtein_normalized_similarity(s1, s2, *, processor=None, score_c
     return damerau_levenshtein_normalized_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 cdef bool GetScorerFlagsDamerauLevenshteinDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.i64 = 0
-    dereference(scorer_flags).worst_score.i64 = INT64_MAX
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.i64 = 0
+    scorer_flags.worst_score.i64 = INT64_MAX
     return True
 
 cdef bool GetScorerFlagsDamerauLevenshteinNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 0.0
-    dereference(scorer_flags).worst_score.f64 = 1
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 0.0
+    scorer_flags.worst_score.f64 = 1
     return True
 
 cdef bool GetScorerFlagsDamerauLevenshteinSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.i64 = INT64_MAX
-    dereference(scorer_flags).worst_score.i64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.i64 = INT64_MAX
+    scorer_flags.worst_score.i64 = 0
     return True
 
 cdef bool GetScorerFlagsDamerauLevenshteinNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 1.0
-    dereference(scorer_flags).worst_score.f64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 1.0
+    scorer_flags.worst_score.f64 = 0
     return True
 
 cdef RF_Scorer DamerauLevenshteinDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsDamerauLevenshteinDistance, DamerauLevenshteinDistanceInit)
@@ -397,27 +396,27 @@ def lcs_seq_opcodes(s1, s2, *, processor=None):
 
 
 cdef bool GetScorerFlagsLCSseqDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.i64 = 0
-    dereference(scorer_flags).worst_score.i64 = INT64_MAX
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.i64 = 0
+    scorer_flags.worst_score.i64 = INT64_MAX
     return True
 
 cdef bool GetScorerFlagsLCSseqNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 0.0
-    dereference(scorer_flags).worst_score.f64 = 1
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 0.0
+    scorer_flags.worst_score.f64 = 1
     return True
 
 cdef bool GetScorerFlagsLCSseqSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.i64 = INT64_MAX
-    dereference(scorer_flags).worst_score.i64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.i64 = INT64_MAX
+    scorer_flags.worst_score.i64 = 0
     return True
 
 cdef bool GetScorerFlagsLCSseqNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 1.0
-    dereference(scorer_flags).worst_score.f64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 1.0
+    scorer_flags.worst_score.f64 = 0
     return True
 
 cdef RF_Scorer LCSseqDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsLCSseqDistance, LCSseqDistanceInit)
@@ -486,29 +485,29 @@ def indel_opcodes(s1, s2, *, processor=None):
 
 
 cdef bool GetScorerFlagsIndelDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.i64 = 0
-    dereference(scorer_flags).worst_score.i64 = INT64_MAX
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.i64 = 0
+    scorer_flags.worst_score.i64 = INT64_MAX
     return True
 
 
 cdef bool GetScorerFlagsIndelNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 0.0
-    dereference(scorer_flags).worst_score.f64 = 1
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 0.0
+    scorer_flags.worst_score.f64 = 1
     return True
 
 cdef bool GetScorerFlagsIndelSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.i64 = INT64_MAX
-    dereference(scorer_flags).worst_score.i64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.i64 = INT64_MAX
+    scorer_flags.worst_score.i64 = 0
     return True
 
 
 cdef bool GetScorerFlagsIndelNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 1.0
-    dereference(scorer_flags).worst_score.f64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 1.0
+    scorer_flags.worst_score.f64 = 0
     return True
 
 
@@ -584,27 +583,27 @@ def hamming_opcodes(s1, s2, *, processor=None):
 
 
 cdef bool GetScorerFlagsHammingDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.i64 = 0
-    dereference(scorer_flags).worst_score.i64 = INT64_MAX
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.i64 = 0
+    scorer_flags.worst_score.i64 = INT64_MAX
     return True
 
 cdef bool GetScorerFlagsHammingNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 0.0
-    dereference(scorer_flags).worst_score.f64 = 1.0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 0.0
+    scorer_flags.worst_score.f64 = 1.0
     return True
 
 cdef bool GetScorerFlagsHammingSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.i64 = INT64_MAX
-    dereference(scorer_flags).worst_score.i64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.i64 = INT64_MAX
+    scorer_flags.worst_score.i64 = 0
     return True
 
 cdef bool GetScorerFlagsHammingNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 1.0
-    dereference(scorer_flags).worst_score.f64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 1.0
+    scorer_flags.worst_score.f64 = 0
     return True
 
 cdef RF_Scorer HammingDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsHammingDistance, HammingDistanceInit)
@@ -660,27 +659,27 @@ def osa_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
 
 
 cdef bool GetScorerFlagsOSADistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.i64 = 0
-    dereference(scorer_flags).worst_score.i64 = INT64_MAX
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.i64 = 0
+    scorer_flags.worst_score.i64 = INT64_MAX
     return True
 
 cdef bool GetScorerFlagsOSANormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 0.0
-    dereference(scorer_flags).worst_score.f64 = 1.0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 0.0
+    scorer_flags.worst_score.f64 = 1.0
     return True
 
 cdef bool GetScorerFlagsOSASimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.i64 = INT64_MAX
-    dereference(scorer_flags).worst_score.i64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.i64 = INT64_MAX
+    scorer_flags.worst_score.i64 = 0
     return True
 
 cdef bool GetScorerFlagsOSANormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    dereference(scorer_flags).flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    dereference(scorer_flags).optimal_score.f64 = 1.0
-    dereference(scorer_flags).worst_score.f64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 1.0
+    scorer_flags.worst_score.f64 = 0
     return True
 
 cdef RF_Scorer OSADistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsOSADistance, OSADistanceInit)
