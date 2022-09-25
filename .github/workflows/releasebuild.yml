@@ -16,6 +16,8 @@ jobs:
         with:
           submodules: 'true'
       - uses: actions/setup-python@v2
+        with:
+          python-version: "3.9"
 
       - name: Install dependencies
         run: |
@@ -67,18 +69,10 @@ jobs:
             python_tag: "pp38-*"
           - arch: auto32
             python_tag: "pp39-*"
-
-          # PyPy Windows is currently broken in scikit-build
-          - arch: auto64
-            python_tag: "pp37-*"
-          - arch: auto64
-            python_tag: "pp38-*"
-          - arch: auto64
-            python_tag: "pp39-*"
     env:
       CIBW_BUILD: ${{matrix.python_tag}}
       CIBW_ARCHS: ${{matrix.arch}}
-      CIBW_TEST_SKIP: "*-win32"
+      CIBW_TEST_SKIP: "{*-win32,pp37-*}"
       CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_COMMAND: pytest {package}/tests
       CIBW_BUILD_VERBOSITY: 3
