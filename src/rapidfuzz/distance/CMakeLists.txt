@@ -10,8 +10,15 @@ function(create_cython_target _name)
     endif()
 endfunction(create_cython_target)
 
-if (CMAKE_SYSTEM_PROCESSOR MATCHES "(x86_64)|(X86_64)|(amd64)|(AMD64)")
-    set(X64 TRUE)
+if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
+    # todo how to handle universal binaries?
+    if (CMAKE_OSX_ARCHITECTURES MATCHES "x86_64")
+        set(X64 TRUE)
+    endif()
+else()
+    if (CMAKE_SYSTEM_PROCESSOR MATCHES "(x86_64)|(X86_64)|(amd64)|(AMD64)")
+        set(X64 TRUE)
+    endif()
 endif()
 
 if (X64)
