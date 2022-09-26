@@ -6,11 +6,6 @@ set(SKBUILD_LINK_LIBRARIES_KEYWORD PRIVATE)
 set(Python_FIND_IMPLEMENTATIONS CPython PyPy)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
-
-
-include(CMakePrintHelpers)
-cmake_print_variables(CMAKE_SYSTEM_PROCESSOR CMAKE_HOST_SYSTEM_PROCESSOR CMAKE_OSX_ARCHITECTURES)
-
 project(rapidfuzz LANGUAGES C CXX)
 
 if (MSVC)
@@ -37,6 +32,9 @@ if("${Python_INTERPRETER_ID}" STREQUAL "PyPy")
 endif()
 
 include(FetchContent)
+include(CheckCPUArch)
+
+check_cpu_arch_x64(RAPIDFUZZ_ARCH_X64)
 
 set(RF_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 

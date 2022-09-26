@@ -10,18 +10,7 @@ function(create_cython_target _name)
     endif()
 endfunction(create_cython_target)
 
-if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
-    # todo how to handle universal binaries?
-    if (CMAKE_OSX_ARCHITECTURES MATCHES "x86_64")
-        set(X64 TRUE)
-    endif()
-else()
-    if (CMAKE_SYSTEM_PROCESSOR MATCHES "(x86_64)|(X86_64)|(amd64)|(AMD64)")
-        set(X64 TRUE)
-    endif()
-endif()
-
-if (X64)
+if (RAPIDFUZZ_ARCH_X64)
     add_library(CpuInfo STATIC ${RF_BASE_DIR}/rapidfuzz/FeatureDetector/CpuInfo.cpp)
     target_compile_features(CpuInfo PUBLIC cxx_std_14)
 
