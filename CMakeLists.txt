@@ -23,7 +23,14 @@ else()
     find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
 endif()
 
-if("${Python_INTERPRETER_ID}" STREQUAL "PyPy")
+if(CMAKE_VERSION VERSION_LESS 3.17)
+    execute_process(
+        COMMAND "${Python_EXECUTABLE}" -c
+                "import sysconfig; print(sysconfig.get_config_var('EXT_SUFFIX').split('.')[1])"
+        OUTPUT_VARIABLE Python_SOABI
+        OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ECHO STDOUT)
+    message(STATUS "Corrected SOABI: ${Python_SOABI}")
+elseif("${Python_INTERPRETER_ID}" STREQUAL "PyPy")
     message(STATUS "PyPy SOABI: ${Python_SOABI}")
     execute_process(
         COMMAND "${Python_EXECUTABLE}" -c

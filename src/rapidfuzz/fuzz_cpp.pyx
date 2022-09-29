@@ -180,14 +180,8 @@ def QRatio(s1, s2, *, processor=default_process, score_cutoff=None):
     return QRatio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
-cdef bool GetScorerFlagsFuzzSymmetric(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
-    scorer_flags.optimal_score.f64 = 100
-    scorer_flags.worst_score.f64 = 0
-    return True
-
 cdef bool GetScorerFlagsFuzz(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
-    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     scorer_flags.optimal_score.f64 = 100
     scorer_flags.worst_score.f64 = 0
     return True
@@ -197,19 +191,19 @@ def _GetScorerFlagsSimilarity(**kwargs):
 
 cdef dict FuzzContextPy = CreateScorerContextPy(_GetScorerFlagsSimilarity)
 
-cdef RF_Scorer RatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzzSymmetric, RatioInit)
+cdef RF_Scorer RatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, RatioInit)
 AddScorerContext(ratio, FuzzContextPy, &RatioContext)
 
 cdef RF_Scorer PartialRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, PartialRatioInit)
 AddScorerContext(partial_ratio, FuzzContextPy, &PartialRatioContext)
 
-cdef RF_Scorer TokenSortRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzzSymmetric, TokenSortRatioInit)
+cdef RF_Scorer TokenSortRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, TokenSortRatioInit)
 AddScorerContext(token_sort_ratio, FuzzContextPy, &TokenSortRatioContext)
 
-cdef RF_Scorer TokenSetRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzzSymmetric, TokenSetRatioInit)
+cdef RF_Scorer TokenSetRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, TokenSetRatioInit)
 AddScorerContext(token_set_ratio, FuzzContextPy, &TokenSetRatioContext)
 
-cdef RF_Scorer TokenRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzzSymmetric, TokenRatioInit)
+cdef RF_Scorer TokenRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, TokenRatioInit)
 AddScorerContext(token_ratio, FuzzContextPy, &TokenRatioContext)
 
 cdef RF_Scorer PartialTokenSortRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, PartialTokenSortRatioInit)
@@ -224,5 +218,5 @@ AddScorerContext(partial_token_ratio, FuzzContextPy, &PartialTokenRatioContext)
 cdef RF_Scorer WRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, WRatioInit)
 AddScorerContext(WRatio, FuzzContextPy, &WRatioContext)
 
-cdef RF_Scorer QRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzzSymmetric, QRatioInit)
+cdef RF_Scorer QRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, QRatioInit)
 AddScorerContext(QRatio, FuzzContextPy, &QRatioContext)
