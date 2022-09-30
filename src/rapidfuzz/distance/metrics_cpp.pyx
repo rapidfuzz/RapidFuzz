@@ -79,6 +79,8 @@ cdef extern from "metrics.hpp":
     bool IndelSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
     bool IndelNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
 
+    bool IndelMultiStringSupport(const RF_Kwargs*) nogil
+
     # Hamming
     double hamming_normalized_distance_func(  const RF_String&, const RF_String&, double) nogil except +
     int64_t hamming_distance_func(            const RF_String&, const RF_String&, int64_t) nogil except +
@@ -515,6 +517,9 @@ def indel_opcodes(s1, s2, *, processor=None):
 
 cdef bool GetScorerFlagsIndelDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    if IndelMultiStringSupport(self):
+        scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
+
     scorer_flags.optimal_score.i64 = 0
     scorer_flags.worst_score.i64 = INT64_MAX
     return True
@@ -522,12 +527,18 @@ cdef bool GetScorerFlagsIndelDistance(const RF_Kwargs* self, RF_ScorerFlags* sco
 
 cdef bool GetScorerFlagsIndelNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    if IndelMultiStringSupport(self):
+        scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
+
     scorer_flags.optimal_score.f64 = 0.0
     scorer_flags.worst_score.f64 = 1
     return True
 
 cdef bool GetScorerFlagsIndelSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    if IndelMultiStringSupport(self):
+        scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
+
     scorer_flags.optimal_score.i64 = INT64_MAX
     scorer_flags.worst_score.i64 = 0
     return True
@@ -535,6 +546,9 @@ cdef bool GetScorerFlagsIndelSimilarity(const RF_Kwargs* self, RF_ScorerFlags* s
 
 cdef bool GetScorerFlagsIndelNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    if IndelMultiStringSupport(self):
+        scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
+
     scorer_flags.optimal_score.f64 = 1.0
     scorer_flags.worst_score.f64 = 0
     return True

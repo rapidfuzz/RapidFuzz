@@ -5,7 +5,8 @@ from .distance._initialize_cpp import ScoreAlignment
 
 from rapidfuzz_capi cimport (
     RF_String, RF_Scorer, RF_ScorerFunc, RF_Kwargs, RF_ScorerFlags,
-    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_SYMMETRIC
+    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_SYMMETRIC,
+    RF_SCORER_FLAG_MULTI_STRING_INIT
 )
 
 # required for preprocess_strings
@@ -45,6 +46,8 @@ cdef extern from "fuzz_cpp.hpp":
     bool PartialTokenRatioInit(     RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
     bool WRatioInit(                RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
     bool QRatioInit(                RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+
+    bool RatioMultiStringSupport(const RF_Kwargs*) nogil
 
 def ratio(s1, s2, *, processor=None, score_cutoff=None):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
@@ -186,12 +189,21 @@ cdef bool GetScorerFlagsFuzz(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags
     scorer_flags.worst_score.f64 = 0
     return True
 
+cdef bool GetScorerFlagsFuzzRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    if RatioMultiStringSupport(self):
+        scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
+
+    scorer_flags.optimal_score.f64 = 100
+    scorer_flags.worst_score.f64 = 0
+    return True
+
 def _GetScorerFlagsSimilarity(**kwargs):
     return {"optimal_score": 100, "worst_score": 0, "flags": (1 << 5)}
 
 cdef dict FuzzContextPy = CreateScorerContextPy(_GetScorerFlagsSimilarity)
 
-cdef RF_Scorer RatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, RatioInit)
+cdef RF_Scorer RatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzzRatio, RatioInit)
 AddScorerContext(ratio, FuzzContextPy, &RatioContext)
 
 cdef RF_Scorer PartialRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, PartialRatioInit)

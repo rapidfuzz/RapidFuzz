@@ -9,6 +9,11 @@
 
 #define PYTHON_VERSION(major, minor, micro) ((major << 24) | (minor << 16) | (micro << 8))
 
+#if defined(__amd64__) || defined(__amd64) || defined(__x86_64__) || defined(__x86_64) || defined(_M_X64) || \
+    defined(_M_AMD64)
+#define RAPIDFUZZ_X64
+#endif
+
 namespace fuzz = rapidfuzz::fuzz;
 using rapidfuzz::detail::Range;
 
@@ -84,11 +89,12 @@ static inline bool PyExceptionHandler(Func&& func)
 {
     try {
         func();
-    } catch(...) {
-      PyGILState_STATE gilstate_save = PyGILState_Ensure();
-      CppExn2PyErr();
-      PyGILState_Release(gilstate_save);
-      return false;
+    }
+    catch (...) {
+        PyGILState_STATE gilstate_save = PyGILState_Ensure();
+        CppExn2PyErr();
+        PyGILState_Release(gilstate_save);
+        return false;
     }
     return true;
 }
@@ -142,6 +148,11 @@ struct RF_StringWrapper {
         if (string.dtor) string.dtor(&string);
 
         Py_XDECREF(obj);
+    }
+
+    size_t size() const noexcept
+    {
+        return static_cast<size_t>(string.length);
     }
 
     friend void swap(RF_StringWrapper& first, RF_StringWrapper& second) noexcept
@@ -332,7 +343,7 @@ template <typename CachedScorer, typename T>
 static inline bool distance_func_wrapper(const RF_ScorerFunc* self, const RF_String* str, int64_t str_count,
                                          T score_cutoff, T* result)
 {
-    return PyExceptionHandler([&]{
+    return PyExceptionHandler([&] {
         CachedScorer& scorer = *(CachedScorer*)self->context;
         if (str_count != 1) throw std::logic_error("Only str_count == 1 supported");
 
@@ -346,7 +357,7 @@ template <typename CachedScorer, typename T>
 static inline bool normalized_distance_func_wrapper(const RF_ScorerFunc* self, const RF_String* str,
                                                     int64_t str_count, T score_cutoff, T* result)
 {
-    return PyExceptionHandler([&]{
+    return PyExceptionHandler([&] {
         CachedScorer& scorer = *(CachedScorer*)self->context;
         if (str_count != 1) throw std::logic_error("Only str_count == 1 supported");
 
@@ -360,7 +371,7 @@ template <typename CachedScorer, typename T>
 static inline bool similarity_func_wrapper(const RF_ScorerFunc* self, const RF_String* str, int64_t str_count,
                                            T score_cutoff, T* result)
 {
-    return PyExceptionHandler([&]{
+    return PyExceptionHandler([&] {
         CachedScorer& scorer = *(CachedScorer*)self->context;
         if (str_count != 1) throw std::logic_error("Only str_count == 1 supported");
 
@@ -374,7 +385,7 @@ template <typename CachedScorer, typename T>
 static inline bool normalized_similarity_func_wrapper(const RF_ScorerFunc* self, const RF_String* str,
                                                       int64_t str_count, T score_cutoff, T* result)
 {
-    return PyExceptionHandler([&]{
+    return PyExceptionHandler([&] {
         CachedScorer& scorer = *(CachedScorer*)self->context;
         if (str_count != 1) throw std::logic_error("Only str_count == 1 supported");
 
@@ -411,7 +422,7 @@ template <template <typename> class CachedScorer, typename T, typename... Args>
 static inline bool distance_init(RF_ScorerFunc* self, int64_t str_count, const RF_String* strings,
                                  Args... args)
 {
-    return PyExceptionHandler([&]{
+    return PyExceptionHandler([&] {
         if (str_count != 1) throw std::logic_error("Only str_count == 1 supported");
 
         *self = visit(*strings, [&](auto s) {
@@ -427,7 +438,7 @@ template <template <typename> class CachedScorer, typename T, typename... Args>
 static inline bool normalized_distance_init(RF_ScorerFunc* self, int64_t str_count, const RF_String* strings,
                                             Args... args)
 {
-    return PyExceptionHandler([&]{
+    return PyExceptionHandler([&] {
         if (str_count != 1) throw std::logic_error("Only str_count == 1 supported");
 
         *self = visit(*strings, [&](auto s) {
@@ -443,7 +454,7 @@ template <template <typename> class CachedScorer, typename T, typename... Args>
 static inline bool similarity_init(RF_ScorerFunc* self, int64_t str_count, const RF_String* strings,
                                    Args... args)
 {
-    return PyExceptionHandler([&]{
+    return PyExceptionHandler([&] {
         if (str_count != 1) throw std::logic_error("Only str_count == 1 supported");
 
         *self = visit(*strings, [&](auto s) {
@@ -459,7 +470,7 @@ template <template <typename> class CachedScorer, typename T, typename... Args>
 static inline bool normalized_similarity_init(RF_ScorerFunc* self, int64_t str_count,
                                               const RF_String* strings, Args... args)
 {
-    return PyExceptionHandler([&]{
+    return PyExceptionHandler([&] {
         if (str_count != 1) throw std::logic_error("Only str_count == 1 supported");
 
         *self = visit(*strings, [&](auto s) {
@@ -471,63 +482,63 @@ static inline bool normalized_similarity_init(RF_ScorerFunc* self, int64_t str_c
     });
 }
 
-template<typename CachedScorer, typename T>
-static inline bool multi_similarity_func_wrapper(const RF_ScorerFunc* self, const RF_String* str, int64_t str_count, T score_cutoff, T* result)
+template <typename CachedScorer, typename T>
+static inline bool multi_similarity_func_wrapper(const RF_ScorerFunc* self, const RF_String* str,
+                                                 int64_t str_count, T score_cutoff, T* result)
 {
-    return PyExceptionHandler([&]{
+    return PyExceptionHandler([&] {
         CachedScorer& scorer = *(CachedScorer*)self->context;
-        if (str_count != 1)
-            throw std::logic_error("Only str_count == 1 supported");
+        if (str_count != 1) throw std::logic_error("Only str_count == 1 supported");
 
-        visit(*str, [&](auto s){
+        visit(*str, [&](auto s) {
             scorer.similarity(result, scorer.result_count(), s, score_cutoff);
         });
     });
 }
 
-template<typename CachedScorer, typename T>
-static inline bool multi_distance_func_wrapper(const RF_ScorerFunc* self, const RF_String* str, int64_t str_count, T score_cutoff, T* result)
+template <typename CachedScorer, typename T>
+static inline bool multi_distance_func_wrapper(const RF_ScorerFunc* self, const RF_String* str,
+                                               int64_t str_count, T score_cutoff, T* result)
 {
-    return PyExceptionHandler([&]{
+    return PyExceptionHandler([&] {
         CachedScorer& scorer = *(CachedScorer*)self->context;
-        if (str_count != 1)
-            throw std::logic_error("Only str_count == 1 supported");
+        if (str_count != 1) throw std::logic_error("Only str_count == 1 supported");
 
-        visit(*str, [&](auto s){
+        visit(*str, [&](auto s) {
             scorer.distance(result, scorer.result_count(), s, score_cutoff);
         });
     });
 }
 
-template<typename CachedScorer, typename T>
-static inline bool multi_normalized_similarity_func_wrapper(const RF_ScorerFunc* self, const RF_String* str, int64_t str_count, T score_cutoff, T* result)
+template <typename CachedScorer, typename T>
+static inline bool multi_normalized_similarity_func_wrapper(const RF_ScorerFunc* self, const RF_String* str,
+                                                            int64_t str_count, T score_cutoff, T* result)
 {
-    return PyExceptionHandler([&]{
+    return PyExceptionHandler([&] {
         CachedScorer& scorer = *(CachedScorer*)self->context;
-        if (str_count != 1)
-            throw std::logic_error("Only str_count == 1 supported");
+        if (str_count != 1) throw std::logic_error("Only str_count == 1 supported");
 
-        visit(*str, [&](auto s){
+        visit(*str, [&](auto s) {
             scorer.normalized_similarity(result, scorer.result_count(), s, score_cutoff);
         });
     });
 }
 
-template<typename CachedScorer, typename T>
-static inline bool multi_normalized_distance_func_wrapper(const RF_ScorerFunc* self, const RF_String* str, int64_t str_count, T score_cutoff, T* result)
+template <typename CachedScorer, typename T>
+static inline bool multi_normalized_distance_func_wrapper(const RF_ScorerFunc* self, const RF_String* str,
+                                                          int64_t str_count, T score_cutoff, T* result)
 {
-    return PyExceptionHandler([&]{
+    return PyExceptionHandler([&] {
         CachedScorer& scorer = *(CachedScorer*)self->context;
-        if (str_count != 1)
-            throw std::logic_error("Only str_count == 1 supported");
+        if (str_count != 1) throw std::logic_error("Only str_count == 1 supported");
 
-        visit(*str, [&](auto s){
+        visit(*str, [&](auto s) {
             scorer.normalized_distance(result, scorer.result_count(), s, score_cutoff);
         });
     });
 }
 
-template<typename CachedScorer, typename T, typename ...Args>
+template <typename CachedScorer, typename T, typename... Args>
 static inline RF_ScorerFunc get_MultiScorerContext(int64_t str_count, const RF_String* strings, Args... args)
 {
     CachedScorer* scorer = new CachedScorer(str_count, args...);
@@ -543,42 +554,47 @@ static inline RF_ScorerFunc get_MultiScorerContext(int64_t str_count, const RF_S
     return context;
 }
 
-template<typename CachedScorer, typename T, typename ...Args>
-static inline RF_ScorerFunc get_MultiScorerContext_similarity(int64_t str_count, const RF_String* strings, Args... args)
+template <typename CachedScorer, typename T, typename... Args>
+static inline RF_ScorerFunc get_MultiScorerContext_similarity(int64_t str_count, const RF_String* strings,
+                                                              Args... args)
 {
     RF_ScorerFunc context = get_MultiScorerContext<CachedScorer, T>(str_count, strings, args...);
     assign_callback(context, multi_similarity_func_wrapper<CachedScorer, T>);
     return context;
 }
 
-template<typename CachedScorer, typename T, typename ...Args>
-static inline RF_ScorerFunc get_MultiScorerContext_distance(int64_t str_count, const RF_String* strings, Args... args)
+template <typename CachedScorer, typename T, typename... Args>
+static inline RF_ScorerFunc get_MultiScorerContext_distance(int64_t str_count, const RF_String* strings,
+                                                            Args... args)
 {
     RF_ScorerFunc context = get_MultiScorerContext<CachedScorer, T>(str_count, strings, args...);
     assign_callback(context, multi_distance_func_wrapper<CachedScorer, T>);
     return context;
 }
 
-template<typename CachedScorer, typename T, typename ...Args>
-static inline RF_ScorerFunc get_MultiScorerContext_normalized_similarity(int64_t str_count, const RF_String* strings, Args... args)
+template <typename CachedScorer, typename T, typename... Args>
+static inline RF_ScorerFunc
+get_MultiScorerContext_normalized_similarity(int64_t str_count, const RF_String* strings, Args... args)
 {
     RF_ScorerFunc context = get_MultiScorerContext<CachedScorer, T>(str_count, strings, args...);
     assign_callback(context, multi_normalized_similarity_func_wrapper<CachedScorer, T>);
     return context;
 }
 
-template<typename CachedScorer, typename T, typename ...Args>
-static inline RF_ScorerFunc get_MultiScorerContext_normalized_distance(int64_t str_count, const RF_String* strings, Args... args)
+template <typename CachedScorer, typename T, typename... Args>
+static inline RF_ScorerFunc get_MultiScorerContext_normalized_distance(int64_t str_count,
+                                                                       const RF_String* strings, Args... args)
 {
     RF_ScorerFunc context = get_MultiScorerContext<CachedScorer, T>(str_count, strings, args...);
     assign_callback(context, multi_normalized_distance_func_wrapper<CachedScorer, T>);
     return context;
 }
 
-template<template <int> class CachedScorer, typename T, typename ...Args>
-static inline bool multi_similarity_init(RF_ScorerFunc* self, int64_t str_count, const RF_String* strings, Args... args)
+template <template <int> class CachedScorer, typename T, typename... Args>
+static inline bool multi_similarity_init(RF_ScorerFunc* self, int64_t str_count, const RF_String* strings,
+                                         Args... args)
 {
-    return PyExceptionHandler([&]{
+    return PyExceptionHandler([&] {
         int64_t length = 0;
         for (int64_t i = 0; i < str_count; ++i)
             length = std::max(length, strings[i].length);
@@ -591,13 +607,16 @@ static inline bool multi_similarity_init(RF_ScorerFunc* self, int64_t str_count,
             *self = get_MultiScorerContext_similarity<CachedScorer<32>, T>(str_count, strings, args...);
         else if (length <= 64)
             *self = get_MultiScorerContext_similarity<CachedScorer<64>, T>(str_count, strings, args...);
+        else
+            throw std::runtime_error("invalid string length");
     });
 }
 
-template<template <int> class CachedScorer, typename T, typename ...Args>
-static inline bool multi_distance_init(RF_ScorerFunc* self, int64_t str_count, const RF_String* strings, Args... args)
+template <template <int> class CachedScorer, typename T, typename... Args>
+static inline bool multi_distance_init(RF_ScorerFunc* self, int64_t str_count, const RF_String* strings,
+                                       Args... args)
 {
-    return PyExceptionHandler([&]{
+    return PyExceptionHandler([&] {
         int64_t length = 0;
         for (int64_t i = 0; i < str_count; ++i)
             length = std::max(length, strings[i].length);
@@ -610,44 +629,60 @@ static inline bool multi_distance_init(RF_ScorerFunc* self, int64_t str_count, c
             *self = get_MultiScorerContext_distance<CachedScorer<32>, T>(str_count, strings, args...);
         else if (length <= 64)
             *self = get_MultiScorerContext_distance<CachedScorer<64>, T>(str_count, strings, args...);
+        else
+            throw std::runtime_error("invalid string length");
     });
 }
 
-template<template <int> class CachedScorer, typename T, typename ...Args>
-static inline bool multi_normalized_similarity_init(RF_ScorerFunc* self, int64_t str_count, const RF_String* strings, Args... args)
+template <template <int> class CachedScorer, typename T, typename... Args>
+static inline bool multi_normalized_similarity_init(RF_ScorerFunc* self, int64_t str_count,
+                                                    const RF_String* strings, Args... args)
 {
-    return PyExceptionHandler([&]{
+    return PyExceptionHandler([&] {
         int64_t length = 0;
         for (int64_t i = 0; i < str_count; ++i)
             length = std::max(length, strings[i].length);
 
         if (length <= 8)
-            *self = get_MultiScorerContext_normalized_similarity<CachedScorer<8>, T>(str_count, strings, args...);
+            *self =
+                get_MultiScorerContext_normalized_similarity<CachedScorer<8>, T>(str_count, strings, args...);
         else if (length <= 16)
-            *self = get_MultiScorerContext_normalized_similarity<CachedScorer<16>, T>(str_count, strings, args...);
+            *self = get_MultiScorerContext_normalized_similarity<CachedScorer<16>, T>(str_count, strings,
+                                                                                      args...);
         else if (length <= 32)
-            *self = get_MultiScorerContext_normalized_similarity<CachedScorer<32>, T>(str_count, strings, args...);
+            *self = get_MultiScorerContext_normalized_similarity<CachedScorer<32>, T>(str_count, strings,
+                                                                                      args...);
         else if (length <= 64)
-            *self = get_MultiScorerContext_normalized_similarity<CachedScorer<64>, T>(str_count, strings, args...);
+            *self = get_MultiScorerContext_normalized_similarity<CachedScorer<64>, T>(str_count, strings,
+                                                                                      args...);
+        else
+            throw std::runtime_error("invalid string length");
     });
 }
 
-template<template <int> class CachedScorer, typename T, typename ...Args>
-static inline bool multi_normalized_distance_init(RF_ScorerFunc* self, int64_t str_count, const RF_String* strings, Args... args)
+template <template <int> class CachedScorer, typename T, typename... Args>
+static inline bool multi_normalized_distance_init(RF_ScorerFunc* self, int64_t str_count,
+                                                  const RF_String* strings, Args... args)
 {
-    return PyExceptionHandler([&]{
+    return PyExceptionHandler([&] {
         int64_t length = 0;
         for (int64_t i = 0; i < str_count; ++i)
             length = std::max(length, strings[i].length);
 
         if (length <= 8)
-            *self = get_MultiScorerContext_normalized_distance<CachedScorer<8>, T>(str_count, strings, args...);
+            *self =
+                get_MultiScorerContext_normalized_distance<CachedScorer<8>, T>(str_count, strings, args...);
         else if (length <= 16)
-            *self = get_MultiScorerContext_normalized_distance<CachedScorer<16>, T>(str_count, strings, args...);
+            *self =
+                get_MultiScorerContext_normalized_distance<CachedScorer<16>, T>(str_count, strings, args...);
         else if (length <= 32)
-            *self = get_MultiScorerContext_normalized_distance<CachedScorer<32>, T>(str_count, strings, args...);
+            *self =
+                get_MultiScorerContext_normalized_distance<CachedScorer<32>, T>(str_count, strings, args...);
         else if (length <= 64)
-            *self = get_MultiScorerContext_normalized_distance<CachedScorer<64>, T>(str_count, strings, args...);
+            *self =
+                get_MultiScorerContext_normalized_distance<CachedScorer<64>, T>(str_count, strings, args...);
+        else
+            throw std::runtime_error("invalid string length");
     });
 }
 

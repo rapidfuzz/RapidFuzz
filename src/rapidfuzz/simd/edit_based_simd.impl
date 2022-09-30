@@ -1,47 +1,46 @@
 
+
 namespace rf = rapidfuzz;
 
 bool LCSseqSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str)
 {
-    if (str_count == 1)
-        return similarity_init<rf::CachedLCSseq, int64_t>(self, str_count, str);
+    if (str_count == 1) return similarity_init<rf::CachedLCSseq, int64_t>(self, str_count, str);
 
     return multi_similarity_init<rf::experimental::MultiLCSseq, int64_t>(self, str_count, str);
 }
 
-bool LCSseqNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str)
+bool LCSseqNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                    const RF_String* str)
 {
-    if (str_count == 1)
-        return normalized_similarity_init<rf::CachedLCSseq, double>(self, str_count, str);
+    if (str_count == 1) return normalized_similarity_init<rf::CachedLCSseq, double>(self, str_count, str);
 
     return multi_normalized_similarity_init<rf::experimental::MultiLCSseq, double>(self, str_count, str);
 }
 
 bool LCSseqDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str)
 {
-    if (str_count == 1)
-        return distance_init<rf::CachedLCSseq, int64_t>(self, str_count, str);
+    if (str_count == 1) return distance_init<rf::CachedLCSseq, int64_t>(self, str_count, str);
 
     return multi_distance_init<rf::experimental::MultiLCSseq, int64_t>(self, str_count, str);
 }
 
-bool LCSseqNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str)
+bool LCSseqNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                  const RF_String* str)
 {
-    if (str_count == 1)
-        return normalized_distance_init<rf::CachedLCSseq, double>(self, str_count, str);
+    if (str_count == 1) return normalized_distance_init<rf::CachedLCSseq, double>(self, str_count, str);
 
     return multi_normalized_distance_init<rf::experimental::MultiLCSseq, double>(self, str_count, str);
 }
 
 bool LevenshteinSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str)
 {
-    if (str_count == 1)
-        return similarity_init<rf::CachedLevenshtein, int64_t>(self, str_count, str);
+    if (str_count == 1) return similarity_init<rf::CachedLevenshtein, int64_t>(self, str_count, str);
 
     return multi_similarity_init<rf::experimental::MultiLevenshtein, int64_t>(self, str_count, str);
 }
 
-bool LevenshteinNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str)
+bool LevenshteinNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                         const RF_String* str)
 {
     if (str_count == 1)
         return normalized_similarity_init<rf::CachedLevenshtein, double>(self, str_count, str);
@@ -51,16 +50,52 @@ bool LevenshteinNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, 
 
 bool LevenshteinDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str)
 {
-    if (str_count == 1)
-        return distance_init<rf::CachedLevenshtein, int64_t>(self, str_count, str);
+    if (str_count == 1) return distance_init<rf::CachedLevenshtein, int64_t>(self, str_count, str);
 
     return multi_distance_init<rf::experimental::MultiLevenshtein, int64_t>(self, str_count, str);
 }
 
-bool LevenshteinNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str)
+bool LevenshteinNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                       const RF_String* str)
 {
-    if (str_count == 1)
-        return normalized_distance_init<rf::CachedLevenshtein, double>(self, str_count, str);
+    if (str_count == 1) return normalized_distance_init<rf::CachedLevenshtein, double>(self, str_count, str);
 
     return multi_normalized_distance_init<rf::experimental::MultiLevenshtein, double>(self, str_count, str);
+}
+
+bool IndelSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str)
+{
+    if (str_count == 1) return similarity_init<rf::CachedIndel, int64_t>(self, str_count, str);
+
+    return multi_similarity_init<rf::experimental::MultiIndel, int64_t>(self, str_count, str);
+}
+
+bool IndelNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                   const RF_String* str)
+{
+    if (str_count == 1) return normalized_similarity_init<rf::CachedIndel, double>(self, str_count, str);
+
+    return multi_normalized_similarity_init<rf::experimental::MultiIndel, double>(self, str_count, str);
+}
+
+bool IndelDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str)
+{
+    if (str_count == 1) return distance_init<rf::CachedIndel, int64_t>(self, str_count, str);
+
+    return multi_distance_init<rf::experimental::MultiIndel, int64_t>(self, str_count, str);
+}
+
+bool IndelNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                 const RF_String* str)
+{
+    if (str_count == 1) return normalized_distance_init<rf::CachedIndel, double>(self, str_count, str);
+
+    return multi_normalized_distance_init<rf::experimental::MultiIndel, double>(self, str_count, str);
+}
+
+bool RatioInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str)
+{
+    if (str_count == 1) return similarity_init<rf::fuzz::CachedRatio, double>(self, str_count, str);
+
+    return multi_similarity_init<rf::fuzz::experimental::MultiRatio, double>(self, str_count, str);
 }
