@@ -1,5 +1,10 @@
 ## Changelog
 
+### [2.10.3] - 2022-08-30
+#### Fixed
+- always use `scikit-build=0.14.1` since both `0.14.0` and `0.15.0` are broken
+- workaround gcc in bug in template type deduction
+
 ### [2.10.2] - 2022-08-27
 #### Fixed
 - fix support for cmake versions below 3.17

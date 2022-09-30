@@ -402,7 +402,8 @@ template <template <typename> class CachedScorer, typename T, typename Sentence1
 static inline RF_ScorerFunc get_ScorerContext(Sentence1 s1, Args... args)
 {
     RF_ScorerFunc context;
-    context.context = (void*)new CachedScorer(s1, args...);
+    /* deduction guides are broken here in some gcc versions */
+    context.context = (void*)new CachedScorer<typename decltype(s1)::value_type>(s1, args...);
     context.dtor = scorer_deinit<CachedScorer<typename Sentence1::value_type>>;
     return context;
 }
