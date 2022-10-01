@@ -5,6 +5,7 @@
 #include <atomic>
 #include <chrono>
 #include <exception>
+#include <numeric>
 using namespace std::chrono_literals;
 
 template <typename T>
@@ -380,19 +381,19 @@ bool KeyboardInterruptOccured(PyThreadState*& save)
 }
 
 template <typename Func>
-void run_parallel(int workers, int64_t rows, Func&& func)
+void run_parallel(int workers, int64_t rows, int64_t step_size, Func&& func)
 {
     PyThreadState* save = PyEval_SaveThread();
 
     /* for these cases spawning threads causes to much overhead to be worth it */
     if (workers == 0 || workers == 1) {
-        for (int64_t row = 0; row < rows; ++row) {
+        for (int64_t row = 0; row < rows; row += step_size) {
             if (KeyboardInterruptOccured(save)) {
                 PyEval_RestoreThread(save);
                 throw std::runtime_error("");
             }
 
-            func(row, row + 1);
+            func(row, std::min(row + step_size, rows));
         }
 
         PyEval_RestoreThread(save);
@@ -407,15 +408,14 @@ void run_parallel(int workers, int64_t rows, Func&& func)
     std::atomic<int> exceptions_occured{0};
     tf::Executor executor(workers);
     tf::Taskflow taskflow;
-    std::int64_t step_size = 1;
 
-    taskflow.for_each_index((std::int64_t)0, rows, step_size, [&](std::int64_t row) {
+    taskflow.for_each_index((int64_t)0, rows, step_size, [&](int64_t row) {
         /* skip work after an exception occured */
         if (exceptions_occured.load() > 0) {
             return;
         }
         try {
-            std::int64_t row_end = std::min(row + step_size, rows);
+            int64_t row_end = std::min(row + step_size, rows);
             func(row, row_end);
         }
         catch (...) {
@@ -442,15 +442,16 @@ void run_parallel(int workers, int64_t rows, Func&& func)
 }
 
 template <typename T>
-static Matrix cdist_single_list_impl(const RF_Kwargs* kwargs, RF_Scorer* scorer,
-                                     const std::vector<RF_StringWrapper>& queries, MatrixType dtype,
-                                     int workers, T score_cutoff)
+static Matrix cdist_single_list_impl(const RF_ScorerFlags* scorer_flags, const RF_Kwargs* kwargs,
+                                     RF_Scorer* scorer, const std::vector<RF_StringWrapper>& queries,
+                                     MatrixType dtype, int workers, T score_cutoff)
 {
+    (void)scorer_flags;
     int64_t rows = queries.size();
     int64_t cols = queries.size();
     Matrix matrix(dtype, static_cast<size_t>(rows), static_cast<size_t>(cols));
 
-    run_parallel(workers, rows, [&](std::int64_t row, std::int64_t row_end) {
+    run_parallel(workers, rows, 1, [&](int64_t row, int64_t row_end) {
         for (; row < row_end; ++row) {
             RF_ScorerFunc scorer_func;
             PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, 1, &queries[row].string));
@@ -472,28 +473,102 @@ static Matrix cdist_single_list_impl(const RF_Kwargs* kwargs, RF_Scorer* scorer,
 }
 
 template <typename T>
-static Matrix cdist_two_lists_impl(const RF_Kwargs* kwargs, RF_Scorer* scorer,
-                                   const std::vector<RF_StringWrapper>& queries,
+static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_Kwargs* kwargs,
+                                   RF_Scorer* scorer, const std::vector<RF_StringWrapper>& queries,
                                    const std::vector<RF_StringWrapper>& choices, MatrixType dtype,
                                    int workers, T score_cutoff)
 {
     int64_t rows = queries.size();
     int64_t cols = choices.size();
     Matrix matrix(dtype, static_cast<size_t>(rows), static_cast<size_t>(cols));
+    bool multiStringInit = scorer_flags->flags & RF_SCORER_FLAG_MULTI_STRING_INIT;
 
-    run_parallel(workers, rows, [&](std::int64_t row, std::int64_t row_end) {
-        for (; row < row_end; ++row) {
+    if (multiStringInit) {
+        std::vector<size_t> row_idx(rows);
+        std::iota(row_idx.begin(), row_idx.end(), 0);
+
+        /* sort into blocks fitting simd vectors */
+        std::stable_sort(row_idx.begin(), row_idx.end(), [&queries](size_t i1, size_t i2) {
+            size_t len1 = queries[i1].size();
+            if (len1 <= 64)
+                len1 = len1 / 8;
+            else
+                len1 = (64 / 8) + len1 / 64;
+
+            size_t len2 = queries[i2].size();
+            if (len2 <= 64)
+                len2 = len2 / 8;
+            else
+                len2 = (64 / 8) + len2 / 64;
+
+            return len1 > len2;
+        });
+
+        size_t smallest_size = queries[row_idx.back()].size();
+        size_t step_size;
+        if (smallest_size <= 8)
+            step_size = 256 / 8;
+        else if (smallest_size <= 16)
+            step_size = 256 / 16;
+        else if (smallest_size <= 32)
+            step_size = 256 / 32;
+        else
+            step_size = 256 / 64;
+
+        run_parallel(workers, rows, step_size, [&](int64_t row, int64_t row_end) {
+            /* todo add simd support for long sequences */
+            for (; row < row_end; ++row) {
+                if (queries[row_idx[row]].size() <= 64) break;
+
+                RF_ScorerFunc scorer_func;
+                PyErr2RuntimeExn(
+                    scorer->scorer_func_init(&scorer_func, kwargs, 1, &queries[row_idx[row]].string));
+                RF_ScorerWrapper ScorerFunc(scorer_func);
+
+                for (int64_t col = 0; col < cols; ++col) {
+                    T score;
+                    ScorerFunc.call(&choices[col].string, score_cutoff, &score);
+                    matrix.set(row_idx[row], col, score);
+                }
+            }
+
+            int64_t row_count = row_end - row;
+            if (row_count == 0) return;
+
+            assert(row_count <= 256 / 8);
+            T scores[256 / 8];
+            RF_String strings[256 / 8];
+
+            for (int64_t i = 0; i < row_count; ++i)
+                strings[i] = queries[row_idx[row + i]].string;
+
             RF_ScorerFunc scorer_func;
-            PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, 1, &queries[row].string));
+            PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, row_count, strings));
             RF_ScorerWrapper ScorerFunc(scorer_func);
 
             for (int64_t col = 0; col < cols; ++col) {
-                T score;
-                ScorerFunc.call(&choices[col].string, score_cutoff, &score);
-                matrix.set(row, col, score);
+                ScorerFunc.call(&choices[col].string, score_cutoff, scores);
+
+                for (int64_t i = 0; i < row_count; ++i)
+                    matrix.set(row_idx[row + i], col, scores[i]);
             }
-        }
-    });
+        });
+    }
+    else {
+        run_parallel(workers, rows, 1, [&](int64_t row, int64_t row_end) {
+            for (; row < row_end; ++row) {
+                RF_ScorerFunc scorer_func;
+                PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, 1, &queries[row].string));
+                RF_ScorerWrapper ScorerFunc(scorer_func);
+
+                for (int64_t col = 0; col < cols; ++col) {
+                    T score;
+                    ScorerFunc.call(&choices[col].string, score_cutoff, &score);
+                    matrix.set(row, col, score);
+                }
+            }
+        });
+    }
 
     return matrix;
 }

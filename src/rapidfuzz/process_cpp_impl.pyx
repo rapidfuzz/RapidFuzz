@@ -113,9 +113,9 @@ cdef extern from "process_cpp.hpp":
         size_t m_cols
         void* m_matrix
 
-    RfMatrix cdist_single_list_impl[T](  const RF_Kwargs*, RF_Scorer*,
+    RfMatrix cdist_single_list_impl[T](  const RF_ScorerFlags* scorer_flags, const RF_Kwargs*, RF_Scorer*,
         const vector[RF_StringWrapper]&, MatrixType, int, T) except +
-    RfMatrix cdist_two_lists_impl[T](    const RF_Kwargs*, RF_Scorer*,
+    RfMatrix cdist_two_lists_impl[T](    const RF_ScorerFlags* scorer_flags, const RF_Kwargs*, RF_Scorer*,
         const vector[RF_StringWrapper]&, const vector[RF_StringWrapper]&, MatrixType, int, T) except +
 
 cdef inline vector[DictStringElem] preprocess_dict(queries, processor) except *:
@@ -1259,6 +1259,7 @@ cdef cdist_two_lists(queries, choices, RF_Scorer* scorer, const RF_ScorerFlags* 
 
     if flags & RF_SCORER_FLAG_RESULT_F64:
         matrix.matrix = cdist_two_lists_impl(
+            scorer_flags,
             kwargs, scorer, proc_queries, proc_choices,
             dtype_to_type_num_f64(dtype),
             c_workers,
@@ -1266,6 +1267,7 @@ cdef cdist_two_lists(queries, choices, RF_Scorer* scorer, const RF_ScorerFlags* 
 
     elif flags & RF_SCORER_FLAG_RESULT_I64:
         matrix.matrix = cdist_two_lists_impl(
+            scorer_flags,
             kwargs, scorer, proc_queries, proc_choices,
             dtype_to_type_num_i64(dtype),
             c_workers,
@@ -1282,6 +1284,7 @@ cdef Matrix cdist_single_list(queries, RF_Scorer* scorer, const RF_ScorerFlags* 
 
     if flags & RF_SCORER_FLAG_RESULT_F64:
         matrix.matrix = cdist_single_list_impl(
+            scorer_flags,
             kwargs, scorer, proc_queries,
             dtype_to_type_num_f64(dtype),
             c_workers,
@@ -1289,6 +1292,7 @@ cdef Matrix cdist_single_list(queries, RF_Scorer* scorer, const RF_ScorerFlags* 
 
     elif flags & RF_SCORER_FLAG_RESULT_I64:
         matrix.matrix = cdist_single_list_impl(
+            scorer_flags,
             kwargs, scorer, proc_queries,
             dtype_to_type_num_i64(dtype),
             c_workers,

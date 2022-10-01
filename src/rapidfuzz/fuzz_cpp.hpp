@@ -1,15 +1,39 @@
 #pragma once
 #include "cpp_common.hpp"
 
+#ifdef RAPIDFUZZ_X64
+#include "FeatureDetector/CpuInfo.hpp"
+#include "simd/avx2/edit_based_avx2.hpp"
+#include "simd/sse2/edit_based_sse2.hpp"
+#endif
+
 static inline double ratio_func(const RF_String& str1, const RF_String& str2, double score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return fuzz::ratio(s1, s2, score_cutoff);
     });
 }
-static inline bool RatioInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str)
+static inline bool RatioInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count,
+                             const RF_String* str)
 {
+#ifdef RAPIDFUZZ_X64
+    if (CpuInfo::supports(CPU_FEATURE_AVX2)) return Avx2::RatioInit(self, kwargs, str_count, str);
+
+    if (CpuInfo::supports(CPU_FEATURE_SSE2)) return Sse2::RatioInit(self, kwargs, str_count, str);
+#else
+    (void)kwargs;
+#endif
+
     return similarity_init<fuzz::CachedRatio, double>(self, str_count, str);
+}
+
+static inline bool RatioMultiStringSupport(const RF_Kwargs*)
+{
+#ifdef RAPIDFUZZ_X64
+    return CpuInfo::supports(CPU_FEATURE_AVX2) || CpuInfo::supports(CPU_FEATURE_SSE2);
+#else
+    return false;
+#endif
 }
 
 static inline double partial_ratio_func(const RF_String& str1, const RF_String& str2, double score_cutoff)

@@ -1,6 +1,11 @@
 #pragma once
 #include "cpp_common.hpp"
-#include <iostream>
+
+#ifdef RAPIDFUZZ_X64
+#include "../FeatureDetector/CpuInfo.hpp"
+#include "../simd/avx2/edit_based_avx2.hpp"
+#include "../simd/sse2/edit_based_sse2.hpp"
+#endif
 
 /* Levenshtein */
 static inline int64_t levenshtein_distance_func(const RF_String& str1, const RF_String& str2,
@@ -15,8 +20,33 @@ static inline int64_t levenshtein_distance_func(const RF_String& str1, const RF_
 static inline bool LevenshteinDistanceInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count,
                                            const RF_String* str)
 {
-    return distance_init<rapidfuzz::CachedLevenshtein, int64_t>(
-        self, str_count, str, *(rapidfuzz::LevenshteinWeightTable*)(kwargs->context));
+    rapidfuzz::LevenshteinWeightTable weights =
+        *static_cast<rapidfuzz::LevenshteinWeightTable*>(kwargs->context);
+
+#ifdef RAPIDFUZZ_X64
+    if (weights.insert_cost == 1 && weights.delete_cost == 1 && weights.replace_cost == 1) {
+        if (CpuInfo::supports(CPU_FEATURE_AVX2))
+            return Avx2::LevenshteinDistanceInit(self, kwargs, str_count, str);
+
+        if (CpuInfo::supports(CPU_FEATURE_SSE2))
+            return Sse2::LevenshteinDistanceInit(self, kwargs, str_count, str);
+    }
+#endif
+
+    return distance_init<rapidfuzz::CachedLevenshtein, int64_t>(self, str_count, str, weights);
+}
+static inline bool LevenshteinMultiStringSupport(const RF_Kwargs* kwargs)
+{
+    rapidfuzz::LevenshteinWeightTable weights =
+        *static_cast<rapidfuzz::LevenshteinWeightTable*>(kwargs->context);
+
+#ifdef RAPIDFUZZ_X64
+    if (weights.insert_cost == 1 && weights.delete_cost == 1 && weights.replace_cost == 1)
+        return CpuInfo::supports(CPU_FEATURE_AVX2) || CpuInfo::supports(CPU_FEATURE_SSE2);
+#else
+    (void)weights;
+#endif
+    return false;
 }
 
 static inline double levenshtein_normalized_distance_func(const RF_String& str1, const RF_String& str2,
@@ -31,8 +61,20 @@ static inline double levenshtein_normalized_distance_func(const RF_String& str1,
 static inline bool LevenshteinNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs,
                                                      int64_t str_count, const RF_String* str)
 {
-    return normalized_distance_init<rapidfuzz::CachedLevenshtein, double>(
-        self, str_count, str, *(rapidfuzz::LevenshteinWeightTable*)(kwargs->context));
+    rapidfuzz::LevenshteinWeightTable weights =
+        *static_cast<rapidfuzz::LevenshteinWeightTable*>(kwargs->context);
+
+#ifdef RAPIDFUZZ_X64
+    if (weights.insert_cost == 1 && weights.delete_cost == 1 && weights.replace_cost == 1) {
+        if (CpuInfo::supports(CPU_FEATURE_AVX2))
+            return Avx2::LevenshteinNormalizedDistanceInit(self, kwargs, str_count, str);
+
+        if (CpuInfo::supports(CPU_FEATURE_SSE2))
+            return Sse2::LevenshteinNormalizedDistanceInit(self, kwargs, str_count, str);
+    }
+#endif
+
+    return normalized_distance_init<rapidfuzz::CachedLevenshtein, double>(self, str_count, str, weights);
 }
 
 static inline int64_t levenshtein_similarity_func(const RF_String& str1, const RF_String& str2,
@@ -47,8 +89,20 @@ static inline int64_t levenshtein_similarity_func(const RF_String& str1, const R
 static inline bool LevenshteinSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count,
                                              const RF_String* str)
 {
-    return similarity_init<rapidfuzz::CachedLevenshtein, int64_t>(
-        self, str_count, str, *(rapidfuzz::LevenshteinWeightTable*)(kwargs->context));
+    rapidfuzz::LevenshteinWeightTable weights =
+        *static_cast<rapidfuzz::LevenshteinWeightTable*>(kwargs->context);
+
+#ifdef RAPIDFUZZ_X64
+    if (weights.insert_cost == 1 && weights.delete_cost == 1 && weights.replace_cost == 1) {
+        if (CpuInfo::supports(CPU_FEATURE_AVX2))
+            return Avx2::LevenshteinSimilarityInit(self, kwargs, str_count, str);
+
+        if (CpuInfo::supports(CPU_FEATURE_SSE2))
+            return Sse2::LevenshteinSimilarityInit(self, kwargs, str_count, str);
+    }
+#endif
+
+    return similarity_init<rapidfuzz::CachedLevenshtein, int64_t>(self, str_count, str, weights);
 }
 
 static inline double levenshtein_normalized_similarity_func(const RF_String& str1, const RF_String& str2,
@@ -63,8 +117,20 @@ static inline double levenshtein_normalized_similarity_func(const RF_String& str
 static inline bool LevenshteinNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs,
                                                        int64_t str_count, const RF_String* str)
 {
-    return normalized_similarity_init<rapidfuzz::CachedLevenshtein, double>(
-        self, str_count, str, *(rapidfuzz::LevenshteinWeightTable*)(kwargs->context));
+    rapidfuzz::LevenshteinWeightTable weights =
+        *static_cast<rapidfuzz::LevenshteinWeightTable*>(kwargs->context);
+
+#ifdef RAPIDFUZZ_X64
+    if (weights.insert_cost == 1 && weights.delete_cost == 1 && weights.replace_cost == 1) {
+        if (CpuInfo::supports(CPU_FEATURE_AVX2))
+            return Avx2::LevenshteinNormalizedSimilarityInit(self, kwargs, str_count, str);
+
+        if (CpuInfo::supports(CPU_FEATURE_SSE2))
+            return Sse2::LevenshteinNormalizedSimilarityInit(self, kwargs, str_count, str);
+    }
+#endif
+
+    return normalized_similarity_init<rapidfuzz::CachedLevenshtein, double>(self, str_count, str, weights);
 }
 
 /* Damerau Levenshtein */
@@ -183,10 +249,26 @@ static inline int64_t indel_distance_func(const RF_String& str1, const RF_String
         return rapidfuzz::indel_distance(s1, s2, max);
     });
 }
-static inline bool IndelDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+static inline bool IndelDistanceInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count,
                                      const RF_String* str)
 {
+#ifdef RAPIDFUZZ_X64
+    if (CpuInfo::supports(CPU_FEATURE_AVX2)) return Avx2::IndelDistanceInit(self, kwargs, str_count, str);
+
+    if (CpuInfo::supports(CPU_FEATURE_SSE2)) return Sse2::IndelDistanceInit(self, kwargs, str_count, str);
+#else
+    (void)kwargs;
+#endif
+
     return distance_init<rapidfuzz::CachedIndel, int64_t>(self, str_count, str);
+}
+static inline bool IndelMultiStringSupport(const RF_Kwargs*)
+{
+#ifdef RAPIDFUZZ_X64
+    return CpuInfo::supports(CPU_FEATURE_AVX2) || CpuInfo::supports(CPU_FEATURE_SSE2);
+#else
+    return false;
+#endif
 }
 
 static inline double indel_normalized_distance_func(const RF_String& str1, const RF_String& str2,
@@ -196,9 +278,19 @@ static inline double indel_normalized_distance_func(const RF_String& str1, const
         return rapidfuzz::indel_normalized_distance(s1, s2, score_cutoff);
     });
 }
-static inline bool IndelNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
-                                               const RF_String* str)
+static inline bool IndelNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs,
+                                               int64_t str_count, const RF_String* str)
 {
+#ifdef RAPIDFUZZ_X64
+    if (CpuInfo::supports(CPU_FEATURE_AVX2))
+        return Avx2::IndelNormalizedDistanceInit(self, kwargs, str_count, str);
+
+    if (CpuInfo::supports(CPU_FEATURE_SSE2))
+        return Sse2::IndelNormalizedDistanceInit(self, kwargs, str_count, str);
+#else
+    (void)kwargs;
+#endif
+
     return normalized_distance_init<rapidfuzz::CachedIndel, double>(self, str_count, str);
 }
 
@@ -208,9 +300,17 @@ static inline int64_t indel_similarity_func(const RF_String& str1, const RF_Stri
         return rapidfuzz::indel_similarity(s1, s2, max);
     });
 }
-static inline bool IndelSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+static inline bool IndelSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count,
                                        const RF_String* str)
 {
+#ifdef RAPIDFUZZ_X64
+    if (CpuInfo::supports(CPU_FEATURE_AVX2)) return Avx2::IndelSimilarityInit(self, kwargs, str_count, str);
+
+    if (CpuInfo::supports(CPU_FEATURE_SSE2)) return Sse2::IndelSimilarityInit(self, kwargs, str_count, str);
+#else
+    (void)kwargs;
+#endif
+
     return similarity_init<rapidfuzz::CachedIndel, int64_t>(self, str_count, str);
 }
 
@@ -221,9 +321,19 @@ static inline double indel_normalized_similarity_func(const RF_String& str1, con
         return rapidfuzz::indel_normalized_similarity(s1, s2, score_cutoff);
     });
 }
-static inline bool IndelNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
-                                                 const RF_String* str)
+static inline bool IndelNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs,
+                                                 int64_t str_count, const RF_String* str)
 {
+#ifdef RAPIDFUZZ_X64
+    if (CpuInfo::supports(CPU_FEATURE_AVX2))
+        return Avx2::IndelNormalizedSimilarityInit(self, kwargs, str_count, str);
+
+    if (CpuInfo::supports(CPU_FEATURE_SSE2))
+        return Sse2::IndelNormalizedSimilarityInit(self, kwargs, str_count, str);
+#else
+    (void)kwargs;
+#endif
+
     return normalized_similarity_init<rapidfuzz::CachedIndel, double>(self, str_count, str);
 }
 
@@ -234,10 +344,26 @@ static inline int64_t lcs_seq_distance_func(const RF_String& str1, const RF_Stri
         return rapidfuzz::lcs_seq_distance(s1, s2, max);
     });
 }
-static inline bool LCSseqDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+static inline bool LCSseqDistanceInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count,
                                       const RF_String* str)
 {
+#ifdef RAPIDFUZZ_X64
+    if (CpuInfo::supports(CPU_FEATURE_AVX2)) return Avx2::LCSseqDistanceInit(self, kwargs, str_count, str);
+
+    if (CpuInfo::supports(CPU_FEATURE_SSE2)) return Sse2::LCSseqDistanceInit(self, kwargs, str_count, str);
+#else
+    (void)kwargs;
+#endif
+
     return distance_init<rapidfuzz::CachedLCSseq, int64_t>(self, str_count, str);
+}
+static inline bool LCSseqMultiStringSupport(const RF_Kwargs*)
+{
+#ifdef RAPIDFUZZ_X64
+    return CpuInfo::supports(CPU_FEATURE_AVX2) || CpuInfo::supports(CPU_FEATURE_SSE2);
+#else
+    return false;
+#endif
 }
 
 static inline double lcs_seq_normalized_distance_func(const RF_String& str1, const RF_String& str2,
@@ -247,9 +373,19 @@ static inline double lcs_seq_normalized_distance_func(const RF_String& str1, con
         return rapidfuzz::lcs_seq_normalized_distance(s1, s2, score_cutoff);
     });
 }
-static inline bool LCSseqNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
-                                                const RF_String* str)
+static inline bool LCSseqNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs,
+                                                int64_t str_count, const RF_String* str)
 {
+#ifdef RAPIDFUZZ_X64
+    if (CpuInfo::supports(CPU_FEATURE_AVX2))
+        return Avx2::LCSseqNormalizedDistanceInit(self, kwargs, str_count, str);
+
+    if (CpuInfo::supports(CPU_FEATURE_SSE2))
+        return Sse2::LCSseqNormalizedDistanceInit(self, kwargs, str_count, str);
+#else
+    (void)kwargs;
+#endif
+
     return normalized_distance_init<rapidfuzz::CachedLCSseq, double>(self, str_count, str);
 }
 
@@ -259,9 +395,17 @@ static inline int64_t lcs_seq_similarity_func(const RF_String& str1, const RF_St
         return rapidfuzz::lcs_seq_similarity(s1, s2, max);
     });
 }
-static inline bool LCSseqSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+static inline bool LCSseqSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count,
                                         const RF_String* str)
 {
+#ifdef RAPIDFUZZ_X64
+    if (CpuInfo::supports(CPU_FEATURE_AVX2)) return Avx2::LCSseqSimilarityInit(self, kwargs, str_count, str);
+
+    if (CpuInfo::supports(CPU_FEATURE_SSE2)) return Sse2::LCSseqSimilarityInit(self, kwargs, str_count, str);
+#else
+    (void)kwargs;
+#endif
+
     return similarity_init<rapidfuzz::CachedLCSseq, int64_t>(self, str_count, str);
 }
 
@@ -272,9 +416,19 @@ static inline double lcs_seq_normalized_similarity_func(const RF_String& str1, c
         return rapidfuzz::lcs_seq_normalized_similarity(s1, s2, score_cutoff);
     });
 }
-static inline bool LCSseqNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
-                                                  const RF_String* str)
+static inline bool LCSseqNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs,
+                                                  int64_t str_count, const RF_String* str)
 {
+#ifdef RAPIDFUZZ_X64
+    if (CpuInfo::supports(CPU_FEATURE_AVX2))
+        return Avx2::LCSseqNormalizedSimilarityInit(self, kwargs, str_count, str);
+
+    if (CpuInfo::supports(CPU_FEATURE_SSE2))
+        return Sse2::LCSseqNormalizedSimilarityInit(self, kwargs, str_count, str);
+#else
+    (void)kwargs;
+#endif
+
     return normalized_similarity_init<rapidfuzz::CachedLCSseq, double>(self, str_count, str);
 }
 

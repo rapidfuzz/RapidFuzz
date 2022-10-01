@@ -36,7 +36,7 @@ jobs:
           pip install build
           python -m build --sdist
           # test whether tarball contains all files required for compiling
-          pip install dist/rapidfuzz-*.tar.gz
+          pip install dist/rapidfuzz-*.tar.gz -v
 
       - name: Test type stubs
         # prevent import from rapidfuzz
