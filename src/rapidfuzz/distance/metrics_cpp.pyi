@@ -215,3 +215,63 @@ def osa_normalized_similarity(
     processor: Optional[Callable[..., _StringType]] = None,
     score_cutoff: Optional[float] = 0
 ) -> float: ...
+def jaro_distance(
+    s1: _S1,
+    s2: _S2,
+    *,
+    processor: Optional[Callable[..., _StringType]] = None,
+    score_cutoff: Optional[int] = None
+) -> float: ...
+def jaro_normalized_distance(
+    s1: _S1,
+    s2: _S2,
+    *,
+    processor: Optional[Callable[..., _StringType]] = None,
+    score_cutoff: Optional[float] = 0
+) -> float: ...
+def jaro_similarity(
+    s1: _S1,
+    s2: _S2,
+    *,
+    processor: Optional[Callable[..., _StringType]] = None,
+    score_cutoff: Optional[int] = None
+) -> float: ...
+def jaro_normalized_similarity(
+    s1: _S1,
+    s2: _S2,
+    *,
+    processor: Optional[Callable[..., _StringType]] = None,
+    score_cutoff: Optional[float] = 0
+) -> float: ...
+def jaro_winkler_distance(
+    s1: _S1,
+    s2: _S2,
+    *,
+    prefix_weight: float = 0.1,
+    processor: Optional[Callable[..., _StringType]] = None,
+    score_cutoff: Optional[int] = None
+) -> float: ...
+def jaro_winkler_normalized_distance(
+    s1: _S1,
+    s2: _S2,
+    *,
+    prefix_weight: float = 0.1,
+    processor: Optional[Callable[..., _StringType]] = None,
+    score_cutoff: Optional[float] = 0
+) -> float: ...
+def jaro_winkler_similarity(
+    s1: _S1,
+    s2: _S2,
+    *,
+    prefix_weight: float = 0.1,
+    processor: Optional[Callable[..., _StringType]] = None,
+    score_cutoff: Optional[int] = None
+) -> float: ...
+def jaro_winkler_normalized_similarity(
+    s1: _S1,
+    s2: _S2,
+    *,
+    prefix_weight: float = 0.1,
+    processor: Optional[Callable[..., _StringType]] = None,
+    score_cutoff: Optional[float] = 0
+) -> float: ...
