@@ -230,5 +230,5 @@ AddScorerContext(partial_token_ratio, FuzzContextPy, &PartialTokenRatioContext)
 cdef RF_Scorer WRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, WRatioInit)
 AddScorerContext(WRatio, FuzzContextPy, &WRatioContext)
 
-cdef RF_Scorer QRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, QRatioInit)
+cdef RF_Scorer QRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzzRatio, QRatioInit)
 AddScorerContext(QRatio, FuzzContextPy, &QRatioContext)

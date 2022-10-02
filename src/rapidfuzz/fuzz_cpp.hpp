@@ -148,7 +148,16 @@ static inline double QRatio_func(const RF_String& str1, const RF_String& str2, d
         return fuzz::QRatio(s1, s2, score_cutoff);
     });
 }
-static inline bool QRatioInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str)
+static inline bool QRatioInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count,
+                             const RF_String* str)
 {
+#ifdef RAPIDFUZZ_X64
+    if (CpuInfo::supports(CPU_FEATURE_AVX2)) return Avx2::QRatioInit(self, kwargs, str_count, str);
+
+    if (CpuInfo::supports(CPU_FEATURE_SSE2)) return Sse2::QRatioInit(self, kwargs, str_count, str);
+#else
+    (void)kwargs;
+#endif
+
     return similarity_init<fuzz::CachedQRatio, double>(self, str_count, str);
 }

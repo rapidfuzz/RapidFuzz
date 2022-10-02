@@ -9,12 +9,12 @@ import string
 
 random.seed(18)
 
-plt.rc('font', size=13)          # controls default text sizes
-plt.rc('axes', titlesize=18)     # fontsize of the axes title
+plt.rc('font', size=13)         # controls default text sizes
+plt.rc('axes', titlesize=18)    # fontsize of the axes title
 plt.rc('axes', labelsize=15)    # fontsize of the x and y labels
-plt.rc('xtick', labelsize=15)    # fontsize of the tick labels
-plt.rc('ytick', labelsize=15)    # fontsize of the tick labels
-plt.rc('legend', fontsize=15)    # legend fontsize
+plt.rc('xtick', labelsize=15)   # fontsize of the tick labels
+plt.rc('ytick', labelsize=15)   # fontsize of the tick labels
+plt.rc('legend', fontsize=15)   # legend fontsize
 
 PROCESSOR = {
     "ratio":False,
@@ -51,7 +51,7 @@ def get_platform():
     return 'Python %s on %s (%s)' % (pyver, uname.system, uname.machine)
 
 def benchmark():
-    words = [''.join(random.choice(string.ascii_letters + string.digits) for _ in range(10)) for _ in range(10000)]
+    words = [''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8)) for _ in range(10000)]
     sample_rate = len(words) // 100
     sample = words[::sample_rate]
     total = len(words) * len(sample)
@@ -61,11 +61,17 @@ def benchmark():
     print('Sample:', len(sample))
     print('Total : %s calls\n' % total)
 
-    def wrap(f, scorer, processor):
+    def wrap_cdist(scorer, processor):
+        from rapidfuzz.process import cdist
         def func():
-            if not processor:
-                return len([f(x, words, scorer=scorer, processor=None) for x in sample])
-            return len([f(x, words, scorer=scorer) for x in sample])
+            cdist(sample, words, scorer=scorer, processor=processor)
+        return func
+
+    def wrap_iterate(scorer, processor):
+        def func():
+            for query in sample:
+                for choice in words:
+                    scorer(query, choice)
         return func
 
     fuzz = []
@@ -75,15 +81,13 @@ def benchmark():
     row_format ="{:>25}" * len(header_list)
     print(row_format.format(*header_list))
     for target in LIBRARIES:
-        func = load_func("fuzzywuzzy.process.extractOne")
         scorer = load_func("fuzzywuzzy.fuzz." + target)
-        sec = timeit('func()', globals={'func': wrap(func, scorer, PROCESSOR[target])}, number=1)
+        sec = timeit('func()', globals={'func': wrap_iterate(scorer, PROCESSOR[target])}, number=1)
         calls = total / sec
         fuzz.append(calls)
 
-        rfunc = load_func("rapidfuzz.process.extractOne")
         rscorer = load_func("rapidfuzz.fuzz." + target)
-        rsec = timeit('func()', globals={'func': wrap(rfunc, rscorer, PROCESSOR[target])}, number=1)
+        rsec = timeit('func()', globals={'func': wrap_cdist(rscorer, PROCESSOR[target])}, number=1)
         rcalls = total / rsec
         rfuzz.append(rcalls)
 
