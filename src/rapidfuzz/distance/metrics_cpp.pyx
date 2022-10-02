@@ -105,6 +105,28 @@ cdef extern from "metrics.hpp":
     bool OSASimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
     bool OSANormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
 
+    # Damerau Levenshtein
+    double jaro_normalized_distance_func(  const RF_String&, const RF_String&, double) nogil except +
+    double jaro_distance_func(             const RF_String&, const RF_String&, double) nogil except +
+    double jaro_normalized_similarity_func(const RF_String&, const RF_String&, double) nogil except +
+    double jaro_similarity_func(           const RF_String&, const RF_String&, double) nogil except +
+
+    bool JaroDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool JaroNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool JaroSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool JaroNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+
+    # Damerau Levenshtein
+    double jaro_winkler_normalized_distance_func(  const RF_String&, const RF_String&, double, double) nogil except +
+    double jaro_winkler_distance_func(             const RF_String&, const RF_String&, double, double) nogil except +
+    double jaro_winkler_normalized_similarity_func(const RF_String&, const RF_String&, double, double) nogil except +
+    double jaro_winkler_similarity_func(           const RF_String&, const RF_String&, double, double) nogil except +
+
+    bool JaroWinklerDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool JaroWinklerNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool JaroWinklerSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool JaroWinklerNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+
 
 cdef int64_t get_score_cutoff_i64(score_cutoff, int64_t default) except -1:
     cdef int64_t c_score_cutoff = default
@@ -736,3 +758,136 @@ osa_similarity._RF_Scorer = PyCapsule_New(&OSASimilarityContext, NULL, NULL)
 
 cdef RF_Scorer OSANormalizedSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsOSANormalizedSimilarity, OSANormalizedSimilarityInit)
 osa_normalized_similarity._RF_Scorer = PyCapsule_New(&OSANormalizedDistanceContext, NULL, NULL)
+
+###############################################
+# Jaro
+###############################################
+
+def jaro_distance(s1, s2, *, processor=None, score_cutoff=None):
+    cdef RF_StringWrapper s1_proc, s2_proc
+    if s1 is None or s2 is None:
+        return 0
+
+    cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 1.0)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
+    return jaro_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+
+def jaro_similarity(s1, s2, *, processor=None, score_cutoff=None):
+    cdef RF_StringWrapper s1_proc, s2_proc
+    if s1 is None or s2 is None:
+        return 0
+
+    cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
+    return jaro_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+
+def jaro_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
+    cdef RF_StringWrapper s1_proc, s2_proc
+    if s1 is None or s2 is None:
+        return 0
+
+    cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 1.0)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
+    return jaro_normalized_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+
+
+def jaro_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
+    cdef RF_StringWrapper s1_proc, s2_proc
+    if s1 is None or s2 is None:
+        return 0
+
+    cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
+    return jaro_normalized_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+
+cdef bool GetScorerFlagsJaroDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 0.0
+    scorer_flags.worst_score.f64 = 1.0
+    return True
+
+cdef bool GetScorerFlagsJaroSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 1.0
+    scorer_flags.worst_score.f64 = 0
+    return True
+
+cdef RF_Scorer JaroDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsJaroDistance, JaroDistanceInit)
+jaro_distance._RF_Scorer = PyCapsule_New(&JaroDistanceContext, NULL, NULL)
+jaro_normalized_distance._RF_Scorer = PyCapsule_New(&JaroDistanceContext, NULL, NULL)
+
+cdef RF_Scorer JaroSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsJaroSimilarity, JaroSimilarityInit)
+jaro_similarity._RF_Scorer = PyCapsule_New(&JaroSimilarityContext, NULL, NULL)
+jaro_normalized_similarity._RF_Scorer = PyCapsule_New(&JaroDistanceContext, NULL, NULL)
+
+
+###############################################
+# JaroWinkler
+###############################################
+
+def jaro_winkler_distance(s1, s2, *, double prefix_weight=0.1, processor=None, score_cutoff=None):
+    cdef RF_StringWrapper s1_proc, s2_proc
+    if s1 is None or s2 is None:
+        return 0
+
+    cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 1.0)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
+    return jaro_winkler_distance_func(s1_proc.string, s2_proc.string, prefix_weight, c_score_cutoff)
+
+def jaro_winkler_similarity(s1, s2, *, double prefix_weight=0.1, processor=None, score_cutoff=None):
+    cdef RF_StringWrapper s1_proc, s2_proc
+    if s1 is None or s2 is None:
+        return 0
+
+    cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
+    return jaro_winkler_similarity_func(s1_proc.string, s2_proc.string, prefix_weight, c_score_cutoff)
+
+def jaro_winkler_normalized_distance(s1, s2, *, double prefix_weight=0.1, processor=None, score_cutoff=None):
+    cdef RF_StringWrapper s1_proc, s2_proc
+    if s1 is None or s2 is None:
+        return 0
+
+    cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 1.0)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
+    return jaro_winkler_normalized_distance_func(s1_proc.string, s2_proc.string, prefix_weight, c_score_cutoff)
+
+def jaro_winkler_normalized_similarity(s1, s2, *, double prefix_weight=0.1, processor=None, score_cutoff=None):
+    cdef RF_StringWrapper s1_proc, s2_proc
+    if s1 is None or s2 is None:
+        return 0
+
+    cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
+    return jaro_winkler_normalized_similarity_func(s1_proc.string, s2_proc.string, prefix_weight, c_score_cutoff)
+
+cdef bool JaroWinklerKwargsInit(RF_Kwargs * self, dict kwargs) except False:
+    cdef double * prefix_weight = <double *> malloc(sizeof(double))
+
+    if not prefix_weight:
+        raise MemoryError
+
+    prefix_weight[0] = kwargs.get("prefix_weight", 0.1)
+    self.context = prefix_weight
+    self.dtor = KwargsDeinit
+    return True
+
+cdef bool GetScorerFlagsJaroWinklerDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 0.0
+    scorer_flags.worst_score.f64 = 1.0
+    return True
+
+cdef bool GetScorerFlagsJaroWinklerSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 1.0
+    scorer_flags.worst_score.f64 = 0
+    return True
+
+cdef RF_Scorer JaroWinklerDistanceContext = CreateScorerContext(JaroWinklerKwargsInit, GetScorerFlagsJaroWinklerDistance, JaroWinklerDistanceInit)
+jaro_winkler_distance._RF_Scorer = PyCapsule_New(&JaroWinklerDistanceContext, NULL, NULL)
+jaro_winkler_normalized_distance._RF_Scorer = PyCapsule_New(&JaroWinklerDistanceContext, NULL, NULL)
+
+cdef RF_Scorer JaroWinklerSimilarityContext = CreateScorerContext(JaroWinklerKwargsInit, GetScorerFlagsJaroWinklerSimilarity, JaroWinklerSimilarityInit)
+jaro_winkler_similarity._RF_Scorer = PyCapsule_New(&JaroWinklerSimilarityContext, NULL, NULL)
+jaro_winkler_normalized_similarity._RF_Scorer = PyCapsule_New(&JaroWinklerDistanceContext, NULL, NULL)

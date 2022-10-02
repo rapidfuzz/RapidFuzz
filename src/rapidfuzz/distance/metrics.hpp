@@ -513,3 +513,109 @@ static inline bool OSANormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwa
 {
     return normalized_similarity_init<rapidfuzz::CachedOSA, double>(self, str_count, str);
 }
+
+/* Jaro */
+static inline double jaro_distance_func(const RF_String& str1, const RF_String& str2, double max)
+{
+    return visitor(str1, str2, [&](auto s1, auto s2) {
+        return rapidfuzz::jaro_distance(s1, s2, max);
+    });
+}
+static inline bool JaroDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                       const RF_String* str)
+{
+    return distance_init<rapidfuzz::CachedJaro, double>(self, str_count, str);
+}
+
+static inline double jaro_normalized_distance_func(const RF_String& str1, const RF_String& str2,
+                                                      double score_cutoff)
+{
+    return visitor(str1, str2, [&](auto s1, auto s2) {
+        return rapidfuzz::jaro_normalized_distance(s1, s2, score_cutoff);
+    });
+}
+static inline bool JaroNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                                 const RF_String* str)
+{
+    return normalized_distance_init<rapidfuzz::CachedJaro, double>(self, str_count, str);
+}
+
+static inline double jaro_similarity_func(const RF_String& str1, const RF_String& str2, double max)
+{
+    return visitor(str1, str2, [&](auto s1, auto s2) {
+        return rapidfuzz::jaro_similarity(s1, s2, max);
+    });
+}
+static inline bool JaroSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                         const RF_String* str)
+{
+    return similarity_init<rapidfuzz::CachedJaro, double>(self, str_count, str);
+}
+
+static inline double jaro_normalized_similarity_func(const RF_String& str1, const RF_String& str2,
+                                                        double score_cutoff)
+{
+    return visitor(str1, str2, [&](auto s1, auto s2) {
+        return rapidfuzz::jaro_normalized_similarity(s1, s2, score_cutoff);
+    });
+}
+static inline bool JaroNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                                   const RF_String* str)
+{
+    return normalized_similarity_init<rapidfuzz::CachedJaro, double>(self, str_count, str);
+}
+
+/* JaroWinkler */
+static inline double jaro_winkler_distance_func(const RF_String& str1, const RF_String& str2, double prefix_weight, double max)
+{
+    return visitor(str1, str2, [&](auto s1, auto s2) {
+        return rapidfuzz::jaro_winkler_distance(s1, s2, prefix_weight, max);
+    });
+}
+static inline bool JaroWinklerDistanceInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count,
+                                       const RF_String* str)
+{
+    double prefix_weight = *static_cast<double*>(kwargs->context);
+    return distance_init<rapidfuzz::CachedJaroWinkler, double>(self, str_count, str, prefix_weight);
+}
+
+static inline double jaro_winkler_normalized_distance_func(const RF_String& str1, const RF_String& str2, double prefix_weight,
+                                                      double score_cutoff)
+{
+    return visitor(str1, str2, [&](auto s1, auto s2) {
+        return rapidfuzz::jaro_winkler_normalized_distance(s1, s2, prefix_weight, score_cutoff);
+    });
+}
+static inline bool JaroWinklerNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count,
+                                                 const RF_String* str)
+{
+    double prefix_weight = *static_cast<double*>(kwargs->context);
+    return normalized_distance_init<rapidfuzz::CachedJaroWinkler, double>(self, str_count, str, prefix_weight);
+}
+
+static inline double jaro_winkler_similarity_func(const RF_String& str1, const RF_String& str2, double prefix_weight, double max)
+{
+    return visitor(str1, str2, [&](auto s1, auto s2) {
+        return rapidfuzz::jaro_winkler_similarity(s1, s2, prefix_weight, max);
+    });
+}
+static inline bool JaroWinklerSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count,
+                                         const RF_String* str)
+{
+    double prefix_weight = *static_cast<double*>(kwargs->context);
+    return similarity_init<rapidfuzz::CachedJaroWinkler, double>(self, str_count, str, prefix_weight);
+}
+
+static inline double jaro_winkler_normalized_similarity_func(const RF_String& str1, const RF_String& str2, double prefix_weight,
+                                                        double score_cutoff)
+{
+    return visitor(str1, str2, [&](auto s1, auto s2) {
+        return rapidfuzz::jaro_winkler_normalized_similarity(s1, s2, prefix_weight, score_cutoff);
+    });
+}
+static inline bool JaroWinklerNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count,
+                                                   const RF_String* str)
+{
+    double prefix_weight = *static_cast<double*>(kwargs->context);
+    return normalized_similarity_init<rapidfuzz::CachedJaroWinkler, double>(self, str_count, str, prefix_weight);
+}
