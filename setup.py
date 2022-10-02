@@ -7,7 +7,7 @@ def show_message(*lines):
         print(line)
     print("=" * 74)
 
-with open('README.md', 'rt', encoding="utf8") as f:
+with open('README.md', encoding="utf8") as f:
     readme = f.read()
 
 setup_args = {
