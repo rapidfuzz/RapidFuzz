@@ -59,7 +59,7 @@ The following implementation is used with a worst-case performance of ``O([N/64]
 
 - If max is ≤ 4 the mbleven algorithm is used. This algorithm
   checks all possible edit operations that are possible under
-  the threshold `max`. As a difference to the normal Levenshtein distance this
+  the threshold ``max``. As a difference to the normal Levenshtein distance this
   algorithm can even be used up to a threshold of 4 here, since the higher weight
   of substitutions decreases the amount of possible edit operations.
   The time complexity of this algorithm is ``O(N)``.
