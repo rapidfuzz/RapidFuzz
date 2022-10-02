@@ -87,11 +87,12 @@ cdef RfEditops list_to_editops(ops, size_t src_len, size_t dest_len) except *:
         result.emplace_back(edit_type, src_pos, dest_pos)
 
     # validate order of editops
-    for i in range(0, ops_len - 1):
-        if result[i + 1].src_pos < result[i].src_pos or result[i + 1].dest_pos < result[i].dest_pos:
-            raise ValueError("List of edit operations out of order")
-        if result[i + 1].src_pos == result[i].src_pos and result[i + 1].dest_pos == result[i].dest_pos:
-            raise ValueError("Duplicated edit operation")
+    if (result.size()):
+        for i in range(0, result.size() - 1):
+            if result[i + 1].src_pos < result[i].src_pos or result[i + 1].dest_pos < result[i].dest_pos:
+                raise ValueError("List of edit operations out of order")
+            if result[i + 1].src_pos == result[i].src_pos and result[i + 1].dest_pos == result[i].dest_pos:
+                raise ValueError("Duplicated edit operation")
 
     result.shrink_to_fit()
     return result

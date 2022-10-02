@@ -16,6 +16,20 @@ from rapidfuzz.distance import (
     Opcodes,
 )
 
+from rapidfuzz.distance._initialize_cpp import (
+    Editop as Editop_cpp,
+    Editops as Editops_cpp,
+    Opcode as Opcode_cpp,
+    Opcodes as Opcodes_cpp,
+)
+
+from rapidfuzz.distance._initialize_py import (
+    Editop as Editop_py,
+    Editops as Editops_py,
+    Opcode as Opcode_py,
+    Opcodes as Opcodes_py,
+)
+
 
 def test_editops_comparison():
     """
@@ -28,11 +42,11 @@ def test_editops_comparison():
     assert not (ops != ops.copy())
 
 
-def test_editops_get_index():
+def test_editops_cpp_get_index():
     """
     test __getitem__ with index of Editops
     """
-    ops = Editops(
+    ops = Editops_cpp(
         [
             ("delete", 1, 1),
             ("replace", 2, 1),
@@ -70,11 +84,53 @@ def test_editops_get_index():
         ops[-6]
 
 
-def test_editops_get_slice():
+def test_editops_py_get_index():
+    """
+    test __getitem__ with index of Editops
+    """
+    ops = Editops_py(
+        [
+            ("delete", 1, 1),
+            ("replace", 2, 1),
+            ("insert", 6, 5),
+            ("insert", 6, 6),
+            ("insert", 6, 7),
+        ],
+        7,
+        9,
+    )
+
+    ops_list = [
+        ("delete", 1, 1),
+        ("replace", 2, 1),
+        ("insert", 6, 5),
+        ("insert", 6, 6),
+        ("insert", 6, 7),
+    ]
+
+    assert ops[0] == ops_list[0]
+    assert ops[1] == ops_list[1]
+    assert ops[2] == ops_list[2]
+    assert ops[3] == ops_list[3]
+    assert ops[4] == ops_list[4]
+
+    assert ops[-1] == ops_list[-1]
+    assert ops[-2] == ops_list[-2]
+    assert ops[-3] == ops_list[-3]
+    assert ops[-4] == ops_list[-4]
+    assert ops[-5] == ops_list[-5]
+
+    with pytest.raises(IndexError):
+        ops[5]
+    with pytest.raises(IndexError):
+        ops[-6]
+
+
+def test_editops_cpp_get_slice():
     """
     test __getitem__ with slice of Editops
     """
-    ops = Editops(
+    ops = Editops_cpp(
         [
             ("delete", 1, 1),
             ("replace", 2, 1),
@@ -110,11 +166,51 @@ def test_editops_get_slice():
         ops[::-1]
 
 
-def test_editops_del_slice():
+def test_editops_py_get_slice():
+    """
+    test __getitem__ with slice of Editops
+    """
+    ops = Editops_py(
+        [
+            ("delete", 1, 1),
+            ("replace", 2, 1),
+            ("insert", 6, 5),
+            ("insert", 6, 6),
+            ("insert", 6, 7),
+        ],
+        7,
+        9,
+    )
+
+    ops_list = [
+        ("delete", 1, 1),
+        ("replace", 2, 1),
+        ("insert", 6, 5),
+        ("insert", 6, 6),
+        ("insert", 6, 7),
+    ]
+
+    assert ops[::].as_list() == ops_list[::]
+    assert ops[::] is not ops
+    assert ops[1:].as_list() == ops_list[1:]
+    assert ops[:3].as_list() == ops_list[:3]
+    assert ops[1:3].as_list() == ops_list[1:3]
+    assert ops[:-1].as_list() == ops_list[:-1]
+    assert ops[-3:].as_list() == ops_list[-3:]
+    assert ops[-3:-1].as_list() == ops_list[-3:-1]
+
+    with pytest.raises(ValueError):
+        ops[::0]
+
+    with pytest.raises(ValueError):
+        ops[::-1]
+
+
+def test_editops_cpp_del_slice():
     """
     test __delitem__ with slice of Editops
     """
-    ops = Editops(
+    ops = Editops_cpp(
         [
             ("delete", 1, 1),
             ("replace", 2, 1),
@@ -156,11 +252,82 @@ def test_editops_del_slice():
     del_test(slice(-4, -1, 2))
 
 
-def test_editops_inversion():
+def test_editops_py_del_slice():
+    """
+    test __delitem__ with slice of Editops
+    """
+    ops = Editops_py(
+        [
+            ("delete", 1, 1),
+            ("replace", 2, 1),
+            ("insert", 6, 5),
+            ("insert", 6, 6),
+            ("insert", 6, 7),
+        ],
+        7,
+        9,
+    )
+
+    ops_list = [
+        ("delete", 1, 1),
+        ("replace", 2, 1),
+        ("insert", 6, 5),
+        ("insert", 6, 6),
+        ("insert", 6, 7),
+    ]
+
+    def del_test(key):
+        _ops = ops[::]
+        _ops_list = ops_list[::]
+        del _ops[key]
+        del _ops_list[key]
+        assert _ops.as_list() == _ops_list
+
+    del_test(slice(None, 4, None))
+    del_test(slice(1, None, None))
+    del_test(slice(1, 4, None))
+    del_test(slice(None, 4, 2))
+    del_test(slice(1, None, 2))
+    del_test(slice(1, 4, 2))
+
+    del_test(slice(None, -1, None))
+    del_test(slice(-4, None, None))
+    del_test(slice(-4, -1, None))
+    del_test(slice(None, -1, 2))
+    del_test(slice(-4, None, 2))
+    del_test(slice(-4, -1, 2))
+
+
+def test_editops_cpp_inversion():
     """
     test correct inversion of Editops
     """
-    ops = Editops(
+    ops = Editops_cpp(
+        [
+            ("delete", 1, 1),
+            ("replace", 2, 1),
+            ("insert", 6, 5),
+            ("insert", 6, 6),
+            ("insert", 6, 7),
+        ],
+        7,
+        9,
+    )
+
+    assert ops.inverse().as_list() == [
+        ("insert", 1, 1),
+        ("replace", 1, 2),
+        ("delete", 5, 6),
+        ("delete", 6, 6),
+        ("delete", 7, 6),
+    ]
+
+
+def test_editops_py_inversion():
+    """
+    test correct inversion of Editops
+    """
+    ops = Editops_py(
         [
             ("delete", 1, 1),
             ("replace", 2, 1),
@@ -192,11 +359,11 @@ def test_opcodes_comparison():
     assert not (ops != ops.copy())
 
 
-def test_opcode_get_index():
+def test_opcode_cpp_get_index():
     """
     test __getitem__ with index of Opcodes
     """
-    ops = Opcodes(
+    ops = Opcodes_cpp(
         [
             ("equal", 0, 1, 0, 1),
             ("delete", 1, 2, 1, 1),
@@ -238,11 +405,57 @@ def test_opcode_get_index():
         ops[-7]
 
 
-def test_opcode_inversion():
+def test_opcode_py_get_index():
+    """
+    test __getitem__ with index of Opcodes
+    """
+    ops = Opcodes_py(
+        [
+            ("equal", 0, 1, 0, 1),
+            ("delete", 1, 2, 1, 1),
+            ("replace", 2, 3, 1, 2),
+            ("equal", 3, 6, 2, 5),
+            ("insert", 6, 6, 5, 8),
+            ("equal", 6, 7, 8, 9),
+        ],
+        7,
+        9,
+    )
+
+    ops_list = [
+        ("equal", 0, 1, 0, 1),
+        ("delete", 1, 2, 1, 1),
+        ("replace", 2, 3, 1, 2),
+        ("equal", 3, 6, 2, 5),
+        ("insert", 6, 6, 5, 8),
+        ("equal", 6, 7, 8, 9),
+    ]
+
+    assert ops[0] == ops_list[0]
+    assert ops[1] == ops_list[1]
+    assert ops[2] == ops_list[2]
+    assert ops[3] == ops_list[3]
+    assert ops[4] == ops_list[4]
+    assert ops[5] == ops_list[5]
+
+    assert ops[-1] == ops_list[-1]
+    assert ops[-2] == ops_list[-2]
+    assert ops[-3] == ops_list[-3]
+    assert ops[-4] == ops_list[-4]
+    assert ops[-5] == ops_list[-5]
+    assert ops[-6] == ops_list[-6]
+
+    with pytest.raises(IndexError):
+        ops[6]
+    with pytest.raises(IndexError):
+        ops[-7]
+
+
+def test_opcode_cpp_inversion():
     """
     test correct inversion of Opcodes
     """
-    ops = Opcodes(
+    ops = Opcodes_cpp(
         [
             ("equal", 0, 1, 0, 1),
             ("delete", 1, 2, 1, 1),
@@ -265,33 +478,92 @@ def test_opcode_inversion():
     ]
 
 
-def test_editops_empty():
+def test_opcode_py_inversion():
+    """
+    test correct inversion of Opcodes
+    """
+    ops = Opcodes_py(
+        [
+            ("equal", 0, 1, 0, 1),
+            ("delete", 1, 2, 1, 1),
+            ("replace", 2, 3, 1, 2),
+            ("equal", 3, 6, 2, 5),
+            ("insert", 6, 6, 5, 8),
+            ("equal", 6, 7, 8, 9),
+        ],
+        7,
+        9,
+    )
+
+    assert ops.inverse().as_list() == [
+        ("equal", 0, 1, 0, 1),
+        ("insert", 1, 1, 1, 2),
+        ("replace", 1, 2, 2, 3),
+        ("equal", 2, 5, 3, 6),
+        ("delete", 5, 8, 6, 6),
+        ("equal", 8, 9, 6, 7),
+    ]
+
+
+def test_editops_cpp_empty():
     """
     test behavior of conversion between empty list and Editops
     """
-    ops = Opcodes([], 0, 0)
+    ops = Opcodes_cpp([], 0, 0)
     assert ops.as_list() == []
     assert ops.src_len == 0
     assert ops.dest_len == 0
 
-    ops = Opcodes([], 0, 3)
+    ops = Opcodes_cpp([], 0, 3)
     assert ops.as_list() == [
-        Opcode(tag="equal", src_start=0, src_end=0, dest_start=0, dest_end=3)
+        Opcode_cpp(tag="equal", src_start=0, src_end=0, dest_start=0, dest_end=3)
     ]
     assert ops.src_len == 0
     assert ops.dest_len == 3
 
 
-def test_editops_empty():
+def test_editops_py_empty():
     """
-    test behavior of conversion between empty list and Opcodes
+    test behavior of conversion between empty list and Editops
     """
-    ops = Editops([], 0, 0)
+    ops = Opcodes_py([], 0, 0)
     assert ops.as_list() == []
     assert ops.src_len == 0
     assert ops.dest_len == 0
 
-    ops = Editops([], 0, 3)
+    ops = Opcodes_py([], 0, 3)
+    assert ops.as_list() == [
+        Opcode_py(tag="equal", src_start=0, src_end=0, dest_start=0, dest_end=3)
+    ]
+    assert ops.src_len == 0
+    assert ops.dest_len == 3
+
+
+def test_editops_cpp_empty():
+    """
+    test behavior of conversion between empty list and Opcodes
+    """
+    ops = Editops_cpp([], 0, 0)
+    assert ops.as_list() == []
+    assert ops.src_len == 0
+    assert ops.dest_len == 0
+
+    ops = Editops_cpp([], 0, 3)
+    assert ops.as_list() == []
+    assert ops.src_len == 0
+    assert ops.dest_len == 3
+
+
+def test_editops_py_empty():
+    """
+    test behavior of conversion between empty list and Opcodes
+    """
+    ops = Editops_py([], 0, 0)
+    assert ops.as_list() == []
+    assert ops.src_len == 0
+    assert ops.dest_len == 0
+
+    ops = Editops_py([], 0, 3)
     assert ops.as_list() == []
     assert ops.src_len == 0
     assert ops.dest_len == 3
@@ -322,30 +594,80 @@ def test_list_initialization():
     assert ops.as_opcodes() == ops2
 
 
-def test_merge_adjacent_blocks():
+def test_merge_adjacent_blocks_cpp():
     """
     test whether adjacent blocks are merged
     """
-    ops1 = [Opcode(tag="equal", src_start=0, src_end=3, dest_start=0, dest_end=3)]
+    ops1 = [Opcode_cpp(tag="equal", src_start=0, src_end=3, dest_start=0, dest_end=3)]
     ops2 = [
-        Opcode(tag="equal", src_start=0, src_end=1, dest_start=0, dest_end=1),
-        Opcode(tag="equal", src_start=1, src_end=3, dest_start=1, dest_end=3),
+        Opcode_cpp(tag="equal", src_start=0, src_end=1, dest_start=0, dest_end=1),
+        Opcode_cpp(tag="equal", src_start=1, src_end=3, dest_start=1, dest_end=3),
     ]
-    assert Opcodes(ops1, 3, 3) == Opcodes(ops2, 3, 3)
-    assert Opcodes(ops2, 3, 3) == Opcodes(ops2, 3, 3).as_editops().as_opcodes()
+    assert Opcodes_cpp(ops1, 3, 3) == Opcodes_cpp(ops2, 3, 3)
+    assert Opcodes_cpp(ops2, 3, 3) == Opcodes_cpp(ops2, 3, 3).as_editops().as_opcodes()
 
 
-def test_empty_matching_blocks():
+def test_merge_adjacent_blocks_py():
+    """
+    test whether adjacent blocks are merged
+    """
+    ops1 = [Opcode_py(tag="equal", src_start=0, src_end=3, dest_start=0, dest_end=3)]
+    ops2 = [
+        Opcode_py(tag="equal", src_start=0, src_end=1, dest_start=0, dest_end=1),
+        Opcode_py(tag="equal", src_start=1, src_end=3, dest_start=1, dest_end=3),
+    ]
+    assert Opcodes_py(ops1, 3, 3) == Opcodes_py(ops2, 3, 3)
+    assert Opcodes_py(ops2, 3, 3) == Opcodes_py(ops2, 3, 3).as_editops().as_opcodes()
+
+
+def test_empty_matching_blocks_cpp():
     """
     test behavior for empty matching blocks
     """
-    assert Editops([], 0, 0).as_matching_blocks() == [MatchingBlock(a=0, b=0, size=0)]
-    assert Editops([], 0, 3).as_matching_blocks() == [MatchingBlock(a=0, b=3, size=0)]
-    assert Editops([], 3, 0).as_matching_blocks() == [MatchingBlock(a=3, b=0, size=0)]
+    assert Editops_cpp([], 0, 0).as_matching_blocks() == [
+        MatchingBlock(a=0, b=0, size=0)
+    ]
+    assert Editops_cpp([], 0, 3).as_matching_blocks() == [
+        MatchingBlock(a=0, b=3, size=0)
+    ]
+    assert Editops_cpp([], 3, 0).as_matching_blocks() == [
+        MatchingBlock(a=3, b=0, size=0)
+    ]
 
-    assert Opcodes([], 0, 0).as_matching_blocks() == [MatchingBlock(a=0, b=0, size=0)]
-    assert Opcodes([], 0, 3).as_matching_blocks() == [MatchingBlock(a=0, b=3, size=0)]
-    assert Opcodes([], 3, 0).as_matching_blocks() == [MatchingBlock(a=3, b=0, size=0)]
+    assert Opcodes_cpp([], 0, 0).as_matching_blocks() == [
+        MatchingBlock(a=0, b=0, size=0)
+    ]
+    assert Opcodes_cpp([], 0, 3).as_matching_blocks() == [
+        MatchingBlock(a=0, b=3, size=0)
+    ]
+    assert Opcodes_cpp([], 3, 0).as_matching_blocks() == [
+        MatchingBlock(a=3, b=0, size=0)
+    ]
+
+
+def test_empty_matching_blocks_py():
+    """
+    test behavior for empty matching blocks
+    """
+    assert Editops_py([], 0, 0).as_matching_blocks() == [
+        MatchingBlock(a=0, b=0, size=0)
+    ]
+    assert Editops_py([], 0, 3).as_matching_blocks() == [
+        MatchingBlock(a=0, b=3, size=0)
+    ]
+    assert Editops_py([], 3, 0).as_matching_blocks() == [
+        MatchingBlock(a=3, b=0, size=0)
+    ]
+
+    assert Opcodes_py([], 0, 0).as_matching_blocks() == [
+        MatchingBlock(a=0, b=0, size=0)
+    ]
+    assert Opcodes_py([], 0, 3).as_matching_blocks() == [
+        MatchingBlock(a=0, b=3, size=0)
+    ]
+    assert Opcodes_py([], 3, 0).as_matching_blocks() == [
+        MatchingBlock(a=3, b=0, size=0)
+    ]
 
 
 @given(s1=st.text(), s2=st.text())
