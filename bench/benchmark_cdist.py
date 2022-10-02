@@ -1,11 +1,11 @@
 import importlib
 import random
-from timeit import timeit
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib
-
 import string
+from timeit import timeit
+
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
 
 random.seed(18)
 

@@ -1,4 +1,4 @@
-from typing import Callable, Hashable, Sequence, Optional, TypeVar, Tuple, List
+from typing import Callable, Hashable, List, Optional, Sequence, Tuple, TypeVar
 
 _StringType = Sequence[Hashable]
 _S1 = TypeVar("_S1")

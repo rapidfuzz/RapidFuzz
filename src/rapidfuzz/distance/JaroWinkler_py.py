@@ -3,6 +3,7 @@
 
 from rapidfuzz.distance import Jaro
 
+
 def similarity(s1, s2, *, prefix_weight=0.1, processor=None, score_cutoff=None) -> float:
     """
     Calculates the jaro winkler similarity

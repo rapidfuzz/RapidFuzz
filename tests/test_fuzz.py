@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-import pytest
 from array import array
 
-from rapidfuzz import fuzz_py, fuzz_cpp, utils
+import pytest
+
+from rapidfuzz import fuzz_cpp, fuzz_py, utils
 from rapidfuzz.distance import ScoreAlignment
 
 

@@ -1,6 +1,9 @@
-from typing import Callable, Hashable, Sequence, Optional, TypeVar, Tuple, Any, Dict
-from rapidfuzz.distance import Editops, Opcodes
+from typing import (Any, Callable, Dict, Hashable, Optional, Sequence, Tuple,
+                    TypeVar)
+
 from typing_extensions import Protocol
+
+from rapidfuzz.distance import Editops, Opcodes
 
 class _ScorerAttributes(Protocol):
     _RF_ScorerPy: Dict

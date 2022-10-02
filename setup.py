@@ -1,5 +1,6 @@
 import os
 
+
 def show_message(*lines):
     print("=" * 74)
     for line in lines:
@@ -45,8 +46,8 @@ setup_args = {
 
 def run_setup(with_binary):
     if with_binary:
-        from skbuild import setup
         import rapidfuzz_capi
+        from skbuild import setup
 
         setup(
             **setup_args,

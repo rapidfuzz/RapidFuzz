@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
 
-from rapidfuzz.utils import default_process
-from rapidfuzz.fuzz import WRatio, ratio
 import heapq
+
+from rapidfuzz.fuzz import WRatio, ratio
+from rapidfuzz.utils import default_process
 
 
 def _get_scorer_flags_py(scorer, kwargs):

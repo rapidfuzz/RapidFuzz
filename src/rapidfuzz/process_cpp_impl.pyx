@@ -1,39 +1,35 @@
 # distutils: language=c++
 # cython: language_level=3, binding=True, linetrace=True
 
-from rapidfuzz.utils import default_process
 from rapidfuzz.fuzz import WRatio, ratio
+from rapidfuzz.utils import default_process
 
-from libcpp cimport bool
-from libcpp.vector cimport vector
-from libcpp cimport algorithm
-from libcpp.utility cimport move
-from libc.stdint cimport uint8_t, int32_t, uint64_t, int64_t
-from libc.math cimport floor
-
-from cpython.list cimport PyList_New, PyList_SET_ITEM
-from cpython.ref cimport Py_INCREF
 cimport cython
-from cpython.exc cimport PyErr_CheckSignals
+from cpp_common cimport (PyObjectWrapper, RF_KwargsWrapper, RF_StringWrapper,
+                         conv_sequence, get_score_cutoff_f64,
+                         get_score_cutoff_i64)
 from cpython cimport Py_buffer
-from cpython.buffer cimport PyBUF_ND, PyBUF_SIMPLE, PyBUF_F_CONTIGUOUS
+from cpython.buffer cimport PyBUF_F_CONTIGUOUS, PyBUF_ND, PyBUF_SIMPLE
+from cpython.exc cimport PyErr_CheckSignals
+from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.object cimport PyObject
-
-from cpp_common cimport (
-    PyObjectWrapper, RF_StringWrapper, RF_KwargsWrapper,
-    conv_sequence, get_score_cutoff_f64, get_score_cutoff_i64
-)
+from cpython.ref cimport Py_INCREF
+from libc.math cimport floor
+from libc.stdint cimport int32_t, int64_t, uint8_t, uint64_t
+from libcpp cimport algorithm, bool
+from libcpp.utility cimport move
+from libcpp.vector cimport vector
 
 import heapq
 from array import array
 
-from rapidfuzz_capi cimport (
-    RF_Preprocess, RF_Kwargs, RF_String, RF_Scorer, RF_ScorerFunc,
-    RF_Preprocessor, RF_ScorerFlags,
-    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_I64,
-    RF_SCORER_FLAG_SYMMETRIC
-)
-from cpython.pycapsule cimport PyCapsule_IsValid, PyCapsule_GetPointer
+from cpython.pycapsule cimport PyCapsule_GetPointer, PyCapsule_IsValid
+from rapidfuzz_capi cimport (RF_SCORER_FLAG_RESULT_F64,
+                             RF_SCORER_FLAG_RESULT_I64,
+                             RF_SCORER_FLAG_SYMMETRIC, RF_Kwargs,
+                             RF_Preprocess, RF_Preprocessor, RF_Scorer,
+                             RF_ScorerFlags, RF_ScorerFunc, RF_String)
+
 
 cdef extern from "process_cpp.hpp":
     cdef cppclass ExtractComp:
@@ -1224,6 +1220,7 @@ cdef inline MatrixType dtype_to_type_num_i64(dtype) except MatrixType.UNDEFINED:
 
 from cpython cimport Py_buffer
 from libcpp.vector cimport vector
+
 
 cdef class Matrix:
     cdef Py_ssize_t shape[2]

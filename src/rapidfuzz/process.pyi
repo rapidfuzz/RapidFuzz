@@ -1,19 +1,7 @@
-from typing import (
-    Any,
-    Collection,
-    Mapping,
-    Tuple,
-    Callable,
-    Hashable,
-    Sequence,
-    Iterable,
-    Optional,
-    Union,
-    overload,
-    TypeVar,
-    List,
-    Generator,
-)
+from typing import (Any, Callable, Collection, Generator, Hashable, Iterable,
+                    List, Mapping, Optional, Sequence, Tuple, TypeVar, Union,
+                    overload)
+
 from rapidfuzz.fuzz import WRatio, ratio
 
 _StringType = Sequence[Hashable]

@@ -1,14 +1,12 @@
-from typing import Tuple, List, Union
+from typing import List, Tuple, Union
 
-from . import (
-    Hamming as Hamming,
-    Indel as Indel,
-    Jaro as Jaro,
-    JaroWinkler as JaroWinkler,
-    Levenshtein as Levenshtein,
-    LCSseq as LCSseq,
-    DamerauLevenshtein as DamerauLevenshtein,
-)
+from . import DamerauLevenshtein as DamerauLevenshtein
+from . import Hamming as Hamming
+from . import Indel as Indel
+from . import Jaro as Jaro
+from . import JaroWinkler as JaroWinkler
+from . import LCSseq as LCSseq
+from . import Levenshtein as Levenshtein
 
 _AnyOpList = Union[
     List[Union[Editop, Tuple[str, int, int]]],
