@@ -3,15 +3,17 @@
 
 from __future__ import annotations
 
+from typing import List, Union
 
-def _list_to_editops(ops, src_len: int, dest_len: int):
+
+def _list_to_editops(ops, src_len: int, dest_len: int) -> list[Editop]:
     if not ops:
         return []
 
     if len(ops[0]) == 5:
         return Opcodes(ops, src_len, dest_len).as_editops()._editops
 
-    blocks = []
+    blocks: list[Editop] = []
     for op in ops:
         edit_type, src_pos, dest_pos = op
 
@@ -45,11 +47,11 @@ def _list_to_editops(ops, src_len: int, dest_len: int):
     return blocks
 
 
-def _list_to_opcodes(ops, src_len: int, dest_len: int):
+def _list_to_opcodes(ops, src_len: int, dest_len: int) -> list[Opcode]:
     if not ops or len(ops[0]) == 3:
         return Editops(ops, src_len, dest_len).as_opcodes()._opcodes
 
-    blocks = []
+    blocks: list[Opcode] = []
     for op in ops:
         edit_type, src_start, src_end, dest_start, dest_end = op
 
@@ -97,21 +99,24 @@ def _list_to_opcodes(ops, src_len: int, dest_len: int):
 
 
 class MatchingBlock:
-    def __init__(self, a, b, size):
-        self.a = a
-        self.b = b
-        self.size = size
+    def __init__(self, a: int, b: int, size: int):
+        self.a: int = a
+        self.b: int = b
+        self.size: int = size
 
-    def __len__(self):
+    def __len__(self) -> int:
         return 3
 
-    def __eq__(self, other):
-        if len(other) != 3:
+    def __eq__(self, other: object) -> bool:
+        try:
+            if len(other) != 3:
+                return False
+
+            return other[0] == self.a and other[1] == self.b and other[2] == self.size
+        except:
             return False
 
-        return other[0] == self.a and other[1] == self.b and other[2] == self.size
-
-    def __getitem__(self, i):
+    def __getitem__(self, i) -> int:
         if i == 0 or i == -3:
             return self.a
         if i == 1 or i == -2:
@@ -121,7 +126,11 @@ class MatchingBlock:
 
         raise IndexError("MatchingBlock index out of range")
 
-    def __repr__(self):
+    def __iter__(self):
+        for i in range(3):
+            yield self[i]
+
+    def __repr__(self) -> str:
         return f"MatchingBlock(a={self.a}, b={self.b}, size={self.size})"
 
 
@@ -148,20 +157,23 @@ class Editop:
         self.src_pos = src_pos
         self.dest_pos = dest_pos
 
-    def __len__(self):
+    def __len__(self) -> int:
         return 3
 
-    def __eq__(self, other):
-        if len(other) != 3:
+    def __eq__(self, other: object) -> bool:
+        try:
+            if len(other) != 3:
+                return False
+
+            return (
+                other[0] == self.tag
+                and other[1] == self.src_pos
+                and other[2] == self.dest_pos
+            )
+        except:
             return False
 
-        return (
-            other[0] == self.tag
-            and other[1] == self.src_pos
-            and other[2] == self.dest_pos
-        )
-
-    def __getitem__(self, i):
+    def __getitem__(self, i) -> int | str:
         if i == 0 or i == -3:
             return self.tag
         if i == 1 or i == -2:
@@ -171,7 +183,11 @@ class Editop:
 
         raise IndexError("Editop index out of range")
 
-    def __repr__(self):
+    def __iter__(self):
+        for i in range(3):
+            yield self[i]
+
+    def __repr__(self) -> str:
         return (
             f"Editop(tag={self.tag}, src_pos={self.src_pos}, dest_pos={self.dest_pos})"
         )
@@ -185,7 +201,7 @@ class Editops:
     def __init__(self, editops=None, src_len: int = 0, dest_len: int = 0):
         self._src_len: int = src_len
         self._dest_len: int = dest_len
-        self._editops = _list_to_editops(editops, src_len, dest_len)
+        self._editops: list[Editop] = _list_to_editops(editops, src_len, dest_len)
 
     @classmethod
     def from_opcodes(cls, opcodes: Opcodes) -> Editops:
@@ -312,7 +328,7 @@ class Editops:
         x._editops = self._editops[::]
         return x
 
-    def inverse(self):
+    def inverse(self) -> Editops:
         """
         Invert Editops, so it describes how to transform the destination string to
         the source string.
@@ -336,13 +352,14 @@ class Editops:
          Editop(tag=delete, src_pos=3, dest_pos=4)]
         """
         blocks = []
-        for tag, src_pos, dest_pos in self:
+        for op in self:
+            tag = op.tag
             if tag == "delete":
                 tag = "insert"
             elif tag == "insert":
                 tag = "delete"
 
-            blocks.append(Editop(tag, dest_pos, src_pos))
+            blocks.append(Editop(tag, op.dest_pos, op.src_pos))
 
         x = Editops.__new__(Editops)
         x._src_len = self.dest_len
@@ -372,7 +389,7 @@ class Editops:
     def dest_len(self, value: int):
         self._dest_len = value
 
-    def __eq__(self, other: Editops) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, Editops):
             return False
 
@@ -382,7 +399,7 @@ class Editops:
             and self._editops == other._editops
         )
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._editops)
 
     def __delitem__(self, key) -> None:
@@ -402,7 +419,10 @@ class Editops:
         x._editops = self._editops[start:stop:step]
         return x
 
-    def __repr__(self):
+    def __iter__(self):
+        yield from self._editops
+
+    def __repr__(self) -> str:
         return (
             "Editops(["
             + ", ".join(repr(op) for op in self)
@@ -451,19 +471,22 @@ class Opcode:
     def __len__(self) -> int:
         return 5
 
-    def __eq__(self, other) -> bool:
-        if len(other) != 5:
+    def __eq__(self, other: object) -> bool:
+        try:
+            if len(other) != 5:
+                return False
+
+            return (
+                other[0] == self.tag
+                and other[1] == self.src_start
+                and other[2] == self.src_end
+                and other[3] == self.dest_start
+                and other[4] == self.dest_end
+            )
+        except:
             return False
 
-        return (
-            other[0] == self.tag
-            and other[1] == self.src_start
-            and other[2] == self.src_end
-            and other[3] == self.dest_start
-            and other[4] == self.dest_end
-        )
-
-    def __getitem__(self, i):
+    def __getitem__(self, i) -> int | str:
         if i == 0 or i == -5:
             return self.tag
         if i == 1 or i == -4:
@@ -476,6 +499,10 @@ class Opcode:
             return self.dest_end
 
         raise IndexError("Opcode index out of range")
+
+    def __iter__(self):
+        for i in range(5):
+            yield self[i]
 
     def __repr__(self) -> str:
         return f"Opcode(tag={self.tag}, src_start={self.src_start}, src_end={self.src_end}, dest_start={self.dest_start}, dest_end={self.dest_end})"
@@ -492,7 +519,7 @@ class Opcodes:
     def __init__(self, opcodes=None, src_len=0, dest_len=0):
         self._src_len: int = src_len
         self._dest_len: int = dest_len
-        self._opcodes = _list_to_opcodes(opcodes, src_len, dest_len)
+        self._opcodes: list[Opcode] = _list_to_opcodes(opcodes, src_len, dest_len)
 
     @classmethod
     def from_editops(cls, editops: Editops) -> Opcodes:
@@ -570,7 +597,7 @@ class Opcodes:
         x._opcodes = self._opcodes[::]
         return x
 
-    def inverse(self):
+    def inverse(self) -> Opcodes:
         """
         Invert Opcodes, so it describes how to transform the destination string to
         the source string.
@@ -596,13 +623,16 @@ class Opcodes:
          Opcode(tag=delete, src_start=3, src_end=4, dest_start=4, dest_end=4)]
         """
         blocks = []
-        for tag, src_start, src_end, dest_start, dest_end in self:
+        for op in self:
+            tag = op.tag
             if tag == "delete":
                 tag = "insert"
             elif tag == "insert":
                 tag = "delete"
 
-            blocks.append(Opcode(tag, dest_start, dest_end, src_start, src_end))
+            blocks.append(
+                Opcode(tag, op.dest_start, op.dest_end, op.src_start, op.src_end)
+            )
 
         x = Opcodes.__new__(Opcodes)
         x._src_len = self.dest_len
@@ -629,7 +659,7 @@ class Opcodes:
     def dest_len(self, value: int):
         self._dest_len = value
 
-    def __eq__(self, other: Opcodes) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, Opcodes):
             return False
 
@@ -639,7 +669,7 @@ class Opcodes:
             and self._opcodes == other._opcodes
         )
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._opcodes)
 
     def __getitem__(self, key: int) -> Opcode:
@@ -648,7 +678,10 @@ class Opcodes:
         else:
             raise TypeError("Expected index")
 
-    def __repr__(self):
+    def __iter__(self):
+        yield from self._opcodes
+
+    def __repr__(self) -> str:
         return (
             "Opcodes(["
             + ", ".join(repr(op) for op in self)
@@ -665,29 +698,39 @@ class ScoreAlignment:
     src[src_start:src_end] and dest[dest_start:dest_end]
     """
 
-    def __init__(self, score, src_start, src_end, dest_start, dest_end):
-        self.score = score
-        self.src_start = src_start
-        self.src_end = src_end
-        self.dest_start = dest_start
-        self.dest_end = dest_end
+    def __init__(
+        self,
+        score: int | float,
+        src_start: int,
+        src_end: int,
+        dest_start: int,
+        dest_end: int,
+    ):
+        self.score: int | float = score
+        self.src_start: int = src_start
+        self.src_end: int = src_end
+        self.dest_start: int = dest_start
+        self.dest_end: int = dest_end
 
-    def __len__(self):
+    def __len__(self) -> int:
         return 5
 
-    def __eq__(self, other):
-        if len(other) != 5:
+    def __eq__(self, other: object) -> bool:
+        try:
+            if len(other) != 5:
+                return False
+
+            return (
+                other[0] == self.score
+                and other[1] == self.src_start
+                and other[2] == self.src_end
+                and other[3] == self.dest_start
+                and other[4] == self.dest_end
+            )
+        except:
             return False
 
-        return (
-            other[0] == self.score
-            and other[1] == self.src_start
-            and other[2] == self.src_end
-            and other[3] == self.dest_start
-            and other[4] == self.dest_end
-        )
-
-    def __getitem__(self, i):
+    def __getitem__(self, i) -> int | float:
         if i == 0 or i == -5:
             return self.score
         if i == 1 or i == -4:
@@ -701,5 +744,9 @@ class ScoreAlignment:
 
         raise IndexError("Opcode index out of range")
 
-    def __repr__(self):
+    def __iter__(self):
+        for i in range(5):
+            yield self[i]
+
+    def __repr__(self) -> str:
         return f"ScoreAlignment(score={self.score}, src_start={self.src_start}, src_end={self.src_end}, dest_start={self.dest_start}, dest_end={self.dest_end})"

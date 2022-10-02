@@ -15,20 +15,14 @@ from rapidfuzz.distance import (
     Opcode,
     Opcodes,
 )
-
-from rapidfuzz.distance._initialize_cpp import (
-    Editop as Editop_cpp,
-    Editops as Editops_cpp,
-    Opcode as Opcode_cpp,
-    Opcodes as Opcodes_cpp,
-)
-
-from rapidfuzz.distance._initialize_py import (
-    Editop as Editop_py,
-    Editops as Editops_py,
-    Opcode as Opcode_py,
-    Opcodes as Opcodes_py,
-)
+from rapidfuzz.distance._initialize_cpp import Editop as Editop_cpp
+from rapidfuzz.distance._initialize_cpp import Editops as Editops_cpp
+from rapidfuzz.distance._initialize_cpp import Opcode as Opcode_cpp
+from rapidfuzz.distance._initialize_cpp import Opcodes as Opcodes_cpp
+from rapidfuzz.distance._initialize_py import Editop as Editop_py
+from rapidfuzz.distance._initialize_py import Editops as Editops_py
+from rapidfuzz.distance._initialize_py import Opcode as Opcode_py
+from rapidfuzz.distance._initialize_py import Opcodes as Opcodes_py
 
 
 def test_editops_comparison():

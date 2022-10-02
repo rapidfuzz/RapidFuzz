@@ -116,7 +116,7 @@ jobs:
 
       - name: Test type stubs
         run: |
-          python -m mypy.stubtest rapidfuzz --ignore-missing-stub
+          python -m mypy.stubtest rapidfuzz --ignore-missing-stub --allowlist stubtest_allowlist.txt
 
       - name: Test with pytest and backtrace in case of SegFault
         if: runner.os == 'Linux'
