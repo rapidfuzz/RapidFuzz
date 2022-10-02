@@ -149,7 +149,7 @@ static inline double QRatio_func(const RF_String& str1, const RF_String& str2, d
     });
 }
 static inline bool QRatioInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count,
-                             const RF_String* str)
+                              const RF_String* str)
 {
 #ifdef RAPIDFUZZ_X64
     if (CpuInfo::supports(CPU_FEATURE_AVX2)) return Avx2::QRatioInit(self, kwargs, str_count, str);
