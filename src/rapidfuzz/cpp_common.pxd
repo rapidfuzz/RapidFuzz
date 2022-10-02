@@ -13,7 +13,7 @@ from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPo
 
 from rapidfuzz_capi cimport (
     RF_Scorer, RF_StringType, RF_String, RF_Kwargs, RF_KwargsInit,
-    SCORER_STRUCT_VERSION, 
+    SCORER_STRUCT_VERSION,
     RF_ScorerFlags, RF_Preprocessor, RF_GetScorerFlags, RF_ScorerFuncInit
 )
 

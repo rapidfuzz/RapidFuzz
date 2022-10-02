@@ -115,7 +115,7 @@ jobs:
             python_tag: "cp36-*"
           - arch: universal2
             python_tag: "cp37-*"
-          
+
           # PyPy not supported on MacOS Arm
           - arch: arm64
             python_tag: "pp37-*"

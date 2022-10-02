@@ -56,7 +56,7 @@ def _cmake_required():
     for tag in _sys_tags():
         if tag.platform in cmake_wheels:
             return True
-    
+
     print("No Cmake wheel available on platform")
     return False
 
@@ -76,7 +76,7 @@ def _ninja_required():
     for tag in _sys_tags():
         if tag.platform in ninja_wheels:
             return True
-    
+
     print("No Ninja wheel available on platform")
     return False
 
