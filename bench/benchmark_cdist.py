@@ -48,7 +48,7 @@ def get_platform():
     import platform
     uname = platform.uname()
     pyver = platform.python_version()
-    return 'Python {} on {} ({})'.format(pyver, uname.system, uname.machine)
+    return f'Python {pyver} on {uname.system} ({uname.machine})'
 
 def benchmark():
     words = [''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8)) for _ in range(10000)]
