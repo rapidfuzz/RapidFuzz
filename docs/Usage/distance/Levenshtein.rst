@@ -87,7 +87,7 @@ performance of ``O([N/64]M)``. It uses the following optimized implementations:
 
 - If score_cutoff is ≤ 3 the mbleven algorithm is used. This algorithm
   checks all possible edit operations that are possible under
-  the threshold `score_cutoff`. The time complexity of this algorithm is ``O(N)``.
+  the threshold ``score_cutoff``. The time complexity of this algorithm is ``O(N)``.
 
 - If the length of the shorter string is ≤ 64 after removing the common affix
   Hyyrös' algorithm is used, which calculates the Levenshtein distance in
