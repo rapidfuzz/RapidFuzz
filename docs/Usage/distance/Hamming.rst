@@ -19,4 +19,3 @@ similarity
 normalized_similarity
 ~~~~~~~~~~~~~~~~~~~~~
 .. autofunction:: rapidfuzz.distance.Hamming.normalized_similarity
-

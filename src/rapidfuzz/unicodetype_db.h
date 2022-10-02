@@ -6265,4 +6265,3 @@ int _PyUnicode_IsLinebreak(const uint32_t ch)
     }
     return 0;
 }
-

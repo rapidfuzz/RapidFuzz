@@ -50,4 +50,3 @@ Submitting an issue
 Before you submit an issue, please search the issue tracker, maybe an issue for
 your problem already exists and the discussion might inform you of workarounds
 readily available.
-

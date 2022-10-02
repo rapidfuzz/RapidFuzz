@@ -112,4 +112,3 @@ Generic
 The implementation for other weights is based on Wagner-Fischer.
 It has a performance of ``O(N * M)`` and has a memory usage of ``O(N)``.
 Further details can be found in :cite:t:`1974:WagFisch`.
-
