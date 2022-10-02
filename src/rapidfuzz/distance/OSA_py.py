@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
 
+
 def _osa_distance_hyrroe2003(s1, s2):
     if not s1:
         return len(s2)

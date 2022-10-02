@@ -8,10 +8,8 @@ substitutions required to transform s1 into s2.
 """
 
 from rapidfuzz._utils import default_distance_attribute as _dist_attr
-from rapidfuzz._utils import \
-    default_normalized_distance_attribute as _norm_dist_attr
-from rapidfuzz._utils import \
-    default_normalized_similarity_attribute as _norm_sim_attr
+from rapidfuzz._utils import default_normalized_distance_attribute as _norm_dist_attr
+from rapidfuzz._utils import default_normalized_similarity_attribute as _norm_sim_attr
 from rapidfuzz._utils import default_similarity_attribute as _sim_attr
 from rapidfuzz._utils import fallback_import as _fallback_import
 

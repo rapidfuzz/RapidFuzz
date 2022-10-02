@@ -7,21 +7,13 @@ from rapidfuzz.distance import OSA as _OSA
 from rapidfuzz.distance import OSA_cpp, OSA_py
 
 OSA_cpp.distance._RF_ScorerPy = _OSA.distance._RF_ScorerPy
-OSA_cpp.normalized_distance._RF_ScorerPy = (
-    _OSA.normalized_distance._RF_ScorerPy
-)
+OSA_cpp.normalized_distance._RF_ScorerPy = _OSA.normalized_distance._RF_ScorerPy
 OSA_cpp.similarity._RF_ScorerPy = _OSA.similarity._RF_ScorerPy
-OSA_cpp.normalized_similarity._RF_ScorerPy = (
-    _OSA.normalized_similarity._RF_ScorerPy
-)
+OSA_cpp.normalized_similarity._RF_ScorerPy = _OSA.normalized_similarity._RF_ScorerPy
 OSA_py.distance._RF_ScorerPy = _OSA.distance._RF_ScorerPy
-OSA_py.normalized_distance._RF_ScorerPy = (
-    _OSA.normalized_distance._RF_ScorerPy
-)
+OSA_py.normalized_distance._RF_ScorerPy = _OSA.normalized_distance._RF_ScorerPy
 OSA_py.similarity._RF_ScorerPy = _OSA.similarity._RF_ScorerPy
-OSA_py.normalized_similarity._RF_ScorerPy = (
-    _OSA.normalized_similarity._RF_ScorerPy
-)
+OSA_py.normalized_similarity._RF_ScorerPy = _OSA.normalized_similarity._RF_ScorerPy
 
 
 def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
@@ -111,10 +103,10 @@ def test_simple():
     """
     assert OSA.distance("CA", "ABC") == 3
     assert OSA.distance("CA", "AC") == 1
-    assert OSA.distance(
-        "a" * 65 + "CA" + "a" * 65,
-        "b" + "a" * 64 + "AC" + "a" * 64 + "b"
-    ) == 3
+    assert (
+        OSA.distance("a" * 65 + "CA" + "a" * 65, "b" + "a" * 64 + "AC" + "a" * 64 + "b")
+        == 3
+    )
 
 
 def test_simple_unicode_tests():

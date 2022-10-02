@@ -3,9 +3,11 @@
 
 from rapidfuzz.distance.metrics_cpp import hamming_distance as distance
 from rapidfuzz.distance.metrics_cpp import hamming_editops as editops
-from rapidfuzz.distance.metrics_cpp import \
-    hamming_normalized_distance as normalized_distance
-from rapidfuzz.distance.metrics_cpp import \
-    hamming_normalized_similarity as normalized_similarity
+from rapidfuzz.distance.metrics_cpp import (
+    hamming_normalized_distance as normalized_distance,
+)
+from rapidfuzz.distance.metrics_cpp import (
+    hamming_normalized_similarity as normalized_similarity,
+)
 from rapidfuzz.distance.metrics_cpp import hamming_opcodes as opcodes
 from rapidfuzz.distance.metrics_cpp import hamming_similarity as similarity

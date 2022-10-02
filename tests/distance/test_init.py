@@ -7,8 +7,14 @@ import hypothesis.strategies as st
 import pytest
 from hypothesis import given, settings
 
-from rapidfuzz.distance import (Editop, Editops, Levenshtein, MatchingBlock,
-                                Opcode, Opcodes)
+from rapidfuzz.distance import (
+    Editop,
+    Editops,
+    Levenshtein,
+    MatchingBlock,
+    Opcode,
+    Opcodes,
+)
 
 
 def test_editops_comparision():

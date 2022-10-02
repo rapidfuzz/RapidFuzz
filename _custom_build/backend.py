@@ -46,6 +46,7 @@ ninja_wheels = {
     "macosx_10_9_universal2",
 }
 
+
 def _cmake_required():
     try:
         if _version.parse(_get_cmake_version()) >= _version.parse("3.12"):
@@ -61,6 +62,7 @@ def _cmake_required():
     print("No cmake wheel available on platform")
     return False
 
+
 def _ninja_required():
     if _platform.system() == "Windows":
         print("Ninja is part of the MSVC installation on Windows")
@@ -68,7 +70,7 @@ def _ninja_required():
 
     for generator in ("ninja", "make"):
         try:
-            _subprocess.check_output([generator, '--version'])
+            _subprocess.check_output([generator, "--version"])
             print(f"Using System version of {generator}")
             return False
         except (OSError, _subprocess.CalledProcessError):
@@ -81,11 +83,12 @@ def _ninja_required():
     print("No Ninja wheel available on platform")
     return False
 
+
 def get_requires_for_build_wheel(self, config_settings=None):
     packages = []
     if _cmake_required():
-        packages.append('cmake')
+        packages.append("cmake")
     if _ninja_required():
-        packages.append('ninja')
+        packages.append("ninja")
 
     return _orig.get_requires_for_build_wheel(config_settings) + packages

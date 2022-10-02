@@ -10,8 +10,7 @@ from hypothesis import assume, given, settings
 
 from rapidfuzz import fuzz, process, utils
 from rapidfuzz.distance import Indel as _Indel
-from rapidfuzz.distance import (Indel_cpp, Indel_py, JaroWinkler_cpp,
-                                JaroWinkler_py)
+from rapidfuzz.distance import Indel_cpp, Indel_py, JaroWinkler_cpp, JaroWinkler_py
 from rapidfuzz.distance import Levenshtein as _Levenshtein
 from rapidfuzz.distance import Levenshtein_cpp, Levenshtein_py
 
@@ -105,11 +104,13 @@ def normalize_distance(dist, s1, s2, weights=(1, 1, 1)):
 
     return 1 - 1 * float(dist) / float(max_dist) if max_dist else 1
 
+
 def jarowinkler_similarity(*args, **kwargs):
     sim1 = JaroWinkler_py.similarity(*args, **kwargs)
     sim2 = JaroWinkler_cpp.similarity(*args, **kwargs)
     assert isclose(sim1, sim2)
     return sim1
+
 
 def jaro_similarity(P, T):
     P_flag = [0] * (len(P) + 1)
@@ -149,8 +150,13 @@ def jaro_similarity(P, T):
 
     Transpositions = Transpositions // 2
 
-    Sim = CommonChars / len(P) + CommonChars / len(T) + (CommonChars - Transpositions) / CommonChars
+    Sim = (
+        CommonChars / len(P)
+        + CommonChars / len(T)
+        + (CommonChars - Transpositions) / CommonChars
+    )
     return Sim / 3
+
 
 def jaro_winkler_similarity(P, T, prefix_weight=0.1):
     min_len = min(len(P), len(T))
@@ -167,6 +173,7 @@ def jaro_winkler_similarity(P, T, prefix_weight=0.1):
         Sim += prefix * prefix_weight * (1.0 - Sim)
 
     return Sim
+
 
 def partial_ratio_short_needle(s1, s2):
     if not s1 and not s2:
@@ -363,24 +370,12 @@ def test_levenshtein_word(s1, s2):
     # InDel-Distance
     # distance
     reference_dist = levenshtein(s1, s2, weights=(1, 1, 2))
-    assert isclose(
-        extractOne_scorer(s1, s2, Indel_cpp.distance), reference_dist
-    )
-    assert isclose(
-        extract_scorer(s1, s2, Indel_cpp.distance), reference_dist
-    )
-    assert isclose(
-        extract_iter_scorer(s1, s2, Indel_cpp.distance), reference_dist
-    )
-    assert isclose(
-        extractOne_scorer(s1, s2, Indel_py.distance), reference_dist
-    )
-    assert isclose(
-        extract_scorer(s1, s2, Indel_py.distance), reference_dist
-    )
-    assert isclose(
-        extract_iter_scorer(s1, s2, Indel_py.distance), reference_dist
-    )
+    assert isclose(extractOne_scorer(s1, s2, Indel_cpp.distance), reference_dist)
+    assert isclose(extract_scorer(s1, s2, Indel_cpp.distance), reference_dist)
+    assert isclose(extract_iter_scorer(s1, s2, Indel_cpp.distance), reference_dist)
+    assert isclose(extractOne_scorer(s1, s2, Indel_py.distance), reference_dist)
+    assert isclose(extract_scorer(s1, s2, Indel_py.distance), reference_dist)
+    assert isclose(extract_iter_scorer(s1, s2, Indel_py.distance), reference_dist)
 
     # normalized distance
     reference_sim = normalize_distance(reference_dist, s1, s2, weights=(1, 1, 2))
@@ -585,27 +580,26 @@ def test_cdist(queries, choices):
     Test that cdist returns correct results
     """
 
-    reference_matrix = cdist_distance(
-        queries, choices, scorer=Levenshtein_cpp.distance
-    )
+    reference_matrix = cdist_distance(queries, choices, scorer=Levenshtein_cpp.distance)
     matrix = process.cdist(queries, choices, scorer=Levenshtein_cpp.distance)
     assert (matrix == reference_matrix).all()
 
-    reference_matrix = cdist_distance(
-        queries, queries, scorer=Levenshtein_cpp.distance
-    )
+    reference_matrix = cdist_distance(queries, queries, scorer=Levenshtein_cpp.distance)
     matrix = process.cdist(queries, queries, scorer=Levenshtein_cpp.distance)
     assert (matrix == reference_matrix).all()
+
 
 @given(s1=st.text(max_size=64), s2=st.text(max_size=64))
 @settings(max_examples=50, deadline=1000)
 def test_jaro_winkler_word(s1, s2):
     assert isclose(jaro_winkler_similarity(s1, s2), jarowinkler_similarity(s1, s2))
 
+
 @given(s1=st.text(min_size=65), s2=st.text(min_size=65))
 @settings(max_examples=50, deadline=1000)
 def test_jaro_winkler_block(s1, s2):
     assert isclose(jaro_winkler_similarity(s1, s2), jarowinkler_similarity(s1, s2))
+
 
 @given(s1=st.text(), s2=st.text())
 @settings(max_examples=50, deadline=1000)

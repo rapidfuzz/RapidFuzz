@@ -11,5 +11,4 @@ Opcodes = _fallback_import(_mod, "Opcodes", False)
 ScoreAlignment = _fallback_import(_mod, "ScoreAlignment", False)
 MatchingBlock = _fallback_import(_mod, "MatchingBlock", False)
 
-from . import (DamerauLevenshtein, Hamming, Indel, Jaro, JaroWinkler, LCSseq,
-               Levenshtein)
+from . import DamerauLevenshtein, Hamming, Indel, Jaro, JaroWinkler, LCSseq, Levenshtein

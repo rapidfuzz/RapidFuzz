@@ -4,7 +4,9 @@
 from rapidfuzz.distance import Jaro
 
 
-def similarity(s1, s2, *, prefix_weight=0.1, processor=None, score_cutoff=None) -> float:
+def similarity(
+    s1, s2, *, prefix_weight=0.1, processor=None, score_cutoff=None
+) -> float:
     """
     Calculates the jaro winkler similarity
 
@@ -57,22 +59,26 @@ def similarity(s1, s2, *, prefix_weight=0.1, processor=None, score_cutoff=None) 
         prefix += 1
 
     jaro_score_cutoff = score_cutoff
-    if (jaro_score_cutoff > 0.7):
+    if jaro_score_cutoff > 0.7:
         prefix_sim = prefix * prefix_weight
 
-        if (prefix_sim >= 1.0):
+        if prefix_sim >= 1.0:
             jaro_score_cutoff = 0.7
         else:
-            jaro_score_cutoff = max(0.7, (prefix_sim - jaro_score_cutoff) / (prefix_sim - 1.0))
+            jaro_score_cutoff = max(
+                0.7, (prefix_sim - jaro_score_cutoff) / (prefix_sim - 1.0)
+            )
 
     Sim = Jaro.similarity(s1, s2, score_cutoff=jaro_score_cutoff)
-    if (Sim > 0.7):
+    if Sim > 0.7:
         Sim += prefix * prefix_weight * (1.0 - Sim)
 
     return Sim if Sim >= score_cutoff else 0
 
 
-def normalized_similarity(s1, s2, *, prefix_weight=0.1, processor=None, score_cutoff=None) -> float:
+def normalized_similarity(
+    s1, s2, *, prefix_weight=0.1, processor=None, score_cutoff=None
+) -> float:
     """
     Calculates the normalized jaro winkler similarity
 
@@ -103,7 +109,14 @@ def normalized_similarity(s1, s2, *, prefix_weight=0.1, processor=None, score_cu
     ValueError
         If prefix_weight is invalid
     """
-    return similarity(s1, s2, prefix_weight=prefix_weight, processor=processor, score_cutoff=score_cutoff)
+    return similarity(
+        s1,
+        s2,
+        prefix_weight=prefix_weight,
+        processor=processor,
+        score_cutoff=score_cutoff,
+    )
+
 
 def distance(s1, s2, *, processor=None, prefix_weight=0.1, score_cutoff=None) -> float:
     """
@@ -140,13 +153,17 @@ def distance(s1, s2, *, processor=None, prefix_weight=0.1, score_cutoff=None) ->
         s1 = processor(s1)
         s2 = processor(s2)
 
-    cutoff_distance = None if (score_cutoff is None or score_cutoff > 1.0) else 1.0 - score_cutoff
+    cutoff_distance = (
+        None if (score_cutoff is None or score_cutoff > 1.0) else 1.0 - score_cutoff
+    )
     sim = similarity(s1, s2, prefix_weight=prefix_weight, score_cutoff=cutoff_distance)
     dist = 1.0 - sim
     return dist if (score_cutoff is None or dist <= score_cutoff) else 1.0
 
 
-def normalized_distance(s1, s2, *, prefix_weight=0.1, processor=None, score_cutoff=None) -> float:
+def normalized_distance(
+    s1, s2, *, prefix_weight=0.1, processor=None, score_cutoff=None
+) -> float:
     """
     Calculates the normalized jaro winkler distance
 
@@ -177,4 +194,10 @@ def normalized_distance(s1, s2, *, prefix_weight=0.1, processor=None, score_cuto
     ValueError
         If prefix_weight is invalid
     """
-    return distance(s1, s2, prefix_weight=prefix_weight, processor=processor, score_cutoff=score_cutoff)
+    return distance(
+        s1,
+        s2,
+        prefix_weight=prefix_weight,
+        processor=processor,
+        score_cutoff=score_cutoff,
+    )

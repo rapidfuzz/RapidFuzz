@@ -1,6 +1,19 @@
-from typing import (Any, Callable, Collection, Generator, Hashable, Iterable,
-                    List, Mapping, Optional, Sequence, Tuple, TypeVar, Union,
-                    overload)
+from typing import (
+    Any,
+    Callable,
+    Collection,
+    Generator,
+    Hashable,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    TypeVar,
+    Union,
+    overload,
+)
 
 from rapidfuzz.fuzz import WRatio, ratio
 
