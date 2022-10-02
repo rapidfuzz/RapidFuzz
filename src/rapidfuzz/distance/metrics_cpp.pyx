@@ -101,7 +101,7 @@ cdef extern from "metrics.hpp":
 
     RfEditops hamming_editops_func(const RF_String&, const RF_String&) nogil except +
 
-    # Damerau Levenshtein
+    # Optimal String Alignment
     double osa_normalized_distance_func(  const RF_String&, const RF_String&, double) nogil except +
     int64_t osa_distance_func(            const RF_String&, const RF_String&, int64_t) nogil except +
     double osa_normalized_similarity_func(const RF_String&, const RF_String&, double) nogil except +
@@ -111,6 +111,8 @@ cdef extern from "metrics.hpp":
     bool OSANormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
     bool OSASimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
     bool OSANormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+
+    bool OSAMultiStringSupport(const RF_Kwargs*) nogil
 
     # Damerau Levenshtein
     double jaro_normalized_distance_func(  const RF_String&, const RF_String&, double) nogil except +
@@ -732,24 +734,36 @@ def osa_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
 
 cdef bool GetScorerFlagsOSADistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    if OSAMultiStringSupport(self):
+        scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
+
     scorer_flags.optimal_score.i64 = 0
     scorer_flags.worst_score.i64 = INT64_MAX
     return True
 
 cdef bool GetScorerFlagsOSANormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    if OSAMultiStringSupport(self):
+        scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
+
     scorer_flags.optimal_score.f64 = 0.0
     scorer_flags.worst_score.f64 = 1.0
     return True
 
 cdef bool GetScorerFlagsOSASimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    if OSAMultiStringSupport(self):
+        scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
+
     scorer_flags.optimal_score.i64 = INT64_MAX
     scorer_flags.worst_score.i64 = 0
     return True
 
 cdef bool GetScorerFlagsOSANormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    if OSAMultiStringSupport(self):
+        scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
+
     scorer_flags.optimal_score.f64 = 1.0
     scorer_flags.worst_score.f64 = 0
     return True
