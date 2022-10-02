@@ -48,7 +48,7 @@ def get_platform():
     import platform
     uname = platform.uname()
     pyver = platform.python_version()
-    return 'Python %s on %s (%s)' % (pyver, uname.system, uname.machine)
+    return 'Python {} on {} ({})'.format(pyver, uname.system, uname.machine)
 
 def benchmark():
     words = [''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8)) for _ in range(10000)]
@@ -117,7 +117,7 @@ def benchmark():
         """Attach a text label above each bar in *rects*, displaying its height."""
         for rect in rects:
             height = rect.get_height()
-            ax.annotate('{:,}'.format(int(height)),
+            ax.annotate(f'{int(height):,}',
                         xy=(rect.get_x() + rect.get_width() / 2, height),
                         xytext=(0, 3),  # 3 points vertical offset
                         textcoords="offset points",
