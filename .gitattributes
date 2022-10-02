@@ -1,2 +1,4 @@
 bench/results/* linguist-vendored
 docs/img/* linguist-vendored
+*.impl linguist-language=C++
+*.incl linguist-language=C++

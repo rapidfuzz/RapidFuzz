@@ -1,6 +1,6 @@
 //  Dependencies
-#include <string.h>
 #include "CpuInfo.hpp"
+#include <string.h>
 
 #if defined(_WIN32) && (defined(_MSC_VER) || defined(__clang__))
 #include <intrin.h>
@@ -38,8 +38,7 @@ bool CpuInfo::detect_OS_AVX()
 
     bool osUsesXSAVE_XRSTORE = (cpuInfo[2] & (1 << 27)) != 0;
     bool cpuAVXSuport = (cpuInfo[2] & (1 << 28)) != 0;
-    if (osUsesXSAVE_XRSTORE && cpuAVXSuport)
-    {
+    if (osUsesXSAVE_XRSTORE && cpuAVXSuport) {
         uint64_t xcrFeatureMask = xgetbv(0);
         avxSupported = (xcrFeatureMask & 0x6) == 0x6;
     }
@@ -47,43 +46,33 @@ bool CpuInfo::detect_OS_AVX()
     return avxSupported;
 }
 
-CpuInfo::CpuInfo()
- : supportedFeatures(0)
+CpuInfo::CpuInfo() : supportedFeatures(0)
 {
     int regs[4];
     cpuid(regs, 0, 0);
 
     int cpuIdCount = regs[0];
-    if (cpuIdCount < 1)
-        return;
+    if (cpuIdCount < 1) return;
 
     cpuid(regs, 1, 0);
 
-    if ((regs[3] & ((int)1 << 26)))
-        supportedFeatures |= CPU_FEATURE_SSE2;
+    if ((regs[3] & ((int)1 << 26))) supportedFeatures |= CPU_FEATURE_SSE2;
 
-    if ((regs[2] & ((int)1 << 0)))
-        supportedFeatures |= CPU_FEATURE_SSE3;
+    if ((regs[2] & ((int)1 << 0))) supportedFeatures |= CPU_FEATURE_SSE3;
 
-    if ((regs[2] & ((int)1 << 9)))
-        supportedFeatures |= CPU_FEATURE_SSSE3;
+    if ((regs[2] & ((int)1 << 9))) supportedFeatures |= CPU_FEATURE_SSSE3;
 
-    if ((regs[2] & ((int)1 << 19)))
-        supportedFeatures |= CPU_FEATURE_SSE4_1;
+    if ((regs[2] & ((int)1 << 19))) supportedFeatures |= CPU_FEATURE_SSE4_1;
 
-    if ((regs[2] & ((int)1 << 20)))
-        supportedFeatures |= CPU_FEATURE_SSE4_2;
+    if ((regs[2] & ((int)1 << 20))) supportedFeatures |= CPU_FEATURE_SSE4_2;
 
-    if (detect_OS_AVX())
-    {
-        if ((regs[2] & ((int)1 << 28)))
-            supportedFeatures |= CPU_FEATURE_AVX;
+    if (detect_OS_AVX()) {
+        if ((regs[2] & ((int)1 << 28))) supportedFeatures |= CPU_FEATURE_AVX;
 
-        if (cpuIdCount >= 7){
+        if (cpuIdCount >= 7) {
             cpuid(regs, 0x00000007, 0);
 
-            if ((regs[1] & ((int)1 << 5)))
-                supportedFeatures |= CPU_FEATURE_AVX2;
+            if ((regs[1] & ((int)1 << 5))) supportedFeatures |= CPU_FEATURE_AVX2;
         }
     }
 }
