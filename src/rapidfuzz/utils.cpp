@@ -66,7 +66,7 @@ uint32_t UnicodeDefaultProcess(uint32_t ch)
         int i;
         for (i = 0; i < n; i++)
             res[i] = _PyUnicode_ExtendedCase[index + i];*/
-        /* for now ignore extended cases. The only exisiting
+        /* for now ignore extended cases. The only existing
          * on is U+0130 anyways */
         return _PyUnicode_ExtendedCase[index];
     }

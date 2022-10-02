@@ -282,7 +282,7 @@ static inline bool is_valid_string(PyObject* py_str)
     if (PyBytes_Check(py_str))
         is_string = true;
     else if (PyUnicode_Check(py_str)) {
-        // PEP 623 deprecates legacy strings and therefor
+        // PEP 623 deprecates legacy strings and therefore
         // deprecates e.g. PyUnicode_READY in Python 3.10
 #if PY_VERSION_HEX < PYTHON_VERSION(3, 10, 0)
         if (PyUnicode_READY(py_str)) {
@@ -301,7 +301,7 @@ static inline void validate_string(PyObject* py_str, const char* err)
     if (PyBytes_Check(py_str))
         return;
     else if (PyUnicode_Check(py_str)) {
-        // PEP 623 deprecates legacy strings and therefor
+        // PEP 623 deprecates legacy strings and therefore
         // deprecates e.g. PyUnicode_READY in Python 3.10
 #if PY_VERSION_HEX < PYTHON_VERSION(3, 10, 0)
         if (PyUnicode_READY(py_str)) {

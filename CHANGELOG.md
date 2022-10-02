@@ -75,7 +75,7 @@
 #### Added
 - added support for KeyboardInterrupt in processor module
   It might still take a bit until the KeyboardInterrupt is registered, but
-  no longer runs all text comparisions after pressing `Ctrl + C`
+  no longer runs all text comparisons after pressing `Ctrl + C`
 
 #### Fixed
 - fix default scorer used by cdist to use C++ implementation if possible
@@ -435,7 +435,7 @@
 - when different weights are used for Insertion and Deletion the strings are not swapped inside the Levenshtein implementation anymore. So different weights for Insertion and Deletion are now supported.
 - replace C++ implementation with a Cython implementation. This has the following advantages:
   - The implementation is less error prone, since a lot of the complex things are done by Cython
-  - slighly faster than the current implementation (up to 10% for some parts)
+  - slightly faster than the current implementation (up to 10% for some parts)
   - about 33% smaller binary size
   - reduced compile time
 - Added **kwargs argument to process.extract/extractOne/extract_iter that is passed to the scorer

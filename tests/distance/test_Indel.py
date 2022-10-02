@@ -59,7 +59,7 @@ def test_similar_strings():
 
 def test_different_strings():
     """
-    Test completly different strings
+    Test completely different strings
     """
     assert Indel.distance("aaaa", "bbbb") == 8
     assert Indel.similarity("aaaa", "bbbb") == 0

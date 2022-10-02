@@ -58,7 +58,7 @@ def extract_iter(
         Yields similarity between the query and each choice in form of a Tuple with 3 elements.
         The values stored in the tuple depend on the types of the input arguments.
 
-        * The first element is always the current `choice`, which is the value thats compared to the query.
+        * The first element is always the current `choice`, which is the value that's compared to the query.
 
         * The second value represents the similarity calculated by the scorer. This can be:
 
@@ -165,7 +165,7 @@ def extractOne(
         Returns the best match in form of a Tuple with 3 elements. The values stored in the
         tuple depend on the types of the input arguments.
 
-        * The first element is always the `choice`, which is the value thats compared to the query.
+        * The first element is always the `choice`, which is the value that's compared to the query.
 
         * The second value represents the similarity calculated by the scorer. This can be:
 
@@ -346,7 +346,7 @@ def extract(
         The return type is always a List of Tuples with 3 elements. However the values stored in the
         tuple depend on the types of the input arguments.
 
-        * The first element is always the `choice`, which is the value thats compared to the query.
+        * The first element is always the `choice`, which is the value that's compared to the query.
 
         * The second value represents the similarity calculated by the scorer. This can be:
 

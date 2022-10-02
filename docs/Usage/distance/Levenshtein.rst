@@ -5,7 +5,7 @@ Levenshtein
 
 This implementation supports the usage of different weights for
 Insertion/Deletion/Substitution. The uniform Levenshtein distance refers to ``weights=(1,1,1)``
-and the Indel distance refers to ``weights=(1,1,2)``. All other weights are refered to
+and the Indel distance refers to ``weights=(1,1,2)``. All other weights are referred to
 as generic Levenshtein distance.
 
 Functions
@@ -77,7 +77,7 @@ Uniform
 The implementation for the uniform Levenshtein distance has a worst-case
 performance of ``O([N/64]M)``. It uses the following optimized implementations:
 
-- if score_cutoff is 0 the similarity can be calculated using a direct comparision,
+- if score_cutoff is 0 the similarity can be calculated using a direct comparison,
   since no difference between the strings is allowed.  The time complexity of
   this algorithm is ``O(N)``.
 

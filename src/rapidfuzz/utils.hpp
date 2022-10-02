@@ -19,7 +19,7 @@ uint32_t UnicodeDefaultProcess(uint32_t ch);
  * beginning/end and lowercase the string. Currently this only supports
  * Ascii. Characters outside of the ascii spec are not changed. This
  * will be changed in the future to support full unicode. In case this has
- * has a noticable effect on the performance an additional `ascii_default_process`
+ * has a noticeable effect on the performance an additional `ascii_default_process`
  * function will be provided, that keeps this behaviour
  *
  * @tparam CharT char type of the string

@@ -49,7 +49,7 @@ def levenshtein(s1, s2, weights=(1, 1, 1)):
     """
     python implementation of a generic Levenshtein distance
     this is much less error prone, than the bitparallel C implementations
-    and is therefor used to test the C implementation
+    and is therefore used to test the C implementation
     However this makes this very slow even for testing purposes
     """
 

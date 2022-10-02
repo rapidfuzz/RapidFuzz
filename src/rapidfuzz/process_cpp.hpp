@@ -405,13 +405,13 @@ void run_parallel(int workers, int64_t rows, int64_t step_size, Func&& func)
     }
 
     std::exception_ptr exception = nullptr;
-    std::atomic<int> exceptions_occured{0};
+    std::atomic<int> exceptions_occurred{0};
     tf::Executor executor(workers);
     tf::Taskflow taskflow;
 
     taskflow.for_each_index((int64_t)0, rows, step_size, [&](int64_t row) {
-        /* skip work after an exception occured */
-        if (exceptions_occured.load() > 0) {
+        /* skip work after an exception occurred */
+        if (exceptions_occurred.load() > 0) {
             return;
         }
         try {
@@ -420,7 +420,7 @@ void run_parallel(int workers, int64_t rows, int64_t step_size, Func&& func)
         }
         catch (...) {
             /* only store first exception */
-            if (exceptions_occured.fetch_add(1) == 0) {
+            if (exceptions_occurred.fetch_add(1) == 0) {
                 exception = std::current_exception();
             }
         }
@@ -429,7 +429,7 @@ void run_parallel(int workers, int64_t rows, int64_t step_size, Func&& func)
     auto future = executor.run(taskflow);
     while (future.wait_for(1s) != std::future_status::ready) {
         if (KeyboardInterruptOccured(save)) {
-            exceptions_occured.fetch_add(1);
+            exceptions_occurred.fetch_add(1);
             future.wait();
             PyEval_RestoreThread(save);
             /* exception already set */
