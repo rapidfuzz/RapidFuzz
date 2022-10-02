@@ -6,7 +6,7 @@ from hypothesis import given, assume, settings
 import hypothesis.strategies as st
 import pytest
 
-from rapidfuzz import fuzz, process, utils, string_metric
+from rapidfuzz import fuzz, process, utils
 from rapidfuzz.distance import (
     Levenshtein_cpp,
     Levenshtein_py,
@@ -14,6 +14,8 @@ from rapidfuzz.distance import (
     Indel_cpp,
     Indel_py,
     Indel as _Indel,
+    JaroWinkler_py,
+    JaroWinkler_cpp,
 )
 import random
 import numpy as np
@@ -108,6 +110,68 @@ def normalize_distance(dist, s1, s2, weights=(1, 1, 1)):
 
     return 1 - 1 * float(dist) / float(max_dist) if max_dist else 1
 
+def jarowinkler_similarity(*args, **kwargs):
+    sim1 = JaroWinkler_py.similarity(*args, **kwargs)
+    sim2 = JaroWinkler_cpp.similarity(*args, **kwargs)
+    assert isclose(sim1, sim2)
+    return sim1
+
+def jaro_similarity(P, T):
+    P_flag = [0] * (len(P) + 1)
+    T_flag = [0] * (len(T) + 1)
+
+    Bound = max(len(P), len(T)) // 2
+    Bound = max(Bound - 1, 0)
+
+    CommonChars = 0
+    for i in range(len(T)):
+        lowlim = i - Bound if i >= Bound else 0
+        hilim = i + Bound if i + Bound <= len(P) - 1 else len(P) - 1
+
+        for j in range(lowlim, hilim + 1):
+            if not P_flag[j] and P[j] == T[i]:
+                T_flag[i] = 1
+                P_flag[j] = 1
+                CommonChars += 1
+                break
+
+    if not CommonChars:
+        return 0
+
+    Transpositions = 0
+    k = 0
+    for i in range(len(T)):
+        if T_flag[i]:
+            j = k
+            while j < len(P):
+                if P_flag[j]:
+                    k = j + 1
+                    break
+                j += 1
+
+            if T[i] != P[j]:
+                Transpositions += 1
+
+    Transpositions = Transpositions // 2
+
+    Sim = CommonChars / len(P) + CommonChars / len(T) + (CommonChars - Transpositions) / CommonChars
+    return Sim / 3
+
+def jaro_winkler_similarity(P, T, prefix_weight=0.1):
+    min_len = min(len(P), len(T))
+    prefix = 0
+    max_prefix = min(min_len, 4)
+
+    while prefix < max_prefix:
+        if T[prefix] != P[prefix]:
+            break
+        prefix += 1
+
+    Sim = jaro_similarity(P, T)
+    if Sim > 0.7:
+        Sim += prefix * prefix_weight * (1.0 - Sim)
+
+    return Sim
 
 def partial_ratio_short_needle(s1, s2):
     if not s1 and not s2:
@@ -271,10 +335,6 @@ def test_levenshtein_word(s1, s2):
     # uniform Levenshtein
     # distance
     reference_dist = levenshtein(s1, s2)
-    assert string_metric.levenshtein(s1, s2) == reference_dist
-    assert extractOne_scorer(s1, s2, string_metric.levenshtein) == reference_dist
-    assert extract_scorer(s1, s2, string_metric.levenshtein) == reference_dist
-    assert extract_iter_scorer(s1, s2, string_metric.levenshtein) == reference_dist
     assert Levenshtein_cpp.distance(s1, s2) == reference_dist
     assert extractOne_scorer(s1, s2, Levenshtein_cpp.distance) == reference_dist
     assert extract_scorer(s1, s2, Levenshtein_cpp.distance) == reference_dist
@@ -285,19 +345,6 @@ def test_levenshtein_word(s1, s2):
     assert extract_iter_scorer(s1, s2, Levenshtein_py.distance) == reference_dist
     # normalized distance
     reference_sim = normalize_distance(reference_dist, s1, s2)
-    assert isclose(string_metric.normalized_levenshtein(s1, s2), reference_sim * 100)
-    assert isclose(
-        extractOne_scorer(s1, s2, string_metric.normalized_levenshtein),
-        reference_sim * 100,
-    )
-    assert isclose(
-        extract_scorer(s1, s2, string_metric.normalized_levenshtein),
-        reference_sim * 100,
-    )
-    assert isclose(
-        extract_iter_scorer(s1, s2, string_metric.normalized_levenshtein),
-        reference_sim * 100,
-    )
     assert isclose(
         extractOne_scorer(s1, s2, Levenshtein_cpp.normalized_similarity), reference_sim
     )
@@ -321,41 +368,27 @@ def test_levenshtein_word(s1, s2):
     # InDel-Distance
     # distance
     reference_dist = levenshtein(s1, s2, weights=(1, 1, 2))
-    assert string_metric.levenshtein(s1, s2, weights=(1, 1, 2)) == reference_dist
-    assert (
-        extractOne_scorer(s1, s2, string_metric.levenshtein, weights=(1, 1, 2))
-        == reference_dist
+    assert isclose(
+        extractOne_scorer(s1, s2, Indel_cpp.distance), reference_dist
     )
-    assert (
-        extract_scorer(s1, s2, string_metric.levenshtein, weights=(1, 1, 2))
-        == reference_dist
+    assert isclose(
+        extract_scorer(s1, s2, Indel_cpp.distance), reference_dist
     )
-    assert (
-        extract_iter_scorer(s1, s2, string_metric.levenshtein, weights=(1, 1, 2))
-        == reference_dist
+    assert isclose(
+        extract_iter_scorer(s1, s2, Indel_cpp.distance), reference_dist
     )
+    assert isclose(
+        extractOne_scorer(s1, s2, Indel_py.distance), reference_dist
+    )
+    assert isclose(
+        extract_scorer(s1, s2, Indel_py.distance), reference_dist
+    )
+    assert isclose(
+        extract_iter_scorer(s1, s2, Indel_py.distance), reference_dist
+    )
+
     # normalized distance
     reference_sim = normalize_distance(reference_dist, s1, s2, weights=(1, 1, 2))
-    assert isclose(
-        string_metric.normalized_levenshtein(s1, s2, weights=(1, 1, 2)),
-        reference_sim * 100,
-    )
-    assert isclose(
-        extractOne_scorer(
-            s1, s2, string_metric.normalized_levenshtein, weights=(1, 1, 2)
-        ),
-        reference_sim * 100,
-    )
-    assert isclose(
-        extract_scorer(s1, s2, string_metric.normalized_levenshtein, weights=(1, 1, 2)),
-        reference_sim * 100,
-    )
-    assert isclose(
-        extract_iter_scorer(
-            s1, s2, string_metric.normalized_levenshtein, weights=(1, 1, 2)
-        ),
-        reference_sim * 100,
-    )
     assert isclose(
         extractOne_scorer(s1, s2, Indel_cpp.normalized_similarity), reference_sim
     )
@@ -385,10 +418,6 @@ def test_levenshtein_block(s1, s2):
     # uniform Levenshtein
     # distance
     reference_dist = levenshtein(s1, s2)
-    assert string_metric.levenshtein(s1, s2) == reference_dist
-    assert extractOne_scorer(s1, s2, string_metric.levenshtein) == reference_dist
-    assert extract_scorer(s1, s2, string_metric.levenshtein) == reference_dist
-    assert extract_iter_scorer(s1, s2, string_metric.levenshtein) == reference_dist
     assert extractOne_scorer(s1, s2, Levenshtein_cpp.distance) == reference_dist
     assert extract_scorer(s1, s2, Levenshtein_cpp.distance) == reference_dist
     assert extract_iter_scorer(s1, s2, Levenshtein_cpp.distance) == reference_dist
@@ -397,19 +426,6 @@ def test_levenshtein_block(s1, s2):
     assert extract_iter_scorer(s1, s2, Levenshtein_py.distance) == reference_dist
     # normalized distance
     reference_sim = normalize_distance(reference_dist, s1, s2)
-    assert isclose(string_metric.normalized_levenshtein(s1, s2), reference_sim * 100)
-    assert isclose(
-        extractOne_scorer(s1, s2, string_metric.normalized_levenshtein),
-        reference_sim * 100,
-    )
-    assert isclose(
-        extract_scorer(s1, s2, string_metric.normalized_levenshtein),
-        reference_sim * 100,
-    )
-    assert isclose(
-        extract_iter_scorer(s1, s2, string_metric.normalized_levenshtein),
-        reference_sim * 100,
-    )
     assert isclose(
         extractOne_scorer(s1, s2, Levenshtein_cpp.normalized_similarity), reference_sim
     )
@@ -433,19 +449,6 @@ def test_levenshtein_block(s1, s2):
     # InDel-Distance
     # distance
     reference_dist = levenshtein(s1, s2, weights=(1, 1, 2))
-    assert string_metric.levenshtein(s1, s2, weights=(1, 1, 2)) == reference_dist
-    assert (
-        extractOne_scorer(s1, s2, string_metric.levenshtein, weights=(1, 1, 2))
-        == reference_dist
-    )
-    assert (
-        extract_scorer(s1, s2, string_metric.levenshtein, weights=(1, 1, 2))
-        == reference_dist
-    )
-    assert (
-        extract_iter_scorer(s1, s2, string_metric.levenshtein, weights=(1, 1, 2))
-        == reference_dist
-    )
     assert extractOne_scorer(s1, s2, Indel_cpp.distance) == reference_dist
     assert extract_scorer(s1, s2, Indel_cpp.distance) == reference_dist
     assert extract_iter_scorer(s1, s2, Indel_cpp.distance) == reference_dist
@@ -454,26 +457,6 @@ def test_levenshtein_block(s1, s2):
     assert extract_iter_scorer(s1, s2, Indel_py.distance) == reference_dist
     # normalized distance
     reference_sim = normalize_distance(reference_dist, s1, s2, weights=(1, 1, 2))
-    assert isclose(
-        string_metric.normalized_levenshtein(s1, s2, weights=(1, 1, 2)),
-        reference_sim * 100,
-    )
-    assert isclose(
-        extractOne_scorer(
-            s1, s2, string_metric.normalized_levenshtein, weights=(1, 1, 2)
-        ),
-        reference_sim * 100,
-    )
-    assert isclose(
-        extract_scorer(s1, s2, string_metric.normalized_levenshtein, weights=(1, 1, 2)),
-        reference_sim * 100,
-    )
-    assert isclose(
-        extract_iter_scorer(
-            s1, s2, string_metric.normalized_levenshtein, weights=(1, 1, 2)
-        ),
-        reference_sim * 100,
-    )
     assert isclose(
         extractOne_scorer(s1, s2, Indel_cpp.normalized_similarity), reference_sim
     )
@@ -503,10 +486,6 @@ def test_levenshtein_random(s1, s2):
     # uniform Levenshtein
     # distance
     reference_dist = levenshtein(s1, s2)
-    assert string_metric.levenshtein(s1, s2) == reference_dist
-    assert extractOne_scorer(s1, s2, string_metric.levenshtein) == reference_dist
-    assert extract_scorer(s1, s2, string_metric.levenshtein) == reference_dist
-    assert extract_iter_scorer(s1, s2, string_metric.levenshtein) == reference_dist
     assert extractOne_scorer(s1, s2, Levenshtein_cpp.distance) == reference_dist
     assert extract_scorer(s1, s2, Levenshtein_cpp.distance) == reference_dist
     assert extract_iter_scorer(s1, s2, Levenshtein_cpp.distance) == reference_dist
@@ -515,19 +494,6 @@ def test_levenshtein_random(s1, s2):
     assert extract_iter_scorer(s1, s2, Levenshtein_py.distance) == reference_dist
     # normalized distance
     reference_sim = normalize_distance(reference_dist, s1, s2)
-    assert isclose(string_metric.normalized_levenshtein(s1, s2), reference_sim * 100)
-    assert isclose(
-        extractOne_scorer(s1, s2, string_metric.normalized_levenshtein),
-        reference_sim * 100,
-    )
-    assert isclose(
-        extract_scorer(s1, s2, string_metric.normalized_levenshtein),
-        reference_sim * 100,
-    )
-    assert isclose(
-        extract_iter_scorer(s1, s2, string_metric.normalized_levenshtein),
-        reference_sim * 100,
-    )
     assert isclose(
         extractOne_scorer(s1, s2, Levenshtein_cpp.normalized_similarity), reference_sim
     )
@@ -551,19 +517,6 @@ def test_levenshtein_random(s1, s2):
     # InDel-Distance
     # distance
     reference_dist = levenshtein(s1, s2, weights=(1, 1, 2))
-    assert string_metric.levenshtein(s1, s2, weights=(1, 1, 2)) == reference_dist
-    assert (
-        extractOne_scorer(s1, s2, string_metric.levenshtein, weights=(1, 1, 2))
-        == reference_dist
-    )
-    assert (
-        extract_scorer(s1, s2, string_metric.levenshtein, weights=(1, 1, 2))
-        == reference_dist
-    )
-    assert (
-        extract_iter_scorer(s1, s2, string_metric.levenshtein, weights=(1, 1, 2))
-        == reference_dist
-    )
     assert extractOne_scorer(s1, s2, Indel_cpp.distance) == reference_dist
     assert extract_scorer(s1, s2, Indel_cpp.distance) == reference_dist
     assert extract_iter_scorer(s1, s2, Indel_cpp.distance) == reference_dist
@@ -572,26 +525,6 @@ def test_levenshtein_random(s1, s2):
     assert extract_iter_scorer(s1, s2, Indel_py.distance) == reference_dist
     # normalized distance
     reference_sim = normalize_distance(reference_dist, s1, s2, weights=(1, 1, 2))
-    assert isclose(
-        string_metric.normalized_levenshtein(s1, s2, weights=(1, 1, 2)),
-        reference_sim * 100,
-    )
-    assert isclose(
-        extractOne_scorer(
-            s1, s2, string_metric.normalized_levenshtein, weights=(1, 1, 2)
-        ),
-        reference_sim * 100,
-    )
-    assert isclose(
-        extract_scorer(s1, s2, string_metric.normalized_levenshtein, weights=(1, 1, 2)),
-        reference_sim * 100,
-    )
-    assert isclose(
-        extract_iter_scorer(
-            s1, s2, string_metric.normalized_levenshtein, weights=(1, 1, 2)
-        ),
-        reference_sim * 100,
-    )
     assert isclose(
         extractOne_scorer(s1, s2, Indel_cpp.normalized_similarity), reference_sim
     )
@@ -658,13 +591,29 @@ def test_cdist(queries, choices):
     """
 
     reference_matrix = cdist_distance(
-        queries, choices, scorer=string_metric.levenshtein
+        queries, choices, scorer=Levenshtein_cpp.distance
     )
-    matrix = process.cdist(queries, choices, scorer=string_metric.levenshtein)
+    matrix = process.cdist(queries, choices, scorer=Levenshtein_cpp.distance)
     assert (matrix == reference_matrix).all()
 
     reference_matrix = cdist_distance(
-        queries, queries, scorer=string_metric.levenshtein
+        queries, queries, scorer=Levenshtein_cpp.distance
     )
-    matrix = process.cdist(queries, queries, scorer=string_metric.levenshtein)
+    matrix = process.cdist(queries, queries, scorer=Levenshtein_cpp.distance)
     assert (matrix == reference_matrix).all()
+
+@given(s1=st.text(max_size=64), s2=st.text(max_size=64))
+@settings(max_examples=50, deadline=1000)
+def test_jaro_winkler_word(s1, s2):
+    assert isclose(jaro_winkler_similarity(s1, s2), jarowinkler_similarity(s1, s2))
+
+@given(s1=st.text(min_size=65), s2=st.text(min_size=65))
+@settings(max_examples=50, deadline=1000)
+def test_jaro_winkler_block(s1, s2):
+    assert isclose(jaro_winkler_similarity(s1, s2), jarowinkler_similarity(s1, s2))
+
+@given(s1=st.text(), s2=st.text())
+@settings(max_examples=50, deadline=1000)
+def test_jaro_winkler_random(s1, s2):
+    print(s1, s2)
+    assert isclose(jaro_winkler_similarity(s1, s2), jarowinkler_similarity(s1, s2))
