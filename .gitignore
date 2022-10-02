@@ -26,4 +26,3 @@ bench_results/
 
 # Cython generated files
 *.cxx
-

@@ -9,4 +9,3 @@ Usage
    fuzz
    string_metric
    utils
-
