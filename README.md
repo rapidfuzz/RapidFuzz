@@ -6,7 +6,7 @@
 <p align="center">
   <a href="https://github.com/maxbachmann/RapidFuzz/actions">
     <img src="https://github.com/maxbachmann/RapidFuzz/workflows/Test%20Build/badge.svg"
-         alt="Continous Integration">
+         alt="Continuous Integration">
   </a>
   <a href="https://pypi.org/project/rapidfuzz/">
     <img src="https://img.shields.io/pypi/v/rapidfuzz"
@@ -140,8 +140,8 @@ The full documentation of processors can be found [here](https://maxbachmann.git
 
 ## Benchmark
 
-The following benchmark gives a quick performance comparision between RapidFuzz and FuzzyWuzzy.
-More detailed benchmarks for the string metrics can be found in the [documentation](https://maxbachmann.github.io/RapidFuzz/fuzz.html). For this simple comparision I generated a list of 10.000 strings with length 10, that is compared to a sample of 100 elements from this list:
+The following benchmark gives a quick performance comparison between RapidFuzz and FuzzyWuzzy.
+More detailed benchmarks for the string metrics can be found in the [documentation](https://maxbachmann.github.io/RapidFuzz/fuzz.html). For this simple comparison I generated a list of 10.000 strings with length 10, that is compared to a sample of 100 elements from this list:
 ```python
 words = [
     "".join(random.choice(string.ascii_letters + string.digits) for _ in range(10))
@@ -166,7 +166,7 @@ way:
 ```python3
 cdist(samples, words, scorer=scorer)
 ```
-The following graph shows how many elements are processed per second with each of the scorers. In RapidFuzz the usage of scorers through processors like `cdist` is a lot faster than directly using it. Thats why they should be used whenever possible.
+The following graph shows how many elements are processed per second with each of the scorers. In RapidFuzz the usage of scorers through processors like `cdist` is a lot faster than directly using it. That's why they should be used whenever possible.
 
 <img src="https://raw.githubusercontent.com/maxbachmann/RapidFuzz/main/docs/img/cdist.svg?sanitize=true" alt="Benchmark cdist">
 
@@ -180,5 +180,5 @@ Support the project through [GitHub Sponsors]() or via [PayPal](https://www.payp
 [![](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=VGWQBBD5CTWJU).
 
 ## License
-RapidFuzz is licensed under the MIT license since I believe that everyone should be able to use it without being forced to adopt the GPL license. Thats why the library is based on an older version of fuzzywuzzy that was MIT licensed as well.
+RapidFuzz is licensed under the MIT license since I believe that everyone should be able to use it without being forced to adopt the GPL license. That's why the library is based on an older version of fuzzywuzzy that was MIT licensed as well.
 This old version of fuzzywuzzy can be found [here](https://github.com/seatgeek/fuzzywuzzy/tree/4bf28161f7005f3aa9d4d931455ac55126918df7).

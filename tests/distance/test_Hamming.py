@@ -59,7 +59,7 @@ def test_similar_strings():
 
 def test_different_strings():
     """
-    Test completly different strings
+    Test completely different strings
     """
     assert Hamming.distance("aaaa", "bbbb") == 4
     assert Hamming.similarity("aaaa", "bbbb") == 0

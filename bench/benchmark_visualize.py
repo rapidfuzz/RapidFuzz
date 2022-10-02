@@ -12,7 +12,7 @@ ax = df.plot(x="length")
 plt.xticks(list(range(0, 257, 64)))
 
 plt.title(
-    "Performance comparision of the \nDamerauLevenshtein similarity in different libraries"
+    "Performance comparison of the \nDamerauLevenshtein similarity in different libraries"
 )
 plt.xlabel("string length [in characters]")
 plt.ylabel("runtime [μs]")

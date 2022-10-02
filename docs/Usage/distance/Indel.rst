@@ -44,12 +44,12 @@ Implementation Notes
 
 The following implementation is used with a worst-case performance of ``O([N/64]M)``.
 
-- if max is 0 the similarity can be calculated using a direct comparision,
+- if max is 0 the similarity can be calculated using a direct comparison,
   since no difference between the strings is allowed.  The time complexity of
   this algorithm is ``O(N)``.
 
 - if max is 1 and the two strings have a similar length, the similarity can be
-  calculated using a direct comparision aswell, since a substitution would cause
+  calculated using a direct comparison as well, since a substitution would cause
   a edit distance higher than max. The time complexity of this algorithm
   is ``O(N)``.
 

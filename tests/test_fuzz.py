@@ -230,7 +230,7 @@ class RatioTest(unittest.TestCase):
         assert fuzz.WRatio("South Korea", "North Korea", score_cutoff=85.5) == 0.0
 
     def testIssue231(self):
-        str1 = "er merkantilismus förderte handel und verkehr mit teils marktkonformen, teils dirigistischen maßnahmen."
+        str1 = "er merkantilismus förderte handle und verkehr mit teils marktkonformen, teils dirigistischen maßnahmen."
         str2 = "ils marktkonformen, teils dirigistischen maßnahmen. an der schwelle zum 19. jahrhundert entstand ein neu"
 
         alignment = fuzz.partial_ratio_alignment(str1, str2)
@@ -348,7 +348,7 @@ def testIssue206(scorer):
 def test_help(scorer):
     """
     test that all help texts can be printed without throwing an exception,
-    since they are implemented in C++ aswell
+    since they are implemented in C++ as well
     """
     help(scorer)
 

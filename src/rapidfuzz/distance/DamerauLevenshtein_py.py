@@ -26,7 +26,7 @@ def _damerau_levenshtein_distance_zhao(s1, s2):
             temp = min(diag, left, up)
 
             if s1[i - 1] == s2[j - 1]:
-                last_col_id = j  # last occurence of s1_i
+                last_col_id = j  # last occurrence of s1_i
                 FR[j] = R1[j - 2]  # save H_k-1,j-2
                 T = last_i2l1  # save H_i-2,l-1
             else:

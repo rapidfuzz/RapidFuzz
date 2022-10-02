@@ -17,9 +17,9 @@ from rapidfuzz.distance import (
 )
 
 
-def test_editops_comparision():
+def test_editops_comparison():
     """
-    test comparision with Editops
+    test comparison with Editops
     """
     ops = Levenshtein.editops("aaabaaa", "abbaaabba")
     assert ops == ops
@@ -181,9 +181,9 @@ def test_editops_inversion():
     ]
 
 
-def test_opcodes_comparision():
+def test_opcodes_comparison():
     """
-    test comparision with Opcodes
+    test comparison with Opcodes
     """
     ops = Levenshtein.opcodes("aaabaaa", "abbaaabba")
     assert ops == ops
