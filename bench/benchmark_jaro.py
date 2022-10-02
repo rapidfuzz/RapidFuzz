@@ -10,6 +10,7 @@ def benchmark(name, func, setup, lengths, count):
     start = timeit.default_timer()
     results = []
     from tqdm import tqdm
+
     for length in tqdm(lengths):
         test = timeit.Timer(func, setup=setup.format(length, count))
         results.append(min(test.timeit(number=1) for _ in range(7)) / count)
@@ -17,7 +18,8 @@ def benchmark(name, func, setup, lengths, count):
     print(f"finished {name}, Runtime: ", stop - start)
     return results
 
-setup ="""
+
+setup = """
 from rapidfuzz.distance import Jaro
 import jellyfish
 import string
@@ -28,22 +30,31 @@ a      = ''.join(random.choice(characters) for _ in range({0}))
 b_list = [''.join(random.choice(characters) for _ in range({0})) for _ in range({1})]
 """
 
-lengths = list(range(1,256,4))
+lengths = list(range(1, 256, 4))
 count = 4000
 
-time_rapidfuzz = benchmark("rapidfuzz",
-        '[Jaro.similarity(a, b) for b in b_list]',
-        setup, lengths, count)
+time_rapidfuzz = benchmark(
+    "rapidfuzz", "[Jaro.similarity(a, b) for b in b_list]", setup, lengths, count
+)
 
 # this gets very slow, so only benchmark it for smaller values
-time_jellyfish = benchmark("jellyfish",
-        '[jellyfish.jaro_similarity(a, b) for b in b_list]',
-        setup, list(range(1,128,4)), count) + [np.NaN] * 32
+time_jellyfish = (
+    benchmark(
+        "jellyfish",
+        "[jellyfish.jaro_similarity(a, b) for b in b_list]",
+        setup,
+        list(range(1, 128, 4)),
+        count,
+    )
+    + [np.NaN] * 32
+)
 
-df = pandas.DataFrame(data={
-    "length": lengths,
-    "rapidfuzz": time_rapidfuzz,
-    "jellyfish": time_jellyfish,
-})
+df = pandas.DataFrame(
+    data={
+        "length": lengths,
+        "rapidfuzz": time_rapidfuzz,
+        "jellyfish": time_jellyfish,
+    }
+)
 
-df.to_csv("results/jaro.csv", sep=',',index=False)
+df.to_csv("results/jaro.csv", sep=",", index=False)

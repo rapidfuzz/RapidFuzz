@@ -15,7 +15,8 @@ def benchmark(name, func, setup, lengths, count):
     print(f"finished {name}, Runtime: ", stop - start)
     return results
 
-setup ="""
+
+setup = """
 from rapidfuzz import fuzz as rfuzz
 from fuzzywuzzy import fuzz
 import string
@@ -26,22 +27,31 @@ a      = ''.join(random.choice(characters) for _ in range({0}))
 b_list = [''.join(random.choice(characters) for _ in range({0})) for _ in range({1})]
 """
 
-lengths = list(range(0,512,2))
+lengths = list(range(0, 512, 2))
 count = 4000
 
-time_rapidfuzz = benchmark("rapidfuzz",
-        '[rfuzz.partial_ratio(a, b) for b in b_list]',
-        setup, lengths, count)
+time_rapidfuzz = benchmark(
+    "rapidfuzz", "[rfuzz.partial_ratio(a, b) for b in b_list]", setup, lengths, count
+)
 
 # this gets very slow, so only benchmark it for smaller values
-time_fuzzywuzzy = benchmark("fuzzywuzzy",
-        '[fuzz.partial_ratio(a, b) for b in b_list]',
-        setup, list(range(0,256,2)), count) + [np.NaN] * 128
+time_fuzzywuzzy = (
+    benchmark(
+        "fuzzywuzzy",
+        "[fuzz.partial_ratio(a, b) for b in b_list]",
+        setup,
+        list(range(0, 256, 2)),
+        count,
+    )
+    + [np.NaN] * 128
+)
 
-df = pd.DataFrame(data={
-    "length": lengths,
-    "rapidfuzz": time_rapidfuzz,
-    "fuzzywuzzy": time_fuzzywuzzy,
-})
+df = pd.DataFrame(
+    data={
+        "length": lengths,
+        "rapidfuzz": time_rapidfuzz,
+        "fuzzywuzzy": time_fuzzywuzzy,
+    }
+)
 
-df.to_csv("results/partial_ratio_long_needle.csv", sep=',',index=False)
+df.to_csv("results/partial_ratio_long_needle.csv", sep=",", index=False)

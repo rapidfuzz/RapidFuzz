@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
 
-def _jaro_calculate_similarity(P_len: int, T_len: int, CommonChars: int, Transpositions: int) -> float:
+
+def _jaro_calculate_similarity(
+    P_len: int, T_len: int, CommonChars: int, Transpositions: int
+) -> float:
     Transpositions //= 2
     Sim = 0.0
     Sim += CommonChars / P_len
@@ -9,20 +12,26 @@ def _jaro_calculate_similarity(P_len: int, T_len: int, CommonChars: int, Transpo
     Sim += (CommonChars - Transpositions) / CommonChars
     return Sim / 3.0
 
+
 def _jaro_length_filter(P_len: int, T_len: int, score_cutoff: float) -> bool:
     """
     filter matches below score_cutoff based on string lengths
     """
-    if not P_len or not T_len: return False
+    if not P_len or not T_len:
+        return False
 
     sim = _jaro_calculate_similarity(P_len, T_len, min(P_len, T_len), 0)
     return sim >= score_cutoff
 
-def _jaro_common_char_filter(P_len: int, T_len: int, CommonChars: int, score_cutoff: float) -> bool:
+
+def _jaro_common_char_filter(
+    P_len: int, T_len: int, CommonChars: int, score_cutoff: float
+) -> bool:
     """
     filter matches below score_cutoff based on string lengths and common characters
     """
-    if not CommonChars: return False
+    if not CommonChars:
+        return False
 
     sim = _jaro_calculate_similarity(P_len, T_len, CommonChars, 0)
     return sim >= score_cutoff
@@ -41,12 +50,13 @@ def _jaro_bounds(s1, s2):
     if T_len > P_len:
         Bound = T_len // 2 - 1
         if T_len > P_len + Bound:
-            s2 = s2[:P_len + Bound]
+            s2 = s2[: P_len + Bound]
     else:
         Bound = P_len // 2 - 1
         if P_len > T_len + Bound:
-            s1 = s1[:T_len + Bound]
+            s1 = s1[: T_len + Bound]
     return s1, s2, Bound
+
 
 def similarity(s1, s2, *, processor=None, score_cutoff=None) -> float:
     """
@@ -126,6 +136,7 @@ def similarity(s1, s2, *, processor=None, score_cutoff=None) -> float:
 
     return _jaro_calculate_similarity(P_len, T_len, CommonChars, trans_count)
 
+
 def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None) -> float:
     """
     Calculates the normalized jaro similarity
@@ -150,6 +161,7 @@ def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None) -> float
         normalized similarity between s1 and s2 as a float between 0 and 1.0
     """
     return similarity(s1, s2, processor=processor, score_cutoff=score_cutoff)
+
 
 def distance(s1, s2, *, processor=None, score_cutoff=None) -> float:
     """
@@ -178,7 +190,9 @@ def distance(s1, s2, *, processor=None, score_cutoff=None) -> float:
         s1 = processor(s1)
         s2 = processor(s2)
 
-    cutoff_distance = None if (score_cutoff is None or score_cutoff > 1.0) else 1.0 - score_cutoff
+    cutoff_distance = (
+        None if (score_cutoff is None or score_cutoff > 1.0) else 1.0 - score_cutoff
+    )
     sim = similarity(s1, s2, score_cutoff=cutoff_distance)
     dist = 1.0 - sim
     return dist if (score_cutoff is None or dist <= score_cutoff) else 1.0

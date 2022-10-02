@@ -3,9 +3,11 @@
 
 from rapidfuzz.distance.metrics_cpp import levenshtein_distance as distance
 from rapidfuzz.distance.metrics_cpp import levenshtein_editops as editops
-from rapidfuzz.distance.metrics_cpp import \
-    levenshtein_normalized_distance as normalized_distance
-from rapidfuzz.distance.metrics_cpp import \
-    levenshtein_normalized_similarity as normalized_similarity
+from rapidfuzz.distance.metrics_cpp import (
+    levenshtein_normalized_distance as normalized_distance,
+)
+from rapidfuzz.distance.metrics_cpp import (
+    levenshtein_normalized_similarity as normalized_similarity,
+)
 from rapidfuzz.distance.metrics_cpp import levenshtein_opcodes as opcodes
 from rapidfuzz.distance.metrics_cpp import levenshtein_similarity as similarity

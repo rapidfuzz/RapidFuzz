@@ -3,9 +3,11 @@
 
 from rapidfuzz.distance.metrics_cpp import indel_distance as distance
 from rapidfuzz.distance.metrics_cpp import indel_editops as editops
-from rapidfuzz.distance.metrics_cpp import \
-    indel_normalized_distance as normalized_distance
-from rapidfuzz.distance.metrics_cpp import \
-    indel_normalized_similarity as normalized_similarity
+from rapidfuzz.distance.metrics_cpp import (
+    indel_normalized_distance as normalized_distance,
+)
+from rapidfuzz.distance.metrics_cpp import (
+    indel_normalized_similarity as normalized_similarity,
+)
 from rapidfuzz.distance.metrics_cpp import indel_opcodes as opcodes
 from rapidfuzz.distance.metrics_cpp import indel_similarity as similarity

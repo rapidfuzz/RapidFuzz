@@ -47,14 +47,8 @@ def normalized_similarity(
     score_cutoff: Optional[float] = 0
 ) -> float: ...
 def editops(
-    s1: _S1,
-    s2: _S2,
-    *,
-    processor: Optional[Callable[..., _StringType]] = None
+    s1: _S1, s2: _S2, *, processor: Optional[Callable[..., _StringType]] = None
 ) -> Editops: ...
 def opcodes(
-    s1: _S1,
-    s2: _S2,
-    *,
-    processor: Optional[Callable[..., _StringType]] = None
+    s1: _S1, s2: _S2, *, processor: Optional[Callable[..., _StringType]] = None
 ) -> Opcodes: ...

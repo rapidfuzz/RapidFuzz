@@ -156,6 +156,7 @@ def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
 
     return norm_sim if (score_cutoff is None or norm_dist >= score_cutoff) else 0.0
 
+
 def editops(s1, s2, *, processor=None):
     """
     Return Editops describing how to turn s1 into s2.

@@ -1,5 +1,4 @@
-from typing import (Any, Callable, Dict, Hashable, Optional, Sequence, Tuple,
-                    TypeVar)
+from typing import Any, Callable, Dict, Hashable, Optional, Sequence, Tuple, TypeVar
 
 from typing_extensions import Protocol
 

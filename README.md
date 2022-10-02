@@ -144,10 +144,10 @@ The following benchmark gives a quick performance comparision between RapidFuzz 
 More detailed benchmarks for the string metrics can be found in the [documentation](https://maxbachmann.github.io/RapidFuzz/fuzz.html). For this simple comparision I generated a list of 10.000 strings with length 10, that is compared to a sample of 100 elements from this list:
 ```python
 words = [
-  ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(10))
-  for _ in range(10_000)
+    "".join(random.choice(string.ascii_letters + string.digits) for _ in range(10))
+    for _ in range(10_000)
 ]
-samples = words[::len(words) // 100]
+samples = words[:: len(words) // 100]
 ```
 
 The first benchmark compares the performance of the scorers in FuzzyWuzzy and RapidFuzz when they are used directly
