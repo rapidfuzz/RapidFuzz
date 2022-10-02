@@ -161,15 +161,14 @@ The following graph shows how many elements are processed per second with each o
 
 <img src="https://raw.githubusercontent.com/maxbachmann/RapidFuzz/main/docs/img/scorer.svg?sanitize=true" alt="Benchmark Scorer">
 
-The second benchmark compares the performance when the scorers are used in combination with extractOne in the following
+The second benchmark compares the performance when the scorers are used in combination with cdist in the following
 way:
 ```python3
-for sample in samples:
-  extractOne(sample, word, scorer=scorer)
+cdist(samples, words, scorer=scorer)
 ```
-The following graph shows how many elements are processed per second with each of the scorers. In RapidFuzz the usage of scorers through processors like `extractOne` is a lot faster than directly using it. Thats why they should be used whenever possible.
+The following graph shows how many elements are processed per second with each of the scorers. In RapidFuzz the usage of scorers through processors like `cdist` is a lot faster than directly using it. Thats why they should be used whenever possible.
 
-<img src="https://raw.githubusercontent.com/maxbachmann/RapidFuzz/main/docs/img/extractOne.svg?sanitize=true" alt="Benchmark extractOne">
+<img src="https://raw.githubusercontent.com/maxbachmann/RapidFuzz/main/docs/img/cdist.svg?sanitize=true" alt="Benchmark cdist">
 
 
 ## Support the project

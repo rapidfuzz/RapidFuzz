@@ -1,5 +1,13 @@
 ## Changelog
 
+### [2.11.0] - 2022-
+#### Changes
+- move jarowinkler dependency into rapidfuzz to simplify maintenance
+
+#### Performance
+- add SIMD implementation for `fuzz.ratio`/`fuzz.QRatio`/`Levenshtein`/`Indel`/`LCSseq` to improve
+  performance for short strings in cdist
+
 ### [2.10.3] - 2022-08-30
 #### Fixed
 - use `scikit-build=0.14.1` on Linux, since `scikit-build=0.15.0` fails to find the Python Interpreter
