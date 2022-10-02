@@ -3,7 +3,7 @@
 
 import unittest
 
-from rapidfuzz import process, fuzz, utils
+from rapidfuzz import fuzz, process, utils
 
 
 class UtilsTest(unittest.TestCase):

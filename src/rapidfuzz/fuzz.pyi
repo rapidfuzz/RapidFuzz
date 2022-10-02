@@ -1,6 +1,7 @@
-from typing import Callable, Hashable, Sequence, Optional, TypeVar
-from rapidfuzz.utils import default_process
+from typing import Callable, Hashable, Optional, Sequence, TypeVar
+
 from rapidfuzz.distance import ScoreAlignment
+from rapidfuzz.utils import default_process
 
 _StringType = Sequence[Hashable]
 _S1 = TypeVar("_S1")

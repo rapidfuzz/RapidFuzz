@@ -5,4 +5,4 @@ __author__: str = "Max Bachmann"
 __license__: str = "MIT"
 __version__: str = "2.10.3"
 
-from rapidfuzz import process, distance, fuzz, string_metric, utils
+from rapidfuzz import distance, fuzz, process, string_metric, utils

@@ -1,17 +1,19 @@
 # distutils: language=c++
 # cython: language_level=3, binding=True, linetrace=True
 
-from rapidfuzz_capi cimport RF_String
-from cpp_common cimport RfEditOp, RfOpcode, EditType, is_valid_string, convert_string
-
-from libcpp cimport bool
-from libcpp.vector cimport vector
-from libcpp.utility cimport move
-from libc.stdlib cimport malloc, free
-from libc.stdint cimport uint32_t, int64_t
+from cpp_common cimport (EditType, RfEditOp, RfOpcode, convert_string,
+                         is_valid_string)
 from cpython.list cimport PyList_New, PyList_SET_ITEM
+from cpython.pycapsule cimport (PyCapsule_GetPointer, PyCapsule_IsValid,
+                                PyCapsule_New)
 from cpython.ref cimport Py_INCREF
-from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer
+from libc.stdint cimport int64_t, uint32_t
+from libc.stdlib cimport free, malloc
+from libcpp cimport bool
+from libcpp.utility cimport move
+from libcpp.vector cimport vector
+from rapidfuzz_capi cimport RF_String
+
 
 cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
     cdef struct LevenshteinWeightTable:

@@ -1,12 +1,14 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
-from rapidfuzz.utils_py import default_process
-from rapidfuzz.distance.Indel_py import (
-    normalized_similarity as indel_normalized_similarity,
-    _block_normalized_similarity as indel_block_normalized_similarity,
-    distance as indel_distance,
-)
 from math import ceil
+
+from rapidfuzz.distance.Indel_py import \
+    _block_normalized_similarity as indel_block_normalized_similarity
+from rapidfuzz.distance.Indel_py import distance as indel_distance
+from rapidfuzz.distance.Indel_py import \
+    normalized_similarity as indel_normalized_similarity
+from rapidfuzz.utils_py import default_process
+
 from .distance._initialize_py import ScoreAlignment
 
 

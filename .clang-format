@@ -5,7 +5,6 @@ AccessModifierOffset: -4
 AllowShortIfStatementsOnASingleLine: true
 PointerAlignment: Left
 AllowShortBlocksOnASingleLine: Always
-AllowShortIfStatementsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: None
 AllowShortLambdasOnASingleLine: None
 BreakBeforeBraces: Custom

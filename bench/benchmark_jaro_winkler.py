@@ -1,7 +1,9 @@
 # todo combine benchmarks of scorers into common code base
 import timeit
-import pandas
+
 import numpy as np
+import pandas
+
 
 def benchmark(name, func, setup, lengths, count):
     print(f"starting {name}")

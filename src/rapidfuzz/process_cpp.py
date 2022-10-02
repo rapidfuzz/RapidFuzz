@@ -1,23 +1,20 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
-from rapidfuzz.process_cpp_impl import (
-    FLOAT32 as _FLOAT32,
-    FLOAT64 as _FLOAT64,
-    INT8 as _INT8,
-    INT16 as _INT16,
-    INT32 as _INT32,
-    INT64 as _INT64,
-    UINT8 as _UINT8,
-    UINT16 as _UINT16,
-    UINT32 as _UINT32,
-    UINT64 as _UINT64,
-    cdist as _cdist,
-    extract as extract,
-    extractOne as extractOne,
-    extract_iter as extract_iter,
-)
-
 from rapidfuzz.fuzz import ratio as _ratio
+from rapidfuzz.process_cpp_impl import FLOAT32 as _FLOAT32
+from rapidfuzz.process_cpp_impl import FLOAT64 as _FLOAT64
+from rapidfuzz.process_cpp_impl import INT8 as _INT8
+from rapidfuzz.process_cpp_impl import INT16 as _INT16
+from rapidfuzz.process_cpp_impl import INT32 as _INT32
+from rapidfuzz.process_cpp_impl import INT64 as _INT64
+from rapidfuzz.process_cpp_impl import UINT8 as _UINT8
+from rapidfuzz.process_cpp_impl import UINT16 as _UINT16
+from rapidfuzz.process_cpp_impl import UINT32 as _UINT32
+from rapidfuzz.process_cpp_impl import UINT64 as _UINT64
+from rapidfuzz.process_cpp_impl import cdist as _cdist
+from rapidfuzz.process_cpp_impl import extract as extract
+from rapidfuzz.process_cpp_impl import extract_iter as extract_iter
+from rapidfuzz.process_cpp_impl import extractOne as extractOne
 
 
 def _dtype_to_type_num(dtype):

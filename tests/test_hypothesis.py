@@ -1,24 +1,19 @@
-from itertools import product
+import random
 from functools import partial
+from itertools import product
 from string import ascii_letters, digits, punctuation
 
-from hypothesis import given, assume, settings
 import hypothesis.strategies as st
+import numpy as np
 import pytest
+from hypothesis import assume, given, settings
 
 from rapidfuzz import fuzz, process, utils
-from rapidfuzz.distance import (
-    Levenshtein_cpp,
-    Levenshtein_py,
-    Levenshtein as _Levenshtein,
-    Indel_cpp,
-    Indel_py,
-    Indel as _Indel,
-    JaroWinkler_py,
-    JaroWinkler_cpp,
-)
-import random
-import numpy as np
+from rapidfuzz.distance import Indel as _Indel
+from rapidfuzz.distance import (Indel_cpp, Indel_py, JaroWinkler_cpp,
+                                JaroWinkler_py)
+from rapidfuzz.distance import Levenshtein as _Levenshtein
+from rapidfuzz.distance import Levenshtein_cpp, Levenshtein_py
 
 Levenshtein_cpp.distance._RF_ScorerPy = _Levenshtein.distance._RF_ScorerPy
 Levenshtein_cpp.normalized_distance._RF_ScorerPy = (

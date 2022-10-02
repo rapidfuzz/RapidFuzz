@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
 
-from rapidfuzz.distance import Levenshtein, Hamming, Jaro, JaroWinkler
 import warnings
+
+from rapidfuzz.distance import Hamming, Jaro, JaroWinkler, Levenshtein
 
 
 def levenshtein(

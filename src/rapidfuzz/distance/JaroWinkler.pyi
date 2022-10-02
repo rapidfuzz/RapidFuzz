@@ -1,4 +1,5 @@
-from typing import Callable, Hashable, Sequence, Optional, TypeVar, Any, Dict
+from typing import Any, Callable, Dict, Hashable, Optional, Sequence, TypeVar
+
 from typing_extensions import Protocol
 
 class _ScorerAttributes(Protocol):

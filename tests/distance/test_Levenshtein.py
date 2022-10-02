@@ -4,13 +4,8 @@
 import unittest
 
 from rapidfuzz import process
-from rapidfuzz.distance import (
-    Opcodes,
-    Opcode,
-    Levenshtein_cpp,
-    Levenshtein_py,
-    Levenshtein as _Levenshtein,
-)
+from rapidfuzz.distance import Levenshtein as _Levenshtein
+from rapidfuzz.distance import Levenshtein_cpp, Levenshtein_py, Opcode, Opcodes
 
 Levenshtein_cpp.distance._RF_ScorerPy = _Levenshtein.distance._RF_ScorerPy
 Levenshtein_cpp.normalized_distance._RF_ScorerPy = (

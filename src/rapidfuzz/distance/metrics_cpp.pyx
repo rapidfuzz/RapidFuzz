@@ -2,21 +2,28 @@
 # cython: language_level=3, binding=True, linetrace=True
 
 from ._initialize_cpp import Editops
+
+from rapidfuzz_capi cimport (RF_SCORER_FLAG_MULTI_STRING_CALL,
+                             RF_SCORER_FLAG_MULTI_STRING_INIT,
+                             RF_SCORER_FLAG_RESULT_F64,
+                             RF_SCORER_FLAG_RESULT_I64,
+                             RF_SCORER_FLAG_SYMMETRIC, RF_Kwargs,
+                             RF_Preprocess, RF_Scorer, RF_ScorerFlags,
+                             RF_ScorerFunc, RF_String)
+
 from ._initialize_cpp cimport Editops, RfEditops
 
-from rapidfuzz_capi cimport (
-    RF_String, RF_Scorer, RF_Kwargs, RF_ScorerFunc, RF_Preprocess, RF_ScorerFlags,
-    RF_SCORER_FLAG_RESULT_F64, RF_SCORER_FLAG_RESULT_I64, RF_SCORER_FLAG_SYMMETRIC,
-    RF_SCORER_FLAG_MULTI_STRING_INIT, RF_SCORER_FLAG_MULTI_STRING_CALL
-)
 # required for preprocess_strings
-from array import array
-from cpp_common cimport RF_StringWrapper, preprocess_strings, NoKwargsInit, CreateScorerContext
 
-from libcpp cimport bool
-from libc.stdlib cimport malloc, free
-from libc.stdint cimport INT64_MAX, int64_t
+from array import array
+
+from cpp_common cimport (CreateScorerContext, NoKwargsInit, RF_StringWrapper,
+                         preprocess_strings)
 from cpython.pycapsule cimport PyCapsule_New
+from libc.stdint cimport INT64_MAX, int64_t
+from libc.stdlib cimport free, malloc
+from libcpp cimport bool
+
 
 cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
     cdef struct LevenshteinWeightTable:

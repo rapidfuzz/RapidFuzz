@@ -1,22 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import unittest
-import pytest
-
-from hypothesis import given, settings
-import hypothesis.strategies as st
-
 import random
+import unittest
 
-from rapidfuzz.distance import (
-    Levenshtein,
-    Editops,
-    Opcodes,
-    Editop,
-    Opcode,
-    MatchingBlock,
-)
+import hypothesis.strategies as st
+import pytest
+from hypothesis import given, settings
+
+from rapidfuzz.distance import (Editop, Editops, Levenshtein, MatchingBlock,
+                                Opcode, Opcodes)
 
 
 def test_editops_comparision():

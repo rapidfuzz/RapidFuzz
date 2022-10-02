@@ -1,6 +1,6 @@
 docutils==0.18.1
-Sphinx
 furo
-numpy
-sphinxcontrib-bibtex
 m2r2
+numpy
+Sphinx
+sphinxcontrib-bibtex

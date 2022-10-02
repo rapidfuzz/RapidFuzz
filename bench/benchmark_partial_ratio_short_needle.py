@@ -1,6 +1,8 @@
-import pandas as pd
-import numpy as np
 import timeit
+
+import numpy as np
+import pandas as pd
+
 
 def benchmark(name, func, setup, lengths, count):
     print(f"starting {name}")

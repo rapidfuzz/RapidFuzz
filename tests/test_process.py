@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import unittest
+
 import pytest
 
-from rapidfuzz import process_py, process_cpp, fuzz
+from rapidfuzz import fuzz, process_cpp, process_py
 
 
 class process:

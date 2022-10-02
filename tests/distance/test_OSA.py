@@ -4,11 +4,8 @@
 import unittest
 
 from rapidfuzz import process
-from rapidfuzz.distance import (
-    OSA_cpp,
-    OSA_py,
-    OSA as _OSA,
-)
+from rapidfuzz.distance import OSA as _OSA
+from rapidfuzz.distance import OSA_cpp, OSA_py
 
 OSA_cpp.distance._RF_ScorerPy = _OSA.distance._RF_ScorerPy
 OSA_cpp.normalized_distance._RF_ScorerPy = (

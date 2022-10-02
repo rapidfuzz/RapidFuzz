@@ -1,10 +1,11 @@
-from setuptools import build_meta as _orig
+import platform as _platform
+import subprocess as _subprocess
+
 from packaging import version as _version
 from packaging.tags import sys_tags as _sys_tags
-from skbuild.exceptions import SKBuildError as _SKBuildError
+from setuptools import build_meta as _orig
 from skbuild.cmaker import get_cmake_version as _get_cmake_version
-import subprocess as _subprocess
-import platform as _platform
+from skbuild.exceptions import SKBuildError as _SKBuildError
 
 prepare_metadata_for_build_wheel = _orig.prepare_metadata_for_build_wheel
 build_wheel = _orig.build_wheel
