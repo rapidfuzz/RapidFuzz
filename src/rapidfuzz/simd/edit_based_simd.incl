@@ -26,4 +26,5 @@ bool IndelNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, i
                                  const RF_String* str);
 
 bool RatioInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str);
+bool TokenSortRatioInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str);
 bool QRatioInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str);

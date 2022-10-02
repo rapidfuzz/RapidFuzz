@@ -100,6 +100,13 @@ bool RatioInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const R
     return multi_similarity_init<rf::fuzz::experimental::MultiRatio, double>(self, str_count, str);
 }
 
+bool TokenSortRatioInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str)
+{
+    if (str_count == 1) return similarity_init<rf::fuzz::CachedTokenSortRatio, double>(self, str_count, str);
+
+    return multi_similarity_init<rf::fuzz::experimental::MultiTokenSortRatio, double>(self, str_count, str);
+}
+
 bool QRatioInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count, const RF_String* str)
 {
     if (str_count == 1) return similarity_init<rf::fuzz::CachedQRatio, double>(self, str_count, str);

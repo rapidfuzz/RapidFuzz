@@ -210,7 +210,7 @@ AddScorerContext(ratio, FuzzContextPy, &RatioContext)
 cdef RF_Scorer PartialRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, PartialRatioInit)
 AddScorerContext(partial_ratio, FuzzContextPy, &PartialRatioContext)
 
-cdef RF_Scorer TokenSortRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, TokenSortRatioInit)
+cdef RF_Scorer TokenSortRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzzRatio, TokenSortRatioInit)
 AddScorerContext(token_sort_ratio, FuzzContextPy, &TokenSortRatioContext)
 
 cdef RF_Scorer TokenSetRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, TokenSetRatioInit)
