@@ -1,19 +1,19 @@
 ## Changelog
 
-### [2.11.0] - 2022-
+### [2.11.0] - 2022-10-02
 #### Changes
 - move jarowinkler dependency into rapidfuzz to simplify maintenance
 
 #### Performance
-- add SIMD implementation for `fuzz.ratio`/`fuzz.QRatio`/`Levenshtein`/`Indel`/`LCSseq` to improve
+- add SIMD implementation for `fuzz.ratio`/`fuzz.QRatio`/`Levenshtein`/`Indel`/`LCSseq`/`OSA` to improve
   performance for short strings in cdist
 
-### [2.10.3] - 2022-08-30
+### [2.10.3] - 2022-09-30
 #### Fixed
 - use `scikit-build=0.14.1` on Linux, since `scikit-build=0.15.0` fails to find the Python Interpreter
 - workaround gcc in bug in template type deduction
 
-### [2.10.2] - 2022-08-27
+### [2.10.2] - 2022-09-27
 #### Fixed
 - fix support for cmake versions below 3.17
 
