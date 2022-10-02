@@ -58,7 +58,7 @@ def _cmake_required():
         if tag.platform in cmake_wheels:
             return True
 
-    print("No Cmake wheel available on platform")
+    print("No cmake wheel available on platform")
     return False
 
 def _ninja_required():
