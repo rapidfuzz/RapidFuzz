@@ -11,3 +11,12 @@ from rapidfuzz.distance.metrics_cpp import (
 )
 from rapidfuzz.distance.metrics_cpp import indel_opcodes as opcodes
 from rapidfuzz.distance.metrics_cpp import indel_similarity as similarity
+
+__all__ = [
+    "distance",
+    "editops",
+    "normalized_distance",
+    "normalized_similarity",
+    "opcodes",
+    "similarity",
+]

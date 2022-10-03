@@ -12,3 +12,19 @@ ScoreAlignment = _fallback_import(_mod, "ScoreAlignment", False)
 MatchingBlock = _fallback_import(_mod, "MatchingBlock", False)
 
 from . import DamerauLevenshtein, Hamming, Indel, Jaro, JaroWinkler, LCSseq, Levenshtein
+
+__all__ = [
+    "Editop",
+    "Editops",
+    "Opcode",
+    "Opcodes",
+    "ScoreAlignment",
+    "MatchingBlock",
+    "DamerauLevenshtein",
+    "Hamming",
+    "Indel",
+    "Jaro",
+    "JaroWinkler",
+    "LCSseq",
+    "Levenshtein",
+]

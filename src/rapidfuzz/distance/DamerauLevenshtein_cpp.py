@@ -9,3 +9,5 @@ from rapidfuzz.distance.metrics_cpp import (
     damerau_levenshtein_normalized_similarity as normalized_similarity,
 )
 from rapidfuzz.distance.metrics_cpp import damerau_levenshtein_similarity as similarity
+
+__all__ = ["distance", "normalized_distance", "normalized_similarity", "similarity"]
