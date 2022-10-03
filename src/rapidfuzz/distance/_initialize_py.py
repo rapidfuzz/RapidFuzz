@@ -29,7 +29,7 @@ def _list_to_editops(
 
         if src_pos == src_len and edit_type != "insert":
             raise ValueError("List of edit operations invalid")
-        elif dest_pos == dest_len and edit_type != "delete":
+        if dest_pos == dest_len and edit_type != "delete":
             raise ValueError("List of edit operations invalid")
 
         # keep operations are not relevant in editops
@@ -73,10 +73,10 @@ def _list_to_opcodes(
 
         if src_end > src_len or dest_end > dest_len:
             raise ValueError("List of edit operations invalid")
-        elif src_end < src_start or dest_end < dest_start:
+        if src_end < src_start or dest_end < dest_start:
             raise ValueError("List of edit operations invalid")
 
-        if edit_type == "equal" or edit_type == "replace":
+        if edit_type in {"equal", "replace"}:
             if src_end - src_start != dest_end - dest_start or src_start == src_end:
                 raise ValueError("List of edit operations invalid")
         if edit_type == "insert":
@@ -115,6 +115,10 @@ def _list_to_opcodes(
 
 
 class MatchingBlock:
+    """
+    Triple describing matching subsequences
+    """
+
     def __init__(self, a: int, b: int, size: int):
         self.a: int = a
         self.b: int = b
@@ -133,11 +137,11 @@ class MatchingBlock:
             return False
 
     def __getitem__(self, i: int) -> int:
-        if i == 0 or i == -3:
+        if i in {0, -3}:
             return self.a
-        if i == 1 or i == -2:
+        if i in {1, -2}:
             return self.b
-        if i == 2 or i == -1:
+        if i in {2, -1}:
             return self.size
 
         raise IndexError("MatchingBlock index out of range")
@@ -186,15 +190,15 @@ class Editop:
                 and other[1] == self.src_pos  # type: ignore[index]
                 and other[2] == self.dest_pos  # type: ignore[index]
             )
-        except:
+        except TypeError:
             return False
 
     def __getitem__(self, i: int) -> int | str:
-        if i == 0 or i == -3:
+        if i in {0, -3}:
             return self.tag
-        if i == 1 or i == -2:
+        if i in {1, -2}:
             return self.src_pos
-        if i == 2 or i == -1:
+        if i in {2, -1}:
             return self.dest_pos
 
         raise IndexError("Editop index out of range")
@@ -276,24 +280,24 @@ class Editops:
 
             src_begin = src_pos
             dest_begin = dest_pos
-            type = self._editops[i].tag
+            tag = self._editops[i].tag
             while (
                 i < len(self._editops)
-                and self._editops[i].tag == type
+                and self._editops[i].tag == tag
                 and src_pos == self._editops[i].src_pos
                 and dest_pos == self._editops[i].dest_pos
             ):
-                if type == "replace":
+                if tag == "replace":
                     src_pos += 1
                     dest_pos += 1
-                elif type == "insert":
+                elif tag == "insert":
                     dest_pos += 1
-                elif type == "delete":
+                elif tag == "delete":
                     src_pos += 1
 
                 i += 1
 
-            blocks.append(Opcode(type, src_begin, src_pos, dest_begin, dest_pos))
+            blocks.append(Opcode(tag, src_begin, src_pos, dest_begin, dest_pos))
 
         if src_pos < self.src_len or dest_pos < self.dest_len:
             blocks.append(
@@ -304,6 +308,14 @@ class Editops:
         return x
 
     def as_matching_blocks(self) -> list[MatchingBlock]:
+        """
+        Convert to matching blocks
+
+        Returns
+        -------
+        matching blocks : list[MatchingBlock]
+            Editops converted to matching blocks
+        """
         blocks = []
         src_pos = 0
         dest_pos = 0
@@ -389,9 +401,38 @@ class Editops:
         return x
 
     def remove_subsequence(self, subsequence: Editops) -> None:
+        """
+        remove a subsequence
+
+        Parameters
+        ----------
+        subsequence : Editops
+            subsequence to remove (has to be a subset of editops)
+
+        Returns
+        -------
+        sequence : Editops
+            a copy of the editops without the subsequence
+        """
         raise NotImplementedError
 
     def apply(self, source_string: str, destination_string: str) -> str:
+        """
+        apply editops to source_string
+
+        Parameters
+        ----------
+        source_string : str | bytes
+            string to apply editops to
+        destination_string : str | bytes
+            string to use for replacements / insertions into source_string
+
+        Returns
+        -------
+        mod_string : str
+            modified source_string
+
+        """
         raise NotImplementedError
 
     @property
@@ -504,19 +545,19 @@ class Opcode:
                 and other[3] == self.dest_start  # type: ignore[index]
                 and other[4] == self.dest_end  # type: ignore[index]
             )
-        except:
+        except TypeError:
             return False
 
     def __getitem__(self, i: int) -> int | str:
-        if i == 0 or i == -5:
+        if i in {0, -5}:
             return self.tag
-        if i == 1 or i == -4:
+        if i in {1, -4}:
             return self.src_start
-        if i == 2 or i == -3:
+        if i in {2, -3}:
             return self.src_end
-        if i == 3 or i == -2:
+        if i in {3, -2}:
             return self.dest_start
-        if i == 4 or i == -1:
+        if i in {4, -1}:
             return self.dest_end
 
         raise IndexError("Opcode index out of range")
@@ -594,6 +635,14 @@ class Opcodes:
         return x
 
     def as_matching_blocks(self) -> list[MatchingBlock]:
+        """
+        Convert to matching blocks
+
+        Returns
+        -------
+        matching blocks : list[MatchingBlock]
+            Opcodes converted to matching blocks
+        """
         blocks = []
         for op in self:
             if op.tag == "equal":
@@ -667,6 +716,22 @@ class Opcodes:
         return x
 
     def apply(self, source_string: str, destination_string: str) -> str:
+        """
+        apply opcodes to source_string
+
+        Parameters
+        ----------
+        source_string : str | bytes
+            string to apply opcodes to
+        destination_string : str | bytes
+            string to use for replacements / insertions into source_string
+
+        Returns
+        -------
+        mod_string : str
+            modified source_string
+
+        """
         raise NotImplementedError
 
     @property
@@ -701,8 +766,8 @@ class Opcodes:
     def __getitem__(self, key: int) -> Opcode:
         if isinstance(key, int):
             return self._opcodes[key]
-        else:
-            raise TypeError("Expected index")
+
+        raise TypeError("Expected index")
 
     def __iter__(self) -> Iterator[Opcode]:
         yield from self._opcodes
@@ -753,19 +818,19 @@ class ScoreAlignment:
                 and other[3] == self.dest_start  # type: ignore[index]
                 and other[4] == self.dest_end  # type: ignore[index]
             )
-        except:
+        except TypeError:
             return False
 
     def __getitem__(self, i: int) -> int | float:
-        if i == 0 or i == -5:
+        if i in {0, -5}:
             return self.score
-        if i == 1 or i == -4:
+        if i in {1, -4}:
             return self.src_start
-        if i == 2 or i == -3:
+        if i in {2, -3}:
             return self.src_end
-        if i == 3 or i == -2:
+        if i in {3, -2}:
             return self.dest_start
-        if i == 4 or i == -1:
+        if i in {4, -1}:
             return self.dest_end
 
         raise IndexError("Opcode index out of range")

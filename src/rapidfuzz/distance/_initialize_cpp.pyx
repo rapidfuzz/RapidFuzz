@@ -177,6 +177,10 @@ cdef list opcodes_to_list(const RfOpcodes& ops):
     return result_list
 
 cdef class MatchingBlock:
+    """
+    Triple describing matching subsequences
+    """
+
     cdef public size_t a
     cdef public size_t b
     cdef public size_t size

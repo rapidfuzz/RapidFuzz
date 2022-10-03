@@ -3,129 +3,17 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable, Hashable, Sequence
+from typing import Any, Callable
 
 from rapidfuzz._utils import fallback_import as _fallback_import
-from rapidfuzz.distance import ScoreAlignment
-from rapidfuzz.utils import default_process
 
 
-def ratio(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
-    *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = 0,
-) -> float:
-    ...
-
-
-def partial_ratio(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
-    *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = 0,
-) -> float:
-    ...
-
-
-def partial_ratio_alignment(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
-    *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = 0,
-) -> ScoreAlignment | None:
-    ...
-
-
-def token_sort_ratio(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
-    *,
-    processor: Callable[..., Sequence[Hashable]] | None = default_process,
-    score_cutoff: float | None = 0,
-) -> float:
-    ...
-
-
-def token_set_ratio(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
-    *,
-    processor: Callable[..., Sequence[Hashable]] | None = default_process,
-    score_cutoff: float | None = 0,
-) -> float:
-    ...
-
-
-def token_ratio(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
-    *,
-    processor: Callable[..., Sequence[Hashable]] | None = default_process,
-    score_cutoff: float | None = 0,
-) -> float:
-    ...
-
-
-def partial_token_sort_ratio(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
-    *,
-    processor: Callable[..., Sequence[Hashable]] | None = default_process,
-    score_cutoff: float | None = 0,
-) -> float:
-    ...
-
-
-def partial_token_set_ratio(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
-    *,
-    processor: Callable[..., Sequence[Hashable]] | None = default_process,
-    score_cutoff: float | None = 0,
-) -> float:
-    ...
-
-
-def partial_token_ratio(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
-    *,
-    processor: Callable[..., Sequence[Hashable]] | None = default_process,
-    score_cutoff: float | None = 0,
-) -> float:
-    ...
-
-
-def WRatio(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
-    *,
-    processor: Callable[..., Sequence[Hashable]] | None = default_process,
-    score_cutoff: float | None = 0,
-) -> float:
-    ...
-
-
-def QRatio(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
-    *,
-    processor: Callable[..., Sequence[Hashable]] | None = default_process,
-    score_cutoff: float | None = 0,
-) -> float:
-    ...
-
-
-def _GetScorerFlagsSimilarity(**kwargs: Any) -> dict[str, Any]:
+def _get_scorer_flags_fuzz(**_kwargs: Any) -> dict[str, Any]:
     return {"optimal_score": 100, "worst_score": 0, "flags": (1 << 5)}
 
 
 _fuzz_attribute: dict[str, Callable[..., dict[str, Any]]] = {
-    "get_scorer_flags": _GetScorerFlagsSimilarity
+    "get_scorer_flags": _get_scorer_flags_fuzz
 }
 
 _mod = "rapidfuzz.fuzz"

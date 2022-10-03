@@ -6,19 +6,19 @@ from __future__ import annotations
 from typing import Any, Callable
 
 
-def _GetScorerFlagsDistance(**kwargs: Any) -> dict[str, Any]:
+def _get_scorer_flags_distance(**_kwargs: Any) -> dict[str, Any]:
     return {"optimal_score": 0, "worst_score": 2**63 - 1, "flags": (1 << 6)}
 
 
-def _GetScorerFlagsSimilarity(**kwargs: Any) -> dict[str, Any]:
+def _get_scorer_flags_similarity(**_kwargs: Any) -> dict[str, Any]:
     return {"optimal_score": 2**63 - 1, "worst_score": 0, "flags": (1 << 6)}
 
 
-def _GetScorerFlagsNormalizedDistance(**kwargs: Any) -> dict[str, Any]:
+def _get_scorer_flags_normalized_distance(**_kwargs: Any) -> dict[str, Any]:
     return {"optimal_score": 0, "worst_score": 1, "flags": (1 << 5)}
 
 
-def _GetScorerFlagsNormalizedSimilarity(**kwargs: Any) -> dict[str, Any]:
+def _get_scorer_flags_normalized_similarity(**_kwargs: Any) -> dict[str, Any]:
     return {"optimal_score": 1, "worst_score": 0, "flags": (1 << 5)}
 
 
@@ -75,14 +75,14 @@ def fallback_import(
 
 
 default_distance_attribute: dict[str, Callable[..., dict[str, Any]]] = {
-    "get_scorer_flags": _GetScorerFlagsDistance
+    "get_scorer_flags": _get_scorer_flags_distance
 }
 default_similarity_attribute: dict[str, Callable[..., dict[str, Any]]] = {
-    "get_scorer_flags": _GetScorerFlagsSimilarity
+    "get_scorer_flags": _get_scorer_flags_similarity
 }
 default_normalized_distance_attribute: dict[str, Callable[..., dict[str, Any]]] = {
-    "get_scorer_flags": _GetScorerFlagsNormalizedDistance
+    "get_scorer_flags": _get_scorer_flags_normalized_distance
 }
 default_normalized_similarity_attribute: dict[str, Callable[..., dict[str, Any]]] = {
-    "get_scorer_flags": _GetScorerFlagsNormalizedSimilarity
+    "get_scorer_flags": _get_scorer_flags_normalized_similarity
 }

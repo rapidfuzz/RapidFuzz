@@ -320,10 +320,10 @@ def partial_ratio_alignment(
 
     if len(s1) <= len(s2):
         return res
-    else:
-        return ScoreAlignment(
-            res.score, res.dest_start, res.dest_end, res.src_start, res.src_end
-        )
+
+    return ScoreAlignment(
+        res.score, res.dest_start, res.dest_end, res.src_start, res.src_end
+    )
 
 
 def token_sort_ratio(

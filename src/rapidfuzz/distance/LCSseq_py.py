@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Callable, Dict, Hashable, Sequence
+from typing import Callable, Hashable, Sequence
 
 from rapidfuzz.distance import Editops, Opcodes
 

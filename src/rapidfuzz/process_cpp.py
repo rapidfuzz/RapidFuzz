@@ -3,15 +3,7 @@
 
 from __future__ import annotations
 
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Collection,
-    Hashable,
-    Iterable,
-    Sequence,
-)
+from typing import TYPE_CHECKING, Any, Callable, Collection, Hashable, Sequence
 
 from rapidfuzz.fuzz import ratio
 from rapidfuzz.process_cpp_impl import FLOAT32 as _FLOAT32
@@ -25,9 +17,9 @@ from rapidfuzz.process_cpp_impl import UINT16 as _UINT16
 from rapidfuzz.process_cpp_impl import UINT32 as _UINT32
 from rapidfuzz.process_cpp_impl import UINT64 as _UINT64
 from rapidfuzz.process_cpp_impl import cdist as _cdist
-from rapidfuzz.process_cpp_impl import extract as extract
-from rapidfuzz.process_cpp_impl import extract_iter as extract_iter
-from rapidfuzz.process_cpp_impl import extractOne as extractOne
+from rapidfuzz.process_cpp_impl import extract, extract_iter, extractOne
+
+__all__ = ["extract", "extract_iter", "extractOne", "cdist"]
 
 if TYPE_CHECKING:
     import numpy as np

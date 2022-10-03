@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import warnings
-from optparse import Option
 from typing import Callable, Hashable, Sequence
 
 from rapidfuzz.distance import Editop, Hamming, Jaro, JaroWinkler, Levenshtein

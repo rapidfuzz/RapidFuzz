@@ -19,6 +19,8 @@ from typing import (
 from rapidfuzz.fuzz import WRatio, ratio
 from rapidfuzz.utils import default_process
 
+__all__ = ["extract", "extract_iter", "extractOne", "cdist"]
+
 
 def _get_scorer_flags_py(scorer: Any, kwargs: dict[str, Any]) -> tuple[int, int]:
     params = getattr(scorer, "_RF_ScorerPy", None)
@@ -475,8 +477,7 @@ def extract(
     )
     if lowest_score_worst:
         return heapq.nlargest(limit, result_iter, key=lambda i: i[1])
-    else:
-        return heapq.nsmallest(limit, result_iter, key=lambda i: i[1])
+    return heapq.nsmallest(limit, result_iter, key=lambda i: i[1])
 
 
 if TYPE_CHECKING:
@@ -498,8 +499,7 @@ def _dtype_to_type_num(
         flags = params["get_scorer_flags"](**kwargs)
         if flags["flags"] & (1 << 6):
             return np.int32
-        else:
-            return np.float32
+        return np.float32
 
     return np.float32
 
@@ -566,6 +566,7 @@ def cdist(
         Returns a matrix of dtype with the distance/similarity between each pair
         of the two collections of inputs.
     """
+    _workers = workers
     dtype = _dtype_to_type_num(dtype, scorer, **kwargs)
     results = np.zeros((len(queries), len(choices)), dtype=dtype)
 
