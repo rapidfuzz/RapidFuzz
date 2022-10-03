@@ -18,7 +18,6 @@ from typing import (
 from rapidfuzz.fuzz import WRatio, ratio
 
 _StringType = Sequence[Hashable]
-_AnyStringType = TypeVar("_AnyStringType", bound=_StringType)
 _S1 = TypeVar("_S1")
 _S2 = TypeVar("_S2")
 _ResultType = Union[int, float]

@@ -1,12 +1,14 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
 
+from __future__ import annotations
+
 import re
 
 _alnum_regex = re.compile(r"(?ui)\W")
 
 
-def default_process(sentence):
+def default_process(sentence: str) -> str:
     """
     This function preprocesses a string by:
 

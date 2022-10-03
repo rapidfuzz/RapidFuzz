@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
 
+from __future__ import annotations
+
 from rapidfuzz._utils import fallback_import as _fallback_import
 
 _mod = "rapidfuzz.process"

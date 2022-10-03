@@ -1,7 +1,11 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
-from math import ceil
+from __future__ import annotations
 
+from math import ceil
+from typing import Callable, Hashable
+
+from rapidfuzz.distance import ScoreAlignment
 from rapidfuzz.distance.Indel_py import (
     _block_normalized_similarity as indel_block_normalized_similarity,
 )
@@ -11,23 +15,27 @@ from rapidfuzz.distance.Indel_py import (
 )
 from rapidfuzz.utils_py import default_process
 
-from .distance._initialize_py import ScoreAlignment
 
-
-def _norm_distance(dist, lensum, score_cutoff):
+def _norm_distance(dist: int, lensum: int, score_cutoff: float) -> float:
     score = (100 - 100 * dist / lensum) if lensum else 100
     return score if score >= score_cutoff else 0
 
 
-def ratio(s1, s2, *, processor=None, score_cutoff=None):
+def ratio(
+    s1: str | bytes,
+    s2: str | bytes,
+    *,
+    processor: Callable[..., str | bytes] | None | bool = None,
+    score_cutoff: float | None = None,
+) -> float:
     """
     Calculates the normalized Indel distance.
 
     Parameters
     ----------
-    s1 : Sequence[Hashable]
+    s1 : str | bytes
         First string to compare.
-    s2 : Sequence[Hashable]
+    s2 : str | bytes
         Second string to compare.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
@@ -55,9 +63,6 @@ def ratio(s1, s2, *, processor=None, score_cutoff=None):
     >>> fuzz.ratio("this is a test", "this is a test!")
     96.55171966552734
     """
-    if s1 is None or s2 is None:
-        return 0
-
     if processor is True:
         processor = default_process
     elif processor is False:
@@ -72,7 +77,9 @@ def ratio(s1, s2, *, processor=None, score_cutoff=None):
     return score * 100
 
 
-def _partial_ratio_short_needle(s1, s2, score_cutoff):
+def _partial_ratio_short_needle(
+    s1: str | bytes, s2: str | bytes, score_cutoff: float
+) -> ScoreAlignment:
     """
     implementation of partial_ratio for needles <= 64. assumes s1 is already the
     shorter string
@@ -83,7 +90,7 @@ def _partial_ratio_short_needle(s1, s2, score_cutoff):
 
     res = ScoreAlignment(0, 0, len1, 0, len1)
 
-    block = {}
+    block: dict[Hashable, int] = {}
     block_get = block.get
     x = 1
     for ch1 in s1:
@@ -145,16 +152,22 @@ def _partial_ratio_short_needle(s1, s2, score_cutoff):
     return res
 
 
-def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
+def partial_ratio(
+    s1: str | bytes,
+    s2: str | bytes,
+    *,
+    processor: Callable[..., str | bytes] | None | bool = None,
+    score_cutoff: float | None = None,
+) -> float:
     """
     Searches for the optimal alignment of the shorter string in the
     longer string and returns the fuzz.ratio for this alignment.
 
     Parameters
     ----------
-    s1 : Sequence[Hashable]
+    s1 : str | bytes
         First string to compare.
-    s2 : Sequence[Hashable]
+    s2 : str | bytes
         Second string to compare.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
@@ -210,9 +223,6 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
     >>> fuzz.partial_ratio("this is a test", "this is a test!")
     100.0
     """
-    if s1 is None or s2 is None:
-        return 0
-
     if processor is True:
         processor = default_process
     elif processor is False:
@@ -238,7 +248,13 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
     return _partial_ratio_short_needle(shorter, longer, score_cutoff / 100).score
 
 
-def partial_ratio_alignment(s1, s2, *, processor=None, score_cutoff=None):
+def partial_ratio_alignment(
+    s1: str | bytes,
+    s2: str | bytes,
+    *,
+    processor: Callable[..., str | bytes] | None | bool = None,
+    score_cutoff: float | None = None,
+) -> ScoreAlignment | None:
     """
     Searches for the optimal alignment of the shorter string in the
     longer string and returns the fuzz.ratio and the corresponding
@@ -246,9 +262,9 @@ def partial_ratio_alignment(s1, s2, *, processor=None, score_cutoff=None):
 
     Parameters
     ----------
-    s1 : Sequence[Hashable]
+    s1 : str | bytes
         First string to compare.
-    s2 : Sequence[Hashable]
+    s2 : str | bytes
         Second string to compare.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
@@ -276,9 +292,6 @@ def partial_ratio_alignment(s1, s2, *, processor=None, score_cutoff=None):
     >>> fuzz.ratio(s1[res.src_start:res.src_end], s2[res.dest_start:res.dest_end])
     83.33333333333334
     """
-    if s1 is None or s2 is None:
-        return None
-
     if processor is True:
         processor = default_process
     elif processor is False:
@@ -313,15 +326,21 @@ def partial_ratio_alignment(s1, s2, *, processor=None, score_cutoff=None):
         )
 
 
-def token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
+def token_sort_ratio(
+    s1: str,
+    s2: str,
+    *,
+    processor: Callable[..., str] | None | bool = default_process,
+    score_cutoff: float | None = None,
+) -> float:
     """
     Sorts the words in the strings and calculates the fuzz.ratio between them
 
     Parameters
     ----------
-    s1 : Sequence[Hashable]
+    s1 : str
         First string to compare.
-    s2 : Sequence[Hashable]
+    s2 : str
         Second string to compare.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
@@ -345,9 +364,6 @@ def token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     >>> fuzz.token_sort_ratio("fuzzy wuzzy was a bear", "wuzzy fuzzy was a bear")
     100.0
     """
-    if s1 is None or s2 is None:
-        return 0
-
     if processor is True:
         processor = default_process
     elif processor is False:
@@ -362,16 +378,22 @@ def token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     return ratio(sorted_s1, sorted_s2, score_cutoff=score_cutoff)
 
 
-def token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
+def token_set_ratio(
+    s1: str,
+    s2: str,
+    *,
+    processor: Callable[..., str] | None | bool = default_process,
+    score_cutoff: float | None = None,
+) -> float:
     """
     Compares the words in the strings based on unique and common words between them
     using fuzz.ratio
 
     Parameters
     ----------
-    s1 : Sequence[Hashable]
+    s1 : str
         First string to compare.
-    s2 : Sequence[Hashable]
+    s2 : str
         Second string to compare.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
@@ -397,9 +419,6 @@ def token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     >>> fuzz.token_set_ratio("fuzzy was a bear", "fuzzy fuzzy was a bear")
     100.0
     """
-    if s1 is None or s2 is None:
-        return 0
-
     if processor is True:
         processor = default_process
     elif processor is False:
@@ -439,7 +458,7 @@ def token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     sect_ab_len = sect_len + (sect_len != 0) + ab_len
     sect_ba_len = sect_len + (sect_len != 0) + ba_len
 
-    result = 0
+    result = 0.0
     cutoff_distance = ceil((sect_ab_len + sect_ba_len) * (1 - score_cutoff / 100))
     dist = indel_distance(diff_ab_joined, diff_ba_joined, score_cutoff=cutoff_distance)
 
@@ -462,16 +481,22 @@ def token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     return max(result, sect_ab_ratio, sect_ba_ratio)
 
 
-def token_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
+def token_ratio(
+    s1: str,
+    s2: str,
+    *,
+    processor: Callable[..., str] | None | bool = default_process,
+    score_cutoff: float | None = None,
+) -> float:
     """
     Helper method that returns the maximum of fuzz.token_set_ratio and fuzz.token_sort_ratio
     (faster than manually executing the two functions)
 
     Parameters
     ----------
-    s1 : Sequence[Hashable]
+    s1 : str
         First string to compare.
-    s2 : Sequence[Hashable]
+    s2 : str
         Second string to compare.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
@@ -490,9 +515,6 @@ def token_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     -----
     .. image:: img/token_ratio.svg
     """
-    if s1 is None or s2 is None:
-        return 0
-
     if processor is True:
         processor = default_process
     elif processor is False:
@@ -509,15 +531,21 @@ def token_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     )
 
 
-def partial_token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
+def partial_token_sort_ratio(
+    s1: str,
+    s2: str,
+    *,
+    processor: Callable[..., str] | None | bool = default_process,
+    score_cutoff: float | None = None,
+) -> float:
     """
     sorts the words in the strings and calculates the fuzz.partial_ratio between them
 
     Parameters
     ----------
-    s1 : Sequence[Hashable]
+    s1 : str
         First string to compare.
-    s2 : Sequence[Hashable]
+    s2 : str
         Second string to compare.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
@@ -536,9 +564,6 @@ def partial_token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=
     -----
     .. image:: img/partial_token_sort_ratio.svg
     """
-    if s1 is None or s2 is None:
-        return 0
-
     if processor is True:
         processor = default_process
     elif processor is False:
@@ -553,16 +578,22 @@ def partial_token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=
     return partial_ratio(sorted_s1, sorted_s2, score_cutoff=score_cutoff)
 
 
-def partial_token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
+def partial_token_set_ratio(
+    s1: str,
+    s2: str,
+    *,
+    processor: Callable[..., str] | None | bool = default_process,
+    score_cutoff: float | None = None,
+) -> float:
     """
     Compares the words in the strings based on unique and common words between them
     using fuzz.partial_ratio
 
     Parameters
     ----------
-    s1 : Sequence[Hashable]
+    s1 : str
         First string to compare.
-    s2 : Sequence[Hashable]
+    s2 : str
         Second string to compare.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
@@ -581,9 +612,6 @@ def partial_token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=N
     -----
     .. image:: img/partial_token_set_ratio.svg
     """
-    if s1 is None or s2 is None:
-        return 0
-
     if processor is True:
         processor = default_process
     elif processor is False:
@@ -609,16 +637,22 @@ def partial_token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=N
     return partial_ratio(diff_ab, diff_ba, score_cutoff=score_cutoff)
 
 
-def partial_token_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
+def partial_token_ratio(
+    s1: str,
+    s2: str,
+    *,
+    processor: Callable[..., str] | None | bool = default_process,
+    score_cutoff: float | None = None,
+) -> float:
     """
     Helper method that returns the maximum of fuzz.partial_token_set_ratio and
     fuzz.partial_token_sort_ratio (faster than manually executing the two functions)
 
     Parameters
     ----------
-    s1 : Sequence[Hashable]
+    s1 : str
         First string to compare.
-    s2 : Sequence[Hashable]
+    s2 : str
         Second string to compare.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
@@ -637,15 +671,12 @@ def partial_token_ratio(s1, s2, *, processor=default_process, score_cutoff=None)
     -----
     .. image:: img/partial_token_ratio.svg
     """
-    if s1 is None or s2 is None:
-        return 0
-
     if processor is True:
         processor = default_process
     elif processor is False:
         processor = None
 
-    if processor is not None and processor:
+    if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
 
@@ -685,15 +716,21 @@ def partial_token_ratio(s1, s2, *, processor=default_process, score_cutoff=None)
     )
 
 
-def WRatio(s1, s2, *, processor=default_process, score_cutoff=None):
+def WRatio(
+    s1: str,
+    s2: str,
+    *,
+    processor: Callable[..., str] | None | bool = default_process,
+    score_cutoff: float | None = None,
+) -> float:
     """
     Calculates a weighted ratio based on the other ratio algorithms
 
     Parameters
     ----------
-    s1 : Sequence[Hashable]
+    s1 : str
         First string to compare.
-    s2 : Sequence[Hashable]
+    s2 : str
         Second string to compare.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
@@ -713,9 +750,6 @@ def WRatio(s1, s2, *, processor=default_process, score_cutoff=None):
     .. image:: img/WRatio.svg
     """
     UNBASE_SCALE = 0.95
-
-    if s1 is None or s2 is None:
-        return 0
 
     if processor is True:
         processor = default_process
@@ -762,7 +796,13 @@ def WRatio(s1, s2, *, processor=default_process, score_cutoff=None):
     )
 
 
-def QRatio(s1, s2, *, processor=default_process, score_cutoff=None):
+def QRatio(
+    s1: str | bytes,
+    s2: str | bytes,
+    *,
+    processor: Callable[..., str | bytes] | None | bool = default_process,
+    score_cutoff: float | None = None,
+) -> float:
     """
     Calculates a quick ratio between two strings using fuzz.ratio.
     The only difference to fuzz.ratio is, that this preprocesses
@@ -770,9 +810,9 @@ def QRatio(s1, s2, *, processor=default_process, score_cutoff=None):
 
     Parameters
     ----------
-    s1 : Sequence[Hashable]
+    s1 : str | bytes
         First string to compare.
-    s2 : Sequence[Hashable]
+    s2 : str | bytes
         Second string to compare.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
@@ -792,9 +832,6 @@ def QRatio(s1, s2, *, processor=default_process, score_cutoff=None):
     >>> fuzz.QRatio("this is a test", "THIS is a test!")
     100.0
     """
-    if s1 is None or s2 is None:
-        return 0
-
     if processor is True:
         processor = default_process
     elif processor is False:
@@ -809,28 +846,3 @@ def QRatio(s1, s2, *, processor=default_process, score_cutoff=None):
         return 0
 
     return ratio(s1, s2, score_cutoff=score_cutoff)
-
-
-def _GetScorerFlagsSimilarity(**kwargs):
-    return {"optimal_score": 100, "worst_score": 0, "flags": (1 << 5)}
-
-
-ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
-
-partial_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
-
-token_sort_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
-
-partial_token_sort_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
-
-token_set_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
-
-partial_token_set_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
-
-token_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
-
-partial_token_ratio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
-
-WRatio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
-
-QRatio._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}

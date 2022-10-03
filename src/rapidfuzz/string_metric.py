@@ -1,14 +1,24 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
 
-import warnings
+from __future__ import annotations
 
-from rapidfuzz.distance import Hamming, Jaro, JaroWinkler, Levenshtein
+import warnings
+from optparse import Option
+from typing import Callable, Hashable, Sequence
+
+from rapidfuzz.distance import Editop, Hamming, Jaro, JaroWinkler, Levenshtein
 
 
 def levenshtein(
-    s1, s2, *, weights=(1, 1, 1), processor=None, max=None, score_cutoff=None
-):
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    weights: tuple[int, int, int] | None = (1, 1, 1),
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    max: int | None = None,
+    score_cutoff: int | None = None,
+) -> int:
     """
     Calculates the minimum number of insertions, deletions, and substitutions
     required to change one sequence into the other according to Levenshtein with custom
@@ -78,7 +88,12 @@ def levenshtein(
     )
 
 
-def levenshtein_editops(s1, s2, *, processor=None):
+def levenshtein_editops(
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+) -> list[Editop]:
     """
     Return list of 3-tuples describing how to turn s1 into s2.
     Each tuple is of the form (tag, src_pos, dest_pos).
@@ -125,8 +140,13 @@ def levenshtein_editops(s1, s2, *, processor=None):
 
 
 def normalized_levenshtein(
-    s1, s2, *, weights=(1, 1, 1), processor=None, score_cutoff=None
-):
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    weights: tuple[int, int, int] | None = (1, 1, 1),
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: float | None = None,
+) -> float:
     """
     Calculates a normalized levenshtein distance using custom
     costs for insertion, deletion and substitution.
@@ -205,7 +225,14 @@ def normalized_levenshtein(
     )
 
 
-def hamming(s1, s2, *, processor=None, max=None, score_cutoff=None):
+def hamming(
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    max: int | None = None,
+    score_cutoff: int | None = None,
+) -> int:
     """
     Calculates the Hamming distance between two strings.
     The hamming distance is defined as the number of positions
@@ -250,7 +277,13 @@ def hamming(s1, s2, *, processor=None, max=None, score_cutoff=None):
     return Hamming.distance(s1, s2, processor=processor, score_cutoff=score_cutoff)
 
 
-def normalized_hamming(s1, s2, *, processor=None, score_cutoff=None):
+def normalized_hamming(
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: float | None = None,
+) -> float:
     """
     Calculates a normalized hamming distance
 
@@ -299,7 +332,13 @@ def normalized_hamming(s1, s2, *, processor=None, score_cutoff=None):
     )
 
 
-def jaro_similarity(s1, s2, *, processor=None, score_cutoff=None):
+def jaro_similarity(
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: float | None = None,
+) -> float:
     """
     Calculates the jaro similarity
 
@@ -335,8 +374,13 @@ def jaro_similarity(s1, s2, *, processor=None, score_cutoff=None):
 
 
 def jaro_winkler_similarity(
-    s1, s2, *, prefix_weight=0.1, processor=None, score_cutoff=None
-):
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    prefix_weight: float = 0.1,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: float | None = None,
+) -> float:
     """
     Calculates the jaro winkler similarity
 
@@ -386,24 +430,3 @@ def jaro_winkler_similarity(
         )
         * 100
     )
-
-
-def _GetScorerFlagsDistance(**kwargs):
-    return {"optimal_score": 0, "worst_score": 2**63 - 1, "flags": (1 << 6)}
-
-
-def _GetScorerFlagsSimilarity(**kwargs):
-    return {"optimal_score": 100, "worst_score": 0, "flags": (1 << 5)}
-
-
-levenshtein._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsDistance}
-
-normalized_levenshtein._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
-
-hamming._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsDistance}
-
-normalized_hamming._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
-
-jaro_similarity._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}
-
-jaro_winkler_similarity._RF_ScorerPy = {"get_scorer_flags": _GetScorerFlagsSimilarity}

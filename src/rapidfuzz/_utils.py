@@ -1,24 +1,33 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
 
+from __future__ import annotations
 
-def _GetScorerFlagsDistance(**kwargs):
+from typing import Any, Callable
+
+
+def _GetScorerFlagsDistance(**kwargs: Any) -> dict[str, Any]:
     return {"optimal_score": 0, "worst_score": 2**63 - 1, "flags": (1 << 6)}
 
 
-def _GetScorerFlagsSimilarity(**kwargs):
+def _GetScorerFlagsSimilarity(**kwargs: Any) -> dict[str, Any]:
     return {"optimal_score": 2**63 - 1, "worst_score": 0, "flags": (1 << 6)}
 
 
-def _GetScorerFlagsNormalizedDistance(**kwargs):
+def _GetScorerFlagsNormalizedDistance(**kwargs: Any) -> dict[str, Any]:
     return {"optimal_score": 0, "worst_score": 1, "flags": (1 << 5)}
 
 
-def _GetScorerFlagsNormalizedSimilarity(**kwargs):
+def _GetScorerFlagsNormalizedSimilarity(**kwargs: Any) -> dict[str, Any]:
     return {"optimal_score": 1, "worst_score": 0, "flags": (1 << 5)}
 
 
-def fallback_import(module: str, name: str, set_attrs: bool = True):
+def fallback_import(
+    module: str,
+    name: str,
+    cached_scorer_call: dict[str, Callable[..., dict[str, Any]]] | None = None,
+    set_attrs: bool = True,
+) -> Any:
     """
     import library function and possibly fall back to a pure Python version
     when no C++ implementation is available
@@ -34,6 +43,9 @@ def fallback_import(module: str, name: str, set_attrs: bool = True):
         raise ImportError(
             f"cannot import name '{name}' from '{py_mod.__name}' ({py_mod.__file__})"
         )
+
+    if cached_scorer_call:
+        py_func._RF_ScorerPy = cached_scorer_call
 
     if impl == "cpp":
         cpp_mod = importlib.import_module(module + "_cpp")
@@ -55,14 +67,22 @@ def fallback_import(module: str, name: str, set_attrs: bool = True):
     if set_attrs:
         cpp_func.__name__ = py_func.__name__
         cpp_func.__doc__ = py_func.__doc__
+
+    if cached_scorer_call:
+        cpp_func._RF_ScorerPy = cached_scorer_call
+
     return cpp_func
 
 
-default_distance_attribute = {"get_scorer_flags": _GetScorerFlagsDistance}
-default_similarity_attribute = {"get_scorer_flags": _GetScorerFlagsSimilarity}
-default_normalized_distance_attribute = {
+default_distance_attribute: dict[str, Callable[..., dict[str, Any]]] = {
+    "get_scorer_flags": _GetScorerFlagsDistance
+}
+default_similarity_attribute: dict[str, Callable[..., dict[str, Any]]] = {
+    "get_scorer_flags": _GetScorerFlagsSimilarity
+}
+default_normalized_distance_attribute: dict[str, Callable[..., dict[str, Any]]] = {
     "get_scorer_flags": _GetScorerFlagsNormalizedDistance
 }
-default_normalized_similarity_attribute = {
+default_normalized_similarity_attribute: dict[str, Callable[..., dict[str, Any]]] = {
     "get_scorer_flags": _GetScorerFlagsNormalizedSimilarity
 }
