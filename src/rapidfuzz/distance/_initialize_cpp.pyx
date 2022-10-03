@@ -1,11 +1,9 @@
 # distutils: language=c++
 # cython: language_level=3, binding=True, linetrace=True
 
-from cpp_common cimport (EditType, RfEditOp, RfOpcode, convert_string,
-                         is_valid_string)
+from cpp_common cimport EditType, RfEditOp, RfOpcode, convert_string, is_valid_string
 from cpython.list cimport PyList_New, PyList_SET_ITEM
-from cpython.pycapsule cimport (PyCapsule_GetPointer, PyCapsule_IsValid,
-                                PyCapsule_New)
+from cpython.pycapsule cimport PyCapsule_GetPointer, PyCapsule_IsValid, PyCapsule_New
 from cpython.ref cimport Py_INCREF
 from libc.stdint cimport int64_t, uint32_t
 from libc.stdlib cimport free, malloc

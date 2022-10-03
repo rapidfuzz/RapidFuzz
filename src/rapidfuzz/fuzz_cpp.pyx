@@ -3,10 +3,16 @@
 
 from .distance._initialize_cpp import ScoreAlignment
 
-from rapidfuzz_capi cimport (RF_SCORER_FLAG_MULTI_STRING_INIT,
-                             RF_SCORER_FLAG_RESULT_F64,
-                             RF_SCORER_FLAG_SYMMETRIC, RF_Kwargs, RF_Scorer,
-                             RF_ScorerFlags, RF_ScorerFunc, RF_String)
+from rapidfuzz_capi cimport (
+    RF_SCORER_FLAG_MULTI_STRING_INIT,
+    RF_SCORER_FLAG_RESULT_F64,
+    RF_SCORER_FLAG_SYMMETRIC,
+    RF_Kwargs,
+    RF_Scorer,
+    RF_ScorerFlags,
+    RF_ScorerFunc,
+    RF_String,
+)
 
 # required for preprocess_strings
 
@@ -14,9 +20,15 @@ from array import array
 
 from rapidfuzz.utils import default_process
 
-from cpp_common cimport (AddScorerContext, CreateScorerContext,
-                         CreateScorerContextPy, NoKwargsInit, RF_StringWrapper,
-                         RfScoreAlignment, preprocess_strings)
+from cpp_common cimport (
+    AddScorerContext,
+    CreateScorerContext,
+    CreateScorerContextPy,
+    NoKwargsInit,
+    RF_StringWrapper,
+    RfScoreAlignment,
+    preprocess_strings,
+)
 from libc.stdint cimport int64_t, uint32_t
 from libcpp cimport bool
 

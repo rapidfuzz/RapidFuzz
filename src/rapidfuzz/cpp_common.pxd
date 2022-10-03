@@ -2,18 +2,25 @@
 # cython: language_level=3, binding=True, linetrace=True
 
 from cpython.object cimport PyObject
-from cpython.pycapsule cimport (PyCapsule_GetPointer, PyCapsule_IsValid,
-                                PyCapsule_New)
+from cpython.pycapsule cimport PyCapsule_GetPointer, PyCapsule_IsValid, PyCapsule_New
 from libc.stddef cimport wchar_t
 from libc.stdint cimport int64_t, uint64_t
 from libc.stdlib cimport free, malloc
 from libcpp cimport bool
 from libcpp.utility cimport move, pair
 from libcpp.vector cimport vector
-from rapidfuzz_capi cimport (SCORER_STRUCT_VERSION, RF_GetScorerFlags,
-                             RF_Kwargs, RF_KwargsInit, RF_Preprocessor,
-                             RF_Scorer, RF_ScorerFlags, RF_ScorerFuncInit,
-                             RF_String, RF_StringType)
+from rapidfuzz_capi cimport (
+    SCORER_STRUCT_VERSION,
+    RF_GetScorerFlags,
+    RF_Kwargs,
+    RF_KwargsInit,
+    RF_Preprocessor,
+    RF_Scorer,
+    RF_ScorerFlags,
+    RF_ScorerFuncInit,
+    RF_String,
+    RF_StringType,
+)
 
 from array import array
 

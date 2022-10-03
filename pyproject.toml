@@ -8,3 +8,6 @@ requires = [
 ]
 build-backend = "backend"
 backend-path = ["_custom_build"]
+
+[tool.isort]
+profile = "black"
