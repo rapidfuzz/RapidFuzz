@@ -1,5 +1,10 @@
 ## Changelog
 
+
+### [2.11.1] - 2022-10-05
+#### Fixed
+- Fix segmentation fault in `process.cdist` when used with an empty query sequence
+
 ### [2.11.0] - 2022-10-02
 #### Changes
 - move jarowinkler dependency into rapidfuzz to simplify maintenance

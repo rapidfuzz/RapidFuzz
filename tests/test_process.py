@@ -338,5 +338,14 @@ def test_extractOne_use_first_match(scorer):
     )
 
 
+@pytest.mark.parametrize("scorer", [fuzz.ratio, fuzz.WRatio, custom_scorer])
+def test_cdist_empty_seq(scorer):
+    pytest.importorskip("numpy")
+    assert process_cpp.cdist([], ["a", "b"], scorer=scorer).shape == (0, 2)
+    assert process_cpp.cdist(["a", "b"], [], scorer=scorer).shape == (2, 0)
+    assert process_py.cdist([], ["a", "b"], scorer=scorer).shape == (0, 2)
+    assert process_py.cdist(["a", "b"], [], scorer=scorer).shape == (2, 0)
+
+
 if __name__ == "__main__":
     unittest.main()
