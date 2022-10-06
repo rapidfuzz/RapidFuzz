@@ -1,5 +1,4 @@
 import random
-from functools import partial
 from itertools import product
 from string import ascii_letters, digits, punctuation
 
@@ -112,20 +111,20 @@ def jarowinkler_similarity(*args, **kwargs):
     return sim1
 
 
-def jaro_similarity(P, T):
-    P_flag = [0] * (len(P) + 1)
-    T_flag = [0] * (len(T) + 1)
+def jaro_similarity(pattern, text):
+    P_flag = [0] * (len(pattern) + 1)
+    T_flag = [0] * (len(text) + 1)
 
-    Bound = max(len(P), len(T)) // 2
+    Bound = max(len(pattern), len(text)) // 2
     Bound = max(Bound - 1, 0)
 
     CommonChars = 0
-    for i in range(len(T)):
+    for i in range(len(text)):
         lowlim = i - Bound if i >= Bound else 0
-        hilim = i + Bound if i + Bound <= len(P) - 1 else len(P) - 1
+        hilim = i + Bound if i + Bound <= len(pattern) - 1 else len(pattern) - 1
 
         for j in range(lowlim, hilim + 1):
-            if not P_flag[j] and P[j] == T[i]:
+            if not P_flag[j] and pattern[j] == text[i]:
                 T_flag[i] = 1
                 P_flag[j] = 1
                 CommonChars += 1
@@ -136,39 +135,39 @@ def jaro_similarity(P, T):
 
     Transpositions = 0
     k = 0
-    for i in range(len(T)):
+    for i in range(len(text)):
         if T_flag[i]:
             j = k
-            while j < len(P):
+            while j < len(pattern):
                 if P_flag[j]:
                     k = j + 1
                     break
                 j += 1
 
-            if T[i] != P[j]:
+            if text[i] != pattern[j]:
                 Transpositions += 1
 
     Transpositions = Transpositions // 2
 
-    Sim = (
-        CommonChars / len(P)
-        + CommonChars / len(T)
+    sim = (
+        CommonChars / len(pattern)
+        + CommonChars / len(text)
         + (CommonChars - Transpositions) / CommonChars
     )
-    return Sim / 3
+    return sim / 3
 
 
-def jaro_winkler_similarity(P, T, prefix_weight=0.1):
-    min_len = min(len(P), len(T))
+def jaro_winkler_similarity(pattern, text, prefix_weight=0.1):
+    min_len = min(len(pattern), len(text))
     prefix = 0
     max_prefix = min(min_len, 4)
 
     while prefix < max_prefix:
-        if T[prefix] != P[prefix]:
+        if text[prefix] != pattern[prefix]:
             break
         prefix += 1
 
-    Sim = jaro_similarity(P, T)
+    Sim = jaro_similarity(pattern, text)
     if Sim > 0.7:
         Sim += prefix * prefix_weight * (1.0 - Sim)
 

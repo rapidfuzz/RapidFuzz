@@ -69,7 +69,7 @@ if packaging:
 else:
     try:
         run_setup(True)
-    except:
+    except BaseException:
         show_message(
             "WARNING: The C extension could not be compiled, speedups"
             " are not enabled.",

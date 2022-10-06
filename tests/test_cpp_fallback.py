@@ -2,4 +2,4 @@
 import os
 
 os.environ["RAPIDFUZZ_IMPLEMENTATION"] = "cpp"
-import rapidfuzz
+import rapidfuzz  # noqa: E402, F401

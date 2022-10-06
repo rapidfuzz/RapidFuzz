@@ -1,42 +1,49 @@
-from typing import Callable, Hashable, Optional, Sequence, TypeVar
+# SPDX-License-Identifier: MIT
+# Copyright (C) 2022 Max Bachmann
+
+from __future__ import annotations
+
+from typing import Callable, Hashable, Sequence
 
 from rapidfuzz.distance import Editops, Opcodes
 
-_StringType = Sequence[Hashable]
-_S1 = TypeVar("_S1")
-_S2 = TypeVar("_S2")
-
 def distance(
-    s1: _S1,
-    s2: _S2,
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
     *,
-    processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[int] = None
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: int | None = None,
 ) -> int: ...
 def normalized_distance(
-    s1: _S1,
-    s2: _S2,
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
     *,
-    processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: float | None = 0,
 ) -> float: ...
 def similarity(
-    s1: _S1,
-    s2: _S2,
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
     *,
-    processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[int] = None
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: int | None = None,
 ) -> int: ...
 def normalized_similarity(
-    s1: _S1,
-    s2: _S2,
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
     *,
-    processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: float | None = 0,
 ) -> float: ...
 def editops(
-    s1: _S1, s2: _S2, *, processor: Optional[Callable[..., _StringType]] = None
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
 ) -> Editops: ...
 def opcodes(
-    s1: _S1, s2: _S2, *, processor: Optional[Callable[..., _StringType]] = None
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
 ) -> Opcodes: ...

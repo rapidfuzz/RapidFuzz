@@ -67,7 +67,7 @@ def test_different_strings():
     assert Indel.normalized_similarity("aaaa", "bbbb") == 0.0
 
 
-def testIssue196():
+def test_issue_196():
     """
     Indel distance did not work correctly for score_cutoff=1
     """

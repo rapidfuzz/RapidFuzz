@@ -1,46 +1,35 @@
-from typing import Any, Callable, Dict, Hashable, Optional, Sequence, TypeVar
+# SPDX-License-Identifier: MIT
+# Copyright (C) 2022 Max Bachmann
 
-from typing_extensions import Protocol
+from __future__ import annotations
 
-class _ScorerAttributes(Protocol):
-    _RF_ScorerPy: Dict
+from typing import Callable, Hashable, Sequence
 
-def _attr_decorator(func: Any) -> _ScorerAttributes:
-    return func
-
-_StringType = Sequence[Hashable]
-_S1 = TypeVar("_S1")
-_S2 = TypeVar("_S2")
-
-@_attr_decorator
 def distance(
-    s1: _S1,
-    s2: _S2,
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
     *,
-    processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[int] = None
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: float | None = None,
 ) -> float: ...
-@_attr_decorator
 def normalized_distance(
-    s1: _S1,
-    s2: _S2,
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
     *,
-    processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: float | None = 0,
 ) -> float: ...
-@_attr_decorator
 def similarity(
-    s1: _S1,
-    s2: _S2,
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
     *,
-    processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[int] = None
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: float | None = None,
 ) -> float: ...
-@_attr_decorator
 def normalized_similarity(
-    s1: _S1,
-    s2: _S2,
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
     *,
-    processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: float | None = 0,
 ) -> float: ...

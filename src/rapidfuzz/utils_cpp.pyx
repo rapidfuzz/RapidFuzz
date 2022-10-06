@@ -1,12 +1,16 @@
 # distutils: language=c++
 # cython: language_level=3, binding=True, linetrace=True
 
-from cpp_common cimport (conv_sequence, convert_string, hash_array,
-                         hash_sequence, is_valid_string)
+from cpp_common cimport (
+    conv_sequence,
+    convert_string,
+    hash_array,
+    hash_sequence,
+    is_valid_string,
+)
 from cpython.pycapsule cimport PyCapsule_New
 from libcpp cimport bool
-from rapidfuzz_capi cimport (PREPROCESSOR_STRUCT_VERSION, RF_Preprocessor,
-                             RF_String)
+from rapidfuzz_capi cimport PREPROCESSOR_STRUCT_VERSION, RF_Preprocessor, RF_String
 
 from array import array
 

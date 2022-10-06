@@ -1,10 +1,16 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
 
+from __future__ import annotations
 
-def _damerau_levenshtein_distance_zhao(s1, s2):
+from typing import Callable, Hashable, Sequence
+
+
+def _damerau_levenshtein_distance_zhao(
+    s1: Sequence[Hashable], s2: Sequence[Hashable]
+) -> int:
     maxVal = max(len(s1), len(s2)) + 1
-    last_row_id = {}
+    last_row_id: dict[Hashable, int] = {}
     last_row_id_get = last_row_id.get
     size = len(s2) + 2
     FR = [maxVal] * size
@@ -31,7 +37,7 @@ def _damerau_levenshtein_distance_zhao(s1, s2):
                 T = last_i2l1  # save H_i-2,l-1
             else:
                 k = last_row_id_get(s2[j - 1], -1)
-                l = last_col_id
+                l = last_col_id  # noqa:  E741
 
                 if (j - l) == 1:
                     transpose = FR[j] + (i - k)
@@ -49,7 +55,13 @@ def _damerau_levenshtein_distance_zhao(s1, s2):
     return dist
 
 
-def distance(s1, s2, *, processor=None, score_cutoff=None):
+def distance(
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: int | None = None,
+) -> int:
     """
     Calculates the Damerau-Levenshtein distance.
 
@@ -89,7 +101,13 @@ def distance(s1, s2, *, processor=None, score_cutoff=None):
     return dist if (score_cutoff is None or dist <= score_cutoff) else score_cutoff + 1
 
 
-def similarity(s1, s2, *, processor=None, score_cutoff=None):
+def similarity(
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: int | None = None,
+) -> int:
     """
     Calculates the Damerau-Levenshtein similarity in the range [max, 0].
 
@@ -125,7 +143,13 @@ def similarity(s1, s2, *, processor=None, score_cutoff=None):
     return sim if (score_cutoff is None or sim >= score_cutoff) else 0
 
 
-def normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
+def normalized_distance(
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: float | None = None,
+) -> float:
     """
     Calculates a normalized Damerau-Levenshtein similarity in the range [1, 0].
 
@@ -160,7 +184,13 @@ def normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
     return norm_dist if (score_cutoff is None or norm_dist <= score_cutoff) else 1
 
 
-def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
+def normalized_similarity(
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: float | None = None,
+) -> float:
     """
     Calculates a normalized Damerau-Levenshtein similarity in the range [0, 1].
 

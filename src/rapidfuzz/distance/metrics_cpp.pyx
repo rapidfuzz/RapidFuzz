@@ -3,13 +3,19 @@
 
 from ._initialize_cpp import Editops
 
-from rapidfuzz_capi cimport (RF_SCORER_FLAG_MULTI_STRING_CALL,
-                             RF_SCORER_FLAG_MULTI_STRING_INIT,
-                             RF_SCORER_FLAG_RESULT_F64,
-                             RF_SCORER_FLAG_RESULT_I64,
-                             RF_SCORER_FLAG_SYMMETRIC, RF_Kwargs,
-                             RF_Preprocess, RF_Scorer, RF_ScorerFlags,
-                             RF_ScorerFunc, RF_String)
+from rapidfuzz_capi cimport (
+    RF_SCORER_FLAG_MULTI_STRING_CALL,
+    RF_SCORER_FLAG_MULTI_STRING_INIT,
+    RF_SCORER_FLAG_RESULT_F64,
+    RF_SCORER_FLAG_RESULT_I64,
+    RF_SCORER_FLAG_SYMMETRIC,
+    RF_Kwargs,
+    RF_Preprocess,
+    RF_Scorer,
+    RF_ScorerFlags,
+    RF_ScorerFunc,
+    RF_String,
+)
 
 from ._initialize_cpp cimport Editops, RfEditops
 
@@ -17,8 +23,12 @@ from ._initialize_cpp cimport Editops, RfEditops
 
 from array import array
 
-from cpp_common cimport (CreateScorerContext, NoKwargsInit, RF_StringWrapper,
-                         preprocess_strings)
+from cpp_common cimport (
+    CreateScorerContext,
+    NoKwargsInit,
+    RF_StringWrapper,
+    preprocess_strings,
+)
 from cpython.pycapsule cimport PyCapsule_New
 from libc.stdint cimport INT64_MAX, int64_t
 from libc.stdlib cimport free, malloc

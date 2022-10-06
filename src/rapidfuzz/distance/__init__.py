@@ -1,17 +1,19 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
 
+from __future__ import annotations
+
 from rapidfuzz._utils import fallback_import as _fallback_import
 
-_mod = "rapidfuzz.distance._initialize"
-Editop = _fallback_import(_mod, "Editop", False)
-Editops = _fallback_import(_mod, "Editops", False)
-Opcode = _fallback_import(_mod, "Opcode", False)
-Opcodes = _fallback_import(_mod, "Opcodes", False)
-ScoreAlignment = _fallback_import(_mod, "ScoreAlignment", False)
-MatchingBlock = _fallback_import(_mod, "MatchingBlock", False)
-
 from . import DamerauLevenshtein, Hamming, Indel, Jaro, JaroWinkler, LCSseq, Levenshtein
+
+_mod = "rapidfuzz.distance._initialize"
+Editop = _fallback_import(_mod, "Editop", set_attrs=False)
+Editops = _fallback_import(_mod, "Editops", set_attrs=False)
+Opcode = _fallback_import(_mod, "Opcode", set_attrs=False)
+Opcodes = _fallback_import(_mod, "Opcodes", set_attrs=False)
+ScoreAlignment = _fallback_import(_mod, "ScoreAlignment", set_attrs=False)
+MatchingBlock = _fallback_import(_mod, "MatchingBlock", set_attrs=False)
 
 __all__ = [
     "Editop",

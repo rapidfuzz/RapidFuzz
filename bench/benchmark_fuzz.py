@@ -1,7 +1,6 @@
 # todo combine benchmarks of scorers into common code base
 import timeit
 
-import numpy as np
 import pandas
 
 
@@ -63,7 +62,7 @@ scorer_benchmark("WRatio")
 # token_ratio is unique to RapidFuzz
 time_token_ratio = benchmark(
     "token_ratio",
-    f"[rfuzz.token_ratio(a, b, processor=None) for b in b_list]",
+    "[rfuzz.token_ratio(a, b, processor=None) for b in b_list]",
     setup,
     lengths,
     count,
@@ -72,7 +71,7 @@ time_token_ratio = benchmark(
 # this gets very slow, so only benchmark it for smaller values
 time_token_ratio_simple = benchmark(
     "fuzzywuzzy",
-    f"[max(rfuzz.token_sort_ratio(a, b, processor=None), rfuzz.token_set_ratio(a, b, processor=None)) for b in b_list]",
+    "[max(rfuzz.token_sort_ratio(a, b, processor=None), rfuzz.token_set_ratio(a, b, processor=None)) for b in b_list]",
     setup,
     lengths,
     count,
@@ -86,12 +85,12 @@ df = pandas.DataFrame(
     }
 )
 
-df.to_csv(f"results/token_ratio.csv", sep=",", index=False)
+df.to_csv("results/token_ratio.csv", sep=",", index=False)
 
 # partial_token_ratio is unique to RapidFuzz
 time_partial_token_ratio = benchmark(
     "token_ratio",
-    f"[rfuzz.partial_token_ratio(a, b, processor=None) for b in b_list]",
+    "[rfuzz.partial_token_ratio(a, b, processor=None) for b in b_list]",
     setup,
     lengths,
     count,
@@ -100,7 +99,10 @@ time_partial_token_ratio = benchmark(
 # this gets very slow, so only benchmark it for smaller values
 time_partial_token_ratio_simple = benchmark(
     "fuzzywuzzy",
-    f"[max(rfuzz.partial_token_sort_ratio(a, b, processor=None), rfuzz.partial_token_set_ratio(a, b, processor=None)) for b in b_list]",
+    (
+        "[max(rfuzz.partial_token_sort_ratio(a, b, processor=None), "
+        "rfuzz.partial_token_set_ratio(a, b, processor=None)) for b in b_list]"
+    ),
     setup,
     lengths,
     count,
@@ -114,4 +116,4 @@ df = pandas.DataFrame(
     }
 )
 
-df.to_csv(f"results/partial_token_ratio.csv", sep=",", index=False)
+df.to_csv("results/partial_token_ratio.csv", sep=",", index=False)

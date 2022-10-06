@@ -1,11 +1,9 @@
 # distutils: language=c++
 # cython: language_level=3, binding=True, linetrace=True
 
-from cpp_common cimport (EditType, RfEditOp, RfOpcode, convert_string,
-                         is_valid_string)
+from cpp_common cimport EditType, RfEditOp, RfOpcode, convert_string, is_valid_string
 from cpython.list cimport PyList_New, PyList_SET_ITEM
-from cpython.pycapsule cimport (PyCapsule_GetPointer, PyCapsule_IsValid,
-                                PyCapsule_New)
+from cpython.pycapsule cimport PyCapsule_GetPointer, PyCapsule_IsValid, PyCapsule_New
 from cpython.ref cimport Py_INCREF
 from libc.stdint cimport int64_t, uint32_t
 from libc.stdlib cimport free, malloc
@@ -87,11 +85,12 @@ cdef RfEditops list_to_editops(ops, size_t src_len, size_t dest_len) except *:
         result.emplace_back(edit_type, src_pos, dest_pos)
 
     # validate order of editops
-    for i in range(0, ops_len - 1):
-        if result[i + 1].src_pos < result[i].src_pos or result[i + 1].dest_pos < result[i].dest_pos:
-            raise ValueError("List of edit operations out of order")
-        if result[i + 1].src_pos == result[i].src_pos and result[i + 1].dest_pos == result[i].dest_pos:
-            raise ValueError("Duplicated edit operation")
+    if (result.size()):
+        for i in range(0, result.size() - 1):
+            if result[i + 1].src_pos < result[i].src_pos or result[i + 1].dest_pos < result[i].dest_pos:
+                raise ValueError("List of edit operations out of order")
+            if result[i + 1].src_pos == result[i].src_pos and result[i + 1].dest_pos == result[i].dest_pos:
+                raise ValueError("Duplicated edit operation")
 
     result.shrink_to_fit()
     return result
@@ -178,6 +177,10 @@ cdef list opcodes_to_list(const RfOpcodes& ops):
     return result_list
 
 cdef class MatchingBlock:
+    """
+    Triple describing matching subsequences
+    """
+
     cdef public size_t a
     cdef public size_t b
     cdef public size_t size
@@ -191,12 +194,15 @@ cdef class MatchingBlock:
         return 3
 
     def __eq__(self, other):
-        if len(other) != 3:
-            return False
+        try:
+            if len(other) != 3:
+                return False
 
-        return (other[0] == self.a
-            and other[1] == self.b
-            and other[2] == self.size)
+            return (other[0] == self.a
+                and other[1] == self.b
+                and other[2] == self.size)
+        except:
+            return False
 
     def __getitem__(self, Py_ssize_t i):
         if i==0 or i==-3: return self.a
@@ -204,6 +210,11 @@ cdef class MatchingBlock:
         if i==2 or i==-1: return self.size
 
         raise IndexError('MatchingBlock index out of range')
+
+    def __iter__(self):
+        yield self.a
+        yield self.b
+        yield self.size
 
     def __repr__(self):
         return f"MatchingBlock(a={self.a}, b={self.b}, size={self.size})"
@@ -324,12 +335,15 @@ cdef class Editop:
         return 3
 
     def __eq__(self, other):
-        if len(other) != 3:
-            return False
+        try:
+            if len(other) != 3:
+                return False
 
-        return (other[0] == self.tag
-            and other[1] == self.src_pos
-            and other[2] == self.dest_pos)
+            return (other[0] == self.tag
+                and other[1] == self.src_pos
+                and other[2] == self.dest_pos)
+        except:
+            return False
 
     def __getitem__(self, Py_ssize_t i):
         if i==0 or i==-3: return self.tag
@@ -337,6 +351,11 @@ cdef class Editop:
         if i==2 or i==-1: return self.dest_pos
 
         raise IndexError('Editop index out of range')
+
+    def __iter__(self):
+        yield self.tag
+        yield self.src_pos
+        yield self.dest_pos
 
     def __repr__(self):
         return f"Editop(tag='{self.tag}', src_pos={self.src_pos}, dest_pos={self.dest_pos})"
@@ -550,6 +569,15 @@ cdef class Editops:
         else:
             raise TypeError("Expected index or slice")
 
+    def __iter__(self):
+        cdef size_t i
+        for i in range(self.editops.size()):
+            yield Editop(
+                edit_type_to_str(self.editops[i].type),
+                self.editops[i].src_pos,
+                self.editops[i].dest_pos
+            )
+
     def __repr__(self):
         return "Editops([" + ", ".join(repr(op) for op in self) + f"], src_len={self.editops.get_src_len()}, dest_len={self.editops.get_dest_len()})"
 
@@ -598,14 +626,17 @@ cdef class Opcode:
         return 5
 
     def __eq__(self, other):
-        if len(other) != 5:
-            return False
+        try:
+            if len(other) != 5:
+                return False
 
-        return (other[0] == self.tag
-            and other[1] == self.src_start
-            and other[2] == self.src_end
-            and other[3] == self.dest_start
-            and other[4] == self.dest_end)
+            return (other[0] == self.tag
+                and other[1] == self.src_start
+                and other[2] == self.src_end
+                and other[3] == self.dest_start
+                and other[4] == self.dest_end)
+        except:
+            return False
 
     def __getitem__(self, Py_ssize_t i):
         if i==0 or i==-5: return self.tag
@@ -615,6 +646,13 @@ cdef class Opcode:
         if i==4 or i==-1: return self.dest_end
 
         raise IndexError('Opcode index out of range')
+
+    def __iter__(self):
+        yield self.tag
+        yield self.src_start
+        yield self.src_end
+        yield self.dest_start
+        yield self.dest_end
 
     def __repr__(self):
         return f"Opcode(tag='{self.tag}', src_start={self.src_start}, src_end={self.src_end}, dest_start={self.dest_start}, dest_end={self.dest_end})"
@@ -788,6 +826,17 @@ cdef class Opcodes:
         else:
             raise TypeError("Expected index")
 
+    def __iter__(self):
+        cdef size_t i
+        for i in range(self.opcodes.size()):
+            yield Opcode(
+                edit_type_to_str(self.opcodes[i].type),
+                self.opcodes[i].src_begin,
+                self.opcodes[i].src_end,
+                self.opcodes[i].dest_begin,
+                self.opcodes[i].dest_end
+            )
+
     def __repr__(self):
         return "Opcodes([" + ", ".join(repr(op) for op in self) + f"], src_len={self.opcodes.get_src_len()}, dest_len={self.opcodes.get_dest_len()})"
 
@@ -811,14 +860,17 @@ cdef class ScoreAlignment:
         return 5
 
     def __eq__(self, other):
-        if len(other) != 5:
-            return False
+        try:
+            if len(other) != 5:
+                return False
 
-        return (other[0] == self.score
-            and other[1] == self.src_start
-            and other[2] == self.src_end
-            and other[3] == self.dest_start
-            and other[4] == self.dest_end)
+            return (other[0] == self.score
+                and other[1] == self.src_start
+                and other[2] == self.src_end
+                and other[3] == self.dest_start
+                and other[4] == self.dest_end)
+        except:
+            return False
 
     def __getitem__(self, Py_ssize_t i):
         if i==0 or i==-5: return self.score
@@ -828,6 +880,13 @@ cdef class ScoreAlignment:
         if i==4 or i==-1: return self.dest_end
 
         raise IndexError('Opcode index out of range')
+
+    def __iter__(self):
+        yield self.score
+        yield self.src_start
+        yield self.src_end
+        yield self.dest_start
+        yield self.dest_end
 
     def __repr__(self):
         return f"ScoreAlignment(score={self.score}, src_start={self.src_start}, src_end={self.src_end}, dest_start={self.dest_start}, dest_end={self.dest_end})"

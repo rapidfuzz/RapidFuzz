@@ -1,10 +1,16 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
 
-from .Indel_py import distance as indel_distance
+from __future__ import annotations
+
+from typing import Callable, Hashable, Sequence
+
+from rapidfuzz.distance import Editops, Indel, Opcodes
 
 
-def _levenshtein_maximum(s1, s2, weights):
+def _levenshtein_maximum(
+    s1: Sequence[Hashable], s2: Sequence[Hashable], weights: tuple[int, int, int]
+) -> int:
     len1 = len(s1)
     len2 = len(s2)
     insert, delete, replace = weights
@@ -19,7 +25,9 @@ def _levenshtein_maximum(s1, s2, weights):
     return max_dist
 
 
-def _uniform_generic(s1, s2, weights):
+def _uniform_generic(
+    s1: Sequence[Hashable], s2: Sequence[Hashable], weights: tuple[int, int, int]
+) -> int:
     len1 = len(s1)
     insert, delete, replace = weights
     cache = list(range(0, (len1 + 1) * delete, delete))
@@ -37,7 +45,7 @@ def _uniform_generic(s1, s2, weights):
     return cache[-1]
 
 
-def _uniform_distance(s1, s2):
+def _uniform_distance(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> int:
     if not s1:
         return len(s2)
 
@@ -46,7 +54,7 @@ def _uniform_distance(s1, s2):
     currDist = len(s1)
     mask = 1 << (len(s1) - 1)
 
-    block = {}
+    block: dict[Hashable, int] = {}
     block_get = block.get
     x = 1
     for ch1 in s1:
@@ -73,7 +81,14 @@ def _uniform_distance(s1, s2):
     return currDist
 
 
-def distance(s1, s2, *, weights=(1, 1, 1), processor=None, score_cutoff=None):
+def distance(
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    weights: tuple[int, int, int] | None = (1, 1, 1),
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: int | None = None,
+) -> int:
     """
     Calculates the minimum number of insertions, deletions, and substitutions
     required to change one sequence into the other according to Levenshtein with custom
@@ -132,17 +147,24 @@ def distance(s1, s2, *, weights=(1, 1, 1), processor=None, score_cutoff=None):
         s1 = processor(s1)
         s2 = processor(s2)
 
-    if weights == (1, 1, 1):
+    if weights is None or weights == (1, 1, 1):
         dist = _uniform_distance(s1, s2)
     elif weights == (1, 1, 2):
-        dist = indel_distance(s1, s2)
+        dist = Indel.distance(s1, s2)
     else:
         dist = _uniform_generic(s1, s2, weights)
 
     return dist if (score_cutoff is None or dist <= score_cutoff) else score_cutoff + 1
 
 
-def similarity(s1, s2, *, weights=(1, 1, 1), processor=None, score_cutoff=None):
+def similarity(
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    weights: tuple[int, int, int] | None = (1, 1, 1),
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: int | None = None,
+) -> int:
     """
     Calculates the levenshtein similarity in the range [max, 0] using custom
     costs for insertion, deletion and substitution.
@@ -183,6 +205,7 @@ def similarity(s1, s2, *, weights=(1, 1, 1), processor=None, score_cutoff=None):
         s1 = processor(s1)
         s2 = processor(s2)
 
+    weights = weights or (1, 1, 1)
     maximum = _levenshtein_maximum(s1, s2, weights)
     dist = distance(s1, s2, weights=weights)
     sim = maximum - dist
@@ -190,8 +213,13 @@ def similarity(s1, s2, *, weights=(1, 1, 1), processor=None, score_cutoff=None):
 
 
 def normalized_distance(
-    s1, s2, *, weights=(1, 1, 1), processor=None, score_cutoff=None
-):
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    weights: tuple[int, int, int] | None = (1, 1, 1),
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: float | None = None,
+) -> float:
     """
     Calculates a normalized levenshtein distance in the range [1, 0] using custom
     costs for insertion, deletion and substitution.
@@ -231,6 +259,7 @@ def normalized_distance(
         s1 = processor(s1)
         s2 = processor(s2)
 
+    weights = weights or (1, 1, 1)
     maximum = _levenshtein_maximum(s1, s2, weights)
     dist = distance(s1, s2, weights=weights)
     norm_dist = dist / maximum if maximum else 0
@@ -238,8 +267,13 @@ def normalized_distance(
 
 
 def normalized_similarity(
-    s1, s2, *, weights=(1, 1, 1), processor=None, score_cutoff=None
-):
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    weights: tuple[int, int, int] | None = (1, 1, 1),
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: float | None = None,
+) -> float:
     """
     Calculates a normalized levenshtein similarity in the range [0, 1] using custom
     costs for insertion, deletion and substitution.
@@ -303,12 +337,19 @@ def normalized_similarity(
         s1 = processor(s1)
         s2 = processor(s2)
 
+    weights = weights or (1, 1, 1)
     norm_dist = normalized_distance(s1, s2, weights=weights)
     norm_sim = 1.0 - norm_dist
     return norm_sim if (score_cutoff is None or norm_sim >= score_cutoff) else 0
 
 
-def editops(s1, s2, *, processor=None, score_hint=None):
+def editops(
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_hint: int | None = None,
+) -> Editops:
     """
     Return Editops describing how to turn s1 into s2.
 
@@ -353,7 +394,13 @@ def editops(s1, s2, *, processor=None, score_hint=None):
     raise NotImplementedError
 
 
-def opcodes(s1, s2, *, processor=None, score_hint=None):
+def opcodes(
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_hint: int | None = None,
+) -> Opcodes:
     """
     Return Opcodes describing how to turn s1 into s2.
 

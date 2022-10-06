@@ -1,8 +1,12 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
 
+from __future__ import annotations
 
-def _osa_distance_hyrroe2003(s1, s2):
+from typing import Callable, Hashable, Sequence
+
+
+def _osa_distance_hyrroe2003(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> int:
     if not s1:
         return len(s2)
 
@@ -13,7 +17,7 @@ def _osa_distance_hyrroe2003(s1, s2):
     currDist = len(s1)
     mask = 1 << (len(s1) - 1)
 
-    block = {}
+    block: dict[Hashable, int] = {}
     block_get = block.get
     x = 1
     for ch1 in s1:
@@ -45,7 +49,13 @@ def _osa_distance_hyrroe2003(s1, s2):
     return currDist
 
 
-def distance(s1, s2, *, processor=None, score_cutoff=None):
+def distance(
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: int | None = None,
+) -> int:
     """
     Calculates the optimal string alignment (OSA) distance.
 
@@ -87,7 +97,13 @@ def distance(s1, s2, *, processor=None, score_cutoff=None):
     return dist if (score_cutoff is None or dist <= score_cutoff) else score_cutoff + 1
 
 
-def similarity(s1, s2, *, processor=None, score_cutoff=None):
+def similarity(
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: int | None = None,
+) -> int:
     """
     Calculates the optimal string alignment (OSA) similarity in the range [max, 0].
 
@@ -123,7 +139,13 @@ def similarity(s1, s2, *, processor=None, score_cutoff=None):
     return sim if (score_cutoff is None or sim >= score_cutoff) else 0
 
 
-def normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
+def normalized_distance(
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: float | None = None,
+) -> float:
     """
     Calculates a normalized optimal string alignment (OSA) similarity in the range [1, 0].
 
@@ -158,7 +180,13 @@ def normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
     return norm_dist if (score_cutoff is None or norm_dist <= score_cutoff) else 1
 
 
-def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
+def normalized_similarity(
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: float | None = None,
+) -> float:
     """
     Calculates a normalized optimal string alignment (OSA) similarity in the range [0, 1].
 

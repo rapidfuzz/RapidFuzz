@@ -1,11 +1,23 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
 
+from __future__ import annotations
+
+from typing import Callable, Hashable, Sequence
+
+from rapidfuzz.distance import Editops, Opcodes
+
 from .LCSseq_py import _block_similarity as lcs_seq_block_similarity
 from .LCSseq_py import similarity as lcs_seq_similarity
 
 
-def distance(s1, s2, *, processor=None, score_cutoff=None):
+def distance(
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: int | None = None,
+) -> int:
     """
     Calculates the minimum number of insertions and deletions
     required to change one sequence into the other. This is equivalent to the
@@ -56,14 +68,25 @@ def distance(s1, s2, *, processor=None, score_cutoff=None):
     return dist if (score_cutoff is None or dist <= score_cutoff) else score_cutoff + 1
 
 
-def _block_distance(block, s1, s2, score_cutoff=None):
+def _block_distance(
+    block: dict[Hashable, int],
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    score_cutoff: int | None = None,
+) -> int:
     maximum = len(s1) + len(s2)
     lcs_sim = lcs_seq_block_similarity(block, s1, s2)
     dist = maximum - 2 * lcs_sim
     return dist if (score_cutoff is None or dist <= score_cutoff) else score_cutoff + 1
 
 
-def similarity(s1, s2, *, processor=None, score_cutoff=None):
+def similarity(
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: int | None = None,
+) -> int:
     """
     Calculates the Indel similarity in the range [max, 0].
 
@@ -99,7 +122,13 @@ def similarity(s1, s2, *, processor=None, score_cutoff=None):
     return sim if (score_cutoff is None or sim >= score_cutoff) else 0
 
 
-def normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
+def normalized_distance(
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: float | None = None,
+) -> float:
     """
     Calculates a normalized levenshtein similarity in the range [1, 0].
 
@@ -134,14 +163,25 @@ def normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
     return norm_dist if (score_cutoff is None or norm_dist <= score_cutoff) else 1
 
 
-def _block_normalized_distance(block, s1, s2, score_cutoff=None):
+def _block_normalized_distance(
+    block: dict[Hashable, int],
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    score_cutoff: float | None = None,
+) -> float:
     maximum = len(s1) + len(s2)
     dist = _block_distance(block, s1, s2)
     norm_dist = dist / maximum if maximum else 0
     return norm_dist if (score_cutoff is None or norm_dist <= score_cutoff) else 1
 
 
-def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
+def normalized_similarity(
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: float | None = None,
+) -> float:
     """
     Calculates a normalized indel similarity in the range [0, 1].
 
@@ -194,13 +234,23 @@ def normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     return norm_sim if (score_cutoff is None or norm_sim >= score_cutoff) else 0
 
 
-def _block_normalized_similarity(block, s1, s2, score_cutoff=None):
+def _block_normalized_similarity(
+    block: dict[Hashable, int],
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    score_cutoff: float | None = None,
+) -> float:
     norm_dist = _block_normalized_distance(block, s1, s2)
     norm_sim = 1.0 - norm_dist
     return norm_sim if (score_cutoff is None or norm_sim >= score_cutoff) else 0
 
 
-def editops(s1, s2, *, processor=None):
+def editops(
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+) -> Editops:
     """
     Return Editops describing how to turn s1 into s2.
 
@@ -242,7 +292,12 @@ def editops(s1, s2, *, processor=None):
     raise NotImplementedError
 
 
-def opcodes(s1, s2, *, processor=None):
+def opcodes(
+    s1: Sequence[Hashable],
+    s2: Sequence[Hashable],
+    *,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+) -> Opcodes:
     """
     Return Opcodes describing how to turn s1 into s2.
 

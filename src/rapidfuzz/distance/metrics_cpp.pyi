@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Callable, Hashable, Optional, Sequence, Tuple, TypeVar
 
 from rapidfuzz.distance import Editops, Opcodes
@@ -12,7 +14,7 @@ def levenshtein_distance(
     *,
     weights: Optional[Tuple[int, int, int]] = (1, 1, 1),
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[int] = None
+    score_cutoff: Optional[int] = None,
 ) -> int: ...
 def levenshtein_normalized_distance(
     s1: _S1,
@@ -20,7 +22,7 @@ def levenshtein_normalized_distance(
     *,
     weights: Optional[Tuple[int, int, int]] = (1, 1, 1),
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0
+    score_cutoff: Optional[float] = 0,
 ) -> float: ...
 def levenshtein_similarity(
     s1: _S1,
@@ -28,7 +30,7 @@ def levenshtein_similarity(
     *,
     weights: Optional[Tuple[int, int, int]] = (1, 1, 1),
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[int] = None
+    score_cutoff: Optional[int] = None,
 ) -> int: ...
 def levenshtein_normalized_similarity(
     s1: _S1,
@@ -36,49 +38,49 @@ def levenshtein_normalized_similarity(
     *,
     weights: Optional[Tuple[int, int, int]] = (1, 1, 1),
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0
+    score_cutoff: Optional[float] = 0,
 ) -> float: ...
 def levenshtein_editops(
     s1: _S1,
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_hint: Optional[int] = None
+    score_hint: Optional[int] = None,
 ) -> Editops: ...
 def levenshtein_opcodes(
     s1: _S1,
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_hint: Optional[int] = None
+    score_hint: Optional[int] = None,
 ) -> Opcodes: ...
 def indel_distance(
     s1: _S1,
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[int] = None
+    score_cutoff: Optional[int] = None,
 ) -> int: ...
 def indel_normalized_distance(
     s1: _S1,
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0
+    score_cutoff: Optional[float] = 0,
 ) -> float: ...
 def indel_similarity(
     s1: _S1,
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[int] = None
+    score_cutoff: Optional[int] = None,
 ) -> int: ...
 def indel_normalized_similarity(
     s1: _S1,
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0
+    score_cutoff: Optional[float] = 0,
 ) -> float: ...
 def indel_editops(
     s1: _S1, s2: _S2, *, processor: Optional[Callable[..., _StringType]] = None
@@ -91,28 +93,28 @@ def lcs_seq_distance(
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[int] = None
+    score_cutoff: Optional[int] = None,
 ) -> int: ...
 def lcs_seq_normalized_distance(
     s1: _S1,
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0
+    score_cutoff: Optional[float] = 0,
 ) -> float: ...
 def lcs_seq_similarity(
     s1: _S1,
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[int] = None
+    score_cutoff: Optional[int] = None,
 ) -> int: ...
 def lcs_seq_normalized_similarity(
     s1: _S1,
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0
+    score_cutoff: Optional[float] = 0,
 ) -> float: ...
 def lcs_seq_editops(
     s1: _S1, s2: _S2, *, processor: Optional[Callable[..., _StringType]] = None
@@ -125,28 +127,28 @@ def hamming_distance(
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[int] = None
+    score_cutoff: Optional[int] = None,
 ) -> int: ...
 def hamming_normalized_distance(
     s1: _S1,
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0
+    score_cutoff: Optional[float] = 0,
 ) -> float: ...
 def hamming_similarity(
     s1: _S1,
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[int] = None
+    score_cutoff: Optional[int] = None,
 ) -> int: ...
 def hamming_normalized_similarity(
     s1: _S1,
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0
+    score_cutoff: Optional[float] = 0,
 ) -> float: ...
 def hamming_editops(
     s1: _S1, s2: _S2, *, processor: Optional[Callable[..., _StringType]] = None
@@ -159,84 +161,84 @@ def damerau_levenshtein_distance(
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[int] = None
+    score_cutoff: Optional[int] = None,
 ) -> int: ...
 def damerau_levenshtein_normalized_distance(
     s1: _S1,
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0
+    score_cutoff: Optional[float] = 0,
 ) -> float: ...
 def damerau_levenshtein_similarity(
     s1: _S1,
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[int] = None
+    score_cutoff: Optional[int] = None,
 ) -> int: ...
 def damerau_levenshtein_normalized_similarity(
     s1: _S1,
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0
+    score_cutoff: Optional[float] = 0,
 ) -> float: ...
 def osa_distance(
     s1: _S1,
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[int] = None
+    score_cutoff: Optional[int] = None,
 ) -> int: ...
 def osa_normalized_distance(
     s1: _S1,
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0
+    score_cutoff: Optional[float] = 0,
 ) -> float: ...
 def osa_similarity(
     s1: _S1,
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[int] = None
+    score_cutoff: Optional[int] = None,
 ) -> int: ...
 def osa_normalized_similarity(
     s1: _S1,
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0
+    score_cutoff: Optional[float] = 0,
 ) -> float: ...
 def jaro_distance(
     s1: _S1,
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[int] = None
+    score_cutoff: Optional[int] = None,
 ) -> float: ...
 def jaro_normalized_distance(
     s1: _S1,
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0
+    score_cutoff: Optional[float] = 0,
 ) -> float: ...
 def jaro_similarity(
     s1: _S1,
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[int] = None
+    score_cutoff: Optional[int] = None,
 ) -> float: ...
 def jaro_normalized_similarity(
     s1: _S1,
     s2: _S2,
     *,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0
+    score_cutoff: Optional[float] = 0,
 ) -> float: ...
 def jaro_winkler_distance(
     s1: _S1,
@@ -244,7 +246,7 @@ def jaro_winkler_distance(
     *,
     prefix_weight: float = 0.1,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[int] = None
+    score_cutoff: Optional[int] = None,
 ) -> float: ...
 def jaro_winkler_normalized_distance(
     s1: _S1,
@@ -252,7 +254,7 @@ def jaro_winkler_normalized_distance(
     *,
     prefix_weight: float = 0.1,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0
+    score_cutoff: Optional[float] = 0,
 ) -> float: ...
 def jaro_winkler_similarity(
     s1: _S1,
@@ -260,7 +262,7 @@ def jaro_winkler_similarity(
     *,
     prefix_weight: float = 0.1,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[int] = None
+    score_cutoff: Optional[int] = None,
 ) -> float: ...
 def jaro_winkler_normalized_similarity(
     s1: _S1,
@@ -268,5 +270,5 @@ def jaro_winkler_normalized_similarity(
     *,
     prefix_weight: float = 0.1,
     processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[float] = 0
+    score_cutoff: Optional[float] = 0,
 ) -> float: ...

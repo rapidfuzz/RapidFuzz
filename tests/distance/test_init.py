@@ -7,14 +7,9 @@ import hypothesis.strategies as st
 import pytest
 from hypothesis import given, settings
 
-from rapidfuzz.distance import (
-    Editop,
-    Editops,
-    Levenshtein,
-    MatchingBlock,
-    Opcode,
-    Opcodes,
-)
+import rapidfuzz.distance._initialize_cpp as distance_cpp
+import rapidfuzz.distance._initialize_py as distance_py
+from rapidfuzz.distance import Editops, Levenshtein, Opcodes
 
 
 def test_editops_comparison():
@@ -28,11 +23,12 @@ def test_editops_comparison():
     assert not (ops != ops.copy())
 
 
-def test_editops_get_index():
+@pytest.mark.parametrize("module", [distance_py, distance_cpp])
+def test_editops_get_index(module):
     """
     test __getitem__ with index of Editops
     """
-    ops = Editops(
+    ops = module.Editops(
         [
             ("delete", 1, 1),
             ("replace", 2, 1),
@@ -70,11 +66,12 @@ def test_editops_get_index():
         ops[-6]
 
 
-def test_editops_get_slice():
+@pytest.mark.parametrize("module", [distance_py, distance_cpp])
+def test_editops_get_slice(module):
     """
     test __getitem__ with slice of Editops
     """
-    ops = Editops(
+    ops = module.Editops(
         [
             ("delete", 1, 1),
             ("replace", 2, 1),
@@ -110,11 +107,12 @@ def test_editops_get_slice():
         ops[::-1]
 
 
-def test_editops_del_slice():
+@pytest.mark.parametrize("module", [distance_py, distance_cpp])
+def test_editops_del_slice(module):
     """
     test __delitem__ with slice of Editops
     """
-    ops = Editops(
+    ops = module.Editops(
         [
             ("delete", 1, 1),
             ("replace", 2, 1),
@@ -156,11 +154,12 @@ def test_editops_del_slice():
     del_test(slice(-4, -1, 2))
 
 
-def test_editops_inversion():
+@pytest.mark.parametrize("module", [distance_py, distance_cpp])
+def test_editops_inversion(module):
     """
     test correct inversion of Editops
     """
-    ops = Editops(
+    ops = module.Editops(
         [
             ("delete", 1, 1),
             ("replace", 2, 1),
@@ -192,11 +191,12 @@ def test_opcodes_comparison():
     assert not (ops != ops.copy())
 
 
-def test_opcode_get_index():
+@pytest.mark.parametrize("module", [distance_py, distance_cpp])
+def test_opcode_py_get_index(module):
     """
     test __getitem__ with index of Opcodes
     """
-    ops = Opcodes(
+    ops = module.Opcodes(
         [
             ("equal", 0, 1, 0, 1),
             ("delete", 1, 2, 1, 1),
@@ -238,11 +238,12 @@ def test_opcode_get_index():
         ops[-7]
 
 
-def test_opcode_inversion():
+@pytest.mark.parametrize("module", [distance_py, distance_cpp])
+def test_opcode_inversion(module):
     """
     test correct inversion of Opcodes
     """
-    ops = Opcodes(
+    ops = module.Opcodes(
         [
             ("equal", 0, 1, 0, 1),
             ("delete", 1, 2, 1, 1),
@@ -265,33 +266,35 @@ def test_opcode_inversion():
     ]
 
 
-def test_editops_empty():
+@pytest.mark.parametrize("module", [distance_py, distance_cpp])
+def test_opcodes_empty(module):
     """
     test behavior of conversion between empty list and Editops
     """
-    ops = Opcodes([], 0, 0)
+    ops = module.Opcodes([], 0, 0)
     assert ops.as_list() == []
     assert ops.src_len == 0
     assert ops.dest_len == 0
 
-    ops = Opcodes([], 0, 3)
+    ops = module.Opcodes([], 0, 3)
     assert ops.as_list() == [
-        Opcode(tag="equal", src_start=0, src_end=0, dest_start=0, dest_end=3)
+        module.Opcode(tag="equal", src_start=0, src_end=0, dest_start=0, dest_end=3)
     ]
     assert ops.src_len == 0
     assert ops.dest_len == 3
 
 
-def test_editops_empty():
+@pytest.mark.parametrize("module", [distance_py, distance_cpp])
+def test_editops_empty(module):
     """
     test behavior of conversion between empty list and Opcodes
     """
-    ops = Editops([], 0, 0)
+    ops = module.Editops([], 0, 0)
     assert ops.as_list() == []
     assert ops.src_len == 0
     assert ops.dest_len == 0
 
-    ops = Editops([], 0, 3)
+    ops = module.Editops([], 0, 3)
     assert ops.as_list() == []
     assert ops.src_len == 0
     assert ops.dest_len == 3
@@ -322,30 +325,49 @@ def test_list_initialization():
     assert ops.as_opcodes() == ops2
 
 
-def test_merge_adjacent_blocks():
+@pytest.mark.parametrize("module", [distance_py, distance_cpp])
+def test_merge_adjacent_blocks(module):
     """
     test whether adjacent blocks are merged
     """
-    ops1 = [Opcode(tag="equal", src_start=0, src_end=3, dest_start=0, dest_end=3)]
-    ops2 = [
-        Opcode(tag="equal", src_start=0, src_end=1, dest_start=0, dest_end=1),
-        Opcode(tag="equal", src_start=1, src_end=3, dest_start=1, dest_end=3),
+    ops1 = [
+        module.Opcodes(tag="equal", src_start=0, src_end=3, dest_start=0, dest_end=3)
     ]
-    assert Opcodes(ops1, 3, 3) == Opcodes(ops2, 3, 3)
-    assert Opcodes(ops2, 3, 3) == Opcodes(ops2, 3, 3).as_editops().as_opcodes()
+    ops2 = [
+        module.Opcodes(tag="equal", src_start=0, src_end=1, dest_start=0, dest_end=1),
+        module.Opcodes(tag="equal", src_start=1, src_end=3, dest_start=1, dest_end=3),
+    ]
+    assert module.Opcodes(ops1, 3, 3) == module.Opcodes(ops2, 3, 3)
+    assert (
+        module.Opcodes(ops2, 3, 3)
+        == module.Opcodes(ops2, 3, 3).as_editops().as_opcodes()
+    )
 
 
-def test_empty_matching_blocks():
+@pytest.mark.parametrize("module", [distance_py, distance_cpp])
+def test_empty_matching_blocks(module):
     """
     test behavior for empty matching blocks
     """
-    assert Editops([], 0, 0).as_matching_blocks() == [MatchingBlock(a=0, b=0, size=0)]
-    assert Editops([], 0, 3).as_matching_blocks() == [MatchingBlock(a=0, b=3, size=0)]
-    assert Editops([], 3, 0).as_matching_blocks() == [MatchingBlock(a=3, b=0, size=0)]
+    assert module.Editops([], 0, 0).as_matching_blocks() == [
+        module.MatchingBlock(a=0, b=0, size=0)
+    ]
+    assert module.Editops([], 0, 3).as_matching_blocks() == [
+        module.MatchingBlock(a=0, b=3, size=0)
+    ]
+    assert module.Editops([], 3, 0).as_matching_blocks() == [
+        module.MatchingBlock(a=3, b=0, size=0)
+    ]
 
-    assert Opcodes([], 0, 0).as_matching_blocks() == [MatchingBlock(a=0, b=0, size=0)]
-    assert Opcodes([], 0, 3).as_matching_blocks() == [MatchingBlock(a=0, b=3, size=0)]
-    assert Opcodes([], 3, 0).as_matching_blocks() == [MatchingBlock(a=3, b=0, size=0)]
+    assert module.Opcodes([], 0, 0).as_matching_blocks() == [
+        module.MatchingBlock(a=0, b=0, size=0)
+    ]
+    assert module.Opcodes([], 0, 3).as_matching_blocks() == [
+        module.MatchingBlock(a=0, b=3, size=0)
+    ]
+    assert module.Opcodes([], 3, 0).as_matching_blocks() == [
+        module.MatchingBlock(a=3, b=0, size=0)
+    ]
 
 
 @given(s1=st.text(), s2=st.text())

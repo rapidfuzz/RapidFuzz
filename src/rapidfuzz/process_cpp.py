@@ -1,6 +1,11 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
-from rapidfuzz.fuzz import ratio as _ratio
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Callable, Collection, Hashable, Sequence
+
+from rapidfuzz.fuzz import ratio
 from rapidfuzz.process_cpp_impl import FLOAT32 as _FLOAT32
 from rapidfuzz.process_cpp_impl import FLOAT64 as _FLOAT64
 from rapidfuzz.process_cpp_impl import INT8 as _INT8
@@ -12,12 +17,15 @@ from rapidfuzz.process_cpp_impl import UINT16 as _UINT16
 from rapidfuzz.process_cpp_impl import UINT32 as _UINT32
 from rapidfuzz.process_cpp_impl import UINT64 as _UINT64
 from rapidfuzz.process_cpp_impl import cdist as _cdist
-from rapidfuzz.process_cpp_impl import extract as extract
-from rapidfuzz.process_cpp_impl import extract_iter as extract_iter
-from rapidfuzz.process_cpp_impl import extractOne as extractOne
+from rapidfuzz.process_cpp_impl import extract, extract_iter, extractOne
+
+__all__ = ["extract", "extract_iter", "extractOne", "cdist"]
+
+if TYPE_CHECKING:
+    import numpy as np
 
 
-def _dtype_to_type_num(dtype):
+def _dtype_to_type_num(dtype: np.dtype | None) -> int | None:
     import numpy as np
 
     if dtype is None:
@@ -47,16 +55,16 @@ def _dtype_to_type_num(dtype):
 
 
 def cdist(
-    queries,
-    choices,
+    queries: Collection[Sequence[Hashable] | None],
+    choices: Collection[Sequence[Hashable] | None],
     *,
-    scorer=_ratio,
-    processor=None,
-    score_cutoff=None,
-    dtype=None,
-    workers=1,
-    **kwargs
-):
+    scorer: Callable[..., int | float] = ratio,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: int | float | None = None,
+    dtype: np.dtype | None = None,
+    workers: int = 1,
+    **kwargs: Any,
+) -> np.ndarray:
     import numpy as np
 
     dtype = _dtype_to_type_num(dtype)
@@ -69,6 +77,6 @@ def cdist(
             score_cutoff=score_cutoff,
             dtype=dtype,
             workers=workers,
-            **kwargs
+            **kwargs,
         )
     )

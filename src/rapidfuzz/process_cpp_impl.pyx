@@ -5,9 +5,14 @@ from rapidfuzz.fuzz import WRatio, ratio
 from rapidfuzz.utils import default_process
 
 cimport cython
-from cpp_common cimport (PyObjectWrapper, RF_KwargsWrapper, RF_StringWrapper,
-                         conv_sequence, get_score_cutoff_f64,
-                         get_score_cutoff_i64)
+from cpp_common cimport (
+    PyObjectWrapper,
+    RF_KwargsWrapper,
+    RF_StringWrapper,
+    conv_sequence,
+    get_score_cutoff_f64,
+    get_score_cutoff_i64,
+)
 from cpython cimport Py_buffer
 from cpython.buffer cimport PyBUF_F_CONTIGUOUS, PyBUF_ND, PyBUF_SIMPLE
 from cpython.exc cimport PyErr_CheckSignals
@@ -24,11 +29,18 @@ import heapq
 from array import array
 
 from cpython.pycapsule cimport PyCapsule_GetPointer, PyCapsule_IsValid
-from rapidfuzz_capi cimport (RF_SCORER_FLAG_RESULT_F64,
-                             RF_SCORER_FLAG_RESULT_I64,
-                             RF_SCORER_FLAG_SYMMETRIC, RF_Kwargs,
-                             RF_Preprocess, RF_Preprocessor, RF_Scorer,
-                             RF_ScorerFlags, RF_ScorerFunc, RF_String)
+from rapidfuzz_capi cimport (
+    RF_SCORER_FLAG_RESULT_F64,
+    RF_SCORER_FLAG_RESULT_I64,
+    RF_SCORER_FLAG_SYMMETRIC,
+    RF_Kwargs,
+    RF_Preprocess,
+    RF_Preprocessor,
+    RF_Scorer,
+    RF_ScorerFlags,
+    RF_ScorerFunc,
+    RF_String,
+)
 
 
 cdef extern from "process_cpp.hpp":

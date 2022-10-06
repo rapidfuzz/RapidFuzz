@@ -8,3 +8,36 @@ requires = [
 ]
 build-backend = "backend"
 backend-path = ["_custom_build"]
+
+[tool.isort]
+profile = "black"
+
+[tool.mypy]
+files = "src"
+python_version = "3.7"
+strict = true
+show_error_codes = true
+enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
+warn_unreachable = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+xfail_strict = true
+filterwarnings = ["error"]
+log_cli_level = "info"
+testpaths = ["tests"]
+
+[tool.pylint]
+master.py-version = "3.6"
+reports.output-format = "colorized"
+messages_control.disable = [
+  "design",
+  "fixme",
+  "imports",
+  "line-too-long",
+  "imports",
+  "invalid-name",
+  "protected-access",
+  "missing-module-docstring",
+]
