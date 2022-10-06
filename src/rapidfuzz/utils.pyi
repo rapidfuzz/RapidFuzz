@@ -5,5 +5,4 @@ from __future__ import annotations
 
 from typing import Hashable, Sequence
 
-def default_process(sentence: Sequence[Hashable]) -> Sequence[Hashable]:
-    ...
+def default_process(sentence: Sequence[Hashable]) -> Sequence[Hashable]: ...
