@@ -1,5 +1,9 @@
 ## Changelog
 
+### [2.12.0] - 2022-10-
+#### Changed
+- drop support for Python 3.6
+
 
 ### [2.11.1] - 2022-10-05
 #### Fixed
