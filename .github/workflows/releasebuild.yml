@@ -38,11 +38,11 @@ jobs:
           # test whether tarball contains all files required for compiling
           pip install dist/rapidfuzz-*.tar.gz -v
 
-      - name: Test type stubs
-        # prevent import from rapidfuzz
-        working-directory: .github
-        run: |
-          python -m mypy.stubtest rapidfuzz --ignore-missing-stub
+      #- name: Test type stubs
+      #  # prevent import from rapidfuzz
+      #  working-directory: .github
+      #  run: |
+      #    python -m mypy.stubtest rapidfuzz --ignore-missing-stub
 
       - name: Test with pytest and backtrace in case of SegFault
         run: |
