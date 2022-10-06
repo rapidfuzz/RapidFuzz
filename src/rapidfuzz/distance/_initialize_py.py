@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterator, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Iterator, Sequence, Tuple, Union
 
 
 def _list_to_editops(
@@ -567,7 +567,10 @@ class Opcode:
             yield self[i]
 
     def __repr__(self) -> str:
-        return f"Opcode(tag={self.tag}, src_start={self.src_start}, src_end={self.src_end}, dest_start={self.dest_start}, dest_end={self.dest_end})"
+        return (
+            f"Opcode(tag={self.tag}, src_start={self.src_start}, src_end={self.src_end}, "
+            f"dest_start={self.dest_start}, dest_end={self.dest_end})"
+        )
 
 
 class Opcodes:
@@ -840,7 +843,10 @@ class ScoreAlignment:
             yield self[i]
 
     def __repr__(self) -> str:
-        return f"ScoreAlignment(score={self.score}, src_start={self.src_start}, src_end={self.src_end}, dest_start={self.dest_start}, dest_end={self.dest_end})"
+        return (
+            f"ScoreAlignment(score={self.score}, src_start={self.src_start}, "
+            f"src_end={self.src_end}, dest_start={self.dest_start}, dest_end={self.dest_end})"
+        )
 
 
 if TYPE_CHECKING:

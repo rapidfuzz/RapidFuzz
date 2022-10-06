@@ -37,7 +37,7 @@ def _damerau_levenshtein_distance_zhao(
                 T = last_i2l1  # save H_i-2,l-1
             else:
                 k = last_row_id_get(s2[j - 1], -1)
-                l = last_col_id
+                l = last_col_id  # noqa:  E741
 
                 if (j - l) == 1:
                     transpose = FR[j] + (i - k)

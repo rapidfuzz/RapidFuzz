@@ -137,7 +137,8 @@ def extract_iter(
     if processor is not None:
         query = processor(query)
 
-    choices_iter: Iterable[tuple[Any, Sequence[Hashable] | None]] = choices.items() if hasattr(choices, "items") else enumerate(choices)  # type: ignore[union-attr]
+    choices_iter: Iterable[tuple[Any, Sequence[Hashable] | None]]
+    choices_iter = choices.items() if hasattr(choices, "items") else enumerate(choices)  # type: ignore[union-attr]
     for key, choice in choices_iter:
         if choice is None:
             continue
@@ -335,7 +336,8 @@ def extractOne(
 
     result: tuple[Sequence[Hashable], int | float, Any] | None = None
 
-    choices_iter: Iterable[tuple[Any, Sequence[Hashable] | None]] = choices.items() if hasattr(choices, "items") else enumerate(choices)  # type: ignore[union-attr]
+    choices_iter: Iterable[tuple[Any, Sequence[Hashable] | None]]
+    choices_iter = choices.items() if hasattr(choices, "items") else enumerate(choices)  # type: ignore[union-attr]
     for key, choice in choices_iter:
         if choice is None:
             continue
@@ -566,7 +568,6 @@ def cdist(
         Returns a matrix of dtype with the distance/similarity between each pair
         of the two collections of inputs.
     """
-    _workers = workers
     dtype = _dtype_to_type_num(dtype, scorer, **kwargs)
     results = np.zeros((len(queries), len(choices)), dtype=dtype)
 

@@ -122,13 +122,13 @@ repos:
     files: (\.cmake|CMakeLists.txt)(.in)?$
 
 # Check static types with mypy
-- repo: https://github.com/pre-commit/mirrors-mypy
-  rev: "v0.971"
-  hooks:
-  - id: mypy
-    args: []
-    exclude: ^(tests|docs)/
-    additional_dependencies: [nox, rich]
+#- repo: https://github.com/pre-commit/mirrors-mypy
+#  rev: "v0.971"
+#  hooks:
+#  - id: mypy
+#    args: []
+#    exclude: ^(tests|docs)/
+#    additional_dependencies: [nox, rich]
 
 # Checks the manifest for missing files (native support)
 - repo: https://github.com/mgedmin/check-manifest

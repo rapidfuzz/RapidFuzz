@@ -2,7 +2,6 @@
 
 import unittest
 
-from rapidfuzz import process
 from rapidfuzz.distance import OSA as _OSA
 from rapidfuzz.distance import OSA_cpp, OSA_py
 

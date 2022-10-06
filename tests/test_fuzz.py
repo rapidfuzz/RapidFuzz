@@ -231,7 +231,10 @@ class RatioTest(unittest.TestCase):
 
     def testIssue231(self):
         str1 = "er merkantilismus förderte handle und verkehr mit teils marktkonformen, teils dirigistischen maßnahmen."
-        str2 = "ils marktkonformen, teils dirigistischen maßnahmen. an der schwelle zum 19. jahrhundert entstand ein neu"
+        str2 = (
+            "ils marktkonformen, teils dirigistischen maßnahmen. "
+            "an der schwelle zum 19. jahrhundert entstand ein neu"
+        )
 
         alignment = fuzz.partial_ratio_alignment(str1, str2)
         self.assertEqual(alignment.src_start, 0)
