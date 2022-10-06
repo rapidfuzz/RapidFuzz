@@ -35,7 +35,7 @@ repos:
   rev: "v2.38.2"
   hooks:
   - id: pyupgrade
-    args: [--py36-plus]
+    args: [--py37-plus]
 
 # Nicely sort includes
 - repo: https://github.com/PyCQA/isort

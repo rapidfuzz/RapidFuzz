@@ -483,8 +483,7 @@ static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_
     Matrix matrix(dtype, static_cast<size_t>(rows), static_cast<size_t>(cols));
     bool multiStringInit = scorer_flags->flags & RF_SCORER_FLAG_MULTI_STRING_INIT;
 
-    if (queries.empty() || choices.empty())
-        return matrix;
+    if (queries.empty() || choices.empty()) return matrix;
 
     if (multiStringInit) {
         std::vector<size_t> row_idx(rows);

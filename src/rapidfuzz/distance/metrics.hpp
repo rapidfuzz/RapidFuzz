@@ -503,9 +503,11 @@ static inline bool OSANormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwarg
                                              const RF_String* str)
 {
 #ifdef RAPIDFUZZ_X64
-    if (CpuInfo::supports(CPU_FEATURE_AVX2)) return Avx2::OsaNormalizedDistanceInit(self, kwargs, str_count, str);
+    if (CpuInfo::supports(CPU_FEATURE_AVX2))
+        return Avx2::OsaNormalizedDistanceInit(self, kwargs, str_count, str);
 
-    if (CpuInfo::supports(CPU_FEATURE_SSE2)) return Sse2::OsaNormalizedDistanceInit(self, kwargs, str_count, str);
+    if (CpuInfo::supports(CPU_FEATURE_SSE2))
+        return Sse2::OsaNormalizedDistanceInit(self, kwargs, str_count, str);
 #else
     (void)kwargs;
 #endif
@@ -541,13 +543,15 @@ static inline double osa_normalized_similarity_func(const RF_String& str1, const
         return rapidfuzz::osa_normalized_similarity(s1, s2, score_cutoff);
     });
 }
-static inline bool OSANormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count,
-                                               const RF_String* str)
+static inline bool OSANormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs,
+                                               int64_t str_count, const RF_String* str)
 {
 #ifdef RAPIDFUZZ_X64
-    if (CpuInfo::supports(CPU_FEATURE_AVX2)) return Avx2::OsaNormalizedSimilarityInit(self, kwargs, str_count, str);
+    if (CpuInfo::supports(CPU_FEATURE_AVX2))
+        return Avx2::OsaNormalizedSimilarityInit(self, kwargs, str_count, str);
 
-    if (CpuInfo::supports(CPU_FEATURE_SSE2)) return Sse2::OsaNormalizedSimilarityInit(self, kwargs, str_count, str);
+    if (CpuInfo::supports(CPU_FEATURE_SSE2))
+        return Sse2::OsaNormalizedSimilarityInit(self, kwargs, str_count, str);
 #else
     (void)kwargs;
 #endif
