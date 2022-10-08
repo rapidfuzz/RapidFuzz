@@ -22,8 +22,8 @@ def _norm_distance(dist: int, lensum: int, score_cutoff: float) -> float:
 
 
 def ratio(
-    s1: str | bytes,
-    s2: str | bytes,
+    s1: str | bytes | None,
+    s2: str | bytes | None,
     *,
     processor: Callable[..., str | bytes] | None | bool = None,
     score_cutoff: float | None = None,
@@ -63,6 +63,9 @@ def ratio(
     >>> fuzz.ratio("this is a test", "this is a test!")
     96.55171966552734
     """
+    if s1 is None or s2 is None:
+        return 0
+
     if processor is True:
         processor = default_process
     elif processor is False:
@@ -153,8 +156,8 @@ def _partial_ratio_short_needle(
 
 
 def partial_ratio(
-    s1: str | bytes,
-    s2: str | bytes,
+    s1: str | bytes | None,
+    s2: str | bytes | None,
     *,
     processor: Callable[..., str | bytes] | None | bool = None,
     score_cutoff: float | None = None,
@@ -223,6 +226,9 @@ def partial_ratio(
     >>> fuzz.partial_ratio("this is a test", "this is a test!")
     100.0
     """
+    if s1 is None or s2 is None:
+        return 0
+
     if processor is True:
         processor = default_process
     elif processor is False:
@@ -249,8 +255,8 @@ def partial_ratio(
 
 
 def partial_ratio_alignment(
-    s1: str | bytes,
-    s2: str | bytes,
+    s1: str | bytes | None,
+    s2: str | bytes | None,
     *,
     processor: Callable[..., str | bytes] | None | bool = None,
     score_cutoff: float | None = None,
@@ -292,6 +298,9 @@ def partial_ratio_alignment(
     >>> fuzz.ratio(s1[res.src_start:res.src_end], s2[res.dest_start:res.dest_end])
     83.33333333333334
     """
+    if s1 is None or s2 is None:
+        return None
+
     if processor is True:
         processor = default_process
     elif processor is False:
@@ -327,8 +336,8 @@ def partial_ratio_alignment(
 
 
 def token_sort_ratio(
-    s1: str,
-    s2: str,
+    s1: str | None,
+    s2: str | None,
     *,
     processor: Callable[..., str] | None | bool = default_process,
     score_cutoff: float | None = None,
@@ -364,6 +373,9 @@ def token_sort_ratio(
     >>> fuzz.token_sort_ratio("fuzzy wuzzy was a bear", "wuzzy fuzzy was a bear")
     100.0
     """
+    if s1 is None or s2 is None:
+        return 0
+
     if processor is True:
         processor = default_process
     elif processor is False:
@@ -379,8 +391,8 @@ def token_sort_ratio(
 
 
 def token_set_ratio(
-    s1: str,
-    s2: str,
+    s1: str | None,
+    s2: str | None,
     *,
     processor: Callable[..., str] | None | bool = default_process,
     score_cutoff: float | None = None,
@@ -419,6 +431,9 @@ def token_set_ratio(
     >>> fuzz.token_set_ratio("fuzzy was a bear", "fuzzy fuzzy was a bear")
     100.0
     """
+    if s1 is None or s2 is None:
+        return 0
+
     if processor is True:
         processor = default_process
     elif processor is False:
@@ -482,8 +497,8 @@ def token_set_ratio(
 
 
 def token_ratio(
-    s1: str,
-    s2: str,
+    s1: str | None,
+    s2: str | None,
     *,
     processor: Callable[..., str] | None | bool = default_process,
     score_cutoff: float | None = None,
@@ -515,6 +530,9 @@ def token_ratio(
     -----
     .. image:: img/token_ratio.svg
     """
+    if s1 is None or s2 is None:
+        return 0
+
     if processor is True:
         processor = default_process
     elif processor is False:
@@ -532,8 +550,8 @@ def token_ratio(
 
 
 def partial_token_sort_ratio(
-    s1: str,
-    s2: str,
+    s1: str | None,
+    s2: str | None,
     *,
     processor: Callable[..., str] | None | bool = default_process,
     score_cutoff: float | None = None,
@@ -564,6 +582,9 @@ def partial_token_sort_ratio(
     -----
     .. image:: img/partial_token_sort_ratio.svg
     """
+    if s1 is None or s2 is None:
+        return 0
+
     if processor is True:
         processor = default_process
     elif processor is False:
@@ -579,8 +600,8 @@ def partial_token_sort_ratio(
 
 
 def partial_token_set_ratio(
-    s1: str,
-    s2: str,
+    s1: str | None,
+    s2: str | None,
     *,
     processor: Callable[..., str] | None | bool = default_process,
     score_cutoff: float | None = None,
@@ -612,6 +633,9 @@ def partial_token_set_ratio(
     -----
     .. image:: img/partial_token_set_ratio.svg
     """
+    if s1 is None or s2 is None:
+        return 0
+
     if processor is True:
         processor = default_process
     elif processor is False:
@@ -638,8 +662,8 @@ def partial_token_set_ratio(
 
 
 def partial_token_ratio(
-    s1: str,
-    s2: str,
+    s1: str | None,
+    s2: str | None,
     *,
     processor: Callable[..., str] | None | bool = default_process,
     score_cutoff: float | None = None,
@@ -671,6 +695,9 @@ def partial_token_ratio(
     -----
     .. image:: img/partial_token_ratio.svg
     """
+    if s1 is None or s2 is None:
+        return 0
+
     if processor is True:
         processor = default_process
     elif processor is False:
@@ -717,8 +744,8 @@ def partial_token_ratio(
 
 
 def WRatio(
-    s1: str,
-    s2: str,
+    s1: str | None,
+    s2: str | None,
     *,
     processor: Callable[..., str] | None | bool = default_process,
     score_cutoff: float | None = None,
@@ -749,6 +776,9 @@ def WRatio(
     -----
     .. image:: img/WRatio.svg
     """
+    if s1 is None or s2 is None:
+        return 0
+
     UNBASE_SCALE = 0.95
 
     if processor is True:
@@ -797,8 +827,8 @@ def WRatio(
 
 
 def QRatio(
-    s1: str | bytes,
-    s2: str | bytes,
+    s1: str | bytes | None,
+    s2: str | bytes | None,
     *,
     processor: Callable[..., str | bytes] | None | bool = default_process,
     score_cutoff: float | None = None,
@@ -832,6 +862,9 @@ def QRatio(
     >>> fuzz.QRatio("this is a test", "THIS is a test!")
     100.0
     """
+    if s1 is None or s2 is None:
+        return 0
+
     if processor is True:
         processor = default_process
     elif processor is False:

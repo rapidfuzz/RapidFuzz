@@ -331,11 +331,11 @@ def test_merge_adjacent_blocks(module):
     test whether adjacent blocks are merged
     """
     ops1 = [
-        module.Opcodes(tag="equal", src_start=0, src_end=3, dest_start=0, dest_end=3)
+        module.Opcode(tag="equal", src_start=0, src_end=3, dest_start=0, dest_end=3)
     ]
     ops2 = [
-        module.Opcodes(tag="equal", src_start=0, src_end=1, dest_start=0, dest_end=1),
-        module.Opcodes(tag="equal", src_start=1, src_end=3, dest_start=1, dest_end=3),
+        module.Opcode(tag="equal", src_start=0, src_end=1, dest_start=0, dest_end=1),
+        module.Opcode(tag="equal", src_start=1, src_end=3, dest_start=1, dest_end=3),
     ]
     assert module.Opcodes(ops1, 3, 3) == module.Opcodes(ops2, 3, 3)
     assert (
