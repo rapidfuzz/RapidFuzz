@@ -5,10 +5,9 @@ from __future__ import annotations
 
 from typing import Callable, Hashable, Sequence
 
-from rapidfuzz.distance import Editops, Opcodes
-
-from .LCSseq_py import _block_similarity as lcs_seq_block_similarity
-from .LCSseq_py import similarity as lcs_seq_similarity
+from rapidfuzz.distance._initialize import Editops, Opcodes
+from rapidfuzz.distance.LCSseq_py import _block_similarity as lcs_seq_block_similarity
+from rapidfuzz.distance.LCSseq_py import similarity as lcs_seq_similarity
 
 
 def distance(

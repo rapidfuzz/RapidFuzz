@@ -5,7 +5,8 @@ from __future__ import annotations
 
 from typing import Callable, Hashable, Sequence
 
-from rapidfuzz.distance import Editops, Indel, Opcodes
+from rapidfuzz.distance import Indel
+from rapidfuzz.distance._initialize import Editops, Opcodes
 
 
 def _levenshtein_maximum(

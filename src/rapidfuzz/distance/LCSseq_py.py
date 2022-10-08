@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Callable, Hashable, Sequence
 
-from rapidfuzz.distance import Editops, Opcodes
+from rapidfuzz.distance._initialize import Editops, Opcodes
 
 
 def similarity(
