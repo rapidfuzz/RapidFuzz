@@ -1,8 +1,11 @@
 ## Changelog
 
-### [2.12.0] - 2022-10-
+### [2.12.0] - 2022-10-22
 #### Changed
 - drop support for Python 3.6
+
+#### Added
+- added `Prefix`/`Suffix` similarity
 
 
 ### [2.11.1] - 2022-10-05

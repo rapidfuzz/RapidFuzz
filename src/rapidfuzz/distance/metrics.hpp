@@ -668,3 +668,105 @@ static inline bool JaroWinklerNormalizedSimilarityInit(RF_ScorerFunc* self, cons
     return normalized_similarity_init<rapidfuzz::CachedJaroWinkler, double>(self, str_count, str,
                                                                             prefix_weight);
 }
+
+/* Prefix */
+static inline int64_t prefix_distance_func(const RF_String& str1, const RF_String& str2, int64_t max)
+{
+    return visitor(str1, str2, [&](auto s1, auto s2) {
+        return rapidfuzz::prefix_distance(s1, s2, max);
+    });
+}
+static inline bool PrefixDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                       const RF_String* str)
+{
+    return distance_init<rapidfuzz::CachedPrefix, int64_t>(self, str_count, str);
+}
+
+static inline double prefix_normalized_distance_func(const RF_String& str1, const RF_String& str2,
+                                                      double score_cutoff)
+{
+    return visitor(str1, str2, [&](auto s1, auto s2) {
+        return rapidfuzz::prefix_normalized_distance(s1, s2, score_cutoff);
+    });
+}
+static inline bool PrefixNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                                 const RF_String* str)
+{
+    return normalized_distance_init<rapidfuzz::CachedPrefix, double>(self, str_count, str);
+}
+
+static inline int64_t prefix_similarity_func(const RF_String& str1, const RF_String& str2, int64_t max)
+{
+    return visitor(str1, str2, [&](auto s1, auto s2) {
+        return rapidfuzz::prefix_similarity(s1, s2, max);
+    });
+}
+static inline bool PrefixSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                         const RF_String* str)
+{
+    return similarity_init<rapidfuzz::CachedPrefix, int64_t>(self, str_count, str);
+}
+
+static inline double prefix_normalized_similarity_func(const RF_String& str1, const RF_String& str2,
+                                                        double score_cutoff)
+{
+    return visitor(str1, str2, [&](auto s1, auto s2) {
+        return rapidfuzz::prefix_normalized_similarity(s1, s2, score_cutoff);
+    });
+}
+static inline bool PrefixNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                                   const RF_String* str)
+{
+    return normalized_similarity_init<rapidfuzz::CachedPrefix, double>(self, str_count, str);
+}
+
+/* Postfix */
+static inline int64_t postfix_distance_func(const RF_String& str1, const RF_String& str2, int64_t max)
+{
+    return visitor(str1, str2, [&](auto s1, auto s2) {
+        return rapidfuzz::postfix_distance(s1, s2, max);
+    });
+}
+static inline bool PostfixDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                       const RF_String* str)
+{
+    return distance_init<rapidfuzz::CachedPostfix, int64_t>(self, str_count, str);
+}
+
+static inline double postfix_normalized_distance_func(const RF_String& str1, const RF_String& str2,
+                                                      double score_cutoff)
+{
+    return visitor(str1, str2, [&](auto s1, auto s2) {
+        return rapidfuzz::postfix_normalized_distance(s1, s2, score_cutoff);
+    });
+}
+static inline bool PostfixNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                                 const RF_String* str)
+{
+    return normalized_distance_init<rapidfuzz::CachedPostfix, double>(self, str_count, str);
+}
+
+static inline int64_t postfix_similarity_func(const RF_String& str1, const RF_String& str2, int64_t max)
+{
+    return visitor(str1, str2, [&](auto s1, auto s2) {
+        return rapidfuzz::postfix_similarity(s1, s2, max);
+    });
+}
+static inline bool PostfixSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                         const RF_String* str)
+{
+    return similarity_init<rapidfuzz::CachedPostfix, int64_t>(self, str_count, str);
+}
+
+static inline double postfix_normalized_similarity_func(const RF_String& str1, const RF_String& str2,
+                                                        double score_cutoff)
+{
+    return visitor(str1, str2, [&](auto s1, auto s2) {
+        return rapidfuzz::postfix_normalized_similarity(s1, s2, score_cutoff);
+    });
+}
+static inline bool PostfixNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                                   const RF_String* str)
+{
+    return normalized_similarity_init<rapidfuzz::CachedPostfix, double>(self, str_count, str);
+}

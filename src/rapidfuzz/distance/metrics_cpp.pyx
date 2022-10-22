@@ -146,6 +146,28 @@ cdef extern from "metrics.hpp":
     bool JaroWinklerSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
     bool JaroWinklerNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
 
+    # Prefix
+    double prefix_normalized_distance_func(  const RF_String&, const RF_String&, double) nogil except +
+    int64_t prefix_distance_func(            const RF_String&, const RF_String&, int64_t) nogil except +
+    double prefix_normalized_similarity_func(const RF_String&, const RF_String&, double) nogil except +
+    int64_t prefix_similarity_func(          const RF_String&, const RF_String&, int64_t) nogil except +
+
+    bool PrefixDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool PrefixNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool PrefixSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool PrefixNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+
+    # Postfix
+    double postfix_normalized_distance_func(  const RF_String&, const RF_String&, double) nogil except +
+    int64_t postfix_distance_func(            const RF_String&, const RF_String&, int64_t) nogil except +
+    double postfix_normalized_similarity_func(const RF_String&, const RF_String&, double) nogil except +
+    int64_t postfix_similarity_func(          const RF_String&, const RF_String&, int64_t) nogil except +
+
+    bool PostfixDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool PostfixNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool PostfixSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool PostfixNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+
 
 cdef int64_t get_score_cutoff_i64(score_cutoff, int64_t default) except -1:
     cdef int64_t c_score_cutoff = default
@@ -922,3 +944,163 @@ jaro_winkler_normalized_distance._RF_Scorer = PyCapsule_New(&JaroWinklerDistance
 cdef RF_Scorer JaroWinklerSimilarityContext = CreateScorerContext(JaroWinklerKwargsInit, GetScorerFlagsJaroWinklerSimilarity, JaroWinklerSimilarityInit)
 jaro_winkler_similarity._RF_Scorer = PyCapsule_New(&JaroWinklerSimilarityContext, NULL, NULL)
 jaro_winkler_normalized_similarity._RF_Scorer = PyCapsule_New(&JaroWinklerDistanceContext, NULL, NULL)
+
+###############################################
+# Postfix
+###############################################
+
+def postfix_distance(s1, s2, *, processor=None, score_cutoff=None):
+    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, INT64_MAX)
+    cdef RF_StringWrapper s1_proc, s2_proc
+
+    if s1 is None or s2 is None:
+        return 0
+
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
+    return postfix_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+
+def postfix_similarity(s1, s2, *, processor=None, score_cutoff=None):
+    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, 0)
+    cdef RF_StringWrapper s1_proc, s2_proc
+
+    if s1 is None or s2 is None:
+        return 0
+
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
+    return postfix_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+
+def postfix_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
+    cdef RF_StringWrapper s1_proc, s2_proc
+    if s1 is None or s2 is None:
+        return 0
+
+    cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 1.0)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
+    return postfix_normalized_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+
+
+def postfix_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
+    cdef RF_StringWrapper s1_proc, s2_proc
+    if s1 is None or s2 is None:
+        return 0
+
+    cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
+    return postfix_normalized_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+
+cdef bool GetScorerFlagsPostfixDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.i64 = 0
+    scorer_flags.worst_score.i64 = INT64_MAX
+    return True
+
+cdef bool GetScorerFlagsPostfixNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 0.0
+    scorer_flags.worst_score.f64 = 1.0
+    return True
+
+cdef bool GetScorerFlagsPostfixSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.i64 = INT64_MAX
+    scorer_flags.worst_score.i64 = 0
+    return True
+
+cdef bool GetScorerFlagsPostfixNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 1.0
+    scorer_flags.worst_score.f64 = 0
+    return True
+
+cdef RF_Scorer PostfixDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsPostfixDistance, PostfixDistanceInit)
+postfix_distance._RF_Scorer = PyCapsule_New(&PostfixDistanceContext, NULL, NULL)
+
+cdef RF_Scorer PostfixNormalizedDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsPostfixNormalizedDistance, PostfixNormalizedDistanceInit)
+postfix_normalized_distance._RF_Scorer = PyCapsule_New(&PostfixNormalizedDistanceContext, NULL, NULL)
+
+cdef RF_Scorer PostfixSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsPostfixSimilarity, PostfixSimilarityInit)
+postfix_similarity._RF_Scorer = PyCapsule_New(&PostfixSimilarityContext, NULL, NULL)
+
+cdef RF_Scorer PostfixNormalizedSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsPostfixNormalizedSimilarity, PostfixNormalizedSimilarityInit)
+postfix_normalized_similarity._RF_Scorer = PyCapsule_New(&PostfixNormalizedDistanceContext, NULL, NULL)
+
+
+###############################################
+# Prefix
+###############################################
+
+def prefix_distance(s1, s2, *, processor=None, score_cutoff=None):
+    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, INT64_MAX)
+    cdef RF_StringWrapper s1_proc, s2_proc
+
+    if s1 is None or s2 is None:
+        return 0
+
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
+    return prefix_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+
+def prefix_similarity(s1, s2, *, processor=None, score_cutoff=None):
+    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, 0)
+    cdef RF_StringWrapper s1_proc, s2_proc
+
+    if s1 is None or s2 is None:
+        return 0
+
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
+    return prefix_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+
+def prefix_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
+    cdef RF_StringWrapper s1_proc, s2_proc
+    if s1 is None or s2 is None:
+        return 0
+
+    cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 1.0)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
+    return prefix_normalized_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+
+
+def prefix_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
+    cdef RF_StringWrapper s1_proc, s2_proc
+    if s1 is None or s2 is None:
+        return 0
+
+    cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0)
+    preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
+    return prefix_normalized_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+
+
+cdef bool GetScorerFlagsPrefixDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.i64 = 0
+    scorer_flags.worst_score.i64 = INT64_MAX
+    return True
+
+cdef bool GetScorerFlagsPrefixNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 0.0
+    scorer_flags.worst_score.f64 = 1.0
+    return True
+
+cdef bool GetScorerFlagsPrefixSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.i64 = INT64_MAX
+    scorer_flags.worst_score.i64 = 0
+    return True
+
+cdef bool GetScorerFlagsPrefixNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.f64 = 1.0
+    scorer_flags.worst_score.f64 = 0
+    return True
+
+cdef RF_Scorer PrefixDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsPrefixDistance, PrefixDistanceInit)
+prefix_distance._RF_Scorer = PyCapsule_New(&PrefixDistanceContext, NULL, NULL)
+
+cdef RF_Scorer PrefixNormalizedDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsPrefixNormalizedDistance, PrefixNormalizedDistanceInit)
+prefix_normalized_distance._RF_Scorer = PyCapsule_New(&PrefixNormalizedDistanceContext, NULL, NULL)
+
+cdef RF_Scorer PrefixSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsPrefixSimilarity, PrefixSimilarityInit)
+prefix_similarity._RF_Scorer = PyCapsule_New(&PrefixSimilarityContext, NULL, NULL)
+
+cdef RF_Scorer PrefixNormalizedSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsPrefixNormalizedSimilarity, PrefixNormalizedSimilarityInit)
+prefix_normalized_similarity._RF_Scorer = PyCapsule_New(&PrefixNormalizedDistanceContext, NULL, NULL)

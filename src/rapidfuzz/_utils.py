@@ -5,21 +5,37 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
+from enum import Flag
+
+
+class ScorerFlag(Flag):
+    RESULT_F64 = 1 << 6
+    RESULT_I64 = 1 << 6
+    SYMMETRIC = 1 << 11
+
 
 def _get_scorer_flags_distance(**_kwargs: Any) -> dict[str, Any]:
-    return {"optimal_score": 0, "worst_score": 2**63 - 1, "flags": (1 << 6)}
+    return {
+        "optimal_score": 0,
+        "worst_score": 2**63 - 1,
+        "flags": ScorerFlag.RESULT_I64,
+    }
 
 
 def _get_scorer_flags_similarity(**_kwargs: Any) -> dict[str, Any]:
-    return {"optimal_score": 2**63 - 1, "worst_score": 0, "flags": (1 << 6)}
+    return {
+        "optimal_score": 2**63 - 1,
+        "worst_score": 0,
+        "flags": ScorerFlag.RESULT_I64,
+    }
 
 
 def _get_scorer_flags_normalized_distance(**_kwargs: Any) -> dict[str, Any]:
-    return {"optimal_score": 0, "worst_score": 1, "flags": (1 << 5)}
+    return {"optimal_score": 0, "worst_score": 1, "flags": ScorerFlag.RESULT_F64}
 
 
 def _get_scorer_flags_normalized_similarity(**_kwargs: Any) -> dict[str, Any]:
-    return {"optimal_score": 1, "worst_score": 0, "flags": (1 << 5)}
+    return {"optimal_score": 1, "worst_score": 0, "flags": ScorerFlag.RESULT_F64}
 
 
 def fallback_import(

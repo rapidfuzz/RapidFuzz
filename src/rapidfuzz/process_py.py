@@ -18,6 +18,7 @@ from typing import (
 
 from rapidfuzz.fuzz import WRatio, ratio
 from rapidfuzz.utils import default_process
+from rapidfuzz._utils import ScorerFlag
 
 __all__ = ["extract", "extract_iter", "extractOne", "cdist"]
 
@@ -499,7 +500,7 @@ def _dtype_to_type_num(
     params = getattr(scorer, "_RF_ScorerPy", None)
     if params is not None:
         flags = params["get_scorer_flags"](**kwargs)
-        if flags["flags"] & (1 << 6):
+        if flags["flags"] & ScorerFlag.RESULT_I64:
             return np.int32
         return np.float32
 

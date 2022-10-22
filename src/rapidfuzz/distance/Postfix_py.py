@@ -5,8 +5,6 @@ from __future__ import annotations
 
 from typing import Callable, Hashable, Sequence
 
-from rapidfuzz.distance._initialize import Editops, Opcodes
-
 
 def distance(
     s1: Sequence[Hashable],
@@ -16,10 +14,7 @@ def distance(
     score_cutoff: int | None = None,
 ) -> int:
     """
-    Calculates the Hamming distance between two strings.
-    The hamming distance is defined as the number of positions
-    where the two strings differ. It describes the minimum
-    amount of substitutions required to transform s1 into s2.
+    Calculates the postfix distance between two strings.
 
     Parameters
     ----------
@@ -40,22 +35,14 @@ def distance(
     -------
     distance : int
         distance between s1 and s2
-
-    Raises
-    ------
-    ValueError
-        If s1 and s2 have a different length
     """
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
 
-    dist = 0
-    if len(s1) != len(s2):
-        raise ValueError("Sequences are not the same length.")
-
-    for i in range(len(s1)):
-        dist += s1[i] != s2[i]
+    maximum = max(len(s1), len(s2))
+    sim = similarity(s1, s2)
+    dist = maximum - sim
 
     return dist if (score_cutoff is None or dist <= score_cutoff) else score_cutoff + 1
 
@@ -68,7 +55,7 @@ def similarity(
     score_cutoff: int | None = None,
 ) -> int:
     """
-    Calculates the Hamming similarity between two strings.
+    Calculates the postfix similarity between two strings.
 
     This is calculated as ``len1 - distance``.
 
@@ -91,19 +78,16 @@ def similarity(
     -------
     distance : int
         distance between s1 and s2
-
-    Raises
-    ------
-    ValueError
-        If s1 and s2 have a different length
     """
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
 
-    maximum = len(s1)
-    dist = distance(s1, s2)
-    sim = maximum - dist
+    sim = 0
+    for ch1, ch2 in zip(reversed(s1), reversed(s2)):
+        if ch1 != ch2:
+            break
+        sim += 1
 
     return sim if (score_cutoff is None or sim >= score_cutoff) else 0
 
@@ -116,7 +100,7 @@ def normalized_distance(
     score_cutoff: float | None = None,
 ) -> float:
     """
-    Calculates a normalized Hamming similarity in the range [1, 0].
+    Calculates a normalized postfix similarity in the range [1, 0].
 
     This is calculated as ``distance / (len1 + len2)``.
 
@@ -138,19 +122,11 @@ def normalized_distance(
     -------
     norm_dist : float
         normalized distance between s1 and s2 as a float between 0 and 1.0
-
-    Raises
-    ------
-    ValueError
-        If s1 and s2 have a different length
     """
-    if processor is not None:
-        s1 = processor(s1)
-        s2 = processor(s2)
-
-    maximum = len(s1)
-    dist = distance(s1, s2)
-    norm_dist = dist / maximum if maximum else 0
+    norm_sim = normalized_similarity(
+        s1, s2, processor=processor, score_cutoff=score_cutoff
+    )
+    norm_dist = 1.0 - norm_sim
 
     return norm_dist if (score_cutoff is None or norm_dist <= score_cutoff) else 1.0
 
@@ -163,7 +139,7 @@ def normalized_similarity(
     score_cutoff: float | None = None,
 ) -> float:
     """
-    Calculates a normalized Hamming similarity in the range [0, 1].
+    Calculates a normalized postfix similarity in the range [0, 1].
 
     This is calculated as ``1 - normalized_distance``
 
@@ -185,67 +161,13 @@ def normalized_similarity(
     -------
     norm_sim : float
         normalized similarity between s1 and s2 as a float between 0 and 1.0
-
-    Raises
-    ------
-    ValueError
-        If s1 and s2 have a different length
     """
-    norm_dist = normalized_distance(s1, s2, processor=processor)
-    norm_sim = 1 - norm_dist
+    if processor is not None:
+        s1 = processor(s1)
+        s2 = processor(s2)
+
+    maximum = max(len(s1), len(s2))
+    sim = similarity(s1, s2)
+    norm_sim = sim / maximum if maximum else 1.0
 
     return norm_sim if (score_cutoff is None or norm_sim >= score_cutoff) else 0.0
-
-
-def editops(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
-    *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-) -> Editops:
-    """
-    Return Editops describing how to turn s1 into s2.
-
-    Parameters
-    ----------
-    s1 : Sequence[Hashable]
-        First string to compare.
-    s2 : Sequence[Hashable]
-        Second string to compare.
-    processor: callable, optional
-        Optional callable that is used to preprocess the strings before
-        comparing them. Default is None, which deactivates this behaviour.
-
-    Returns
-    -------
-    editops : Editops
-        edit operations required to turn s1 into s2
-    """
-    raise NotImplementedError
-
-
-def opcodes(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
-    *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-) -> Opcodes:
-    """
-    Return Opcodes describing how to turn s1 into s2.
-
-    Parameters
-    ----------
-    s1 : Sequence[Hashable]
-        First string to compare.
-    s2 : Sequence[Hashable]
-        Second string to compare.
-    processor: callable, optional
-        Optional callable that is used to preprocess the strings before
-        comparing them. Default is None, which deactivates this behaviour.
-
-    Returns
-    -------
-    opcodes : Opcodes
-        edit operations required to turn s1 into s2
-    """
-    raise NotImplementedError
