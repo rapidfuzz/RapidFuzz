@@ -10,6 +10,9 @@ from . import Jaro as Jaro
 from . import JaroWinkler as JaroWinkler
 from . import LCSseq as LCSseq
 from . import Levenshtein as Levenshtein
+from . import OSA as OSA
+from . import Prefix as Prefix
+from . import Postfix as Postfix
 from ._initialize import Editop as Editop
 from ._initialize import Editops as Editops
 from ._initialize import MatchingBlock as MatchingBlock
