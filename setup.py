@@ -62,6 +62,7 @@ def run_setup(with_binary):
 packaging = "1" in {
     os.environ.get("CIBUILDWHEEL", "0"),
     os.environ.get("CONDA_BUILD", "0"),
+    os.environ.get("PIWHEELS_BUILD", "0"),
     os.environ.get("RAPIDFUZZ_BUILD_EXTENSION", "0"),
 }
 if packaging:
