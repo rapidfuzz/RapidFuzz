@@ -9,7 +9,7 @@ from enum import Flag
 
 
 class ScorerFlag(Flag):
-    RESULT_F64 = 1 << 6
+    RESULT_F64 = 1 << 5
     RESULT_I64 = 1 << 6
     SYMMETRIC = 1 << 11
 
