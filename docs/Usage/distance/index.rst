@@ -31,3 +31,5 @@ Opcodes
    JaroWinkler
    Levenshtein
    OSA
+   Prefix
+   Postfix
