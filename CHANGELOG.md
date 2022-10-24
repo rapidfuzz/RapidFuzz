@@ -1,12 +1,14 @@
 ## Changelog
 
-### [2.12.0] - 2022-10-22
+### [2.12.0] - 2022-10-24
 #### Changed
 - drop support for Python 3.6
 
 #### Added
 - added `Prefix`/`Suffix` similarity
 
+#### Fixed
+- fixed packaging with pyinstaller
 
 ### [2.11.1] - 2022-10-05
 #### Fixed

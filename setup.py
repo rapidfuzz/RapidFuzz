@@ -31,7 +31,13 @@ setup_args = {
         "Programming Language :: Python :: 3.11",
         "License :: OSI Approved :: MIT License",
     ],
-    "packages": ["rapidfuzz", "rapidfuzz.distance"],
+    "packages": ["rapidfuzz", "rapidfuzz.distance", "rapidfuzz.__pyinstaller"],
+    "entry_points": {
+        "pyinstaller40": [
+            "hook-dirs = rapidfuzz.__pyinstaller:get_hook_dirs",
+            "tests = rapidfuzz.__pyinstaller:get_PyInstaller_tests",
+        ],
+    },
     "package_dir": {
         "": "src",
     },
