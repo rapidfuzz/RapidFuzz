@@ -1,6 +1,6 @@
 # Pyinstaller hook to successfully freeze: https://pyinstaller.readthedocs.io/en/stable/hooks.html
 hiddenimports = [
-    "array.array",
+    "array",
     "rapidfuzz.fuzz_py",
     "rapidfuzz.fuzz_cpp",
     "rapidfuzz.utils_py",
