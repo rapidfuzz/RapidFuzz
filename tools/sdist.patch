@@ -1,11 +1,11 @@
 diff --git a/pyproject.toml b/pyproject.toml
-index 4fcb1d7..af19a4a 100644
+index 1b56a82..cbb1b77 100644
 --- a/pyproject.toml
 +++ b/pyproject.toml
-@@ -3,7 +3,6 @@ requires = [
+@@ -2,7 +2,6 @@
+ requires = [
      "setuptools>=42",
-     "scikit-build==0.14.1; platform_system=='Linux'",
-     "scikit-build==0.15.0; platform_system!='Linux'",
+     "scikit-build==0.16.1",
 -    "Cython==3.0.0a11",
      "rapidfuzz_capi==1.0.5"
  ]
