@@ -1,5 +1,9 @@
 ## Changelog
 
+### [2.13.0] - 2022-
+#### Fixed
+- fix bug in `Levenshtein.editops` leading to crashes when used with `score_hint`
+
 ### [2.12.0] - 2022-10-24
 #### Changed
 - drop support for Python 3.6
