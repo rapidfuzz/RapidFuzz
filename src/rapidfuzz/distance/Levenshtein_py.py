@@ -106,7 +106,7 @@ def distance(
         The weights for the three operations in the form
         (insertion, deletion, substitution). Default is (1, 1, 1),
         which gives all three operations a weight of 1.
-    processor: callable, optional
+    processor : callable, optional
         Optional callable that is used to preprocess the strings before
         comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : int, optional
@@ -114,6 +114,9 @@ def distance(
         considered as a result. If the distance is bigger than score_cutoff,
         score_cutoff + 1 is returned instead. Default is None, which deactivates
         this behaviour.
+    score_hint : int, optional
+        Expected distance between s1 and s2. This is used to select a
+        faster implementation. Default is None, which deactivates this behaviour.
 
     Returns
     -------
@@ -185,7 +188,7 @@ def similarity(
         The weights for the three operations in the form
         (insertion, deletion, substitution). Default is (1, 1, 1),
         which gives all three operations a weight of 1.
-    processor: callable, optional
+    processor : callable, optional
         Optional callable that is used to preprocess the strings before
         comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : int, optional
@@ -193,6 +196,9 @@ def similarity(
         considered as a result. If the similarity is smaller than score_cutoff,
         0 is returned instead. Default is None, which deactivates
         this behaviour.
+    score_hint : int, optional
+        Expected similarity between s1 and s2. This is used to select a
+        faster implementation. Default is None, which deactivates this behaviour.
 
     Returns
     -------
@@ -241,13 +247,16 @@ def normalized_distance(
         The weights for the three operations in the form
         (insertion, deletion, substitution). Default is (1, 1, 1),
         which gives all three operations a weight of 1.
-    processor: callable, optional
+    processor : callable, optional
         Optional callable that is used to preprocess the strings before
         comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 1.0.
-        For norm_dist > score_cutoff 1.0 is returned instead. Default is 1.0,
+        For norm_dist > score_cutoff 1.0 is returned instead. Default is None,
         which deactivates this behaviour.
+    score_hint : float, optional
+        Expected normalized distance between s1 and s2. This is used to select a
+        faster implementation. Default is None, which deactivates this behaviour.
 
     Returns
     -------
@@ -295,13 +304,16 @@ def normalized_similarity(
         The weights for the three operations in the form
         (insertion, deletion, substitution). Default is (1, 1, 1),
         which gives all three operations a weight of 1.
-    processor: callable, optional
+    processor : callable, optional
         Optional callable that is used to preprocess the strings before
         comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 1.0.
-        For norm_sim < score_cutoff 0 is returned instead. Default is 0,
+        For norm_sim < score_cutoff 0 is returned instead. Default is None,
         which deactivates this behaviour.
+    score_hint : int, optional
+        Expected normalized similarity between s1 and s2. This is used to select a
+        faster implementation. Default is None, which deactivates this behaviour.
 
     Returns
     -------
@@ -364,13 +376,12 @@ def editops(
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
-    processor: callable, optional
+    processor : callable, optional
         Optional callable that is used to preprocess the strings before
         comparing them. Default is None, which deactivates this behaviour.
     score_hint : int, optional
-        Expected edit distance between s1 and s2. This is used to select a
-        faster implementation. If the edit distance is bigger than `score_hint`,
-        it is doubled until the distance is smaller than `score_hint`.
+        Expected distance between s1 and s2. This is used to select a
+        faster implementation. Default is None, which deactivates this behaviour.
 
     Returns
     -------
@@ -415,13 +426,12 @@ def opcodes(
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
-    processor: callable, optional
+    processor : callable, optional
         Optional callable that is used to preprocess the strings before
         comparing them. Default is None, which deactivates this behaviour.
     score_hint : int, optional
-        Expected edit distance between s1 and s2. This is used to select a
-        faster implementation. If the edit distance is bigger than `score_hint`,
-        it is doubled until the distance is smaller than `score_hint`.
+        Expected distance between s1 and s2. This is used to select a
+        faster implementation. Default is None, which deactivates this behaviour.
 
     Returns
     -------

@@ -9,6 +9,7 @@ from rapidfuzz import distance, fuzz, process, string_metric, utils
 
 __all__ = ["distance", "fuzz", "process", "string_metric", "utils", "get_include"]
 
+
 def get_include():
     """
     Return the directory that contains the RapidFuzz \\*.h header files.
@@ -25,4 +26,5 @@ def get_include():
         ...
     """
     import os
+
     return os.path.dirname(__file__)

@@ -16,9 +16,9 @@ from typing import (
     overload,
 )
 
+from rapidfuzz._utils import ScorerFlag
 from rapidfuzz.fuzz import WRatio, ratio
 from rapidfuzz.utils import default_process
-from rapidfuzz._utils import ScorerFlag
 
 __all__ = ["extract", "extract_iter", "extractOne", "cdist"]
 
@@ -39,6 +39,7 @@ def extract_iter(
     scorer: Callable[..., int | float] = WRatio,
     processor: Callable[..., Sequence[Hashable]] | None | bool = None,
     score_cutoff: int | float | None = None,
+    score_hint: int | float | None = None,
     **kwargs: Any,
 ) -> Iterable[tuple[Sequence[Hashable], int | float, int]]:
     ...
@@ -52,6 +53,7 @@ def extract_iter(
     scorer: Callable[..., int | float] = WRatio,
     processor: Callable[..., Sequence[Hashable]] | None | bool = None,
     score_cutoff: int | float | None = None,
+    score_hint: int | float | None = None,
     **kwargs: Any,
 ) -> Iterable[tuple[Sequence[Hashable], int | float, Any]]:
     ...
@@ -65,6 +67,7 @@ def extract_iter(
     scorer: Callable[..., int | float] = WRatio,
     processor: Callable[..., Sequence[Hashable]] | None | bool = default_process,
     score_cutoff: int | float | None = None,
+    score_hint: int | float | None = None,
     **kwargs: Any,
 ) -> Iterable[tuple[Sequence[Hashable], int | float, Any]]:
     """
@@ -91,6 +94,10 @@ def extract_iter(
         edit distance and matches with a `distance <= score_cutoff` are ignored. When a
         normalized edit distance is used this represents the minimal similarity
         and matches with a `similarity >= score_cutoff` are ignored. Default is None, which deactivates this behaviour.
+    score_hint : Any, optional
+        Optional argument for an expected score to be passed to the scorer.
+        This is used to select a faster implementation. Default is None,
+        which deactivates this behaviour.
     **kwargs : Any, optional
         any other named parameters are passed to the scorer. This can be used to pass
         e.g. weights to string_metric.levenshtein
@@ -173,6 +180,7 @@ def extractOne(
     scorer: Callable[..., int | float] = WRatio,
     processor: Callable[..., Sequence[Hashable]] | None | bool = None,
     score_cutoff: int | float | None = None,
+    score_hint: int | float | None = None,
     **kwargs: Any,
 ) -> tuple[Sequence[Hashable], int | float, int] | None:
     ...
@@ -186,6 +194,7 @@ def extractOne(
     scorer: Callable[..., int | float] = WRatio,
     processor: Callable[..., Sequence[Hashable]] | None | bool = None,
     score_cutoff: int | float | None = None,
+    score_hint: int | float | None = None,
     **kwargs: Any,
 ) -> tuple[Sequence[Hashable], int | float, Any] | None:
     ...
@@ -199,6 +208,7 @@ def extractOne(
     scorer: Callable[..., int | float] = WRatio,
     processor: Callable[..., Sequence[Hashable]] | None | bool = default_process,
     score_cutoff: int | float | None = None,
+    score_hint: int | float | None = None,
     **kwargs: Any,
 ) -> tuple[Sequence[Hashable], int | float, Any] | None:
     """
@@ -226,6 +236,10 @@ def extractOne(
         edit distance and matches with a `distance <= score_cutoff` are ignored. When a
         normalized edit distance is used this represents the minimal similarity
         and matches with a `similarity >= score_cutoff` are ignored. Default is None, which deactivates this behaviour.
+    score_hint : Any, optional
+        Optional argument for an expected score to be passed to the scorer.
+        This is used to select a faster implementation. Default is None,
+        which deactivates this behaviour.
     **kwargs : Any, optional
         any other named parameters are passed to the scorer. This can be used to pass
         e.g. weights to string_metric.levenshtein
@@ -380,6 +394,7 @@ def extract(
     processor: Callable[..., Sequence[Hashable]] | None | bool = None,
     limit: int | None = None,
     score_cutoff: int | float | None = None,
+    score_hint: int | float | None = None,
     **kwargs: Any,
 ) -> list[tuple[Sequence[Hashable], int | float, int]]:
     ...
@@ -394,6 +409,7 @@ def extract(
     processor: Callable[..., Sequence[Hashable]] | None | bool = None,
     limit: int | None = None,
     score_cutoff: int | float | None = None,
+    score_hint: int | float | None = None,
     **kwargs: Any,
 ) -> list[tuple[Sequence[Hashable], int | float, Any]]:
     ...
@@ -408,6 +424,7 @@ def extract(
     processor: Callable[..., Sequence[Hashable]] | None | bool = default_process,
     limit: int | None = 5,
     score_cutoff: int | float | None = None,
+    score_hint: int | float | None = None,
     **kwargs: Any,
 ) -> list[tuple[Sequence[Hashable], int | float, Any]]:
     """
@@ -437,6 +454,10 @@ def extract(
         edit distance and matches with a `distance <= score_cutoff` are ignored. When a
         normalized edit distance is used this represents the minimal similarity
         and matches with a `similarity >= score_cutoff` are ignored. Default is None, which deactivates this behaviour.
+    score_hint : Any, optional
+        Optional argument for an expected score to be passed to the scorer.
+        This is used to select a faster implementation. Default is None,
+        which deactivates this behaviour.
     **kwargs : Any, optional
         any other named parameters are passed to the scorer. This can be used to pass
         e.g. weights to string_metric.levenshtein
@@ -514,6 +535,7 @@ def cdist(
     scorer: Callable[..., int | float] = ratio,
     processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: int | float | None = None,
+    score_hint: int | float | None = None,
     dtype: np.dtype | None = None,
     workers: int = 1,
     **kwargs: Any,
@@ -543,6 +565,10 @@ def cdist(
     score_cutoff : Any, optional
         Optional argument for a score threshold to be passed to the scorer.
         Default is None, which deactivates this behaviour.
+    score_hint : Any, optional
+        Optional argument for an expected score to be passed to the scorer.
+        This is used to select a faster implementation. Default is None,
+        which deactivates this behaviour.
     dtype : data-type, optional
         The desired data-type for the result array.Depending on the scorer type the following
         dtypes are supported:

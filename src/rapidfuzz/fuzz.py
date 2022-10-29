@@ -5,10 +5,8 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
-from rapidfuzz._utils import (
-    ScorerFlag as _ScorerFlag,
-    fallback_import as _fallback_import,
-)
+from rapidfuzz._utils import ScorerFlag as _ScorerFlag
+from rapidfuzz._utils import fallback_import as _fallback_import
 
 
 def _get_scorer_flags_fuzz(**_kwargs: Any) -> dict[str, Any]:

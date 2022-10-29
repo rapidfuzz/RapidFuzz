@@ -40,9 +40,8 @@ if(RAPIDFUZZ_ARCH_X64)
               ${RF_BASE_DIR}/rapidfuzz/simd/avx2/edit_based_avx2.cpp)
   target_compile_features(edit_based_avx2 PUBLIC cxx_std_17)
   target_include_directories(
-    edit_based_avx2
-    PRIVATE ${Python_INCLUDE_DIRS} ${RF_BASE_DIR}/rapidfuzz
-            ${RF_BASE_DIR}/rapidfuzz/distance)
+    edit_based_avx2 PRIVATE ${Python_INCLUDE_DIRS} ${RF_BASE_DIR}/rapidfuzz
+                            ${RF_BASE_DIR}/rapidfuzz/distance)
   target_link_libraries(edit_based_avx2 PRIVATE rapidfuzz::rapidfuzz)
   if(MSVC)
     set_target_properties(edit_based_avx2 PROPERTIES COMPILE_FLAGS "/arch:AVX2")
@@ -54,9 +53,8 @@ if(RAPIDFUZZ_ARCH_X64)
               ${RF_BASE_DIR}/rapidfuzz/simd/sse2/edit_based_sse2.cpp)
   target_compile_features(edit_based_sse2 PUBLIC cxx_std_17)
   target_include_directories(
-    edit_based_sse2
-    PRIVATE ${Python_INCLUDE_DIRS} ${RF_BASE_DIR}/rapidfuzz
-            ${RF_BASE_DIR}/rapidfuzz/distance)
+    edit_based_sse2 PRIVATE ${Python_INCLUDE_DIRS} ${RF_BASE_DIR}/rapidfuzz
+                            ${RF_BASE_DIR}/rapidfuzz/distance)
   target_link_libraries(edit_based_sse2 PRIVATE rapidfuzz::rapidfuzz)
   if(NOT MSVC)
     set_target_properties(edit_based_sse2 PROPERTIES COMPILE_FLAGS "-msse2")

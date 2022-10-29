@@ -7,6 +7,8 @@
 #### Changed
 - moved capi from `rapidfuzz_capi` into `rapidfuzz`, since it will always
   succeed the installation now that there is a pure Python mode
+- add `score_hint` argument to process module
+- add `score_hint` argument to Levenshtein module
 
 ### [2.12.0] - 2022-10-24
 #### Changed

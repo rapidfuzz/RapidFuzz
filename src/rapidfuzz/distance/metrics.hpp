@@ -13,7 +13,8 @@ static inline int64_t levenshtein_distance_func(const RF_String& str1, const RF_
                                                 int64_t score_cutoff, int64_t score_hint)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
-        return rapidfuzz::levenshtein_distance(s1, s2, {insertion, deletion, substitution}, score_cutoff, score_hint);
+        return rapidfuzz::levenshtein_distance(s1, s2, {insertion, deletion, substitution}, score_cutoff,
+                                               score_hint);
     });
 }
 
@@ -51,7 +52,8 @@ static inline bool LevenshteinMultiStringSupport(const RF_Kwargs* kwargs)
 
 static inline double levenshtein_normalized_distance_func(const RF_String& str1, const RF_String& str2,
                                                           int64_t insertion, int64_t deletion,
-                                                          int64_t substitution, double score_cutoff, double score_hint)
+                                                          int64_t substitution, double score_cutoff,
+                                                          double score_hint)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rapidfuzz::levenshtein_normalized_distance(s1, s2, {insertion, deletion, substitution},
@@ -82,7 +84,8 @@ static inline int64_t levenshtein_similarity_func(const RF_String& str1, const R
                                                   int64_t score_cutoff, int64_t score_hint)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
-        return rapidfuzz::levenshtein_similarity(s1, s2, {insertion, deletion, substitution}, score_cutoff, score_hint);
+        return rapidfuzz::levenshtein_similarity(s1, s2, {insertion, deletion, substitution}, score_cutoff,
+                                                 score_hint);
     });
 }
 
@@ -107,7 +110,8 @@ static inline bool LevenshteinSimilarityInit(RF_ScorerFunc* self, const RF_Kwarg
 
 static inline double levenshtein_normalized_similarity_func(const RF_String& str1, const RF_String& str2,
                                                             int64_t insertion, int64_t deletion,
-                                                            int64_t substitution, double score_cutoff, double score_hint)
+                                                            int64_t substitution, double score_cutoff,
+                                                            double score_hint)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rapidfuzz::levenshtein_normalized_similarity(s1, s2, {insertion, deletion, substitution},
@@ -192,7 +196,8 @@ static inline bool DamerauLevenshteinNormalizedSimilarityInit(RF_ScorerFunc* sel
 }
 
 /* Hamming */
-static inline int64_t hamming_distance_func(const RF_String& str1, const RF_String& str2, int64_t score_cutoff)
+static inline int64_t hamming_distance_func(const RF_String& str1, const RF_String& str2,
+                                            int64_t score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rapidfuzz::hamming_distance(s1, s2, score_cutoff);
@@ -217,7 +222,8 @@ static inline bool HammingNormalizedDistanceInit(RF_ScorerFunc* self, const RF_K
     return normalized_distance_init<rapidfuzz::CachedHamming, double>(self, str_count, str);
 }
 
-static inline int64_t hamming_similarity_func(const RF_String& str1, const RF_String& str2, int64_t score_cutoff)
+static inline int64_t hamming_similarity_func(const RF_String& str1, const RF_String& str2,
+                                              int64_t score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rapidfuzz::hamming_similarity(s1, s2, score_cutoff);
@@ -294,7 +300,8 @@ static inline bool IndelNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwa
     return normalized_distance_init<rapidfuzz::CachedIndel, double>(self, str_count, str);
 }
 
-static inline int64_t indel_similarity_func(const RF_String& str1, const RF_String& str2, int64_t score_cutoff)
+static inline int64_t indel_similarity_func(const RF_String& str1, const RF_String& str2,
+                                            int64_t score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rapidfuzz::indel_similarity(s1, s2, score_cutoff);
@@ -338,7 +345,8 @@ static inline bool IndelNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_K
 }
 
 /* LCSseq */
-static inline int64_t lcs_seq_distance_func(const RF_String& str1, const RF_String& str2, int64_t score_cutoff)
+static inline int64_t lcs_seq_distance_func(const RF_String& str1, const RF_String& str2,
+                                            int64_t score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rapidfuzz::lcs_seq_distance(s1, s2, score_cutoff);
@@ -389,7 +397,8 @@ static inline bool LCSseqNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kw
     return normalized_distance_init<rapidfuzz::CachedLCSseq, double>(self, str_count, str);
 }
 
-static inline int64_t lcs_seq_similarity_func(const RF_String& str1, const RF_String& str2, int64_t score_cutoff)
+static inline int64_t lcs_seq_similarity_func(const RF_String& str1, const RF_String& str2,
+                                              int64_t score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rapidfuzz::lcs_seq_similarity(s1, s2, score_cutoff);
@@ -677,51 +686,53 @@ static inline int64_t prefix_distance_func(const RF_String& str1, const RF_Strin
     });
 }
 static inline bool PrefixDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
-                                       const RF_String* str)
+                                      const RF_String* str)
 {
     return distance_init<rapidfuzz::CachedPrefix, int64_t>(self, str_count, str);
 }
 
 static inline double prefix_normalized_distance_func(const RF_String& str1, const RF_String& str2,
-                                                      double score_cutoff)
+                                                     double score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rapidfuzz::prefix_normalized_distance(s1, s2, score_cutoff);
     });
 }
 static inline bool PrefixNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
-                                                 const RF_String* str)
+                                                const RF_String* str)
 {
     return normalized_distance_init<rapidfuzz::CachedPrefix, double>(self, str_count, str);
 }
 
-static inline int64_t prefix_similarity_func(const RF_String& str1, const RF_String& str2, int64_t score_cutoff)
+static inline int64_t prefix_similarity_func(const RF_String& str1, const RF_String& str2,
+                                             int64_t score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rapidfuzz::prefix_similarity(s1, s2, score_cutoff);
     });
 }
 static inline bool PrefixSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
-                                         const RF_String* str)
+                                        const RF_String* str)
 {
     return similarity_init<rapidfuzz::CachedPrefix, int64_t>(self, str_count, str);
 }
 
 static inline double prefix_normalized_similarity_func(const RF_String& str1, const RF_String& str2,
-                                                        double score_cutoff)
+                                                       double score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rapidfuzz::prefix_normalized_similarity(s1, s2, score_cutoff);
     });
 }
 static inline bool PrefixNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
-                                                   const RF_String* str)
+                                                  const RF_String* str)
 {
     return normalized_similarity_init<rapidfuzz::CachedPrefix, double>(self, str_count, str);
 }
 
 /* Postfix */
-static inline int64_t postfix_distance_func(const RF_String& str1, const RF_String& str2, int64_t score_cutoff)
+static inline int64_t postfix_distance_func(const RF_String& str1, const RF_String& str2,
+                                            int64_t score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rapidfuzz::postfix_distance(s1, s2, score_cutoff);
@@ -746,7 +757,8 @@ static inline bool PostfixNormalizedDistanceInit(RF_ScorerFunc* self, const RF_K
     return normalized_distance_init<rapidfuzz::CachedPostfix, double>(self, str_count, str);
 }
 
-static inline int64_t postfix_similarity_func(const RF_String& str1, const RF_String& str2, int64_t score_cutoff)
+static inline int64_t postfix_similarity_func(const RF_String& str1, const RF_String& str2,
+                                              int64_t score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rapidfuzz::postfix_similarity(s1, s2, score_cutoff);
