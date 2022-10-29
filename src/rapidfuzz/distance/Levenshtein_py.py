@@ -89,6 +89,7 @@ def distance(
     weights: tuple[int, int, int] | None = (1, 1, 1),
     processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: int | None = None,
+    score_hint: int | None = None,
 ) -> int:
     """
     Calculates the minimum number of insertions, deletions, and substitutions
@@ -165,6 +166,7 @@ def similarity(
     weights: tuple[int, int, int] | None = (1, 1, 1),
     processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: int | None = None,
+    score_hint: int | None = None,
 ) -> int:
     """
     Calculates the levenshtein similarity in the range [max, 0] using custom
@@ -220,6 +222,7 @@ def normalized_distance(
     weights: tuple[int, int, int] | None = (1, 1, 1),
     processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: float | None = None,
+    score_hint: float | None = None,
 ) -> float:
     """
     Calculates a normalized levenshtein distance in the range [1, 0] using custom
@@ -274,6 +277,7 @@ def normalized_similarity(
     weights: tuple[int, int, int] | None = (1, 1, 1),
     processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: float | None = None,
+    score_hint: float | None = None,
 ) -> float:
     """
     Calculates a normalized levenshtein similarity in the range [0, 1] using custom

@@ -1,6 +1,6 @@
 #pragma once
 #include "cpp_common.hpp"
-#include "rapidfuzz_capi.h"
+#include "rapidfuzz.h"
 #include "taskflow/taskflow.hpp"
 #include <atomic>
 #include <chrono>

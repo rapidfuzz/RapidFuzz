@@ -36,7 +36,7 @@ create_cython_target(_initialize_cpp)
 rf_add_library(_initialize_cpp ${_initialize_cpp})
 target_compile_features(_initialize_cpp PUBLIC cxx_std_17)
 target_include_directories(
-  _initialize_cpp PRIVATE ${RF_CAPI_PATH} ${RF_BASE_DIR}/rapidfuzz
+  _initialize_cpp PRIVATE ${RF_BASE_DIR}/rapidfuzz
                           ${RF_BASE_DIR}/rapidfuzz/distance)
 target_link_libraries(_initialize_cpp PRIVATE rapidfuzz::rapidfuzz)
 install(TARGETS _initialize_cpp LIBRARY DESTINATION src/rapidfuzz/distance)
@@ -45,7 +45,7 @@ create_cython_target(metrics_cpp)
 rf_add_library(metrics_cpp ${metrics_cpp})
 target_compile_features(metrics_cpp PUBLIC cxx_std_17)
 target_include_directories(
-  metrics_cpp PRIVATE ${RF_CAPI_PATH} ${RF_BASE_DIR}/rapidfuzz
+  metrics_cpp PRIVATE ${RF_BASE_DIR}/rapidfuzz
                       ${RF_BASE_DIR}/rapidfuzz/distance)
 target_link_libraries(metrics_cpp PRIVATE rapidfuzz::rapidfuzz)
 if(RAPIDFUZZ_ARCH_X64)

@@ -29,7 +29,7 @@ import heapq
 from array import array
 
 from cpython.pycapsule cimport PyCapsule_GetPointer, PyCapsule_IsValid
-from rapidfuzz_capi cimport (
+from rapidfuzz cimport (
     RF_SCORER_FLAG_RESULT_F64,
     RF_SCORER_FLAG_RESULT_I64,
     RF_SCORER_FLAG_SYMMETRIC,
@@ -40,6 +40,7 @@ from rapidfuzz_capi cimport (
     RF_ScorerFlags,
     RF_ScorerFunc,
     RF_String,
+    SCORER_STRUCT_VERSION
 )
 
 
@@ -151,7 +152,7 @@ cdef inline vector[DictStringElem] preprocess_dict(queries, processor) except *:
             processor_context = <RF_Preprocessor*>PyCapsule_GetPointer(processor_capsule, NULL)
 
         # use RapidFuzz C-Api
-        if processor_context != NULL and processor_context.version == 1:
+        if processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
             for i, (query_key, query) in enumerate(queries.items()):
                 if query is None:
                     continue
@@ -202,7 +203,7 @@ cdef inline vector[ListStringElem] preprocess_list(queries, processor) except *:
             processor_context = <RF_Preprocessor*>PyCapsule_GetPointer(processor_capsule, NULL)
 
         # use RapidFuzz C-Api
-        if processor_context != NULL and processor_context.version == 1:
+        if processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
             for i, query in enumerate(queries):
                 if query is None:
                     continue
@@ -261,7 +262,7 @@ cdef inline extractOne_dict_f64(query, choices, RF_Scorer* scorer, const RF_Scor
 
         if processor is None:
             proc_choice = move(RF_StringWrapper(conv_sequence(choice)))
-        elif processor_context != NULL and processor_context.version == 1:
+        elif processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
             processor_context.preprocess(choice, &proc_str)
             proc_choice = move(RF_StringWrapper(proc_str))
         else:
@@ -323,7 +324,7 @@ cdef inline extractOne_dict_i64(query, choices, RF_Scorer* scorer, const RF_Scor
 
         if processor is None:
             proc_choice = move(RF_StringWrapper(conv_sequence(choice)))
-        elif processor_context != NULL and processor_context.version == 1:
+        elif processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
             processor_context.preprocess(choice, &proc_str)
             proc_choice = move(RF_StringWrapper(proc_str))
         else:
@@ -398,7 +399,7 @@ cdef inline extractOne_list_f64(query, choices, RF_Scorer* scorer, const RF_Scor
 
         if processor is None:
             proc_choice = move(RF_StringWrapper(conv_sequence(choice)))
-        elif processor_context != NULL and processor_context.version == 1:
+        elif processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
             processor_context.preprocess(choice, &proc_str)
             proc_choice = move(RF_StringWrapper(proc_str))
         else:
@@ -458,7 +459,7 @@ cdef inline extractOne_list_i64(query, choices, RF_Scorer* scorer, const RF_Scor
 
         if processor is None:
             proc_choice = move(RF_StringWrapper(conv_sequence(choice)))
-        elif processor_context != NULL and processor_context.version == 1:
+        elif processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
             processor_context.preprocess(choice, &proc_str)
             proc_choice = move(RF_StringWrapper(proc_str))
         else:
@@ -608,7 +609,7 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
     if PyCapsule_IsValid(scorer_capsule, NULL):
         scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
 
-    if scorer_context and scorer_context.version == 1:
+    if scorer_context and scorer_context.version == SCORER_STRUCT_VERSION:
         kwargs_context = RF_KwargsWrapper()
         scorer_context.kwargs_init(&kwargs_context.kwargs, kwargs)
         scorer_context.get_scorer_flags(&kwargs_context.kwargs, &scorer_flags)
@@ -855,7 +856,7 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
     if PyCapsule_IsValid(scorer_capsule, NULL):
         scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
 
-    if scorer_context and scorer_context.version == 1:
+    if scorer_context and scorer_context.version == SCORER_STRUCT_VERSION:
         kwargs_context = RF_KwargsWrapper()
         scorer_context.kwargs_init(&kwargs_context.kwargs, kwargs)
         scorer_context.get_scorer_flags(&kwargs_context.kwargs, &scorer_flags)
@@ -910,7 +911,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
                 continue
 
             # use RapidFuzz C-Api
-            if processor_context != NULL and processor_context.version == 1:
+            if processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
                 processor_context.preprocess(choice, &proc_str)
                 choice_proc = RF_StringWrapper(proc_str)
             elif processor is not None:
@@ -952,7 +953,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
                 continue
 
             # use RapidFuzz C-Api
-            if processor_context != NULL and processor_context.version == 1:
+            if processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
                 processor_context.preprocess(choice, &proc_str)
                 choice_proc = RF_StringWrapper(proc_str)
             elif processor is not None:
@@ -994,7 +995,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
                 continue
 
             # use RapidFuzz C-Api
-            if processor_context != NULL and processor_context.version == 1:
+            if processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
                 processor_context.preprocess(choice, &proc_str)
                 choice_proc = RF_StringWrapper(proc_str)
             elif processor is not None:
@@ -1036,7 +1037,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
                 continue
 
             # use RapidFuzz C-Api
-            if processor_context != NULL and processor_context.version == 1:
+            if processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
                 processor_context.preprocess(choice, &proc_str)
                 choice_proc = RF_StringWrapper(proc_str)
             elif processor is not None:
@@ -1122,7 +1123,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
     if PyCapsule_IsValid(scorer_capsule, NULL):
         scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
 
-    if scorer_context and scorer_context.version == 1:
+    if scorer_context and scorer_context.version == SCORER_STRUCT_VERSION:
         kwargs_context = RF_KwargsWrapper()
         scorer_context.kwargs_init(&kwargs_context.kwargs, kwargs)
         scorer_context.get_scorer_flags(&kwargs_context.kwargs, &scorer_flags)
@@ -1207,7 +1208,7 @@ cdef inline vector[RF_StringWrapper] preprocess(queries, processor) except *:
             processor_context = <RF_Preprocessor*>PyCapsule_GetPointer(processor_capsule, NULL)
 
         # use RapidFuzz C-Api
-        if processor_context != NULL and processor_context.version == 1:
+        if processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
             for query in queries:
                 processor_context.preprocess(query, &proc_str)
                 proc_queries.emplace_back(proc_str)
@@ -1348,7 +1349,7 @@ def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, 
         scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
 
     if scorer_context:
-        if scorer_context.version == 1:
+        if scorer_context.version == SCORER_STRUCT_VERSION:
             kwargs_context = RF_KwargsWrapper()
             scorer_context.kwargs_init(&kwargs_context.kwargs, kwargs)
             scorer_context.get_scorer_flags(&kwargs_context.kwargs, &scorer_flags)

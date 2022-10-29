@@ -42,7 +42,7 @@ setup_args = {
         "": "src",
     },
     "package_data": {
-        "rapidfuzz": ["*.pyi", "py.typed"],
+        "rapidfuzz": ["*.pyi", "py.typed", "__init__.pxd", "rapidfuzz.h"],
         "rapidfuzz.distance": ["*.pyi"],
     },
     "python_requires": ">=3.7",
@@ -51,13 +51,9 @@ setup_args = {
 
 def run_setup(with_binary):
     if with_binary:
-        import rapidfuzz_capi
         from skbuild import setup
 
-        setup(
-            **setup_args,
-            cmake_args=[f"-DRF_CAPI_PATH:STRING={rapidfuzz_capi.get_include()}"],
-        )
+        setup(**setup_args)
     else:
         from setuptools import setup
 

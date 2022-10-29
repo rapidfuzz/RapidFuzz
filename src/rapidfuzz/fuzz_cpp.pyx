@@ -3,7 +3,7 @@
 
 from .distance._initialize_cpp import ScoreAlignment
 
-from rapidfuzz_capi cimport (
+from rapidfuzz cimport (
     RF_SCORER_FLAG_MULTI_STRING_INIT,
     RF_SCORER_FLAG_RESULT_F64,
     RF_SCORER_FLAG_SYMMETRIC,
