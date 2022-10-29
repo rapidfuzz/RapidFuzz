@@ -1,12 +1,14 @@
 diff --git a/pyproject.toml b/pyproject.toml
-index 1b56a82..cbb1b77 100644
+index 77671b1..7692f90 100644
 --- a/pyproject.toml
 +++ b/pyproject.toml
-@@ -2,7 +2,6 @@
+@@ -1,8 +1,7 @@
+ [build-system]
  requires = [
      "setuptools>=42",
-     "scikit-build==0.16.1",
--    "Cython==3.0.0a11",
-     "rapidfuzz_capi==1.0.5"
+-    "scikit-build==0.16.1",
+-    "Cython==3.0.0a11"
++    "scikit-build==0.16.1"
  ]
  build-backend = "backend"
+ backend-path = ["_custom_build"]
