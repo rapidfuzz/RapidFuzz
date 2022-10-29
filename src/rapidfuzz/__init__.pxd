@@ -1,5 +1,6 @@
+from libc.stdint cimport int64_t, uint32_t
 from libcpp cimport bool
-from libc.stdint cimport uint32_t, int64_t
+
 
 cdef extern from "rapidfuzz.h":
     cdef enum RF_StringType:

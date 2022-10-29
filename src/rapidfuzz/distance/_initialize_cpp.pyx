@@ -10,6 +10,7 @@ from libc.stdlib cimport free, malloc
 from libcpp cimport bool
 from libcpp.utility cimport move
 from libcpp.vector cimport vector
+
 from rapidfuzz cimport RF_String
 
 

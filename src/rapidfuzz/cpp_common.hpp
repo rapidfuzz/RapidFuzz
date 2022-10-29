@@ -341,63 +341,65 @@ static void scorer_deinit(RF_ScorerFunc* self)
 
 template <typename CachedScorer, typename T>
 static inline bool distance_func_wrapper(const RF_ScorerFunc* self, const RF_String* str, int64_t str_count,
-                                         T score_cutoff, T* result)
+                                         T score_cutoff, T score_hint, T* result)
 {
     return PyExceptionHandler([&] {
         CachedScorer& scorer = *(CachedScorer*)self->context;
         if (str_count != 1) throw std::logic_error("Only str_count == 1 supported");
 
         *result = visit(*str, [&](auto s) {
-            return scorer.distance(s, score_cutoff);
+            return scorer.distance(s, score_cutoff, score_hint);
         });
     });
 }
 
 template <typename CachedScorer, typename T>
 static inline bool normalized_distance_func_wrapper(const RF_ScorerFunc* self, const RF_String* str,
-                                                    int64_t str_count, T score_cutoff, T* result)
+                                                    int64_t str_count, T score_cutoff, T score_hint,
+                                                    T* result)
 {
     return PyExceptionHandler([&] {
         CachedScorer& scorer = *(CachedScorer*)self->context;
         if (str_count != 1) throw std::logic_error("Only str_count == 1 supported");
 
         *result = visit(*str, [&](auto s) {
-            return scorer.normalized_distance(s, score_cutoff);
+            return scorer.normalized_distance(s, score_cutoff, score_hint);
         });
     });
 }
 
 template <typename CachedScorer, typename T>
 static inline bool similarity_func_wrapper(const RF_ScorerFunc* self, const RF_String* str, int64_t str_count,
-                                           T score_cutoff, T* result)
+                                           T score_cutoff, T score_hint, T* result)
 {
     return PyExceptionHandler([&] {
         CachedScorer& scorer = *(CachedScorer*)self->context;
         if (str_count != 1) throw std::logic_error("Only str_count == 1 supported");
 
         *result = visit(*str, [&](auto s) {
-            return scorer.similarity(s, score_cutoff);
+            return scorer.similarity(s, score_cutoff, score_hint);
         });
     });
 }
 
 template <typename CachedScorer, typename T>
 static inline bool normalized_similarity_func_wrapper(const RF_ScorerFunc* self, const RF_String* str,
-                                                      int64_t str_count, T score_cutoff, T* result)
+                                                      int64_t str_count, T score_cutoff, T score_hint,
+                                                      T* result)
 {
     return PyExceptionHandler([&] {
         CachedScorer& scorer = *(CachedScorer*)self->context;
         if (str_count != 1) throw std::logic_error("Only str_count == 1 supported");
 
         *result = visit(*str, [&](auto s) {
-            return scorer.normalized_similarity(s, score_cutoff);
+            return scorer.normalized_similarity(s, score_cutoff, score_hint);
         });
     });
 }
 
 // todo cleanup
-typedef bool (*func_f64)(const struct _RF_ScorerFunc*, const RF_String*, int64_t, double, double*);
-typedef bool (*func_i64)(const struct _RF_ScorerFunc*, const RF_String*, int64_t, int64_t, int64_t*);
+typedef bool (*func_f64)(const struct _RF_ScorerFunc*, const RF_String*, int64_t, double, double, double*);
+typedef bool (*func_i64)(const struct _RF_ScorerFunc*, const RF_String*, int64_t, int64_t, int64_t, int64_t*);
 
 static inline void assign_callback(RF_ScorerFunc& context, func_f64 func)
 {
@@ -485,7 +487,8 @@ static inline bool normalized_similarity_init(RF_ScorerFunc* self, int64_t str_c
 
 template <typename CachedScorer, typename T>
 static inline bool multi_similarity_func_wrapper(const RF_ScorerFunc* self, const RF_String* str,
-                                                 int64_t str_count, T score_cutoff, T* result)
+                                                 int64_t str_count, T score_cutoff,
+                                                 [[maybe_unused]] T score_hint, T* result)
 {
     return PyExceptionHandler([&] {
         CachedScorer& scorer = *(CachedScorer*)self->context;
@@ -499,7 +502,8 @@ static inline bool multi_similarity_func_wrapper(const RF_ScorerFunc* self, cons
 
 template <typename CachedScorer, typename T>
 static inline bool multi_distance_func_wrapper(const RF_ScorerFunc* self, const RF_String* str,
-                                               int64_t str_count, T score_cutoff, T* result)
+                                               int64_t str_count, T score_cutoff,
+                                               [[maybe_unused]] T score_hint, T* result)
 {
     return PyExceptionHandler([&] {
         CachedScorer& scorer = *(CachedScorer*)self->context;
@@ -513,7 +517,8 @@ static inline bool multi_distance_func_wrapper(const RF_ScorerFunc* self, const 
 
 template <typename CachedScorer, typename T>
 static inline bool multi_normalized_similarity_func_wrapper(const RF_ScorerFunc* self, const RF_String* str,
-                                                            int64_t str_count, T score_cutoff, T* result)
+                                                            int64_t str_count, T score_cutoff,
+                                                            [[maybe_unused]] T score_hint, T* result)
 {
     return PyExceptionHandler([&] {
         CachedScorer& scorer = *(CachedScorer*)self->context;
@@ -527,7 +532,8 @@ static inline bool multi_normalized_similarity_func_wrapper(const RF_ScorerFunc*
 
 template <typename CachedScorer, typename T>
 static inline bool multi_normalized_distance_func_wrapper(const RF_ScorerFunc* self, const RF_String* str,
-                                                          int64_t str_count, T score_cutoff, T* result)
+                                                          int64_t str_count, T score_cutoff,
+                                                          [[maybe_unused]] T score_hint, T* result)
 {
     return PyExceptionHandler([&] {
         CachedScorer& scorer = *(CachedScorer*)self->context;

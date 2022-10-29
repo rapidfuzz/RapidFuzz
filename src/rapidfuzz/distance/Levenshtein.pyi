@@ -20,6 +20,7 @@ def distance(
     weights: tuple[int, int, int] | None = (1, 1, 1),
     processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: int | None = None,
+    score_hint: int | None = None,
 ) -> int: ...
 def normalized_distance(
     s1: Sequence[Hashable],
@@ -28,6 +29,7 @@ def normalized_distance(
     weights: tuple[int, int, int] | None = (1, 1, 1),
     processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: float | None = 0,
+    score_hint: float | None = 0,
 ) -> float: ...
 def similarity(
     s1: Sequence[Hashable],
@@ -36,6 +38,7 @@ def similarity(
     weights: tuple[int, int, int] | None = (1, 1, 1),
     processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: int | None = None,
+    score_hint: int | None = None,
 ) -> int: ...
 def normalized_similarity(
     s1: Sequence[Hashable],
@@ -44,6 +47,7 @@ def normalized_similarity(
     weights: tuple[int, int, int] | None = (1, 1, 1),
     processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: float | None = 0,
+    score_hint: float | None = 0,
 ) -> float: ...
 def editops(
     s1: Sequence[Hashable],

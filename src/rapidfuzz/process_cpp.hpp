@@ -140,14 +140,14 @@ struct RF_ScorerWrapper {
         }
     }
 
-    void call(const RF_String* str, double score_cutoff, double* result) const
+    void call(const RF_String* str, double score_cutoff, double score_hint, double* result) const
     {
-        PyErr2RuntimeExn(scorer_func.call.f64(&scorer_func, str, 1, score_cutoff, result));
+        PyErr2RuntimeExn(scorer_func.call.f64(&scorer_func, str, 1, score_cutoff, score_hint, result));
     }
 
-    void call(const RF_String* str, int64_t score_cutoff, int64_t* result) const
+    void call(const RF_String* str, int64_t score_cutoff, int64_t score_hint, int64_t* result) const
     {
-        PyErr2RuntimeExn(scorer_func.call.i64(&scorer_func, str, 1, score_cutoff, result));
+        PyErr2RuntimeExn(scorer_func.call.i64(&scorer_func, str, 1, score_cutoff, score_hint, result));
     }
 };
 
@@ -176,7 +176,8 @@ T get_optimal_score(const RF_ScorerFlags* scorer_flags)
 template <typename T>
 std::vector<DictMatchElem<T>> extract_dict_impl(const RF_Kwargs* kwargs, const RF_ScorerFlags* scorer_flags,
                                                 RF_Scorer* scorer, const RF_StringWrapper& query,
-                                                const std::vector<DictStringElem>& choices, T score_cutoff)
+                                                const std::vector<DictStringElem>& choices, T score_cutoff,
+                                                T score_hint)
 {
     std::vector<DictMatchElem<T>> results;
     results.reserve(choices.size());
@@ -192,7 +193,7 @@ std::vector<DictMatchElem<T>> extract_dict_impl(const RF_Kwargs* kwargs, const R
             if (PyErr_CheckSignals() != 0) throw std::runtime_error("");
 
         T score;
-        ScorerFunc.call(&choices[i].proc_val.string, score_cutoff, &score);
+        ScorerFunc.call(&choices[i].proc_val.string, score_cutoff, score_hint, &score);
 
         if (lowest_score_worst) {
             if (score >= score_cutoff) {
@@ -212,7 +213,8 @@ std::vector<DictMatchElem<T>> extract_dict_impl(const RF_Kwargs* kwargs, const R
 template <typename T>
 std::vector<ListMatchElem<T>> extract_list_impl(const RF_Kwargs* kwargs, const RF_ScorerFlags* scorer_flags,
                                                 RF_Scorer* scorer, const RF_StringWrapper& query,
-                                                const std::vector<ListStringElem>& choices, T score_cutoff)
+                                                const std::vector<ListStringElem>& choices, T score_cutoff,
+                                                T score_hint)
 {
     std::vector<ListMatchElem<T>> results;
     results.reserve(choices.size());
@@ -228,7 +230,7 @@ std::vector<ListMatchElem<T>> extract_list_impl(const RF_Kwargs* kwargs, const R
             if (PyErr_CheckSignals() != 0) throw std::runtime_error("");
 
         T score;
-        ScorerFunc.call(&choices[i].proc_val.string, score_cutoff, &score);
+        ScorerFunc.call(&choices[i].proc_val.string, score_cutoff, score_hint, &score);
 
         if (lowest_score_worst) {
             if (score >= score_cutoff) {
@@ -444,7 +446,7 @@ void run_parallel(int workers, int64_t rows, int64_t step_size, Func&& func)
 template <typename T>
 static Matrix cdist_single_list_impl(const RF_ScorerFlags* scorer_flags, const RF_Kwargs* kwargs,
                                      RF_Scorer* scorer, const std::vector<RF_StringWrapper>& queries,
-                                     MatrixType dtype, int workers, T score_cutoff)
+                                     MatrixType dtype, int workers, T score_cutoff, T score_hint)
 {
     (void)scorer_flags;
     int64_t rows = queries.size();
@@ -458,11 +460,11 @@ static Matrix cdist_single_list_impl(const RF_ScorerFlags* scorer_flags, const R
             RF_ScorerWrapper ScorerFunc(scorer_func);
 
             T score;
-            ScorerFunc.call(&queries[row].string, score_cutoff, &score);
+            ScorerFunc.call(&queries[row].string, score_cutoff, score_hint, &score);
             matrix.set(row, row, score);
 
             for (int64_t col = row + 1; col < cols; ++col) {
-                ScorerFunc.call(&queries[col].string, score_cutoff, &score);
+                ScorerFunc.call(&queries[col].string, score_cutoff, score_hint, &score);
                 matrix.set(row, col, score);
                 matrix.set(col, row, score);
             }
@@ -476,7 +478,7 @@ template <typename T>
 static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_Kwargs* kwargs,
                                    RF_Scorer* scorer, const std::vector<RF_StringWrapper>& queries,
                                    const std::vector<RF_StringWrapper>& choices, MatrixType dtype,
-                                   int workers, T score_cutoff)
+                                   int workers, T score_cutoff, T score_hint)
 {
     int64_t rows = queries.size();
     int64_t cols = choices.size();
@@ -529,7 +531,7 @@ static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_
 
                 for (int64_t col = 0; col < cols; ++col) {
                     T score;
-                    ScorerFunc.call(&choices[col].string, score_cutoff, &score);
+                    ScorerFunc.call(&choices[col].string, score_cutoff, score_hint, &score);
                     matrix.set(row_idx[row], col, score);
                 }
             }
@@ -549,7 +551,7 @@ static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_
             RF_ScorerWrapper ScorerFunc(scorer_func);
 
             for (int64_t col = 0; col < cols; ++col) {
-                ScorerFunc.call(&choices[col].string, score_cutoff, scores);
+                ScorerFunc.call(&choices[col].string, score_cutoff, score_hint, scores);
 
                 for (int64_t i = 0; i < row_count; ++i)
                     matrix.set(row_idx[row + i], col, scores[i]);
@@ -565,7 +567,7 @@ static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_
 
                 for (int64_t col = 0; col < cols; ++col) {
                     T score;
-                    ScorerFunc.call(&choices[col].string, score_cutoff, &score);
+                    ScorerFunc.call(&choices[col].string, score_cutoff, score_hint, &score);
                     matrix.set(row, col, score);
                 }
             }

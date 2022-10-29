@@ -2,6 +2,7 @@ import subprocess
 
 from PyInstaller import __main__ as pyi_main
 
+
 # Test out the package by importing it, then running functions from it.
 def test_pyi_hooksample(tmp_path):
     app_name = "userapp"

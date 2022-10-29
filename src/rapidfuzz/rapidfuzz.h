@@ -7,8 +7,8 @@ extern "C" {
 
 #include "Python.h"
 
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 /**
@@ -30,15 +30,15 @@ typedef struct _RF_String {
      *
      * @param self pointer to RF_String instance to destruct
      */
-    void (*dtor) (struct _RF_String* self);
+    void (*dtor)(struct _RF_String* self);
 
-/* members */
+    /* members */
     RF_StringType kind; /**< flag to specify string type stored in data */
     void* data;         /**< string data */
     int64_t length;     /**< string length */
     void* context;      /**< context which can be used to store addition information
-                          * required for the string like e.g. a PyObject which needs
-                          * to be decrefed in the destructor */
+                         * required for the string like e.g. a PyObject which needs
+                         * to be decrefed in the destructor */
 } RF_String;
 
 /**
@@ -49,17 +49,16 @@ typedef struct _RF_String {
  *
  * @return true on success and false with a Python exception set on failure
  */
-typedef bool (*RF_Preprocess) (PyObject* obj, RF_String* str);
+typedef bool (*RF_Preprocess)(PyObject* obj, RF_String* str);
 
 /**
  * @brief struct describing a Processor callback function.
  */
 typedef struct {
 #define PREPROCESSOR_STRUCT_VERSION ((uint32_t)1)
-    uint32_t version; /**< version number of the structure. Set to PREPROCESSOR_STRUCT_VERSION */
+    uint32_t version;         /**< version number of the structure. Set to PREPROCESSOR_STRUCT_VERSION */
     RF_Preprocess preprocess; /**< function to preprocess string */
 } RF_Preprocessor;
-
 
 /**
  * @brief struct describing keyword arguments
@@ -70,9 +69,9 @@ typedef struct _RF_Kwargs {
      *
      * @param self pointer to RF_Kwargs instance to destruct
      */
-    void (*dtor) (struct _RF_Kwargs* self);
+    void (*dtor)(struct _RF_Kwargs* self);
 
-/* members */
+    /* members */
     void* context; /**< context used to store the keyword arguments */
 } RF_Kwargs;
 
@@ -84,8 +83,7 @@ typedef struct _RF_Kwargs {
  *
  * @return true on success and false with a Python exception set on failure
  */
-typedef bool (*RF_KwargsInit) (RF_Kwargs* self, PyObject* kwargs);
-
+typedef bool (*RF_KwargsInit)(RF_Kwargs* self, PyObject* kwargs);
 
 /**
  * @brief struct describing a Scorer
@@ -96,7 +94,7 @@ typedef struct _RF_ScorerFunc {
      *
      * @param self pointer to RF_ScorerFunc instance to destruct
      */
-    void (*dtor) (struct _RF_ScorerFunc* self);
+    void (*dtor)(struct _RF_ScorerFunc* self);
 
     /**
      * @brief Calculate edit distance
@@ -108,16 +106,19 @@ typedef struct _RF_ScorerFunc {
      * @param[in] self pointer to RF_ScorerFunc instance
      * @param[in] str string to calculate distance with `strings` passed into `ctor`
      * @param[in] score_cutoff argument for a score threshold
+     * @param[in] score_hint argument for an expected score to improve the performance
      * @param[out] result array of size `str_count` for results of the calculation
      *
      * @return true on success and false with a Python exception set on failure
      */
     union {
-        bool (*f64) (const struct _RF_ScorerFunc* self, const RF_String* str, int64_t str_count, double score_cutoff, double* result);
-        bool (*i64) (const struct _RF_ScorerFunc* self, const RF_String* str, int64_t str_count, int64_t score_cutoff, int64_t* result);
+        bool (*f64)(const struct _RF_ScorerFunc* self, const RF_String* str, int64_t str_count,
+                    double score_cutoff, double score_hint, double* result);
+        bool (*i64)(const struct _RF_ScorerFunc* self, const RF_String* str, int64_t str_count,
+                    int64_t score_cutoff, int64_t score_hint, int64_t* result);
     } call;
 
-/* members */
+    /* members */
     void* context; /**< context of the scorer */
 } RF_ScorerFunc;
 
@@ -132,31 +133,32 @@ typedef struct _RF_ScorerFunc {
  *
  * @return true on success and false with a Python exception set on failure
  */
-typedef bool (*RF_ScorerFuncInit) (RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count, const RF_String* strings);
+typedef bool (*RF_ScorerFuncInit)(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count,
+                                  const RF_String* strings);
 
 /* RF_ScorerFuncInit supports str_count != 1.
  * This is useful for scorers which have SIMD support
  */
-#define RF_SCORER_FLAG_MULTI_STRING_INIT     ((uint32_t)1 << 0)
+#define RF_SCORER_FLAG_MULTI_STRING_INIT ((uint32_t)1 << 0)
 
 /* RF_ScorerFunc::call can be called with str_count != 1
  * This is useful for scorers which have SIMD support
  */
-#define RF_SCORER_FLAG_MULTI_STRING_CALL     ((uint32_t)1 << 1)
+#define RF_SCORER_FLAG_MULTI_STRING_CALL ((uint32_t)1 << 1)
 
 /* scorer returns result as double */
-#define RF_SCORER_FLAG_RESULT_F64            ((uint32_t)1 << 5)
+#define RF_SCORER_FLAG_RESULT_F64 ((uint32_t)1 << 5)
 
 /* scorer returns result as int64_t */
-#define RF_SCORER_FLAG_RESULT_I64            ((uint32_t)1 << 6)
+#define RF_SCORER_FLAG_RESULT_I64 ((uint32_t)1 << 6)
 
 /* scorer is symmetric: scorer(a, b) == scorer(b, a) */
-#define RF_SCORER_FLAG_SYMMETRIC             ((uint32_t)1 << 11)
+#define RF_SCORER_FLAG_SYMMETRIC ((uint32_t)1 << 11)
 
 /* scorer adheres to triangle inequality: scorer(a,b) <= scorer(a,c) + scorer(b,c)
  * Implies that the scorer is symmetric
  */
-#define RF_SCORER_FLAG_TRIANGLE_INEQUALITY   ((uint32_t)1 << 12 | RF_SCORER_FLAG_SYMMETRIC)
+#define RF_SCORER_FLAG_TRIANGLE_INEQUALITY ((uint32_t)1 << 12 | RF_SCORER_FLAG_SYMMETRIC)
 
 /**
  * @brief information associated with a scorer
@@ -170,16 +172,16 @@ typedef struct _RF_ScorerFlags {
      * @brief optimal score which can be achieved.
      */
     union {
-        double   f64;
-        int64_t  i64;
+        double f64;
+        int64_t i64;
     } optimal_score;
 
     /**
      * @brief worst score which can be achieved.
      */
     union {
-        double   f64;
-        int64_t  i64;
+        double f64;
+        int64_t i64;
     } worst_score;
 } RF_ScorerFlags;
 
@@ -191,15 +193,15 @@ typedef struct _RF_ScorerFlags {
  *
  * @return true on success and false with a Python exception set on failure
  */
-typedef bool (*RF_GetScorerFlags) (const RF_Kwargs* kwargs, RF_ScorerFlags* scorer_flags);
+typedef bool (*RF_GetScorerFlags)(const RF_Kwargs* kwargs, RF_ScorerFlags* scorer_flags);
 
 /**
  * @brief struct describing a Scorer callback function.
  */
 typedef struct {
 #define SCORER_STRUCT_VERSION ((uint32_t)2)
-    uint32_t version; /**< version number of the structure. Set to SCORER_STRUCT_VERSION */
-    RF_KwargsInit kwargs_init; /**< keyword argument constructor */
+    uint32_t version;                   /**< version number of the structure. Set to SCORER_STRUCT_VERSION */
+    RF_KwargsInit kwargs_init;          /**< keyword argument constructor */
     RF_GetScorerFlags get_scorer_flags; /**< function to retrieve additional information about the scorer */
     RF_ScorerFuncInit scorer_func_init; /**< scorer constructor */
 } RF_Scorer;
@@ -208,4 +210,4 @@ typedef struct {
 }
 #endif
 
-#endif  /* RAPIDFUZZ_CAPI_H */
+#endif /* RAPIDFUZZ_CAPI_H */

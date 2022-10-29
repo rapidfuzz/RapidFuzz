@@ -29,10 +29,12 @@ import heapq
 from array import array
 
 from cpython.pycapsule cimport PyCapsule_GetPointer, PyCapsule_IsValid
+
 from rapidfuzz cimport (
     RF_SCORER_FLAG_RESULT_F64,
     RF_SCORER_FLAG_RESULT_I64,
     RF_SCORER_FLAG_SYMMETRIC,
+    SCORER_STRUCT_VERSION,
     RF_Kwargs,
     RF_Preprocess,
     RF_Preprocessor,
@@ -40,7 +42,6 @@ from rapidfuzz cimport (
     RF_ScorerFlags,
     RF_ScorerFunc,
     RF_String,
-    SCORER_STRUCT_VERSION
 )
 
 
@@ -83,16 +84,16 @@ cdef extern from "process_cpp.hpp":
         RF_ScorerWrapper()
         RF_ScorerWrapper(RF_ScorerFunc)
 
-        void call(const RF_String*, double, double*) except +
-        void call(const RF_String*, int64_t, int64_t*) except +
+        void call(const RF_String*, double, double, double*) except +
+        void call(const RF_String*, int64_t, int64_t, int64_t*) except +
 
     cdef vector[DictMatchElem[T]] extract_dict_impl[T](
         const RF_Kwargs*, const RF_ScorerFlags*, RF_Scorer*,
-        const RF_StringWrapper&, const vector[DictStringElem]&, T) except +
+        const RF_StringWrapper&, const vector[DictStringElem]&, T, T) except +
 
     cdef vector[ListMatchElem[T]] extract_list_impl[T](
         const RF_Kwargs*, const RF_ScorerFlags*, RF_Scorer*,
-        const RF_StringWrapper&, const vector[ListStringElem]&, T) except +
+        const RF_StringWrapper&, const vector[ListStringElem]&, T, T) except +
 
     cdef bool is_lowest_score_worst[T](const RF_ScorerFlags* scorer_flags)
     cdef T get_optimal_score[T](const RF_ScorerFlags* scorer_flags)
@@ -123,9 +124,9 @@ cdef extern from "process_cpp.hpp":
         void* m_matrix
 
     RfMatrix cdist_single_list_impl[T](  const RF_ScorerFlags* scorer_flags, const RF_Kwargs*, RF_Scorer*,
-        const vector[RF_StringWrapper]&, MatrixType, int, T) except +
+        const vector[RF_StringWrapper]&, MatrixType, int, T, T) except +
     RfMatrix cdist_two_lists_impl[T](    const RF_ScorerFlags* scorer_flags, const RF_Kwargs*, RF_Scorer*,
-        const vector[RF_StringWrapper]&, const vector[RF_StringWrapper]&, MatrixType, int, T) except +
+        const vector[RF_StringWrapper]&, const vector[RF_StringWrapper]&, MatrixType, int, T, T) except +
 
 cdef inline vector[DictStringElem] preprocess_dict(queries, processor) except *:
     cdef vector[DictStringElem] proc_queries
@@ -228,7 +229,13 @@ cdef inline vector[ListStringElem] preprocess_list(queries, processor) except *:
 
     return move(proc_queries)
 
-cdef inline extractOne_dict_f64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, const RF_Kwargs* kwargs):
+cdef inline extractOne_dict_f64(
+    query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags,
+    processor,
+    score_cutoff,
+    score_hint,
+    const RF_Kwargs* kwargs
+):
     cdef RF_String proc_str
     cdef double score
     cdef Py_ssize_t i = 0
@@ -240,6 +247,7 @@ cdef inline extractOne_dict_f64(query, choices, RF_Scorer* scorer, const RF_Scor
 
     cdef RF_StringWrapper proc_query = move(RF_StringWrapper(conv_sequence(query)))
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, scorer_flags)
+    cdef double c_score_hint = get_score_cutoff_f64(score_hint, scorer_flags)
 
     cdef RF_ScorerFunc scorer_func
     scorer.scorer_func_init(&scorer_func, kwargs, 1, &proc_query.string)
@@ -269,7 +277,7 @@ cdef inline extractOne_dict_f64(query, choices, RF_Scorer* scorer, const RF_Scor
             py_proc_choice = processor(choice)
             proc_choice = move(RF_StringWrapper(conv_sequence(py_proc_choice)))
 
-        ScorerFunc.call(&proc_choice.string, c_score_cutoff, &score)
+        ScorerFunc.call(&proc_choice.string, c_score_cutoff, c_score_hint, &score)
 
         if lowest_score_worst:
             if score >= c_score_cutoff and (not result_found or score > result_score):
@@ -290,7 +298,15 @@ cdef inline extractOne_dict_f64(query, choices, RF_Scorer* scorer, const RF_Scor
     return (result_choice, result_score, result_key) if result_found else None
 
 
-cdef inline extractOne_dict_i64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, const RF_Kwargs* kwargs):
+cdef inline extractOne_dict_i64(
+    query, choices,
+    RF_Scorer* scorer,
+    const RF_ScorerFlags* scorer_flags,
+    processor,
+    score_cutoff,
+    score_hint,
+    const RF_Kwargs* kwargs
+):
     cdef RF_String proc_str
     cdef int64_t score
     cdef Py_ssize_t i = 0
@@ -302,6 +318,7 @@ cdef inline extractOne_dict_i64(query, choices, RF_Scorer* scorer, const RF_Scor
 
     cdef RF_StringWrapper proc_query = move(RF_StringWrapper(conv_sequence(query)))
     cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, scorer_flags)
+    cdef int64_t c_score_hint = get_score_cutoff_i64(score_hint, scorer_flags)
 
     cdef RF_ScorerFunc scorer_func
     scorer.scorer_func_init(&scorer_func, kwargs, 1, &proc_query.string)
@@ -331,7 +348,7 @@ cdef inline extractOne_dict_i64(query, choices, RF_Scorer* scorer, const RF_Scor
             py_proc_choice = processor(choice)
             proc_choice = move(RF_StringWrapper(conv_sequence(py_proc_choice)))
 
-        ScorerFunc.call(&proc_choice.string, c_score_cutoff, &score)
+        ScorerFunc.call(&proc_choice.string, c_score_cutoff, c_score_hint, &score)
 
         if lowest_score_worst:
             if score >= c_score_cutoff and (not result_found or score > result_score):
@@ -352,21 +369,37 @@ cdef inline extractOne_dict_i64(query, choices, RF_Scorer* scorer, const RF_Scor
     return (result_choice, result_score, result_key) if result_found else None
 
 
-cdef inline extractOne_dict(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, const RF_Kwargs* kwargs):
+cdef inline extractOne_dict(
+    query, choices,
+    RF_Scorer* scorer,
+    const RF_ScorerFlags* scorer_flags,
+    processor,
+    score_cutoff,
+    score_hint,
+    const RF_Kwargs* kwargs
+):
     flags = scorer_flags.flags
 
     if flags & RF_SCORER_FLAG_RESULT_F64:
         return extractOne_dict_f64(
-            query, choices, scorer, scorer_flags, processor, score_cutoff, kwargs
+            query, choices, scorer, scorer_flags, processor, score_cutoff, score_hint, kwargs
         )
     elif flags & RF_SCORER_FLAG_RESULT_I64:
         return extractOne_dict_i64(
-            query, choices, scorer, scorer_flags, processor, score_cutoff, kwargs
+            query, choices, scorer, scorer_flags, processor, score_cutoff, score_hint, kwargs
         )
 
     raise ValueError("scorer does not properly use the C-API")
 
-cdef inline extractOne_list_f64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, const RF_Kwargs* kwargs):
+cdef inline extractOne_list_f64(
+    query, choices,
+    RF_Scorer* scorer,
+    const RF_ScorerFlags* scorer_flags,
+    processor,
+    score_cutoff,
+    score_hint,
+    const RF_Kwargs* kwargs
+):
     cdef RF_String proc_str
     cdef double score
     cdef Py_ssize_t i
@@ -378,6 +411,7 @@ cdef inline extractOne_list_f64(query, choices, RF_Scorer* scorer, const RF_Scor
 
     cdef RF_StringWrapper proc_query = move(RF_StringWrapper(conv_sequence(query)))
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, scorer_flags)
+    cdef double c_score_hint = get_score_cutoff_f64(score_hint, scorer_flags)
 
     cdef RF_ScorerFunc scorer_func
     scorer.scorer_func_init(&scorer_func, kwargs, 1, &proc_query.string)
@@ -406,7 +440,7 @@ cdef inline extractOne_list_f64(query, choices, RF_Scorer* scorer, const RF_Scor
             py_proc_choice = processor(choice)
             proc_choice = move(RF_StringWrapper(conv_sequence(py_proc_choice)))
 
-        ScorerFunc.call(&proc_choice.string, c_score_cutoff, &score)
+        ScorerFunc.call(&proc_choice.string, c_score_cutoff, c_score_hint, &score)
 
         if lowest_score_worst:
             if score >= c_score_cutoff and (not result_found or score > result_score):
@@ -426,7 +460,15 @@ cdef inline extractOne_list_f64(query, choices, RF_Scorer* scorer, const RF_Scor
 
     return (result_choice, result_score, result_index) if result_found else None
 
-cdef inline extractOne_list_i64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, const RF_Kwargs* kwargs):
+cdef inline extractOne_list_i64(
+    query, choices,
+    RF_Scorer* scorer,
+    const RF_ScorerFlags* scorer_flags,
+    processor,
+    score_cutoff,
+    score_hint,
+    const RF_Kwargs* kwargs
+):
     cdef RF_String proc_str
     cdef int64_t score
     cdef Py_ssize_t i
@@ -438,6 +480,7 @@ cdef inline extractOne_list_i64(query, choices, RF_Scorer* scorer, const RF_Scor
 
     cdef RF_StringWrapper proc_query = move(RF_StringWrapper(conv_sequence(query)))
     cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, scorer_flags)
+    cdef int64_t c_score_hint = get_score_cutoff_i64(score_hint, scorer_flags)
 
     cdef RF_ScorerFunc scorer_func
     scorer.scorer_func_init(&scorer_func, kwargs, 1, &proc_query.string)
@@ -466,7 +509,7 @@ cdef inline extractOne_list_i64(query, choices, RF_Scorer* scorer, const RF_Scor
             py_proc_choice = processor(choice)
             proc_choice = move(RF_StringWrapper(conv_sequence(py_proc_choice)))
 
-        ScorerFunc.call(&proc_choice.string, c_score_cutoff, &score)
+        ScorerFunc.call(&proc_choice.string, c_score_cutoff, c_score_hint, &score)
 
         if lowest_score_worst:
             if score >= c_score_cutoff and (not result_found or score > result_score):
@@ -486,16 +529,24 @@ cdef inline extractOne_list_i64(query, choices, RF_Scorer* scorer, const RF_Scor
 
     return (result_choice, result_score, result_index) if result_found else None
 
-cdef inline extractOne_list(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, const RF_Kwargs* kwargs):
+cdef inline extractOne_list(
+    query, choices,
+    RF_Scorer* scorer,
+    const RF_ScorerFlags* scorer_flags,
+    processor,
+    score_cutoff,
+    score_hint,
+    const RF_Kwargs* kwargs
+):
     flags = scorer_flags.flags
 
     if flags & RF_SCORER_FLAG_RESULT_F64:
         return extractOne_list_f64(
-            query, choices, scorer, scorer_flags, processor, score_cutoff, kwargs
+            query, choices, scorer, scorer_flags, processor, score_cutoff, score_hint, kwargs
         )
     elif flags & RF_SCORER_FLAG_RESULT_I64:
         return extractOne_list_i64(
-            query, choices, scorer, scorer_flags, processor, score_cutoff, kwargs
+            query, choices, scorer, scorer_flags, processor, score_cutoff, score_hint, kwargs
         )
 
     raise ValueError("scorer does not properly use the C-API")
@@ -587,7 +638,7 @@ cdef inline py_extractOne_list(query, choices, scorer, processor, double score_c
     return (result_choice, result_score, result_index) if result_choice is not None else None
 
 
-def extractOne(query, choices, *, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):
+def extractOne(query, choices, *, scorer=WRatio, processor=default_process, score_cutoff=None, score_hint=None, **kwargs):
     cdef RF_Scorer* scorer_context = NULL
     cdef RF_ScorerFlags scorer_flags
 
@@ -616,10 +667,10 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
 
         if hasattr(choices, "items"):
             return extractOne_dict(query, choices, scorer_context, &scorer_flags,
-                processor, score_cutoff, &kwargs_context.kwargs)
+                processor, score_cutoff, score_hint, &kwargs_context.kwargs)
         else:
             return extractOne_list(query, choices, scorer_context, &scorer_flags,
-                processor, score_cutoff, &kwargs_context.kwargs)
+                processor, score_cutoff, score_hint, &kwargs_context.kwargs)
 
 
     worst_score, optimal_score = get_scorer_flags_py(scorer, kwargs)
@@ -636,13 +687,24 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
         return py_extractOne_list(query, choices, scorer, processor, score_cutoff, worst_score, optimal_score, kwargs)
 
 
-cdef inline extract_dict_f64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, int64_t limit, score_cutoff, const RF_Kwargs* kwargs):
+cdef inline extract_dict_f64(
+    query, choices,
+    RF_Scorer* scorer,
+    const RF_ScorerFlags* scorer_flags,
+    processor,
+    int64_t limit,
+    score_cutoff,
+    score_hint,
+    const RF_Kwargs* kwargs
+):
     proc_query = move(RF_StringWrapper(conv_sequence(query)))
     proc_choices = preprocess_dict(choices, processor)
 
     cdef vector[DictMatchElem[double]] results = extract_dict_impl[double](
         kwargs, scorer_flags, scorer, proc_query, proc_choices,
-        get_score_cutoff_f64(score_cutoff, scorer_flags))
+        get_score_cutoff_f64(score_cutoff, scorer_flags),
+        get_score_cutoff_f64(score_hint, scorer_flags)
+    )
 
     # due to score_cutoff not always completely filled
     if limit > <int64_t>results.size():
@@ -664,13 +726,24 @@ cdef inline extract_dict_f64(query, choices, RF_Scorer* scorer, const RF_ScorerF
     return result_list
 
 
-cdef inline extract_dict_i64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, int64_t limit, score_cutoff, const RF_Kwargs* kwargs):
+cdef inline extract_dict_i64(
+    query, choices,
+    RF_Scorer* scorer,
+    const RF_ScorerFlags* scorer_flags,
+    processor,
+    int64_t limit,
+    score_cutoff,
+    score_hint,
+    const RF_Kwargs* kwargs
+):
     proc_query = move(RF_StringWrapper(conv_sequence(query)))
     proc_choices = preprocess_dict(choices, processor)
 
     cdef vector[DictMatchElem[int64_t]] results = extract_dict_impl[int64_t](
         kwargs, scorer_flags, scorer, proc_query, proc_choices,
-        get_score_cutoff_i64(score_cutoff, scorer_flags))
+        get_score_cutoff_i64(score_cutoff, scorer_flags),
+        get_score_cutoff_i64(score_hint, scorer_flags)
+    )
 
     # due to score_cutoff not always completely filled
     if limit > <int64_t>results.size():
@@ -692,28 +765,48 @@ cdef inline extract_dict_i64(query, choices, RF_Scorer* scorer, const RF_ScorerF
     return result_list
 
 
-cdef inline extract_dict(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, int64_t limit, score_cutoff, const RF_Kwargs* kwargs):
+cdef inline extract_dict(
+    query, choices,
+    RF_Scorer* scorer,
+    const RF_ScorerFlags* scorer_flags,
+    processor,
+    int64_t limit,
+    score_cutoff,
+    score_hint,
+    const RF_Kwargs* kwargs
+):
     flags = scorer_flags.flags
 
     if flags & RF_SCORER_FLAG_RESULT_F64:
         return extract_dict_f64(
-            query, choices, scorer, scorer_flags, processor, limit, score_cutoff, kwargs
+            query, choices, scorer, scorer_flags, processor, limit, score_cutoff, score_hint, kwargs
         )
     elif flags & RF_SCORER_FLAG_RESULT_I64:
         return extract_dict_i64(
-            query, choices, scorer, scorer_flags, processor, limit, score_cutoff, kwargs
+            query, choices, scorer, scorer_flags, processor, limit, score_cutoff, score_hint, kwargs
         )
 
     raise ValueError("scorer does not properly use the C-API")
 
 
-cdef inline extract_list_f64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, int64_t limit, score_cutoff, const RF_Kwargs* kwargs):
+cdef inline extract_list_f64(
+    query, choices,
+    RF_Scorer* scorer,
+    const RF_ScorerFlags* scorer_flags,
+    processor,
+    int64_t limit,
+    score_cutoff,
+    score_hint,
+    const RF_Kwargs* kwargs
+):
     proc_query = move(RF_StringWrapper(conv_sequence(query)))
     proc_choices = preprocess_list(choices, processor)
 
     cdef vector[ListMatchElem[double]] results = extract_list_impl[double](
         kwargs, scorer_flags, scorer, proc_query, proc_choices,
-        get_score_cutoff_f64(score_cutoff, scorer_flags))
+        get_score_cutoff_f64(score_cutoff, scorer_flags),
+        get_score_cutoff_f64(score_hint, scorer_flags)
+    )
 
     # due to score_cutoff not always completely filled
     if limit > <int64_t>results.size():
@@ -735,13 +828,24 @@ cdef inline extract_list_f64(query, choices, RF_Scorer* scorer, const RF_ScorerF
     return result_list
 
 
-cdef inline extract_list_i64(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, int64_t limit, score_cutoff, const RF_Kwargs* kwargs):
+cdef inline extract_list_i64(
+    query, choices,
+    RF_Scorer* scorer,
+    const RF_ScorerFlags* scorer_flags,
+    processor,
+    int64_t limit,
+    score_cutoff,
+    score_hint,
+    const RF_Kwargs* kwargs
+):
     proc_query = move(RF_StringWrapper(conv_sequence(query)))
     proc_choices = preprocess_list(choices, processor)
 
     cdef vector[ListMatchElem[int64_t]] results = extract_list_impl[int64_t](
         kwargs, scorer_flags, scorer, proc_query, proc_choices,
-        get_score_cutoff_i64(score_cutoff, scorer_flags))
+        get_score_cutoff_i64(score_cutoff, scorer_flags),
+        get_score_cutoff_i64(score_hint, scorer_flags)
+    )
 
     # due to score_cutoff not always completely filled
     if limit > <int64_t>results.size():
@@ -763,16 +867,25 @@ cdef inline extract_list_i64(query, choices, RF_Scorer* scorer, const RF_ScorerF
     return result_list
 
 
-cdef inline extract_list(query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, int64_t limit, score_cutoff, const RF_Kwargs* kwargs):
+cdef inline extract_list(
+    query, choices,
+    RF_Scorer* scorer,
+    const RF_ScorerFlags* scorer_flags,
+    processor,
+    int64_t limit,
+    score_cutoff,
+    score_hint,
+    const RF_Kwargs* kwargs
+):
     flags = scorer_flags.flags
 
     if flags & RF_SCORER_FLAG_RESULT_F64:
         return extract_list_f64(
-            query, choices, scorer, scorer_flags, processor, limit, score_cutoff, kwargs
+            query, choices, scorer, scorer_flags, processor, limit, score_cutoff, score_hint, kwargs
         )
     elif flags & RF_SCORER_FLAG_RESULT_I64:
         return extract_list_i64(
-            query, choices, scorer, scorer_flags, processor, limit, score_cutoff, kwargs
+            query, choices, scorer, scorer_flags, processor, limit, score_cutoff, score_hint, kwargs
         )
 
     raise ValueError("scorer does not properly use the C-API")
@@ -833,7 +946,7 @@ cdef inline py_extract_list(query, choices, scorer, processor, int64_t limit, do
         return heapq.nsmallest(limit, result_list, key=lambda i: i[1])
 
 
-def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5, score_cutoff=None, **kwargs):
+def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5, score_cutoff=None, score_hint=None, **kwargs):
     cdef RF_Scorer* scorer_context = NULL
     cdef RF_ScorerFlags scorer_flags
 
@@ -863,10 +976,10 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
 
         if hasattr(choices, "items"):
             return extract_dict(query, choices, scorer_context, &scorer_flags,
-                processor, limit, score_cutoff, &kwargs_context.kwargs)
+                processor, limit, score_cutoff, score_hint, &kwargs_context.kwargs)
         else:
             return extract_list(query, choices, scorer_context, &scorer_flags,
-                processor, limit, score_cutoff, &kwargs_context.kwargs)
+                processor, limit, score_cutoff, score_hint, &kwargs_context.kwargs)
 
 
     worst_score, optimal_score = get_scorer_flags_py(scorer, kwargs)
@@ -883,7 +996,7 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
         return py_extract_list(query, choices, scorer, processor, limit, score_cutoff, worst_score, optimal_score, kwargs)
 
 
-def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, score_cutoff=None, **kwargs):
+def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, score_cutoff=None, score_hint=None, **kwargs):
     cdef RF_Scorer* scorer_context = NULL
     cdef RF_ScorerFlags scorer_flags
     cdef RF_Preprocessor* processor_context = NULL
@@ -896,6 +1009,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         """
         cdef RF_String proc_str
         cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, &scorer_flags)
+        cdef double c_score_hint = get_score_cutoff_f64(score_hint, &scorer_flags)
         query_proc = RF_StringWrapper(conv_sequence(query))
 
         cdef RF_ScorerFunc scorer_func
@@ -923,7 +1037,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
             else:
                 choice_proc = RF_StringWrapper(conv_sequence(choice))
 
-            ScorerFunc.call(&choice_proc.string, c_score_cutoff, &score)
+            ScorerFunc.call(&choice_proc.string, c_score_cutoff, c_score_hint, &score)
             if lowest_score_worst:
                 if score >= c_score_cutoff:
                     yield (choice, score, choice_key)
@@ -938,6 +1052,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         """
         cdef RF_String proc_str
         cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, &scorer_flags)
+        cdef int64_t c_score_hint = get_score_cutoff_i64(score_hint, &scorer_flags)
         query_proc = RF_StringWrapper(conv_sequence(query))
 
         cdef RF_ScorerFunc scorer_func
@@ -965,7 +1080,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
             else:
                 choice_proc = RF_StringWrapper(conv_sequence(choice))
 
-            ScorerFunc.call(&choice_proc.string, c_score_cutoff, &score)
+            ScorerFunc.call(&choice_proc.string, c_score_cutoff, c_score_hint, &score)
             if lowest_score_worst:
                 if score >= c_score_cutoff:
                     yield (choice, score, choice_key)
@@ -980,6 +1095,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         """
         cdef RF_String proc_str
         cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, &scorer_flags)
+        cdef double c_score_hint = get_score_cutoff_f64(score_hint, &scorer_flags)
         query_proc = RF_StringWrapper(conv_sequence(query))
 
         cdef RF_ScorerFunc scorer_func
@@ -1007,7 +1123,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
             else:
                 choice_proc = RF_StringWrapper(conv_sequence(choice))
 
-            ScorerFunc.call(&choice_proc.string, c_score_cutoff, &score)
+            ScorerFunc.call(&choice_proc.string, c_score_cutoff, c_score_hint, &score)
             if lowest_score_worst:
                 if score >= c_score_cutoff:
                     yield (choice, score, i)
@@ -1022,6 +1138,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         """
         cdef RF_String proc_str
         cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, &scorer_flags)
+        cdef int64_t c_score_hint = get_score_cutoff_i64(score_hint, &scorer_flags)
         query_proc = RF_StringWrapper(conv_sequence(query))
 
         cdef RF_ScorerFunc scorer_func
@@ -1049,7 +1166,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
             else:
                 choice_proc = RF_StringWrapper(conv_sequence(choice))
 
-            ScorerFunc.call(&choice_proc.string, c_score_cutoff, &score)
+            ScorerFunc.call(&choice_proc.string, c_score_cutoff, c_score_hint, &score)
             if lowest_score_worst:
                 if score >= c_score_cutoff:
                     yield (choice, score, i)
@@ -1261,7 +1378,17 @@ cdef class Matrix:
     def __releasebuffer__(self, Py_buffer *buffer):
         pass
 
-cdef cdist_two_lists(queries, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, dtype, int c_workers, const RF_Kwargs* kwargs):
+cdef Matrix cdist_two_lists(
+    queries, choices,
+    RF_Scorer* scorer,
+    const RF_ScorerFlags* scorer_flags,
+    processor,
+    score_cutoff,
+    score_hint,
+    dtype,
+    int c_workers,
+    const RF_Kwargs* kwargs
+):
     proc_queries = preprocess(queries, processor)
     proc_choices = preprocess(choices, processor)
     flags = scorer_flags.flags
@@ -1273,7 +1400,9 @@ cdef cdist_two_lists(queries, choices, RF_Scorer* scorer, const RF_ScorerFlags* 
             kwargs, scorer, proc_queries, proc_choices,
             dtype_to_type_num_f64(dtype),
             c_workers,
-            get_score_cutoff_f64(score_cutoff, scorer_flags))
+            get_score_cutoff_f64(score_cutoff, scorer_flags),
+            get_score_cutoff_f64(score_hint, scorer_flags)
+        )
 
     elif flags & RF_SCORER_FLAG_RESULT_I64:
         matrix.matrix = cdist_two_lists_impl(
@@ -1281,13 +1410,25 @@ cdef cdist_two_lists(queries, choices, RF_Scorer* scorer, const RF_ScorerFlags* 
             kwargs, scorer, proc_queries, proc_choices,
             dtype_to_type_num_i64(dtype),
             c_workers,
-            get_score_cutoff_i64(score_cutoff, scorer_flags))
+            get_score_cutoff_i64(score_cutoff, scorer_flags),
+            get_score_cutoff_i64(score_hint, scorer_flags)
+        )
     else:
         raise ValueError("scorer does not properly use the C-API")
 
     return matrix
 
-cdef Matrix cdist_single_list(queries, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags, processor, score_cutoff, dtype, int c_workers, const RF_Kwargs* kwargs):
+cdef Matrix cdist_single_list(
+    queries,
+    RF_Scorer* scorer,
+    const RF_ScorerFlags* scorer_flags,
+    processor,
+    score_cutoff,
+    score_hint,
+    dtype,
+    int c_workers,
+    const RF_Kwargs* kwargs
+):
     proc_queries = preprocess(queries, processor)
     flags = scorer_flags.flags
     cdef Matrix matrix = Matrix()
@@ -1298,7 +1439,9 @@ cdef Matrix cdist_single_list(queries, RF_Scorer* scorer, const RF_ScorerFlags* 
             kwargs, scorer, proc_queries,
             dtype_to_type_num_f64(dtype),
             c_workers,
-            get_score_cutoff_f64(score_cutoff, scorer_flags))
+            get_score_cutoff_f64(score_cutoff, scorer_flags),
+            get_score_cutoff_f64(score_hint, scorer_flags)
+        )
 
     elif flags & RF_SCORER_FLAG_RESULT_I64:
         matrix.matrix = cdist_single_list_impl(
@@ -1306,7 +1449,9 @@ cdef Matrix cdist_single_list(queries, RF_Scorer* scorer, const RF_ScorerFlags* 
             kwargs, scorer, proc_queries,
             dtype_to_type_num_i64(dtype),
             c_workers,
-            get_score_cutoff_i64(score_cutoff, scorer_flags))
+            get_score_cutoff_i64(score_cutoff, scorer_flags),
+            get_score_cutoff_i64(score_hint, scorer_flags)
+        )
     else:
         raise ValueError("scorer does not properly use the C-API")
 
@@ -1334,7 +1479,7 @@ cdef cdist_py(queries, choices, scorer, processor, score_cutoff, dtype, workers,
     return matrix
 
 
-def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, dtype=None, workers=1, **kwargs):
+def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, score_hint=None, dtype=None, workers=1, **kwargs):
     cdef RF_Scorer* scorer_context = NULL
     cdef RF_ScorerFlags scorer_flags
 
@@ -1358,10 +1503,10 @@ def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, 
             if scorer_flags.flags & RF_SCORER_FLAG_SYMMETRIC and queries is choices:
                 return cdist_single_list(
                     queries, scorer_context, &scorer_flags, processor,
-                    score_cutoff, dtype, workers, &kwargs_context.kwargs)
+                    score_cutoff, score_hint, dtype, workers, &kwargs_context.kwargs)
             else:
                 return cdist_two_lists(
                     queries, choices, scorer_context, &scorer_flags, processor,
-                    score_cutoff, dtype, workers, &kwargs_context.kwargs)
+                    score_cutoff, score_hint, dtype, workers, &kwargs_context.kwargs)
 
     return cdist_py(queries, choices, scorer, processor, score_cutoff, dtype, workers, kwargs)

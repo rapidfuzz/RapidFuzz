@@ -10,6 +10,7 @@ from cpp_common cimport (
 )
 from cpython.pycapsule cimport PyCapsule_New
 from libcpp cimport bool
+
 from rapidfuzz cimport PREPROCESSOR_STRUCT_VERSION, RF_Preprocessor, RF_String
 
 from array import array

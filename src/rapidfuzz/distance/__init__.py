@@ -3,7 +3,18 @@
 
 from __future__ import annotations
 
-from . import DamerauLevenshtein, Hamming, Indel, Jaro, JaroWinkler, LCSseq, Levenshtein, OSA, Prefix, Postfix
+from . import (
+    OSA,
+    DamerauLevenshtein,
+    Hamming,
+    Indel,
+    Jaro,
+    JaroWinkler,
+    LCSseq,
+    Levenshtein,
+    Postfix,
+    Prefix,
+)
 from ._initialize import Editop, Editops, MatchingBlock, Opcode, Opcodes, ScoreAlignment
 
 __all__ = [
