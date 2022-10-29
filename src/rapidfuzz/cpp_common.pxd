@@ -9,7 +9,7 @@ from libc.stdlib cimport free, malloc
 from libcpp cimport bool
 from libcpp.utility cimport move, pair
 from libcpp.vector cimport vector
-from rapidfuzz_capi cimport (
+from rapidfuzz cimport (
     SCORER_STRUCT_VERSION,
     RF_GetScorerFlags,
     RF_Kwargs,

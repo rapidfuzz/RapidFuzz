@@ -4,6 +4,10 @@
 #### Fixed
 - fix bug in `Levenshtein.editops` leading to crashes when used with `score_hint`
 
+#### Changed
+- moved capi from `rapidfuzz_capi` into `rapidfuzz`, since it will always
+  succeed the installation now that there is a pure Python mode
+
 ### [2.12.0] - 2022-10-24
 #### Changed
 - drop support for Python 3.6

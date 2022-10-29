@@ -3,7 +3,7 @@
 
 from ._initialize_cpp import Editops
 
-from rapidfuzz_capi cimport (
+from rapidfuzz cimport (
     RF_SCORER_FLAG_MULTI_STRING_CALL,
     RF_SCORER_FLAG_MULTI_STRING_INIT,
     RF_SCORER_FLAG_RESULT_F64,
@@ -43,10 +43,10 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
 
 cdef extern from "metrics.hpp":
     # Levenshtein
-    double levenshtein_normalized_distance_func(  const RF_String&, const RF_String&, int64_t, int64_t, int64_t, double) nogil except +
-    int64_t levenshtein_distance_func(            const RF_String&, const RF_String&, int64_t, int64_t, int64_t, int64_t) nogil except +
-    double levenshtein_normalized_similarity_func(const RF_String&, const RF_String&, int64_t, int64_t, int64_t, double) nogil except +
-    int64_t levenshtein_similarity_func(          const RF_String&, const RF_String&, int64_t, int64_t, int64_t, int64_t) nogil except +
+    double levenshtein_normalized_distance_func(  const RF_String&, const RF_String&, int64_t, int64_t, int64_t, double, double) nogil except +
+    int64_t levenshtein_distance_func(            const RF_String&, const RF_String&, int64_t, int64_t, int64_t, int64_t, int64_t) nogil except +
+    double levenshtein_normalized_similarity_func(const RF_String&, const RF_String&, int64_t, int64_t, int64_t, double, double) nogil except +
+    int64_t levenshtein_similarity_func(          const RF_String&, const RF_String&, int64_t, int64_t, int64_t, int64_t, int64_t) nogil except +
 
     RfEditops levenshtein_editops_func(const RF_String&, const RF_String&, int64_t) nogil except +
 
@@ -203,7 +203,7 @@ cdef int64_t get_score_hint_i64(score_hint, int64_t default) except -1:
     return c_score_hint
 
 
-def levenshtein_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
+def levenshtein_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None, score_hint=None):
     cdef RF_StringWrapper s1_proc, s2_proc
     cdef int64_t insertion, deletion, substitution
     insertion = deletion = substitution = 1
@@ -211,11 +211,12 @@ def levenshtein_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutof
         insertion, deletion, substitution = weights
 
     cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, INT64_MAX)
+    cdef int64_t c_score_hint = get_score_cutoff_i64(score_hint, INT64_MAX)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
-    return levenshtein_distance_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
+    return levenshtein_distance_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff, c_score_hint)
 
 
-def levenshtein_similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
+def levenshtein_similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None, score_hint=None):
     cdef RF_StringWrapper s1_proc, s2_proc
     cdef int64_t insertion, deletion, substitution
     insertion = deletion = substitution = 1
@@ -223,11 +224,12 @@ def levenshtein_similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cut
         insertion, deletion, substitution = weights
 
     cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, 0)
+    cdef int64_t c_score_hint = get_score_cutoff_i64(score_hint, 0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
-    return levenshtein_similarity_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
+    return levenshtein_similarity_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff, c_score_hint)
 
 
-def levenshtein_normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
+def levenshtein_normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None, score_hint=None):
     cdef RF_StringWrapper s1_proc, s2_proc
     if s1 is None or s2 is None:
         return 0
@@ -238,11 +240,12 @@ def levenshtein_normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, 
         insertion, deletion, substitution = weights
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 1.0)
+    cdef double c_score_hint = get_score_cutoff_f64(score_hint, 1.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
-    return levenshtein_normalized_distance_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
+    return levenshtein_normalized_distance_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff, c_score_hint)
 
 
-def levenshtein_normalized_similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None):
+def levenshtein_normalized_similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None, score_hint=None):
     cdef RF_StringWrapper s1_proc, s2_proc
     if s1 is None or s2 is None:
         return 0
@@ -253,8 +256,9 @@ def levenshtein_normalized_similarity(s1, s2, *, weights=(1,1,1), processor=None
         insertion, deletion, substitution = weights
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0)
+    cdef double c_score_hint = get_score_cutoff_f64(score_hint, 0.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
-    return levenshtein_normalized_similarity_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff)
+    return levenshtein_normalized_similarity_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff, c_score_hint)
 
 
 def levenshtein_editops(s1, s2, *, processor=None, score_hint=None):

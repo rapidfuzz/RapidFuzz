@@ -41,7 +41,7 @@ if(RAPIDFUZZ_ARCH_X64)
   target_compile_features(edit_based_avx2 PUBLIC cxx_std_17)
   target_include_directories(
     edit_based_avx2
-    PRIVATE ${Python_INCLUDE_DIRS} ${RF_CAPI_PATH} ${RF_BASE_DIR}/rapidfuzz
+    PRIVATE ${Python_INCLUDE_DIRS} ${RF_BASE_DIR}/rapidfuzz
             ${RF_BASE_DIR}/rapidfuzz/distance)
   target_link_libraries(edit_based_avx2 PRIVATE rapidfuzz::rapidfuzz)
   if(MSVC)
@@ -55,7 +55,7 @@ if(RAPIDFUZZ_ARCH_X64)
   target_compile_features(edit_based_sse2 PUBLIC cxx_std_17)
   target_include_directories(
     edit_based_sse2
-    PRIVATE ${Python_INCLUDE_DIRS} ${RF_CAPI_PATH} ${RF_BASE_DIR}/rapidfuzz
+    PRIVATE ${Python_INCLUDE_DIRS} ${RF_BASE_DIR}/rapidfuzz
             ${RF_BASE_DIR}/rapidfuzz/distance)
   target_link_libraries(edit_based_sse2 PRIVATE rapidfuzz::rapidfuzz)
   if(NOT MSVC)
@@ -66,16 +66,14 @@ endif()
 create_cython_target(utils_cpp)
 rf_add_library(utils_cpp ${utils_cpp} ${CMAKE_CURRENT_LIST_DIR}/utils.cpp)
 target_compile_features(utils_cpp PUBLIC cxx_std_17)
-target_include_directories(utils_cpp PRIVATE ${RF_CAPI_PATH}
-                                             ${RF_BASE_DIR}/rapidfuzz)
+target_include_directories(utils_cpp PRIVATE ${RF_BASE_DIR}/rapidfuzz)
 target_link_libraries(utils_cpp PRIVATE rapidfuzz::rapidfuzz)
 install(TARGETS utils_cpp LIBRARY DESTINATION src/rapidfuzz)
 
 create_cython_target(fuzz_cpp)
 rf_add_library(fuzz_cpp ${fuzz_cpp})
 target_compile_features(fuzz_cpp PUBLIC cxx_std_17)
-target_include_directories(fuzz_cpp PRIVATE ${RF_CAPI_PATH}
-                                            ${RF_BASE_DIR}/rapidfuzz)
+target_include_directories(fuzz_cpp PRIVATE ${RF_BASE_DIR}/rapidfuzz)
 target_link_libraries(fuzz_cpp PRIVATE rapidfuzz::rapidfuzz)
 if(RAPIDFUZZ_ARCH_X64)
   target_link_libraries(fuzz_cpp PRIVATE edit_based_avx2 edit_based_sse2
@@ -86,8 +84,7 @@ install(TARGETS fuzz_cpp LIBRARY DESTINATION src/rapidfuzz)
 create_cython_target(process_cpp_impl)
 rf_add_library(process_cpp_impl ${process_cpp_impl})
 target_compile_features(process_cpp_impl PUBLIC cxx_std_17)
-target_include_directories(process_cpp_impl PRIVATE ${RF_CAPI_PATH}
-                                                    ${RF_BASE_DIR}/rapidfuzz)
+target_include_directories(process_cpp_impl PRIVATE ${RF_BASE_DIR}/rapidfuzz)
 target_link_libraries(process_cpp_impl PRIVATE Taskflow::Taskflow
                                                rapidfuzz::rapidfuzz)
 

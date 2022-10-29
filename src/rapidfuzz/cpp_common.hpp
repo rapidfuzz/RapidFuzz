@@ -5,7 +5,7 @@
 #include <rapidfuzz/distance.hpp>
 #include <rapidfuzz/fuzz.hpp>
 
-#include "rapidfuzz_capi.h"
+#include "rapidfuzz.h"
 
 #define PYTHON_VERSION(major, minor, micro) ((major << 24) | (minor << 16) | (micro << 8))
 

@@ -10,7 +10,7 @@ from libc.stdlib cimport free, malloc
 from libcpp cimport bool
 from libcpp.utility cimport move
 from libcpp.vector cimport vector
-from rapidfuzz_capi cimport RF_String
+from rapidfuzz cimport RF_String
 
 
 cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
