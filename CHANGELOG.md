@@ -6,6 +6,8 @@
 - fix bug in `normalized_similarity` of most scorers,
   leading to incorrect results when used in combination with the process module
 - fix sse2 support
+- fix bug in `JaroWinkler` and `Jaro` when used in the pure python process module
+- forward kwargs in pure Python implementation of `process.extract`
 
 ### [2.13.0] - 2022-10-30
 #### Fixed

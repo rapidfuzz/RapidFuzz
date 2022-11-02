@@ -497,7 +497,7 @@ def extract(
         limit = len(choices)
 
     result_iter = extract_iter(
-        query, choices, processor=processor, scorer=scorer, score_cutoff=score_cutoff
+        query, choices, processor=processor, scorer=scorer, score_cutoff=score_cutoff, **kwargs
     )
     if lowest_score_worst:
         return heapq.nlargest(limit, result_iter, key=lambda i: i[1])

@@ -3,6 +3,7 @@ from ..common import GenericScorer
 
 LCSseq = GenericScorer(LCSseq_py, LCSseq_cpp)
 
+
 def test_empty_string():
     """
     when both strings are empty this is a perfect match

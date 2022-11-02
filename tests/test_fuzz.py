@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-
-import unittest
 from array import array
 
 import pytest
@@ -123,124 +120,143 @@ cpp_scorers = [
 ]
 
 
-class RatioTest(unittest.TestCase):
-    s1 = "new york mets"
-    s1a = "new york mets"
-    s2 = "new YORK mets"
-    s3 = "the wonderful new york mets"
-    s4 = "new york mets vs atlanta braves"
-    s5 = "atlanta braves vs new york mets"
-    s6 = "new york mets - atlanta braves"
+def test_no_processor():
+    assert fuzz.ratio("new york mets", "new york mets") == 100
+    assert fuzz.ratio("new york mets", "new YORK mets") != 100
 
-    def testNoProcessor(self):
-        self.assertEqual(fuzz.ratio(self.s1, self.s1a), 100)
-        self.assertNotEqual(fuzz.ratio(self.s1, self.s2), 100)
 
-    def testPartialRatio(self):
-        self.assertEqual(fuzz.partial_ratio(self.s1, self.s3), 100)
+def test_partial_ratio():
+    assert fuzz.partial_ratio("new york mets", "the wonderful new york mets") == 100
 
-    def testTokenSortRatio(self):
-        self.assertEqual(fuzz.token_sort_ratio(self.s1, self.s1a), 100)
 
-    def testPartialTokenSortRatio(self):
-        self.assertEqual(fuzz.partial_token_sort_ratio(self.s1, self.s1a), 100)
-        self.assertEqual(fuzz.partial_token_sort_ratio(self.s4, self.s5), 100)
+def test_token_sort_ratio():
+    assert fuzz.token_sort_ratio("new york mets", "new york mets") == 100
 
-    def testTokenSetRatio(self):
-        self.assertEqual(fuzz.token_set_ratio(self.s4, self.s5), 100)
 
-    def testPartialTokenSetRatio(self):
-        self.assertEqual(fuzz.partial_token_set_ratio(self.s4, self.s5), 100)
-
-    def testQuickRatioEqual(self):
-        self.assertEqual(fuzz.QRatio(self.s1, self.s1a), 100)
-
-    def testQuickRatioCaseInsensitive(self):
-        self.assertEqual(fuzz.QRatio(self.s1, self.s2), 100)
-
-    def testQuickRatioNotEqual(self):
-        self.assertNotEqual(fuzz.QRatio(self.s1, self.s3), 100)
-
-    def testWRatioEqual(self):
-        self.assertEqual(fuzz.WRatio(self.s1, self.s1a), 100)
-
-    def testWRatioCaseInsensitive(self):
-        self.assertEqual(fuzz.WRatio(self.s1, self.s2), 100)
-
-    def testWRatioPartialMatch(self):
-        # a partial match is scaled by .9
-        self.assertEqual(fuzz.WRatio(self.s1, self.s3), 90)
-
-    def testWRatioMisorderedMatch(self):
-        # misordered full matches are scaled by .95
-        self.assertEqual(fuzz.WRatio(self.s4, self.s5), 95)
-
-    def testWRatioUnicode(self):
-        self.assertEqual(fuzz.WRatio(self.s1, self.s1a), 100)
-
-    def testQRatioUnicode(self):
-        self.assertEqual(fuzz.WRatio(self.s1, self.s1a), 100)
-
-    def testIssue76(self):
-        self.assertAlmostEqual(
-            fuzz.partial_ratio("physics 2 vid", "study physics physics 2"),
-            81.81818,
-            places=4,
+def testPartialTokenSortRatio():
+    assert fuzz.partial_token_sort_ratio("new york mets", "new york mets") == 100
+    assert (
+        fuzz.partial_token_sort_ratio(
+            "new york mets vs atlanta braves", "atlanta braves vs new york mets"
         )
-        self.assertEqual(
-            fuzz.partial_ratio("physics 2 vid", "study physics physics 2 video"), 100
-        )
+        == 100
+    )
 
-    def testIssue90(self):
-        self.assertAlmostEqual(
-            fuzz_cpp.partial_ratio("ax b", "a b a c b"), 85.71428, places=4
-        )
 
-    def testIssue138(self):
-        str1 = "a" * 65
-        str2 = "a" + chr(256) + "a" * 63
-        self.assertAlmostEqual(fuzz.partial_ratio(str1, str2), 98.46153, places=4)
-
-    def testPartialRatioAlignment(self):
-        a = "a certain string"
-        s = "certain"
-        self.assertEqual(
-            fuzz.partial_ratio_alignment(s, a),
-            ScoreAlignment(100, 0, len(s), 2, 2 + len(s)),
+def testTokenSetRatio():
+    assert (
+        fuzz.token_set_ratio(
+            "new york mets vs atlanta braves", "atlanta braves vs new york mets"
         )
-        self.assertEqual(
-            fuzz.partial_ratio_alignment(a, s),
-            ScoreAlignment(100, 2, 2 + len(s), 0, len(s)),
-        )
-        self.assertEqual(fuzz.partial_ratio_alignment(None, "test"), None)
-        self.assertEqual(fuzz.partial_ratio_alignment("test", None), None)
+        == 100
+    )
 
-        self.assertEqual(
-            fuzz.partial_ratio_alignment("test", "tesx", score_cutoff=90), None
-        )
 
-    def testIssue196(self):
-        """
-        fuzz.WRatio did not work correctly with score_cutoffs
-        """
-        self.assertAlmostEqual(
-            fuzz.WRatio("South Korea", "North Korea"), 81.81818, places=4
+def testPartialTokenSetRatio():
+    assert (
+        fuzz.partial_token_set_ratio(
+            "new york mets vs atlanta braves", "atlanta braves vs new york mets"
         )
-        assert fuzz.WRatio("South Korea", "North Korea", score_cutoff=85.4) == 0.0
-        assert fuzz.WRatio("South Korea", "North Korea", score_cutoff=85.5) == 0.0
+        == 100
+    )
 
-    def testIssue231(self):
-        str1 = "er merkantilismus förderte handle und verkehr mit teils marktkonformen, teils dirigistischen maßnahmen."
-        str2 = (
-            "ils marktkonformen, teils dirigistischen maßnahmen. "
-            "an der schwelle zum 19. jahrhundert entstand ein neu"
+
+def testQuickRatioEqual():
+    assert fuzz.QRatio("new york mets", "new york mets") == 100
+
+
+def testQuickRatioCaseInsensitive():
+    assert fuzz.QRatio("new york mets", "new YORK mets") == 100
+
+
+def testQuickRatioNotEqual():
+    assert fuzz.QRatio("new york mets", "the wonderful new york mets") != 100
+
+
+def testWRatioEqual():
+    assert fuzz.WRatio("new york mets", "new york mets") == 100
+
+
+def testWRatioCaseInsensitive():
+    assert fuzz.WRatio("new york mets", "new YORK mets") == 100
+
+
+def testWRatioPartialMatch():
+    # a partial match is scaled by .9
+    assert fuzz.WRatio("new york mets", "the wonderful new york mets") == 90
+
+
+def testWRatioMisorderedMatch():
+    # misordered full matches are scaled by .95
+    assert (
+        fuzz.WRatio(
+            "new york mets vs atlanta braves", "atlanta braves vs new york mets"
         )
+        == 95
+    )
 
-        alignment = fuzz.partial_ratio_alignment(str1, str2)
-        self.assertEqual(alignment.src_start, 0)
-        self.assertEqual(alignment.src_end, 103)
-        self.assertEqual(alignment.dest_start, 0)
-        self.assertEqual(alignment.dest_end, 51)
+
+def testWRatioUnicode():
+    assert fuzz.WRatio("new york mets", "new york mets") == 100
+
+
+def testQRatioUnicode():
+    assert fuzz.WRatio("new york mets", "new york mets") == 100
+
+
+def test_issue76():
+    pytest.approx(
+        fuzz.partial_ratio("physics 2 vid", "study physics physics 2")
+    ) == 81.81818
+    assert fuzz.partial_ratio("physics 2 vid", "study physics physics 2 video") == 100
+
+
+def test_issue90():
+    pytest.approx(fuzz_cpp.partial_ratio("ax b", "a b a c b")) == 85.71428
+
+
+def test_issue138():
+    str1 = "a" * 65
+    str2 = "a" + chr(256) + "a" * 63
+    pytest.approx(fuzz.partial_ratio(str1, str2)) == 98.46153
+
+
+def test_partial_ratio_alignment():
+    a = "a certain string"
+    s = "certain"
+    assert fuzz.partial_ratio_alignment(s, a) == ScoreAlignment(
+        100, 0, len(s), 2, 2 + len(s)
+    )
+    assert fuzz.partial_ratio_alignment(a, s) == ScoreAlignment(
+        100, 2, 2 + len(s), 0, len(s)
+    )
+    assert fuzz.partial_ratio_alignment(None, "test") is None
+    assert fuzz.partial_ratio_alignment("test", None) is None
+
+    assert fuzz.partial_ratio_alignment("test", "tesx", score_cutoff=90) is None
+
+
+def test_issue196():
+    """
+    fuzz.WRatio did not work correctly with score_cutoffs
+    """
+    pytest.approx(fuzz.WRatio("South Korea", "North Korea")) == 81.81818
+    assert fuzz.WRatio("South Korea", "North Korea", score_cutoff=85.4) == 0.0
+    assert fuzz.WRatio("South Korea", "North Korea", score_cutoff=85.5) == 0.0
+
+
+def test_issue231():
+    str1 = "er merkantilismus förderte handle und verkehr mit teils marktkonformen, teils dirigistischen maßnahmen."
+    str2 = (
+        "ils marktkonformen, teils dirigistischen maßnahmen. "
+        "an der schwelle zum 19. jahrhundert entstand ein neu"
+    )
+
+    alignment = fuzz.partial_ratio_alignment(str1, str2)
+    assert alignment.src_start == 0
+    assert alignment.src_end == 103
+    assert alignment.dest_start == 0
+    assert alignment.dest_end == 51
 
 
 def test_empty_string():
@@ -282,9 +298,16 @@ def test_array(scorer):
     arrays should be supported and treated in a compatible way to strings
     """
     # todo add support in pure python implementation
-    assert scorer(array("u", RatioTest.s3), array("u", RatioTest.s3))
-    assert scorer(RatioTest.s3, array("u", RatioTest.s3))
-    assert scorer(array("u", RatioTest.s3), RatioTest.s3)
+    assert scorer(
+        array("u", "the wonderful new york mets"),
+        array("u", "the wonderful new york mets"),
+    )
+    assert scorer(
+        "the wonderful new york mets", array("u", "the wonderful new york mets")
+    )
+    assert scorer(
+        array("u", "the wonderful new york mets"), "the wonderful new york mets"
+    )
 
 
 @pytest.mark.parametrize("scorer", scorers)
@@ -316,12 +339,12 @@ def test_scorer_case_insensitive(processor, scorer):
     """
     each scorer should be able to preprocess strings properly
     """
-    assert scorer(RatioTest.s1, RatioTest.s2, processor=processor) == 100
+    assert scorer("new york mets", "new YORK mets", processor=processor) == 100
 
 
 @pytest.mark.parametrize("processor", [False, None, lambda s: s])
 def test_ratio_case_censitive(processor):
-    assert fuzz.ratio(RatioTest.s1, RatioTest.s2, processor=processor) != 100
+    assert fuzz.ratio("new york mets", "new YORK mets", processor=processor) != 100
 
 
 @pytest.mark.parametrize("scorer", scorers)
@@ -363,7 +386,3 @@ def testIssue257():
     assert isclose(score, 98.46153846153847)
     score = fuzz.partial_ratio(s2, s1)
     assert isclose(score, 98.46153846153847)
-
-
-if __name__ == "__main__":
-    unittest.main()

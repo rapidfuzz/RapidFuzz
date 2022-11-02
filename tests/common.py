@@ -5,19 +5,24 @@ import pytest
 
 from rapidfuzz import process_cpp, process_py
 
+
 def scorer_tester(scorer, s1, s2, **kwargs):
     score1 = scorer(s1, s2, **kwargs)
 
-    # todo currently 
+    # todo currently
     if kwargs.get("score_cutoff") is None:
-        score2 = process_cpp.extractOne(s1, [s2], processor=None, scorer=scorer, **kwargs)[
-            1
-        ]
-        score3 = process_cpp.extract(s1, [s2], processor=None, scorer=scorer, **kwargs)[0][
-            1
-        ]
-        score4 = process_py.extractOne(s1, [s2], processor=None, scorer=scorer, **kwargs)[1]
-        score5 = process_py.extract(s1, [s2], processor=None, scorer=scorer, **kwargs)[0][1]
+        score2 = process_cpp.extractOne(
+            s1, [s2], processor=None, scorer=scorer, **kwargs
+        )[1]
+        score3 = process_cpp.extract(s1, [s2], processor=None, scorer=scorer, **kwargs)[
+            0
+        ][1]
+        score4 = process_py.extractOne(
+            s1, [s2], processor=None, scorer=scorer, **kwargs
+        )[1]
+        score5 = process_py.extract(s1, [s2], processor=None, scorer=scorer, **kwargs)[
+            0
+        ][1]
         assert pytest.approx(score1) == score2
         assert pytest.approx(score1) == score3
         assert pytest.approx(score1) == score4
@@ -30,6 +35,7 @@ def scorer_tester(scorer, s1, s2, **kwargs):
     assert pytest.approx(score1) == score6
     assert pytest.approx(score1) == score7
     return score1
+
 
 class GenericScorer:
     def __init__(self, py_scorer, cpp_scorer):

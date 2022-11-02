@@ -5,6 +5,7 @@ from ..common import GenericScorer
 
 DamerauLevenshtein = GenericScorer(DamerauLevenshtein_py, DamerauLevenshtein_cpp)
 
+
 @pytest.mark.parametrize(
     "left, right, distance, similarity",
     [
@@ -30,6 +31,12 @@ def test_distance(left, right, distance, similarity):
     maximum = max(len(left), len(right))
     assert DamerauLevenshtein.distance(left, right) == distance
     assert DamerauLevenshtein.similarity(left, right) == similarity
-    assert pytest.approx(DamerauLevenshtein.normalized_distance(left, right)) == distance / maximum
+    assert (
+        pytest.approx(DamerauLevenshtein.normalized_distance(left, right))
+        == distance / maximum
+    )
 
-    assert pytest.approx(DamerauLevenshtein.normalized_similarity(left, right)) == similarity / maximum
+    assert (
+        pytest.approx(DamerauLevenshtein.normalized_similarity(left, right))
+        == similarity / maximum
+    )

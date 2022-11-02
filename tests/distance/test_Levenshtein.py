@@ -2,6 +2,7 @@ from rapidfuzz import process
 from rapidfuzz.distance import Levenshtein_cpp, Levenshtein_py, Opcode, Opcodes
 from ..common import GenericScorer
 
+
 class CustomHashable:
     def __init__(self, string):
         self._string = string
@@ -15,7 +16,9 @@ class CustomHashable:
     def __hash__(self):
         return hash(self._string)
 
+
 Levenshtein = GenericScorer(Levenshtein_py, Levenshtein_cpp)
+
 
 def test_empty_string():
     """

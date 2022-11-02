@@ -19,7 +19,9 @@ class CustomHashable:
     def __hash__(self):
         return hash(self._string)
 
+
 OSA = GenericScorer(OSA_py, OSA_cpp)
+
 
 def test_empty_string():
     """
