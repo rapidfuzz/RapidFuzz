@@ -1,7 +1,7 @@
 from rapidfuzz.distance import Indel_cpp, Indel_py
-from ..common import GenericScorer
+from ..common import GenericDistanceScorer
 
-Indel = GenericScorer(Indel_py, Indel_cpp)
+Indel = GenericDistanceScorer(Indel_py, Indel_cpp)
 
 
 def test_empty_string():

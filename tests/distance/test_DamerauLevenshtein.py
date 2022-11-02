@@ -1,9 +1,11 @@
 import pytest
 
 from rapidfuzz.distance import DamerauLevenshtein_cpp, DamerauLevenshtein_py
-from ..common import GenericScorer
+from ..common import GenericDistanceScorer
 
-DamerauLevenshtein = GenericScorer(DamerauLevenshtein_py, DamerauLevenshtein_cpp)
+DamerauLevenshtein = GenericDistanceScorer(
+    DamerauLevenshtein_py, DamerauLevenshtein_cpp
+)
 
 
 @pytest.mark.parametrize(

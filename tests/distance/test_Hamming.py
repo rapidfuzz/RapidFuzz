@@ -1,7 +1,7 @@
 from rapidfuzz.distance import Hamming_cpp, Hamming_py
-from ..common import GenericScorer
+from ..common import GenericDistanceScorer
 
-Hamming = GenericScorer(Hamming_py, Hamming_cpp)
+Hamming = GenericDistanceScorer(Hamming_py, Hamming_cpp)
 
 
 def test_empty_string():

@@ -6,23 +6,19 @@ from rapidfuzz import fuzz_cpp, fuzz_py, utils
 from rapidfuzz.distance import ScoreAlignment
 
 
-def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
-    return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
-
-
 class fuzz:
     @staticmethod
     def ratio(*args, **kwargs):
         dist1 = fuzz_cpp.ratio(*args, **kwargs)
         dist2 = fuzz_py.ratio(*args, **kwargs)
-        assert isclose(dist1, dist2)
+        assert pytest.approx(dist1) == dist2
         return dist1
 
     @staticmethod
     def partial_ratio(*args, **kwargs):
         dist1 = fuzz_cpp.partial_ratio(*args, **kwargs)
         dist2 = fuzz_py.partial_ratio(*args, **kwargs)
-        assert isclose(dist1, dist2)
+        assert pytest.approx(dist1) == dist2
         return dist1
 
     @staticmethod
@@ -32,7 +28,7 @@ class fuzz:
         if dist1 is None or dist2 is None:
             assert dist1 == dist2
         else:
-            assert isclose(dist1[0], dist2[0])
+            assert pytest.approx(dist1[0]) == dist2[0]
             assert list(dist1)[1:] == list(dist2)[1:]
         return dist1
 
@@ -40,56 +36,56 @@ class fuzz:
     def token_sort_ratio(*args, **kwargs):
         dist1 = fuzz_cpp.token_sort_ratio(*args, **kwargs)
         dist2 = fuzz_py.token_sort_ratio(*args, **kwargs)
-        assert isclose(dist1, dist2)
+        assert pytest.approx(dist1) == dist2
         return dist1
 
     @staticmethod
     def token_set_ratio(*args, **kwargs):
         dist1 = fuzz_cpp.token_set_ratio(*args, **kwargs)
         dist2 = fuzz_py.token_set_ratio(*args, **kwargs)
-        assert isclose(dist1, dist2)
+        assert pytest.approx(dist1) == dist2
         return dist1
 
     @staticmethod
     def token_ratio(*args, **kwargs):
         dist1 = fuzz_cpp.token_ratio(*args, **kwargs)
         dist2 = fuzz_py.token_ratio(*args, **kwargs)
-        assert isclose(dist1, dist2)
+        assert pytest.approx(dist1) == dist2
         return dist1
 
     @staticmethod
     def partial_token_sort_ratio(*args, **kwargs):
         dist1 = fuzz_cpp.partial_token_sort_ratio(*args, **kwargs)
         dist2 = fuzz_py.partial_token_sort_ratio(*args, **kwargs)
-        assert isclose(dist1, dist2)
+        assert pytest.approx(dist1) == dist2
         return dist1
 
     @staticmethod
     def partial_token_set_ratio(*args, **kwargs):
         dist1 = fuzz_cpp.partial_token_set_ratio(*args, **kwargs)
         dist2 = fuzz_py.partial_token_set_ratio(*args, **kwargs)
-        assert isclose(dist1, dist2)
+        assert pytest.approx(dist1) == dist2
         return dist1
 
     @staticmethod
     def partial_token_ratio(*args, **kwargs):
         dist1 = fuzz_cpp.partial_token_ratio(*args, **kwargs)
         dist2 = fuzz_py.partial_token_ratio(*args, **kwargs)
-        assert isclose(dist1, dist2)
+        assert pytest.approx(dist1) == dist2
         return dist1
 
     @staticmethod
     def WRatio(*args, **kwargs):
         dist1 = fuzz_cpp.WRatio(*args, **kwargs)
         dist2 = fuzz_py.WRatio(*args, **kwargs)
-        assert isclose(dist1, dist2)
+        assert pytest.approx(dist1) == dist2
         return dist1
 
     @staticmethod
     def QRatio(*args, **kwargs):
         dist1 = fuzz_cpp.QRatio(*args, **kwargs)
         dist2 = fuzz_py.QRatio(*args, **kwargs)
-        assert isclose(dist1, dist2)
+        assert pytest.approx(dist1) == dist2
         return dist1
 
 
@@ -205,20 +201,21 @@ def testQRatioUnicode():
 
 
 def test_issue76():
-    pytest.approx(
-        fuzz.partial_ratio("physics 2 vid", "study physics physics 2")
-    ) == 81.81818
+    assert (
+        pytest.approx(fuzz.partial_ratio("physics 2 vid", "study physics physics 2"))
+        == 81.81818
+    )
     assert fuzz.partial_ratio("physics 2 vid", "study physics physics 2 video") == 100
 
 
 def test_issue90():
-    pytest.approx(fuzz_cpp.partial_ratio("ax b", "a b a c b")) == 85.71428
+    assert pytest.approx(fuzz_cpp.partial_ratio("ax b", "a b a c b")) == 85.71428
 
 
 def test_issue138():
     str1 = "a" * 65
     str2 = "a" + chr(256) + "a" * 63
-    pytest.approx(fuzz.partial_ratio(str1, str2)) == 98.46153
+    assert pytest.approx(fuzz.partial_ratio(str1, str2)) == 98.46153
 
 
 def test_partial_ratio_alignment():
@@ -240,7 +237,7 @@ def test_issue196():
     """
     fuzz.WRatio did not work correctly with score_cutoffs
     """
-    pytest.approx(fuzz.WRatio("South Korea", "North Korea")) == 81.81818
+    assert pytest.approx(fuzz.WRatio("South Korea", "North Korea")) == 81.81818
     assert fuzz.WRatio("South Korea", "North Korea", score_cutoff=85.4) == 0.0
     assert fuzz.WRatio("South Korea", "North Korea", score_cutoff=85.5) == 0.0
 
@@ -383,6 +380,6 @@ def testIssue257():
     s1 = "aaaaaaaaaaaaaaaaaaaaaaaabacaaaaaaaabaaabaaaaaaaababbbbbbbbbbabbcb"
     s2 = "aaaaaaaaaaaaaaaaaaaaaaaababaaaaaaaabaaabaaaaaaaababbbbbbbbbbabbcb"
     score = fuzz.partial_ratio(s1, s2)
-    assert isclose(score, 98.46153846153847)
+    assert pytest.approx(score) == 98.46153846153847
     score = fuzz.partial_ratio(s2, s1)
-    assert isclose(score, 98.46153846153847)
+    assert pytest.approx(score) == 98.46153846153847

@@ -1,7 +1,7 @@
 from rapidfuzz.distance import Prefix_cpp, Prefix_py
-from ..common import GenericScorer
+from ..common import GenericDistanceScorer
 
-Prefix = GenericScorer(Prefix_py, Prefix_cpp)
+Prefix = GenericDistanceScorer(Prefix_py, Prefix_cpp)
 
 
 def test_empty_string():

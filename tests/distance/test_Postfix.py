@@ -1,7 +1,7 @@
 from rapidfuzz.distance import Postfix_cpp, Postfix_py
-from ..common import GenericScorer
+from ..common import GenericDistanceScorer
 
-Postfix = GenericScorer(Postfix_py, Postfix_cpp)
+Postfix = GenericDistanceScorer(Postfix_py, Postfix_cpp)
 
 
 def test_empty_string():

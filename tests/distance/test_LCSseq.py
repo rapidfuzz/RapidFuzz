@@ -1,7 +1,7 @@
 from rapidfuzz.distance import LCSseq_cpp, LCSseq_py
-from ..common import GenericScorer
+from ..common import GenericDistanceScorer
 
-LCSseq = GenericScorer(LCSseq_py, LCSseq_cpp)
+LCSseq = GenericDistanceScorer(LCSseq_py, LCSseq_cpp)
 
 
 def test_empty_string():
