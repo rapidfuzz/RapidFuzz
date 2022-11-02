@@ -3,8 +3,9 @@
 
 ### [2.13.1] - 2022-11-02
 #### Fixed
-- fix bug in `JaroWinkler.normalized_similarity` and `Jaro.normalized_similarity`
+- fix bug in `normalized_similarity` of most scorers,
   leading to incorrect results when used in combination with the process module
+- fix sse2 support
 
 ### [2.13.0] - 2022-10-30
 #### Fixed
