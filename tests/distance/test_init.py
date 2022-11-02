@@ -1,7 +1,4 @@
-#!/usr/bin/env python
-
 import random
-import unittest
 
 import hypothesis.strategies as st
 import pytest
@@ -382,7 +379,3 @@ def test_editops_reversible(s1, s2):
         del ops[random.randrange(len(ops))]
         assert Opcodes(ops.as_list(), ops.src_len, ops.dest_len) == ops.as_opcodes()
         assert ops == ops.as_opcodes().as_editops()
-
-
-if __name__ == "__main__":
-    unittest.main()

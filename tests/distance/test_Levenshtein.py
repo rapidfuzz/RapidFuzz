@@ -1,32 +1,6 @@
-#!/usr/bin/env python
-
-import unittest
-
 from rapidfuzz import process
-from rapidfuzz.distance import Levenshtein as _Levenshtein
 from rapidfuzz.distance import Levenshtein_cpp, Levenshtein_py, Opcode, Opcodes
-
-Levenshtein_cpp.distance._RF_ScorerPy = _Levenshtein.distance._RF_ScorerPy
-Levenshtein_cpp.normalized_distance._RF_ScorerPy = (
-    _Levenshtein.normalized_distance._RF_ScorerPy
-)
-Levenshtein_cpp.similarity._RF_ScorerPy = _Levenshtein.similarity._RF_ScorerPy
-Levenshtein_cpp.normalized_similarity._RF_ScorerPy = (
-    _Levenshtein.normalized_similarity._RF_ScorerPy
-)
-Levenshtein_py.distance._RF_ScorerPy = _Levenshtein.distance._RF_ScorerPy
-Levenshtein_py.normalized_distance._RF_ScorerPy = (
-    _Levenshtein.normalized_distance._RF_ScorerPy
-)
-Levenshtein_py.similarity._RF_ScorerPy = _Levenshtein.similarity._RF_ScorerPy
-Levenshtein_py.normalized_similarity._RF_ScorerPy = (
-    _Levenshtein.normalized_similarity._RF_ScorerPy
-)
-
-
-def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
-    return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
-
+from ..common import GenericScorer
 
 class CustomHashable:
     def __init__(self, string):
@@ -41,36 +15,7 @@ class CustomHashable:
     def __hash__(self):
         return hash(self._string)
 
-
-class Levenshtein:
-    @staticmethod
-    def distance(*args, **kwargs):
-        dist1 = Levenshtein_cpp.distance(*args, **kwargs)
-        dist2 = Levenshtein_py.distance(*args, **kwargs)
-        assert dist1 == dist2
-        return dist1
-
-    @staticmethod
-    def similarity(*args, **kwargs):
-        dist1 = Levenshtein_cpp.similarity(*args, **kwargs)
-        dist2 = Levenshtein_py.similarity(*args, **kwargs)
-        assert dist1 == dist2
-        return dist1
-
-    @staticmethod
-    def normalized_distance(*args, **kwargs):
-        dist1 = Levenshtein_cpp.normalized_distance(*args, **kwargs)
-        dist2 = Levenshtein_py.normalized_distance(*args, **kwargs)
-        assert isclose(dist1, dist2)
-        return dist1
-
-    @staticmethod
-    def normalized_similarity(*args, **kwargs):
-        dist1 = Levenshtein_cpp.normalized_similarity(*args, **kwargs)
-        dist2 = Levenshtein_py.normalized_similarity(*args, **kwargs)
-        assert isclose(dist1, dist2)
-        return dist1
-
+Levenshtein = GenericScorer(Levenshtein_py, Levenshtein_cpp)
 
 def test_empty_string():
     """
@@ -205,7 +150,3 @@ def test_mbleven():
         "0", ["101"], scorer=Levenshtein_py.distance, processor=None, score_cutoff=3
     )
     assert match == ("101", 2, 0)
-
-
-if __name__ == "__main__":
-    unittest.main()

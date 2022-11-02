@@ -1,41 +1,7 @@
-import unittest
-
 from rapidfuzz.distance import Postfix_cpp, Postfix_py
+from ..common import GenericScorer
 
-
-def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
-    return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
-
-
-class Postfix:
-    @staticmethod
-    def distance(*args, **kwargs):
-        dist1 = Postfix_cpp.distance(*args, **kwargs)
-        dist2 = Postfix_py.distance(*args, **kwargs)
-        assert dist1 == dist2
-        return dist1
-
-    @staticmethod
-    def similarity(*args, **kwargs):
-        dist1 = Postfix_cpp.similarity(*args, **kwargs)
-        dist2 = Postfix_py.similarity(*args, **kwargs)
-        assert dist1 == dist2
-        return dist1
-
-    @staticmethod
-    def normalized_distance(*args, **kwargs):
-        dist1 = Postfix_cpp.normalized_distance(*args, **kwargs)
-        dist2 = Postfix_py.normalized_distance(*args, **kwargs)
-        assert isclose(dist1, dist2)
-        return dist1
-
-    @staticmethod
-    def normalized_similarity(*args, **kwargs):
-        dist1 = Postfix_cpp.normalized_similarity(*args, **kwargs)
-        dist2 = Postfix_py.normalized_similarity(*args, **kwargs)
-        assert isclose(dist1, dist2)
-        return dist1
-
+Postfix = GenericScorer(Postfix_py, Postfix_cpp)
 
 def test_empty_string():
     """
@@ -77,7 +43,3 @@ def test_score_cutoff():
     assert Postfix.distance("abcd", "eebcd", score_cutoff=2) == 2
     assert Postfix.distance("abcd", "eebcd", score_cutoff=1) == 2
     assert Postfix.distance("abcd", "eebcd", score_cutoff=0) == 1
-
-
-if __name__ == "__main__":
-    unittest.main()

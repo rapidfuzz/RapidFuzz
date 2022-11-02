@@ -1,40 +1,7 @@
-import unittest
-
 from rapidfuzz.distance import Indel_cpp, Indel_py
+from ..common import GenericScorer
 
-
-def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
-    return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
-
-
-class Indel:
-    @staticmethod
-    def distance(*args, **kwargs):
-        dist1 = Indel_cpp.distance(*args, **kwargs)
-        dist2 = Indel_py.distance(*args, **kwargs)
-        assert dist1 == dist2
-        return dist1
-
-    @staticmethod
-    def similarity(*args, **kwargs):
-        dist1 = Indel_cpp.similarity(*args, **kwargs)
-        dist2 = Indel_py.similarity(*args, **kwargs)
-        assert dist1 == dist2
-        return dist1
-
-    @staticmethod
-    def normalized_distance(*args, **kwargs):
-        dist1 = Indel_cpp.normalized_distance(*args, **kwargs)
-        dist2 = Indel_py.normalized_distance(*args, **kwargs)
-        assert isclose(dist1, dist2)
-        return dist1
-
-    @staticmethod
-    def normalized_similarity(*args, **kwargs):
-        dist1 = Indel_cpp.normalized_similarity(*args, **kwargs)
-        dist2 = Indel_py.normalized_similarity(*args, **kwargs)
-        assert isclose(dist1, dist2)
-        return dist1
+Indel = GenericScorer(Indel_py, Indel_cpp)
 
 
 def test_empty_string():
@@ -77,7 +44,3 @@ def test_issue_196():
     assert Indel.distance("South Korea", "North Korea", score_cutoff=2) == 3
     assert Indel.distance("South Korea", "North Korea", score_cutoff=1) == 2
     assert Indel.distance("South Korea", "North Korea", score_cutoff=0) == 1
-
-
-if __name__ == "__main__":
-    unittest.main()

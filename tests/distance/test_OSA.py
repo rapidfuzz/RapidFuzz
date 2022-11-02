@@ -1,18 +1,5 @@
-#!/usr/bin/env python
-
-import unittest
-
-from rapidfuzz.distance import OSA as _OSA
 from rapidfuzz.distance import OSA_cpp, OSA_py
-
-OSA_cpp.distance._RF_ScorerPy = _OSA.distance._RF_ScorerPy
-OSA_cpp.normalized_distance._RF_ScorerPy = _OSA.normalized_distance._RF_ScorerPy
-OSA_cpp.similarity._RF_ScorerPy = _OSA.similarity._RF_ScorerPy
-OSA_cpp.normalized_similarity._RF_ScorerPy = _OSA.normalized_similarity._RF_ScorerPy
-OSA_py.distance._RF_ScorerPy = _OSA.distance._RF_ScorerPy
-OSA_py.normalized_distance._RF_ScorerPy = _OSA.normalized_distance._RF_ScorerPy
-OSA_py.similarity._RF_ScorerPy = _OSA.similarity._RF_ScorerPy
-OSA_py.normalized_similarity._RF_ScorerPy = _OSA.normalized_similarity._RF_ScorerPy
+from ..common import GenericScorer
 
 
 def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
@@ -32,36 +19,7 @@ class CustomHashable:
     def __hash__(self):
         return hash(self._string)
 
-
-class OSA:
-    @staticmethod
-    def distance(*args, **kwargs):
-        dist1 = OSA_cpp.distance(*args, **kwargs)
-        dist2 = OSA_py.distance(*args, **kwargs)
-        assert dist1 == dist2
-        return dist1
-
-    @staticmethod
-    def similarity(*args, **kwargs):
-        dist1 = OSA_cpp.similarity(*args, **kwargs)
-        dist2 = OSA_py.similarity(*args, **kwargs)
-        assert dist1 == dist2
-        return dist1
-
-    @staticmethod
-    def normalized_distance(*args, **kwargs):
-        dist1 = OSA_cpp.normalized_distance(*args, **kwargs)
-        dist2 = OSA_py.normalized_distance(*args, **kwargs)
-        assert isclose(dist1, dist2)
-        return dist1
-
-    @staticmethod
-    def normalized_similarity(*args, **kwargs):
-        dist1 = OSA_cpp.normalized_similarity(*args, **kwargs)
-        dist2 = OSA_py.normalized_similarity(*args, **kwargs)
-        assert isclose(dist1, dist2)
-        return dist1
-
+OSA = GenericScorer(OSA_py, OSA_cpp)
 
 def test_empty_string():
     """
@@ -117,7 +75,3 @@ def test_simple_unicode_tests():
     s2 = "ABCD"
     assert OSA.distance(s1, s2) == 4
     assert OSA.distance(s1, s1) == 0
-
-
-if __name__ == "__main__":
-    unittest.main()
