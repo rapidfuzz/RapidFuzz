@@ -875,7 +875,7 @@ jaro_normalized_distance._RF_Scorer = PyCapsule_New(&JaroDistanceContext, NULL, 
 
 cdef RF_Scorer JaroSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsJaroSimilarity, JaroSimilarityInit)
 jaro_similarity._RF_Scorer = PyCapsule_New(&JaroSimilarityContext, NULL, NULL)
-jaro_normalized_similarity._RF_Scorer = PyCapsule_New(&JaroDistanceContext, NULL, NULL)
+jaro_normalized_similarity._RF_Scorer = PyCapsule_New(&JaroSimilarityContext, NULL, NULL)
 
 
 ###############################################
@@ -947,7 +947,7 @@ jaro_winkler_normalized_distance._RF_Scorer = PyCapsule_New(&JaroWinklerDistance
 
 cdef RF_Scorer JaroWinklerSimilarityContext = CreateScorerContext(JaroWinklerKwargsInit, GetScorerFlagsJaroWinklerSimilarity, JaroWinklerSimilarityInit)
 jaro_winkler_similarity._RF_Scorer = PyCapsule_New(&JaroWinklerSimilarityContext, NULL, NULL)
-jaro_winkler_normalized_similarity._RF_Scorer = PyCapsule_New(&JaroWinklerDistanceContext, NULL, NULL)
+jaro_winkler_normalized_similarity._RF_Scorer = PyCapsule_New(&JaroWinklerSimilarityContext, NULL, NULL)
 
 ###############################################
 # Postfix

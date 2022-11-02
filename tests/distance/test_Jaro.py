@@ -3,7 +3,7 @@
 import unittest
 import pytest
 
-from rapidfuzz.distance import JaroWinkler_cpp, JaroWinkler_py
+from rapidfuzz.distance import Jaro_cpp, Jaro_py
 from rapidfuzz import process_cpp, process_py
 
 
@@ -30,23 +30,23 @@ def scorer(scorer, s1, s2, **kwargs):
     return score1
 
 
-def jarowinkler_distance(s1, s2, **kwargs):
-    sim1 = scorer(JaroWinkler_py.distance, s1, s2, **kwargs)
-    sim2 = scorer(JaroWinkler_cpp.distance, s1, s2, **kwargs)
-    sim3 = scorer(JaroWinkler_py.distance, s1, s2, **kwargs)
-    sim4 = scorer(JaroWinkler_cpp.distance, s1, s2, **kwargs)
+def jaro_distance(s1, s2, **kwargs):
+    sim1 = scorer(Jaro_py.distance, s1, s2, **kwargs)
+    sim2 = scorer(Jaro_cpp.distance, s1, s2, **kwargs)
+    sim3 = scorer(Jaro_py.distance, s1, s2, **kwargs)
+    sim4 = scorer(Jaro_cpp.distance, s1, s2, **kwargs)
     assert pytest.approx(sim1, sim2)
     assert pytest.approx(sim1, sim3)
     assert pytest.approx(sim1, sim4)
     return sim1
 
 
-def jarowinkler_similarity(s1, s2, **kwargs):
-    sim1 = scorer(JaroWinkler_py.similarity, s1, s2, **kwargs)
-    sim2 = scorer(JaroWinkler_cpp.similarity, s1, s2, **kwargs)
-    sim3 = scorer(JaroWinkler_py.normalized_similarity, s1, s2, **kwargs)
-    sim4 = scorer(JaroWinkler_cpp.normalized_similarity, s1, s2, **kwargs)
-    sim5 = 1.0 - jarowinkler_distance(s1, s2, **kwargs)
+def jaro_similarity(s1, s2, **kwargs):
+    sim1 = scorer(Jaro_py.similarity, s1, s2, **kwargs)
+    sim2 = scorer(Jaro_cpp.similarity, s1, s2, **kwargs)
+    sim3 = scorer(Jaro_py.normalized_similarity, s1, s2, **kwargs)
+    sim4 = scorer(Jaro_cpp.normalized_similarity, s1, s2, **kwargs)
+    sim5 = 1.0 - jaro_distance(s1, s2, **kwargs)
     assert pytest.approx(sim1, sim2)
     assert pytest.approx(sim1, sim3)
     assert pytest.approx(sim1, sim4)
@@ -55,38 +55,38 @@ def jarowinkler_similarity(s1, s2, **kwargs):
     return sim1
 
 
-class JaroWinklerTest(unittest.TestCase):
-    def _jaro_winkler_similarity(self, s1, s2, result):
-        self.assertAlmostEqual(jarowinkler_similarity(s1, s2), result, places=4)
-        self.assertAlmostEqual(jarowinkler_similarity(s2, s1), result, places=4)
+class JaroTest(unittest.TestCase):
+    def _jaro_similarity(self, s1, s2, result):
+        self.assertAlmostEqual(jaro_similarity(s1, s2), result, places=4)
+        self.assertAlmostEqual(jaro_similarity(s2, s1), result, places=4)
 
     def test_hash_special_case(self):
-        self._jaro_winkler_similarity([0, -1], [0, -2], 0.66666)
+        self._jaro_similarity([0, -1], [0, -2], 0.66666)
 
     def test_edge_case_lengths(self):
-        self._jaro_winkler_similarity("", "", 0)
-        self._jaro_winkler_similarity("0", "0", 1)
-        self._jaro_winkler_similarity("00", "00", 1)
-        self._jaro_winkler_similarity("0", "00", 0.85)
+        self._jaro_similarity("", "", 0)
+        self._jaro_similarity("0", "0", 1)
+        self._jaro_similarity("00", "00", 1)
+        self._jaro_similarity("0", "00", 0.83333)
 
-        self._jaro_winkler_similarity("0" * 65, "0" * 65, 1)
-        self._jaro_winkler_similarity("0" * 64, "0" * 65, 0.9969)
-        self._jaro_winkler_similarity("0" * 63, "0" * 65, 0.9938)
+        self._jaro_similarity("0" * 65, "0" * 65, 1)
+        self._jaro_similarity("0" * 64, "0" * 65, 0.99487)
+        self._jaro_similarity("0" * 63, "0" * 65, 0.98974)
 
         s1 = "10000000000000000000000000000000000000000000000000000000000000020"
         s2 = "00000000000000000000000000000000000000000000000000000000000000000"
-        self._jaro_winkler_similarity(s1, s2, 0.97948)
+        self._jaro_similarity(s1, s2, 0.97948)
 
         s1 = "00000000000000100000000000000000000000010000000000000000000000000"
         s2 = "0000000000000000000000000000000000000000000000000000000000000000000000000000001"
-        self._jaro_winkler_similarity(s2, s1, 0.95333)
+        self._jaro_similarity(s2, s1, 0.92223)
 
         s1 = "00000000000000000000000000000000000000000000000000000000000000000"
         s2 = (
             "010000000000000000000000000000000000000000000000000000000000000000"
             "00000000000000000000000000000000000000000000000000000000000000"
         )
-        self._jaro_winkler_similarity(s2, s1, 0.85234)
+        self._jaro_similarity(s2, s1, 0.83593)
 
 
 if __name__ == "__main__":

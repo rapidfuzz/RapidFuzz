@@ -1,5 +1,11 @@
 ## Changelog
 
+
+### [2.13.1] - 2022-11-02
+#### Fixed
+- fix bug in `JaroWinkler.normalized_similarity` and `Jaro.normalized_similarity`
+  leading to incorrect results when used in combination with the process module
+
 ### [2.13.0] - 2022-10-30
 #### Fixed
 - fix bug in `Levenshtein.editops` leading to crashes when used with `score_hint`
