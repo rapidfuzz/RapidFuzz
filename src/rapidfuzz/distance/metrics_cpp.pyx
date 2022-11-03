@@ -356,7 +356,7 @@ cdef RF_Scorer LevenshteinNormalizedDistanceContext = CreateScorerContext(Levens
 levenshtein_normalized_distance._RF_Scorer = PyCapsule_New(&LevenshteinNormalizedDistanceContext, NULL, NULL)
 
 cdef RF_Scorer LevenshteinNormalizedSimilarityContext = CreateScorerContext(LevenshteinKwargsInit, GetScorerFlagsLevenshteinNormalizedSimilarity, LevenshteinNormalizedSimilarityInit)
-levenshtein_normalized_distance._RF_Scorer = PyCapsule_New(&LevenshteinNormalizedSimilarityContext, NULL, NULL)
+levenshtein_normalized_similarity._RF_Scorer = PyCapsule_New(&LevenshteinNormalizedSimilarityContext, NULL, NULL)
 
 
 def damerau_levenshtein_distance(s1, s2, *, processor=None, score_cutoff=None):

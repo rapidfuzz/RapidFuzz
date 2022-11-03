@@ -13,7 +13,7 @@ _mod = "rapidfuzz.distance.Hamming"
 distance = _fallback_import(_mod, "distance", cached_scorer_call=_dist_attr)
 similarity = _fallback_import(_mod, "similarity", cached_scorer_call=_sim_attr)
 normalized_similarity = _fallback_import(
-    _mod, "similarity", cached_scorer_call=_norm_sim_attr
+    _mod, "normalized_similarity", cached_scorer_call=_norm_sim_attr
 )
 normalized_distance = _fallback_import(
     _mod, "normalized_distance", cached_scorer_call=_norm_dist_attr

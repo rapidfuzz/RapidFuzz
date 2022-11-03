@@ -1,5 +1,12 @@
 ## Changelog
 
+### [2.13.2] - 2022-11-
+#### Fixed
+- fix incorrect results in `Hamming.normalized_similarity`
+- fix incorrect score_cutoff handling in pure python implementation of
+  `Postfix.normalized_distance` and `Prefix.normalized_distance`
+- fix `Levenshtein.normalized_similarity` and `Levenshtein.normalized_distance`
+  when used in combination with the process module
 
 ### [2.13.1] - 2022-11-02
 #### Fixed

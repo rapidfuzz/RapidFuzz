@@ -1,37 +1,18 @@
 from rapidfuzz.distance import Indel_cpp, Indel_py
-from ..common import GenericDistanceScorer
-
-Indel = GenericDistanceScorer(Indel_py, Indel_cpp)
+from ..common import GenericScorer
 
 
-def test_empty_string():
-    """
-    when both strings are empty this is a perfect match
-    """
+def get_scorer_flags(s1, s2, **kwargs):
+    return {"maximum": len(s1) + len(s2), "symmetric": True}
+
+
+Indel = GenericScorer(Indel_py, Indel_cpp, get_scorer_flags)
+
+
+def test_basic():
     assert Indel.distance("", "") == 0
-    assert Indel.similarity("", "") == 0
-    assert Indel.normalized_distance("", "") == 0.0
-    assert Indel.normalized_similarity("", "") == 1.0
-
-
-def test_similar_strings():
-    """
-    Test similar strings
-    """
     assert Indel.distance("test", "test") == 0
-    assert Indel.similarity("test", "test") == 8
-    assert Indel.normalized_distance("test", "test") == 0
-    assert Indel.normalized_similarity("test", "test") == 1.0
-
-
-def test_different_strings():
-    """
-    Test completely different strings
-    """
     assert Indel.distance("aaaa", "bbbb") == 8
-    assert Indel.similarity("aaaa", "bbbb") == 0
-    assert Indel.normalized_distance("aaaa", "bbbb") == 1.0
-    assert Indel.normalized_similarity("aaaa", "bbbb") == 0.0
 
 
 def test_issue_196():

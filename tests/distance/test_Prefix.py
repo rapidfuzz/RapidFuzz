@@ -1,37 +1,18 @@
 from rapidfuzz.distance import Prefix_cpp, Prefix_py
-from ..common import GenericDistanceScorer
-
-Prefix = GenericDistanceScorer(Prefix_py, Prefix_cpp)
+from ..common import GenericScorer
 
 
-def test_empty_string():
-    """
-    when both strings are empty this is a perfect match
-    """
+def get_scorer_flags(s1, s2, **kwargs):
+    return {"maximum": max(len(s1), len(s2)), "symmetric": True}
+
+
+Prefix = GenericScorer(Prefix_py, Prefix_cpp, get_scorer_flags)
+
+
+def test_basic():
     assert Prefix.distance("", "") == 0
-    assert Prefix.similarity("", "") == 0
-    assert Prefix.normalized_distance("", "") == 0.0
-    assert Prefix.normalized_similarity("", "") == 1.0
-
-
-def test_similar_strings():
-    """
-    Test similar strings
-    """
     assert Prefix.distance("test", "test") == 0
-    assert Prefix.similarity("test", "test") == 4
-    assert Prefix.normalized_distance("test", "test") == 0
-    assert Prefix.normalized_similarity("test", "test") == 1.0
-
-
-def test_different_strings():
-    """
-    Test completely different strings
-    """
     assert Prefix.distance("aaaa", "bbbb") == 4
-    assert Prefix.similarity("aaaa", "bbbb") == 0
-    assert Prefix.normalized_distance("aaaa", "bbbb") == 1.0
-    assert Prefix.normalized_similarity("aaaa", "bbbb") == 0.0
 
 
 def test_score_cutoff():

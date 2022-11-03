@@ -1,5 +1,5 @@
 from rapidfuzz.distance import OSA_cpp, OSA_py
-from ..common import GenericDistanceScorer
+from ..common import GenericScorer
 
 
 def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
@@ -20,7 +20,11 @@ class CustomHashable:
         return hash(self._string)
 
 
-OSA = GenericDistanceScorer(OSA_py, OSA_cpp)
+def get_scorer_flags(s1, s2, **kwargs):
+    return {"maximum": max(len(s1), len(s2)), "symmetric": True}
+
+
+OSA = GenericScorer(OSA_py, OSA_cpp, get_scorer_flags)
 
 
 def test_empty_string():

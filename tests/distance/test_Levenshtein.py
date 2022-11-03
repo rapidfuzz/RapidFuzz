@@ -1,6 +1,6 @@
 from rapidfuzz import process
 from rapidfuzz.distance import Levenshtein_cpp, Levenshtein_py, Opcode, Opcodes
-from ..common import GenericDistanceScorer
+from ..common import GenericScorer
 
 
 class CustomHashable:
@@ -17,7 +17,23 @@ class CustomHashable:
         return hash(self._string)
 
 
-Levenshtein = GenericDistanceScorer(Levenshtein_py, Levenshtein_cpp)
+def get_scorer_flags(s1, s2, weights=(1, 1, 1), **kwargs):
+    insert_cost, delete_cost, replace_cost = weights
+    max_dist = len(s1) * delete_cost + len(s2) * insert_cost
+
+    if len(s1) >= len(s2):
+        max_dist = min(
+            max_dist, len(s2) * replace_cost + (len(s1) - len(s2)) * delete_cost
+        )
+    else:
+        max_dist = min(
+            max_dist, len(s1) * replace_cost + (len(s2) - len(s1)) * insert_cost
+        )
+
+    return {"maximum": max_dist, "symmetric": insert_cost == delete_cost}
+
+
+Levenshtein = GenericScorer(Levenshtein_py, Levenshtein_cpp, get_scorer_flags)
 
 
 def test_empty_string():

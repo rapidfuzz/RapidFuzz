@@ -123,9 +123,7 @@ def normalized_distance(
     norm_dist : float
         normalized distance between s1 and s2 as a float between 0 and 1.0
     """
-    norm_sim = normalized_similarity(
-        s1, s2, processor=processor, score_cutoff=score_cutoff
-    )
+    norm_sim = normalized_similarity(s1, s2, processor=processor)
     norm_dist = 1.0 - norm_sim
 
     return norm_dist if (score_cutoff is None or norm_dist <= score_cutoff) else 1.0

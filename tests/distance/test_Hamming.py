@@ -1,37 +1,18 @@
 from rapidfuzz.distance import Hamming_cpp, Hamming_py
-from ..common import GenericDistanceScorer
-
-Hamming = GenericDistanceScorer(Hamming_py, Hamming_cpp)
+from ..common import GenericScorer
 
 
-def test_empty_string():
-    """
-    when both strings are empty this is a perfect match
-    """
+def get_scorer_flags(s1, s2, **kwargs):
+    return {"maximum": max(len(s1), len(s2)), "symmetric": True}
+
+
+Hamming = GenericScorer(Hamming_py, Hamming_cpp, get_scorer_flags)
+
+
+def test_basic():
     assert Hamming.distance("", "") == 0
-    assert Hamming.similarity("", "") == 0
-    assert Hamming.normalized_distance("", "") == 0.0
-    assert Hamming.normalized_similarity("", "") == 1.0
-
-
-def test_similar_strings():
-    """
-    Test similar strings
-    """
     assert Hamming.distance("test", "test") == 0
-    assert Hamming.similarity("test", "test") == 4
-    assert Hamming.normalized_distance("test", "test") == 0
-    assert Hamming.normalized_similarity("test", "test") == 1.0
-
-
-def test_different_strings():
-    """
-    Test completely different strings
-    """
     assert Hamming.distance("aaaa", "bbbb") == 4
-    assert Hamming.similarity("aaaa", "bbbb") == 0
-    assert Hamming.normalized_distance("aaaa", "bbbb") == 1.0
-    assert Hamming.normalized_similarity("aaaa", "bbbb") == 0.0
 
 
 def test_score_cutoff():
