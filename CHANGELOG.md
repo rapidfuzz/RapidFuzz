@@ -7,6 +7,7 @@
   `Postfix.normalized_distance` and `Prefix.normalized_distance`
 - fix `Levenshtein.normalized_similarity` and `Levenshtein.normalized_distance`
   when used in combination with the process module
+- `fuzz.partial_ratio` was not always symmetric when `len(s1) == len(s2)`
 
 ### [2.13.1] - 2022-11-02
 #### Fixed

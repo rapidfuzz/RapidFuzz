@@ -226,32 +226,11 @@ def partial_ratio(
     >>> fuzz.partial_ratio("this is a test", "this is a test!")
     100.0
     """
-    if s1 is None or s2 is None:
+    alignment = partial_ratio_alignment(s1, s2, processor=processor, score_cutoff=score_cutoff)
+    if alignment is None:
         return 0
-
-    if processor is True:
-        processor = default_process
-    elif processor is False:
-        processor = None
-
-    if processor is not None:
-        s1 = processor(s1)
-        s2 = processor(s2)
-
-    if score_cutoff is None:
-        score_cutoff = 0
-
-    if not s1 and not s2:
-        return 100
-
-    if len(s1) <= len(s2):
-        shorter = s1
-        longer = s2
-    else:
-        shorter = s2
-        longer = s1
-
-    return _partial_ratio_short_needle(shorter, longer, score_cutoff / 100).score
+    
+    return alignment.score
 
 
 def partial_ratio_alignment(
@@ -324,6 +303,14 @@ def partial_ratio_alignment(
         longer = s1
 
     res = _partial_ratio_short_needle(shorter, longer, score_cutoff / 100)
+    if res.score != 100 and len(s1) == len(s2):
+        score_cutoff = max(score_cutoff, res.score)
+        res2 = _partial_ratio_short_needle(longer, shorter, score_cutoff / 100)
+        if res2.score > res.score:
+            res = ScoreAlignment(
+                res2.score, res2.dest_start, res2.dest_end, res2.src_start, res2.src_end
+            )
+    
     if res.score < score_cutoff:
         return None
 
