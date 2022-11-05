@@ -174,7 +174,7 @@ def jaro_winkler_similarity(pattern, text, prefix_weight=0.1):
     return Sim
 
 
-def partial_ratio_short_needle(s1, s2):
+def partial_ratio_short_needle_impl(s1, s2):
     if not s1 and not s2:
         return 100
 
@@ -182,7 +182,7 @@ def partial_ratio_short_needle(s1, s2):
         return 0
 
     if len(s1) > len(s2):
-        return partial_ratio_short_needle(s2, s1)
+        return partial_ratio_short_needle_impl(s2, s1)
     parts = [
         s2[max(0, i) : min(len(s2), i + len(s1))] for i in range(-len(s1), len(s2))
     ]
@@ -190,6 +190,16 @@ def partial_ratio_short_needle(s1, s2):
     for part in parts:
         res = max(res, fuzz.ratio(s1, part))
     return res
+
+
+def partial_ratio_short_needle(s1, s2):
+    if len(s1) != len(s2):
+        return partial_ratio_short_needle_impl(s1, s2)
+    else:
+        return max(
+            partial_ratio_short_needle_impl(s1, s2),
+            partial_ratio_short_needle_impl(s2, s1),
+        )
 
 
 def cdist_scorer(queries, choices, scorer):
