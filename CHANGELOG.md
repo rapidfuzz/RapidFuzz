@@ -1,6 +1,6 @@
 ## Changelog
 
-### [2.13.2] - 2022-11-
+### [2.13.2] - 2022-11-05
 #### Fixed
 - fix incorrect results in `Hamming.normalized_similarity`
 - fix incorrect score_cutoff handling in pure python implementation of
