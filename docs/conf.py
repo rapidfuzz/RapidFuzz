@@ -17,12 +17,14 @@
 
 # -- Project information -----------------------------------------------------
 
+import rapidfuzz
+
 project = "RapidFuzz"
 copyright = "2021, Max Bachmann"
 author = "Max Bachmann"
 
 # The full version, including alpha/beta/rc tags
-release = "2.13.1"
+release = rapidfuzz.__version__
 
 
 # -- General configuration ---------------------------------------------------
