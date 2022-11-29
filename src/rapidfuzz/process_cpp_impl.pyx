@@ -1482,6 +1482,7 @@ cdef cdist_py(queries, choices, scorer, processor, score_cutoff, dtype, workers,
 def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, score_hint=None, dtype=None, workers=1, **kwargs):
     cdef RF_Scorer* scorer_context = NULL
     cdef RF_ScorerFlags scorer_flags
+    cdef bool is_orig_scorer
 
     if processor is True:
         # todo: deprecate this
@@ -1493,20 +1494,21 @@ def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, 
     if PyCapsule_IsValid(scorer_capsule, NULL):
         scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
 
-    if scorer_context:
-        if scorer_context.version == SCORER_STRUCT_VERSION:
-            kwargs_context = RF_KwargsWrapper()
-            scorer_context.kwargs_init(&kwargs_context.kwargs, kwargs)
-            scorer_context.get_scorer_flags(&kwargs_context.kwargs, &scorer_flags)
+    is_orig_scorer = getattr(scorer, '_RF_OriginalScorer', None) is scorer
 
-            # scorer(queries[i], choices[j]) == scorer(queries[j], choices[i])
-            if scorer_flags.flags & RF_SCORER_FLAG_SYMMETRIC and queries is choices:
-                return cdist_single_list(
-                    queries, scorer_context, &scorer_flags, processor,
-                    score_cutoff, score_hint, dtype, workers, &kwargs_context.kwargs)
-            else:
-                return cdist_two_lists(
-                    queries, choices, scorer_context, &scorer_flags, processor,
-                    score_cutoff, score_hint, dtype, workers, &kwargs_context.kwargs)
+    if is_orig_scorer and scorer_context and scorer_context.version == SCORER_STRUCT_VERSION:
+        kwargs_context = RF_KwargsWrapper()
+        scorer_context.kwargs_init(&kwargs_context.kwargs, kwargs)
+        scorer_context.get_scorer_flags(&kwargs_context.kwargs, &scorer_flags)
+
+        # scorer(queries[i], choices[j]) == scorer(queries[j], choices[i])
+        if scorer_flags.flags & RF_SCORER_FLAG_SYMMETRIC and queries is choices:
+            return cdist_single_list(
+                queries, scorer_context, &scorer_flags, processor,
+                score_cutoff, score_hint, dtype, workers, &kwargs_context.kwargs)
+        else:
+            return cdist_two_lists(
+                queries, choices, scorer_context, &scorer_flags, processor,
+                score_cutoff, score_hint, dtype, workers, &kwargs_context.kwargs)
 
     return cdist_py(queries, choices, scorer, processor, score_cutoff, dtype, workers, kwargs)

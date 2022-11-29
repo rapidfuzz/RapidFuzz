@@ -2,6 +2,13 @@ import pytest
 
 from rapidfuzz import fuzz, process_cpp, process_py
 
+def wrapped(func):
+    from functools import wraps
+    @wraps(func)
+    def decorator(*args, **kwargs):
+        return 100
+
+    return decorator
 
 class process:
     @staticmethod
@@ -24,6 +31,13 @@ class process:
     def extract(*args, **kwargs):
         res1 = process_cpp.extract(*args, **kwargs)
         res2 = process_py.extract(*args, **kwargs)
+        assert res1 == res2
+        return res1
+
+    @staticmethod
+    def cdist(*args, **kwargs):
+        res1 = process_cpp.cdist(*args, **kwargs)
+        res2 = process_py.cdist(*args, **kwargs)
         assert res1 == res2
         return res1
 
@@ -351,7 +365,14 @@ def test_extractOne_use_first_match(scorer):
 @pytest.mark.parametrize("scorer", [fuzz.ratio, fuzz.WRatio, custom_scorer])
 def test_cdist_empty_seq(scorer):
     pytest.importorskip("numpy")
-    assert process_cpp.cdist([], ["a", "b"], scorer=scorer).shape == (0, 2)
-    assert process_cpp.cdist(["a", "b"], [], scorer=scorer).shape == (2, 0)
-    assert process_py.cdist([], ["a", "b"], scorer=scorer).shape == (0, 2)
-    assert process_py.cdist(["a", "b"], [], scorer=scorer).shape == (2, 0)
+    assert process.cdist([], ["a", "b"], scorer=scorer).shape == (0, 2)
+    assert process.cdist(["a", "b"], [], scorer=scorer).shape == (2, 0)
+
+
+@pytest.mark.parametrize("scorer", [fuzz.ratio])
+def test_wrapped_function(scorer):
+    pytest.importorskip("numpy")
+    scorer = wrapped(scorer)
+    assert process.cdist(["test"], [float("nan")], scorer=scorer)[0, 0] == 100
+    assert process.cdist(["test"], [None], scorer=scorer)[0, 0] == 100
+    assert process.cdist(["test"], ["tes"], scorer=scorer)[0, 0] == 100

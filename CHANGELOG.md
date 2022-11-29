@@ -1,5 +1,9 @@
 ## Changelog
 
+### [2.14.0] -
+#### Fixed
+- improve handling of functions wrapped using `functools.wraps`
+
 ### [2.13.2] - 2022-11-05
 #### Fixed
 - fix incorrect results in `Hamming.normalized_similarity`

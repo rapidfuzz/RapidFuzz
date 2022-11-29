@@ -61,6 +61,8 @@ def fallback_import(
 
     if cached_scorer_call:
         py_func._RF_ScorerPy = cached_scorer_call
+        # used to detect the function hasn't been wrapped afterwards
+        py_func._RF_OriginalScorer = py_func
 
     if impl == "cpp":
         cpp_mod = importlib.import_module(module + "_cpp")
@@ -85,6 +87,8 @@ def fallback_import(
 
     if cached_scorer_call:
         cpp_func._RF_ScorerPy = cached_scorer_call
+        # used to detect the function hasn't been wrapped afterwards
+        cpp_func._RF_OriginalScorer = cpp_func
 
     return cpp_func
 

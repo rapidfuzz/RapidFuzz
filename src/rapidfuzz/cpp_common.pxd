@@ -409,8 +409,3 @@ cdef inline RF_Scorer CreateScorerContext(RF_KwargsInit kwargs_init, RF_GetScore
 
 cdef inline dict CreateScorerContextPy(get_scorer_flags):
     return {"get_scorer_flags": get_scorer_flags}
-
-cdef inline bool AddScorerContext(func, py_context, RF_Scorer* c_context) except False:
-    func._RF_Scorer = PyCapsule_New(c_context, NULL, NULL)
-    func._RF_ScorerPy = py_context
-    return True
