@@ -38,7 +38,10 @@ class process:
     def cdist(*args, **kwargs):
         res1 = process_cpp.cdist(*args, **kwargs)
         res2 = process_py.cdist(*args, **kwargs)
-        assert res1 == res2
+        assert res1.dtype == res2.dtype
+        assert res1.shape == res2.shape
+        if res1.size and res2.size:
+            assert res1 == res2
         return res1
 
 
