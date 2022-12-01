@@ -74,7 +74,7 @@ def fallback_import(
     else:
         try:
             cpp_mod = importlib.import_module(module + "_cpp")
-        except ModuleNotFoundError:
+        except Exception:
             return py_func
 
     cpp_func = getattr(cpp_mod, name)
