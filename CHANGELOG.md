@@ -1,8 +1,14 @@
 ## Changelog
 
-### [2.14.0] -
+### [2.13.3] - 2022-12-03
 #### Fixed
 - improve handling of functions wrapped using `functools.wraps`
+- fix broken fallback to Python implementation when the a `ImportError` occurs on import.
+  This can e.g. occur when the binary has a dependency on libatomic, but it is unavailable on
+  the system
+- define `CMAKE_C_COMPILER_AR`/`CMAKE_CXX_COMPILER_AR`/`CMAKE_C_COMPILER_RANLIB`/`CMAKE_CXX_COMPILER_RANLIB`
+  if they are not defined yet
+  
 
 ### [2.13.2] - 2022-11-05
 #### Fixed
