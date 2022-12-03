@@ -9,6 +9,10 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 project(rapidfuzz LANGUAGES C CXX)
 
+include(CMakePrintHelpers)
+cmake_print_variables(CMAKE_AR CMAKE_C_COMPILER_AR CMAKE_CXX_COMPILER_AR)
+cmake_print_variables(CMAKE_RANLIB CMAKE_C_COMPILER_RANLIB CMAKE_CXX_COMPILER_RANLIB)
+
 if(MSVC)
   add_compile_options(/W4 /bigobj)
 else()
