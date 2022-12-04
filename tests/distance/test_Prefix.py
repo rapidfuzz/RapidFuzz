@@ -1,12 +1,4 @@
-from rapidfuzz.distance import Prefix_cpp, Prefix_py
-from ..common import GenericScorer
-
-
-def get_scorer_flags(s1, s2, **kwargs):
-    return {"maximum": max(len(s1), len(s2)), "symmetric": True}
-
-
-Prefix = GenericScorer(Prefix_py, Prefix_cpp, get_scorer_flags)
+from .common import Prefix
 
 
 def test_basic():

@@ -6,12 +6,21 @@ import pytest
 from rapidfuzz import process_cpp, process_py
 from rapidfuzz import utils
 
+from math import isnan
+
+
+def is_none(s):
+    if s is None:
+        return True
+
+    if isinstance(s, float) and isnan(s):
+        return True
+
+    return False
+
 
 def scorer_tester(scorer, s1, s2, **kwargs):
     score1 = scorer(s1, s2, **kwargs)
-
-    if s1 is None or s2 is None:
-        return score1
 
     if "processor" not in kwargs:
         kwargs["processor"] = None
@@ -20,23 +29,37 @@ def scorer_tester(scorer, s1, s2, **kwargs):
     elif kwargs["processor"] is False:
         kwargs["processor"] = None
 
+    extractOne_res1 = process_cpp.extractOne(s1, [s2], scorer=scorer, **kwargs)
+    extractOne_res2 = process_py.extractOne(s1, [s2], scorer=scorer, **kwargs)
+    extract_res1 = process_cpp.extract(s1, [s2], scorer=scorer, **kwargs)
+    extract_res2 = process_py.extract(s1, [s2], scorer=scorer, **kwargs)
+
+    if is_none(s1) or is_none(s2):
+        assert extractOne_res1 is None
+        assert extractOne_res2 is None
+        assert extract_res1 == []
+        assert extract_res2 == []
     # todo add testing with score_cutoff
     # this is a bit harder, since result elements are filtererd out
     # if they are worse than score_cutoff
-    if kwargs.get("score_cutoff") is None:
-        score2 = process_cpp.extractOne(s1, [s2], scorer=scorer, **kwargs)[1]
-        score3 = process_cpp.extract(s1, [s2], scorer=scorer, **kwargs)[0][1]
-        score4 = process_py.extractOne(s1, [s2], scorer=scorer, **kwargs)[1]
-        score5 = process_py.extract(s1, [s2], scorer=scorer, **kwargs)[0][1]
-        assert pytest.approx(score1) == score2
-        assert pytest.approx(score1) == score3
-        assert pytest.approx(score1) == score4
-        assert pytest.approx(score1) == score5
+    elif kwargs.get("score_cutoff") is not None:
+        assert extractOne_res1 is None or pytest.approx(score1) == extractOne_res1[1]
+        assert extractOne_res2 is None or pytest.approx(score1) == extractOne_res2[1]
+        assert extract_res1 == [] or pytest.approx(score1) == extract_res1[0][1]
+        assert extract_res2 == [] or pytest.approx(score1) == extract_res2[0][1]
+    else:
+        assert pytest.approx(score1) == extractOne_res1[1]
+        assert pytest.approx(score1) == extractOne_res2[1]
+        assert pytest.approx(score1) == extract_res1[0][1]
+        assert pytest.approx(score1) == extract_res2[0][1]
 
-    score6 = process_cpp.cdist([s1], [s2], scorer=scorer, **kwargs)[0][0]
-    score7 = process_py.cdist([s1], [s2], scorer=scorer, **kwargs)[0][0]
-    assert pytest.approx(score1) == score6
-    assert pytest.approx(score1) == score7
+    # todo this should be able to handle None similar to the original scorer
+    if not is_none(s1) and not is_none(s2):
+        score6 = process_cpp.cdist([s1], [s2], scorer=scorer, **kwargs)[0][0]
+        score7 = process_py.cdist([s1], [s2], scorer=scorer, **kwargs)[0][0]
+        assert pytest.approx(score1) == score6
+        assert pytest.approx(score1) == score7
+
     return score1
 
 
@@ -128,9 +151,11 @@ class GenericScorer:
         return self._similarity(s1, s2, **kwargs)
 
     def normalized_distance(self, s1, s2, **kwargs):
-        self._validate(s1, s2, **kwargs)
+        if not is_none(s1) and not is_none(s2):
+            self._validate(s1, s2, **kwargs)
         return self._normalized_distance(s1, s2, **kwargs)
 
     def normalized_similarity(self, s1, s2, **kwargs):
-        self._validate(s1, s2, **kwargs)
+        if not is_none(s1) and not is_none(s2):
+            self._validate(s1, s2, **kwargs)
         return self._normalized_similarity(s1, s2, **kwargs)

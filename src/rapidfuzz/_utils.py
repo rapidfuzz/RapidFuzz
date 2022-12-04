@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from enum import Flag
 from typing import Any, Callable
+from math import isnan
 
 
 class ScorerFlag(Flag):
@@ -29,6 +30,16 @@ def _get_scorer_flags_similarity(**_kwargs: Any) -> dict[str, Any]:
     }
 
 
+def is_none(s: Any) -> bool:
+    if s is None:
+        return True
+
+    if isinstance(s, float) and isnan(s):
+        return True
+
+    return False
+
+
 def _get_scorer_flags_normalized_distance(**_kwargs: Any) -> dict[str, Any]:
     return {"optimal_score": 0, "worst_score": 1, "flags": ScorerFlag.RESULT_F64}
 
@@ -36,11 +47,15 @@ def _get_scorer_flags_normalized_distance(**_kwargs: Any) -> dict[str, Any]:
 def _get_scorer_flags_normalized_similarity(**_kwargs: Any) -> dict[str, Any]:
     return {"optimal_score": 1, "worst_score": 0, "flags": ScorerFlag.RESULT_F64}
 
-def _create_scorer(func: Any, cached_scorer_call: dict[str, Callable[..., dict[str, Any]]]):
+
+def _create_scorer(
+    func: Any, cached_scorer_call: dict[str, Callable[..., dict[str, Any]]]
+):
     func._RF_ScorerPy = cached_scorer_call
     # used to detect the function hasn't been wrapped afterwards
     func._RF_OriginalScorer = func
     return func
+
 
 def fallback_import(
     module: str,
@@ -92,6 +107,7 @@ def fallback_import(
         cpp_func = _create_scorer(cpp_func, cached_scorer_call)
 
     return cpp_func
+
 
 default_distance_attribute: dict[str, Callable[..., dict[str, Any]]] = {
     "get_scorer_flags": _get_scorer_flags_distance

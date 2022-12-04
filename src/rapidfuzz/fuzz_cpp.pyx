@@ -31,6 +31,7 @@ from cpp_common cimport (
     preprocess_strings,
 )
 from libc.stdint cimport int64_t, uint32_t
+from libc.math cimport isnan
 from libcpp cimport bool
 
 from array import array
@@ -63,11 +64,20 @@ cdef extern from "fuzz_cpp.hpp":
 
     bool RatioMultiStringSupport(const RF_Kwargs*) nogil
 
+cdef inline bool is_none(s):
+    if s is None:
+        return True
+
+    if isinstance(s, float) and isnan(s):
+        return True
+
+    return False
+
 def ratio(s1, s2, *, processor=None, score_cutoff=None):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
-    if s1 is None or s2 is None:
+    if is_none(s1) or is_none(s2):
         return 0
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
@@ -78,7 +88,7 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
-    if s1 is None or s2 is None:
+    if is_none(s1) or is_none(s2):
         return 0
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
@@ -89,7 +99,7 @@ def partial_ratio_alignment(s1, s2, *, processor=None, score_cutoff=None):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
-    if s1 is None or s2 is None:
+    if is_none(s1) or is_none(s2):
         return None
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
@@ -105,7 +115,7 @@ def token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
-    if s1 is None or s2 is None:
+    if is_none(s1) or is_none(s2):
         return 0
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
@@ -116,7 +126,7 @@ def token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
-    if s1 is None or s2 is None:
+    if is_none(s1) or is_none(s2):
         return 0
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
@@ -127,7 +137,7 @@ def token_ratio(s1, s2, *, processor=default_process, score_cutoff=None):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
-    if s1 is None or s2 is None:
+    if is_none(s1) or is_none(s2):
         return 0
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
@@ -138,7 +148,7 @@ def partial_token_sort_ratio(s1, s2, *, processor=default_process, score_cutoff=
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
-    if s1 is None or s2 is None:
+    if is_none(s1) or is_none(s2):
         return 0
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
@@ -149,7 +159,7 @@ def partial_token_set_ratio(s1, s2, *, processor=default_process, score_cutoff=N
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
-    if s1 is None or s2 is None:
+    if is_none(s1) or is_none(s2):
         return 0
 
     if processor is True:
@@ -163,7 +173,7 @@ def partial_token_ratio(s1, s2, *, processor=default_process, score_cutoff=None)
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
-    if s1 is None or s2 is None:
+    if is_none(s1) or is_none(s2):
         return 0
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, default_process)
@@ -174,7 +184,7 @@ def WRatio(s1, s2, *, processor=default_process, score_cutoff=None):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
-    if s1 is None or s2 is None:
+    if is_none(s1) or is_none(s2):
         return 0
 
     if processor is True:
@@ -187,7 +197,7 @@ def QRatio(s1, s2, *, processor=default_process, score_cutoff=None):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
-    if s1 is None or s2 is None:
+    if is_none(s1) or is_none(s2):
         return 0
 
     if processor is True:

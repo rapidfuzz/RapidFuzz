@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import Callable, Hashable, Sequence
 
 from rapidfuzz.distance._initialize import Editops, Opcodes
+from rapidfuzz._utils import is_none
 
 
 def distance(
@@ -144,6 +145,9 @@ def normalized_distance(
     ValueError
         If s1 and s2 have a different length
     """
+    if is_none(s1) or is_none(s2):
+        return 1.0
+
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -191,6 +195,9 @@ def normalized_similarity(
     ValueError
         If s1 and s2 have a different length
     """
+    if is_none(s1) or is_none(s2):
+        return 0.0
+
     norm_dist = normalized_distance(s1, s2, processor=processor)
     norm_sim = 1 - norm_dist
 

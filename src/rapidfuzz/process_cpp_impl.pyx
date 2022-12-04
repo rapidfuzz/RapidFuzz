@@ -19,7 +19,7 @@ from cpython.exc cimport PyErr_CheckSignals
 from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.object cimport PyObject
 from cpython.ref cimport Py_INCREF
-from libc.math cimport floor
+from libc.math cimport floor, isnan
 from libc.stdint cimport int32_t, int64_t, uint8_t, uint64_t
 from libcpp cimport algorithm, bool
 from libcpp.utility cimport move
@@ -128,6 +128,15 @@ cdef extern from "process_cpp.hpp":
     RfMatrix cdist_two_lists_impl[T](    const RF_ScorerFlags* scorer_flags, const RF_Kwargs*, RF_Scorer*,
         const vector[RF_StringWrapper]&, const vector[RF_StringWrapper]&, MatrixType, int, T, T) except +
 
+cdef inline bool is_none(s):
+    if s is None:
+        return True
+
+    if isinstance(s, float) and isnan(s):
+        return True
+
+    return False
+
 cdef inline vector[DictStringElem] preprocess_dict(queries, processor) except *:
     cdef vector[DictStringElem] proc_queries
     cdef int64_t queries_len = <int64_t>len(queries)
@@ -139,7 +148,7 @@ cdef inline vector[DictStringElem] preprocess_dict(queries, processor) except *:
     # No processor
     if not processor:
         for i, (query_key, query) in enumerate(queries.items()):
-            if query is None:
+            if is_none(query):
                 continue
             proc_queries.emplace_back(
                 i,
@@ -155,7 +164,7 @@ cdef inline vector[DictStringElem] preprocess_dict(queries, processor) except *:
         # use RapidFuzz C-Api
         if processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
             for i, (query_key, query) in enumerate(queries.items()):
-                if query is None:
+                if is_none(query):
                     continue
                 processor_context.preprocess(query, &proc_str)
                 proc_queries.emplace_back(
@@ -168,7 +177,7 @@ cdef inline vector[DictStringElem] preprocess_dict(queries, processor) except *:
         # Call Processor through Python
         else:
             for i, (query_key, query) in enumerate(queries.items()):
-                if query is None:
+                if is_none(query):
                     continue
                 proc_query = processor(query)
                 proc_queries.emplace_back(
@@ -191,7 +200,7 @@ cdef inline vector[ListStringElem] preprocess_list(queries, processor) except *:
     # No processor
     if not processor:
         for i, query in enumerate(queries):
-            if query is None:
+            if is_none(query):
                 continue
             proc_queries.emplace_back(
                 i,
@@ -206,7 +215,7 @@ cdef inline vector[ListStringElem] preprocess_list(queries, processor) except *:
         # use RapidFuzz C-Api
         if processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
             for i, query in enumerate(queries):
-                if query is None:
+                if is_none(query):
                     continue
                 processor_context.preprocess(query, &proc_str)
                 proc_queries.emplace_back(
@@ -218,7 +227,7 @@ cdef inline vector[ListStringElem] preprocess_list(queries, processor) except *:
         # Call Processor through Python
         else:
             for i, query in enumerate(queries):
-                if query is None:
+                if is_none(query):
                     continue
                 proc_query = processor(query)
                 proc_queries.emplace_back(
@@ -265,7 +274,7 @@ cdef inline extractOne_dict_f64(
         if i % 1000 == 0:
             PyErr_CheckSignals()
         i += 1
-        if choice is None:
+        if is_none(choice):
             continue
 
         if processor is None:
@@ -336,7 +345,7 @@ cdef inline extractOne_dict_i64(
         if i % 1000 == 0:
             PyErr_CheckSignals()
         i += 1
-        if choice is None:
+        if is_none(choice):
             continue
 
         if processor is None:
@@ -428,7 +437,7 @@ cdef inline extractOne_list_f64(
     for i, choice in enumerate(choices):
         if i % 1000 == 0:
             PyErr_CheckSignals()
-        if choice is None:
+        if is_none(choice):
             continue
 
         if processor is None:
@@ -497,7 +506,7 @@ cdef inline extractOne_list_i64(
     for i, choice in enumerate(choices):
         if i % 1000 == 0:
             PyErr_CheckSignals()
-        if choice is None:
+        if is_none(choice):
             continue
 
         if processor is None:
@@ -567,7 +576,7 @@ cdef inline py_extractOne_dict(query, choices, scorer, processor, double score_c
     result_key = None
 
     for choice_key, choice in choices.items():
-        if choice is None:
+        if is_none(choice):
             continue
 
         if processor is not None:
@@ -607,7 +616,7 @@ cdef inline py_extractOne_list(query, choices, scorer, processor, double score_c
     result_choice = None
 
     for i, choice in enumerate(choices):
-        if choice is None:
+        if is_none(choice):
             continue
 
         if processor is not None:
@@ -642,7 +651,7 @@ def extractOne(query, choices, *, scorer=WRatio, processor=default_process, scor
     cdef RF_Scorer* scorer_context = NULL
     cdef RF_ScorerFlags scorer_flags
 
-    if query is None:
+    if is_none(query):
         return None
 
     if processor is True:
@@ -897,7 +906,7 @@ cdef inline py_extract_dict(query, choices, scorer, processor, int64_t limit, do
     cdef list result_list = []
 
     for choice_key, choice in choices.items():
-        if choice is None:
+        if is_none(choice):
             continue
 
         if processor is not None:
@@ -925,7 +934,7 @@ cdef inline py_extract_list(query, choices, scorer, processor, int64_t limit, do
     cdef int64_t i
 
     for i, choice in enumerate(choices):
-        if choice is None:
+        if is_none(choice):
             continue
 
         if processor is not None:
@@ -950,7 +959,7 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
     cdef RF_Scorer* scorer_context = NULL
     cdef RF_ScorerFlags scorer_flags
 
-    if query is None:
+    if is_none(query):
         return []
 
     if processor is True:
@@ -1021,7 +1030,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         cdef double score
 
         for choice_key, choice in choices.items():
-            if choice is None:
+            if is_none(choice):
                 continue
 
             # use RapidFuzz C-Api
@@ -1030,7 +1039,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
                 choice_proc = RF_StringWrapper(proc_str)
             elif processor is not None:
                 proc_choice = processor(choice)
-                if proc_choice is None:
+                if is_none(proc_choice):
                     continue
 
                 choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
@@ -1064,7 +1073,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         cdef int64_t score
 
         for choice_key, choice in choices.items():
-            if choice is None:
+            if is_none(choice):
                 continue
 
             # use RapidFuzz C-Api
@@ -1073,7 +1082,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
                 choice_proc = RF_StringWrapper(proc_str)
             elif processor is not None:
                 proc_choice = processor(choice)
-                if proc_choice is None:
+                if is_none(proc_choice):
                     continue
 
                 choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
@@ -1107,7 +1116,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         cdef double score
 
         for i, choice in enumerate(choices):
-            if choice is None:
+            if is_none(choice):
                 continue
 
             # use RapidFuzz C-Api
@@ -1116,7 +1125,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
                 choice_proc = RF_StringWrapper(proc_str)
             elif processor is not None:
                 proc_choice = processor(choice)
-                if proc_choice is None:
+                if is_none(proc_choice):
                     continue
 
                 choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
@@ -1150,7 +1159,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         cdef int64_t score
 
         for i, choice in enumerate(choices):
-            if choice is None:
+            if is_none(choice):
                 continue
 
             # use RapidFuzz C-Api
@@ -1159,7 +1168,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
                 choice_proc = RF_StringWrapper(proc_str)
             elif processor is not None:
                 proc_choice = processor(choice)
-                if proc_choice is None:
+                if is_none(proc_choice):
                     continue
 
                 choice_proc = RF_StringWrapper(conv_sequence(proc_choice))
@@ -1183,7 +1192,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         cdef bool lowest_score_worst = optimal_score > worst_score
 
         for choice_key, choice in choices.items():
-            if choice is None:
+            if is_none(choice):
                 continue
 
             if processor is not None:
@@ -1208,7 +1217,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
         cdef int64_t i
 
         for i, choice in enumerate(choices):
-            if choice is None:
+            if is_none(choice):
                 continue
 
             if processor is not None:
@@ -1223,7 +1232,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
                 if score <= score_cutoff:
                     yield (choice, score, i)
 
-    if query is None:
+    if is_none(query):
         # finish generator
         return
 

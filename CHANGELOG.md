@@ -1,5 +1,13 @@
 ## Changelog
 
+### [2.14.0] -
+#### Changed
+- handle `float("nan")` similar to None for query / choice, since this is common for
+  non-existent data in tools like numpy
+
+#### Fixed
+- fix handling on `None`/`float("nan")` in `process.distance`
+
 ### [2.13.3] - 2022-12-03
 #### Fixed
 - improve handling of functions wrapped using `functools.wraps`

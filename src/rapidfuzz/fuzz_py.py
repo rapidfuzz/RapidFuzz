@@ -2,8 +2,8 @@
 # Copyright (C) 2022 Max Bachmann
 from __future__ import annotations
 
-from math import ceil
-from typing import Callable, Hashable
+from math import ceil, isnan
+from typing import Callable, Hashable, Any
 
 from rapidfuzz.distance import ScoreAlignment
 from rapidfuzz.distance.Indel_py import (
@@ -14,6 +14,7 @@ from rapidfuzz.distance.Indel_py import (
     normalized_similarity as indel_normalized_similarity,
 )
 from rapidfuzz.utils_py import default_process
+from rapidfuzz._utils import is_none
 
 
 def _norm_distance(dist: int, lensum: int, score_cutoff: float) -> float:
@@ -63,7 +64,7 @@ def ratio(
     >>> fuzz.ratio("this is a test", "this is a test!")
     96.55171966552734
     """
-    if s1 is None or s2 is None:
+    if is_none(s1) or is_none(s2):
         return 0
 
     if processor is True:
@@ -226,10 +227,12 @@ def partial_ratio(
     >>> fuzz.partial_ratio("this is a test", "this is a test!")
     100.0
     """
-    alignment = partial_ratio_alignment(s1, s2, processor=processor, score_cutoff=score_cutoff)
+    alignment = partial_ratio_alignment(
+        s1, s2, processor=processor, score_cutoff=score_cutoff
+    )
     if alignment is None:
         return 0
-    
+
     return alignment.score
 
 
@@ -277,7 +280,7 @@ def partial_ratio_alignment(
     >>> fuzz.ratio(s1[res.src_start:res.src_end], s2[res.dest_start:res.dest_end])
     83.33333333333334
     """
-    if s1 is None or s2 is None:
+    if is_none(s1) or is_none(s2):
         return None
 
     if processor is True:
@@ -310,7 +313,7 @@ def partial_ratio_alignment(
             res = ScoreAlignment(
                 res2.score, res2.dest_start, res2.dest_end, res2.src_start, res2.src_end
             )
-    
+
     if res.score < score_cutoff:
         return None
 
@@ -360,7 +363,7 @@ def token_sort_ratio(
     >>> fuzz.token_sort_ratio("fuzzy wuzzy was a bear", "wuzzy fuzzy was a bear")
     100.0
     """
-    if s1 is None or s2 is None:
+    if is_none(s1) or is_none(s2):
         return 0
 
     if processor is True:
@@ -418,7 +421,7 @@ def token_set_ratio(
     >>> fuzz.token_set_ratio("fuzzy was a bear", "fuzzy fuzzy was a bear")
     100.0
     """
-    if s1 is None or s2 is None:
+    if is_none(s1) or is_none(s2):
         return 0
 
     if processor is True:
@@ -517,7 +520,7 @@ def token_ratio(
     -----
     .. image:: img/token_ratio.svg
     """
-    if s1 is None or s2 is None:
+    if is_none(s1) or is_none(s2):
         return 0
 
     if processor is True:
@@ -569,7 +572,7 @@ def partial_token_sort_ratio(
     -----
     .. image:: img/partial_token_sort_ratio.svg
     """
-    if s1 is None or s2 is None:
+    if is_none(s1) or is_none(s2):
         return 0
 
     if processor is True:
@@ -620,7 +623,7 @@ def partial_token_set_ratio(
     -----
     .. image:: img/partial_token_set_ratio.svg
     """
-    if s1 is None or s2 is None:
+    if is_none(s1) or is_none(s2):
         return 0
 
     if processor is True:
@@ -682,7 +685,7 @@ def partial_token_ratio(
     -----
     .. image:: img/partial_token_ratio.svg
     """
-    if s1 is None or s2 is None:
+    if is_none(s1) or is_none(s2):
         return 0
 
     if processor is True:
@@ -763,7 +766,7 @@ def WRatio(
     -----
     .. image:: img/WRatio.svg
     """
-    if s1 is None or s2 is None:
+    if is_none(s1) or is_none(s2):
         return 0
 
     UNBASE_SCALE = 0.95
@@ -849,7 +852,7 @@ def QRatio(
     >>> fuzz.QRatio("this is a test", "THIS is a test!")
     100.0
     """
-    if s1 is None or s2 is None:
+    if is_none(s1) or is_none(s2):
         return 0
 
     if processor is True:

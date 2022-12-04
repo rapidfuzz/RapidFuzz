@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from typing import Callable, Hashable, Sequence
+from rapidfuzz._utils import is_none
 
 
 def _damerau_levenshtein_distance_zhao(
@@ -174,6 +175,9 @@ def normalized_distance(
     norm_dist : float
         normalized distance between s1 and s2 as a float between 0 and 1.0
     """
+    if is_none(s1) or is_none(s2):
+        return 1.0
+
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -215,6 +219,9 @@ def normalized_similarity(
     norm_sim : float
         normalized similarity between s1 and s2 as a float between 0 and 1.0
     """
+    if is_none(s1) or is_none(s2):
+        return 0.0
+
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)

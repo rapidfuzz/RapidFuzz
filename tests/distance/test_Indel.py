@@ -1,12 +1,4 @@
-from rapidfuzz.distance import Indel_cpp, Indel_py
-from ..common import GenericScorer
-
-
-def get_scorer_flags(s1, s2, **kwargs):
-    return {"maximum": len(s1) + len(s2), "symmetric": True}
-
-
-Indel = GenericScorer(Indel_py, Indel_cpp, get_scorer_flags)
+from .common import Indel
 
 
 def test_basic():

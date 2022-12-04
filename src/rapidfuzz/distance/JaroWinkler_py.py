@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import Callable, Hashable, Sequence
 
 from rapidfuzz.distance import Jaro
+from rapidfuzz._utils import is_none
 
 
 def similarity(
@@ -46,6 +47,9 @@ def similarity(
     ValueError
         If prefix_weight is invalid
     """
+    if is_none(s1) or is_none(s2):
+        return 0.0
+
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -167,6 +171,9 @@ def distance(
     ValueError
         If prefix_weight is invalid
     """
+    if is_none(s1) or is_none(s2):
+        return 1.0
+
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)

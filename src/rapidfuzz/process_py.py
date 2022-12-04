@@ -19,6 +19,7 @@ from typing import (
 from rapidfuzz._utils import ScorerFlag
 from rapidfuzz.fuzz import WRatio, ratio
 from rapidfuzz.utils import default_process
+from math import isnan
 
 __all__ = ["extract", "extract_iter", "extractOne", "cdist"]
 
@@ -29,6 +30,16 @@ def _get_scorer_flags_py(scorer: Any, kwargs: dict[str, Any]) -> tuple[int, int]
         flags = params["get_scorer_flags"](**kwargs)
         return (flags["worst_score"], flags["optimal_score"])
     return (0, 100)
+
+
+def _is_none(s: Any) -> bool:
+    if s is None:
+        return True
+
+    if isinstance(s, float) and isnan(s):
+        return True
+
+    return False
 
 
 @overload
@@ -130,7 +141,7 @@ def extract_iter(
     worst_score, optimal_score = _get_scorer_flags_py(scorer, kwargs)
     lowest_score_worst = optimal_score > worst_score
 
-    if query is None:
+    if _is_none(query):
         return
 
     if processor is True:
@@ -148,7 +159,7 @@ def extract_iter(
     choices_iter: Iterable[tuple[Any, Sequence[Hashable] | None]]
     choices_iter = choices.items() if hasattr(choices, "items") else enumerate(choices)  # type: ignore[union-attr]
     for key, choice in choices_iter:
-        if choice is None:
+        if _is_none(choice):
             continue
 
         if processor is None:
@@ -334,7 +345,7 @@ def extractOne(
     worst_score, optimal_score = _get_scorer_flags_py(scorer, kwargs)
     lowest_score_worst = optimal_score > worst_score
 
-    if query is None:
+    if _is_none(query):
         return None
 
     if processor is True:
@@ -354,7 +365,7 @@ def extractOne(
     choices_iter: Iterable[tuple[Any, Sequence[Hashable] | None]]
     choices_iter = choices.items() if hasattr(choices, "items") else enumerate(choices)  # type: ignore[union-attr]
     for key, choice in choices_iter:
-        if choice is None:
+        if _is_none(choice):
             continue
 
         if processor is None:
@@ -497,7 +508,12 @@ def extract(
         limit = len(choices)
 
     result_iter = extract_iter(
-        query, choices, processor=processor, scorer=scorer, score_cutoff=score_cutoff, **kwargs
+        query,
+        choices,
+        processor=processor,
+        scorer=scorer,
+        score_cutoff=score_cutoff,
+        **kwargs,
     )
     if lowest_score_worst:
         return heapq.nlargest(limit, result_iter, key=lambda i: i[1])

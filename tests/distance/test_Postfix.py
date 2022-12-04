@@ -1,12 +1,4 @@
-from rapidfuzz.distance import Postfix_cpp, Postfix_py
-from ..common import GenericScorer
-
-
-def get_scorer_flags(s1, s2, **kwargs):
-    return {"maximum": max(len(s1), len(s2)), "symmetric": True}
-
-
-Postfix = GenericScorer(Postfix_py, Postfix_cpp, get_scorer_flags)
+from .common import Postfix
 
 
 def test_basic():

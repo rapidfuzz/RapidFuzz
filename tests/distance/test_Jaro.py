@@ -1,14 +1,5 @@
 import pytest
-
-from rapidfuzz.distance import Jaro_cpp, Jaro_py
-from ..common import GenericScorer
-
-
-def get_scorer_flags(s1, s2, **kwargs):
-    return {"maximum": 1.0, "symmetric": True}
-
-
-Jaro = GenericScorer(Jaro_py, Jaro_cpp, get_scorer_flags)
+from .common import Jaro
 
 
 def test_hash_special_case():

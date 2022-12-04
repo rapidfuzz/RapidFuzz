@@ -342,6 +342,15 @@ def test_none_string(scorer):
 
 
 @pytest.mark.parametrize("scorer", scorers)
+def test_nan_string(scorer):
+    """
+    when float("nan") is passed to a scorer the result should always be 0
+    """
+    assert scorer("test", float("nan")) == 0
+    assert scorer(float("nan"), "test") == 0
+
+
+@pytest.mark.parametrize("scorer", scorers)
 def test_simple_unicode_tests(scorer):
     """
     some very simple tests using unicode with scorers

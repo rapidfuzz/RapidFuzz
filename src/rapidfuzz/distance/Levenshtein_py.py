@@ -7,6 +7,7 @@ from typing import Callable, Hashable, Sequence
 
 from rapidfuzz.distance import Indel
 from rapidfuzz.distance._initialize import Editops, Opcodes
+from rapidfuzz._utils import is_none
 
 
 def _levenshtein_maximum(
@@ -268,6 +269,9 @@ def normalized_distance(
     ValueError
         If unsupported weights are provided a ValueError is thrown
     """
+    if is_none(s1) or is_none(s2):
+        return 1.0
+
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -350,6 +354,9 @@ def normalized_similarity(
     >>> Levenshtein.normalized_similarity(["lewenstein"], ["levenshtein"], processor=lambda s: s[0])
     0.81818181818181
     """
+    if is_none(s1) or is_none(s2):
+        return 0.0
+
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)

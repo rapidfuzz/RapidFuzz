@@ -2,13 +2,16 @@ import pytest
 
 from rapidfuzz import fuzz, process_cpp, process_py
 
+
 def wrapped(func):
     from functools import wraps
+
     @wraps(func)
     def decorator(*args, **kwargs):
         return 100
 
     return decorator
+
 
 class process:
     @staticmethod

@@ -1,16 +1,6 @@
 import pytest
 
-from rapidfuzz.distance import DamerauLevenshtein_cpp, DamerauLevenshtein_py
-from ..common import GenericScorer
-
-
-def get_scorer_flags(s1, s2, **kwargs):
-    return {"maximum": max(len(s1), len(s2)), "symmetric": True}
-
-
-DamerauLevenshtein = GenericScorer(
-    DamerauLevenshtein_py, DamerauLevenshtein_cpp, get_scorer_flags
-)
+from .common import DamerauLevenshtein
 
 
 @pytest.mark.parametrize(

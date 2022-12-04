@@ -32,6 +32,7 @@ from cpp_common cimport (
 from cpython.pycapsule cimport PyCapsule_New
 from libc.stdint cimport INT64_MAX, int64_t
 from libc.stdlib cimport free, malloc
+from libc.math cimport isnan
 from libcpp cimport bool
 
 
@@ -168,6 +169,14 @@ cdef extern from "metrics.hpp":
     bool PostfixSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
     bool PostfixNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
 
+cdef inline bool is_none(s):
+    if s is None:
+        return True
+
+    if isinstance(s, float) and isnan(s):
+        return True
+
+    return False
 
 cdef int64_t get_score_cutoff_i64(score_cutoff, int64_t default) except -1:
     cdef int64_t c_score_cutoff = default
@@ -231,8 +240,8 @@ def levenshtein_similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cut
 
 def levenshtein_normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None, score_hint=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 1.0
 
     cdef int64_t insertion, deletion, substitution
     insertion = deletion = substitution = 1
@@ -247,8 +256,8 @@ def levenshtein_normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, 
 
 def levenshtein_normalized_similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None, score_hint=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 0.0
 
     cdef int64_t insertion, deletion, substitution
     insertion = deletion = substitution = 1
@@ -375,8 +384,8 @@ def damerau_levenshtein_similarity(s1, s2, *, processor=None, score_cutoff=None)
 
 def damerau_levenshtein_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 1.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 1.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
@@ -385,8 +394,8 @@ def damerau_levenshtein_normalized_distance(s1, s2, *, processor=None, score_cut
 
 def damerau_levenshtein_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 0.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
@@ -445,8 +454,8 @@ def lcs_seq_similarity(s1, s2, *, processor=None, score_cutoff=None):
 
 def lcs_seq_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 1.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 1.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
@@ -455,8 +464,8 @@ def lcs_seq_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
 
 def lcs_seq_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 0.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
@@ -546,8 +555,8 @@ def indel_similarity(s1, s2, *, processor=None, score_cutoff=None):
 
 def indel_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 1.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 1.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
@@ -556,8 +565,8 @@ def indel_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
 
 def indel_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 0.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
@@ -638,9 +647,6 @@ def hamming_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, INT64_MAX)
     cdef RF_StringWrapper s1_proc, s2_proc
 
-    if s1 is None or s2 is None:
-        return 0
-
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
     return hamming_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
@@ -648,16 +654,13 @@ def hamming_similarity(s1, s2, *, processor=None, score_cutoff=None):
     cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, 0)
     cdef RF_StringWrapper s1_proc, s2_proc
 
-    if s1 is None or s2 is None:
-        return 0
-
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
     return hamming_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 def hamming_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 1.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 1.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
@@ -666,8 +669,8 @@ def hamming_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
 
 def hamming_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 0.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
@@ -732,9 +735,6 @@ def osa_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, INT64_MAX)
     cdef RF_StringWrapper s1_proc, s2_proc
 
-    if s1 is None or s2 is None:
-        return 0
-
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
     return osa_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
@@ -742,16 +742,13 @@ def osa_similarity(s1, s2, *, processor=None, score_cutoff=None):
     cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, 0)
     cdef RF_StringWrapper s1_proc, s2_proc
 
-    if s1 is None or s2 is None:
-        return 0
-
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
     return osa_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 def osa_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 1.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 1.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
@@ -760,8 +757,8 @@ def osa_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
 
 def osa_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 0.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
@@ -822,8 +819,8 @@ osa_normalized_similarity._RF_Scorer = PyCapsule_New(&OSANormalizedSimilarityCon
 
 def jaro_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 1.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 1.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
@@ -831,8 +828,8 @@ def jaro_distance(s1, s2, *, processor=None, score_cutoff=None):
 
 def jaro_similarity(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 0.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
@@ -840,8 +837,8 @@ def jaro_similarity(s1, s2, *, processor=None, score_cutoff=None):
 
 def jaro_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 1.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 1.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
@@ -850,8 +847,8 @@ def jaro_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
 
 def jaro_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 0.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
@@ -884,8 +881,8 @@ jaro_normalized_similarity._RF_Scorer = PyCapsule_New(&JaroSimilarityContext, NU
 
 def jaro_winkler_distance(s1, s2, *, double prefix_weight=0.1, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 1.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 1.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
@@ -893,8 +890,8 @@ def jaro_winkler_distance(s1, s2, *, double prefix_weight=0.1, processor=None, s
 
 def jaro_winkler_similarity(s1, s2, *, double prefix_weight=0.1, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 0.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
@@ -902,8 +899,8 @@ def jaro_winkler_similarity(s1, s2, *, double prefix_weight=0.1, processor=None,
 
 def jaro_winkler_normalized_distance(s1, s2, *, double prefix_weight=0.1, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 1.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 1.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
@@ -911,8 +908,8 @@ def jaro_winkler_normalized_distance(s1, s2, *, double prefix_weight=0.1, proces
 
 def jaro_winkler_normalized_similarity(s1, s2, *, double prefix_weight=0.1, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 0.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
@@ -957,9 +954,6 @@ def postfix_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, INT64_MAX)
     cdef RF_StringWrapper s1_proc, s2_proc
 
-    if s1 is None or s2 is None:
-        return 0
-
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
     return postfix_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
@@ -967,16 +961,13 @@ def postfix_similarity(s1, s2, *, processor=None, score_cutoff=None):
     cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, 0)
     cdef RF_StringWrapper s1_proc, s2_proc
 
-    if s1 is None or s2 is None:
-        return 0
-
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
     return postfix_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 def postfix_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 1.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 1.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
@@ -985,8 +976,8 @@ def postfix_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
 
 def postfix_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 0.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
@@ -1037,9 +1028,6 @@ def prefix_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, INT64_MAX)
     cdef RF_StringWrapper s1_proc, s2_proc
 
-    if s1 is None or s2 is None:
-        return 0
-
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
     return prefix_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
@@ -1047,16 +1035,13 @@ def prefix_similarity(s1, s2, *, processor=None, score_cutoff=None):
     cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, 0)
     cdef RF_StringWrapper s1_proc, s2_proc
 
-    if s1 is None or s2 is None:
-        return 0
-
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
     return prefix_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 def prefix_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 1.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 1.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
@@ -1065,8 +1050,8 @@ def prefix_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
 
 def prefix_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    if s1 is None or s2 is None:
-        return 0
+    if is_none(s1) or is_none(s2):
+        return 0.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
