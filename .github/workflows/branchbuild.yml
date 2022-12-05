@@ -108,7 +108,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest hypothesis pandas mypy pyinstaller[hook_testing]
+          pip install pytest hypothesis pandas mypy pyinstaller[hook_testing] GitPython==3.1.29
 
       - name: build
         run: |
