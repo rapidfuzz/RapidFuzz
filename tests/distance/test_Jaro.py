@@ -1,5 +1,5 @@
 import pytest
-from .common import Jaro
+from tests.distance.common import Jaro
 
 
 def test_hash_special_case():

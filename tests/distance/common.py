@@ -20,7 +20,7 @@ from rapidfuzz.distance import (
     Prefix_cpp,
     Prefix_py,
 )
-from ..common import GenericScorer, is_none
+from tests.common import GenericScorer, is_none
 
 
 def get_scorer_flags_damerau_levenshtein(s1, s2, **kwargs):

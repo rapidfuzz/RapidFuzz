@@ -1,4 +1,4 @@
-from .common import Hamming
+from tests.distance.common import Hamming
 
 
 def test_basic():

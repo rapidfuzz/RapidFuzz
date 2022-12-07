@@ -1,4 +1,4 @@
-from .common import Prefix
+from tests.distance.common import Prefix
 
 
 def test_basic():

@@ -1,4 +1,4 @@
-from .common import Postfix
+from tests.distance.common import Postfix
 
 
 def test_basic():

@@ -1,4 +1,4 @@
-from .common import LCSseq
+from tests.distance.common import LCSseq
 
 
 def test_basic():

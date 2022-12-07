@@ -1,5 +1,5 @@
 from rapidfuzz.distance import OSA_cpp, OSA_py
-from .common import OSA
+from tests.distance.common import OSA
 
 
 def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
