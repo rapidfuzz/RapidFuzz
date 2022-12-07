@@ -1,6 +1,6 @@
 from rapidfuzz import process
 from rapidfuzz.distance import Levenshtein_cpp, Levenshtein_py, Opcode, Opcodes
-from .common import Levenshtein
+from tests.distance.common import Levenshtein
 
 
 class CustomHashable:

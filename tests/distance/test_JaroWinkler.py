@@ -1,5 +1,5 @@
 import pytest
-from .common import JaroWinkler
+from tests.distance.common import JaroWinkler
 
 
 def test_hash_special_case():

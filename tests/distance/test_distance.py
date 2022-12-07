@@ -1,5 +1,5 @@
 import pytest
-from .common import all_scorer_modules
+from tests.distance.common import all_scorer_modules
 
 
 @pytest.mark.parametrize("scorer", all_scorer_modules)

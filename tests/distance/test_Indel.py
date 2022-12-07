@@ -1,4 +1,4 @@
-from .common import Indel
+from tests.distance.common import Indel
 
 
 def test_basic():

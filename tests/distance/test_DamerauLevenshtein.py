@@ -1,6 +1,6 @@
 import pytest
 
-from .common import DamerauLevenshtein
+from tests.distance.common import DamerauLevenshtein
 
 
 @pytest.mark.parametrize(
