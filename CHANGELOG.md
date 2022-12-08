@@ -1,12 +1,13 @@
 ## Changelog
 
-### [2.14.0] -
+### [2.13.4] - 2022-12-08
 #### Changed
 - handle `float("nan")` similar to None for query / choice, since this is common for
   non-existent data in tools like numpy
 
 #### Fixed
 - fix handling on `None`/`float("nan")` in `process.distance`
+- use absolute imports inside tests
 
 ### [2.13.3] - 2022-12-03
 #### Fixed
