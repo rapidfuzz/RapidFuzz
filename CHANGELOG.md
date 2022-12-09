@@ -1,5 +1,9 @@
 ## Changelog
 
+### [unreleased] - 
+#### Added
+- added docs to sdist
+
 ### [2.13.4] - 2022-12-08
 #### Changed
 - handle `float("nan")` similar to None for query / choice, since this is common for

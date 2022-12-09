@@ -12,6 +12,7 @@ recursive-include src/rapidfuzz CMakeLists.txt
 recursive-include cmake *
 recursive-include src/rapidfuzz *.hpp *.h *.cpp *.cxx *.pyx *.pxd *.incl *.impl
 recursive-include tests *
+recursive-include docs *
 include src/rapidfuzz/__init__.pxd
 include src/rapidfuzz/rapidfuzz.h
 
