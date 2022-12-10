@@ -1,8 +1,11 @@
 ## Changelog
 
-### [unreleased] - 
+### [2.13.5] - 2022-12-11
 #### Added
 - added docs to sdist
+
+#### Fixed
+- fix two cases of undefined behavior in `process.cdist`
 
 ### [2.13.4] - 2022-12-08
 #### Changed

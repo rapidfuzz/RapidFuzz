@@ -1327,7 +1327,7 @@ cdef inline vector[RF_StringWrapper] preprocess(queries, processor) except *:
     # No processor
     if not processor:
         for query in queries:
-            proc_queries.emplace_back(conv_sequence(query))
+            proc_queries.emplace_back(conv_sequence(query), <PyObject*>query)
     else:
         processor_capsule = getattr(processor, '_RF_Preprocess', processor)
         if PyCapsule_IsValid(processor_capsule, NULL):
@@ -1337,7 +1337,7 @@ cdef inline vector[RF_StringWrapper] preprocess(queries, processor) except *:
         if processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
             for query in queries:
                 processor_context.preprocess(query, &proc_str)
-                proc_queries.emplace_back(proc_str)
+                proc_queries.emplace_back(proc_str, <PyObject*>query)
 
         # Call Processor through Python
         else:
