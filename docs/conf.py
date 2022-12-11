@@ -36,7 +36,6 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinxcontrib.bibtex",
-    "m2r2",
 ]
 bibtex_bibfiles = ["refs.bib"]
 

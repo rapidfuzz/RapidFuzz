@@ -1,5 +1,6 @@
 include MANIFEST.in
 include setup.py
+include CHANGELOG.rst
 include CMakeLists.txt
 include README.md
 include LICENSE
