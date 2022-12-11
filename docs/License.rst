@@ -1,3 +1,5 @@
+.. _my-license-label:
+
 License
 =======
 
