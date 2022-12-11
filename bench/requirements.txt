@@ -1,0 +1,7 @@
+tqdm
+numpy
+matplotlib
+pandas
+jellyfish
+pyxdameraulevenshtein
+thefuzz

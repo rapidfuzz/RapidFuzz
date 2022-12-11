@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+[2.13.6] - 2022-12-11
+^^^^^^^^^^^^^^^^^^^^^
+Changed
+~~~~~~~
+- reformat changelog as restructured text to get rig of ``m2r2`` dependency
+
+
 [2.13.5] - 2022-12-11
 ^^^^^^^^^^^^^^^^^^^^^
 Added
