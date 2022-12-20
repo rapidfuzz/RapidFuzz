@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+[2.13.7] - 
+^^^^^^^^^^^^^^^^^^^^^
+Fixed
+~~~~~~~
+- fix function signature of ``get_requires_for_build_wheel``
+
 [2.13.6] - 2022-12-11
 ^^^^^^^^^^^^^^^^^^^^^
 Changed

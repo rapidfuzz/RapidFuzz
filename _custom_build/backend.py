@@ -84,7 +84,7 @@ def _ninja_required():
     return False
 
 
-def get_requires_for_build_wheel(self, config_settings=None):
+def get_requires_for_build_wheel(config_settings=None):
     packages = []
     if _cmake_required():
         packages.append("cmake")
