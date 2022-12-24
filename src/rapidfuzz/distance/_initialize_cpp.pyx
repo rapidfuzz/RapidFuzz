@@ -363,7 +363,7 @@ cdef class Editop:
 
 cdef class Editops:
     """
-    List like object of Editos describing how to turn s1 into s2.
+    List like object of Editops describing how to turn s1 into s2.
     """
 
     def __init__(self, editops=None, src_len=0, dest_len=0):

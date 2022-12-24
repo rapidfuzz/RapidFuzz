@@ -215,7 +215,7 @@ class Editop:
 
 class Editops:
     """
-    List like object of Editos describing how to turn s1 into s2.
+    List like object of Editops describing how to turn s1 into s2.
     """
 
     def __init__(
@@ -414,7 +414,47 @@ class Editops:
         sequence : Editops
             a copy of the editops without the subsequence
         """
-        raise NotImplementedError
+        result = Editops.__new__(Editops)
+        result._src_len = self._src_len
+        result._dest_len = self._dest_len
+
+        if len(subsequence) > len(self):
+            raise ValueError("subsequence is not a subsequence")
+
+        result._editops = [None] * (len(self) - len(subsequence))
+
+        # offset to correct removed edit operation
+        offset = 0
+        op_pos = 0
+        result_pos = 0
+
+        for sop in subsequence:
+            while op_pos != len(self) and sop != self._editops[op_pos]:
+                result[result_pos] = self._editops[op_pos]
+                result[result_pos].src_pos += offset
+                result_pos += 1
+                op_pos += 1
+
+            # element of subsequence not part of the sequence
+            if op_pos == len(self):
+                raise ValueError("subsequence is not a subsequence")
+
+            if sop.tag == "insert":
+                offset += 1
+            elif sop.tag == "delete":
+                offset -= 1
+
+            op_pos += 1
+
+        # add remaining elements
+        while op_pos != len(self):
+            result[result_pos] = self._editops[op_pos]
+            result[result_pos].src_pos += offset
+            result_pos += 1
+            op_pos += 1
+
+        return result
+
 
     def apply(self, source_string: str, destination_string: str) -> str:
         """
@@ -433,7 +473,29 @@ class Editops:
             modified source_string
 
         """
-        raise NotImplementedError
+        res_str = ""
+        src_pos = 0
+
+        for op in self._editops:
+            # matches between last and current editop
+            while src_pos < op.dest_pos:
+                res_str += source_string[src_pos]
+                src_pos += 1
+
+            if op.tag == "replace":
+                res_str += destination_string[src_pos]
+                src_pos += 1
+            elif op.tag == "insert":
+                res_str += destination_string[src_pos]
+            elif op.tag == "delete":
+                src_pos += 1
+
+        # matches after the last editop
+        while src_pos < len(source_string):
+            res_str += source_string[src_pos]
+            src_pos += 1
+
+        return res_str
 
     @property
     def src_len(self) -> int:
@@ -735,7 +797,15 @@ class Opcodes:
             modified source_string
 
         """
-        raise NotImplementedError
+        res_str = ""
+
+        for op in self._opcodes:
+            if op.tag == "equal":
+                res_str += source_string[op.src_start:op.src_end]
+            elif op.tag in {"replace", "insert"}:
+                res_str += destination_string[op.dest_start:op.dest_end]
+
+        return res_str
 
     @property
     def src_len(self) -> int:
