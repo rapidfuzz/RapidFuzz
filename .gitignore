@@ -26,3 +26,6 @@ bench_results/
 
 # Cython generated files
 *.cxx
+
+# temp files from benchmarks
+bench/temp/

@@ -5,3 +5,7 @@ pandas
 jellyfish
 pyxdameraulevenshtein
 thefuzz
+editdistance
+edlib
+polyleven
+
