@@ -20,8 +20,6 @@ from array import array
 
 from rapidfuzz.utils import default_process
 
-from cpython.pycapsule cimport PyCapsule_New
-
 from cpp_common cimport (
     CreateScorerContext,
     CreateScorerContextPy,
@@ -30,8 +28,9 @@ from cpp_common cimport (
     RfScoreAlignment,
     preprocess_strings,
 )
-from libc.stdint cimport int64_t, uint32_t
+from cpython.pycapsule cimport PyCapsule_New
 from libc.math cimport isnan
+from libc.stdint cimport int64_t, uint32_t
 from libcpp cimport bool
 
 from array import array

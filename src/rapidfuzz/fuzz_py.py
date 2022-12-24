@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from math import ceil, isnan
-from typing import Callable, Hashable, Any
+from typing import Any, Callable, Hashable
 
+from rapidfuzz._utils import is_none
 from rapidfuzz.distance import ScoreAlignment
 from rapidfuzz.distance.Indel_py import (
     _block_normalized_similarity as indel_block_normalized_similarity,
@@ -14,7 +15,6 @@ from rapidfuzz.distance.Indel_py import (
     normalized_similarity as indel_normalized_similarity,
 )
 from rapidfuzz.utils_py import default_process
-from rapidfuzz._utils import is_none
 
 
 def _norm_distance(dist: int, lensum: int, score_cutoff: float) -> float:

@@ -5,8 +5,8 @@ from __future__ import annotations
 
 from typing import Callable, Hashable, Sequence
 
-from rapidfuzz.distance import Jaro
 from rapidfuzz._utils import is_none
+from rapidfuzz.distance import Jaro
 
 
 def similarity(

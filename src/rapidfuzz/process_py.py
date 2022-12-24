@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import heapq
+from math import isnan
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -19,7 +20,6 @@ from typing import (
 from rapidfuzz._utils import ScorerFlag
 from rapidfuzz.fuzz import WRatio, ratio
 from rapidfuzz.utils import default_process
-from math import isnan
 
 __all__ = ["extract", "extract_iter", "extractOne", "cdist"]
 

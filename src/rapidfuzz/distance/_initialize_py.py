@@ -455,7 +455,6 @@ class Editops:
 
         return result
 
-
     def apply(self, source_string: str, destination_string: str) -> str:
         """
         apply editops to source_string
@@ -801,9 +800,9 @@ class Opcodes:
 
         for op in self._opcodes:
             if op.tag == "equal":
-                res_str += source_string[op.src_start:op.src_end]
+                res_str += source_string[op.src_start : op.src_end]
             elif op.tag in {"replace", "insert"}:
-                res_str += destination_string[op.dest_start:op.dest_end]
+                res_str += destination_string[op.dest_start : op.dest_end]
 
         return res_str
 

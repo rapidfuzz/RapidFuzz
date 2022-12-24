@@ -30,9 +30,9 @@ from cpp_common cimport (
     preprocess_strings,
 )
 from cpython.pycapsule cimport PyCapsule_New
+from libc.math cimport isnan
 from libc.stdint cimport INT64_MAX, int64_t
 from libc.stdlib cimport free, malloc
-from libc.math cimport isnan
 from libcpp cimport bool
 
 

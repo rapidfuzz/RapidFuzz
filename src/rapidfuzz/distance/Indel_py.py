@@ -5,10 +5,10 @@ from __future__ import annotations
 
 from typing import Callable, Hashable, Sequence
 
+from rapidfuzz._utils import is_none
 from rapidfuzz.distance._initialize import Editops, Opcodes
 from rapidfuzz.distance.LCSseq_py import _block_similarity as lcs_seq_block_similarity
 from rapidfuzz.distance.LCSseq_py import similarity as lcs_seq_similarity
-from rapidfuzz._utils import is_none
 
 
 def distance(
@@ -295,6 +295,10 @@ def editops(
      insert s1[4] s2[2]
      insert s1[6] s2[5]
     """
+    if processor is not None:
+        s1 = processor(s1)
+        s2 = processor(s2)
+
     raise NotImplementedError
 
 
@@ -348,4 +352,4 @@ def opcodes(
       equal a[4:6] (cd) b[3:5] (cd)
      insert a[6:6] () b[5:6] (f)
     """
-    raise NotImplementedError
+    return editops(s1, s2, processor=processor).as_opcodes()

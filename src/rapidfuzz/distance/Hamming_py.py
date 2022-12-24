@@ -5,8 +5,8 @@ from __future__ import annotations
 
 from typing import Callable, Hashable, Sequence
 
-from rapidfuzz.distance._initialize import Editops, Opcodes
 from rapidfuzz._utils import is_none
+from rapidfuzz.distance._initialize import Editop, Editops, Opcodes
 
 
 def distance(
@@ -228,7 +228,24 @@ def editops(
     editops : Editops
         edit operations required to turn s1 into s2
     """
-    raise NotImplementedError
+    if processor is not None:
+        s1 = processor(s1)
+        s2 = processor(s2)
+
+    if len(s1) != len(s2):
+        raise ValueError("Sequences are not the same length.")
+
+    ops_list = []
+    for i in range(len(s1)):
+        if s1[i] != s2[i]:
+            ops_list.append(Editop("replace", i, i))
+
+    # sidestep input validation
+    ops = Editops.__new__(Editops)
+    ops._src_len = len(s1)
+    ops._dest_len = len(s2)
+    ops._editops = ops_list
+    return ops
 
 
 def opcodes(
@@ -255,4 +272,4 @@ def opcodes(
     opcodes : Opcodes
         edit operations required to turn s1 into s2
     """
-    raise NotImplementedError
+    return editops(s1, s2, processor=processor).as_opcodes()

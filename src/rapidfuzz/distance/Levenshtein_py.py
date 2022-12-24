@@ -5,9 +5,9 @@ from __future__ import annotations
 
 from typing import Callable, Hashable, Sequence
 
+from rapidfuzz._utils import is_none
 from rapidfuzz.distance import Indel
 from rapidfuzz.distance._initialize import Editops, Opcodes
-from rapidfuzz._utils import is_none
 
 
 def _levenshtein_maximum(
@@ -414,6 +414,10 @@ def editops(
     replace s1[3] s2[2]
      insert s1[6] s2[5]
     """
+    if processor is not None:
+        s1 = processor(s1)
+        s2 = processor(s2)
+
     raise NotImplementedError
 
 
@@ -470,4 +474,4 @@ def opcodes(
       equal a[4:6] (cd) b[3:5] (cd)
      insert a[6:6] () b[5:6] (f)
     """
-    raise NotImplementedError
+    return editops(s1, s2, processor=processor, score_hint=score_hint).as_opcodes()
