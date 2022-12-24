@@ -1,12 +1,11 @@
 """
 common parts of the test suite for rapidfuzz
 """
+from math import isnan
+
 import pytest
 
-from rapidfuzz import process_cpp, process_py
-from rapidfuzz import utils
-
-from math import isnan
+from rapidfuzz import process_cpp, process_py, utils
 
 
 def is_none(s):
@@ -33,6 +32,10 @@ def scorer_tester(scorer, s1, s2, **kwargs):
     extractOne_res2 = process_py.extractOne(s1, [s2], scorer=scorer, **kwargs)
     extract_res1 = process_cpp.extract(s1, [s2], scorer=scorer, **kwargs)
     extract_res2 = process_py.extract(s1, [s2], scorer=scorer, **kwargs)
+    extract_iter_res1 = list(
+        process_cpp.extract_iter(s1, [s2], scorer=scorer, **kwargs)
+    )
+    extract_iter_res2 = list(process_py.extract_iter(s1, [s2], scorer=scorer, **kwargs))
 
     if is_none(s1) or is_none(s2):
         assert extractOne_res1 is None
@@ -47,11 +50,19 @@ def scorer_tester(scorer, s1, s2, **kwargs):
         assert extractOne_res2 is None or pytest.approx(score1) == extractOne_res2[1]
         assert extract_res1 == [] or pytest.approx(score1) == extract_res1[0][1]
         assert extract_res2 == [] or pytest.approx(score1) == extract_res2[0][1]
+        assert (
+            extract_iter_res1 == [] or pytest.approx(score1) == extract_iter_res1[0][1]
+        )
+        assert (
+            extract_iter_res2 == [] or pytest.approx(score1) == extract_iter_res2[0][1]
+        )
     else:
         assert pytest.approx(score1) == extractOne_res1[1]
         assert pytest.approx(score1) == extractOne_res2[1]
         assert pytest.approx(score1) == extract_res1[0][1]
         assert pytest.approx(score1) == extract_res2[0][1]
+        assert pytest.approx(score1) == extract_iter_res1[0][1]
+        assert pytest.approx(score1) == extract_iter_res2[0][1]
 
     # todo this should be able to handle None similar to the original scorer
     if not is_none(s1) and not is_none(s2):
