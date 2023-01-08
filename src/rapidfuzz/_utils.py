@@ -18,7 +18,7 @@ def _get_scorer_flags_distance(**_kwargs: Any) -> dict[str, Any]:
     return {
         "optimal_score": 0,
         "worst_score": 2**63 - 1,
-        "flags": ScorerFlag.RESULT_I64,
+        "flags": ScorerFlag.RESULT_I64 | ScorerFlag.SYMMETRIC,
     }
 
 
@@ -26,7 +26,23 @@ def _get_scorer_flags_similarity(**_kwargs: Any) -> dict[str, Any]:
     return {
         "optimal_score": 2**63 - 1,
         "worst_score": 0,
-        "flags": ScorerFlag.RESULT_I64,
+        "flags": ScorerFlag.RESULT_I64 | ScorerFlag.SYMMETRIC,
+    }
+
+
+def _get_scorer_flags_normalized_distance(**_kwargs: Any) -> dict[str, Any]:
+    return {
+        "optimal_score": 0,
+        "worst_score": 1,
+        "flags": ScorerFlag.RESULT_F64 | ScorerFlag.SYMMETRIC,
+    }
+
+
+def _get_scorer_flags_normalized_similarity(**_kwargs: Any) -> dict[str, Any]:
+    return {
+        "optimal_score": 1,
+        "worst_score": 0,
+        "flags": ScorerFlag.RESULT_F64 | ScorerFlag.SYMMETRIC,
     }
 
 
@@ -38,14 +54,6 @@ def is_none(s: Any) -> bool:
         return True
 
     return False
-
-
-def _get_scorer_flags_normalized_distance(**_kwargs: Any) -> dict[str, Any]:
-    return {"optimal_score": 0, "worst_score": 1, "flags": ScorerFlag.RESULT_F64}
-
-
-def _get_scorer_flags_normalized_similarity(**_kwargs: Any) -> dict[str, Any]:
-    return {"optimal_score": 1, "worst_score": 0, "flags": ScorerFlag.RESULT_F64}
 
 
 def _create_scorer(

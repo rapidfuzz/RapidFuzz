@@ -1470,6 +1470,8 @@ cdef Matrix cdist_single_list(
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef cdist_py(queries, choices, scorer, processor, score_cutoff, dtype, workers, dict kwargs):
+    # todo this should handle two similar sequences more efficiently
+
     proc_queries = preprocess_py(queries, processor)
     proc_choices = preprocess_py(choices, processor)
     cdef double score

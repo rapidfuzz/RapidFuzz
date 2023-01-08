@@ -520,8 +520,10 @@ def extract(
     return heapq.nsmallest(limit, result_iter, key=lambda i: i[1])
 
 
-if TYPE_CHECKING:
+try:
     import numpy as np
+except:
+    pass
 
 
 def _dtype_to_type_num(
@@ -542,6 +544,16 @@ def _dtype_to_type_num(
         return np.float32
 
     return np.float32
+
+
+def _is_symmetric(scorer: Callable[..., int | float], **kwargs: dict[str, Any]) -> bool:
+    params = getattr(scorer, "_RF_ScorerPy", None)
+    if params is not None:
+        flags = params["get_scorer_flags"](**kwargs)
+        if flags["flags"] & ScorerFlag.SYMMETRIC:
+            return True
+
+    return False
 
 
 def cdist(
@@ -616,7 +628,7 @@ def cdist(
     dtype = _dtype_to_type_num(dtype, scorer, **kwargs)
     results = np.zeros((len(queries), len(choices)), dtype=dtype)
 
-    if queries is choices:
+    if queries is choices and _is_symmetric(scorer, **kwargs):
         if processor is None:
             proc_queries = list(queries)
         else:

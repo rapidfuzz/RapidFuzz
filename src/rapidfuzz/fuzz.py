@@ -10,7 +10,11 @@ from rapidfuzz._utils import fallback_import as _fallback_import
 
 
 def _get_scorer_flags_fuzz(**_kwargs: Any) -> dict[str, Any]:
-    return {"optimal_score": 100, "worst_score": 0, "flags": _ScorerFlag.RESULT_F64}
+    return {
+        "optimal_score": 100,
+        "worst_score": 0,
+        "flags": _ScorerFlag.RESULT_F64 | _ScorerFlag.SYMMETRIC,
+    }
 
 
 _fuzz_attribute: dict[str, Callable[..., dict[str, Any]]] = {

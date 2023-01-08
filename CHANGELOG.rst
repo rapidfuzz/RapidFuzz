@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+[2.14.0] -
+^^^^^^^^^^^^^^^^^^^^^
+Fixed
+~~~~~~~
+- fix handling of non symmetric scorers in pure python version of ``process.cdist``
+
 [2.13.7] - 2022-12-20
 ^^^^^^^^^^^^^^^^^^^^^
 Fixed

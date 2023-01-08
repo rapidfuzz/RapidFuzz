@@ -1,6 +1,7 @@
 import pytest
 
 from rapidfuzz import fuzz, process_cpp, process_py
+from rapidfuzz.distance import Levenshtein
 
 
 def wrapped(func):
@@ -39,12 +40,14 @@ class process:
 
     @staticmethod
     def cdist(*args, **kwargs):
+        import numpy as np
+
         res1 = process_cpp.cdist(*args, **kwargs)
         res2 = process_py.cdist(*args, **kwargs)
         assert res1.dtype == res2.dtype
         assert res1.shape == res2.shape
         if res1.size and res2.size:
-            assert res1 == res2
+            assert np.array_equal(res1, res2)
         return res1
 
 
@@ -382,3 +385,15 @@ def test_wrapped_function(scorer):
     assert process.cdist(["test"], [float("nan")], scorer=scorer)[0, 0] == 100
     assert process.cdist(["test"], [None], scorer=scorer)[0, 0] == 100
     assert process.cdist(["test"], ["tes"], scorer=scorer)[0, 0] == 100
+
+
+def test_cdist_not_symmetric():
+    pytest.importorskip("numpy")
+    import numpy as np
+
+    strings = ["test", "test2"]
+    expected_res = np.array([[0, 1], [2, 0]])
+    assert np.array_equal(
+        process.cdist(strings, strings, scorer=Levenshtein.distance, weights=(1, 2, 1)),
+        expected_res,
+    )

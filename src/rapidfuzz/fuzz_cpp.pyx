@@ -221,11 +221,6 @@ cdef bool GetScorerFlagsFuzzRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_
     scorer_flags.worst_score.f64 = 0
     return True
 
-def _GetScorerFlagsSimilarity(**kwargs):
-    return {"optimal_score": 100, "worst_score": 0, "flags": (1 << 5)}
-
-cdef dict FuzzContextPy = CreateScorerContextPy(_GetScorerFlagsSimilarity)
-
 cdef RF_Scorer RatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzzRatio, RatioInit)
 ratio._RF_Scorer = PyCapsule_New(&RatioContext, NULL, NULL)
 
