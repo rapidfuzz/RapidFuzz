@@ -1357,6 +1357,22 @@ cdef inline MatrixType dtype_to_type_num_i64(dtype) except MatrixType.UNDEFINED:
         return MatrixType.INT32
     return <MatrixType>dtype
 
+cdef inline MatrixType dtype_to_type_num_py(dtype, scorer, dict kwargs) except MatrixType.UNDEFINED:
+    import numpy as np
+
+    if dtype is not None:
+        return <MatrixType>dtype
+
+    params = getattr(scorer, "_RF_ScorerPy", None)
+    if params is not None:
+        flags = params["get_scorer_flags"](**kwargs)
+        if <int>flags["flags"] & RF_SCORER_FLAG_RESULT_I64:
+            return MatrixType.INT32
+        return MatrixType.FLOAT32
+
+    return MatrixType.FLOAT32
+
+
 from cpython cimport Py_buffer
 from libcpp.vector cimport vector
 
@@ -1476,7 +1492,7 @@ cdef cdist_py(queries, choices, scorer, processor, score_cutoff, dtype, workers,
     proc_choices = preprocess_py(choices, processor)
     cdef double score
     cdef Matrix matrix = Matrix()
-    c_dtype = dtype_to_type_num_f64(dtype)
+    c_dtype = dtype_to_type_num_py(dtype, scorer, kwargs)
     matrix.matrix = RfMatrix(c_dtype, proc_queries.size(), proc_choices.size())
 
     kwargs["processor"] = None

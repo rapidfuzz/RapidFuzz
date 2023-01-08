@@ -3,12 +3,12 @@
 
 from __future__ import annotations
 
-from enum import Flag
+from enum import IntFlag
 from math import isnan
 from typing import Any, Callable
 
 
-class ScorerFlag(Flag):
+class ScorerFlag(IntFlag):
     RESULT_F64 = 1 << 5
     RESULT_I64 = 1 << 6
     SYMMETRIC = 1 << 11

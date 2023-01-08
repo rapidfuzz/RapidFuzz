@@ -2,6 +2,12 @@ import pytest
 
 from rapidfuzz import fuzz, process_cpp, process_py
 from rapidfuzz.distance import Levenshtein
+from rapidfuzz.distance import Levenshtein_py
+
+try:
+    import numpy as np
+except:
+    pass
 
 
 def wrapped(func):
@@ -40,8 +46,6 @@ class process:
 
     @staticmethod
     def cdist(*args, **kwargs):
-        import numpy as np
-
         res1 = process_cpp.cdist(*args, **kwargs)
         res2 = process_py.cdist(*args, **kwargs)
         assert res1.dtype == res2.dtype
@@ -389,11 +393,33 @@ def test_wrapped_function(scorer):
 
 def test_cdist_not_symmetric():
     pytest.importorskip("numpy")
-    import numpy as np
-
     strings = ["test", "test2"]
     expected_res = np.array([[0, 1], [2, 0]])
     assert np.array_equal(
         process.cdist(strings, strings, scorer=Levenshtein.distance, weights=(1, 2, 1)),
         expected_res,
+    )
+
+
+def test_cdist_pure_python_dtype():
+    pytest.importorskip("numpy")
+    assert (
+        process.cdist(["test"], ["test"], scorer=Levenshtein_py.distance).dtype
+        == np.int32
+    )
+    assert (
+        process.cdist(["test"], ["test"], scorer=Levenshtein_py.similarity).dtype
+        == np.int32
+    )
+    assert (
+        process.cdist(
+            ["test"], ["test"], scorer=Levenshtein_py.normalized_distance
+        ).dtype
+        == np.float32
+    )
+    assert (
+        process.cdist(
+            ["test"], ["test"], scorer=Levenshtein_py.normalized_similarity
+        ).dtype
+        == np.float32
     )

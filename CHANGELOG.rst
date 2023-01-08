@@ -6,6 +6,7 @@ Changelog
 Fixed
 ~~~~~~~
 - fix handling of non symmetric scorers in pure python version of ``process.cdist``
+- fix default dtype handling when using ``process.cdist`` with pure python scorers
 
 [2.13.7] - 2022-12-20
 ^^^^^^^^^^^^^^^^^^^^^
