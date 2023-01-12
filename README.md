@@ -43,7 +43,7 @@
 RapidFuzz is a fast string matching library for Python and C++, which is using the string similarity calculations from [FuzzyWuzzy](https://github.com/seatgeek/fuzzywuzzy). However there are a couple of aspects that set RapidFuzz apart from FuzzyWuzzy:
 1) It is MIT licensed so it can be used whichever License you might want to choose for your project, while you're forced to adopt the GPL license when using FuzzyWuzzy
 2) It provides many string_metrics like hamming or jaro_winkler, which are not included in FuzzyWuzzy
-3) It is mostly written in C++ and on top of this comes with a lot of Algorithmic improvements to make string matching even faster, while still providing the same results. For detailed benchmarks check the [documentation](https://maxbachmann.github.io/RapidFuzz/fuzz.html)
+3) It is mostly written in C++ and on top of this comes with a lot of Algorithmic improvements to make string matching even faster, while still providing the same results. For detailed benchmarks check the [documentation](https://maxbachmann.github.io/RapidFuzz)
 4) Fixes multiple bugs in the `partial_ratio` implementation
 
 ## Requirements
@@ -141,7 +141,7 @@ The full documentation of processors can be found [here](https://maxbachmann.git
 ## Benchmark
 
 The following benchmark gives a quick performance comparison between RapidFuzz and FuzzyWuzzy.
-More detailed benchmarks for the string metrics can be found in the [documentation](https://maxbachmann.github.io/RapidFuzz/fuzz.html). For this simple comparison I generated a list of 10.000 strings with length 10, that is compared to a sample of 100 elements from this list:
+More detailed benchmarks for the string metrics can be found in the [documentation](https://maxbachmann.github.io/RapidFuzz). For this simple comparison I generated a list of 10.000 strings with length 10, that is compared to a sample of 100 elements from this list:
 ```python
 words = [
     "".join(random.choice(string.ascii_letters + string.digits) for _ in range(10))
