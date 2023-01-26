@@ -347,4 +347,4 @@ def opcodes(
       equal a[4:6] (cd) b[3:5] (cd)
      insert a[6:6] () b[5:6] (f)
     """
-    raise NotImplementedError
+    return editops(s1, s2, processor=processor).as_opcodes()
