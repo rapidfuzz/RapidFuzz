@@ -42,7 +42,7 @@ setup_args = {
         "": "src",
     },
     "package_data": {
-        "rapidfuzz": ["*.pyi", "py.typed", "__init__.pxd", "rapidfuzz.h"],
+        "rapidfuzz": ["*.pyi", "py.typed", "__init__.pxd"],
         "rapidfuzz.distance": ["*.pyi"],
     },
     "python_requires": ">=3.7",
