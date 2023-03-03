@@ -44,130 +44,130 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
 
 cdef extern from "metrics.hpp":
     # Levenshtein
-    double levenshtein_normalized_distance_func(  const RF_String&, const RF_String&, int64_t, int64_t, int64_t, double, double) nogil except +
-    int64_t levenshtein_distance_func(            const RF_String&, const RF_String&, int64_t, int64_t, int64_t, int64_t, int64_t) nogil except +
-    double levenshtein_normalized_similarity_func(const RF_String&, const RF_String&, int64_t, int64_t, int64_t, double, double) nogil except +
-    int64_t levenshtein_similarity_func(          const RF_String&, const RF_String&, int64_t, int64_t, int64_t, int64_t, int64_t) nogil except +
+    double levenshtein_normalized_distance_func(  const RF_String&, const RF_String&, int64_t, int64_t, int64_t, double, double) except + nogil
+    int64_t levenshtein_distance_func(            const RF_String&, const RF_String&, int64_t, int64_t, int64_t, int64_t, int64_t) except + nogil
+    double levenshtein_normalized_similarity_func(const RF_String&, const RF_String&, int64_t, int64_t, int64_t, double, double) except + nogil
+    int64_t levenshtein_similarity_func(          const RF_String&, const RF_String&, int64_t, int64_t, int64_t, int64_t, int64_t) except + nogil
 
-    RfEditops levenshtein_editops_func(const RF_String&, const RF_String&, int64_t) nogil except +
+    RfEditops levenshtein_editops_func(const RF_String&, const RF_String&, int64_t) except + nogil
 
-    bool LevenshteinDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool LevenshteinNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool LevenshteinSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool LevenshteinNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool LevenshteinDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool LevenshteinNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool LevenshteinSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool LevenshteinNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
 
     bool LevenshteinMultiStringSupport(const RF_Kwargs*) nogil
 
     # Damerau Levenshtein
-    double damerau_levenshtein_normalized_distance_func(  const RF_String&, const RF_String&, double) nogil except +
-    int64_t damerau_levenshtein_distance_func(            const RF_String&, const RF_String&, int64_t) nogil except +
-    double damerau_levenshtein_normalized_similarity_func(const RF_String&, const RF_String&, double) nogil except +
-    int64_t damerau_levenshtein_similarity_func(          const RF_String&, const RF_String&, int64_t) nogil except +
+    double damerau_levenshtein_normalized_distance_func(  const RF_String&, const RF_String&, double) except + nogil
+    int64_t damerau_levenshtein_distance_func(            const RF_String&, const RF_String&, int64_t) except + nogil
+    double damerau_levenshtein_normalized_similarity_func(const RF_String&, const RF_String&, double) except + nogil
+    int64_t damerau_levenshtein_similarity_func(          const RF_String&, const RF_String&, int64_t) except + nogil
 
-    bool DamerauLevenshteinDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool DamerauLevenshteinNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool DamerauLevenshteinSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool DamerauLevenshteinNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool DamerauLevenshteinDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool DamerauLevenshteinNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool DamerauLevenshteinSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool DamerauLevenshteinNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
 
     # LCS
-    double lcs_seq_normalized_distance_func(  const RF_String&, const RF_String&, double) nogil except +
-    int64_t lcs_seq_distance_func(            const RF_String&, const RF_String&, int64_t) nogil except +
-    double lcs_seq_normalized_similarity_func(const RF_String&, const RF_String&, double) nogil except +
-    int64_t lcs_seq_similarity_func(          const RF_String&, const RF_String&, int64_t) nogil except +
+    double lcs_seq_normalized_distance_func(  const RF_String&, const RF_String&, double) except + nogil
+    int64_t lcs_seq_distance_func(            const RF_String&, const RF_String&, int64_t) except + nogil
+    double lcs_seq_normalized_similarity_func(const RF_String&, const RF_String&, double) except + nogil
+    int64_t lcs_seq_similarity_func(          const RF_String&, const RF_String&, int64_t) except + nogil
 
-    RfEditops lcs_seq_editops_func(const RF_String&, const RF_String&) nogil except +
+    RfEditops lcs_seq_editops_func(const RF_String&, const RF_String&) except + nogil
 
-    bool LCSseqDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool LCSseqNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool LCSseqSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool LCSseqNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool LCSseqDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool LCSseqNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool LCSseqSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool LCSseqNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
 
     bool LCSseqMultiStringSupport(const RF_Kwargs*) nogil
 
     # Indel
-    double indel_normalized_distance_func(  const RF_String&, const RF_String&, double) nogil except +
-    int64_t indel_distance_func(            const RF_String&, const RF_String&, int64_t) nogil except +
-    double indel_normalized_similarity_func(const RF_String&, const RF_String&, double) nogil except +
-    int64_t indel_similarity_func(          const RF_String&, const RF_String&, int64_t) nogil except +
+    double indel_normalized_distance_func(  const RF_String&, const RF_String&, double) except + nogil
+    int64_t indel_distance_func(            const RF_String&, const RF_String&, int64_t) except + nogil
+    double indel_normalized_similarity_func(const RF_String&, const RF_String&, double) except + nogil
+    int64_t indel_similarity_func(          const RF_String&, const RF_String&, int64_t) except + nogil
 
-    RfEditops indel_editops_func(const RF_String&, const RF_String&) nogil except +
+    RfEditops indel_editops_func(const RF_String&, const RF_String&) except + nogil
 
-    bool IndelDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool IndelNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool IndelSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool IndelNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool IndelDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool IndelNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool IndelSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool IndelNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
 
     bool IndelMultiStringSupport(const RF_Kwargs*) nogil
 
     # Hamming
-    double hamming_normalized_distance_func(  const RF_String&, const RF_String&, double) nogil except +
-    int64_t hamming_distance_func(            const RF_String&, const RF_String&, int64_t) nogil except +
-    double hamming_normalized_similarity_func(const RF_String&, const RF_String&, double) nogil except +
-    int64_t hamming_similarity_func(          const RF_String&, const RF_String&, int64_t) nogil except +
+    double hamming_normalized_distance_func(  const RF_String&, const RF_String&, double) except + nogil
+    int64_t hamming_distance_func(            const RF_String&, const RF_String&, int64_t) except + nogil
+    double hamming_normalized_similarity_func(const RF_String&, const RF_String&, double) except + nogil
+    int64_t hamming_similarity_func(          const RF_String&, const RF_String&, int64_t) except + nogil
 
-    bool HammingDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool HammingNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool HammingSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool HammingNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool HammingDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool HammingNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool HammingSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool HammingNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
 
-    RfEditops hamming_editops_func(const RF_String&, const RF_String&) nogil except +
+    RfEditops hamming_editops_func(const RF_String&, const RF_String&) except + nogil
 
     # Optimal String Alignment
-    double osa_normalized_distance_func(  const RF_String&, const RF_String&, double) nogil except +
-    int64_t osa_distance_func(            const RF_String&, const RF_String&, int64_t) nogil except +
-    double osa_normalized_similarity_func(const RF_String&, const RF_String&, double) nogil except +
-    int64_t osa_similarity_func(          const RF_String&, const RF_String&, int64_t) nogil except +
+    double osa_normalized_distance_func(  const RF_String&, const RF_String&, double) except + nogil
+    int64_t osa_distance_func(            const RF_String&, const RF_String&, int64_t) except + nogil
+    double osa_normalized_similarity_func(const RF_String&, const RF_String&, double) except + nogil
+    int64_t osa_similarity_func(          const RF_String&, const RF_String&, int64_t) except + nogil
 
-    bool OSADistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool OSANormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool OSASimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool OSANormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool OSADistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool OSANormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool OSASimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool OSANormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
 
     bool OSAMultiStringSupport(const RF_Kwargs*) nogil
 
     # Damerau Levenshtein
-    double jaro_normalized_distance_func(  const RF_String&, const RF_String&, double) nogil except +
-    double jaro_distance_func(             const RF_String&, const RF_String&, double) nogil except +
-    double jaro_normalized_similarity_func(const RF_String&, const RF_String&, double) nogil except +
-    double jaro_similarity_func(           const RF_String&, const RF_String&, double) nogil except +
+    double jaro_normalized_distance_func(  const RF_String&, const RF_String&, double) except + nogil
+    double jaro_distance_func(             const RF_String&, const RF_String&, double) except + nogil
+    double jaro_normalized_similarity_func(const RF_String&, const RF_String&, double) except + nogil
+    double jaro_similarity_func(           const RF_String&, const RF_String&, double) except + nogil
 
-    bool JaroDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool JaroNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool JaroSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool JaroNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool JaroDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool JaroNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool JaroSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool JaroNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
 
     # Damerau Levenshtein
-    double jaro_winkler_normalized_distance_func(  const RF_String&, const RF_String&, double, double) nogil except +
-    double jaro_winkler_distance_func(             const RF_String&, const RF_String&, double, double) nogil except +
-    double jaro_winkler_normalized_similarity_func(const RF_String&, const RF_String&, double, double) nogil except +
-    double jaro_winkler_similarity_func(           const RF_String&, const RF_String&, double, double) nogil except +
+    double jaro_winkler_normalized_distance_func(  const RF_String&, const RF_String&, double, double) except + nogil
+    double jaro_winkler_distance_func(             const RF_String&, const RF_String&, double, double) except + nogil
+    double jaro_winkler_normalized_similarity_func(const RF_String&, const RF_String&, double, double) except + nogil
+    double jaro_winkler_similarity_func(           const RF_String&, const RF_String&, double, double) except + nogil
 
-    bool JaroWinklerDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool JaroWinklerNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool JaroWinklerSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool JaroWinklerNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool JaroWinklerDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool JaroWinklerNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool JaroWinklerSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool JaroWinklerNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
 
     # Prefix
-    double prefix_normalized_distance_func(  const RF_String&, const RF_String&, double) nogil except +
-    int64_t prefix_distance_func(            const RF_String&, const RF_String&, int64_t) nogil except +
-    double prefix_normalized_similarity_func(const RF_String&, const RF_String&, double) nogil except +
-    int64_t prefix_similarity_func(          const RF_String&, const RF_String&, int64_t) nogil except +
+    double prefix_normalized_distance_func(  const RF_String&, const RF_String&, double) except + nogil
+    int64_t prefix_distance_func(            const RF_String&, const RF_String&, int64_t) except + nogil
+    double prefix_normalized_similarity_func(const RF_String&, const RF_String&, double) except + nogil
+    int64_t prefix_similarity_func(          const RF_String&, const RF_String&, int64_t) except + nogil
 
-    bool PrefixDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool PrefixNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool PrefixSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool PrefixNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool PrefixDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool PrefixNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool PrefixSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool PrefixNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
 
     # Postfix
-    double postfix_normalized_distance_func(  const RF_String&, const RF_String&, double) nogil except +
-    int64_t postfix_distance_func(            const RF_String&, const RF_String&, int64_t) nogil except +
-    double postfix_normalized_similarity_func(const RF_String&, const RF_String&, double) nogil except +
-    int64_t postfix_similarity_func(          const RF_String&, const RF_String&, int64_t) nogil except +
+    double postfix_normalized_distance_func(  const RF_String&, const RF_String&, double) except + nogil
+    int64_t postfix_distance_func(            const RF_String&, const RF_String&, int64_t) except + nogil
+    double postfix_normalized_similarity_func(const RF_String&, const RF_String&, double) except + nogil
+    int64_t postfix_similarity_func(          const RF_String&, const RF_String&, int64_t) except + nogil
 
-    bool PostfixDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool PostfixNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool PostfixSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool PostfixNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool PostfixDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool PostfixNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool PostfixSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool PostfixNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
 
 cdef inline bool is_none(s):
     if s is None:
@@ -307,7 +307,7 @@ cdef bool LevenshteinKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     self.dtor = KwargsDeinit
     return True
 
-cdef bool GetScorerFlagsLevenshteinDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsLevenshteinDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>self.context
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64
     if weights.insert_cost == weights.delete_cost:
@@ -319,7 +319,7 @@ cdef bool GetScorerFlagsLevenshteinDistance(const RF_Kwargs* self, RF_ScorerFlag
     scorer_flags.worst_score.i64 = INT64_MAX
     return True
 
-cdef bool GetScorerFlagsLevenshteinSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsLevenshteinSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>self.context
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64
     if weights.insert_cost == weights.delete_cost:
@@ -331,7 +331,7 @@ cdef bool GetScorerFlagsLevenshteinSimilarity(const RF_Kwargs* self, RF_ScorerFl
     scorer_flags.worst_score.i64 = 0
     return True
 
-cdef bool GetScorerFlagsLevenshteinNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsLevenshteinNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>self.context
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64
     if weights.insert_cost == weights.delete_cost:
@@ -343,7 +343,7 @@ cdef bool GetScorerFlagsLevenshteinNormalizedDistance(const RF_Kwargs* self, RF_
     scorer_flags.worst_score.f64 = 1.0
     return True
 
-cdef bool GetScorerFlagsLevenshteinNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsLevenshteinNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>self.context
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64
     if weights.insert_cost == weights.delete_cost:
@@ -401,25 +401,25 @@ def damerau_levenshtein_normalized_similarity(s1, s2, *, processor=None, score_c
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
     return damerau_levenshtein_normalized_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
-cdef bool GetScorerFlagsDamerauLevenshteinDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsDamerauLevenshteinDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
     scorer_flags.optimal_score.i64 = 0
     scorer_flags.worst_score.i64 = INT64_MAX
     return True
 
-cdef bool GetScorerFlagsDamerauLevenshteinNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsDamerauLevenshteinNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     scorer_flags.optimal_score.f64 = 0.0
     scorer_flags.worst_score.f64 = 1
     return True
 
-cdef bool GetScorerFlagsDamerauLevenshteinSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsDamerauLevenshteinSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
     scorer_flags.optimal_score.i64 = INT64_MAX
     scorer_flags.worst_score.i64 = 0
     return True
 
-cdef bool GetScorerFlagsDamerauLevenshteinNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsDamerauLevenshteinNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     scorer_flags.optimal_score.f64 = 1.0
     scorer_flags.worst_score.f64 = 0
@@ -490,7 +490,7 @@ def lcs_seq_opcodes(s1, s2, *, processor=None):
     return ops.as_opcodes()
 
 
-cdef bool GetScorerFlagsLCSseqDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsLCSseqDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
     if LCSseqMultiStringSupport(self):
         scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
@@ -499,7 +499,7 @@ cdef bool GetScorerFlagsLCSseqDistance(const RF_Kwargs* self, RF_ScorerFlags* sc
     scorer_flags.worst_score.i64 = INT64_MAX
     return True
 
-cdef bool GetScorerFlagsLCSseqNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsLCSseqNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     if LCSseqMultiStringSupport(self):
         scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
@@ -508,7 +508,7 @@ cdef bool GetScorerFlagsLCSseqNormalizedDistance(const RF_Kwargs* self, RF_Score
     scorer_flags.worst_score.f64 = 1
     return True
 
-cdef bool GetScorerFlagsLCSseqSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsLCSseqSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
     if LCSseqMultiStringSupport(self):
         scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
@@ -517,7 +517,7 @@ cdef bool GetScorerFlagsLCSseqSimilarity(const RF_Kwargs* self, RF_ScorerFlags* 
     scorer_flags.worst_score.i64 = 0
     return True
 
-cdef bool GetScorerFlagsLCSseqNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsLCSseqNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     if LCSseqMultiStringSupport(self):
         scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
@@ -591,7 +591,7 @@ def indel_opcodes(s1, s2, *, processor=None):
     return ops.as_opcodes()
 
 
-cdef bool GetScorerFlagsIndelDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsIndelDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
     if IndelMultiStringSupport(self):
         scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
@@ -601,7 +601,7 @@ cdef bool GetScorerFlagsIndelDistance(const RF_Kwargs* self, RF_ScorerFlags* sco
     return True
 
 
-cdef bool GetScorerFlagsIndelNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsIndelNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     if IndelMultiStringSupport(self):
         scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
@@ -610,7 +610,7 @@ cdef bool GetScorerFlagsIndelNormalizedDistance(const RF_Kwargs* self, RF_Scorer
     scorer_flags.worst_score.f64 = 1
     return True
 
-cdef bool GetScorerFlagsIndelSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsIndelSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
     if IndelMultiStringSupport(self):
         scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
@@ -620,7 +620,7 @@ cdef bool GetScorerFlagsIndelSimilarity(const RF_Kwargs* self, RF_ScorerFlags* s
     return True
 
 
-cdef bool GetScorerFlagsIndelNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsIndelNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     if IndelMultiStringSupport(self):
         scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
@@ -695,25 +695,25 @@ def hamming_opcodes(s1, s2, *, processor=None):
     return ops.as_opcodes()
 
 
-cdef bool GetScorerFlagsHammingDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsHammingDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
     scorer_flags.optimal_score.i64 = 0
     scorer_flags.worst_score.i64 = INT64_MAX
     return True
 
-cdef bool GetScorerFlagsHammingNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsHammingNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     scorer_flags.optimal_score.f64 = 0.0
     scorer_flags.worst_score.f64 = 1.0
     return True
 
-cdef bool GetScorerFlagsHammingSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsHammingSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
     scorer_flags.optimal_score.i64 = INT64_MAX
     scorer_flags.worst_score.i64 = 0
     return True
 
-cdef bool GetScorerFlagsHammingNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsHammingNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     scorer_flags.optimal_score.f64 = 1.0
     scorer_flags.worst_score.f64 = 0
@@ -765,7 +765,7 @@ def osa_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     return osa_normalized_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
-cdef bool GetScorerFlagsOSADistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsOSADistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
     if OSAMultiStringSupport(self):
         scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
@@ -774,7 +774,7 @@ cdef bool GetScorerFlagsOSADistance(const RF_Kwargs* self, RF_ScorerFlags* score
     scorer_flags.worst_score.i64 = INT64_MAX
     return True
 
-cdef bool GetScorerFlagsOSANormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsOSANormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     if OSAMultiStringSupport(self):
         scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
@@ -783,7 +783,7 @@ cdef bool GetScorerFlagsOSANormalizedDistance(const RF_Kwargs* self, RF_ScorerFl
     scorer_flags.worst_score.f64 = 1.0
     return True
 
-cdef bool GetScorerFlagsOSASimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsOSASimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
     if OSAMultiStringSupport(self):
         scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
@@ -792,7 +792,7 @@ cdef bool GetScorerFlagsOSASimilarity(const RF_Kwargs* self, RF_ScorerFlags* sco
     scorer_flags.worst_score.i64 = 0
     return True
 
-cdef bool GetScorerFlagsOSANormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsOSANormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     if OSAMultiStringSupport(self):
         scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
@@ -854,13 +854,13 @@ def jaro_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
     return jaro_normalized_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
-cdef bool GetScorerFlagsJaroDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsJaroDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     scorer_flags.optimal_score.f64 = 0.0
     scorer_flags.worst_score.f64 = 1.0
     return True
 
-cdef bool GetScorerFlagsJaroSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsJaroSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     scorer_flags.optimal_score.f64 = 1.0
     scorer_flags.worst_score.f64 = 0
@@ -926,13 +926,13 @@ cdef bool JaroWinklerKwargsInit(RF_Kwargs * self, dict kwargs) except False:
     self.dtor = KwargsDeinit
     return True
 
-cdef bool GetScorerFlagsJaroWinklerDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsJaroWinklerDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     scorer_flags.optimal_score.f64 = 0.0
     scorer_flags.worst_score.f64 = 1.0
     return True
 
-cdef bool GetScorerFlagsJaroWinklerSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsJaroWinklerSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     scorer_flags.optimal_score.f64 = 1.0
     scorer_flags.worst_score.f64 = 0
@@ -983,25 +983,25 @@ def postfix_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc, None)
     return postfix_normalized_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
-cdef bool GetScorerFlagsPostfixDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsPostfixDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
     scorer_flags.optimal_score.i64 = 0
     scorer_flags.worst_score.i64 = INT64_MAX
     return True
 
-cdef bool GetScorerFlagsPostfixNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsPostfixNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     scorer_flags.optimal_score.f64 = 0.0
     scorer_flags.worst_score.f64 = 1.0
     return True
 
-cdef bool GetScorerFlagsPostfixSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsPostfixSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
     scorer_flags.optimal_score.i64 = INT64_MAX
     scorer_flags.worst_score.i64 = 0
     return True
 
-cdef bool GetScorerFlagsPostfixNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsPostfixNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     scorer_flags.optimal_score.f64 = 1.0
     scorer_flags.worst_score.f64 = 0
@@ -1058,25 +1058,25 @@ def prefix_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     return prefix_normalized_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
-cdef bool GetScorerFlagsPrefixDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsPrefixDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
     scorer_flags.optimal_score.i64 = 0
     scorer_flags.worst_score.i64 = INT64_MAX
     return True
 
-cdef bool GetScorerFlagsPrefixNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsPrefixNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     scorer_flags.optimal_score.f64 = 0.0
     scorer_flags.worst_score.f64 = 1.0
     return True
 
-cdef bool GetScorerFlagsPrefixSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsPrefixSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
     scorer_flags.optimal_score.i64 = INT64_MAX
     scorer_flags.worst_score.i64 = 0
     return True
 
-cdef bool GetScorerFlagsPrefixNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsPrefixNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     scorer_flags.optimal_score.f64 = 1.0
     scorer_flags.worst_score.f64 = 0

@@ -21,8 +21,8 @@ cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
         int64_t replace_cost
 
 cdef extern from "cpp_common.hpp":
-    object opcodes_apply(const RfOpcodes& ops, const RF_String& str1, const RF_String& str2) nogil except +
-    object editops_apply(const RfEditops& ops, const RF_String& str1, const RF_String& str2) nogil except +
+    object opcodes_apply(const RfOpcodes& ops, const RF_String& str1, const RF_String& str2) except + nogil
+    object editops_apply(const RfEditops& ops, const RF_String& str1, const RF_String& str2) except + nogil
 
 cdef str edit_type_to_str(EditType edit_type):
     if edit_type == EditType.Insert:

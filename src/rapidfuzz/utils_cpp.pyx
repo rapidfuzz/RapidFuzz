@@ -17,7 +17,7 @@ from array import array
 
 
 cdef extern from "utils_cpp.hpp":
-    object default_process_impl(object) nogil except +
+    object default_process_impl(object) except + nogil
     void validate_string(object py_str, const char* err) except +
     RF_String default_process_func(RF_String sentence) except +
 

@@ -37,29 +37,29 @@ from array import array
 
 
 cdef extern from "fuzz_cpp.hpp":
-    double ratio_func(                    const RF_String&, const RF_String&, double) nogil except +
-    double partial_ratio_func(            const RF_String&, const RF_String&, double) nogil except +
-    double token_sort_ratio_func(         const RF_String&, const RF_String&, double) nogil except +
-    double token_set_ratio_func(          const RF_String&, const RF_String&, double) nogil except +
-    double token_ratio_func(              const RF_String&, const RF_String&, double) nogil except +
-    double partial_token_sort_ratio_func( const RF_String&, const RF_String&, double) nogil except +
-    double partial_token_set_ratio_func(  const RF_String&, const RF_String&, double) nogil except +
-    double partial_token_ratio_func(      const RF_String&, const RF_String&, double) nogil except +
-    double WRatio_func(                   const RF_String&, const RF_String&, double) nogil except +
-    double QRatio_func(                   const RF_String&, const RF_String&, double) nogil except +
+    double ratio_func(                    const RF_String&, const RF_String&, double) except + nogil
+    double partial_ratio_func(            const RF_String&, const RF_String&, double) except + nogil
+    double token_sort_ratio_func(         const RF_String&, const RF_String&, double) except + nogil
+    double token_set_ratio_func(          const RF_String&, const RF_String&, double) except + nogil
+    double token_ratio_func(              const RF_String&, const RF_String&, double) except + nogil
+    double partial_token_sort_ratio_func( const RF_String&, const RF_String&, double) except + nogil
+    double partial_token_set_ratio_func(  const RF_String&, const RF_String&, double) except + nogil
+    double partial_token_ratio_func(      const RF_String&, const RF_String&, double) except + nogil
+    double WRatio_func(                   const RF_String&, const RF_String&, double) except + nogil
+    double QRatio_func(                   const RF_String&, const RF_String&, double) except + nogil
 
-    RfScoreAlignment[double] partial_ratio_alignment_func(const RF_String&, const RF_String&, double) nogil except +
+    RfScoreAlignment[double] partial_ratio_alignment_func(const RF_String&, const RF_String&, double) except + nogil
 
-    bool RatioInit(                 RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool PartialRatioInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool TokenSortRatioInit(        RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool TokenSetRatioInit(         RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool TokenRatioInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool PartialTokenSortRatioInit( RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool PartialTokenSetRatioInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool PartialTokenRatioInit(     RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool WRatioInit(                RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
-    bool QRatioInit(                RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) nogil except False
+    bool RatioInit(                 RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool PartialRatioInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool TokenSortRatioInit(        RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool TokenSetRatioInit(         RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool TokenRatioInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool PartialTokenSortRatioInit( RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool PartialTokenSetRatioInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool PartialTokenRatioInit(     RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool WRatioInit(                RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+    bool QRatioInit(                RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
 
     bool RatioMultiStringSupport(const RF_Kwargs*) nogil
 
@@ -206,13 +206,13 @@ def QRatio(s1, s2, *, processor=default_process, score_cutoff=None):
     return QRatio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
-cdef bool GetScorerFlagsFuzz(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsFuzz(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     scorer_flags.optimal_score.f64 = 100
     scorer_flags.worst_score.f64 = 0
     return True
 
-cdef bool GetScorerFlagsFuzzRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) nogil except False:
+cdef bool GetScorerFlagsFuzzRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
     if RatioMultiStringSupport(self):
         scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
