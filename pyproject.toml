@@ -25,10 +25,14 @@ xfail_strict = true
 log_cli_level = "info"
 testpaths = ["tests"]
 
-[tool.pylint]
-master.py-version = "3.6"
-reports.output-format = "colorized"
-messages_control.disable = [
+[tool.pylint.master]
+py-version = "3.6"
+
+[tool.pylint.reports]
+output-format = "colorized"
+
+[tool.pylint.messages_control]
+disable = [
   "design",
   "fixme",
   "imports",
