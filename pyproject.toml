@@ -28,13 +28,4 @@ testpaths = ["tests"]
 [tool.pylint]
 master.py-version = "3.6"
 reports.output-format = "colorized"
-messages_control.disable = [
-  "design",
-  "fixme",
-  "imports",
-  "line-too-long",
-  "imports",
-  "invalid-name",
-  "protected-access",
-  "missing-module-docstring",
-]
+messages_control.disable = ["design"]
