@@ -32,4 +32,13 @@ py-version = "3.6"
 output-format = "colorized"
 
 [tool.pylint.messages_control]
-disable = ["design"]
+disable = [
+  "design",
+  "fixme",
+  "imports",
+  "line-too-long",
+  "imports",
+  "invalid-name",
+  "protected-access",
+  "missing-module-docstring",
+]
