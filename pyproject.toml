@@ -27,7 +27,9 @@ testpaths = ["tests"]
 
 [tool.pylint]
 master.py-version = "3.6"
-reports.output-format = "colorized"
+
+[tool.pylint.'REPORTS']
+output-format = "colorized"
 
 [tool.pylint.'MESSAGES CONTROL']
 disable = ["design"]
