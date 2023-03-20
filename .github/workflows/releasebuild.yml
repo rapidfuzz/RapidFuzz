@@ -12,10 +12,10 @@ jobs:
     name: Build source distribution
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: 'true'
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: "3.9"
 
@@ -48,7 +48,7 @@ jobs:
         run: |
           tools/seg_wrapper.sh pytest tests
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           path: dist/*.tar.gz
 
@@ -78,12 +78,12 @@ jobs:
       CIBW_BUILD_VERBOSITY: 3
 
     steps:
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
           name: artifact
           path: dist
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.9.0
@@ -92,7 +92,7 @@ jobs:
           output-dir: wheelhouse
 
       - name: Upload wheels
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           path: ./wheelhouse/*.whl
 
@@ -134,12 +134,12 @@ jobs:
       CIBW_BUILD_VERBOSITY: 3
 
     steps:
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
           name: artifact
           path: dist
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.9.0
@@ -148,7 +148,7 @@ jobs:
           output-dir: wheelhouse
 
       - name: Upload wheels
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           path: ./wheelhouse/*.whl
 
@@ -185,24 +185,24 @@ jobs:
       CIBW_BUILD_VERBOSITY: 3
 
     steps:
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
           name: artifact
           path: dist
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
 
-      - uses: docker/setup-qemu-action@v1
+      - uses: docker/setup-qemu-action@v2
         name: Set up QEMU
 
       - name: Build wheel
-        uses: pypa/cibuildwheel@v2.9.0
+        uses: pypa/cibuildwheel@v2.12.1
         with:
           package-dir: dist/*.tar.gz
           output-dir: wheelhouse
 
       - name: Upload wheels
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           path: ./wheelhouse/*.whl
 
@@ -213,12 +213,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
           name: artifact
           path: dist
 
-      - uses: pypa/gh-action-pypi-publish@v1.5.1
+      - uses: pypa/gh-action-pypi-publish@v1.8.1
         with:
           user: __token__
           password: ${{ secrets.pypi_password }}
