@@ -22,10 +22,10 @@ jobs:
   build:
     runs-on: [ubuntu-latest]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: 'true'
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
 
       - name: Install dependencies
         run: |
@@ -49,4 +49,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v2
