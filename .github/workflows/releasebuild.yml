@@ -196,7 +196,7 @@ jobs:
         name: Set up QEMU
 
       - name: Build wheel
-        uses: pypa/cibuildwheel@v2.9.0
+        uses: pypa/cibuildwheel@v2.12.1
         with:
           package-dir: dist/*.tar.gz
           output-dir: wheelhouse
