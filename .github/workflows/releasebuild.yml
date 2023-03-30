@@ -98,7 +98,7 @@ jobs:
       - uses: actions/setup-python@v4
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.9.0
+        uses: pypa/cibuildwheel@v2.12.1
         with:
           package-dir: dist/*.tar.gz
           output-dir: wheelhouse
@@ -154,7 +154,7 @@ jobs:
       - uses: actions/setup-python@v4
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.9.0
+        uses: pypa/cibuildwheel@v2.12.1
         with:
           package-dir: dist/*.tar.gz
           output-dir: wheelhouse
