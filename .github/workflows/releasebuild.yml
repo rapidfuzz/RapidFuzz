@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest hypothesis pandas mypy rapidfuzz_capi Cython==3.0.0a11
+          pip install pytest hypothesis pandas mypy rapidfuzz_capi Cython==3.0.0b2
 
       # The cythonized files allow installation from the sdist without cython
       - name: Generate cython
@@ -59,7 +59,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [auto32, auto64]
+        arch: [auto32, auto64, ARM64]
         python_tag: ["cp37-*", "cp38-*", "cp39-*", "cp310-*", "cp311-*", "pp37-*", "pp38-*", "pp39-*"]
         exclude:
           # PyPy only supports x86_64 on Windows
@@ -69,6 +69,18 @@ jobs:
             python_tag: "pp38-*"
           - arch: auto32
             python_tag: "pp39-*"
+          
+          # ARM64 only supported only supported on cpython >= 3.9
+          - arch: ARM64
+            python_tag: "pp37-*"
+          - arch: ARM64
+            python_tag: "pp38-*"
+          - arch: ARM64
+            python_tag: "pp39-*"
+          - arch: ARM64
+            python_tag: "cp37-*"
+          - arch: ARM64
+            python_tag: "cp38-*"
     env:
       CIBW_BUILD: ${{matrix.python_tag}}
       CIBW_ARCHS: ${{matrix.arch}}
