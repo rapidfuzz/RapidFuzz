@@ -95,12 +95,15 @@ jobs:
           name: artifact
           path: dist
 
+      - name: Copy wheel
+        run: copy dist/*.tar.gz rapidfuzz.tar.gz
+
       - uses: actions/setup-python@v4
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.12.1
         with:
-          package-dir: dist/*.tar.gz
+          package-dir: rapidfuzz.tar.gz
           output-dir: wheelhouse
 
       - name: Upload wheels
@@ -153,10 +156,13 @@ jobs:
 
       - uses: actions/setup-python@v4
 
+      - name: Copy wheel
+        run: cp dist/*.tar.gz rapidfuzz.tar.gz
+
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.12.1
         with:
-          package-dir: dist/*.tar.gz
+          package-dir: rapidfuzz.tar.gz
           output-dir: wheelhouse
 
       - name: Upload wheels
@@ -204,13 +210,16 @@ jobs:
 
       - uses: actions/setup-python@v4
 
+      - name: Copy wheel
+        run: cp dist/*.tar.gz rapidfuzz.tar.gz
+
       - uses: docker/setup-qemu-action@v2
         name: Set up QEMU
 
       - name: Build wheel
         uses: pypa/cibuildwheel@v2.12.1
         with:
-          package-dir: dist/*.tar.gz
+          package-dir: rapidfuzz.tar.gz
           output-dir: wheelhouse
 
       - name: Upload wheels
