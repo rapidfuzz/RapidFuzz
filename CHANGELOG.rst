@@ -1,8 +1,12 @@
 Changelog
 ---------
 
-[2.14.0] -
+[2.14.0] - 2023-03-31
 ^^^^^^^^^^^^^^^^^^^^^
+Changed
+~~~~~~~
+- upgrade required Cython version to ``Cython==3.0.0b2``
+
 Fixed
 ~~~~~~~
 - fix handling of non symmetric scorers in pure python version of ``process.cdist``
