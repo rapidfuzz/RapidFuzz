@@ -59,7 +59,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [auto32, auto64, ARM64]
+        #arch: [auto32, auto64, ARM64]
+        arch: [auto32, auto64]
         python_tag: ["cp37-*", "cp38-*", "cp39-*", "cp310-*", "cp311-*", "pp37-*", "pp38-*", "pp39-*"]
         exclude:
           # PyPy only supports x86_64 on Windows
