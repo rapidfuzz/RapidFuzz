@@ -967,8 +967,15 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
     elif processor is False:
         processor = None
 
-    if limit is None or limit > len(choices):
-        limit = len(choices)
+    try:
+        if limit is None or limit > len(choices):
+            limit = len(choices)
+    except TypeError:
+        # handle generators. In Theory we could retrieve the length later on while
+        # preprocessing the choices, but this is good enough for now
+        choices = list(choices)
+        if limit is None or limit > len(choices):
+            limit = len(choices)
 
     # preprocess the query
     if callable(processor):

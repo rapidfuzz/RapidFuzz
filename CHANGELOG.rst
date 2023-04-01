@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+[2.15.0] - 2023-04-01
+^^^^^^^^^^^^^^^^^^^^^
+Changed
+~~~~~~~
+- allow the usage of finite generators as choices in ``process.extract``
+
 [2.14.0] - 2023-03-31
 ^^^^^^^^^^^^^^^^^^^^^
 Changed

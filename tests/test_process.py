@@ -401,6 +401,20 @@ def test_cdist_not_symmetric():
     )
 
 
+def test_generators(self):
+    """
+    We should be able to use a generators as choices in process.extract
+    as long as they are finite.
+    """
+    def generate_choices():
+        choices = ['a', 'Bb', 'CcC']
+        yield from choices
+
+    search = 'aaa'
+    result = process.extract(search, generate_choices())
+    assert len(result) > 0
+
+
 def test_cdist_pure_python_dtype():
     pytest.importorskip("numpy")
     assert (

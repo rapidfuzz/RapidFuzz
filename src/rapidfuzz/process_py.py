@@ -504,9 +504,6 @@ def extract(
     worst_score, optimal_score = _get_scorer_flags_py(scorer, kwargs)
     lowest_score_worst = optimal_score > worst_score
 
-    if limit is None:
-        limit = len(choices)
-
     result_iter = extract_iter(
         query,
         choices,
@@ -515,6 +512,10 @@ def extract(
         score_cutoff=score_cutoff,
         **kwargs,
     )
+
+    if limit is None:
+        return sorted(result_iter, key=lambda i: i[1], reverse=lowest_score_worst)
+
     if lowest_score_worst:
         return heapq.nlargest(limit, result_iter, key=lambda i: i[1])
     return heapq.nsmallest(limit, result_iter, key=lambda i: i[1])
