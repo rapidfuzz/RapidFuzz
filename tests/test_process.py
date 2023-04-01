@@ -401,7 +401,7 @@ def test_cdist_not_symmetric():
     )
 
 
-def test_generators(self):
+def test_generators():
     """
     We should be able to use a generators as choices in process.extract
     as long as they are finite.
