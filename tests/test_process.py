@@ -411,8 +411,10 @@ def test_generators():
         yield from choices
 
     search = 'aaa'
-    result = process.extract(search, generate_choices())
-    assert len(result) > 0
+    res1 = process_cpp.extract(search, generate_choices())
+    res2 = process_py.extract(search, generate_choices())
+    assert res1 == res2
+    assert len(res1) > 0
 
 
 def test_cdist_pure_python_dtype():
