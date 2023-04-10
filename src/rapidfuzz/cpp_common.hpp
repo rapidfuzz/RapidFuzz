@@ -14,8 +14,9 @@
 #define RAPIDFUZZ_X64
 #endif
 
-namespace fuzz = rapidfuzz::fuzz;
-using rapidfuzz::detail::Range;
+namespace rf = rapidfuzz;
+namespace fuzz = rf::fuzz;
+using rf::detail::Range;
 
 class PythonTypeError : public std::bad_typeid {
 public:
@@ -693,20 +694,20 @@ static inline bool multi_normalized_distance_init(RF_ScorerFunc* self, int64_t s
     });
 }
 
-static inline PyObject* opcodes_apply(const rapidfuzz::Opcodes& ops, const RF_String& str1,
+static inline PyObject* opcodes_apply(const rf::Opcodes& ops, const RF_String& str1,
                                       const RF_String& str2)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
-        auto proc_str = rapidfuzz::opcodes_apply<uint32_t>(ops, s1, s2);
+        auto proc_str = rf::opcodes_apply<uint32_t>(ops, s1, s2);
         return PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, proc_str.data(), (Py_ssize_t)proc_str.size());
     });
 }
 
-static inline PyObject* editops_apply(const rapidfuzz::Editops& ops, const RF_String& str1,
+static inline PyObject* editops_apply(const rf::Editops& ops, const RF_String& str1,
                                       const RF_String& str2)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
-        auto proc_str = rapidfuzz::editops_apply<uint32_t>(ops, s1, s2);
+        auto proc_str = rf::editops_apply<uint32_t>(ops, s1, s2);
         return PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, proc_str.data(), (Py_ssize_t)proc_str.size());
     });
 }
