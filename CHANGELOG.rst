@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+[2.15.1] - 2023-04-11
+^^^^^^^^^^^^^^^^^^^^^
+Fixed
+~~~~~~~
+- fix incorrect tag dispatching implementation leading to AVX2 instructions in the SSE2 code path
+
 [2.15.0] - 2023-04-01
 ^^^^^^^^^^^^^^^^^^^^^
 Changed

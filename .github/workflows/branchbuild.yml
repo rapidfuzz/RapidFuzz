@@ -94,7 +94,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11-dev"]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
@@ -130,3 +130,33 @@ jobs:
       - name: test pyinstaller packaging
         run: |
           python -m PyInstaller.utils.run_tests --include_only rapidfuzz.
+
+  # validate sse2 code on gcc
+  sde_tests:
+    name: "Test sse2 code on Linux (gcc)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: "actions/checkout@v3"
+        with:
+          submodules: 'true'
+
+      - uses: "actions/checkout@v3"
+        with:
+          repository: maxbachmann/intel-sde
+          path: sde
+
+      - uses: "actions/setup-python@v4"
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest hypothesis pandas mypy pyinstaller[hook_testing]
+
+      - name: build
+        run: |
+          pip install . -v
+
+      - name: Test on nehalem which does not support avx2
+        run: ./sde/sde -nhm -- pytest tests
