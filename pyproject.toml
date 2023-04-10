@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "setuptools>=42",
-    "scikit-build~=0.16.2",
+    "scikit-build~=0.17.0",
     "Cython==3.0.0b2"
 ]
 build-backend = "backend"

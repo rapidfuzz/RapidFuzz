@@ -7,6 +7,10 @@ Fixed
 ~~~~~~~
 - fix incorrect tag dispatching implementation leading to AVX2 instructions in the SSE2 code path
 
+Added
+~~~~~
+- add wheels for windows arm64
+
 [2.15.0] - 2023-04-01
 ^^^^^^^^^^^^^^^^^^^^^
 Changed

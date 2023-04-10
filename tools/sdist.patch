@@ -6,9 +6,9 @@ index 77671b1..7692f90 100644
  [build-system]
  requires = [
      "setuptools>=42",
--    "scikit-build~=0.16.2",
+-    "scikit-build~=0.17.0",
 -    "Cython==3.0.0b2"
-+    "scikit-build~=0.16.2"
++    "scikit-build~=0.17.0"
  ]
  build-backend = "backend"
  backend-path = ["_custom_build"]
