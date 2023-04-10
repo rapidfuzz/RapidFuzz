@@ -11,7 +11,7 @@ recursive-include src/rapidfuzz *.pyi
 
 recursive-include src/rapidfuzz CMakeLists.txt
 recursive-include cmake *
-recursive-include src/rapidfuzz *.hpp *.h *.cpp *.cxx *.pyx *.pxd *.incl *.impl
+recursive-include src/rapidfuzz *.hpp *.h *.cpp *.cxx *.pyx *.pxd
 recursive-include tests *
 recursive-include docs *
 include src/rapidfuzz/__init__.pxd
@@ -27,5 +27,4 @@ include extern/taskflow/TaskflowConfig.cmake.in
 include extern/taskflow/taskflow/algorithm/*
 include extern/taskflow/taskflow/core/*
 include extern/taskflow/taskflow/utility/*
-include extern/taskflow/taskflow/declarations.hpp
 include extern/taskflow/taskflow/taskflow.hpp
