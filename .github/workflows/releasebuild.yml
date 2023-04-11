@@ -69,7 +69,7 @@ jobs:
             python_tag: "pp38-*"
           - arch: auto32
             python_tag: "pp39-*"
-          
+
           # ARM64 only supported only supported on cpython >= 3.9
           - arch: ARM64
             python_tag: "pp37-*"

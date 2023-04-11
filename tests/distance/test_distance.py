@@ -1,4 +1,5 @@
 import pytest
+
 from tests.distance.common import all_scorer_modules
 
 

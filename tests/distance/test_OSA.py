@@ -1,4 +1,4 @@
-from rapidfuzz.distance import OSA_cpp, OSA_py
+from rapidfuzz.distance import OSA_cpp
 from tests.distance.common import OSA
 
 

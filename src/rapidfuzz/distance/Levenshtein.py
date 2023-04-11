@@ -9,6 +9,8 @@ substitutions required to transform s1 into s2.
 
 from __future__ import annotations
 
+from typing import Any, Callable
+
 from rapidfuzz._utils import ScorerFlag as _ScorerFlag
 from rapidfuzz._utils import fallback_import as _fallback_import
 

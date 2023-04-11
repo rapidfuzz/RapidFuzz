@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
-from rapidfuzz._feature_detector import AVX2, SSE2, supports
+from rapidfuzz._feature_detector import AVX2, supports
 
 if supports(AVX2):
     from rapidfuzz.distance.metrics_cpp_avx2 import jaro_distance as distance

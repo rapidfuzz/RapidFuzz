@@ -1,2 +1,3 @@
-            "C'est la vie",
-            "c est la vie",
+        "C'est la vie",
+        "c est la vie",
+    >>> s2 = "cetain"

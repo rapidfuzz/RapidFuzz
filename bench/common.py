@@ -1,8 +1,9 @@
-import timeit
-
 import json
+import timeit
 from urllib.request import urlopen
+
 from packaging.version import Version
+
 
 def find_versions(package_name):
     url = f"https://pypi.org/pypi/{package_name}/json"
@@ -10,6 +11,7 @@ def find_versions(package_name):
     versions = list(data["releases"].keys())
     versions.sort(key=Version, reverse=True)
     return versions
+
 
 def benchmark(name, func, setup, lengths, count):
     print(f"starting {name}")

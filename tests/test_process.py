@@ -1,12 +1,11 @@
 import pytest
 
 from rapidfuzz import fuzz, process_cpp, process_py
-from rapidfuzz.distance import Levenshtein
-from rapidfuzz.distance import Levenshtein_py
+from rapidfuzz.distance import Levenshtein, Levenshtein_py
 
 try:
     import numpy as np
-except:
+except BaseException:
     pass
 
 
@@ -406,11 +405,12 @@ def test_generators():
     We should be able to use a generators as choices in process.extract
     as long as they are finite.
     """
+
     def generate_choices():
-        choices = ['a', 'Bb', 'CcC']
+        choices = ["a", "Bb", "CcC"]
         yield from choices
 
-    search = 'aaa'
+    search = "aaa"
     res1 = process_cpp.extract(search, generate_choices())
     res2 = process_py.extract(search, generate_choices())
     assert res1 == res2

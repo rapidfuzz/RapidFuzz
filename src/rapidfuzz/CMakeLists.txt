@@ -33,9 +33,11 @@ endfunction(rf_add_library)
 
 if(RAPIDFUZZ_ARCH_X64)
   create_cython_target(_feature_detector_cpp)
-  rf_add_library(_feature_detector_cpp ${_feature_detector_cpp} ${CMAKE_CURRENT_LIST_DIR}/FeatureDetector/CpuInfo.cpp)
+  rf_add_library(_feature_detector_cpp ${_feature_detector_cpp}
+                 ${CMAKE_CURRENT_LIST_DIR}/FeatureDetector/CpuInfo.cpp)
   target_compile_features(_feature_detector_cpp PUBLIC cxx_std_17)
-  target_include_directories(_feature_detector_cpp PRIVATE ${RF_BASE_DIR}/rapidfuzz)
+  target_include_directories(_feature_detector_cpp
+                             PRIVATE ${RF_BASE_DIR}/rapidfuzz)
   target_link_libraries(_feature_detector_cpp PRIVATE rapidfuzz::rapidfuzz)
   install(TARGETS _feature_detector_cpp LIBRARY DESTINATION src/rapidfuzz)
 endif()
@@ -60,12 +62,14 @@ if(RAPIDFUZZ_ARCH_X64)
   target_compile_features(fuzz_cpp_impl_avx2 PUBLIC cxx_std_17)
 
   if(MSVC)
-    set_target_properties(fuzz_cpp_impl_avx2 PROPERTIES COMPILE_FLAGS "/arch:AVX2")
+    set_target_properties(fuzz_cpp_impl_avx2 PROPERTIES COMPILE_FLAGS
+                                                        "/arch:AVX2")
   else()
     set_target_properties(fuzz_cpp_impl_avx2 PROPERTIES COMPILE_FLAGS "-mavx2")
   endif()
 
-  target_include_directories(fuzz_cpp_impl_avx2 PRIVATE ${RF_BASE_DIR}/rapidfuzz)
+  target_include_directories(fuzz_cpp_impl_avx2
+                             PRIVATE ${RF_BASE_DIR}/rapidfuzz)
   target_link_libraries(fuzz_cpp_impl_avx2 PRIVATE rapidfuzz::rapidfuzz)
   install(TARGETS fuzz_cpp_impl_avx2 LIBRARY DESTINATION src/rapidfuzz)
 endif()

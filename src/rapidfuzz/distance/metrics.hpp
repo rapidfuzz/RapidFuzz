@@ -8,15 +8,14 @@ static inline int64_t levenshtein_distance_func(const RF_String& str1, const RF_
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rf::levenshtein_distance(s1, s2, {insertion, deletion, substitution}, score_cutoff,
-                                               score_hint);
+                                        score_hint);
     });
 }
 
 static inline bool LevenshteinDistanceInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count,
                                            const RF_String* str)
 {
-    rf::LevenshteinWeightTable weights =
-        *static_cast<rf::LevenshteinWeightTable*>(kwargs->context);
+    rf::LevenshteinWeightTable weights = *static_cast<rf::LevenshteinWeightTable*>(kwargs->context);
 
 #ifdef RAPIDFUZZ_X64
     if (weights.insert_cost == 1 && weights.delete_cost == 1 && weights.replace_cost == 1) {
@@ -33,8 +32,7 @@ static inline bool LevenshteinMultiStringSupport(const RF_Kwargs* kwargs)
         *static_cast<rf::LevenshteinWeightTable*>(kwargs->context);
 
 #ifdef RAPIDFUZZ_X64
-    if (weights.insert_cost == 1 && weights.delete_cost == 1 && weights.replace_cost == 1)
-        return true;
+    if (weights.insert_cost == 1 && weights.delete_cost == 1 && weights.replace_cost == 1) return true;
 #endif
     return false;
 }
@@ -45,20 +43,20 @@ static inline double levenshtein_normalized_distance_func(const RF_String& str1,
                                                           double score_hint)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
-        return rf::levenshtein_normalized_distance(s1, s2, {insertion, deletion, substitution},
-                                                          score_cutoff, score_hint);
+        return rf::levenshtein_normalized_distance(s1, s2, {insertion, deletion, substitution}, score_cutoff,
+                                                   score_hint);
     });
 }
 static inline bool LevenshteinNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs,
                                                      int64_t str_count, const RF_String* str)
 {
-    rf::LevenshteinWeightTable weights =
-        *static_cast<rf::LevenshteinWeightTable*>(kwargs->context);
+    rf::LevenshteinWeightTable weights = *static_cast<rf::LevenshteinWeightTable*>(kwargs->context);
 
 #ifdef RAPIDFUZZ_X64
     if (weights.insert_cost == 1 && weights.delete_cost == 1 && weights.replace_cost == 1) {
         if (str_count != 1)
-            return multi_normalized_distance_init<rf::experimental::MultiLevenshtein, double>(self, str_count, str);
+            return multi_normalized_distance_init<rf::experimental::MultiLevenshtein, double>(self, str_count,
+                                                                                              str);
     }
 #endif
 
@@ -71,15 +69,14 @@ static inline int64_t levenshtein_similarity_func(const RF_String& str1, const R
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rf::levenshtein_similarity(s1, s2, {insertion, deletion, substitution}, score_cutoff,
-                                                 score_hint);
+                                          score_hint);
     });
 }
 
 static inline bool LevenshteinSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count,
                                              const RF_String* str)
 {
-    rf::LevenshteinWeightTable weights =
-        *static_cast<rf::LevenshteinWeightTable*>(kwargs->context);
+    rf::LevenshteinWeightTable weights = *static_cast<rf::LevenshteinWeightTable*>(kwargs->context);
 
 #ifdef RAPIDFUZZ_X64
     if (weights.insert_cost == 1 && weights.delete_cost == 1 && weights.replace_cost == 1) {
@@ -98,19 +95,19 @@ static inline double levenshtein_normalized_similarity_func(const RF_String& str
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rf::levenshtein_normalized_similarity(s1, s2, {insertion, deletion, substitution},
-                                                            score_cutoff, score_hint);
+                                                     score_cutoff, score_hint);
     });
 }
 static inline bool LevenshteinNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs,
                                                        int64_t str_count, const RF_String* str)
 {
-    rf::LevenshteinWeightTable weights =
-        *static_cast<rf::LevenshteinWeightTable*>(kwargs->context);
+    rf::LevenshteinWeightTable weights = *static_cast<rf::LevenshteinWeightTable*>(kwargs->context);
 
 #ifdef RAPIDFUZZ_X64
     if (weights.insert_cost == 1 && weights.delete_cost == 1 && weights.replace_cost == 1) {
         if (str_count != 1)
-            return multi_normalized_similarity_init<rf::experimental::MultiLevenshtein, double>(self, str_count, str);
+            return multi_normalized_similarity_init<rf::experimental::MultiLevenshtein, double>(
+                self, str_count, str);
     }
 #endif
 
@@ -142,8 +139,7 @@ static inline double damerau_levenshtein_normalized_distance_func(const RF_Strin
 static inline bool DamerauLevenshteinNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*,
                                                             int64_t str_count, const RF_String* str)
 {
-    return normalized_distance_init<rf::experimental::CachedDamerauLevenshtein, double>(
-        self, str_count, str);
+    return normalized_distance_init<rf::experimental::CachedDamerauLevenshtein, double>(self, str_count, str);
 }
 
 static inline int64_t damerau_levenshtein_similarity_func(const RF_String& str1, const RF_String& str2,
@@ -171,8 +167,8 @@ static inline double damerau_levenshtein_normalized_similarity_func(const RF_Str
 static inline bool DamerauLevenshteinNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*,
                                                               int64_t str_count, const RF_String* str)
 {
-    return normalized_similarity_init<rf::experimental::CachedDamerauLevenshtein, double>(
-        self, str_count, str);
+    return normalized_similarity_init<rf::experimental::CachedDamerauLevenshtein, double>(self, str_count,
+                                                                                          str);
 }
 
 /* Hamming */
@@ -261,8 +257,8 @@ static inline double indel_normalized_distance_func(const RF_String& str1, const
         return rf::indel_normalized_distance(s1, s2, score_cutoff);
     });
 }
-static inline bool IndelNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*,
-                                               int64_t str_count, const RF_String* str)
+static inline bool IndelNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                               const RF_String* str)
 {
 #ifdef RAPIDFUZZ_X64
     if (str_count != 1)
@@ -297,8 +293,8 @@ static inline double indel_normalized_similarity_func(const RF_String& str1, con
         return rf::indel_normalized_similarity(s1, s2, score_cutoff);
     });
 }
-static inline bool IndelNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*,
-                                                 int64_t str_count, const RF_String* str)
+static inline bool IndelNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                                 const RF_String* str)
 {
 #ifdef RAPIDFUZZ_X64
     if (str_count != 1)
@@ -342,8 +338,8 @@ static inline double lcs_seq_normalized_distance_func(const RF_String& str1, con
         return rf::lcs_seq_normalized_distance(s1, s2, score_cutoff);
     });
 }
-static inline bool LCSseqNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*,
-                                                int64_t str_count, const RF_String* str)
+static inline bool LCSseqNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                                const RF_String* str)
 {
 #ifdef RAPIDFUZZ_X64
     if (str_count != 1)
@@ -378,8 +374,8 @@ static inline double lcs_seq_normalized_similarity_func(const RF_String& str1, c
         return rf::lcs_seq_normalized_similarity(s1, s2, score_cutoff);
     });
 }
-static inline bool LCSseqNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*,
-                                                  int64_t str_count, const RF_String* str)
+static inline bool LCSseqNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                                  const RF_String* str)
 {
 #ifdef RAPIDFUZZ_X64
     if (str_count != 1)
@@ -397,7 +393,7 @@ static inline rf::Editops hamming_editops_func(const RF_String& str1, const RF_S
 }
 
 static inline rf::Editops levenshtein_editops_func(const RF_String& str1, const RF_String& str2,
-                                                          int64_t score_hint)
+                                                   int64_t score_hint)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rf::levenshtein_editops(s1, s2, score_hint);
@@ -430,8 +426,7 @@ static inline bool OSADistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_
                                    const RF_String* str)
 {
 #ifdef RAPIDFUZZ_X64
-    if (str_count != 1)
-        return multi_distance_init<rf::experimental::MultiOSA, int64_t>(self, str_count, str);
+    if (str_count != 1) return multi_distance_init<rf::experimental::MultiOSA, int64_t>(self, str_count, str);
 #endif
 
     return distance_init<rf::CachedOSA, int64_t>(self, str_count, str);
@@ -489,8 +484,8 @@ static inline double osa_normalized_similarity_func(const RF_String& str1, const
         return rf::osa_normalized_similarity(s1, s2, score_cutoff);
     });
 }
-static inline bool OSANormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*,
-                                               int64_t str_count, const RF_String* str)
+static inline bool OSANormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+                                               const RF_String* str)
 {
 #ifdef RAPIDFUZZ_X64
     if (str_count != 1)
@@ -577,8 +572,7 @@ static inline bool JaroWinklerNormalizedDistanceInit(RF_ScorerFunc* self, const 
                                                      int64_t str_count, const RF_String* str)
 {
     double prefix_weight = *static_cast<double*>(kwargs->context);
-    return normalized_distance_init<rf::CachedJaroWinkler, double>(self, str_count, str,
-                                                                          prefix_weight);
+    return normalized_distance_init<rf::CachedJaroWinkler, double>(self, str_count, str, prefix_weight);
 }
 
 static inline double jaro_winkler_similarity_func(const RF_String& str1, const RF_String& str2,
@@ -606,8 +600,7 @@ static inline bool JaroWinklerNormalizedSimilarityInit(RF_ScorerFunc* self, cons
                                                        int64_t str_count, const RF_String* str)
 {
     double prefix_weight = *static_cast<double*>(kwargs->context);
-    return normalized_similarity_init<rf::CachedJaroWinkler, double>(self, str_count, str,
-                                                                            prefix_weight);
+    return normalized_similarity_init<rf::CachedJaroWinkler, double>(self, str_count, str, prefix_weight);
 }
 
 /* Prefix */

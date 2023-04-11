@@ -6,7 +6,6 @@ from __future__ import annotations
 import heapq
 from math import isnan
 from typing import (
-    TYPE_CHECKING,
     Any,
     Callable,
     Collection,
@@ -523,7 +522,7 @@ def extract(
 
 try:
     import numpy as np
-except:
+except BaseException:
     pass
 
 

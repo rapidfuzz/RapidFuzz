@@ -2,8 +2,8 @@
 # Copyright (C) 2022 Max Bachmann
 from __future__ import annotations
 
-from math import ceil, isnan
-from typing import Any, Callable, Hashable
+from math import ceil
+from typing import Callable, Hashable
 
 from rapidfuzz._utils import is_none
 from rapidfuzz.distance import ScoreAlignment

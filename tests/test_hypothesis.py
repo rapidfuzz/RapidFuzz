@@ -8,14 +8,7 @@ import pytest
 from hypothesis import assume, given, settings
 
 from rapidfuzz import fuzz, process, utils
-from rapidfuzz.distance import (
-    Indel_cpp,
-    Indel_py,
-    JaroWinkler_cpp,
-    JaroWinkler_py,
-    Levenshtein_cpp,
-    Levenshtein_py,
-)
+from rapidfuzz.distance import Indel_cpp, Levenshtein_cpp, Levenshtein_py
 from tests.distance.common import Indel, JaroWinkler, Levenshtein
 
 

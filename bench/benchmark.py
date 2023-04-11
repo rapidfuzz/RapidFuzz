@@ -22,9 +22,7 @@ from urllib.request import urlopen
 
 import click
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
-from common import benchmark, find_versions
 from packaging.version import Version
 from tqdm import tqdm
 
@@ -52,7 +50,7 @@ def benchmark(result, setup, func, queries, choices):
 # - a custom range
 # - only the installed version
 def get_rapidfuzz_versions(version):
-    url = f"https://pypi.org/pypi/rapidfuzz/json"
+    url = "https://pypi.org/pypi/rapidfuzz/json"
     data = json.load(urlopen(url))
     versions = list(data["releases"].keys())
     versions.sort(key=Version, reverse=True)
@@ -115,8 +113,8 @@ def run_benchmarks_rapidfuzz(rapidfuzz_version, func_name, dataset, result_df):
     func = "[[scorer(a, b) for a in queries] for b in choices]"
 
     if rapidfuzz_version == "current":
-        print(f"Benchmarking rapidfuzz")
-        result_df[f"rapidfuzz"] = run_benchmark(dataset, setup, func)
+        print("Benchmarking rapidfuzz")
+        result_df["rapidfuzz"] = run_benchmark(dataset, setup, func)
     else:
         rapidfuzz_versions = get_rapidfuzz_versions(rapidfuzz_version)
         os.environ["RAPIDFUZZ_BUILD_EXTENSION"] = "1"
@@ -153,53 +151,55 @@ def run_benchmarks_jellyfish(func_name, result_df, dataset):
     if func_name not in JELLYFISH_SCORERS:
         return
 
-    print(f"Benchmarking jellyfish")
+    print("Benchmarking jellyfish")
     func = f"[[jellyfish.{JELLYFISH_SCORERS[func_name]}(a, b) for a in queries] for b in choices]"
-    result_df[f"jellyfish"] = run_benchmark(dataset, setup, func)
+    result_df["jellyfish"] = run_benchmark(dataset, setup, func)
 
 
 def run_benchmarks_polyleven(func_name, result_df, dataset):
     if func_name != "Levenshtein":
         return
 
-    print(f"Benchmarking polyleven")
+    print("Benchmarking polyleven")
     setup = "import polyleven"
-    func = f"[[polyleven.levenshtein(a, b) for a in queries] for b in choices]"
-    result_df[f"polyleven"] = run_benchmark(dataset, setup, func)
+    func = "[[polyleven.levenshtein(a, b) for a in queries] for b in choices]"
+    result_df["polyleven"] = run_benchmark(dataset, setup, func)
 
 
 def run_benchmarks_edlib(func_name, result_df, dataset):
     if func_name != "Levenshtein":
         return
 
-    print(f"Benchmarking edlib")
+    print("Benchmarking edlib")
     setup = "import edlib"
-    func = f"[[edlib.align(a, b) for a in queries] for b in choices]"
-    result_df[f"edlib"] = run_benchmark(dataset, setup, func)
+    func = "[[edlib.align(a, b) for a in queries] for b in choices]"
+    result_df["edlib"] = run_benchmark(dataset, setup, func)
 
-    print(f"Benchmarking edlib(k=max)")
-    func = f"[[edlib.align(a, b, k=max(len(a), len(b))) for a in queries] for b in choices]"
-    result_df[f"edlib(k=max)"] = run_benchmark(dataset, setup, func)
+    print("Benchmarking edlib(k=max)")
+    func = (
+        "[[edlib.align(a, b, k=max(len(a), len(b))) for a in queries] for b in choices]"
+    )
+    result_df["edlib(k=max)"] = run_benchmark(dataset, setup, func)
 
 
 def run_benchmarks_editdistance(func_name, result_df, dataset):
     if func_name != "Levenshtein":
         return
 
-    print(f"Benchmarking editdistance")
+    print("Benchmarking editdistance")
     setup = "import editdistance"
-    func = f"[[editdistance.eval(a, b) for a in queries] for b in choices]"
-    result_df[f"editdistance"] = run_benchmark(dataset, setup, func)
+    func = "[[editdistance.eval(a, b) for a in queries] for b in choices]"
+    result_df["editdistance"] = run_benchmark(dataset, setup, func)
 
 
 def run_benchmarks_pyxdameraulevenshtein(func_name, result_df, dataset):
     if func_name != "OSA":
         return
 
-    print(f"Benchmarking pyxdameraulevenshtein")
+    print("Benchmarking pyxdameraulevenshtein")
     setup = "import pyxdameraulevenshtein"
-    func = f"[[pyxdameraulevenshtein.damerau_levenshtein_distance(a, b) for a in queries] for b in choices]"
-    result_df[f"pyxdameraulevenshtein"] = run_benchmark(dataset, setup, func)
+    func = "[[pyxdameraulevenshtein.damerau_levenshtein_distance(a, b) for a in queries] for b in choices]"
+    result_df["pyxdameraulevenshtein"] = run_benchmark(dataset, setup, func)
 
 
 AVAILABLE_BENCHMARKS = [

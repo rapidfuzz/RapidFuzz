@@ -4,7 +4,8 @@ import pytest
 
 from rapidfuzz import fuzz_cpp, fuzz_py, utils
 from rapidfuzz.distance import ScoreAlignment
-from .common import symmetric_scorer_tester, scorer_tester
+
+from .common import symmetric_scorer_tester
 
 
 class fuzz:

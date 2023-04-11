@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable, Hashable, Sequence
+from typing import Callable, Hashable, Sequence
 
 from rapidfuzz.distance import ScoreAlignment
 from rapidfuzz.utils import default_process

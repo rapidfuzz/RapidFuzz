@@ -35,7 +35,6 @@ class Editop:
     def __repr__(self) -> str: ...
 
 class Editops:
-
     _src_len: int
     _dest_len: int
     _editops: list[Editop]

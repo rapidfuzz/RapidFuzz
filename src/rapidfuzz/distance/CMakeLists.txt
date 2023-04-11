@@ -56,15 +56,15 @@ if(RAPIDFUZZ_ARCH_X64)
   target_compile_features(metrics_cpp_avx2 PUBLIC cxx_std_17)
 
   if(MSVC)
-    set_target_properties(metrics_cpp_avx2 PROPERTIES COMPILE_FLAGS "/arch:AVX2")
+    set_target_properties(metrics_cpp_avx2 PROPERTIES COMPILE_FLAGS
+                                                      "/arch:AVX2")
   else()
     set_target_properties(metrics_cpp_avx2 PROPERTIES COMPILE_FLAGS "-mavx2")
   endif()
 
   target_include_directories(
     metrics_cpp_avx2 PRIVATE ${RF_BASE_DIR}/rapidfuzz
-                        ${RF_BASE_DIR}/rapidfuzz/distance)
+                             ${RF_BASE_DIR}/rapidfuzz/distance)
   target_link_libraries(metrics_cpp_avx2 PRIVATE rapidfuzz::rapidfuzz)
   install(TARGETS metrics_cpp_avx2 LIBRARY DESTINATION src/rapidfuzz/distance)
 endif()
-

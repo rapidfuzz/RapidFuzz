@@ -84,7 +84,7 @@ def fallback_import(
     py_func = getattr(py_mod, name)
     if not py_func:
         raise ImportError(
-            f"cannot import name '{name}' from '{py_mod.__name}' ({py_mod.__file__})"
+            f"cannot import name {name!r} from {py_mod.__name!r} ({py_mod.__file__})"
         )
 
     if cached_scorer_call:
@@ -103,7 +103,7 @@ def fallback_import(
     cpp_func = getattr(cpp_mod, name)
     if not cpp_func:
         raise ImportError(
-            f"cannot import name '{name}' from '{cpp_mod.__name}' ({cpp_mod.__file__})"
+            f"cannot import name {name!r} from {cpp_mod.__name!r} ({cpp_mod.__file__})"
         )
 
     # patch cpp function so help does not need to be duplicated
