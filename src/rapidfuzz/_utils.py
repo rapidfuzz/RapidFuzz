@@ -3,9 +3,13 @@
 
 from __future__ import annotations
 
+import importlib
+import os
 from enum import IntFlag
 from math import isnan
 from typing import Any, Callable
+
+from rapidfuzz._feature_detector import AVX2, supports
 
 
 class ScorerFlag(IntFlag):
@@ -65,6 +69,28 @@ def _create_scorer(
     return func
 
 
+def optional_import_module(module: str) -> Any:
+    """
+    try to import module. Return None on failure
+    """
+    try:
+        return importlib.import_module(module)
+    except Exception:
+        return None
+
+
+def vectorized_import(module: str) -> Any:
+    """
+    import module best fitting for current CPU
+    """
+    if supports(AVX2):
+        module = optional_import_module(module + "_avx2")
+        if module is not None:
+            return module
+
+    return importlib.import_module(module)
+
+
 def fallback_import(
     module: str,
     name: str,
@@ -75,9 +101,6 @@ def fallback_import(
     import library function and possibly fall back to a pure Python version
     when no C++ implementation is available
     """
-    import importlib
-    import os
-
     impl = os.environ.get("RAPIDFUZZ_IMPLEMENTATION")
 
     py_mod = importlib.import_module(module + "_py")
@@ -91,12 +114,12 @@ def fallback_import(
         py_func = _create_scorer(py_func, cached_scorer_call)
 
     if impl == "cpp":
-        cpp_mod = importlib.import_module(module + "_cpp")
+        cpp_mod = vectorized_import(module + "_cpp")
     elif impl == "python":
         return py_func
     else:
         try:
-            cpp_mod = importlib.import_module(module + "_cpp")
+            cpp_mod = vectorized_import(module + "_cpp")
         except Exception:
             return py_func
 

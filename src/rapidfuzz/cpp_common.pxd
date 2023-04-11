@@ -332,16 +332,16 @@ cdef inline RF_String conv_sequence(seq) except *:
         return move(hash_sequence(seq))
 
 cdef inline double get_score_cutoff_f64(score_cutoff, const RF_ScorerFlags* scorer_flags) except *:
-    worst_score = scorer_flags.worst_score.f64
-    optimal_score = scorer_flags.optimal_score.f64
-    c_score_cutoff = worst_score
+    cdef float worst_score = scorer_flags.worst_score.f64
+    cdef float optimal_score = scorer_flags.optimal_score.f64
+    cdef float c_score_cutoff = worst_score
 
     if score_cutoff is not None:
         c_score_cutoff = score_cutoff
         if optimal_score > worst_score:
             # e.g. 0.0 - 100.0
             if c_score_cutoff < worst_score or c_score_cutoff > optimal_score:
-                raise TypeError(f"score_cutoff has to be in the range of {worst_score} - {optimal_score}")
+                raise TypeError("score_cutoff has to be in the range of %s - %s" % (worst_score, optimal_score))
         else:
             # e.g. DBL_MAX - 0
             if c_score_cutoff > worst_score or c_score_cutoff < optimal_score:
@@ -350,9 +350,9 @@ cdef inline double get_score_cutoff_f64(score_cutoff, const RF_ScorerFlags* scor
     return c_score_cutoff
 
 cdef inline int64_t get_score_cutoff_i64(score_cutoff, const RF_ScorerFlags* scorer_flags) except *:
-    worst_score = scorer_flags.worst_score.i64
-    optimal_score = scorer_flags.optimal_score.i64
-    c_score_cutoff = worst_score
+    cdef int64_t worst_score = scorer_flags.worst_score.i64
+    cdef int64_t optimal_score = scorer_flags.optimal_score.i64
+    cdef int64_t c_score_cutoff = worst_score
 
     if score_cutoff is not None:
         c_score_cutoff = score_cutoff
