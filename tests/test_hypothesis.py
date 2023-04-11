@@ -8,7 +8,7 @@ import pytest
 from hypothesis import assume, given, settings
 
 from rapidfuzz import fuzz, process, utils
-from rapidfuzz.distance import Indel_cpp, Levenshtein_cpp, Levenshtein_py
+from rapidfuzz.distance import metrics_cpp, Levenshtein_py
 from tests.distance.common import Indel, JaroWinkler, Levenshtein
 
 
@@ -213,7 +213,7 @@ def test_matching_blocks(s1, s2):
     """
     test correct matching block conversion
     """
-    ops = Levenshtein_cpp.editops(s1, s2)
+    ops = metrics_cpp.levenshtein_editops(s1, s2)
     assert ops.as_matching_blocks() == ops.as_opcodes().as_matching_blocks()
 
 
@@ -223,7 +223,7 @@ def test_levenshtein_editops(s1, s2):
     """
     test Levenshtein.editops with any sizes
     """
-    ops = Levenshtein_cpp.editops(s1, s2)
+    ops = metrics_cpp.levenshtein_editops(s1, s2)
     assert ops.apply(s1, s2) == s2
 
 
@@ -233,7 +233,7 @@ def test_levenshtein_editops_block(s1, s2):
     """
     test Levenshtein.editops for long strings
     """
-    ops = Levenshtein_cpp.editops(s1, s2)
+    ops = metrics_cpp.levenshtein_editops(s1, s2)
     assert ops.apply(s1, s2) == s2
 
 
@@ -243,7 +243,7 @@ def test_indel_editops(s1, s2):
     """
     test Indel.editops with any sizes
     """
-    ops = Indel_cpp.editops(s1, s2)
+    ops = metrics_cpp.indel_editops(s1, s2)
     assert ops.apply(s1, s2) == s2
 
 
@@ -253,7 +253,7 @@ def test_indel_editops_block(s1, s2):
     """
     test Indel.editops for long strings
     """
-    ops = Indel_cpp.editops(s1, s2)
+    ops = metrics_cpp.indel_editops(s1, s2)
     assert ops.apply(s1, s2) == s2
 
 
@@ -263,7 +263,7 @@ def test_levenshtein_opcodes(s1, s2):
     """
     test Levenshtein.opcodes with any sizes
     """
-    ops = Levenshtein_cpp.opcodes(s1, s2)
+    ops = metrics_cpp.levenshtein_opcodes(s1, s2)
     assert ops.apply(s1, s2) == s2
 
 
@@ -273,7 +273,7 @@ def test_levenshtein_opcodes_block(s1, s2):
     """
     test Levenshtein.opcodes for long strings
     """
-    ops = Levenshtein_cpp.opcodes(s1, s2)
+    ops = metrics_cpp.levenshtein_opcodes(s1, s2)
     assert ops.apply(s1, s2) == s2
 
 
@@ -283,7 +283,7 @@ def test_indel_opcodes(s1, s2):
     """
     test Indel.opcodes with any sizes
     """
-    ops = Indel_cpp.opcodes(s1, s2)
+    ops = metrics_cpp.indel_opcodes(s1, s2)
     assert ops.apply(s1, s2) == s2
 
 
@@ -293,7 +293,7 @@ def test_indel_opcodes_block(s1, s2):
     """
     test Indel.opcodes for long strings
     """
-    ops = Indel_cpp.opcodes(s1, s2)
+    ops = metrics_cpp.indel_opcodes(s1, s2)
     assert ops.apply(s1, s2) == s2
 
 
@@ -442,15 +442,15 @@ def test_cdist(queries, choices):
     Test that cdist returns correct results
     """
 
-    reference_matrix = cdist_distance(queries, choices, scorer=Levenshtein_cpp.distance)
-    matrix1 = process.cdist(queries, choices, scorer=Levenshtein_cpp.distance)
+    reference_matrix = cdist_distance(queries, choices, scorer=metrics_cpp.levenshtein_distance)
+    matrix1 = process.cdist(queries, choices, scorer=metrics_cpp.levenshtein_distance)
     matrix2 = process.cdist(queries, choices, scorer=Levenshtein_py.distance)
     assert (matrix1 == reference_matrix).all()
     assert (matrix2 == reference_matrix).all()
 
-    reference_matrix = cdist_distance(queries, queries, scorer=Levenshtein_cpp.distance)
-    matrix1 = process.cdist(queries, queries, scorer=Levenshtein_cpp.distance)
-    matrix2 = process.cdist(queries, queries, scorer=Levenshtein_cpp.distance)
+    reference_matrix = cdist_distance(queries, queries, scorer=metrics_cpp.levenshtein_distance)
+    matrix1 = process.cdist(queries, queries, scorer=metrics_cpp.levenshtein_distance)
+    matrix2 = process.cdist(queries, queries, scorer=Levenshtein_py.distance)
     assert (matrix1 == reference_matrix).all()
     assert (matrix2 == reference_matrix).all()
 

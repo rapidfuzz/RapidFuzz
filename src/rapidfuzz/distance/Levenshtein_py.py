@@ -6,7 +6,7 @@ from __future__ import annotations
 from typing import Callable, Hashable, Sequence
 
 from rapidfuzz._utils import is_none
-from rapidfuzz.distance import Indel
+from rapidfuzz.distance import Indel_py as Indel
 from rapidfuzz.distance._initialize import Editops, Opcodes
 
 

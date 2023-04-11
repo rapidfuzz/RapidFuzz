@@ -1,4 +1,4 @@
-from rapidfuzz.distance import OSA_cpp
+from rapidfuzz.distance import metrics_cpp
 from tests.distance.common import OSA
 
 
@@ -34,10 +34,10 @@ def test_cross_type_matching():
     assert OSA.distance("aaaa", "aaaa") == 0
     assert OSA.distance("aaaa", ["a", "a", "a", "a"]) == 0
     # todo add support in pure python
-    assert OSA_cpp.distance("aaaa", [ord("a"), ord("a"), "a", "a"]) == 0
-    assert OSA_cpp.distance([0, -1], [0, -2]) == 1
+    assert metrics_cpp.osa_distance("aaaa", [ord("a"), ord("a"), "a", "a"]) == 0
+    assert metrics_cpp.osa_distance([0, -1], [0, -2]) == 1
     assert (
-        OSA_cpp.distance(
+        metrics_cpp.osa_distance(
             [CustomHashable("aa"), CustomHashable("aa")],
             [CustomHashable("aa"), CustomHashable("bb")],
         )

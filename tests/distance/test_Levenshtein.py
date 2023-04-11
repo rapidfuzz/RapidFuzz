@@ -1,5 +1,5 @@
 from rapidfuzz import process
-from rapidfuzz.distance import Levenshtein_cpp, Levenshtein_py, Opcode, Opcodes
+from rapidfuzz.distance import metrics_cpp, Levenshtein_py, Opcode, Opcodes
 from tests.distance.common import Levenshtein
 
 
@@ -35,10 +35,10 @@ def test_cross_type_matching():
     assert Levenshtein.distance("aaaa", "aaaa") == 0
     assert Levenshtein.distance("aaaa", ["a", "a", "a", "a"]) == 0
     # todo add support in pure python
-    assert Levenshtein_cpp.distance("aaaa", [ord("a"), ord("a"), "a", "a"]) == 0
-    assert Levenshtein_cpp.distance([0, -1], [0, -2]) == 1
+    assert metrics_cpp.levenshtein_distance("aaaa", [ord("a"), ord("a"), "a", "a"]) == 0
+    assert metrics_cpp.levenshtein_distance([0, -1], [0, -2]) == 1
     assert (
-        Levenshtein_cpp.distance(
+        metrics_cpp.levenshtein_distance(
             [CustomHashable("aa"), CustomHashable("aa")],
             [CustomHashable("aa"), CustomHashable("bb")],
         )
@@ -79,20 +79,20 @@ def test_simple_unicode_tests():
 
 def test_Editops():
     """
-    basic test for Levenshtein_cpp.editops
+    basic test for Levenshtein.editops
     """
-    assert Levenshtein_cpp.editops("0", "").as_list() == [("delete", 0, 0)]
-    assert Levenshtein_cpp.editops("", "0").as_list() == [("insert", 0, 0)]
+    assert metrics_cpp.levenshtein_editops("0", "").as_list() == [("delete", 0, 0)]
+    assert metrics_cpp.levenshtein_editops("", "0").as_list() == [("insert", 0, 0)]
 
-    assert Levenshtein_cpp.editops("00", "0").as_list() == [("delete", 1, 1)]
-    assert Levenshtein_cpp.editops("0", "00").as_list() == [("insert", 1, 1)]
+    assert metrics_cpp.levenshtein_editops("00", "0").as_list() == [("delete", 1, 1)]
+    assert metrics_cpp.levenshtein_editops("0", "00").as_list() == [("insert", 1, 1)]
 
-    assert Levenshtein_cpp.editops("qabxcd", "abycdf").as_list() == [
+    assert metrics_cpp.levenshtein_editops("qabxcd", "abycdf").as_list() == [
         ("delete", 0, 0),
         ("replace", 3, 2),
         ("insert", 6, 5),
     ]
-    assert Levenshtein_cpp.editops("Lorem ipsum.", "XYZLorem ABC iPsum").as_list() == [
+    assert metrics_cpp.levenshtein_editops("Lorem ipsum.", "XYZLorem ABC iPsum").as_list() == [
         ("insert", 0, 0),
         ("insert", 0, 1),
         ("insert", 0, 2),
@@ -104,16 +104,16 @@ def test_Editops():
         ("delete", 11, 18),
     ]
 
-    ops = Levenshtein_cpp.editops("aaabaaa", "abbaaabba")
+    ops = metrics_cpp.levenshtein_editops("aaabaaa", "abbaaabba")
     assert ops.src_len == 7
     assert ops.dest_len == 9
 
 
 def test_Opcodes():
     """
-    basic test for Levenshtein_cpp.opcodes
+    basic test for Levenshtein.opcodes
     """
-    assert Levenshtein_cpp.opcodes("", "abc") == Opcodes(
+    assert metrics_cpp.levenshtein_opcodes("", "abc") == Opcodes(
         [Opcode(tag="insert", src_start=0, src_end=0, dest_start=0, dest_end=3)], 0, 3
     )
 
@@ -127,7 +127,7 @@ def test_mbleven():
     assert 2 == Levenshtein.distance("0", "101", score_cutoff=3)
 
     match = process.extractOne(
-        "0", ["101"], scorer=Levenshtein_cpp.distance, processor=None, score_cutoff=1
+        "0", ["101"], scorer=metrics_cpp.levenshtein_distance, processor=None, score_cutoff=1
     )
     assert match is None
     match = process.extractOne(
@@ -135,7 +135,7 @@ def test_mbleven():
     )
     assert match is None
     match = process.extractOne(
-        "0", ["101"], scorer=Levenshtein_cpp.distance, processor=None, score_cutoff=2
+        "0", ["101"], scorer=metrics_cpp.levenshtein_distance, processor=None, score_cutoff=2
     )
     assert match == ("101", 2, 0)
     match = process.extractOne(
@@ -143,7 +143,7 @@ def test_mbleven():
     )
     assert match == ("101", 2, 0)
     match = process.extractOne(
-        "0", ["101"], scorer=Levenshtein_cpp.distance, processor=None, score_cutoff=3
+        "0", ["101"], scorer=metrics_cpp.levenshtein_distance, processor=None, score_cutoff=3
     )
     assert match == ("101", 2, 0)
     match = process.extractOne(

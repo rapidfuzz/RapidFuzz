@@ -2,6 +2,8 @@
 common parts of the test suite for rapidfuzz
 """
 from math import isnan
+from dataclasses import dataclass
+from typing import Any
 
 import pytest
 
@@ -80,60 +82,72 @@ def symmetric_scorer_tester(scorer, s1, s2, **kwargs):
     assert pytest.approx(score1) == score2
     return score1
 
+@dataclass
+class Scorer:
+    distance: Any
+    similarity: Any
+    normalized_distance: Any
+    normalized_similarity: Any
+
 
 class GenericScorer:
-    def __init__(self, py_scorer, cpp_scorer, get_scorer_flags):
-        self.py_scorer = py_scorer
-        self.cpp_scorer = cpp_scorer
+    def __init__(self, py_scorers, cpp_scorers, get_scorer_flags):
+        self.py_scorers = cpp_scorers
+        self.cpp_scorers = cpp_scorers
+        self.scorers = self.py_scorers + self.cpp_scorers
+
+        def validate_attrs(func1, func2):
+            assert hasattr(func1, "_RF_ScorerPy")
+            assert hasattr(func2, "_RF_ScorerPy")
+            assert func1.__name__ == func2.__name__
+            assert func1.__qualname__ == func2.__qualname__
+            assert func1.__doc__ == func2.__doc__
+
+        for scorer in self.scorers:
+            validate_attrs(scorer.distance, self.scorers[0].distance)
+            validate_attrs(scorer.similarity, self.scorers[0].similarity)
+            validate_attrs(scorer.normalized_distance, self.scorers[0].normalized_distance)
+            validate_attrs(scorer.normalized_similarity, self.scorers[0].normalized_similarity)
+
+        for scorer in self.cpp_scorers:
+            assert hasattr(scorer.distance, "_RF_Scorer")
+            assert hasattr(scorer.similarity, "_RF_Scorer")
+            assert hasattr(scorer.normalized_distance, "_RF_Scorer")
+            assert hasattr(scorer.normalized_similarity, "_RF_Scorer")
+
         self.get_scorer_flags = get_scorer_flags
 
     def _distance(self, s1, s2, **kwargs):
         symmetric = self.get_scorer_flags(s1, s2, **kwargs)["symmetric"]
         tester = symmetric_scorer_tester if symmetric is True else scorer_tester
 
-        assert hasattr(self.cpp_scorer.distance, "_RF_ScorerPy")
-        assert hasattr(self.cpp_scorer.distance, "_RF_Scorer")
-        assert hasattr(self.py_scorer.distance, "_RF_ScorerPy")
-        score1 = tester(self.cpp_scorer.distance, s1, s2, **kwargs)
-        score2 = tester(self.py_scorer.distance, s1, s2, **kwargs)
-        assert pytest.approx(score1) == score2
-        return score1
+        scores = sorted(tester(scorer.distance, s1, s2, **kwargs) for scorer in self.scorers)
+        assert pytest.approx(scores[0]) == scores[-1]
+        return scores[0]
 
     def _similarity(self, s1, s2, **kwargs):
         symmetric = self.get_scorer_flags(s1, s2, **kwargs)["symmetric"]
         tester = symmetric_scorer_tester if symmetric is True else scorer_tester
 
-        assert hasattr(self.cpp_scorer.similarity, "_RF_ScorerPy")
-        assert hasattr(self.cpp_scorer.similarity, "_RF_Scorer")
-        assert hasattr(self.py_scorer.similarity, "_RF_ScorerPy")
-        score1 = tester(self.cpp_scorer.similarity, s1, s2, **kwargs)
-        score2 = tester(self.py_scorer.similarity, s1, s2, **kwargs)
-        assert pytest.approx(score1) == score2
-        return score1
+        scores = sorted(tester(scorer.similarity, s1, s2, **kwargs) for scorer in self.scorers)
+        assert pytest.approx(scores[0]) == scores[-1]
+        return scores[0]
 
     def _normalized_distance(self, s1, s2, **kwargs):
         symmetric = self.get_scorer_flags(s1, s2, **kwargs)["symmetric"]
         tester = symmetric_scorer_tester if symmetric is True else scorer_tester
 
-        assert hasattr(self.cpp_scorer.normalized_distance, "_RF_ScorerPy")
-        assert hasattr(self.cpp_scorer.normalized_distance, "_RF_Scorer")
-        assert hasattr(self.py_scorer.normalized_distance, "_RF_ScorerPy")
-        score1 = tester(self.cpp_scorer.normalized_distance, s1, s2, **kwargs)
-        score2 = tester(self.py_scorer.normalized_distance, s1, s2, **kwargs)
-        assert pytest.approx(score1) == score2
-        return score1
+        scores = sorted(tester(scorer.normalized_distance, s1, s2, **kwargs) for scorer in self.scorers)
+        assert pytest.approx(scores[0]) == scores[-1]
+        return scores[0]
 
     def _normalized_similarity(self, s1, s2, **kwargs):
         symmetric = self.get_scorer_flags(s1, s2, **kwargs)["symmetric"]
         tester = symmetric_scorer_tester if symmetric is True else scorer_tester
 
-        assert hasattr(self.cpp_scorer.normalized_similarity, "_RF_ScorerPy")
-        assert hasattr(self.cpp_scorer.normalized_similarity, "_RF_Scorer")
-        assert hasattr(self.py_scorer.normalized_similarity, "_RF_ScorerPy")
-        score1 = tester(self.cpp_scorer.normalized_similarity, s1, s2, **kwargs)
-        score2 = tester(self.py_scorer.normalized_similarity, s1, s2, **kwargs)
-        assert pytest.approx(score1) == score2
-        return score1
+        scores = sorted(tester(scorer.normalized_similarity, s1, s2, **kwargs) for scorer in self.scorers)
+        assert pytest.approx(scores[0]) == scores[-1]
+        return scores[0]
 
     def _validate(self, s1, s2, **kwargs):
         # todo requires more complex test handling

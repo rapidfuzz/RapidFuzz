@@ -100,13 +100,13 @@ def run_benchmark(datasets, setup, func) -> bool:
 
 def run_benchmarks_rapidfuzz(rapidfuzz_version, func_name, dataset, result_df):
     SCORERS = {
-        "Jaro": "from rapidfuzz.distance.Jaro_cpp import similarity as scorer",
-        "JaroWinkler": "from rapidfuzz.distance.JaroWinkler_cpp import similarity as scorer",
-        "OSA": "from rapidfuzz.distance.OSA_cpp import distance as scorer",
-        "Levenshtein": "from rapidfuzz.distance.Levenshtein_cpp import distance as scorer",
-        "Indel": "from rapidfuzz.distance.Indel_cpp import distance as scorer",
-        "DamerauLevenshtein": "from rapidfuzz.distance.DamerauLevenshtein_cpp import distance as scorer",
-        "Hamming": "from rapidfuzz.distance.Hamming_cpp import distance as scorer",
+        "Jaro": "from rapidfuzz.distance.metrics_cpp import jaro_similarity as scorer",
+        "JaroWinkler": "from rapidfuzz.distance.metrics_cpp import jaro_winkler_similarity as scorer",
+        "OSA": "from rapidfuzz.distance.metrics_cpp import osa_distance as scorer",
+        "Levenshtein": "from rapidfuzz.distance.metrics_cpp import levenshtein_distance as scorer",
+        "Indel": "from rapidfuzz.distance.metrics_cpp import indel_distance as scorer",
+        "DamerauLevenshtein": "from rapidfuzz.distance.metrics_cpp import damerau_levenshtein_distance as scorer",
+        "Hamming": "from rapidfuzz.distance.metrics_cpp import hamming_distance as scorer",
     }
 
     setup = SCORERS[func_name]

@@ -1,26 +1,34 @@
-from rapidfuzz.distance import (
-    DamerauLevenshtein_cpp,
-    DamerauLevenshtein_py,
-    Hamming_cpp,
-    Hamming_py,
-    Indel_cpp,
-    Indel_py,
-    Jaro_cpp,
-    Jaro_py,
-    JaroWinkler_cpp,
-    JaroWinkler_py,
-    LCSseq_cpp,
-    LCSseq_py,
-    Levenshtein_cpp,
-    Levenshtein_py,
-    OSA_cpp,
-    OSA_py,
-    Postfix_cpp,
-    Postfix_py,
-    Prefix_cpp,
-    Prefix_py,
-)
-from tests.common import GenericScorer, is_none
+from rapidfuzz.distance import metrics_py, metrics_cpp
+from tests.common import GenericScorer, Scorer, is_none
+
+cpp_scorer_modules = [metrics_cpp]
+try:
+    from rapidfuzz.distance import metrics_cpp_avx2
+    cpp_scorer_modules.append(metrics_cpp_avx2)
+except Exception:
+    pass
+
+def create_generic_scorer(func_name, get_scorer_flags):
+    py_scorers = [
+        Scorer(
+            distance=getattr(metrics_py, func_name + "_distance"),
+            similarity=getattr(metrics_py, func_name + "_similarity"),
+            normalized_distance=getattr(metrics_py, func_name + "_normalized_distance"),
+            normalized_similarity=getattr(metrics_py, func_name + "_normalized_similarity"),
+        )
+    ]
+
+    cpp_scorers = [
+        Scorer(
+            distance=getattr(mod, func_name + "_distance"),
+            similarity=getattr(mod, func_name + "_similarity"),
+            normalized_distance=getattr(mod, func_name + "_normalized_distance"),
+            normalized_similarity=getattr(mod, func_name + "_normalized_similarity"),
+        )
+        for mod in cpp_scorer_modules
+    ]
+
+    return GenericScorer(py_scorers, cpp_scorers, get_scorer_flags)
 
 
 def get_scorer_flags_damerau_levenshtein(s1, s2, **kwargs):
@@ -29,9 +37,7 @@ def get_scorer_flags_damerau_levenshtein(s1, s2, **kwargs):
     return {"maximum": max(len(s1), len(s2)), "symmetric": True}
 
 
-DamerauLevenshtein = GenericScorer(
-    DamerauLevenshtein_py, DamerauLevenshtein_cpp, get_scorer_flags_damerau_levenshtein
-)
+DamerauLevenshtein = create_generic_scorer("damerau_levenshtein", get_scorer_flags_damerau_levenshtein)
 
 
 def get_scorer_flags_hamming(s1, s2, **kwargs):
@@ -40,7 +46,7 @@ def get_scorer_flags_hamming(s1, s2, **kwargs):
     return {"maximum": max(len(s1), len(s2)), "symmetric": True}
 
 
-Hamming = GenericScorer(Hamming_py, Hamming_cpp, get_scorer_flags_hamming)
+Hamming = create_generic_scorer("hamming", get_scorer_flags_hamming)
 
 
 def get_scorer_flags_indel(s1, s2, **kwargs):
@@ -49,7 +55,7 @@ def get_scorer_flags_indel(s1, s2, **kwargs):
     return {"maximum": len(s1) + len(s2), "symmetric": True}
 
 
-Indel = GenericScorer(Indel_py, Indel_cpp, get_scorer_flags_indel)
+Indel = create_generic_scorer("indel", get_scorer_flags_indel)
 
 
 def get_scorer_flags_jaro(s1, s2, **kwargs):
@@ -58,7 +64,7 @@ def get_scorer_flags_jaro(s1, s2, **kwargs):
     return {"maximum": 1.0, "symmetric": True}
 
 
-Jaro = GenericScorer(Jaro_py, Jaro_cpp, get_scorer_flags_jaro)
+Jaro = create_generic_scorer("jaro", get_scorer_flags_jaro)
 
 
 def get_scorer_flags_jaro_winkler(s1, s2, **kwargs):
@@ -67,9 +73,7 @@ def get_scorer_flags_jaro_winkler(s1, s2, **kwargs):
     return {"maximum": 1.0, "symmetric": True}
 
 
-JaroWinkler = GenericScorer(
-    JaroWinkler_py, JaroWinkler_cpp, get_scorer_flags_jaro_winkler
-)
+JaroWinkler = create_generic_scorer("jaro_winkler", get_scorer_flags_jaro_winkler)
 
 
 def get_scorer_flags_lcs_seq(s1, s2, **kwargs):
@@ -78,7 +82,7 @@ def get_scorer_flags_lcs_seq(s1, s2, **kwargs):
     return {"maximum": max(len(s1), len(s2)), "symmetric": True}
 
 
-LCSseq = GenericScorer(LCSseq_py, LCSseq_cpp, get_scorer_flags_lcs_seq)
+LCSseq = create_generic_scorer("lcs_seq", get_scorer_flags_lcs_seq)
 
 
 def get_scorer_flags_levenshtein(s1, s2, weights=(1, 1, 1), **kwargs):
@@ -101,9 +105,7 @@ def get_scorer_flags_levenshtein(s1, s2, weights=(1, 1, 1), **kwargs):
     return {"maximum": max_dist, "symmetric": insert_cost == delete_cost}
 
 
-Levenshtein = GenericScorer(
-    Levenshtein_py, Levenshtein_cpp, get_scorer_flags_levenshtein
-)
+Levenshtein = create_generic_scorer("levenshtein", get_scorer_flags_levenshtein)
 
 
 def get_scorer_flags_osa(s1, s2, **kwargs):
@@ -112,7 +114,7 @@ def get_scorer_flags_osa(s1, s2, **kwargs):
     return {"maximum": max(len(s1), len(s2)), "symmetric": True}
 
 
-OSA = GenericScorer(OSA_py, OSA_cpp, get_scorer_flags_osa)
+OSA = create_generic_scorer("osa", get_scorer_flags_osa)
 
 
 def get_scorer_flags_postfix(s1, s2, **kwargs):
@@ -121,7 +123,7 @@ def get_scorer_flags_postfix(s1, s2, **kwargs):
     return {"maximum": max(len(s1), len(s2)), "symmetric": True}
 
 
-Postfix = GenericScorer(Postfix_py, Postfix_cpp, get_scorer_flags_postfix)
+Postfix = create_generic_scorer("postfix", get_scorer_flags_postfix)
 
 
 def get_scorer_flags_prefix(s1, s2, **kwargs):
@@ -130,7 +132,7 @@ def get_scorer_flags_prefix(s1, s2, **kwargs):
     return {"maximum": max(len(s1), len(s2)), "symmetric": True}
 
 
-Prefix = GenericScorer(Prefix_py, Prefix_cpp, get_scorer_flags_prefix)
+Prefix = create_generic_scorer("prefix", get_scorer_flags_prefix)
 
 all_scorer_modules = [
     DamerauLevenshtein,
