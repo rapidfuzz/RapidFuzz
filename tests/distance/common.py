@@ -1,11 +1,13 @@
+from rapidfuzz._feature_detector import AVX2, supports
 from rapidfuzz.distance import metrics_cpp, metrics_py
 from tests.common import GenericScorer, Scorer, is_none
 
 cpp_scorer_modules = [metrics_cpp]
 try:
-    from rapidfuzz.distance import metrics_cpp_avx2
+    if supports(AVX2):
+        from rapidfuzz.distance import metrics_cpp_avx2
 
-    cpp_scorer_modules.append(metrics_cpp_avx2)
+        cpp_scorer_modules.append(metrics_cpp_avx2)
 except Exception:
     pass
 
