@@ -8,7 +8,7 @@ import pytest
 from hypothesis import assume, given, settings
 
 from rapidfuzz import fuzz, process, utils
-from rapidfuzz.distance import metrics_cpp, Levenshtein_py
+from rapidfuzz.distance import Levenshtein_py, metrics_cpp
 from tests.distance.common import Indel, JaroWinkler, Levenshtein
 
 
@@ -442,13 +442,17 @@ def test_cdist(queries, choices):
     Test that cdist returns correct results
     """
 
-    reference_matrix = cdist_distance(queries, choices, scorer=metrics_cpp.levenshtein_distance)
+    reference_matrix = cdist_distance(
+        queries, choices, scorer=metrics_cpp.levenshtein_distance
+    )
     matrix1 = process.cdist(queries, choices, scorer=metrics_cpp.levenshtein_distance)
     matrix2 = process.cdist(queries, choices, scorer=Levenshtein_py.distance)
     assert (matrix1 == reference_matrix).all()
     assert (matrix2 == reference_matrix).all()
 
-    reference_matrix = cdist_distance(queries, queries, scorer=metrics_cpp.levenshtein_distance)
+    reference_matrix = cdist_distance(
+        queries, queries, scorer=metrics_cpp.levenshtein_distance
+    )
     matrix1 = process.cdist(queries, queries, scorer=metrics_cpp.levenshtein_distance)
     matrix2 = process.cdist(queries, queries, scorer=Levenshtein_py.distance)
     assert (matrix1 == reference_matrix).all()

@@ -2,18 +2,21 @@
 # cython: language_level=3, binding=True, linetrace=True
 
 from cpp_common cimport (
+    CreateProcessorContext,
+    SetProcessorAttrs,
     conv_sequence,
     convert_string,
     hash_array,
     hash_sequence,
     is_valid_string,
 )
-from cpython.pycapsule cimport PyCapsule_New
 from libcpp cimport bool
 
 from rapidfuzz cimport PREPROCESSOR_STRUCT_VERSION, RF_Preprocessor, RF_String
 
 from array import array
+
+from . import utils_py
 
 
 cdef extern from "utils_cpp.hpp":
@@ -38,7 +41,5 @@ cdef bool default_process_capi(sentence, RF_String* str_) except False:
     str_[0] = proc_str
     return True
 
-cdef RF_Preprocessor DefaultProcessContext
-DefaultProcessContext.version = PREPROCESSOR_STRUCT_VERSION
-DefaultProcessContext.preprocess = default_process_capi
-default_process._RF_Preprocess = PyCapsule_New(&DefaultProcessContext, NULL, NULL)
+cdef RF_Preprocessor DefaultProcessContext = CreateProcessorContext(default_process_capi)
+SetProcessorAttrs(default_process, utils_py.default_process, &DefaultProcessContext)

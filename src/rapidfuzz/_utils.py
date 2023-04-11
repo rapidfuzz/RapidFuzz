@@ -60,7 +60,7 @@ def is_none(s: Any) -> bool:
     return False
 
 
-def _add_scorer_attrs(
+def add_scorer_attrs(
     func: Any, cached_scorer_call: dict[str, Callable[..., dict[str, Any]]]
 ):
     func._RF_ScorerPy = cached_scorer_call
@@ -82,29 +82,17 @@ def vectorized_import(name: str) -> tuple[Any, list[Any]]:
     """
     import module best fitting for current CPU
     """
-    modules = []
-    best_module = None
-
     if supports(AVX2):
         module = optional_import_module(name + "_avx2")
         if module is not None:
-            modules.append(module)
-            if best_module is None:
-                best_module = module
+            return module
 
-    module = importlib.import_module(name)
-    modules.append(module)
-    if best_module is None:
-        best_module = module
-
-    return module, modules
+    return importlib.import_module(name)
 
 
 def fallback_import(
     module: str,
     name: str,
-    cached_scorer_call: dict[str, Callable[..., dict[str, Any]]] | None = None,
-    set_attrs: bool = True,
 ) -> Any:
     """
     import library function and possibly fall back to a pure Python version
@@ -119,38 +107,23 @@ def fallback_import(
             f"cannot import name {name!r} from {py_mod.__name!r} ({py_mod.__file__})"
         )
 
-    if cached_scorer_call:
-        _add_scorer_attrs(py_func, cached_scorer_call)
-
     if impl == "cpp":
-        best_cpp_mod, cpp_mods = vectorized_import(module + "_cpp")
+        cpp_mod = vectorized_import(module + "_cpp")
     elif impl == "python":
         return py_func
     else:
         try:
-            best_cpp_mod, cpp_mods = vectorized_import(module + "_cpp")
+            cpp_mod = vectorized_import(module + "_cpp")
         except Exception:
             return py_func
 
-    for cpp_mod in cpp_mods:
-        cpp_func = getattr(cpp_mod, name)
-        if not cpp_func:
-            raise ImportError(
-                f"cannot import name {name!r} from {cpp_mod.__name!r} ({cpp_mod.__file__})"
-            )
+    cpp_func = getattr(cpp_mod, name)
+    if not cpp_func:
+        raise ImportError(
+            f"cannot import name {name!r} from {cpp_mod.__name!r} ({cpp_mod.__file__})"
+        )
 
-        # patch cpp function so help does not need to be duplicated
-        # and to hide from users that we combine the functions of multiple
-        # modules into a single shared library
-        if set_attrs:
-            cpp_func.__name__ = py_func.__name__
-            cpp_func.__qualname__ = py_func.__qualname__
-            cpp_func.__doc__ = py_func.__doc__
-
-        if cached_scorer_call:
-            _add_scorer_attrs(cpp_func, cached_scorer_call)
-
-    return getattr(best_cpp_mod, name)
+    return cpp_func
 
 
 default_distance_attribute: dict[str, Callable[..., dict[str, Any]]] = {

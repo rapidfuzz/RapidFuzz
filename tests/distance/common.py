@@ -1,12 +1,14 @@
-from rapidfuzz.distance import metrics_py, metrics_cpp
+from rapidfuzz.distance import metrics_cpp, metrics_py
 from tests.common import GenericScorer, Scorer, is_none
 
 cpp_scorer_modules = [metrics_cpp]
 try:
     from rapidfuzz.distance import metrics_cpp_avx2
+
     cpp_scorer_modules.append(metrics_cpp_avx2)
 except Exception:
     pass
+
 
 def create_generic_scorer(func_name, get_scorer_flags):
     py_scorers = [
@@ -14,7 +16,9 @@ def create_generic_scorer(func_name, get_scorer_flags):
             distance=getattr(metrics_py, func_name + "_distance"),
             similarity=getattr(metrics_py, func_name + "_similarity"),
             normalized_distance=getattr(metrics_py, func_name + "_normalized_distance"),
-            normalized_similarity=getattr(metrics_py, func_name + "_normalized_similarity"),
+            normalized_similarity=getattr(
+                metrics_py, func_name + "_normalized_similarity"
+            ),
         )
     ]
 
@@ -37,7 +41,9 @@ def get_scorer_flags_damerau_levenshtein(s1, s2, **kwargs):
     return {"maximum": max(len(s1), len(s2)), "symmetric": True}
 
 
-DamerauLevenshtein = create_generic_scorer("damerau_levenshtein", get_scorer_flags_damerau_levenshtein)
+DamerauLevenshtein = create_generic_scorer(
+    "damerau_levenshtein", get_scorer_flags_damerau_levenshtein
+)
 
 
 def get_scorer_flags_hamming(s1, s2, **kwargs):

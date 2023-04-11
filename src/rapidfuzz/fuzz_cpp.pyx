@@ -1,6 +1,7 @@
 # distutils: language=c++
 # cython: language_level=3, binding=True, linetrace=True
 
+from . import fuzz_py
 from .distance._initialize_cpp import ScoreAlignment
 
 from rapidfuzz cimport (
@@ -22,13 +23,12 @@ from rapidfuzz.utils import default_process
 
 from cpp_common cimport (
     CreateScorerContext,
-    CreateScorerContextPy,
     NoKwargsInit,
     RF_StringWrapper,
     RfScoreAlignment,
+    SetScorerAttrs,
     preprocess_strings,
 )
-from cpython.pycapsule cimport PyCapsule_New
 from libc.math cimport isnan
 from libc.stdint cimport int64_t, uint32_t
 from libcpp cimport bool
@@ -222,31 +222,31 @@ cdef bool GetScorerFlagsFuzzRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_
     return True
 
 cdef RF_Scorer RatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzzRatio, RatioInit)
-ratio._RF_Scorer = PyCapsule_New(&RatioContext, NULL, NULL)
+SetScorerAttrs(ratio, fuzz_py.ratio, &RatioContext)
 
 cdef RF_Scorer PartialRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, PartialRatioInit)
-partial_ratio._RF_Scorer = PyCapsule_New(&PartialRatioContext, NULL, NULL)
+SetScorerAttrs(partial_ratio, fuzz_py.partial_ratio, &PartialRatioContext)
 
 cdef RF_Scorer TokenSortRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzzRatio, TokenSortRatioInit)
-token_sort_ratio._RF_Scorer = PyCapsule_New(&TokenSortRatioContext, NULL, NULL)
+SetScorerAttrs(token_sort_ratio, fuzz_py.token_sort_ratio, &TokenSortRatioContext)
 
 cdef RF_Scorer TokenSetRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, TokenSetRatioInit)
-token_set_ratio._RF_Scorer = PyCapsule_New(&TokenSetRatioContext, NULL, NULL)
+SetScorerAttrs(token_set_ratio, fuzz_py.token_set_ratio, &TokenSetRatioContext)
 
 cdef RF_Scorer TokenRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, TokenRatioInit)
-token_ratio._RF_Scorer = PyCapsule_New(&TokenRatioContext, NULL, NULL)
+SetScorerAttrs(token_ratio, fuzz_py.token_ratio, &TokenRatioContext)
 
 cdef RF_Scorer PartialTokenSortRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, PartialTokenSortRatioInit)
-partial_token_sort_ratio._RF_Scorer = PyCapsule_New(&PartialTokenSortRatioContext, NULL, NULL)
+SetScorerAttrs(partial_token_sort_ratio, fuzz_py.partial_token_sort_ratio, &PartialTokenSortRatioContext)
 
 cdef RF_Scorer PartialTokenSetRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, PartialTokenSetRatioInit)
-partial_token_set_ratio._RF_Scorer = PyCapsule_New(&PartialTokenSetRatioContext, NULL, NULL)
+SetScorerAttrs(partial_token_set_ratio, fuzz_py.partial_token_set_ratio, &PartialTokenSetRatioContext)
 
 cdef RF_Scorer PartialTokenRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, PartialTokenRatioInit)
-partial_token_ratio._RF_Scorer = PyCapsule_New(&PartialTokenRatioContext, NULL, NULL)
+SetScorerAttrs(partial_token_ratio, fuzz_py.partial_token_ratio, &PartialTokenRatioContext)
 
 cdef RF_Scorer WRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzz, WRatioInit)
-WRatio._RF_Scorer = PyCapsule_New(&WRatioContext, NULL, NULL)
+SetScorerAttrs(WRatio, fuzz_py.WRatio, &WRatioContext)
 
 cdef RF_Scorer QRatioContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsFuzzRatio, QRatioInit)
-QRatio._RF_Scorer = PyCapsule_New(&QRatioContext, NULL, NULL)
+SetScorerAttrs(QRatio, fuzz_py.QRatio, &QRatioContext)

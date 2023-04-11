@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from math import ceil
-from typing import Callable, Hashable
+from typing import Any, Callable, Hashable
 
-from rapidfuzz._utils import is_none
+from rapidfuzz._utils import ScorerFlag, add_scorer_attrs, is_none
 from rapidfuzz.distance import ScoreAlignment
 from rapidfuzz.distance.Indel_py import (
     _block_normalized_similarity as indel_block_normalized_similarity,
@@ -15,6 +15,19 @@ from rapidfuzz.distance.Indel_py import (
     normalized_similarity as indel_normalized_similarity,
 )
 from rapidfuzz.utils_py import default_process
+
+
+def get_scorer_flags_fuzz(**_kwargs: Any) -> dict[str, Any]:
+    return {
+        "optimal_score": 100,
+        "worst_score": 0,
+        "flags": ScorerFlag.RESULT_F64 | ScorerFlag.SYMMETRIC,
+    }
+
+
+fuzz_attribute: dict[str, Callable[..., dict[str, Any]]] = {
+    "get_scorer_flags": get_scorer_flags_fuzz
+}
 
 
 def _norm_distance(dist: int, lensum: int, score_cutoff: float) -> float:
@@ -869,3 +882,15 @@ def QRatio(
         return 0
 
     return ratio(s1, s2, score_cutoff=score_cutoff)
+
+
+add_scorer_attrs(ratio, fuzz_attribute)
+add_scorer_attrs(partial_ratio, fuzz_attribute)
+add_scorer_attrs(token_sort_ratio, fuzz_attribute)
+add_scorer_attrs(token_set_ratio, fuzz_attribute)
+add_scorer_attrs(token_ratio, fuzz_attribute)
+add_scorer_attrs(partial_token_sort_ratio, fuzz_attribute)
+add_scorer_attrs(partial_token_set_ratio, fuzz_attribute)
+add_scorer_attrs(partial_token_ratio, fuzz_attribute)
+add_scorer_attrs(WRatio, fuzz_attribute)
+add_scorer_attrs(QRatio, fuzz_attribute)

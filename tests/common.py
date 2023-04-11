@@ -1,8 +1,8 @@
 """
 common parts of the test suite for rapidfuzz
 """
-from math import isnan
 from dataclasses import dataclass
+from math import isnan
 from typing import Any
 
 import pytest
@@ -82,6 +82,7 @@ def symmetric_scorer_tester(scorer, s1, s2, **kwargs):
     assert pytest.approx(score1) == score2
     return score1
 
+
 @dataclass
 class Scorer:
     distance: Any
@@ -106,8 +107,12 @@ class GenericScorer:
         for scorer in self.scorers:
             validate_attrs(scorer.distance, self.scorers[0].distance)
             validate_attrs(scorer.similarity, self.scorers[0].similarity)
-            validate_attrs(scorer.normalized_distance, self.scorers[0].normalized_distance)
-            validate_attrs(scorer.normalized_similarity, self.scorers[0].normalized_similarity)
+            validate_attrs(
+                scorer.normalized_distance, self.scorers[0].normalized_distance
+            )
+            validate_attrs(
+                scorer.normalized_similarity, self.scorers[0].normalized_similarity
+            )
 
         for scorer in self.cpp_scorers:
             assert hasattr(scorer.distance, "_RF_Scorer")
@@ -121,7 +126,9 @@ class GenericScorer:
         symmetric = self.get_scorer_flags(s1, s2, **kwargs)["symmetric"]
         tester = symmetric_scorer_tester if symmetric is True else scorer_tester
 
-        scores = sorted(tester(scorer.distance, s1, s2, **kwargs) for scorer in self.scorers)
+        scores = sorted(
+            tester(scorer.distance, s1, s2, **kwargs) for scorer in self.scorers
+        )
         assert pytest.approx(scores[0]) == scores[-1]
         return scores[0]
 
@@ -129,7 +136,9 @@ class GenericScorer:
         symmetric = self.get_scorer_flags(s1, s2, **kwargs)["symmetric"]
         tester = symmetric_scorer_tester if symmetric is True else scorer_tester
 
-        scores = sorted(tester(scorer.similarity, s1, s2, **kwargs) for scorer in self.scorers)
+        scores = sorted(
+            tester(scorer.similarity, s1, s2, **kwargs) for scorer in self.scorers
+        )
         assert pytest.approx(scores[0]) == scores[-1]
         return scores[0]
 
@@ -137,7 +146,10 @@ class GenericScorer:
         symmetric = self.get_scorer_flags(s1, s2, **kwargs)["symmetric"]
         tester = symmetric_scorer_tester if symmetric is True else scorer_tester
 
-        scores = sorted(tester(scorer.normalized_distance, s1, s2, **kwargs) for scorer in self.scorers)
+        scores = sorted(
+            tester(scorer.normalized_distance, s1, s2, **kwargs)
+            for scorer in self.scorers
+        )
         assert pytest.approx(scores[0]) == scores[-1]
         return scores[0]
 
@@ -145,7 +157,10 @@ class GenericScorer:
         symmetric = self.get_scorer_flags(s1, s2, **kwargs)["symmetric"]
         tester = symmetric_scorer_tester if symmetric is True else scorer_tester
 
-        scores = sorted(tester(scorer.normalized_similarity, s1, s2, **kwargs) for scorer in self.scorers)
+        scores = sorted(
+            tester(scorer.normalized_similarity, s1, s2, **kwargs)
+            for scorer in self.scorers
+        )
         assert pytest.approx(scores[0]) == scores[-1]
         return scores[0]
 

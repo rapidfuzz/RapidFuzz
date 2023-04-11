@@ -11,10 +11,12 @@ from libcpp.utility cimport move, pair
 from libcpp.vector cimport vector
 
 from rapidfuzz cimport (
+    PREPROCESSOR_STRUCT_VERSION,
     SCORER_STRUCT_VERSION,
     RF_GetScorerFlags,
     RF_Kwargs,
     RF_KwargsInit,
+    RF_Preprocess,
     RF_Preprocessor,
     RF_Scorer,
     RF_ScorerFlags,
@@ -407,5 +409,25 @@ cdef inline RF_Scorer CreateScorerContext(RF_KwargsInit kwargs_init, RF_GetScore
     context.scorer_func_init = scorer_func_init
     return context
 
-cdef inline dict CreateScorerContextPy(get_scorer_flags):
-    return {"get_scorer_flags": get_scorer_flags}
+cdef inline void SetFuncAttrs(cpp_func, py_func):
+    cpp_func.__name__ = py_func.__name__
+    cpp_func.__qualname__ = py_func.__qualname__
+    cpp_func.__doc__ = py_func.__doc__
+
+cdef inline void SetScorerAttrs(cpp_func, py_func, RF_Scorer* context):
+    SetFuncAttrs(cpp_func, py_func)
+    cpp_func._RF_Scorer = PyCapsule_New(context, NULL, NULL)
+    cpp_func._RF_ScorerPy = py_func._RF_ScorerPy
+
+    # used to detect the function hasn't been wrapped afterwards
+    cpp_func._RF_OriginalScorer = cpp_func
+
+cdef inline RF_Preprocessor CreateProcessorContext(RF_Preprocess preprocess):
+    cdef RF_Preprocessor context
+    context.version = PREPROCESSOR_STRUCT_VERSION
+    context.preprocess = preprocess
+    return context
+
+cdef inline void SetProcessorAttrs(cpp_func, py_func, RF_Preprocessor* context):
+    SetFuncAttrs(cpp_func, py_func)
+    cpp_func._RF_Preprocess = PyCapsule_New(context, NULL, NULL)

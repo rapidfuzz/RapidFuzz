@@ -1,6 +1,7 @@
 # distutils: language=c++
 # cython: language_level=3, binding=True, linetrace=True
 
+from . import metrics_py
 from ._initialize_cpp import Editops
 
 from rapidfuzz cimport (
@@ -27,9 +28,10 @@ from cpp_common cimport (
     CreateScorerContext,
     NoKwargsInit,
     RF_StringWrapper,
+    SetFuncAttrs,
+    SetScorerAttrs,
     preprocess_strings,
 )
-from cpython.pycapsule cimport PyCapsule_New
 from libc.math cimport isnan
 from libc.stdint cimport INT64_MAX, int64_t
 from libc.stdlib cimport free, malloc
@@ -356,17 +358,19 @@ cdef bool GetScorerFlagsLevenshteinNormalizedSimilarity(const RF_Kwargs* self, R
     return True
 
 cdef RF_Scorer LevenshteinDistanceContext = CreateScorerContext(LevenshteinKwargsInit, GetScorerFlagsLevenshteinDistance, LevenshteinDistanceInit)
-levenshtein_distance._RF_Scorer = PyCapsule_New(&LevenshteinDistanceContext, NULL, NULL)
+SetScorerAttrs(levenshtein_distance, metrics_py.levenshtein_distance, &LevenshteinDistanceContext)
 
 cdef RF_Scorer LevenshteinSimilarityContext = CreateScorerContext(LevenshteinKwargsInit, GetScorerFlagsLevenshteinSimilarity, LevenshteinSimilarityInit)
-levenshtein_similarity._RF_Scorer = PyCapsule_New(&LevenshteinSimilarityContext, NULL, NULL)
+SetScorerAttrs(levenshtein_similarity, metrics_py.levenshtein_similarity, &LevenshteinSimilarityContext)
 
 cdef RF_Scorer LevenshteinNormalizedDistanceContext = CreateScorerContext(LevenshteinKwargsInit, GetScorerFlagsLevenshteinNormalizedDistance, LevenshteinNormalizedDistanceInit)
-levenshtein_normalized_distance._RF_Scorer = PyCapsule_New(&LevenshteinNormalizedDistanceContext, NULL, NULL)
+SetScorerAttrs(levenshtein_normalized_distance, metrics_py.levenshtein_normalized_distance, &LevenshteinNormalizedDistanceContext)
 
 cdef RF_Scorer LevenshteinNormalizedSimilarityContext = CreateScorerContext(LevenshteinKwargsInit, GetScorerFlagsLevenshteinNormalizedSimilarity, LevenshteinNormalizedSimilarityInit)
-levenshtein_normalized_similarity._RF_Scorer = PyCapsule_New(&LevenshteinNormalizedSimilarityContext, NULL, NULL)
+SetScorerAttrs(levenshtein_normalized_similarity, metrics_py.levenshtein_normalized_similarity, &LevenshteinNormalizedSimilarityContext)
 
+SetFuncAttrs(levenshtein_editops, metrics_py.levenshtein_editops)
+SetFuncAttrs(levenshtein_opcodes, metrics_py.levenshtein_opcodes)
 
 def damerau_levenshtein_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, INT64_MAX)
@@ -426,16 +430,16 @@ cdef bool GetScorerFlagsDamerauLevenshteinNormalizedSimilarity(const RF_Kwargs* 
     return True
 
 cdef RF_Scorer DamerauLevenshteinDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsDamerauLevenshteinDistance, DamerauLevenshteinDistanceInit)
-damerau_levenshtein_distance._RF_Scorer = PyCapsule_New(&DamerauLevenshteinDistanceContext, NULL, NULL)
+SetScorerAttrs(damerau_levenshtein_distance, metrics_py.damerau_levenshtein_distance, &DamerauLevenshteinDistanceContext)
 
 cdef RF_Scorer DamerauLevenshteinNormalizedDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsDamerauLevenshteinNormalizedDistance, DamerauLevenshteinNormalizedDistanceInit)
-damerau_levenshtein_normalized_distance._RF_Scorer = PyCapsule_New(&DamerauLevenshteinNormalizedDistanceContext, NULL, NULL)
+SetScorerAttrs(damerau_levenshtein_normalized_distance, metrics_py.damerau_levenshtein_normalized_distance, &DamerauLevenshteinNormalizedDistanceContext)
 
 cdef RF_Scorer DamerauLevenshteinSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsDamerauLevenshteinSimilarity, DamerauLevenshteinSimilarityInit)
-damerau_levenshtein_similarity._RF_Scorer = PyCapsule_New(&DamerauLevenshteinSimilarityContext, NULL, NULL)
+SetScorerAttrs(damerau_levenshtein_similarity, metrics_py.damerau_levenshtein_similarity, &DamerauLevenshteinSimilarityContext)
 
 cdef RF_Scorer DamerauLevenshteinNormalizedSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsDamerauLevenshteinNormalizedSimilarity, DamerauLevenshteinNormalizedSimilarityInit)
-damerau_levenshtein_normalized_similarity._RF_Scorer = PyCapsule_New(&DamerauLevenshteinNormalizedSimilarityContext, NULL, NULL)
+SetScorerAttrs(damerau_levenshtein_normalized_similarity, metrics_py.damerau_levenshtein_normalized_similarity, &DamerauLevenshteinNormalizedSimilarityContext)
 
 
 def lcs_seq_distance(s1, s2, *, processor=None, score_cutoff=None):
@@ -527,17 +531,19 @@ cdef bool GetScorerFlagsLCSseqNormalizedSimilarity(const RF_Kwargs* self, RF_Sco
     return True
 
 cdef RF_Scorer LCSseqDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsLCSseqDistance, LCSseqDistanceInit)
-lcs_seq_distance._RF_Scorer = PyCapsule_New(&LCSseqDistanceContext, NULL, NULL)
+SetScorerAttrs(lcs_seq_distance, metrics_py.lcs_seq_distance, &LCSseqDistanceContext)
 
 cdef RF_Scorer LCSseqNormalizedDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsLCSseqNormalizedDistance, LCSseqNormalizedDistanceInit)
-lcs_seq_normalized_distance._RF_Scorer = PyCapsule_New(&LCSseqNormalizedDistanceContext, NULL, NULL)
+SetScorerAttrs(lcs_seq_normalized_distance, metrics_py.lcs_seq_normalized_distance, &LCSseqNormalizedDistanceContext)
 
 cdef RF_Scorer LCSseqSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsLCSseqSimilarity, LCSseqSimilarityInit)
-lcs_seq_similarity._RF_Scorer = PyCapsule_New(&LCSseqSimilarityContext, NULL, NULL)
+SetScorerAttrs(lcs_seq_similarity, metrics_py.lcs_seq_similarity, &LCSseqSimilarityContext)
 
 cdef RF_Scorer LCSseqNormalizedSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsLCSseqNormalizedSimilarity, LCSseqNormalizedSimilarityInit)
-lcs_seq_normalized_similarity._RF_Scorer = PyCapsule_New(&LCSseqNormalizedSimilarityContext, NULL, NULL)
+SetScorerAttrs(lcs_seq_normalized_similarity, metrics_py.lcs_seq_normalized_similarity, &LCSseqNormalizedSimilarityContext)
 
+SetFuncAttrs(lcs_seq_editops, metrics_py.lcs_seq_editops)
+SetFuncAttrs(lcs_seq_opcodes, metrics_py.lcs_seq_opcodes)
 
 def indel_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, INT64_MAX)
@@ -631,17 +637,19 @@ cdef bool GetScorerFlagsIndelNormalizedSimilarity(const RF_Kwargs* self, RF_Scor
 
 
 cdef RF_Scorer IndelDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsIndelDistance, IndelDistanceInit)
-indel_distance._RF_Scorer = PyCapsule_New(&IndelDistanceContext, NULL, NULL)
+SetScorerAttrs(indel_distance, metrics_py.indel_distance, &IndelDistanceContext)
 
 cdef RF_Scorer IndelNormalizedDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsIndelNormalizedDistance, IndelNormalizedDistanceInit)
-indel_normalized_distance._RF_Scorer = PyCapsule_New(&IndelNormalizedDistanceContext, NULL, NULL)
+SetScorerAttrs(indel_normalized_distance, metrics_py.indel_normalized_distance, &IndelNormalizedDistanceContext)
 
 cdef RF_Scorer IndelSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsIndelSimilarity, IndelSimilarityInit)
-indel_similarity._RF_Scorer = PyCapsule_New(&IndelSimilarityContext, NULL, NULL)
+SetScorerAttrs(indel_similarity, metrics_py.indel_similarity, &IndelSimilarityContext)
 
 cdef RF_Scorer IndelNormalizedSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsIndelNormalizedSimilarity, IndelNormalizedSimilarityInit)
-indel_normalized_similarity._RF_Scorer = PyCapsule_New(&IndelNormalizedSimilarityContext, NULL, NULL)
+SetScorerAttrs(indel_normalized_similarity, metrics_py.indel_normalized_similarity, &IndelNormalizedSimilarityContext)
 
+SetFuncAttrs(indel_editops, metrics_py.indel_editops)
+SetFuncAttrs(indel_opcodes, metrics_py.indel_opcodes)
 
 def hamming_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, INT64_MAX)
@@ -720,16 +728,19 @@ cdef bool GetScorerFlagsHammingNormalizedSimilarity(const RF_Kwargs* self, RF_Sc
     return True
 
 cdef RF_Scorer HammingDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsHammingDistance, HammingDistanceInit)
-hamming_distance._RF_Scorer = PyCapsule_New(&HammingDistanceContext, NULL, NULL)
+SetScorerAttrs(hamming_distance, metrics_py.hamming_distance, &HammingDistanceContext)
 
 cdef RF_Scorer HammingNormalizedDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsHammingNormalizedDistance, HammingNormalizedDistanceInit)
-hamming_normalized_distance._RF_Scorer = PyCapsule_New(&HammingNormalizedDistanceContext, NULL, NULL)
+SetScorerAttrs(hamming_normalized_distance, metrics_py.hamming_normalized_distance, &HammingNormalizedDistanceContext)
 
 cdef RF_Scorer HammingSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsHammingSimilarity, HammingSimilarityInit)
-hamming_similarity._RF_Scorer = PyCapsule_New(&HammingSimilarityContext, NULL, NULL)
+SetScorerAttrs(hamming_similarity, metrics_py.hamming_similarity, &HammingSimilarityContext)
 
 cdef RF_Scorer HammingNormalizedSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsHammingNormalizedSimilarity, HammingNormalizedSimilarityInit)
-hamming_normalized_similarity._RF_Scorer = PyCapsule_New(&HammingNormalizedSimilarityContext, NULL, NULL)
+SetScorerAttrs(hamming_normalized_similarity, metrics_py.hamming_normalized_similarity, &HammingNormalizedSimilarityContext)
+
+SetFuncAttrs(hamming_editops, metrics_py.hamming_editops)
+SetFuncAttrs(hamming_opcodes, metrics_py.hamming_opcodes)
 
 def osa_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, INT64_MAX)
@@ -802,16 +813,16 @@ cdef bool GetScorerFlagsOSANormalizedSimilarity(const RF_Kwargs* self, RF_Scorer
     return True
 
 cdef RF_Scorer OSADistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsOSADistance, OSADistanceInit)
-osa_distance._RF_Scorer = PyCapsule_New(&OSADistanceContext, NULL, NULL)
+SetScorerAttrs(osa_distance, metrics_py.osa_distance, &OSADistanceContext)
 
 cdef RF_Scorer OSANormalizedDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsOSANormalizedDistance, OSANormalizedDistanceInit)
-osa_normalized_distance._RF_Scorer = PyCapsule_New(&OSANormalizedDistanceContext, NULL, NULL)
+SetScorerAttrs(osa_normalized_distance, metrics_py.osa_normalized_distance, &OSANormalizedDistanceContext)
 
 cdef RF_Scorer OSASimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsOSASimilarity, OSASimilarityInit)
-osa_similarity._RF_Scorer = PyCapsule_New(&OSASimilarityContext, NULL, NULL)
+SetScorerAttrs(osa_similarity, metrics_py.osa_similarity, &OSASimilarityContext)
 
 cdef RF_Scorer OSANormalizedSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsOSANormalizedSimilarity, OSANormalizedSimilarityInit)
-osa_normalized_similarity._RF_Scorer = PyCapsule_New(&OSANormalizedSimilarityContext, NULL, NULL)
+SetScorerAttrs(osa_normalized_similarity, metrics_py.osa_normalized_similarity, &OSANormalizedSimilarityContext)
 
 ###############################################
 # Jaro
@@ -867,12 +878,12 @@ cdef bool GetScorerFlagsJaroSimilarity(const RF_Kwargs* self, RF_ScorerFlags* sc
     return True
 
 cdef RF_Scorer JaroDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsJaroDistance, JaroDistanceInit)
-jaro_distance._RF_Scorer = PyCapsule_New(&JaroDistanceContext, NULL, NULL)
-jaro_normalized_distance._RF_Scorer = PyCapsule_New(&JaroDistanceContext, NULL, NULL)
+SetScorerAttrs(jaro_distance, metrics_py.jaro_distance, &JaroDistanceContext)
+SetScorerAttrs(jaro_normalized_distance, metrics_py.jaro_normalized_distance, &JaroDistanceContext)
 
 cdef RF_Scorer JaroSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsJaroSimilarity, JaroSimilarityInit)
-jaro_similarity._RF_Scorer = PyCapsule_New(&JaroSimilarityContext, NULL, NULL)
-jaro_normalized_similarity._RF_Scorer = PyCapsule_New(&JaroSimilarityContext, NULL, NULL)
+SetScorerAttrs(jaro_similarity, metrics_py.jaro_similarity, &JaroSimilarityContext)
+SetScorerAttrs(jaro_normalized_similarity, metrics_py.jaro_normalized_similarity, &JaroSimilarityContext)
 
 
 ###############################################
@@ -939,12 +950,12 @@ cdef bool GetScorerFlagsJaroWinklerSimilarity(const RF_Kwargs* self, RF_ScorerFl
     return True
 
 cdef RF_Scorer JaroWinklerDistanceContext = CreateScorerContext(JaroWinklerKwargsInit, GetScorerFlagsJaroWinklerDistance, JaroWinklerDistanceInit)
-jaro_winkler_distance._RF_Scorer = PyCapsule_New(&JaroWinklerDistanceContext, NULL, NULL)
-jaro_winkler_normalized_distance._RF_Scorer = PyCapsule_New(&JaroWinklerDistanceContext, NULL, NULL)
+SetScorerAttrs(jaro_winkler_distance, metrics_py.jaro_winkler_distance, &JaroWinklerDistanceContext)
+SetScorerAttrs(jaro_winkler_normalized_distance, metrics_py.jaro_winkler_normalized_distance, &JaroWinklerDistanceContext)
 
 cdef RF_Scorer JaroWinklerSimilarityContext = CreateScorerContext(JaroWinklerKwargsInit, GetScorerFlagsJaroWinklerSimilarity, JaroWinklerSimilarityInit)
-jaro_winkler_similarity._RF_Scorer = PyCapsule_New(&JaroWinklerSimilarityContext, NULL, NULL)
-jaro_winkler_normalized_similarity._RF_Scorer = PyCapsule_New(&JaroWinklerSimilarityContext, NULL, NULL)
+SetScorerAttrs(jaro_winkler_similarity, metrics_py.jaro_winkler_similarity, &JaroWinklerSimilarityContext)
+SetScorerAttrs(jaro_winkler_normalized_similarity, metrics_py.jaro_winkler_normalized_similarity, &JaroWinklerSimilarityContext)
 
 ###############################################
 # Postfix
@@ -1008,16 +1019,16 @@ cdef bool GetScorerFlagsPostfixNormalizedSimilarity(const RF_Kwargs* self, RF_Sc
     return True
 
 cdef RF_Scorer PostfixDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsPostfixDistance, PostfixDistanceInit)
-postfix_distance._RF_Scorer = PyCapsule_New(&PostfixDistanceContext, NULL, NULL)
+SetScorerAttrs(postfix_distance, metrics_py.postfix_distance, &PostfixDistanceContext)
 
 cdef RF_Scorer PostfixNormalizedDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsPostfixNormalizedDistance, PostfixNormalizedDistanceInit)
-postfix_normalized_distance._RF_Scorer = PyCapsule_New(&PostfixNormalizedDistanceContext, NULL, NULL)
+SetScorerAttrs(postfix_normalized_distance, metrics_py.postfix_normalized_distance, &PostfixNormalizedDistanceContext)
 
 cdef RF_Scorer PostfixSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsPostfixSimilarity, PostfixSimilarityInit)
-postfix_similarity._RF_Scorer = PyCapsule_New(&PostfixSimilarityContext, NULL, NULL)
+SetScorerAttrs(postfix_similarity, metrics_py.postfix_similarity, &PostfixSimilarityContext)
 
 cdef RF_Scorer PostfixNormalizedSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsPostfixNormalizedSimilarity, PostfixNormalizedSimilarityInit)
-postfix_normalized_similarity._RF_Scorer = PyCapsule_New(&PostfixNormalizedSimilarityContext, NULL, NULL)
+SetScorerAttrs(postfix_normalized_similarity, metrics_py.postfix_normalized_similarity, &PostfixNormalizedSimilarityContext)
 
 
 ###############################################
@@ -1083,13 +1094,13 @@ cdef bool GetScorerFlagsPrefixNormalizedSimilarity(const RF_Kwargs* self, RF_Sco
     return True
 
 cdef RF_Scorer PrefixDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsPrefixDistance, PrefixDistanceInit)
-prefix_distance._RF_Scorer = PyCapsule_New(&PrefixDistanceContext, NULL, NULL)
+SetScorerAttrs(prefix_distance, metrics_py.prefix_distance, &PrefixDistanceContext)
 
 cdef RF_Scorer PrefixNormalizedDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsPrefixNormalizedDistance, PrefixNormalizedDistanceInit)
-prefix_normalized_distance._RF_Scorer = PyCapsule_New(&PrefixNormalizedDistanceContext, NULL, NULL)
+SetScorerAttrs(prefix_normalized_distance, metrics_py.prefix_normalized_distance, &PrefixNormalizedDistanceContext)
 
 cdef RF_Scorer PrefixSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsPrefixSimilarity, PrefixSimilarityInit)
-prefix_similarity._RF_Scorer = PyCapsule_New(&PrefixSimilarityContext, NULL, NULL)
+SetScorerAttrs(prefix_similarity, metrics_py.prefix_similarity, &PrefixSimilarityContext)
 
 cdef RF_Scorer PrefixNormalizedSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsPrefixNormalizedSimilarity, PrefixNormalizedSimilarityInit)
-prefix_normalized_similarity._RF_Scorer = PyCapsule_New(&PrefixNormalizedSimilarityContext, NULL, NULL)
+SetScorerAttrs(prefix_normalized_similarity, metrics_py.prefix_normalized_similarity, &PrefixNormalizedSimilarityContext)
