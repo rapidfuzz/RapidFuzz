@@ -33,7 +33,7 @@ jobs:
           python -m pip install .
 
       - name: Build Site
-        run: make html
+        run: sphinx-build -b html docs build/html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
