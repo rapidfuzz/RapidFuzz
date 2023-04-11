@@ -76,14 +76,16 @@ _norm_sim_attr: dict[str, Callable[..., dict[str, Any]]] = {
     "get_scorer_flags": _get_scorer_flags_normalized_similarity
 }
 
-_mod = "rapidfuzz.distance.Levenshtein"
-distance = _fallback_import(_mod, "distance", cached_scorer_call=_dist_attr)
-similarity = _fallback_import(_mod, "similarity", cached_scorer_call=_sim_attr)
+_mod = "rapidfuzz.distance.metrics"
+distance = _fallback_import(_mod, "levenshtein_distance", cached_scorer_call=_dist_attr)
+similarity = _fallback_import(
+    _mod, "levenshtein_similarity", cached_scorer_call=_sim_attr
+)
 normalized_distance = _fallback_import(
-    _mod, "normalized_distance", cached_scorer_call=_norm_dist_attr
+    _mod, "levenshtein_normalized_distance", cached_scorer_call=_norm_dist_attr
 )
 normalized_similarity = _fallback_import(
-    _mod, "normalized_similarity", cached_scorer_call=_norm_sim_attr
+    _mod, "levenshtein_normalized_similarity", cached_scorer_call=_norm_sim_attr
 )
-editops = _fallback_import(_mod, "editops")
-opcodes = _fallback_import(_mod, "opcodes")
+editops = _fallback_import(_mod, "levenshtein_editops")
+opcodes = _fallback_import(_mod, "levenshtein_opcodes")
