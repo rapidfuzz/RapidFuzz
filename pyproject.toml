@@ -7,26 +7,26 @@ requires = [
 build-backend = "backend"
 backend-path = ["_custom_build"]
 
-[tool.isort]
-profile = "black"
 
 [tool.mypy]
-files = "src"
+files = ["src"]
 python_version = "3.7"
-strict = true
+warn_unused_configs = true
 show_error_codes = true
 enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
-warn_unreachable = true
+strict = true
+disallow_untyped_defs = false
 
 [tool.pytest.ini_options]
 minversion = "6.0"
+testpaths = ["tests"]
 addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+norecursedirs = ["_skbuild"]
 xfail_strict = true
 log_cli_level = "info"
-testpaths = ["tests"]
 
-[tool.pylint.master]
-py-version = "3.6"
+[tool.pylint]
+py-version = "3.7"
 
 [tool.pylint.reports]
 output-format = "colorized"
@@ -42,3 +42,52 @@ disable = [
   "protected-access",
   "missing-module-docstring",
 ]
+
+
+[tool.ruff]
+select = [
+  "E", "F", "W", # flake8
+  "B",           # flake8-bugbear
+  "I",           # isort
+  "ARG",         # flake8-unused-arguments
+  "C4",          # flake8-comprehensions
+  "EM",          # flake8-errmsg
+  "ICN",         # flake8-import-conventions
+  "ISC",         # flake8-implicit-str-concat
+  "G",           # flake8-logging-format
+  "PGH",         # pygrep-hooks
+  "PIE",         # flake8-pie
+  "PL",          # pylint
+  "PT",          # flake8-pytest-style
+  "PTH",         # flake8-use-pathlib
+  "RET",         # flake8-return
+  "RUF",         # Ruff-specific
+  "SIM",         # flake8-simplify
+  "T20",         # flake8-print
+  "UP",          # pyupgrade
+  "YTT",         # flake8-2020
+  "EXE",         # flake8-executable
+  "NPY",         # NumPy specific rules
+  "PD",          # pandas-vet
+]
+extend-ignore = [
+  "PLR",    # Design related pylint codes
+  "E501",   # Line too long
+  "PT004",  # Use underscore for non-returning fixture (use usefixture instead)
+  "PTH123", # use pathlib instead of builtin open
+]
+target-version = "py37"
+src = ["src"]
+unfixable = [
+  "T20",  # Removes print statements
+  "F841", # Removes unused variables
+]
+exclude = []
+flake8-unused-arguments.ignore-variadic-names = true
+isort.required-imports = ["from __future__ import annotations"]
+
+[tool.ruff.per-file-ignores]
+"tests/**" = ["T20"]
+"bench/**" = ["T20"]
+"_custom_build/backend.py" = ["T20"]
+"setup.py" = ["T20"]

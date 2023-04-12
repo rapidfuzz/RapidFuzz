@@ -17,9 +17,9 @@ def test_editops_comparison():
     """
     ops = Levenshtein.editops("aaabaaa", "abbaaabba")
     assert ops == ops
-    assert not (ops != ops)  # noqa
+    assert not (ops != ops)  # noqa: SIM202
     assert ops == ops.copy()
-    assert not (ops != ops.copy())  # noqa
+    assert not (ops != ops.copy())  # noqa: SIM202
 
 
 @pytest.mark.parametrize("module", [distance_py, distance_cpp])
@@ -99,10 +99,12 @@ def test_editops_get_slice(module):
     assert ops[-3:].as_list() == ops_list[-3:]
     assert ops[-3:-1].as_list() == ops_list[-3:-1]
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="slice step cannot be zero"):
         ops[::0]
 
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="step sizes below 0 lead to an invalid order of editops"
+    ):
         ops[::-1]
 
 
@@ -185,9 +187,9 @@ def test_opcodes_comparison():
     """
     ops = Levenshtein.opcodes("aaabaaa", "abbaaabba")
     assert ops == ops
-    assert not (ops != ops)  # noqa
+    assert not (ops != ops)  # noqa: SIM202
     assert ops == ops.copy()
-    assert not (ops != ops.copy())  # noqa
+    assert not (ops != ops.copy())  # noqa: SIM202
 
 
 @pytest.mark.parametrize("module", [distance_py, distance_cpp])

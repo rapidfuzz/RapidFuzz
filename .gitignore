@@ -14,6 +14,7 @@ test.py
 src/*.html
 .coverage
 coverage.xml
+sde/
 
 # Sphinx documentation
 site/
