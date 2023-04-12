@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import (
     Any,
     Callable,
@@ -5,11 +7,8 @@ from typing import (
     Generator,
     Hashable,
     Iterable,
-    List,
     Mapping,
-    Optional,
     Sequence,
-    Tuple,
     TypeVar,
     Union,
     overload,
@@ -29,61 +28,61 @@ def extractOne(
     choices: Iterable[_S2],
     *,
     scorer: Callable[..., _ResultType] = WRatio,
-    processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[_ResultType] = None,
-    **kwargs: Any
-) -> Tuple[_S2, _ResultType, int]: ...
+    processor: Callable[..., _StringType] | None = None,
+    score_cutoff: _ResultType | None = None,
+    **kwargs: Any,
+) -> tuple[_S2, _ResultType, int]: ...
 @overload
 def extractOne(
     query: _S1,
     choices: Mapping[Any, _S2],
     *,
     scorer: Callable[..., _ResultType] = WRatio,
-    processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[_ResultType] = None,
-    **kwargs: Any
-) -> Tuple[_S2, _ResultType, Any]: ...
+    processor: Callable[..., _StringType] | None = None,
+    score_cutoff: _ResultType | None = None,
+    **kwargs: Any,
+) -> tuple[_S2, _ResultType, Any]: ...
 @overload
 def extract(
     query: _S1,
     choices: Collection[_S2],
     *,
     scorer: Callable[..., _ResultType] = WRatio,
-    processor: Optional[Callable[..., _StringType]] = None,
-    limit: Optional[int] = None,
-    score_cutoff: Optional[_ResultType] = None,
-    **kwargs: Any
-) -> List[Tuple[_S2, _ResultType, int]]: ...
+    processor: Callable[..., _StringType] | None = None,
+    limit: int | None = None,
+    score_cutoff: _ResultType | None = None,
+    **kwargs: Any,
+) -> list[tuple[_S2, _ResultType, int]]: ...
 @overload
 def extract(
     query: _S1,
     choices: Mapping[Any, _S2],
     *,
     scorer: Callable[..., _ResultType] = WRatio,
-    processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[_ResultType] = None,
-    **kwargs: Any
-) -> List[Tuple[_S2, _ResultType, Any]]: ...
+    processor: Callable[..., _StringType] | None = None,
+    score_cutoff: _ResultType | None = None,
+    **kwargs: Any,
+) -> list[tuple[_S2, _ResultType, Any]]: ...
 @overload
 def extract_iter(
     query: _S1,
     choices: Iterable[_S2],
     *,
     scorer: Callable[..., _ResultType] = WRatio,
-    processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[_ResultType] = None,
-    **kwargs: Any
-) -> Generator[Tuple[_S2, _ResultType, int], None, None]: ...
+    processor: Callable[..., _StringType] | None = None,
+    score_cutoff: _ResultType | None = None,
+    **kwargs: Any,
+) -> Generator[tuple[_S2, _ResultType, int], None, None]: ...
 @overload
 def extract_iter(
     query: _S1,
     choices: Mapping[Any, _S2],
     *,
     scorer: Callable[..., _ResultType] = WRatio,
-    processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[_ResultType] = None,
-    **kwargs: Any
-) -> Generator[Tuple[_S2, _ResultType, Any], None, None]: ...
+    processor: Callable[..., _StringType] | None = None,
+    score_cutoff: _ResultType | None = None,
+    **kwargs: Any,
+) -> Generator[tuple[_S2, _ResultType, Any], None, None]: ...
 
 FLOAT32: int
 FLOAT64: int
@@ -101,9 +100,9 @@ def cdist(
     choices: Iterable[_S2],
     *,
     scorer: Callable[..., _ResultType] = ratio,
-    processor: Optional[Callable[..., _StringType]] = None,
-    score_cutoff: Optional[_ResultType] = None,
-    dtype: Optional[int] = None,
+    processor: Callable[..., _StringType] | None = None,
+    score_cutoff: _ResultType | None = None,
+    dtype: int | None = None,
     workers: int = 1,
-    **kwargs: Any
+    **kwargs: Any,
 ) -> Any: ...

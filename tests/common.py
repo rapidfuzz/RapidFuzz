@@ -1,6 +1,8 @@
 """
 common parts of the test suite for rapidfuzz
 """
+from __future__ import annotations
+
 from dataclasses import dataclass
 from math import isnan
 from typing import Any

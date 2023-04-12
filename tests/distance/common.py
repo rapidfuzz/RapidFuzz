@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from rapidfuzz._feature_detector import AVX2, supports
 from rapidfuzz.distance import metrics_cpp, metrics_py
 from tests.common import GenericScorer, Scorer, is_none

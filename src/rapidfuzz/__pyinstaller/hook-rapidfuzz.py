@@ -1,4 +1,6 @@
 # Pyinstaller hook to successfully freeze: https://pyinstaller.readthedocs.io/en/stable/hooks.html
+from __future__ import annotations
+
 hiddenimports = [
     "array",
     "rapidfuzz.fuzz_py",

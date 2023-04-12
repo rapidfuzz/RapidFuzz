@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import pytest
 
 from tests.distance.common import DamerauLevenshtein
 
 
 @pytest.mark.parametrize(
-    "left, right, distance",
+    ("left", "right", "distance"),
     [
         ("test", "text", 1),
         ("test", "tset", 1),

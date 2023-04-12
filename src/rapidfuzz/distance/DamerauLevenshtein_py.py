@@ -17,7 +17,7 @@ def _damerau_levenshtein_distance_zhao(
     size = len(s2) + 2
     FR = [maxVal] * size
     R1 = [maxVal] * size
-    R = [x for x in range(size)]
+    R = list(range(size))
     R[-1] = maxVal
 
     for i in range(1, len(s1) + 1):

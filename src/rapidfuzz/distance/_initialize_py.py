@@ -82,20 +82,18 @@ def _list_to_opcodes(
         if edit_type == "insert":
             if src_start != src_end or dest_start == dest_end:
                 raise ValueError("List of edit operations invalid")
-        elif edit_type == "delete":
-            if src_start == src_end or dest_start != dest_end:
-                raise ValueError("List of edit operations invalid")
+        elif edit_type == "delete" and (src_start == src_end or dest_start != dest_end):
+            raise ValueError("List of edit operations invalid")
 
         # merge similar adjacent blocks
-        if blocks:
-            if (
-                blocks[-1].tag == edit_type
-                and blocks[-1].src_end == src_start
-                and blocks[-1].dest_end == dest_start
-            ):
-                blocks[-1].src_end = src_end
-                blocks[-1].dest_end = dest_end
-                continue
+        if blocks and (
+            blocks[-1].tag == edit_type
+            and blocks[-1].src_end == src_start
+            and blocks[-1].dest_end == dest_start
+        ):
+            blocks[-1].src_end = src_end
+            blocks[-1].dest_end = dest_end
+            continue
 
         blocks.append(Opcode(edit_type, src_start, src_end, dest_start, dest_end))
 

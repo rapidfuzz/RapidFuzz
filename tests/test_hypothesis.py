@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import random
 from itertools import product
 from string import ascii_letters, digits, punctuation
@@ -38,10 +40,7 @@ def levenshtein(s1, s2, weights=(1, 1, 1)):
 
     for col in range(1, cols):
         for row in range(1, rows):
-            if s1[row - 1] == s2[col - 1]:
-                cost = 0
-            else:
-                cost = substitute
+            cost = 0 if s1[row - 1] == s2[col - 1] else substitute
 
             dist[row][col] = min(
                 dist[row - 1][col] + delete,  # deletion
@@ -409,7 +408,9 @@ def test_multiple_processor_runs(sentence):
     )
 
 
-@pytest.mark.parametrize("scorer,processor", list(product(FULL_SCORERS, PROCESSORS)))
+@pytest.mark.parametrize(
+    ("scorer", "processor"), list(product(FULL_SCORERS, PROCESSORS))
+)
 @given(choices=st.lists(st.text(), min_size=1))
 @settings(max_examples=50, deadline=1000)
 def test_only_identical_strings_extracted(scorer, processor, choices):

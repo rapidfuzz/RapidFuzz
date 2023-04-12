@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import subprocess
 
 from PyInstaller import __main__ as pyi_main

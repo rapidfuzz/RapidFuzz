@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from rapidfuzz.distance import metrics_cpp
 from tests.distance.common import OSA
 

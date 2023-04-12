@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from rapidfuzz import process
 from rapidfuzz.distance import Levenshtein_py, Opcode, Opcodes, metrics_cpp
 from tests.distance.common import Levenshtein
@@ -124,9 +126,9 @@ def test_mbleven():
     """
     test for regressions to previous bugs in the cached Levenshtein implementation
     """
-    assert 2 == Levenshtein.distance("0", "101", score_cutoff=1)
-    assert 2 == Levenshtein.distance("0", "101", score_cutoff=2)
-    assert 2 == Levenshtein.distance("0", "101", score_cutoff=3)
+    assert Levenshtein.distance("0", "101", score_cutoff=1) == 2
+    assert Levenshtein.distance("0", "101", score_cutoff=2) == 2
+    assert Levenshtein.distance("0", "101", score_cutoff=3) == 2
 
     match = process.extractOne(
         "0",

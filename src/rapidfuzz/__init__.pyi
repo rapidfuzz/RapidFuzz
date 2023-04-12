@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 __author__: str
 __license__: str
 __version__: str

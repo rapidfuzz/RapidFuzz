@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from rapidfuzz import fuzz, process_cpp, process_py
