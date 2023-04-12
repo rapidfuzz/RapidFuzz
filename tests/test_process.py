@@ -348,8 +348,8 @@ def test_issue81():
     ]
 
 
-def custom_scorer(s1, s2, processor=None, score_cutoff=0):
-    return fuzz.ratio(s1, s2, processor=processor, score_cutoff=score_cutoff)
+def custom_scorer(s1, s2, score_cutoff=0):
+    return fuzz.ratio(s1, s2, score_cutoff=score_cutoff)
 
 
 @pytest.mark.parametrize("processor", [None, lambda s: s])

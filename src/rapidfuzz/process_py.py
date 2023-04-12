@@ -157,12 +157,11 @@ def extract_iter(
             continue
 
         if processor is None:
-            score = scorer(query, choice, processor=None, score_cutoff=score_cutoff, **kwargs)
+            score = scorer(query, choice, score_cutoff=score_cutoff, **kwargs)
         else:
             score = scorer(
                 query,
                 processor(choice),
-                processor=None,
                 score_cutoff=score_cutoff,
                 **kwargs,
             )
@@ -352,12 +351,11 @@ def extractOne(
             continue
 
         if processor is None:
-            score = scorer(query, choice, processor=None, score_cutoff=score_cutoff, **kwargs)
+            score = scorer(query, choice, score_cutoff=score_cutoff, **kwargs)
         else:
             score = scorer(
                 query,
                 processor(choice),
-                processor=None,
                 score_cutoff=score_cutoff,
                 **kwargs,
             )
@@ -616,12 +614,11 @@ def cdist(
             proc_queries = [processor(x) for x in queries]
 
         for i, query in enumerate(proc_queries):
-            results[i, i] = scorer(query, query, processor=None, score_cutoff=score_cutoff, **kwargs)
+            results[i, i] = scorer(query, query, score_cutoff=score_cutoff, **kwargs)
             for j in range(i + 1, len(proc_queries)):
                 results[i, j] = results[j, i] = scorer(
                     query,
                     proc_queries[j],
-                    processor=None,
                     score_cutoff=score_cutoff,
                     **kwargs,
                 )
@@ -637,7 +634,6 @@ def cdist(
                 results[i, j] = scorer(
                     proc_query,
                     choice,
-                    processor=None,
                     score_cutoff=score_cutoff,
                     **kwargs,
                 )

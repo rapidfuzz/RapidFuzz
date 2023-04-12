@@ -680,7 +680,6 @@ def extractOne(query, choices, *, scorer=WRatio, processor=None, score_cutoff=No
     if score_cutoff is None:
         score_cutoff = worst_score
 
-    kwargs["processor"] = None
     kwargs["score_cutoff"] = score_cutoff
 
     if hasattr(choices, "items"):
@@ -991,7 +990,6 @@ def extract(query, choices, *, scorer=WRatio, processor=None, limit=5, score_cut
     if score_cutoff is None:
         score_cutoff = worst_score
 
-    kwargs["processor"] = None
     kwargs["score_cutoff"] = score_cutoff
 
     if hasattr(choices, "items"):
@@ -1270,7 +1268,6 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=None, score_cutoff=
     if score_cutoff is None:
         score_cutoff = worst_score
 
-    kwargs["processor"] = None
     kwargs["score_cutoff"] = score_cutoff
 
     if hasattr(choices, "items"):
@@ -1485,7 +1482,6 @@ cdef cdist_py(queries, choices, scorer, processor, score_cutoff, dtype, workers,
     c_dtype = dtype_to_type_num_py(dtype, scorer, kwargs)
     matrix.matrix = RfMatrix(c_dtype, proc_queries.size(), proc_choices.size())
 
-    kwargs["processor"] = None
     kwargs["score_cutoff"] = score_cutoff
 
     for i in range(proc_queries.size()):
