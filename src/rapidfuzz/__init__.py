@@ -29,4 +29,4 @@ def get_include():
     """
     from pathlib import Path
 
-    return Path(__file__).parent
+    return str(Path(__file__).parent)
