@@ -109,7 +109,7 @@ def extract_iter(
         which deactivates this behaviour.
     scorer_kwargs : dict[str, Any], optional
         any other named parameters are passed to the scorer. This can be used to pass
-        e.g. weights to string_metric.levenshtein
+        e.g. weights to `Levenshtein.distance`
 
     Yields
     -------
@@ -123,10 +123,10 @@ def extract_iter(
 
           * An edit distance (distance is 0 for a perfect match and > 0 for non perfect matches).
             In this case only choices which have a `distance <= max` are yielded.
-            An example of a scorer with this behavior is `string_metric.levenshtein`.
+            An example of a scorer with this behavior is `Levenshtein.distance`.
           * A normalized edit distance (similarity is a score between 0 and 100, with 100 being a perfect match).
             In this case only choices which have a `similarity >= score_cutoff` are yielded.
-            An example of a scorer with this behavior is `string_metric.normalized_levenshtein`.
+            An example of a scorer with this behavior is `Levenshtein.normalized_similarity`.
 
           Note, that for all scorers, which are not provided by RapidFuzz, only normalized edit distances are supported.
 
@@ -244,7 +244,7 @@ def extractOne(
         which deactivates this behaviour.
     scorer_kwargs : dict[str, Any], optional
         any other named parameters are passed to the scorer. This can be used to pass
-        e.g. weights to string_metric.levenshtein
+        e.g. weights to `Levenshtein.distance`
 
     Returns
     -------
@@ -258,10 +258,10 @@ def extractOne(
 
           * An edit distance (distance is 0 for a perfect match and > 0 for non perfect matches).
             In this case only choices which have a `distance <= score_cutoff` are returned.
-            An example of a scorer with this behavior is `string_metric.levenshtein`.
+            An example of a scorer with this behavior is `Levenshtein.distance`.
           * A normalized edit distance (similarity is a score between 0 and 100, with 100 being a perfect match).
             In this case only choices which have a `similarity >= score_cutoff` are returned.
-            An example of a scorer with this behavior is `string_metric.normalized_levenshtein`.
+            An example of a scorer with this behavior is `Levenshtein.normalized_similarity`.
 
           Note, that for all scorers, which are not provided by RapidFuzz, only normalized edit distances are supported.
 
@@ -277,24 +277,24 @@ def extractOne(
     --------
 
     >>> from rapidfuzz.process import extractOne
-    >>> from rapidfuzz.string_metric import levenshtein, normalized_levenshtein
+    >>> from rapidfuzz.distance import Levenshtein
     >>> from rapidfuzz.fuzz import ratio
 
     extractOne can be used with normalized edit distances.
 
     >>> extractOne("abcd", ["abce"], scorer=ratio)
     ("abcd", 75.0, 1)
-    >>> extractOne("abcd", ["abce"], scorer=normalized_levenshtein)
-    ("abcd", 75.0, 1)
+    >>> extractOne("abcd", ["abce"], scorer=Levenshtein.normalized_similarity)
+    ("abcd", 0.75, 1)
 
     extractOne can be used with edit distances as well.
 
-    >>> extractOne("abcd", ["abce"], scorer=levenshtein)
+    >>> extractOne("abcd", ["abce"], scorer=Levenshtein.distance)
     ("abce", 1, 0)
 
     additional settings of the scorer can be passed via the scorer_kwargs argument to extractOne
 
-    >>> extractOne("abcd", ["abce"], scorer=levenshtein, scorer_kwargs={"weights":(1,1,2)})
+    >>> extractOne("abcd", ["abce"], scorer=Levenshtein.distance, scorer_kwargs={"weights":(1,1,2)})
     ("abcde", 2, 1)
 
     when a mapping is used for the choices the key of the choice is returned instead of the List index
@@ -323,9 +323,9 @@ def extractOne(
 
     For edit distances all results with an edit distance above the score_cutoff are filtered out
 
-    >>> extractOne("abcd", ["abce"], scorer=levenshtein, weights=(1,1,2))
+    >>> extractOne("abcd", ["abce"], scorer=Levenshtein.distance, scorer_kwargs={"weights":(1,1,2)})
     ("abce", 2, 0)
-    >>> extractOne("abcd", ["abce"], scorer=levenshtein, weights=(1,1,2), score_cutoff=1)
+    >>> extractOne("abcd", ["abce"], scorer=Levenshtein.distance, scorer_kwargs={"weights":(1,1,2)}, score_cutoff=1)
     None
 
     """
@@ -451,7 +451,7 @@ def extract(
         which deactivates this behaviour.
     scorer_kwargs : dict[str, Any], optional
         any other named parameters are passed to the scorer. This can be used to pass
-        e.g. weights to string_metric.levenshtein
+        e.g. weights to `Levenshtein.distance`
 
     Returns
     -------
@@ -465,10 +465,10 @@ def extract(
 
           * An edit distance (distance is 0 for a perfect match and > 0 for non perfect matches).
             In this case only choices which have a `distance <= max` are returned.
-            An example of a scorer with this behavior is `string_metric.levenshtein`.
+            An example of a scorer with this behavior is `Levenshtein.distance`.
           * A normalized edit distance (similarity is a score between 0 and 100, with 100 being a perfect match).
             In this case only choices which have a `similarity >= score_cutoff` are returned.
-            An example of a scorer with this behavior is `string_metric.normalized_levenshtein`.
+            An example of a scorer with this behavior is `Levenshtein.normalized_similarity`.
 
           Note, that for all scorers, which are not provided by RapidFuzz, only normalized edit distances are supported.
 
@@ -596,7 +596,7 @@ def cdist(
         releases the Python GIL.
     scorer_kwargs : dict[str, Any], optional
         any other named parameters are passed to the scorer. This can be used to pass
-        e.g. weights to string_metric.levenshtein
+        e.g. weights to `Levenshtein.distance`
 
     Returns
     -------

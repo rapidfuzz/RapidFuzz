@@ -63,7 +63,7 @@ def ratio(
 
     See Also
     --------
-    rapidfuzz.string_metric.normalized_levenshtein : Normalized levenshtein distance
+    rapidfuzz.distance.Indel.normalized_distance : Normalized Indel distance
 
     Notes
     -----

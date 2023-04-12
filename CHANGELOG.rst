@@ -16,6 +16,7 @@ Changed
 - remove option to pass keyword arguments to scorer via ``**kwargs`` in ``rapidfuzz.process``. They can be passed
   via a ``scorer_kwargs`` argument now. This ensures this does not break when extending function parameters and
   prevents naming clashes.
+- remove ``rapidfuzz.string_metric`` module. Replacements for all functions are available in ``rapidfuzz.distance``
 
 [2.15.1] - 2023-04-11
 ^^^^^^^^^^^^^^^^^^^^^
