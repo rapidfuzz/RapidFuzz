@@ -13,6 +13,9 @@ Changed
   the functions in ``rapidfuzz.fuzz`` and ``rapidfuzz.process``.
 - ``rapidfuzz.process`` no longer calls scorers with ``processor=None``. For this reason scorer functions
   do not need to provide this argument anymore.
+- remove option to pass keyword arguments to scorer via ``**kwargs`` in ``rapidfuzz.process``. They can be passed
+  via a ``scorer_kwargs`` argument now. This ensures this does not break when extending function parameters and
+  prevents naming clashes.
 
 [2.15.1] - 2023-04-11
 ^^^^^^^^^^^^^^^^^^^^^

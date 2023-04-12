@@ -29,7 +29,7 @@ def extractOne(
     processor: Callable[..., _StringType] | None = None,
     score_cutoff: _ResultType | None = None,
     score_hint: _ResultType | None = None,
-    **kwargs: Any,
+    scorer_kwargs: dict[str, Any] | None = None,
 ) -> tuple[_S2, _ResultType, int]: ...
 @overload
 def extractOne(
@@ -40,7 +40,7 @@ def extractOne(
     processor: Callable[..., _StringType] | None = None,
     score_cutoff: _ResultType | None = None,
     score_hint: _ResultType | None = None,
-    **kwargs: Any,
+    scorer_kwargs: dict[str, Any] | None = None,
 ) -> tuple[_S2, _ResultType, Any]: ...
 @overload
 def extract(
@@ -52,7 +52,7 @@ def extract(
     limit: int | None = None,
     score_cutoff: _ResultType | None = None,
     score_hint: _ResultType | None = None,
-    **kwargs: Any,
+    scorer_kwargs: dict[str, Any] | None = None,
 ) -> list[tuple[_S2, _ResultType, int]]: ...
 @overload
 def extract(
@@ -63,7 +63,7 @@ def extract(
     processor: Callable[..., _StringType] | None = None,
     score_cutoff: _ResultType | None = None,
     score_hint: _ResultType | None = None,
-    **kwargs: Any,
+    scorer_kwargs: dict[str, Any] | None = None,
 ) -> list[tuple[_S2, _ResultType, Any]]: ...
 @overload
 def extract_iter(
@@ -74,7 +74,7 @@ def extract_iter(
     processor: Callable[..., _StringType] | None = None,
     score_cutoff: _ResultType | None = None,
     score_hint: _ResultType | None = None,
-    **kwargs: Any,
+    scorer_kwargs: dict[str, Any] | None = None,
 ) -> Generator[tuple[_S2, _ResultType, int], None, None]: ...
 @overload
 def extract_iter(
@@ -85,7 +85,7 @@ def extract_iter(
     processor: Callable[..., _StringType] | None = None,
     score_cutoff: _ResultType | None = None,
     score_hint: _ResultType | None = None,
-    **kwargs: Any,
+    scorer_kwargs: dict[str, Any] | None = None,
 ) -> Generator[tuple[_S2, _ResultType, Any], None, None]: ...
 
 try:
@@ -101,7 +101,7 @@ try:
         score_hint: _ResultType | None = None,
         dtype: np.dtype | None = None,
         workers: int = 1,
-        **kwargs: Any,
+        scorer_kwargs: dict[str, Any] | None = None,
     ) -> np.ndarray: ...
 
 except ImportError:

@@ -392,7 +392,7 @@ def test_cdist_not_symmetric():
     strings = ["test", "test2"]
     expected_res = np.array([[0, 1], [2, 0]])
     assert np.array_equal(
-        process.cdist(strings, strings, scorer=Levenshtein.distance, weights=(1, 2, 1)),
+        process.cdist(strings, strings, scorer=Levenshtein.distance, scorer_kwargs={"weights": (1, 2, 1)}),
         expected_res,
     )
 

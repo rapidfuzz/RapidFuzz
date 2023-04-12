@@ -9,7 +9,7 @@ from typing import Any
 
 import pytest
 
-from rapidfuzz import process_cpp, process_py, utils
+from rapidfuzz import process_cpp, process_py
 
 
 def is_none(s):
@@ -25,19 +25,26 @@ def is_none(s):
 def scorer_tester(scorer, s1, s2, **kwargs):
     score1 = scorer(s1, s2, **kwargs)
 
-    if "processor" not in kwargs:
-        kwargs["processor"] = None
-    elif kwargs["processor"] is True:
-        kwargs["processor"] = utils.default_process
-    elif kwargs["processor"] is False:
-        kwargs["processor"] = None
+    temp_kwargs = kwargs.copy()
+    process_kwargs = {}
 
-    extractOne_res1 = process_cpp.extractOne(s1, [s2], scorer=scorer, **kwargs)
-    extractOne_res2 = process_py.extractOne(s1, [s2], scorer=scorer, **kwargs)
-    extract_res1 = process_cpp.extract(s1, [s2], scorer=scorer, **kwargs)
-    extract_res2 = process_py.extract(s1, [s2], scorer=scorer, **kwargs)
-    extract_iter_res1 = list(process_cpp.extract_iter(s1, [s2], scorer=scorer, **kwargs))
-    extract_iter_res2 = list(process_py.extract_iter(s1, [s2], scorer=scorer, **kwargs))
+    if "processor" in kwargs:
+        process_kwargs["processor"] = kwargs["processor"]
+        del temp_kwargs["processor"]
+
+    if "score_cutoff" in kwargs:
+        process_kwargs["score_cutoff"] = kwargs["score_cutoff"]
+        del temp_kwargs["score_cutoff"]
+
+    if temp_kwargs:
+        process_kwargs["scorer_kwargs"] = temp_kwargs
+
+    extractOne_res1 = process_cpp.extractOne(s1, [s2], scorer=scorer, **process_kwargs)
+    extractOne_res2 = process_py.extractOne(s1, [s2], scorer=scorer, **process_kwargs)
+    extract_res1 = process_cpp.extract(s1, [s2], scorer=scorer, **process_kwargs)
+    extract_res2 = process_py.extract(s1, [s2], scorer=scorer, **process_kwargs)
+    extract_iter_res1 = list(process_cpp.extract_iter(s1, [s2], scorer=scorer, **process_kwargs))
+    extract_iter_res2 = list(process_py.extract_iter(s1, [s2], scorer=scorer, **process_kwargs))
 
     if is_none(s1) or is_none(s2):
         assert extractOne_res1 is None
@@ -64,8 +71,8 @@ def scorer_tester(scorer, s1, s2, **kwargs):
 
     # todo this should be able to handle None similar to the original scorer
     if not is_none(s1) and not is_none(s2):
-        score6 = process_cpp.cdist([s1], [s2], scorer=scorer, **kwargs)[0][0]
-        score7 = process_py.cdist([s1], [s2], scorer=scorer, **kwargs)[0][0]
+        score6 = process_cpp.cdist([s1], [s2], scorer=scorer, **process_kwargs)[0][0]
+        score7 = process_py.cdist([s1], [s2], scorer=scorer, **process_kwargs)[0][0]
         assert pytest.approx(score1) == score6
         assert pytest.approx(score1) == score7
 

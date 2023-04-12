@@ -23,10 +23,10 @@ from rapidfuzz.fuzz import WRatio, ratio
 __all__ = ["extract", "extract_iter", "extractOne", "cdist"]
 
 
-def _get_scorer_flags_py(scorer: Any, kwargs: dict[str, Any]) -> tuple[int, int]:
+def _get_scorer_flags_py(scorer: Any, scorer_kwargs: dict[str, Any]) -> tuple[int, int]:
     params = getattr(scorer, "_RF_ScorerPy", None)
     if params is not None:
-        flags = params["get_scorer_flags"](**kwargs)
+        flags = params["get_scorer_flags"](**scorer_kwargs)
         return (flags["worst_score"], flags["optimal_score"])
     return (0, 100)
 
@@ -50,7 +50,7 @@ def extract_iter(
     processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
-    **kwargs: Any,
+    scorer_kwargs: dict[str, Any] | None = None,
 ) -> Iterable[tuple[Sequence[Hashable], int | float, int]]:
     ...
 
@@ -64,7 +64,7 @@ def extract_iter(
     processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
-    **kwargs: Any,
+    scorer_kwargs: dict[str, Any] | None = None,
 ) -> Iterable[tuple[Sequence[Hashable], int | float, Any]]:
     ...
 
@@ -77,7 +77,7 @@ def extract_iter(
     processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
-    **kwargs: Any,
+    scorer_kwargs: dict[str, Any] | None = None,
 ) -> Iterable[tuple[Sequence[Hashable], int | float, Any]]:
     """
     Find the best match in a list of choices
@@ -107,7 +107,7 @@ def extract_iter(
         Optional argument for an expected score to be passed to the scorer.
         This is used to select a faster implementation. Default is None,
         which deactivates this behaviour.
-    **kwargs : Any, optional
+    scorer_kwargs : dict[str, Any], optional
         any other named parameters are passed to the scorer. This can be used to pass
         e.g. weights to string_metric.levenshtein
 
@@ -137,7 +137,8 @@ def extract_iter(
 
     """
     _ = score_hint
-    worst_score, optimal_score = _get_scorer_flags_py(scorer, kwargs)
+    scorer_kwargs = scorer_kwargs or {}
+    worst_score, optimal_score = _get_scorer_flags_py(scorer, scorer_kwargs)
     lowest_score_worst = optimal_score > worst_score
 
     if _is_none(query):
@@ -157,13 +158,13 @@ def extract_iter(
             continue
 
         if processor is None:
-            score = scorer(query, choice, score_cutoff=score_cutoff, **kwargs)
+            score = scorer(query, choice, score_cutoff=score_cutoff, **scorer_kwargs)
         else:
             score = scorer(
                 query,
                 processor(choice),
                 score_cutoff=score_cutoff,
-                **kwargs,
+                **scorer_kwargs,
             )
 
         if lowest_score_worst:
@@ -183,7 +184,7 @@ def extractOne(
     processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
-    **kwargs: Any,
+    scorer_kwargs: dict[str, Any] | None = None,
 ) -> tuple[Sequence[Hashable], int | float, int] | None:
     ...
 
@@ -197,7 +198,7 @@ def extractOne(
     processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
-    **kwargs: Any,
+    scorer_kwargs: dict[str, Any] | None = None,
 ) -> tuple[Sequence[Hashable], int | float, Any] | None:
     ...
 
@@ -210,7 +211,7 @@ def extractOne(
     processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
-    **kwargs: Any,
+    scorer_kwargs: dict[str, Any] | None = None,
 ) -> tuple[Sequence[Hashable], int | float, Any] | None:
     """
     Find the best match in a list of choices. When multiple elements have the same similarity,
@@ -241,7 +242,7 @@ def extractOne(
         Optional argument for an expected score to be passed to the scorer.
         This is used to select a faster implementation. Default is None,
         which deactivates this behaviour.
-    **kwargs : Any, optional
+    scorer_kwargs : dict[str, Any], optional
         any other named parameters are passed to the scorer. This can be used to pass
         e.g. weights to string_metric.levenshtein
 
@@ -291,9 +292,9 @@ def extractOne(
     >>> extractOne("abcd", ["abce"], scorer=levenshtein)
     ("abce", 1, 0)
 
-    additional settings of the scorer can be passed as keyword arguments to extractOne
+    additional settings of the scorer can be passed via the scorer_kwargs argument to extractOne
 
-    >>> extractOne("abcd", ["abce"], scorer=levenshtein, weights=(1,1,2))
+    >>> extractOne("abcd", ["abce"], scorer=levenshtein, scorer_kwargs={"weights":(1,1,2)})
     ("abcde", 2, 1)
 
     when a mapping is used for the choices the key of the choice is returned instead of the List index
@@ -329,7 +330,8 @@ def extractOne(
 
     """
     _ = score_hint
-    worst_score, optimal_score = _get_scorer_flags_py(scorer, kwargs)
+    scorer_kwargs = scorer_kwargs or {}
+    worst_score, optimal_score = _get_scorer_flags_py(scorer, scorer_kwargs)
     lowest_score_worst = optimal_score > worst_score
 
     if _is_none(query):
@@ -351,13 +353,13 @@ def extractOne(
             continue
 
         if processor is None:
-            score = scorer(query, choice, score_cutoff=score_cutoff, **kwargs)
+            score = scorer(query, choice, score_cutoff=score_cutoff, **scorer_kwargs)
         else:
             score = scorer(
                 query,
                 processor(choice),
                 score_cutoff=score_cutoff,
-                **kwargs,
+                **scorer_kwargs,
             )
 
         if lowest_score_worst:
@@ -385,7 +387,7 @@ def extract(
     limit: int | None = None,
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
-    **kwargs: Any,
+    scorer_kwargs: dict[str, Any] | None = None,
 ) -> list[tuple[Sequence[Hashable], int | float, int]]:
     ...
 
@@ -400,7 +402,7 @@ def extract(
     limit: int | None = None,
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
-    **kwargs: Any,
+    scorer_kwargs: dict[str, Any] | None = None,
 ) -> list[tuple[Sequence[Hashable], int | float, Any]]:
     ...
 
@@ -414,7 +416,7 @@ def extract(
     limit: int | None = 5,
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
-    **kwargs: Any,
+    scorer_kwargs: dict[str, Any] | None = None,
 ) -> list[tuple[Sequence[Hashable], int | float, Any]]:
     """
     Find the best matches in a list of choices. The list is sorted by the similarity.
@@ -447,7 +449,7 @@ def extract(
         Optional argument for an expected score to be passed to the scorer.
         This is used to select a faster implementation. Default is None,
         which deactivates this behaviour.
-    **kwargs : Any, optional
+    scorer_kwargs : dict[str, Any], optional
         any other named parameters are passed to the scorer. This can be used to pass
         e.g. weights to string_metric.levenshtein
 
@@ -479,8 +481,8 @@ def extract(
         has the `highest similarity`/`smallest distance`.
 
     """
-    _ = score_hint
-    worst_score, optimal_score = _get_scorer_flags_py(scorer, kwargs)
+    scorer_kwargs = scorer_kwargs or {}
+    worst_score, optimal_score = _get_scorer_flags_py(scorer, scorer_kwargs)
     lowest_score_worst = optimal_score > worst_score
 
     result_iter = extract_iter(
@@ -489,7 +491,8 @@ def extract(
         processor=processor,
         scorer=scorer,
         score_cutoff=score_cutoff,
-        **kwargs,
+        score_hint=score_hint,
+        scorer_kwargs=scorer_kwargs,
     )
 
     if limit is None:
@@ -507,7 +510,7 @@ with suppress(BaseException):
 def _dtype_to_type_num(
     dtype: np.dtype | None,
     scorer: Callable[..., int | float],
-    **kwargs: dict[str, Any],
+    scorer_kwargs: dict[str, Any],
 ) -> np.dtype:
     import numpy as np
 
@@ -516,7 +519,7 @@ def _dtype_to_type_num(
 
     params = getattr(scorer, "_RF_ScorerPy", None)
     if params is not None:
-        flags = params["get_scorer_flags"](**kwargs)
+        flags = params["get_scorer_flags"](**scorer_kwargs)
         if flags["flags"] & ScorerFlag.RESULT_I64:
             return np.int32
         return np.float32
@@ -524,10 +527,10 @@ def _dtype_to_type_num(
     return np.float32
 
 
-def _is_symmetric(scorer: Callable[..., int | float], **kwargs: dict[str, Any]) -> bool:
+def _is_symmetric(scorer: Callable[..., int | float], scorer_kwargs: dict[str, Any]) -> bool:
     params = getattr(scorer, "_RF_ScorerPy", None)
     if params is not None:
-        flags = params["get_scorer_flags"](**kwargs)
+        flags = params["get_scorer_flags"](**scorer_kwargs)
         if flags["flags"] & ScorerFlag.SYMMETRIC:
             return True
 
@@ -544,7 +547,7 @@ def cdist(
     score_hint: int | float | None = None,
     dtype: np.dtype | None = None,
     workers: int = 1,
-    **kwargs: Any,
+    scorer_kwargs: dict[str, Any] | None = None,
 ) -> np.ndarray:
     """
     Compute distance/similarity between each pair of the two collections of inputs.
@@ -591,7 +594,7 @@ def cdist(
         Supply -1 to use all available CPU cores.
         This argument is only available for scorers using the RapidFuzz C-API so far, since it
         releases the Python GIL.
-    **kwargs : Any, optional
+    scorer_kwargs : dict[str, Any], optional
         any other named parameters are passed to the scorer. This can be used to pass
         e.g. weights to string_metric.levenshtein
 
@@ -604,23 +607,24 @@ def cdist(
     import numpy as np
 
     _ = workers, score_hint
-    dtype = _dtype_to_type_num(dtype, scorer, **kwargs)
+    scorer_kwargs = scorer_kwargs or {}
+    dtype = _dtype_to_type_num(dtype, scorer, scorer_kwargs)
     results = np.zeros((len(queries), len(choices)), dtype=dtype)
 
-    if queries is choices and _is_symmetric(scorer, **kwargs):
+    if queries is choices and _is_symmetric(scorer, scorer_kwargs):
         if processor is None:
             proc_queries = list(queries)
         else:
             proc_queries = [processor(x) for x in queries]
 
         for i, query in enumerate(proc_queries):
-            results[i, i] = scorer(query, query, score_cutoff=score_cutoff, **kwargs)
+            results[i, i] = scorer(query, query, score_cutoff=score_cutoff, **scorer_kwargs)
             for j in range(i + 1, len(proc_queries)):
                 results[i, j] = results[j, i] = scorer(
                     query,
                     proc_queries[j],
                     score_cutoff=score_cutoff,
-                    **kwargs,
+                    **scorer_kwargs,
                 )
     else:
         if processor is None:
@@ -635,7 +639,7 @@ def cdist(
                     proc_query,
                     choice,
                     score_cutoff=score_cutoff,
-                    **kwargs,
+                    **scorer_kwargs,
                 )
 
     return results
