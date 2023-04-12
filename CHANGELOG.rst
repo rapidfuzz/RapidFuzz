@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+[2.16.0] -
+^^^^^^^^^^^^^^^^^^^^^
+Changed
+~~~~~~~
+- allow the usage of ``Hamming`` for different string lengths. Length differences are handled as
+  insertions / deletions
+
 [2.15.1] - 2023-04-11
 ^^^^^^^^^^^^^^^^^^^^^
 Fixed

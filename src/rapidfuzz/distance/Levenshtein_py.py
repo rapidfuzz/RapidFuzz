@@ -7,7 +7,7 @@ from typing import Callable, Hashable, Sequence
 
 from rapidfuzz._utils import is_none
 from rapidfuzz.distance import Indel_py as Indel
-from rapidfuzz.distance._initialize import Editops, Opcodes
+from rapidfuzz.distance._initialize_py import Editops, Opcodes
 
 
 def _levenshtein_maximum(s1: Sequence[Hashable], s2: Sequence[Hashable], weights: tuple[int, int, int]) -> int:

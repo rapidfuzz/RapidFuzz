@@ -6,7 +6,7 @@ from __future__ import annotations
 from typing import Callable, Hashable, Sequence
 
 from rapidfuzz._utils import is_none
-from rapidfuzz.distance._initialize import Editop, Editops, Opcodes
+from rapidfuzz.distance._initialize_py import Editop, Editops, Opcodes
 
 
 def distance(
@@ -51,13 +51,10 @@ def distance(
         s1 = processor(s1)
         s2 = processor(s2)
 
-    dist = 0
-    if len(s1) != len(s2):
-        msg = "Sequences are not the same length."
-        raise ValueError(msg)
-
-    for i in range(len(s1)):
-        dist += s1[i] != s2[i]
+    min_len = min(len(s1), len(s2))
+    dist = max(len(s1), len(s2))
+    for i in range(min_len):
+        dist -= s1[i] == s2[i]
 
     return dist if (score_cutoff is None or dist <= score_cutoff) else score_cutoff + 1
 
@@ -103,7 +100,7 @@ def similarity(
         s1 = processor(s1)
         s2 = processor(s2)
 
-    maximum = len(s1)
+    maximum = max(len(s1), len(s2))
     dist = distance(s1, s2)
     sim = maximum - dist
 
@@ -153,7 +150,7 @@ def normalized_distance(
         s1 = processor(s1)
         s2 = processor(s2)
 
-    maximum = len(s1)
+    maximum = max(len(s1), len(s2))
     dist = distance(s1, s2)
     norm_dist = dist / maximum if maximum else 0
 
@@ -233,14 +230,17 @@ def editops(
         s1 = processor(s1)
         s2 = processor(s2)
 
-    if len(s1) != len(s2):
-        msg = "Sequences are not the same length."
-        raise ValueError(msg)
-
     ops_list = []
-    for i in range(len(s1)):
+    min_len = min(len(s1), len(s2))
+    for i in range(min_len):
         if s1[i] != s2[i]:
             ops_list.append(Editop("replace", i, i))
+
+    for i in range(min_len, len(s1)):
+        ops_list.append(Editop("delete", i, len(s2)))
+
+    for i in range(min_len, len(s2)):
+        ops_list.append(Editop("insert", len(s1), i))
 
     # sidestep input validation
     ops = Editops.__new__(Editops)
