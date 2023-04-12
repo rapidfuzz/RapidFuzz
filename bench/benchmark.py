@@ -29,9 +29,7 @@ from tqdm import tqdm
 
 
 def benchmark(result, setup, func, queries, choices):
-    timer = timeit.Timer(
-        func, setup=setup, globals={"queries": queries, "choices": choices}
-    )
+    timer = timeit.Timer(func, setup=setup, globals={"queries": queries, "choices": choices})
 
     number = 1
     while True:
@@ -63,11 +61,7 @@ def get_rapidfuzz_versions(version):
         last_ver = None
         for version in versions:
             ver = Version(version)
-            if (
-                last_ver is not None
-                and last_ver.major == ver.major
-                and last_ver.minor == ver.minor
-            ):
+            if last_ver is not None and last_ver.major == ver.major and last_ver.minor == ver.minor:
                 continue
 
             last_ver = ver
@@ -88,9 +82,7 @@ def run_benchmark(datasets, setup, func) -> bool:
         # running this in a different process ensures, that imports do not "leak" out
         # this is relevant, since for regressions tests we install different versions of the module
         # during runtime
-        process = Process(
-            target=benchmark, args=(result, setup, func, queries, choices)
-        )
+        process = Process(target=benchmark, args=(result, setup, func, queries, choices))
         process.start()
         process.join()
         # something went wrong
@@ -179,9 +171,7 @@ def run_benchmarks_edlib(func_name, result_df, dataset):
     result_df["edlib"] = run_benchmark(dataset, setup, func)
 
     print("Benchmarking edlib(k=max)")
-    func = (
-        "[[edlib.align(a, b, k=max(len(a), len(b))) for a in queries] for b in choices]"
-    )
+    func = "[[edlib.align(a, b, k=max(len(a), len(b))) for a in queries] for b in choices]"
     result_df["edlib(k=max)"] = run_benchmark(dataset, setup, func)
 
 
@@ -221,9 +211,7 @@ def cli():
 
 
 @cli.command()
-@click.option(
-    "--rapidfuzz_version", default="current", help="versions of rapidfuzz to benchmark"
-)
+@click.option("--rapidfuzz_version", default="current", help="versions of rapidfuzz to benchmark")
 @click.option(
     "--func",
     default="Levenshtein",
@@ -266,15 +254,10 @@ def length_based(start, end, step, count):
     temp_dir.mkdir(exist_ok=True)
 
     random.seed(18)
-    characters = (
-        string.ascii_letters + string.digits + string.whitespace + string.punctuation
-    )
+    characters = string.ascii_letters + string.digits + string.whitespace + string.punctuation
     dataset = {"x_label": "string length [in characters]", "x_axis": [], "data": []}
     for i in range(start, end, step):
-        data = [
-            "".join(random.choice(characters) for _ in range(i))
-            for _ in range(count + 1)
-        ]
+        data = ["".join(random.choice(characters) for _ in range(i)) for _ in range(count + 1)]
         dataset["data"].append(data)
         dataset["x_axis"].append(i)
 
@@ -297,9 +280,7 @@ def show():
 
     # plt.xticks(list(range(0, 64*20+1, 64)))
 
-    plt.title(
-        "Performance comparison of the \nDamerauLevenshtein similarity in different libraries"
-    )
+    plt.title("Performance comparison of the \nDamerauLevenshtein similarity in different libraries")
     plt.xlabel(dataset["x_label"])
     plt.ylabel("runtime [μs]")
     ax.set_xlim(xmin=0)

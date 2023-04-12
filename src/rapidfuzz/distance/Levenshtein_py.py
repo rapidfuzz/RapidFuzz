@@ -10,9 +10,7 @@ from rapidfuzz.distance import Indel_py as Indel
 from rapidfuzz.distance._initialize import Editops, Opcodes
 
 
-def _levenshtein_maximum(
-    s1: Sequence[Hashable], s2: Sequence[Hashable], weights: tuple[int, int, int]
-) -> int:
+def _levenshtein_maximum(s1: Sequence[Hashable], s2: Sequence[Hashable], weights: tuple[int, int, int]) -> int:
     len1 = len(s1)
     len2 = len(s2)
     insert, delete, replace = weights
@@ -27,9 +25,7 @@ def _levenshtein_maximum(
     return max_dist
 
 
-def _uniform_generic(
-    s1: Sequence[Hashable], s2: Sequence[Hashable], weights: tuple[int, int, int]
-) -> int:
+def _uniform_generic(s1: Sequence[Hashable], s2: Sequence[Hashable], weights: tuple[int, int, int]) -> int:
     len1 = len(s1)
     insert, delete, replace = weights
     cache = list(range(0, (len1 + 1) * delete, delete))

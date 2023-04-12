@@ -8,9 +8,7 @@ from typing import Callable, Hashable, Sequence
 from rapidfuzz._utils import is_none
 
 
-def _jaro_calculate_similarity(
-    pattern_len: int, text_len: int, common_chars: int, transpositions: int
-) -> float:
+def _jaro_calculate_similarity(pattern_len: int, text_len: int, common_chars: int, transpositions: int) -> float:
     transpositions //= 2
     sim = 0.0
     sim += common_chars / pattern_len
@@ -26,15 +24,11 @@ def _jaro_length_filter(pattern_len: int, text_len: int, score_cutoff: float) ->
     if not pattern_len or not text_len:
         return False
 
-    sim = _jaro_calculate_similarity(
-        pattern_len, text_len, min(pattern_len, text_len), 0
-    )
+    sim = _jaro_calculate_similarity(pattern_len, text_len, min(pattern_len, text_len), 0)
     return sim >= score_cutoff
 
 
-def _jaro_common_char_filter(
-    pattern_len: int, text_len: int, common_chars: int, score_cutoff: float
-) -> bool:
+def _jaro_common_char_filter(pattern_len: int, text_len: int, common_chars: int, score_cutoff: float) -> bool:
     """
     filter matches below score_cutoff based on string lengths and common characters
     """
@@ -45,9 +39,7 @@ def _jaro_common_char_filter(
     return sim >= score_cutoff
 
 
-def _jaro_bounds(
-    s1: Sequence[Hashable], s2: Sequence[Hashable]
-) -> tuple[Sequence[Hashable], Sequence[Hashable], int]:
+def _jaro_bounds(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> tuple[Sequence[Hashable], Sequence[Hashable], int]:
     """
     find bounds and skip out of bound parts of the sequences
     """
@@ -221,9 +213,7 @@ def distance(
         s1 = processor(s1)
         s2 = processor(s2)
 
-    cutoff_distance = (
-        None if (score_cutoff is None or score_cutoff > 1.0) else 1.0 - score_cutoff
-    )
+    cutoff_distance = None if (score_cutoff is None or score_cutoff > 1.0) else 1.0 - score_cutoff
     sim = similarity(s1, s2, score_cutoff=cutoff_distance)
     dist = 1.0 - sim
     return dist if (score_cutoff is None or dist <= score_cutoff) else 1.0

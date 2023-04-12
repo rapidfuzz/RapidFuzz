@@ -82,9 +82,7 @@ def levenshtein(
         stacklevel=2,
     )
     score_cutoff = score_cutoff or max
-    return Levenshtein.distance(
-        s1, s2, weights=weights, processor=processor, score_cutoff=score_cutoff
-    )
+    return Levenshtein.distance(s1, s2, weights=weights, processor=processor, score_cutoff=score_cutoff)
 
 
 def levenshtein_editops(
@@ -217,10 +215,7 @@ def normalized_levenshtein(
         stacklevel=2,
     )
     return (
-        Levenshtein.normalized_similarity(
-            s1, s2, weights=weights, processor=processor, score_cutoff=score_cutoff
-        )
-        * 100
+        Levenshtein.normalized_similarity(s1, s2, weights=weights, processor=processor, score_cutoff=score_cutoff) * 100
     )
 
 
@@ -323,12 +318,7 @@ def normalized_hamming(
         DeprecationWarning,
         stacklevel=2,
     )
-    return (
-        Hamming.normalized_similarity(
-            s1, s2, processor=processor, score_cutoff=score_cutoff
-        )
-        * 100
-    )
+    return Hamming.normalized_similarity(s1, s2, processor=processor, score_cutoff=score_cutoff) * 100
 
 
 def jaro_similarity(

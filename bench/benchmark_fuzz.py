@@ -34,13 +34,9 @@ count = 1000
 
 
 def scorer_benchmark(funcname):
-    time_rapidfuzz = benchmark(
-        "rapidfuzz", f"[rfuzz.{funcname}(a, b) for b in b_list]", setup, lengths, count
-    )
+    time_rapidfuzz = benchmark("rapidfuzz", f"[rfuzz.{funcname}(a, b) for b in b_list]", setup, lengths, count)
 
-    time_fuzzywuzzy = benchmark(
-        "fuzzywuzzy", f"[fuzz.{funcname}(a, b) for b in b_list]", setup, lengths, count
-    )
+    time_fuzzywuzzy = benchmark("fuzzywuzzy", f"[fuzz.{funcname}(a, b) for b in b_list]", setup, lengths, count)
 
     results = pd.DataFrame(
         data={

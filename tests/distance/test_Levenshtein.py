@@ -65,9 +65,7 @@ def test_simple_unicode_tests():
     s2 = "ABCD"
     assert Levenshtein.distance(s1, s2) == 4  # 2 sub + 2 ins
     assert Levenshtein.distance(s1, s2, weights=(1, 1, 0)) == 2  # 2 sub + 2 ins
-    assert (
-        Levenshtein.distance(s1, s2, weights=(1, 1, 2)) == 6
-    )  # 2 del + 4 ins / 2 sub + 2 ins
+    assert Levenshtein.distance(s1, s2, weights=(1, 1, 2)) == 6  # 2 del + 4 ins / 2 sub + 2 ins
     assert Levenshtein.distance(s1, s2, weights=(1, 1, 5)) == 6  # 2 del + 4 ins
     assert Levenshtein.distance(s1, s2, weights=(1, 7, 5)) == 12  # 2 sub + 2 ins
     assert Levenshtein.distance(s2, s1, weights=(1, 7, 5)) == 24  # 2 sub + 2 del
@@ -94,9 +92,7 @@ def test_Editops():
         ("replace", 3, 2),
         ("insert", 6, 5),
     ]
-    assert metrics_cpp.levenshtein_editops(
-        "Lorem ipsum.", "XYZLorem ABC iPsum"
-    ).as_list() == [
+    assert metrics_cpp.levenshtein_editops("Lorem ipsum.", "XYZLorem ABC iPsum").as_list() == [
         ("insert", 0, 0),
         ("insert", 0, 1),
         ("insert", 0, 2),
@@ -138,9 +134,7 @@ def test_mbleven():
         score_cutoff=1,
     )
     assert match is None
-    match = process.extractOne(
-        "0", ["101"], scorer=Levenshtein_py.distance, processor=None, score_cutoff=1
-    )
+    match = process.extractOne("0", ["101"], scorer=Levenshtein_py.distance, processor=None, score_cutoff=1)
     assert match is None
     match = process.extractOne(
         "0",
@@ -150,9 +144,7 @@ def test_mbleven():
         score_cutoff=2,
     )
     assert match == ("101", 2, 0)
-    match = process.extractOne(
-        "0", ["101"], scorer=Levenshtein_py.distance, processor=None, score_cutoff=2
-    )
+    match = process.extractOne("0", ["101"], scorer=Levenshtein_py.distance, processor=None, score_cutoff=2)
     assert match == ("101", 2, 0)
     match = process.extractOne(
         "0",
@@ -162,7 +154,5 @@ def test_mbleven():
         score_cutoff=3,
     )
     assert match == ("101", 2, 0)
-    match = process.extractOne(
-        "0", ["101"], scorer=Levenshtein_py.distance, processor=None, score_cutoff=3
-    )
+    match = process.extractOne("0", ["101"], scorer=Levenshtein_py.distance, processor=None, score_cutoff=3)
     assert match == ("101", 2, 0)

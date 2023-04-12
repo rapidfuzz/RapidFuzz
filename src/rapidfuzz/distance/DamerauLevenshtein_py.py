@@ -8,9 +8,7 @@ from typing import Callable, Hashable, Sequence
 from rapidfuzz._utils import is_none
 
 
-def _damerau_levenshtein_distance_zhao(
-    s1: Sequence[Hashable], s2: Sequence[Hashable]
-) -> int:
+def _damerau_levenshtein_distance_zhao(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> int:
     maxVal = max(len(s1), len(s2)) + 1
     last_row_id: dict[Hashable, int] = {}
     last_row_id_get = last_row_id.get

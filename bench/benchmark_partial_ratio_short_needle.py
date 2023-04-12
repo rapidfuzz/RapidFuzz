@@ -32,9 +32,7 @@ b_list = [''.join(random.choice(characters) for _ in range({0})) for _ in range(
 lengths = list(range(64, 512, 2))
 count = 4000
 
-time_rapidfuzz = benchmark(
-    "rapidfuzz", "[rfuzz.partial_ratio(a, b) for b in b_list]", setup, lengths, count
-)
+time_rapidfuzz = benchmark("rapidfuzz", "[rfuzz.partial_ratio(a, b) for b in b_list]", setup, lengths, count)
 
 # this gets very slow, so only benchmark it for smaller values
 time_fuzzywuzzy = (

@@ -61,10 +61,7 @@ def test_simple():
     """
     assert OSA.distance("CA", "ABC") == 3
     assert OSA.distance("CA", "AC") == 1
-    assert (
-        OSA.distance("a" * 65 + "CA" + "a" * 65, "b" + "a" * 64 + "AC" + "a" * 64 + "b")
-        == 3
-    )
+    assert OSA.distance("a" * 65 + "CA" + "a" * 65, "b" + "a" * 64 + "AC" + "a" * 64 + "b") == 3
 
 
 def test_simple_unicode_tests():

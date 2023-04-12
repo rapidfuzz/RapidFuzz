@@ -67,12 +67,8 @@ class fuzz:
     def partial_token_sort_ratio(*args, **kwargs):
         if "processor" not in kwargs:
             kwargs["processor"] = utils.default_process
-        dist1 = symmetric_scorer_tester(
-            fuzz_cpp.partial_token_sort_ratio, *args, **kwargs
-        )
-        dist2 = symmetric_scorer_tester(
-            fuzz_py.partial_token_sort_ratio, *args, **kwargs
-        )
+        dist1 = symmetric_scorer_tester(fuzz_cpp.partial_token_sort_ratio, *args, **kwargs)
+        dist2 = symmetric_scorer_tester(fuzz_py.partial_token_sort_ratio, *args, **kwargs)
         assert pytest.approx(dist1) == dist2
         return dist1
 
@@ -80,12 +76,8 @@ class fuzz:
     def partial_token_set_ratio(*args, **kwargs):
         if "processor" not in kwargs:
             kwargs["processor"] = utils.default_process
-        dist1 = symmetric_scorer_tester(
-            fuzz_cpp.partial_token_set_ratio, *args, **kwargs
-        )
-        dist2 = symmetric_scorer_tester(
-            fuzz_py.partial_token_set_ratio, *args, **kwargs
-        )
+        dist1 = symmetric_scorer_tester(fuzz_cpp.partial_token_set_ratio, *args, **kwargs)
+        dist2 = symmetric_scorer_tester(fuzz_py.partial_token_set_ratio, *args, **kwargs)
         assert pytest.approx(dist1) == dist2
         return dist1
 
@@ -159,30 +151,15 @@ def test_token_sort_ratio():
 
 def testPartialTokenSortRatio():
     assert fuzz.partial_token_sort_ratio("new york mets", "new york mets") == 100
-    assert (
-        fuzz.partial_token_sort_ratio(
-            "new york mets vs atlanta braves", "atlanta braves vs new york mets"
-        )
-        == 100
-    )
+    assert fuzz.partial_token_sort_ratio("new york mets vs atlanta braves", "atlanta braves vs new york mets") == 100
 
 
 def testTokenSetRatio():
-    assert (
-        fuzz.token_set_ratio(
-            "new york mets vs atlanta braves", "atlanta braves vs new york mets"
-        )
-        == 100
-    )
+    assert fuzz.token_set_ratio("new york mets vs atlanta braves", "atlanta braves vs new york mets") == 100
 
 
 def testPartialTokenSetRatio():
-    assert (
-        fuzz.partial_token_set_ratio(
-            "new york mets vs atlanta braves", "atlanta braves vs new york mets"
-        )
-        == 100
-    )
+    assert fuzz.partial_token_set_ratio("new york mets vs atlanta braves", "atlanta braves vs new york mets") == 100
 
 
 def testQuickRatioEqual():
@@ -212,12 +189,7 @@ def testWRatioPartialMatch():
 
 def testWRatioMisorderedMatch():
     # misordered full matches are scaled by .95
-    assert (
-        fuzz.WRatio(
-            "new york mets vs atlanta braves", "atlanta braves vs new york mets"
-        )
-        == 95
-    )
+    assert fuzz.WRatio("new york mets vs atlanta braves", "atlanta braves vs new york mets") == 95
 
 
 def testWRatioUnicode():
@@ -229,10 +201,7 @@ def testQRatioUnicode():
 
 
 def test_issue76():
-    assert (
-        pytest.approx(fuzz.partial_ratio("physics 2 vid", "study physics physics 2"))
-        == 81.81818
-    )
+    assert pytest.approx(fuzz.partial_ratio("physics 2 vid", "study physics physics 2")) == 81.81818
     assert fuzz.partial_ratio("physics 2 vid", "study physics physics 2 video") == 100
 
 
@@ -249,12 +218,8 @@ def test_issue138():
 def test_partial_ratio_alignment():
     a = "a certain string"
     s = "certain"
-    assert fuzz.partial_ratio_alignment(s, a) == ScoreAlignment(
-        100, 0, len(s), 2, 2 + len(s)
-    )
-    assert fuzz.partial_ratio_alignment(a, s) == ScoreAlignment(
-        100, 2, 2 + len(s), 0, len(s)
-    )
+    assert fuzz.partial_ratio_alignment(s, a) == ScoreAlignment(100, 0, len(s), 2, 2 + len(s))
+    assert fuzz.partial_ratio_alignment(a, s) == ScoreAlignment(100, 2, 2 + len(s), 0, len(s))
     assert fuzz.partial_ratio_alignment(None, "test") is None
     assert fuzz.partial_ratio_alignment("test", None) is None
 
@@ -272,10 +237,7 @@ def test_issue196():
 
 def test_issue231():
     str1 = "er merkantilismus förderte handle und verkehr mit teils marktkonformen, teils dirigistischen maßnahmen."
-    str2 = (
-        "ils marktkonformen, teils dirigistischen maßnahmen. "
-        "an der schwelle zum 19. jahrhundert entstand ein neu"
-    )
+    str2 = "ils marktkonformen, teils dirigistischen maßnahmen. an der schwelle zum 19. jahrhundert entstand ein neu"
 
     alignment = fuzz.partial_ratio_alignment(str1, str2)
     assert alignment.src_start == 0
@@ -327,12 +289,8 @@ def test_array(scorer):
         array("u", "the wonderful new york mets"),
         array("u", "the wonderful new york mets"),
     )
-    assert scorer(
-        "the wonderful new york mets", array("u", "the wonderful new york mets")
-    )
-    assert scorer(
-        array("u", "the wonderful new york mets"), "the wonderful new york mets"
-    )
+    assert scorer("the wonderful new york mets", array("u", "the wonderful new york mets"))
+    assert scorer(array("u", "the wonderful new york mets"), "the wonderful new york mets")
 
 
 @pytest.mark.parametrize("scorer", scorers)
@@ -365,9 +323,7 @@ def test_simple_unicode_tests(scorer):
     assert scorer(s1, s1) == 100
 
 
-@pytest.mark.parametrize(
-    "processor", [True, utils.default_process, lambda s: utils.default_process(s)]
-)
+@pytest.mark.parametrize("processor", [True, utils.default_process, lambda s: utils.default_process(s)])
 @pytest.mark.parametrize("scorer", scorers)
 def test_scorer_case_insensitive(processor, scorer):
     """

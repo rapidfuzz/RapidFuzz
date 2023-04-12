@@ -113,11 +113,7 @@ def jaro_similarity(pattern, text):
 
     Transpositions = Transpositions // 2
 
-    sim = (
-        CommonChars / len(pattern)
-        + CommonChars / len(text)
-        + (CommonChars - Transpositions) / CommonChars
-    )
+    sim = CommonChars / len(pattern) + CommonChars / len(text) + (CommonChars - Transpositions) / CommonChars
     return sim / 3
 
 
@@ -147,9 +143,7 @@ def partial_ratio_short_needle_impl(s1, s2):
 
     if len(s1) > len(s2):
         return partial_ratio_short_needle_impl(s2, s1)
-    parts = [
-        s2[max(0, i) : min(len(s2), i + len(s1))] for i in range(-len(s1), len(s2))
-    ]
+    parts = [s2[max(0, i) : min(len(s2), i + len(s1))] for i in range(-len(s1), len(s2))]
     res = 0
     for part in parts:
         res = max(res, fuzz.ratio(s1, part))
@@ -311,9 +305,7 @@ def test_token_ratio(s1, s2):
     """
     token_ratio should be max(token_sort_ratio, token_set_ratio)
     """
-    assert fuzz.token_ratio(s1, s2) == max(
-        fuzz.token_sort_ratio(s1, s2), fuzz.token_set_ratio(s1, s2)
-    )
+    assert fuzz.token_ratio(s1, s2) == max(fuzz.token_sort_ratio(s1, s2), fuzz.token_set_ratio(s1, s2))
 
 
 @given(s1=st.text(), s2=st.text())
@@ -403,14 +395,10 @@ def test_multiple_processor_runs(sentence):
     Test that running a preprocessor on a sentence
     a second time does not change the result
     """
-    assert utils.default_process(sentence) == utils.default_process(
-        utils.default_process(sentence)
-    )
+    assert utils.default_process(sentence) == utils.default_process(utils.default_process(sentence))
 
 
-@pytest.mark.parametrize(
-    ("scorer", "processor"), list(product(FULL_SCORERS, PROCESSORS))
-)
+@pytest.mark.parametrize(("scorer", "processor"), list(product(FULL_SCORERS, PROCESSORS)))
 @given(choices=st.lists(st.text(), min_size=1))
 @settings(max_examples=50, deadline=1000)
 def test_only_identical_strings_extracted(scorer, processor, choices):
@@ -426,9 +414,7 @@ def test_only_identical_strings_extracted(scorer, processor, choices):
     query = random.choice(choices)
     assume(processor(query))
 
-    matches = process.extract(
-        query, choices, scorer=scorer, processor=processor, score_cutoff=100, limit=None
-    )
+    matches = process.extract(query, choices, scorer=scorer, processor=processor, score_cutoff=100, limit=None)
 
     assert matches != []
 
@@ -443,17 +429,13 @@ def test_cdist(queries, choices):
     Test that cdist returns correct results
     """
 
-    reference_matrix = cdist_distance(
-        queries, choices, scorer=metrics_cpp.levenshtein_distance
-    )
+    reference_matrix = cdist_distance(queries, choices, scorer=metrics_cpp.levenshtein_distance)
     matrix1 = process.cdist(queries, choices, scorer=metrics_cpp.levenshtein_distance)
     matrix2 = process.cdist(queries, choices, scorer=Levenshtein_py.distance)
     assert (matrix1 == reference_matrix).all()
     assert (matrix2 == reference_matrix).all()
 
-    reference_matrix = cdist_distance(
-        queries, queries, scorer=metrics_cpp.levenshtein_distance
-    )
+    reference_matrix = cdist_distance(queries, queries, scorer=metrics_cpp.levenshtein_distance)
     matrix1 = process.cdist(queries, queries, scorer=metrics_cpp.levenshtein_distance)
     matrix2 = process.cdist(queries, queries, scorer=Levenshtein_py.distance)
     assert (matrix1 == reference_matrix).all()

@@ -36,9 +36,7 @@ def scorer_tester(scorer, s1, s2, **kwargs):
     extractOne_res2 = process_py.extractOne(s1, [s2], scorer=scorer, **kwargs)
     extract_res1 = process_cpp.extract(s1, [s2], scorer=scorer, **kwargs)
     extract_res2 = process_py.extract(s1, [s2], scorer=scorer, **kwargs)
-    extract_iter_res1 = list(
-        process_cpp.extract_iter(s1, [s2], scorer=scorer, **kwargs)
-    )
+    extract_iter_res1 = list(process_cpp.extract_iter(s1, [s2], scorer=scorer, **kwargs))
     extract_iter_res2 = list(process_py.extract_iter(s1, [s2], scorer=scorer, **kwargs))
 
     if is_none(s1) or is_none(s2):
@@ -54,12 +52,8 @@ def scorer_tester(scorer, s1, s2, **kwargs):
         assert extractOne_res2 is None or pytest.approx(score1) == extractOne_res2[1]
         assert extract_res1 == [] or pytest.approx(score1) == extract_res1[0][1]
         assert extract_res2 == [] or pytest.approx(score1) == extract_res2[0][1]
-        assert (
-            extract_iter_res1 == [] or pytest.approx(score1) == extract_iter_res1[0][1]
-        )
-        assert (
-            extract_iter_res2 == [] or pytest.approx(score1) == extract_iter_res2[0][1]
-        )
+        assert extract_iter_res1 == [] or pytest.approx(score1) == extract_iter_res1[0][1]
+        assert extract_iter_res2 == [] or pytest.approx(score1) == extract_iter_res2[0][1]
     else:
         assert pytest.approx(score1) == extractOne_res1[1]
         assert pytest.approx(score1) == extractOne_res2[1]
@@ -109,12 +103,8 @@ class GenericScorer:
         for scorer in self.scorers:
             validate_attrs(scorer.distance, self.scorers[0].distance)
             validate_attrs(scorer.similarity, self.scorers[0].similarity)
-            validate_attrs(
-                scorer.normalized_distance, self.scorers[0].normalized_distance
-            )
-            validate_attrs(
-                scorer.normalized_similarity, self.scorers[0].normalized_similarity
-            )
+            validate_attrs(scorer.normalized_distance, self.scorers[0].normalized_distance)
+            validate_attrs(scorer.normalized_similarity, self.scorers[0].normalized_similarity)
 
         for scorer in self.cpp_scorers:
             assert hasattr(scorer.distance, "_RF_Scorer")
@@ -128,9 +118,7 @@ class GenericScorer:
         symmetric = self.get_scorer_flags(s1, s2, **kwargs)["symmetric"]
         tester = symmetric_scorer_tester if symmetric is True else scorer_tester
 
-        scores = sorted(
-            tester(scorer.distance, s1, s2, **kwargs) for scorer in self.scorers
-        )
+        scores = sorted(tester(scorer.distance, s1, s2, **kwargs) for scorer in self.scorers)
         assert pytest.approx(scores[0]) == scores[-1]
         return scores[0]
 
@@ -138,9 +126,7 @@ class GenericScorer:
         symmetric = self.get_scorer_flags(s1, s2, **kwargs)["symmetric"]
         tester = symmetric_scorer_tester if symmetric is True else scorer_tester
 
-        scores = sorted(
-            tester(scorer.similarity, s1, s2, **kwargs) for scorer in self.scorers
-        )
+        scores = sorted(tester(scorer.similarity, s1, s2, **kwargs) for scorer in self.scorers)
         assert pytest.approx(scores[0]) == scores[-1]
         return scores[0]
 
@@ -148,10 +134,7 @@ class GenericScorer:
         symmetric = self.get_scorer_flags(s1, s2, **kwargs)["symmetric"]
         tester = symmetric_scorer_tester if symmetric is True else scorer_tester
 
-        scores = sorted(
-            tester(scorer.normalized_distance, s1, s2, **kwargs)
-            for scorer in self.scorers
-        )
+        scores = sorted(tester(scorer.normalized_distance, s1, s2, **kwargs) for scorer in self.scorers)
         assert pytest.approx(scores[0]) == scores[-1]
         return scores[0]
 
@@ -159,10 +142,7 @@ class GenericScorer:
         symmetric = self.get_scorer_flags(s1, s2, **kwargs)["symmetric"]
         tester = symmetric_scorer_tester if symmetric is True else scorer_tester
 
-        scores = sorted(
-            tester(scorer.normalized_similarity, s1, s2, **kwargs)
-            for scorer in self.scorers
-        )
+        scores = sorted(tester(scorer.normalized_similarity, s1, s2, **kwargs) for scorer in self.scorers)
         assert pytest.approx(scores[0]) == scores[-1]
         return scores[0]
 

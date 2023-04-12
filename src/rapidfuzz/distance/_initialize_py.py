@@ -43,16 +43,10 @@ def _list_to_editops(
 
     # validate order of editops
     for i in range(0, len(blocks) - 1):
-        if (
-            blocks[i + 1].src_pos < blocks[i].src_pos
-            or blocks[i + 1].dest_pos < blocks[i].dest_pos
-        ):
+        if blocks[i + 1].src_pos < blocks[i].src_pos or blocks[i + 1].dest_pos < blocks[i].dest_pos:
             msg = "List of edit operations out of order"
             raise ValueError(msg)
-        if (
-            blocks[i + 1].src_pos == blocks[i].src_pos
-            and blocks[i + 1].dest_pos == blocks[i].dest_pos
-        ):
+        if blocks[i + 1].src_pos == blocks[i].src_pos and blocks[i + 1].dest_pos == blocks[i].dest_pos:
             msg = "Duplicated edit operation"
             raise ValueError(msg)
 
@@ -83,9 +77,7 @@ def _list_to_opcodes(
             msg = "List of edit operations invalid"
             raise ValueError(msg)
 
-        if edit_type in {"equal", "replace"} and (
-            src_end - src_start != dest_end - dest_start or src_start == src_end
-        ):
+        if edit_type in {"equal", "replace"} and (src_end - src_start != dest_end - dest_start or src_start == src_end):
             msg = "List of edit operations invalid"
             raise ValueError(msg)
         if edit_type == "insert" and (src_start != src_end or dest_start == dest_end):
@@ -97,9 +89,7 @@ def _list_to_opcodes(
 
         # merge similar adjacent blocks
         if blocks and (
-            blocks[-1].tag == edit_type
-            and blocks[-1].src_end == src_start
-            and blocks[-1].dest_end == dest_start
+            blocks[-1].tag == edit_type and blocks[-1].src_end == src_start and blocks[-1].dest_end == dest_start
         ):
             blocks[-1].src_end = src_end
             blocks[-1].dest_end = dest_end
@@ -115,10 +105,7 @@ def _list_to_opcodes(
         msg = "List of edit operations does not end at the string ends"
         raise ValueError(msg)
     for i in range(0, len(blocks) - 1):
-        if (
-            blocks[i + 1].src_start != blocks[i].src_end
-            or blocks[i + 1].dest_start != blocks[i].dest_end
-        ):
+        if blocks[i + 1].src_start != blocks[i].src_end or blocks[i + 1].dest_start != blocks[i].dest_end:
             msg = "List of edit operations is not continuous"
             raise ValueError(msg)
 
@@ -221,9 +208,7 @@ class Editop:
             yield self[i]
 
     def __repr__(self) -> str:
-        return (
-            f"Editop(tag={self.tag}, src_pos={self.src_pos}, dest_pos={self.dest_pos})"
-        )
+        return f"Editop(tag={self.tag}, src_pos={self.src_pos}, dest_pos={self.dest_pos})"
 
 
 class Editops:
@@ -275,10 +260,7 @@ class Editops:
         dest_pos = 0
         i = 0
         while i < len(self._editops):
-            if (
-                src_pos < self._editops[i].src_pos
-                or dest_pos < self._editops[i].dest_pos
-            ):
+            if src_pos < self._editops[i].src_pos or dest_pos < self._editops[i].dest_pos:
                 blocks.append(
                     Opcode(
                         "equal",
@@ -313,9 +295,7 @@ class Editops:
             blocks.append(Opcode(tag, src_begin, src_pos, dest_begin, dest_pos))
 
         if src_pos < self.src_len or dest_pos < self.dest_len:
-            blocks.append(
-                Opcode("equal", src_pos, self.src_len, dest_pos, self.dest_len)
-            )
+            blocks.append(Opcode("equal", src_pos, self.src_len, dest_pos, self.dest_len))
 
         x._opcodes = blocks
         return x
@@ -531,11 +511,7 @@ class Editops:
         if not isinstance(other, Editops):
             return False
 
-        return (
-            self.dest_len == other.dest_len
-            and self.src_len == other.src_len
-            and self._editops == other._editops
-        )
+        return self.dest_len == other.dest_len and self.src_len == other.src_len and self._editops == other._editops
 
     def __len__(self) -> int:
         return len(self._editops)
@@ -563,9 +539,7 @@ class Editops:
 
     def __repr__(self) -> str:
         return (
-            "Editops(["
-            + ", ".join(repr(op) for op in self)
-            + f"], src_len={self.src_len}, dest_len={self.dest_len})"
+            "Editops([" + ", ".join(repr(op) for op in self) + f"], src_len={self.src_len}, dest_len={self.dest_len})"
         )
 
 
@@ -598,9 +572,7 @@ class Opcode:
     interoperable
     """
 
-    def __init__(
-        self, tag: str, src_start: int, src_end: int, dest_start: int, dest_end: int
-    ):
+    def __init__(self, tag: str, src_start: int, src_end: int, dest_start: int, dest_end: int):
         self.tag: str = tag
         self.src_start: int = src_start
         self.src_end: int = src_end
@@ -702,9 +674,7 @@ class Opcodes:
         for op in self:
             if op.tag == "replace":
                 for j in range(op.src_end - op.src_start):
-                    blocks.append(
-                        Editop("replace", op.src_start + j, op.dest_start + j)
-                    )
+                    blocks.append(Editop("replace", op.src_start + j, op.dest_start + j))
             elif op.tag == "insert":
                 for j in range(op.dest_end - op.dest_start):
                     blocks.append(Editop("insert", op.src_start, op.dest_start + j))
@@ -786,9 +756,7 @@ class Opcodes:
             elif tag == "insert":
                 tag = "delete"
 
-            blocks.append(
-                Opcode(tag, op.dest_start, op.dest_end, op.src_start, op.src_end)
-            )
+            blocks.append(Opcode(tag, op.dest_start, op.dest_end, op.src_start, op.src_end))
 
         x = Opcodes.__new__(Opcodes)
         x._src_len = self.dest_len
@@ -843,11 +811,7 @@ class Opcodes:
         if not isinstance(other, Opcodes):
             return False
 
-        return (
-            self.dest_len == other.dest_len
-            and self.src_len == other.src_len
-            and self._opcodes == other._opcodes
-        )
+        return self.dest_len == other.dest_len and self.src_len == other.src_len and self._opcodes == other._opcodes
 
     def __len__(self) -> int:
         return len(self._opcodes)
@@ -864,9 +828,7 @@ class Opcodes:
 
     def __repr__(self) -> str:
         return (
-            "Opcodes(["
-            + ", ".join(repr(op) for op in self)
-            + f"], src_len={self.src_len}, dest_len={self.dest_len})"
+            "Opcodes([" + ", ".join(repr(op) for op in self) + f"], src_len={self.src_len}, dest_len={self.dest_len})"
         )
 
 

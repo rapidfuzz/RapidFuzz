@@ -102,9 +102,7 @@ def test_editops_get_slice(module):
     with pytest.raises(ValueError, match="slice step cannot be zero"):
         ops[::0]
 
-    with pytest.raises(
-        ValueError, match="step sizes below 0 lead to an invalid order of editops"
-    ):
+    with pytest.raises(ValueError, match="step sizes below 0 lead to an invalid order of editops"):
         ops[::-1]
 
 
@@ -278,9 +276,7 @@ def test_opcodes_empty(module):
     assert ops.dest_len == 0
 
     ops = module.Opcodes([], 0, 3)
-    assert ops.as_list() == [
-        module.Opcode(tag="equal", src_start=0, src_end=0, dest_start=0, dest_end=3)
-    ]
+    assert ops.as_list() == [module.Opcode(tag="equal", src_start=0, src_end=0, dest_start=0, dest_end=3)]
     assert ops.src_len == 0
     assert ops.dest_len == 3
 
@@ -331,18 +327,13 @@ def test_merge_adjacent_blocks(module):
     """
     test whether adjacent blocks are merged
     """
-    ops1 = [
-        module.Opcode(tag="equal", src_start=0, src_end=3, dest_start=0, dest_end=3)
-    ]
+    ops1 = [module.Opcode(tag="equal", src_start=0, src_end=3, dest_start=0, dest_end=3)]
     ops2 = [
         module.Opcode(tag="equal", src_start=0, src_end=1, dest_start=0, dest_end=1),
         module.Opcode(tag="equal", src_start=1, src_end=3, dest_start=1, dest_end=3),
     ]
     assert module.Opcodes(ops1, 3, 3) == module.Opcodes(ops2, 3, 3)
-    assert (
-        module.Opcodes(ops2, 3, 3)
-        == module.Opcodes(ops2, 3, 3).as_editops().as_opcodes()
-    )
+    assert module.Opcodes(ops2, 3, 3) == module.Opcodes(ops2, 3, 3).as_editops().as_opcodes()
 
 
 @pytest.mark.parametrize("module", [distance_py, distance_cpp])
@@ -350,25 +341,13 @@ def test_empty_matching_blocks(module):
     """
     test behavior for empty matching blocks
     """
-    assert module.Editops([], 0, 0).as_matching_blocks() == [
-        module.MatchingBlock(a=0, b=0, size=0)
-    ]
-    assert module.Editops([], 0, 3).as_matching_blocks() == [
-        module.MatchingBlock(a=0, b=3, size=0)
-    ]
-    assert module.Editops([], 3, 0).as_matching_blocks() == [
-        module.MatchingBlock(a=3, b=0, size=0)
-    ]
+    assert module.Editops([], 0, 0).as_matching_blocks() == [module.MatchingBlock(a=0, b=0, size=0)]
+    assert module.Editops([], 0, 3).as_matching_blocks() == [module.MatchingBlock(a=0, b=3, size=0)]
+    assert module.Editops([], 3, 0).as_matching_blocks() == [module.MatchingBlock(a=3, b=0, size=0)]
 
-    assert module.Opcodes([], 0, 0).as_matching_blocks() == [
-        module.MatchingBlock(a=0, b=0, size=0)
-    ]
-    assert module.Opcodes([], 0, 3).as_matching_blocks() == [
-        module.MatchingBlock(a=0, b=3, size=0)
-    ]
-    assert module.Opcodes([], 3, 0).as_matching_blocks() == [
-        module.MatchingBlock(a=3, b=0, size=0)
-    ]
+    assert module.Opcodes([], 0, 0).as_matching_blocks() == [module.MatchingBlock(a=0, b=0, size=0)]
+    assert module.Opcodes([], 0, 3).as_matching_blocks() == [module.MatchingBlock(a=0, b=3, size=0)]
+    assert module.Opcodes([], 3, 0).as_matching_blocks() == [module.MatchingBlock(a=3, b=0, size=0)]
 
 
 @given(s1=st.text(), s2=st.text())

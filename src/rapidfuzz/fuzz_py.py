@@ -25,9 +25,7 @@ def get_scorer_flags_fuzz(**_kwargs: Any) -> dict[str, Any]:
     }
 
 
-fuzz_attribute: dict[str, Callable[..., dict[str, Any]]] = {
-    "get_scorer_flags": get_scorer_flags_fuzz
-}
+fuzz_attribute: dict[str, Callable[..., dict[str, Any]]] = {"get_scorer_flags": get_scorer_flags_fuzz}
 
 
 def _norm_distance(dist: int, lensum: int, score_cutoff: float) -> float:
@@ -88,15 +86,11 @@ def ratio(
     if score_cutoff is not None:
         score_cutoff /= 100
 
-    score = indel_normalized_similarity(
-        s1, s2, processor=processor, score_cutoff=score_cutoff
-    )
+    score = indel_normalized_similarity(s1, s2, processor=processor, score_cutoff=score_cutoff)
     return score * 100
 
 
-def _partial_ratio_short_needle(
-    s1: str | bytes, s2: str | bytes, score_cutoff: float
-) -> ScoreAlignment:
+def _partial_ratio_short_needle(s1: str | bytes, s2: str | bytes, score_cutoff: float) -> ScoreAlignment:
     """
     implementation of partial_ratio for needles <= 64. assumes s1 is already the
     shorter string
@@ -120,9 +114,7 @@ def _partial_ratio_short_needle(
             continue
 
         # todo cache map
-        ls_ratio = indel_block_normalized_similarity(
-            block, s1, s2[:i], score_cutoff=score_cutoff
-        )
+        ls_ratio = indel_block_normalized_similarity(block, s1, s2[:i], score_cutoff=score_cutoff)
         if ls_ratio > res.score:
             res.score = score_cutoff = ls_ratio
             res.dest_start = 0
@@ -137,9 +129,7 @@ def _partial_ratio_short_needle(
             continue
 
         # todo cache map
-        ls_ratio = indel_block_normalized_similarity(
-            block, s1, s2[i : i + len1], score_cutoff=score_cutoff
-        )
+        ls_ratio = indel_block_normalized_similarity(block, s1, s2[i : i + len1], score_cutoff=score_cutoff)
         if ls_ratio > res.score:
             res.score = score_cutoff = ls_ratio
             res.dest_start = i
@@ -154,9 +144,7 @@ def _partial_ratio_short_needle(
             continue
 
         # todo cache map
-        ls_ratio = indel_block_normalized_similarity(
-            block, s1, s2[i:], score_cutoff=score_cutoff
-        )
+        ls_ratio = indel_block_normalized_similarity(block, s1, s2[i:], score_cutoff=score_cutoff)
         if ls_ratio > res.score:
             res.score = score_cutoff = ls_ratio
             res.dest_start = i
@@ -240,9 +228,7 @@ def partial_ratio(
     >>> fuzz.partial_ratio("this is a test", "this is a test!")
     100.0
     """
-    alignment = partial_ratio_alignment(
-        s1, s2, processor=processor, score_cutoff=score_cutoff
-    )
+    alignment = partial_ratio_alignment(s1, s2, processor=processor, score_cutoff=score_cutoff)
     if alignment is None:
         return 0
 
@@ -323,9 +309,7 @@ def partial_ratio_alignment(
         score_cutoff = max(score_cutoff, res.score)
         res2 = _partial_ratio_short_needle(longer, shorter, score_cutoff / 100)
         if res2.score > res.score:
-            res = ScoreAlignment(
-                res2.score, res2.dest_start, res2.dest_end, res2.src_start, res2.src_end
-            )
+            res = ScoreAlignment(res2.score, res2.dest_start, res2.dest_end, res2.src_start, res2.src_end)
 
     if res.score < score_cutoff:
         return None
@@ -333,9 +317,7 @@ def partial_ratio_alignment(
     if len(s1) <= len(s2):
         return res
 
-    return ScoreAlignment(
-        res.score, res.dest_start, res.dest_end, res.src_start, res.src_end
-    )
+    return ScoreAlignment(res.score, res.dest_start, res.dest_end, res.src_start, res.src_end)
 
 
 def token_sort_ratio(
@@ -810,22 +792,17 @@ def WRatio(
         score_cutoff = max(score_cutoff, end_ratio) / UNBASE_SCALE
         return max(
             end_ratio,
-            token_ratio(s1, s2, score_cutoff=score_cutoff, processor=None)
-            * UNBASE_SCALE,
+            token_ratio(s1, s2, score_cutoff=score_cutoff, processor=None) * UNBASE_SCALE,
         )
 
     PARTIAL_SCALE = 0.9 if len_ratio < 8.0 else 0.6
     score_cutoff = max(score_cutoff, end_ratio) / PARTIAL_SCALE
-    end_ratio = max(
-        end_ratio, partial_ratio(s1, s2, score_cutoff=score_cutoff) * PARTIAL_SCALE
-    )
+    end_ratio = max(end_ratio, partial_ratio(s1, s2, score_cutoff=score_cutoff) * PARTIAL_SCALE)
 
     score_cutoff = max(score_cutoff, end_ratio) / UNBASE_SCALE
     return max(
         end_ratio,
-        partial_token_ratio(s1, s2, score_cutoff=score_cutoff, processor=None)
-        * UNBASE_SCALE
-        * PARTIAL_SCALE,
+        partial_token_ratio(s1, s2, score_cutoff=score_cutoff, processor=None) * UNBASE_SCALE * PARTIAL_SCALE,
     )
 
 

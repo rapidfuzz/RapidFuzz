@@ -20,9 +20,7 @@ def create_generic_scorer(func_name, get_scorer_flags):
             distance=getattr(metrics_py, func_name + "_distance"),
             similarity=getattr(metrics_py, func_name + "_similarity"),
             normalized_distance=getattr(metrics_py, func_name + "_normalized_distance"),
-            normalized_similarity=getattr(
-                metrics_py, func_name + "_normalized_similarity"
-            ),
+            normalized_similarity=getattr(metrics_py, func_name + "_normalized_similarity"),
         )
     ]
 
@@ -45,9 +43,7 @@ def get_scorer_flags_damerau_levenshtein(s1, s2, **kwargs):
     return {"maximum": max(len(s1), len(s2)), "symmetric": True}
 
 
-DamerauLevenshtein = create_generic_scorer(
-    "damerau_levenshtein", get_scorer_flags_damerau_levenshtein
-)
+DamerauLevenshtein = create_generic_scorer("damerau_levenshtein", get_scorer_flags_damerau_levenshtein)
 
 
 def get_scorer_flags_hamming(s1, s2, **kwargs):
@@ -104,13 +100,9 @@ def get_scorer_flags_levenshtein(s1, s2, weights=(1, 1, 1), **kwargs):
     max_dist = len(s1) * delete_cost + len(s2) * insert_cost
 
     if len(s1) >= len(s2):
-        max_dist = min(
-            max_dist, len(s2) * replace_cost + (len(s1) - len(s2)) * delete_cost
-        )
+        max_dist = min(max_dist, len(s2) * replace_cost + (len(s1) - len(s2)) * delete_cost)
     else:
-        max_dist = min(
-            max_dist, len(s1) * replace_cost + (len(s2) - len(s1)) * insert_cost
-        )
+        max_dist = min(max_dist, len(s1) * replace_cost + (len(s2) - len(s1)) * insert_cost)
 
     return {"maximum": max_dist, "symmetric": insert_cost == delete_cost}
 

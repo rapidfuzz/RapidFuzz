@@ -75,9 +75,7 @@ def similarity(
         if prefix_sim >= 1.0:
             jaro_score_cutoff = 0.7
         else:
-            jaro_score_cutoff = max(
-                0.7, (prefix_sim - jaro_score_cutoff) / (prefix_sim - 1.0)
-            )
+            jaro_score_cutoff = max(0.7, (prefix_sim - jaro_score_cutoff) / (prefix_sim - 1.0))
 
     Sim = Jaro.similarity(s1, s2, score_cutoff=jaro_score_cutoff)
     if Sim > 0.7:
@@ -178,9 +176,7 @@ def distance(
         s1 = processor(s1)
         s2 = processor(s2)
 
-    cutoff_distance = (
-        None if (score_cutoff is None or score_cutoff > 1.0) else 1.0 - score_cutoff
-    )
+    cutoff_distance = None if (score_cutoff is None or score_cutoff > 1.0) else 1.0 - score_cutoff
     sim = similarity(s1, s2, prefix_weight=prefix_weight, score_cutoff=cutoff_distance)
     dist = 1.0 - sim
     return dist if (score_cutoff is None or dist <= score_cutoff) else 1.0

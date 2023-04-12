@@ -60,9 +60,7 @@ def is_none(s: Any) -> bool:
     return False
 
 
-def add_scorer_attrs(
-    func: Any, cached_scorer_call: dict[str, Callable[..., dict[str, Any]]]
-):
+def add_scorer_attrs(func: Any, cached_scorer_call: dict[str, Callable[..., dict[str, Any]]]):
     func._RF_ScorerPy = cached_scorer_call
     # used to detect the function hasn't been wrapped afterwards
     func._RF_OriginalScorer = func
@@ -118,17 +116,13 @@ def fallback_import(
 
     cpp_func = getattr(cpp_mod, name)
     if not cpp_func:
-        msg = (
-            f"cannot import name {name!r} from {cpp_mod.__name!r} ({cpp_mod.__file__})"
-        )
+        msg = f"cannot import name {name!r} from {cpp_mod.__name!r} ({cpp_mod.__file__})"
         raise ImportError(msg)
 
     return cpp_func
 
 
-default_distance_attribute: dict[str, Callable[..., dict[str, Any]]] = {
-    "get_scorer_flags": _get_scorer_flags_distance
-}
+default_distance_attribute: dict[str, Callable[..., dict[str, Any]]] = {"get_scorer_flags": _get_scorer_flags_distance}
 default_similarity_attribute: dict[str, Callable[..., dict[str, Any]]] = {
     "get_scorer_flags": _get_scorer_flags_similarity
 }

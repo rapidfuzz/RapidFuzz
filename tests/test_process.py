@@ -368,12 +368,7 @@ def test_extractOne_case_sensitive(processor, scorer):
 
 @pytest.mark.parametrize("scorer", [fuzz.ratio, custom_scorer])
 def test_extractOne_use_first_match(scorer):
-    assert (
-        process.extractOne(
-            "new york mets", ["new york mets", "new york mets"], scorer=scorer
-        )[2]
-        == 0
-    )
+    assert process.extractOne("new york mets", ["new york mets", "new york mets"], scorer=scorer)[2] == 0
 
 
 @pytest.mark.parametrize("scorer", [fuzz.ratio, fuzz.WRatio, custom_scorer])
@@ -421,23 +416,7 @@ def test_generators():
 
 def test_cdist_pure_python_dtype():
     pytest.importorskip("numpy")
-    assert (
-        process.cdist(["test"], ["test"], scorer=Levenshtein_py.distance).dtype
-        == np.int32
-    )
-    assert (
-        process.cdist(["test"], ["test"], scorer=Levenshtein_py.similarity).dtype
-        == np.int32
-    )
-    assert (
-        process.cdist(
-            ["test"], ["test"], scorer=Levenshtein_py.normalized_distance
-        ).dtype
-        == np.float32
-    )
-    assert (
-        process.cdist(
-            ["test"], ["test"], scorer=Levenshtein_py.normalized_similarity
-        ).dtype
-        == np.float32
-    )
+    assert process.cdist(["test"], ["test"], scorer=Levenshtein_py.distance).dtype == np.int32
+    assert process.cdist(["test"], ["test"], scorer=Levenshtein_py.similarity).dtype == np.int32
+    assert process.cdist(["test"], ["test"], scorer=Levenshtein_py.normalized_distance).dtype == np.float32
+    assert process.cdist(["test"], ["test"], scorer=Levenshtein_py.normalized_similarity).dtype == np.float32

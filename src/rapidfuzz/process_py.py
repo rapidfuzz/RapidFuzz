@@ -72,8 +72,7 @@ def extract_iter(
 
 def extract_iter(
     query: Sequence[Hashable] | None,
-    choices: Iterable[Sequence[Hashable] | None]
-    | Mapping[Any, Sequence[Hashable] | None],
+    choices: Iterable[Sequence[Hashable] | None] | Mapping[Any, Sequence[Hashable] | None],
     *,
     scorer: Callable[..., int | float] = WRatio,
     processor: Callable[..., Sequence[Hashable]] | None | bool = default_process,
@@ -164,9 +163,7 @@ def extract_iter(
             continue
 
         if processor is None:
-            score = scorer(
-                query, choice, processor=None, score_cutoff=score_cutoff, **kwargs
-            )
+            score = scorer(query, choice, processor=None, score_cutoff=score_cutoff, **kwargs)
         else:
             score = scorer(
                 query,
@@ -214,8 +211,7 @@ def extractOne(
 
 def extractOne(
     query: Sequence[Hashable] | None,
-    choices: Iterable[Sequence[Hashable] | None]
-    | Mapping[Any, Sequence[Hashable] | None],
+    choices: Iterable[Sequence[Hashable] | None] | Mapping[Any, Sequence[Hashable] | None],
     *,
     scorer: Callable[..., int | float] = WRatio,
     processor: Callable[..., Sequence[Hashable]] | None | bool = default_process,
@@ -371,9 +367,7 @@ def extractOne(
             continue
 
         if processor is None:
-            score = scorer(
-                query, choice, processor=None, score_cutoff=score_cutoff, **kwargs
-            )
+            score = scorer(query, choice, processor=None, score_cutoff=score_cutoff, **kwargs)
         else:
             score = scorer(
                 query,
@@ -430,8 +424,7 @@ def extract(
 
 def extract(
     query: Sequence[Hashable] | None,
-    choices: Collection[Sequence[Hashable] | None]
-    | Mapping[Any, Sequence[Hashable] | None],
+    choices: Collection[Sequence[Hashable] | None] | Mapping[Any, Sequence[Hashable] | None],
     *,
     scorer: Callable[..., int | float] = WRatio,
     processor: Callable[..., Sequence[Hashable]] | None | bool = default_process,
@@ -638,9 +631,7 @@ def cdist(
             proc_queries = [processor(x) for x in queries]
 
         for i, query in enumerate(proc_queries):
-            results[i, i] = scorer(
-                query, query, processor=None, score_cutoff=score_cutoff, **kwargs
-            )
+            results[i, i] = scorer(query, query, processor=None, score_cutoff=score_cutoff, **kwargs)
             for j in range(i + 1, len(proc_queries)):
                 results[i, j] = results[j, i] = scorer(
                     query,

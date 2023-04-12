@@ -76,14 +76,12 @@ else:
         run_setup(True)
     except BaseException:
         show_message(
-            "WARNING: The C extension could not be compiled, speedups"
-            " are not enabled.",
+            "WARNING: The C extension could not be compiled, speedups are not enabled.",
             "Failure information, if any, is above.",
             "Retrying the build without the C extension now.",
         )
         run_setup(False)
         show_message(
-            "WARNING: The C extension could not be compiled, speedups"
-            " are not enabled.",
+            "WARNING: The C extension could not be compiled, speedups are not enabled.",
             "Plain-Python build succeeded.",
         )

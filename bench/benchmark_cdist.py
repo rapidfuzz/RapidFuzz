@@ -57,10 +57,7 @@ def get_platform():
 
 
 def benchmark():
-    words = [
-        "".join(random.choice(string.ascii_letters + string.digits) for _ in range(8))
-        for _ in range(10000)
-    ]
+    words = ["".join(random.choice(string.ascii_letters + string.digits) for _ in range(8)) for _ in range(10000)]
     sample_rate = len(words) // 100
     sample = words[::sample_rate]
     total = len(words) * len(sample)
@@ -110,17 +107,11 @@ def benchmark():
         fuzz.append(calls)
 
         rscorer = load_func("rapidfuzz.fuzz." + target)
-        rsec = timeit(
-            "func()", globals={"func": wrap_cdist(rscorer, PROCESSOR[target])}, number=1
-        )
+        rsec = timeit("func()", globals={"func": wrap_cdist(rscorer, PROCESSOR[target])}, number=1)
         rcalls = total / rsec
         rfuzz.append(rcalls)
 
-        print(
-            row_format.format(
-                target, f"{rcalls//1000}k", f"{calls//1000}k", f"{int(100 * sec/rsec)}%"
-            )
-        )
+        print(row_format.format(target, f"{rcalls//1000}k", f"{calls//1000}k", f"{int(100 * sec/rsec)}%"))
 
     labels = LIBRARIES
 
@@ -134,14 +125,10 @@ def benchmark():
     # Add some text for labels, title and custom x-axis tick labels, etc.
     ax.set_ylabel("evaluated word pairs [inputs/s]")
     ax.set_xlabel("Scorer")
-    ax.set_title(
-        "The number of word pairs evaluated per second\n(the larger the better)"
-    )
+    ax.set_title("The number of word pairs evaluated per second\n(the larger the better)")
     ax.set_xticks(x)
     ax.set_xticklabels(labels, rotation=30)
-    ax.get_yaxis().set_major_formatter(
-        mpl.ticker.FuncFormatter(lambda x, _: format(int(x), ","))
-    )
+    ax.get_yaxis().set_major_formatter(mpl.ticker.FuncFormatter(lambda x, _: format(int(x), ",")))
     ax.legend()
 
     def autolabel(rects):
