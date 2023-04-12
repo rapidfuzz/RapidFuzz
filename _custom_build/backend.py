@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import platform as _platform
 import subprocess as _subprocess
 

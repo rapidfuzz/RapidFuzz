@@ -294,6 +294,7 @@ def editops(
      insert s1[4] s2[2]
      insert s1[6] s2[5]
     """
+    _ = s1, s2, processor
     raise NotImplementedError
 
 

@@ -25,12 +25,15 @@ def _list_to_editops(
         edit_type, src_pos, dest_pos = op  # type: ignore[misc, assignment]
 
         if src_pos > src_len or dest_pos > dest_len:
-            raise ValueError("List of edit operations invalid")
+            msg = "List of edit operations invalid"
+            raise ValueError(msg)
 
         if src_pos == src_len and edit_type != "insert":
-            raise ValueError("List of edit operations invalid")
+            msg = "List of edit operations invalid"
+            raise ValueError(msg)
         if dest_pos == dest_len and edit_type != "delete":
-            raise ValueError("List of edit operations invalid")
+            msg = "List of edit operations invalid"
+            raise ValueError(msg)
 
         # keep operations are not relevant in editops
         if edit_type == "equal":
@@ -44,12 +47,14 @@ def _list_to_editops(
             blocks[i + 1].src_pos < blocks[i].src_pos
             or blocks[i + 1].dest_pos < blocks[i].dest_pos
         ):
-            raise ValueError("List of edit operations out of order")
+            msg = "List of edit operations out of order"
+            raise ValueError(msg)
         if (
             blocks[i + 1].src_pos == blocks[i].src_pos
             and blocks[i + 1].dest_pos == blocks[i].dest_pos
         ):
-            raise ValueError("Duplicated edit operation")
+            msg = "Duplicated edit operation"
+            raise ValueError(msg)
 
     return blocks
 
@@ -72,18 +77,23 @@ def _list_to_opcodes(
         edit_type, src_start, src_end, dest_start, dest_end = op  # type: ignore[misc, assignment]
 
         if src_end > src_len or dest_end > dest_len:
-            raise ValueError("List of edit operations invalid")
+            msg = "List of edit operations invalid"
+            raise ValueError(msg)
         if src_end < src_start or dest_end < dest_start:
-            raise ValueError("List of edit operations invalid")
+            msg = "List of edit operations invalid"
+            raise ValueError(msg)
 
-        if edit_type in {"equal", "replace"}:
-            if src_end - src_start != dest_end - dest_start or src_start == src_end:
-                raise ValueError("List of edit operations invalid")
-        if edit_type == "insert":
-            if src_start != src_end or dest_start == dest_end:
-                raise ValueError("List of edit operations invalid")
-        elif edit_type == "delete" and (src_start == src_end or dest_start != dest_end):
-            raise ValueError("List of edit operations invalid")
+        if edit_type in {"equal", "replace"} and (
+            src_end - src_start != dest_end - dest_start or src_start == src_end
+        ):
+            msg = "List of edit operations invalid"
+            raise ValueError(msg)
+        if edit_type == "insert" and (src_start != src_end or dest_start == dest_end):
+            msg = "List of edit operations invalid"
+            raise ValueError(msg)
+        if edit_type == "delete" and (src_start == src_end or dest_start != dest_end):
+            msg = "List of edit operations invalid"
+            raise ValueError(msg)
 
         # merge similar adjacent blocks
         if blocks and (
@@ -99,15 +109,18 @@ def _list_to_opcodes(
 
     # check if edit operations span the complete string
     if blocks[0].src_start != 0 or blocks[0].dest_start != 0:
-        raise ValueError("List of edit operations does not start at position 0")
+        msg = "List of edit operations does not start at position 0"
+        raise ValueError(msg)
     if blocks[-1].src_end != src_len or blocks[-1].dest_end != dest_len:
-        raise ValueError("List of edit operations does not end at the string ends")
+        msg = "List of edit operations does not end at the string ends"
+        raise ValueError(msg)
     for i in range(0, len(blocks) - 1):
         if (
             blocks[i + 1].src_start != blocks[i].src_end
             or blocks[i + 1].dest_start != blocks[i].dest_end
         ):
-            raise ValueError("List of edit operations is not continuous")
+            msg = "List of edit operations is not continuous"
+            raise ValueError(msg)
 
     return blocks
 
@@ -142,7 +155,8 @@ class MatchingBlock:
         if i in {2, -1}:
             return self.size
 
-        raise IndexError("MatchingBlock index out of range")
+        msg = "MatchingBlock index out of range"
+        raise IndexError(msg)
 
     def __iter__(self) -> Iterator[int]:
         for i in range(3):
@@ -199,7 +213,8 @@ class Editop:
         if i in {2, -1}:
             return self.dest_pos
 
-        raise IndexError("Editop index out of range")
+        msg = "Editop index out of range"
+        raise IndexError(msg)
 
     def __iter__(self) -> Iterator[int | str]:
         for i in range(3):
@@ -417,7 +432,8 @@ class Editops:
         result._dest_len = self._dest_len
 
         if len(subsequence) > len(self):
-            raise ValueError("subsequence is not a subsequence")
+            msg = "subsequence is not a subsequence"
+            raise ValueError(msg)
 
         result._editops = [None] * (len(self) - len(subsequence))
 
@@ -435,7 +451,8 @@ class Editops:
 
             # element of subsequence not part of the sequence
             if op_pos == len(self):
-                raise ValueError("subsequence is not a subsequence")
+                msg = "subsequence is not a subsequence"
+                raise ValueError(msg)
 
             if sop.tag == "insert":
                 offset += 1
@@ -532,7 +549,8 @@ class Editops:
 
         start, stop, step = key.indices(len(self._editops))
         if step < 0:
-            raise ValueError("step sizes below 0 lead to an invalid order of editops")
+            msg = "step sizes below 0 lead to an invalid order of editops"
+            raise ValueError(msg)
 
         x = Editops.__new__(Editops)
         x._src_len = self._src_len
@@ -619,7 +637,8 @@ class Opcode:
         if i in {4, -1}:
             return self.dest_end
 
-        raise IndexError("Opcode index out of range")
+        msg = "Opcode index out of range"
+        raise IndexError(msg)
 
     def __iter__(self) -> Iterator[int | str]:
         for i in range(5):
@@ -837,7 +856,8 @@ class Opcodes:
         if isinstance(key, int):
             return self._opcodes[key]
 
-        raise TypeError("Expected index")
+        msg = "Expected index"
+        raise TypeError(msg)
 
     def __iter__(self) -> Iterator[Opcode]:
         yield from self._opcodes
@@ -903,7 +923,8 @@ class ScoreAlignment:
         if i in {4, -1}:
             return self.dest_end
 
-        raise IndexError("Opcode index out of range")
+        msg = "Opcode index out of range"
+        raise IndexError(msg)
 
     def __iter__(self) -> Iterator[int | float]:
         for i in range(5):

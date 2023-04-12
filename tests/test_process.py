@@ -1,14 +1,14 @@
 from __future__ import annotations
 
+from contextlib import suppress
+
 import pytest
 
 from rapidfuzz import fuzz, process_cpp, process_py
 from rapidfuzz.distance import Levenshtein, Levenshtein_py
 
-try:
+with suppress(BaseException):
     import numpy as np
-except BaseException:
-    pass
 
 
 def wrapped(func):

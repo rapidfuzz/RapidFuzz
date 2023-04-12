@@ -27,6 +27,6 @@ def get_include():
                 include_dirs=[rapidfuzz_capi.get_include()])
         ...
     """
-    import os
+    from pathlib import Path
 
-    return os.path.dirname(__file__)
+    return Path(__file__).parent

@@ -1,13 +1,15 @@
+from __future__ import annotations
+
 import matplotlib.pyplot as plt
 import pandas as pd
 
-df = pd.read_csv("temp/result.csv")
+results = pd.read_csv("temp/result.csv")
 
-df *= 1000 * 1000
-df["x_axis"] /= 1000 * 1000
+results *= 1000 * 1000
+results["x_axis"] /= 1000 * 1000
 
 
-ax = df.plot(x="x_axis")
+ax = results.plot(x="x_axis")
 
 # plt.xticks(list(range(0, 64*20+1, 64)))
 

@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import importlib
 import random
 import string
 from timeit import timeit
 
-import matplotlib
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -77,9 +79,16 @@ def benchmark():
         return func
 
     def wrap_iterate(scorer, processor):
+        if processor:
+            queries = [processor(x) for x in sample]
+            choices = [processor(x) for x in words]
+        else:
+            queries = sample
+            choices = words
+
         def func():
-            for query in sample:
-                for choice in words:
+            for query in queries:
+                for choice in choices:
                     scorer(query, choice)
 
         return func
@@ -131,7 +140,7 @@ def benchmark():
     ax.set_xticks(x)
     ax.set_xticklabels(labels, rotation=30)
     ax.get_yaxis().set_major_formatter(
-        matplotlib.ticker.FuncFormatter(lambda x, p: format(int(x), ","))
+        mpl.ticker.FuncFormatter(lambda x, _: format(int(x), ","))
     )
     ax.legend()
 

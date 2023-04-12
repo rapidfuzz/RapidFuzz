@@ -17,9 +17,9 @@ def test_editops_comparison():
     """
     ops = Levenshtein.editops("aaabaaa", "abbaaabba")
     assert ops == ops
-    assert not (ops != ops) # noqa
+    assert not (ops != ops)  # noqa
     assert ops == ops.copy()
-    assert not (ops != ops.copy()) # noqa
+    assert not (ops != ops.copy())  # noqa
 
 
 @pytest.mark.parametrize("module", [distance_py, distance_cpp])
@@ -185,9 +185,9 @@ def test_opcodes_comparison():
     """
     ops = Levenshtein.opcodes("aaabaaa", "abbaaabba")
     assert ops == ops
-    assert not (ops != ops) # noqa
+    assert not (ops != ops)  # noqa
     assert ops == ops.copy()
-    assert not (ops != ops.copy()) # noqa
+    assert not (ops != ops.copy())  # noqa
 
 
 @pytest.mark.parametrize("module", [distance_py, distance_cpp])

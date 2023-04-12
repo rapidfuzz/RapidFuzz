@@ -53,7 +53,8 @@ def distance(
 
     dist = 0
     if len(s1) != len(s2):
-        raise ValueError("Sequences are not the same length.")
+        msg = "Sequences are not the same length."
+        raise ValueError(msg)
 
     for i in range(len(s1)):
         dist += s1[i] != s2[i]
@@ -233,7 +234,8 @@ def editops(
         s2 = processor(s2)
 
     if len(s1) != len(s2):
-        raise ValueError("Sequences are not the same length.")
+        msg = "Sequences are not the same length."
+        raise ValueError(msg)
 
     ops_list = []
     for i in range(len(s1)):

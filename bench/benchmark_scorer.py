@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import importlib
 import random
 import string
 from timeit import timeit
 
-import matplotlib
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -106,7 +108,7 @@ def benchmark():
     ax.set_xticks(x)
     ax.set_xticklabels(labels, rotation=30)
     ax.get_yaxis().set_major_formatter(
-        matplotlib.ticker.FuncFormatter(lambda x, p: format(int(x), ","))
+        mpl.ticker.FuncFormatter(lambda x, _: format(int(x), ","))
     )
     ax.legend()
 

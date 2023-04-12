@@ -103,9 +103,8 @@ def fallback_import(
     py_mod = importlib.import_module(module + "_py")
     py_func = getattr(py_mod, name)
     if not py_func:
-        raise ImportError(
-            f"cannot import name {name!r} from {py_mod.__name!r} ({py_mod.__file__})"
-        )
+        msg = f"cannot import name {name!r} from {py_mod.__name!r} ({py_mod.__file__})"
+        raise ImportError(msg)
 
     if impl == "cpp":
         cpp_mod = vectorized_import(module + "_cpp")
@@ -119,9 +118,10 @@ def fallback_import(
 
     cpp_func = getattr(cpp_mod, name)
     if not cpp_func:
-        raise ImportError(
+        msg = (
             f"cannot import name {name!r} from {cpp_mod.__name!r} ({cpp_mod.__file__})"
         )
+        raise ImportError(msg)
 
     return cpp_func
 

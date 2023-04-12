@@ -7,6 +7,7 @@ This benchmark suite has the following goals:
 - Showcase performance which ideally would be representative of performances of applications running
   on production
 """
+from __future__ import annotations
 
 import json
 import math
@@ -28,7 +29,9 @@ from tqdm import tqdm
 
 
 def benchmark(result, setup, func, queries, choices):
-    timer = timeit.Timer(func, setup=setup, globals=locals())
+    timer = timeit.Timer(
+        func, setup=setup, globals={"queries": queries, "choices": choices}
+    )
 
     number = 1
     while True:
@@ -287,10 +290,10 @@ def show():
     with open(temp_dir / "dataset.json") as f:
         dataset = json.load(f)
 
-    df = pd.read_csv("temp/result.csv")
+    results = pd.read_csv("temp/result.csv")
 
-    df.loc[:, (df.columns != "x_axis")] *= 1000 * 1000
-    ax = df.plot(x="x_axis")
+    results.loc[:, (results.columns != "x_axis")] *= 1000 * 1000
+    ax = results.plot(x="x_axis")
 
     # plt.xticks(list(range(0, 64*20+1, 64)))
 

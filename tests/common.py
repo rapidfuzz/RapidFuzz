@@ -95,7 +95,7 @@ class Scorer:
 
 class GenericScorer:
     def __init__(self, py_scorers, cpp_scorers, get_scorer_flags):
-        self.py_scorers = cpp_scorers
+        self.py_scorers = py_scorers
         self.cpp_scorers = cpp_scorers
         self.scorers = self.py_scorers + self.cpp_scorers
 

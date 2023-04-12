@@ -11,4 +11,5 @@ except ImportError:
     AVX2 = 2
 
     def supports(features):
+        _ = features
         return False

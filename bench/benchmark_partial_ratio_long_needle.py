@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import timeit
 
 import numpy as np
@@ -46,7 +48,7 @@ time_fuzzywuzzy = (
     + [np.NaN] * 128
 )
 
-df = pd.DataFrame(
+results = pd.DataFrame(
     data={
         "length": lengths,
         "rapidfuzz": time_rapidfuzz,
@@ -54,4 +56,4 @@ df = pd.DataFrame(
     }
 )
 
-df.to_csv("results/partial_ratio_long_needle.csv", sep=",", index=False)
+results.to_csv("results/partial_ratio_long_needle.csv", sep=",", index=False)

@@ -53,8 +53,7 @@ def _damerau_levenshtein_distance_zhao(
 
         last_row_id[s1[i - 1]] = i
 
-    dist = R[len(s2)]
-    return dist
+    return R[len(s2)]
 
 
 def distance(

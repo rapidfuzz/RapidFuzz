@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import timeit
 from urllib.request import urlopen

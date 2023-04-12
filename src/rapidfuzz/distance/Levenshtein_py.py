@@ -149,6 +149,7 @@ def distance(
     >>> Levenshtein.distance("lewenstein", "levenshtein", weights=(1,1,2))
     3
     """
+    _ = score_hint
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -211,6 +212,7 @@ def similarity(
     ValueError
         If unsupported weights are provided a ValueError is thrown
     """
+    _ = score_hint
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -269,6 +271,7 @@ def normalized_distance(
     ValueError
         If unsupported weights are provided a ValueError is thrown
     """
+    _ = score_hint
     if is_none(s1) or is_none(s2):
         return 1.0
 
@@ -354,6 +357,7 @@ def normalized_similarity(
     >>> Levenshtein.normalized_similarity(["lewenstein"], ["levenshtein"], processor=lambda s: s[0])
     0.81818181818181
     """
+    _ = score_hint
     if is_none(s1) or is_none(s2):
         return 0.0
 
@@ -414,6 +418,7 @@ def editops(
     replace s1[3] s2[2]
      insert s1[6] s2[5]
     """
+    _ = score_hint
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)

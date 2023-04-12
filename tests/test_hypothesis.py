@@ -159,11 +159,11 @@ def partial_ratio_short_needle_impl(s1, s2):
 def partial_ratio_short_needle(s1, s2):
     if len(s1) != len(s2):
         return partial_ratio_short_needle_impl(s1, s2)
-    else:
-        return max(
-            partial_ratio_short_needle_impl(s1, s2),
-            partial_ratio_short_needle_impl(s2, s1),
-        )
+
+    return max(
+        partial_ratio_short_needle_impl(s1, s2),
+        partial_ratio_short_needle_impl(s2, s1),
+    )
 
 
 def cdist_scorer(queries, choices, scorer):
@@ -424,7 +424,7 @@ def test_only_identical_strings_extracted(scorer, processor, choices):
     :return:
     """
     query = random.choice(choices)
-    assume(processor(query) != "")
+    assume(processor(query))
 
     matches = process.extract(
         query, choices, scorer=scorer, processor=processor, score_cutoff=100, limit=None

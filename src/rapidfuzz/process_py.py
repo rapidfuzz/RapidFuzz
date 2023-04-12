@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import heapq
+from contextlib import suppress
 from math import isnan
 from typing import (
     Any,
@@ -137,6 +138,7 @@ def extract_iter(
           * The `key of choice` when choices is a mapping like a dict, or a pandas Series
 
     """
+    _ = score_hint
     worst_score, optimal_score = _get_scorer_flags_py(scorer, kwargs)
     lowest_score_worst = optimal_score > worst_score
 
@@ -341,6 +343,7 @@ def extractOne(
     None
 
     """
+    _ = score_hint
     worst_score, optimal_score = _get_scorer_flags_py(scorer, kwargs)
     lowest_score_worst = optimal_score > worst_score
 
@@ -500,6 +503,7 @@ def extract(
         has the `highest similarity`/`smallest distance`.
 
     """
+    _ = score_hint
     worst_score, optimal_score = _get_scorer_flags_py(scorer, kwargs)
     lowest_score_worst = optimal_score > worst_score
 
@@ -520,10 +524,8 @@ def extract(
     return heapq.nsmallest(limit, result_iter, key=lambda i: i[1])
 
 
-try:
+with suppress(BaseException):
     import numpy as np
-except BaseException:
-    pass
 
 
 def _dtype_to_type_num(
@@ -625,6 +627,7 @@ def cdist(
     """
     import numpy as np
 
+    _ = workers, score_hint
     dtype = _dtype_to_type_num(dtype, scorer, **kwargs)
     results = np.zeros((len(queries), len(choices)), dtype=dtype)
 

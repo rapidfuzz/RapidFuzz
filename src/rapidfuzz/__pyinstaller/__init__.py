@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import os
+from pathlib import Path
 
 
 def get_hook_dirs():
-    return [os.path.dirname(__file__)]
+    return [Path(__file__).parent]
 
 
 def get_PyInstaller_tests():
-    return [os.path.dirname(__file__)]
+    return [Path(__file__).parent]

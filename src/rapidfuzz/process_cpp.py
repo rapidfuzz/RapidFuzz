@@ -51,7 +51,8 @@ def _dtype_to_type_num(dtype: np.dtype | None) -> int | None:
     if dtype is np.float64:
         return _FLOAT64
 
-    raise TypeError("unsupported dtype")
+    msg = "unsupported dtype"
+    raise TypeError(msg)
 
 
 def cdist(

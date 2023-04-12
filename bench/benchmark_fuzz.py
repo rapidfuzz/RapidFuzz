@@ -1,7 +1,9 @@
 # todo combine benchmarks of scorers into common code base
+from __future__ import annotations
+
 import timeit
 
-import pandas
+import pandas as pd
 
 
 def benchmark(name, func, setup, lengths, count):
@@ -40,7 +42,7 @@ def scorer_benchmark(funcname):
         "fuzzywuzzy", f"[fuzz.{funcname}(a, b) for b in b_list]", setup, lengths, count
     )
 
-    df = pandas.DataFrame(
+    results = pd.DataFrame(
         data={
             "length": lengths,
             "rapidfuzz": time_rapidfuzz,
@@ -48,7 +50,7 @@ def scorer_benchmark(funcname):
         }
     )
 
-    df.to_csv(f"results/{funcname}.csv", sep=",", index=False)
+    results.to_csv(f"results/{funcname}.csv", sep=",", index=False)
 
 
 scorer_benchmark("ratio")
@@ -77,7 +79,7 @@ time_token_ratio_simple = benchmark(
     count,
 )
 
-df = pandas.DataFrame(
+results = pd.DataFrame(
     data={
         "length": lengths,
         "token_ratio": time_token_ratio,
@@ -85,7 +87,7 @@ df = pandas.DataFrame(
     }
 )
 
-df.to_csv("results/token_ratio.csv", sep=",", index=False)
+results.to_csv("results/token_ratio.csv", sep=",", index=False)
 
 # partial_token_ratio is unique to RapidFuzz
 time_partial_token_ratio = benchmark(
@@ -108,7 +110,7 @@ time_partial_token_ratio_simple = benchmark(
     count,
 )
 
-df = pandas.DataFrame(
+results = pd.DataFrame(
     data={
         "length": lengths,
         "partial_token_ratio": time_partial_token_ratio,
@@ -116,4 +118,4 @@ df = pandas.DataFrame(
     }
 )
 
-df.to_csv("results/partial_token_ratio.csv", sep=",", index=False)
+results.to_csv("results/partial_token_ratio.csv", sep=",", index=False)
