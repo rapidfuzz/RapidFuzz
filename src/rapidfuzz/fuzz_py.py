@@ -14,7 +14,6 @@ from rapidfuzz.distance.Indel_py import distance as indel_distance
 from rapidfuzz.distance.Indel_py import (
     normalized_similarity as indel_normalized_similarity,
 )
-from rapidfuzz.utils_py import default_process
 
 
 def get_scorer_flags_fuzz(**_kwargs: Any) -> dict[str, Any]:
@@ -37,7 +36,7 @@ def ratio(
     s1: str | bytes | None,
     s2: str | bytes | None,
     *,
-    processor: Callable[..., str | bytes] | None | bool = None,
+    processor: Callable[..., str | bytes] | None = None,
     score_cutoff: float | None = None,
 ) -> float:
     """
@@ -77,11 +76,6 @@ def ratio(
     """
     if is_none(s1) or is_none(s2):
         return 0
-
-    if processor is True:
-        processor = default_process
-    elif processor is False:
-        processor = None
 
     if score_cutoff is not None:
         score_cutoff /= 100
@@ -161,7 +155,7 @@ def partial_ratio(
     s1: str | bytes | None,
     s2: str | bytes | None,
     *,
-    processor: Callable[..., str | bytes] | None | bool = None,
+    processor: Callable[..., str | bytes] | None = None,
     score_cutoff: float | None = None,
 ) -> float:
     """
@@ -239,7 +233,7 @@ def partial_ratio_alignment(
     s1: str | bytes | None,
     s2: str | bytes | None,
     *,
-    processor: Callable[..., str | bytes] | None | bool = None,
+    processor: Callable[..., str | bytes] | None = None,
     score_cutoff: float | None = None,
 ) -> ScoreAlignment | None:
     """
@@ -282,11 +276,6 @@ def partial_ratio_alignment(
     if is_none(s1) or is_none(s2):
         return None
 
-    if processor is True:
-        processor = default_process
-    elif processor is False:
-        processor = None
-
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -324,7 +313,7 @@ def token_sort_ratio(
     s1: str | None,
     s2: str | None,
     *,
-    processor: Callable[..., str] | None | bool = default_process,
+    processor: Callable[..., str] | None = None,
     score_cutoff: float | None = None,
 ) -> float:
     """
@@ -338,7 +327,7 @@ def token_sort_ratio(
         Second string to compare.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. Default is ``utils.default_process``.
+        comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
@@ -361,11 +350,6 @@ def token_sort_ratio(
     if is_none(s1) or is_none(s2):
         return 0
 
-    if processor is True:
-        processor = default_process
-    elif processor is False:
-        processor = None
-
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -379,7 +363,7 @@ def token_set_ratio(
     s1: str | None,
     s2: str | None,
     *,
-    processor: Callable[..., str] | None | bool = default_process,
+    processor: Callable[..., str] | None = None,
     score_cutoff: float | None = None,
 ) -> float:
     """
@@ -394,7 +378,7 @@ def token_set_ratio(
         Second string to compare.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. Default is ``utils.default_process``.
+        comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
@@ -418,11 +402,6 @@ def token_set_ratio(
     """
     if is_none(s1) or is_none(s2):
         return 0
-
-    if processor is True:
-        processor = default_process
-    elif processor is False:
-        processor = None
 
     if processor is not None:
         s1 = processor(s1)
@@ -485,7 +464,7 @@ def token_ratio(
     s1: str | None,
     s2: str | None,
     *,
-    processor: Callable[..., str] | None | bool = default_process,
+    processor: Callable[..., str] | None = None,
     score_cutoff: float | None = None,
 ) -> float:
     """
@@ -500,7 +479,7 @@ def token_ratio(
         Second string to compare.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. Default is ``utils.default_process``.
+        comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
@@ -518,11 +497,6 @@ def token_ratio(
     if is_none(s1) or is_none(s2):
         return 0
 
-    if processor is True:
-        processor = default_process
-    elif processor is False:
-        processor = None
-
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -538,7 +512,7 @@ def partial_token_sort_ratio(
     s1: str | None,
     s2: str | None,
     *,
-    processor: Callable[..., str] | None | bool = default_process,
+    processor: Callable[..., str] | None = None,
     score_cutoff: float | None = None,
 ) -> float:
     """
@@ -552,7 +526,7 @@ def partial_token_sort_ratio(
         Second string to compare.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. Default is ``utils.default_process``.
+        comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
@@ -570,11 +544,6 @@ def partial_token_sort_ratio(
     if is_none(s1) or is_none(s2):
         return 0
 
-    if processor is True:
-        processor = default_process
-    elif processor is False:
-        processor = None
-
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -588,7 +557,7 @@ def partial_token_set_ratio(
     s1: str | None,
     s2: str | None,
     *,
-    processor: Callable[..., str] | None | bool = default_process,
+    processor: Callable[..., str] | None = None,
     score_cutoff: float | None = None,
 ) -> float:
     """
@@ -603,7 +572,7 @@ def partial_token_set_ratio(
         Second string to compare.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. Default is ``utils.default_process``.
+        comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
@@ -620,11 +589,6 @@ def partial_token_set_ratio(
     """
     if is_none(s1) or is_none(s2):
         return 0
-
-    if processor is True:
-        processor = default_process
-    elif processor is False:
-        processor = None
 
     if processor is not None:
         s1 = processor(s1)
@@ -650,7 +614,7 @@ def partial_token_ratio(
     s1: str | None,
     s2: str | None,
     *,
-    processor: Callable[..., str] | None | bool = default_process,
+    processor: Callable[..., str] | None = None,
     score_cutoff: float | None = None,
 ) -> float:
     """
@@ -665,7 +629,7 @@ def partial_token_ratio(
         Second string to compare.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. Default is ``utils.default_process``.
+        comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
@@ -682,11 +646,6 @@ def partial_token_ratio(
     """
     if is_none(s1) or is_none(s2):
         return 0
-
-    if processor is True:
-        processor = default_process
-    elif processor is False:
-        processor = None
 
     if processor is not None:
         s1 = processor(s1)
@@ -732,7 +691,7 @@ def WRatio(
     s1: str | None,
     s2: str | None,
     *,
-    processor: Callable[..., str] | None | bool = default_process,
+    processor: Callable[..., str] | None = None,
     score_cutoff: float | None = None,
 ) -> float:
     """
@@ -746,7 +705,7 @@ def WRatio(
         Second string to compare.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. Default is ``utils.default_process``.
+        comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
@@ -765,11 +724,6 @@ def WRatio(
         return 0
 
     UNBASE_SCALE = 0.95
-
-    if processor is True:
-        processor = default_process
-    elif processor is False:
-        processor = None
 
     if processor is not None:
         s1 = processor(s1)
@@ -810,7 +764,7 @@ def QRatio(
     s1: str | bytes | None,
     s2: str | bytes | None,
     *,
-    processor: Callable[..., str | bytes] | None | bool = default_process,
+    processor: Callable[..., str | bytes] | None = None,
     score_cutoff: float | None = None,
 ) -> float:
     """
@@ -826,7 +780,7 @@ def QRatio(
         Second string to compare.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
-        comparing them. Default is ``utils.default_process``.
+        comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : float, optional
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
@@ -844,11 +798,6 @@ def QRatio(
     """
     if is_none(s1) or is_none(s2):
         return 0
-
-    if processor is True:
-        processor = default_process
-    elif processor is False:
-        processor = None
 
     if processor is not None:
         s1 = processor(s1)

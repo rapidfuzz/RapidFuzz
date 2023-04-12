@@ -369,12 +369,8 @@ cdef inline int64_t get_score_cutoff_i64(score_cutoff, const RF_ScorerFlags* sco
 
     return c_score_cutoff
 
-cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc, object default) except *:
+cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except *:
     cdef RF_Preprocessor* preprocess_context = NULL
-
-    if processor is True:
-        # todo: deprecate
-        processor = default
 
     if not processor:
         s1_proc[0] = RF_StringWrapper(conv_sequence(s1))

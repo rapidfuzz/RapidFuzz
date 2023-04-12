@@ -19,7 +19,6 @@ from typing import (
 
 from rapidfuzz._utils import ScorerFlag
 from rapidfuzz.fuzz import WRatio, ratio
-from rapidfuzz.utils import default_process
 
 __all__ = ["extract", "extract_iter", "extractOne", "cdist"]
 
@@ -48,7 +47,7 @@ def extract_iter(
     choices: Iterable[Sequence[Hashable] | None],
     *,
     scorer: Callable[..., int | float] = WRatio,
-    processor: Callable[..., Sequence[Hashable]] | None | bool = None,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
     **kwargs: Any,
@@ -62,7 +61,7 @@ def extract_iter(
     choices: Mapping[Any, Sequence[Hashable] | None],
     *,
     scorer: Callable[..., int | float] = WRatio,
-    processor: Callable[..., Sequence[Hashable]] | None | bool = None,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
     **kwargs: Any,
@@ -75,7 +74,7 @@ def extract_iter(
     choices: Iterable[Sequence[Hashable] | None] | Mapping[Any, Sequence[Hashable] | None],
     *,
     scorer: Callable[..., int | float] = WRatio,
-    processor: Callable[..., Sequence[Hashable]] | None | bool = default_process,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
     **kwargs: Any,
@@ -97,8 +96,8 @@ def extract_iter(
         a custom function, which returns a normalized edit distance.
         fuzz.WRatio is used by default.
     processor : Callable, optional
-        Optional callable that reformats the strings.
-        utils.default_process is used by default, which lowercases the strings and trims whitespace
+        Optional callable that is used to preprocess the strings before
+        comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : Any, optional
         Optional argument for a score threshold. When an edit distance is used this represents the maximum
         edit distance and matches with a `distance <= score_cutoff` are ignored. When a
@@ -144,11 +143,6 @@ def extract_iter(
     if _is_none(query):
         return
 
-    if processor is True:
-        processor = default_process
-    elif processor is False:
-        processor = None
-
     if score_cutoff is None:
         score_cutoff = worst_score
 
@@ -187,7 +181,7 @@ def extractOne(
     choices: Iterable[Sequence[Hashable] | None],
     *,
     scorer: Callable[..., int | float] = WRatio,
-    processor: Callable[..., Sequence[Hashable]] | None | bool = None,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
     **kwargs: Any,
@@ -201,7 +195,7 @@ def extractOne(
     choices: Mapping[Any, Sequence[Hashable] | None],
     *,
     scorer: Callable[..., int | float] = WRatio,
-    processor: Callable[..., Sequence[Hashable]] | None | bool = None,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
     **kwargs: Any,
@@ -214,7 +208,7 @@ def extractOne(
     choices: Iterable[Sequence[Hashable] | None] | Mapping[Any, Sequence[Hashable] | None],
     *,
     scorer: Callable[..., int | float] = WRatio,
-    processor: Callable[..., Sequence[Hashable]] | None | bool = default_process,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
     **kwargs: Any,
@@ -237,8 +231,8 @@ def extractOne(
         a custom function, which returns a normalized edit distance.
         fuzz.WRatio is used by default.
     processor : Callable, optional
-        Optional callable that reformats the strings.
-        utils.default_process is used by default, which lowercases the strings and trims whitespace
+        Optional callable that is used to preprocess the strings before
+        comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : Any, optional
         Optional argument for a score threshold. When an edit distance is used this represents the maximum
         edit distance and matches with a `distance <= score_cutoff` are ignored. When a
@@ -308,16 +302,12 @@ def extractOne(
     >>> extractOne("abcd", {"key": "abce"}, scorer=ratio)
     ("abcd", 75.0, "key")
 
-    By default each string is preprocessed using `utils.default_process`, which lowercases the strings,
-    replaces non alphanumeric characters with whitespaces and trims whitespaces from start and end of them.
-    This behavior can be changed by passing a custom function, or None to disable the behavior. Preprocessing
-    can take a significant part of the runtime, so it makes sense to disable it, when it is not required.
-
+    It is possible to specify a processor function which is used to preprocess the strings before comparing them.
 
     >>> extractOne("abcd", ["abdD"], scorer=ratio)
-    ("abcD", 100.0, 0)
-    >>> extractOne("abcd", ["abdD"], scorer=ratio, processor=None)
     ("abcD", 75.0, 0)
+    >>> extractOne("abcd", ["abdD"], scorer=ratio, processor=utils.default_process)
+    ("abcD", 100.0, 0)
     >>> extractOne("abcd", ["abdD"], scorer=ratio, processor=lambda s: s.upper())
     ("abcD", 100.0, 0)
 
@@ -345,11 +335,6 @@ def extractOne(
 
     if _is_none(query):
         return None
-
-    if processor is True:
-        processor = default_process
-    elif processor is False:
-        processor = None
 
     if score_cutoff is None:
         score_cutoff = worst_score
@@ -398,7 +383,7 @@ def extract(
     choices: Collection[Sequence[Hashable] | None],
     *,
     scorer: Callable[..., int | float] = WRatio,
-    processor: Callable[..., Sequence[Hashable]] | None | bool = None,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
     limit: int | None = None,
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
@@ -413,7 +398,7 @@ def extract(
     choices: Mapping[Any, Sequence[Hashable] | None],
     *,
     scorer: Callable[..., int | float] = WRatio,
-    processor: Callable[..., Sequence[Hashable]] | None | bool = None,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
     limit: int | None = None,
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
@@ -427,7 +412,7 @@ def extract(
     choices: Collection[Sequence[Hashable] | None] | Mapping[Any, Sequence[Hashable] | None],
     *,
     scorer: Callable[..., int | float] = WRatio,
-    processor: Callable[..., Sequence[Hashable]] | None | bool = default_process,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
     limit: int | None = 5,
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
@@ -451,8 +436,8 @@ def extract(
         a custom function, which returns a normalized edit distance.
         fuzz.WRatio is used by default.
     processor : Callable, optional
-        Optional callable that reformats the strings.
-        utils.default_process is used by default, which lowercases the strings and trims whitespace
+        Optional callable that is used to preprocess the strings before
+        comparing them. Default is None, which deactivates this behaviour.
     limit : int
         maximum amount of results to return
     score_cutoff : Any, optional

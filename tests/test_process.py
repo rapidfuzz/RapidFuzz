@@ -74,9 +74,9 @@ def test_extractOne_exceptions():
     with pytest.raises(TypeError):
         process_py.extractOne(1)
     with pytest.raises(TypeError):
-        process_cpp.extractOne(1, [])
+        process_cpp.extractOne(1, [""])
     with pytest.raises(TypeError):
-        process_py.extractOne(1, [])
+        process_py.extractOne(1, [""])
     with pytest.raises(TypeError):
         process_cpp.extractOne("", [1])
     with pytest.raises(TypeError):
@@ -97,9 +97,9 @@ def test_extract_exceptions():
     with pytest.raises(TypeError):
         process_py.extract(1)
     with pytest.raises(TypeError):
-        process_cpp.extract(1, [])
+        process_cpp.extract(1, [""])
     with pytest.raises(TypeError):
-        process_py.extract(1, [])
+        process_py.extract(1, [""])
     with pytest.raises(TypeError):
         process_cpp.extract("", [1])
     with pytest.raises(TypeError):
@@ -120,9 +120,9 @@ def test_extract_iter_exceptions():
     with pytest.raises(TypeError):
         process_py.extract_iter(1)
     with pytest.raises(TypeError):
-        next(process_cpp.extract_iter(1, []))
+        next(process_cpp.extract_iter(1, [""]))
     with pytest.raises(TypeError):
-        next(process_py.extract_iter(1, []))
+        next(process_py.extract_iter(1, [""]))
     with pytest.raises(TypeError):
         next(process_cpp.extract_iter("", [1]))
     with pytest.raises(TypeError):
@@ -352,7 +352,7 @@ def custom_scorer(s1, s2, processor=None, score_cutoff=0):
     return fuzz.ratio(s1, s2, processor=processor, score_cutoff=score_cutoff)
 
 
-@pytest.mark.parametrize("processor", [False, None, lambda s: s])
+@pytest.mark.parametrize("processor", [None, lambda s: s])
 @pytest.mark.parametrize("scorer", [fuzz.ratio, custom_scorer])
 def test_extractOne_case_sensitive(processor, scorer):
     assert (

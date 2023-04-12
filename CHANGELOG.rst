@@ -1,12 +1,18 @@
 Changelog
 ---------
 
-[2.16.0] -
+[3.0.0] -
 ^^^^^^^^^^^^^^^^^^^^^
 Changed
 ~~~~~~~
 - allow the usage of ``Hamming`` for different string lengths. Length differences are handled as
   insertions / deletions
+- remove support for boolean preprocessor functions in ``rapidfuzz.fuzz`` and ``rapidfuzz.process``.
+  The processor argument is now always a callable or None.
+- update defaults of the processor argument to be ``None`` everywhere. This changes the defaults of some of
+  the functions in ``rapidfuzz.fuzz`` and ``rapidfuzz.process``.
+- ``rapidfuzz.process`` no longer calls scorers with ``processor=None``. For this reason scorer functions
+  do not need to provide this argument anymore.
 
 [2.15.1] - 2023-04-11
 ^^^^^^^^^^^^^^^^^^^^^

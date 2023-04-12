@@ -2,7 +2,6 @@
 # cython: language_level=3, binding=True, linetrace=True
 
 from rapidfuzz.fuzz import WRatio, ratio
-from rapidfuzz.utils import default_process
 
 cimport cython
 from cpp_common cimport (
@@ -647,18 +646,12 @@ cdef inline py_extractOne_list(query, choices, scorer, processor, double score_c
     return (result_choice, result_score, result_index) if result_choice is not None else None
 
 
-def extractOne(query, choices, *, scorer=WRatio, processor=default_process, score_cutoff=None, score_hint=None, **kwargs):
+def extractOne(query, choices, *, scorer=WRatio, processor=None, score_cutoff=None, score_hint=None, **kwargs):
     cdef RF_Scorer* scorer_context = NULL
     cdef RF_ScorerFlags scorer_flags
 
     if is_none(query):
         return None
-
-    if processor is True:
-        # todo: deprecate this
-        processor = default_process
-    elif processor is False:
-        processor = None
 
     # preprocess the query
     if callable(processor):
@@ -955,17 +948,12 @@ cdef inline py_extract_list(query, choices, scorer, processor, int64_t limit, do
         return heapq.nsmallest(limit, result_list, key=lambda i: i[1])
 
 
-def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5, score_cutoff=None, score_hint=None, **kwargs):
+def extract(query, choices, *, scorer=WRatio, processor=None, limit=5, score_cutoff=None, score_hint=None, **kwargs):
     cdef RF_Scorer* scorer_context = NULL
     cdef RF_ScorerFlags scorer_flags
 
     if is_none(query):
         return []
-
-    if processor is True:
-        processor = default_process
-    elif processor is False:
-        processor = None
 
     try:
         if limit is None or limit > len(choices):
@@ -1012,7 +1000,7 @@ def extract(query, choices, *, scorer=WRatio, processor=default_process, limit=5
         return py_extract_list(query, choices, scorer, processor, limit, score_cutoff, worst_score, optimal_score, kwargs)
 
 
-def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, score_cutoff=None, score_hint=None, **kwargs):
+def extract_iter(query, choices, *, scorer=WRatio, processor=None, score_cutoff=None, score_hint=None, **kwargs):
     cdef RF_Scorer* scorer_context = NULL
     cdef RF_ScorerFlags scorer_flags
     cdef RF_Preprocessor* processor_context = NULL
@@ -1242,11 +1230,6 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=default_process, sc
     if is_none(query):
         # finish generator
         return
-
-    if processor is True:
-        processor = default_process
-    elif processor is False:
-        processor = None
 
     # preprocess the query
     if callable(processor):
@@ -1517,12 +1500,6 @@ def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, 
     cdef RF_Scorer* scorer_context = NULL
     cdef RF_ScorerFlags scorer_flags
     cdef bool is_orig_scorer
-
-    if processor is True:
-        # todo: deprecate this
-        processor = default_process
-    elif processor is False:
-        processor = None
 
     scorer_capsule = getattr(scorer, '_RF_Scorer', scorer)
     if PyCapsule_IsValid(scorer_capsule, NULL):
