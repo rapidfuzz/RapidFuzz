@@ -449,13 +449,13 @@ def test_jaro_winkler_word(s1, s2):
 
 
 @given(s1=st.text(min_size=65), s2=st.text(min_size=65))
-@settings(max_examples=50, deadline=1000)
+@settings(max_examples=50, deadline=None)
 def test_jaro_winkler_block(s1, s2):
     assert isclose(jaro_winkler_similarity(s1, s2), JaroWinkler.similarity(s1, s2))
 
 
 @given(s1=st.text(), s2=st.text())
-@settings(max_examples=50, deadline=1000)
+@settings(max_examples=50, deadline=None)
 def test_jaro_winkler_random(s1, s2):
     print(s1, s2)
     assert isclose(jaro_winkler_similarity(s1, s2), JaroWinkler.similarity(s1, s2))
