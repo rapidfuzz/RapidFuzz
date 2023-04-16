@@ -208,7 +208,7 @@ class Editop:
             yield self[i]
 
     def __repr__(self) -> str:
-        return f"Editop(tag={self.tag}, src_pos={self.src_pos}, dest_pos={self.dest_pos})"
+        return f"Editop(tag={self.tag!r}, src_pos={self.src_pos}, dest_pos={self.dest_pos})"
 
 
 class Editops:

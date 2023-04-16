@@ -7,5 +7,4 @@ Usage
    process
    distance/index
    fuzz
-   string_metric
    utils

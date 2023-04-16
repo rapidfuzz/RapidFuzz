@@ -28,7 +28,7 @@ if("${CMAKE_CXX_COMPILER_RANLIB}" STREQUAL "")
 endif()
 
 if(MSVC)
-  add_compile_options(/W4 /bigobj)
+  add_compile_options(/W4 /bigobj /wd4127)
 else()
   add_compile_options(-Wall -Wextra -pedantic -Wno-psabi)
 endif()

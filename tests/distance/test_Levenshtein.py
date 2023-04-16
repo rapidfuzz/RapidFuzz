@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from rapidfuzz import process
-from rapidfuzz.distance import Levenshtein_py, Opcode, Opcodes, metrics_cpp
+from rapidfuzz.distance import Opcode, Opcodes, metrics_cpp
 from tests.distance.common import Levenshtein
 
 
@@ -36,11 +35,13 @@ def test_cross_type_matching():
     """
     assert Levenshtein.distance("aaaa", "aaaa") == 0
     assert Levenshtein.distance("aaaa", ["a", "a", "a", "a"]) == 0
+    assert Levenshtein.distance(b"aaaa", b"aaaa") == 0
+    assert Levenshtein.distance("aaaa", b"aaaa") == 0
     # todo add support in pure python
-    assert metrics_cpp.levenshtein_distance("aaaa", [ord("a"), ord("a"), "a", "a"]) == 0
-    assert metrics_cpp.levenshtein_distance([0, -1], [0, -2]) == 1
+    assert Levenshtein.distance("aaaa", [ord("a"), ord("a"), "a", "a"]) == 0
+    assert Levenshtein.distance([0, -1], [0, -2]) == 1
     assert (
-        metrics_cpp.levenshtein_distance(
+        Levenshtein.distance(
             [CustomHashable("aa"), CustomHashable("aa")],
             [CustomHashable("aa"), CustomHashable("bb")],
         )
@@ -125,34 +126,3 @@ def test_mbleven():
     assert Levenshtein.distance("0", "101", score_cutoff=1) == 2
     assert Levenshtein.distance("0", "101", score_cutoff=2) == 2
     assert Levenshtein.distance("0", "101", score_cutoff=3) == 2
-
-    match = process.extractOne(
-        "0",
-        ["101"],
-        scorer=metrics_cpp.levenshtein_distance,
-        processor=None,
-        score_cutoff=1,
-    )
-    assert match is None
-    match = process.extractOne("0", ["101"], scorer=Levenshtein_py.distance, processor=None, score_cutoff=1)
-    assert match is None
-    match = process.extractOne(
-        "0",
-        ["101"],
-        scorer=metrics_cpp.levenshtein_distance,
-        processor=None,
-        score_cutoff=2,
-    )
-    assert match == ("101", 2, 0)
-    match = process.extractOne("0", ["101"], scorer=Levenshtein_py.distance, processor=None, score_cutoff=2)
-    assert match == ("101", 2, 0)
-    match = process.extractOne(
-        "0",
-        ["101"],
-        scorer=metrics_cpp.levenshtein_distance,
-        processor=None,
-        score_cutoff=3,
-    )
-    assert match == ("101", 2, 0)
-    match = process.extractOne("0", ["101"], scorer=Levenshtein_py.distance, processor=None, score_cutoff=3)
-    assert match == ("101", 2, 0)

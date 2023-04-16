@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from typing import Callable, Hashable, Sequence
 
+from rapidfuzz._common_py import conv_sequences
 from rapidfuzz._utils import is_none
 
 
@@ -99,6 +100,7 @@ def similarity(
     if score_cutoff is None:
         score_cutoff = 0
 
+    s1, s2 = conv_sequences(s1, s2)
     pattern_len = len(s1)
     text_len = len(s2)
 

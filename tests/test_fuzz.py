@@ -206,7 +206,7 @@ def test_issue76():
 
 
 def test_issue90():
-    assert pytest.approx(fuzz_cpp.partial_ratio("ax b", "a b a c b")) == 85.71428
+    assert pytest.approx(fuzz.partial_ratio("ax b", "a b a c b")) == 85.71428
 
 
 def test_issue138():
@@ -323,7 +323,7 @@ def test_simple_unicode_tests(scorer):
     assert scorer(s1, s1) == 100
 
 
-@pytest.mark.parametrize("processor", [True, utils.default_process, lambda s: utils.default_process(s)])
+@pytest.mark.parametrize("processor", [utils.default_process, lambda s: utils.default_process(s)])
 @pytest.mark.parametrize("scorer", scorers)
 def test_scorer_case_insensitive(processor, scorer):
     """
@@ -332,7 +332,7 @@ def test_scorer_case_insensitive(processor, scorer):
     assert scorer("new york mets", "new YORK mets", processor=processor) == 100
 
 
-@pytest.mark.parametrize("processor", [False, None, lambda s: s])
+@pytest.mark.parametrize("processor", [None, lambda s: s])
 def test_ratio_case_censitive(processor):
     assert fuzz.ratio("new york mets", "new YORK mets", processor=processor) != 100
 

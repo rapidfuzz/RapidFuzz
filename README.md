@@ -92,7 +92,7 @@ pip install .
 Some simple functions are shown below. A complete documentation of all functions can be found [here](https://maxbachmann.github.io/RapidFuzz/Usage/index.html).
 
 ### Scorers
-Scorers in RapidFuzz can be found in the modules `fuzz` and `string_metric`.
+Scorers in RapidFuzz can be found in the modules `fuzz` and `distance`.
 
 #### Simple Ratio
 ```console

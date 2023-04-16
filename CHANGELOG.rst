@@ -1,17 +1,32 @@
 Changelog
 ---------
 
-[2.16.0] -
-^^^^^^^^^^^^^^^^^^^^^
+[3.0.0] - 2023-04-16
+^^^^^^^^^^^^^^^^^^^^
 Changed
 ~~~~~~~
 - allow the usage of ``Hamming`` for different string lengths. Length differences are handled as
   insertions / deletions
+- remove support for boolean preprocessor functions in ``rapidfuzz.fuzz`` and ``rapidfuzz.process``.
+  The processor argument is now always a callable or None.
+- update defaults of the processor argument to be ``None`` everywhere. This changes the defaults of some of
+  the functions in ``rapidfuzz.fuzz`` and ``rapidfuzz.process``.
+- ``rapidfuzz.process`` no longer calls scorers with ``processor=None``. For this reason scorer functions
+  do not need to provide this argument anymore.
+- remove option to pass keyword arguments to scorer via ``**kwargs`` in ``rapidfuzz.process``. They can be passed
+  via a ``scorer_kwargs`` argument now. This ensures this does not break when extending function parameters and
+  prevents naming clashes.
+- remove ``rapidfuzz.string_metric`` module. Replacements for all functions are available in ``rapidfuzz.distance``
+
+Added
+~~~~~
+- added support for arbitrary hashable sequence in the pure Python fallback implementation of all functions in ``rapidfuzz.distance``
+
 
 [2.15.1] - 2023-04-11
 ^^^^^^^^^^^^^^^^^^^^^
 Fixed
-~~~~~~~
+~~~~~
 - fix incorrect tag dispatching implementation leading to AVX2 instructions in the SSE2 code path
 
 Added
@@ -31,7 +46,7 @@ Changed
 - upgrade required Cython version to ``Cython==3.0.0b2``
 
 Fixed
-~~~~~~~
+~~~~~
 - fix handling of non symmetric scorers in pure python version of ``process.cdist``
 - fix default dtype handling when using ``process.cdist`` with pure python scorers
 

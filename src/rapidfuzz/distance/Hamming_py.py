@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from typing import Callable, Hashable, Sequence
 
+from rapidfuzz._common_py import conv_sequences
 from rapidfuzz._utils import is_none
 from rapidfuzz.distance._initialize_py import Editop, Editops, Opcodes
 
@@ -51,6 +52,7 @@ def distance(
         s1 = processor(s1)
         s2 = processor(s2)
 
+    s1, s2 = conv_sequences(s1, s2)
     min_len = min(len(s1), len(s2))
     dist = max(len(s1), len(s2))
     for i in range(min_len):
@@ -100,6 +102,7 @@ def similarity(
         s1 = processor(s1)
         s2 = processor(s2)
 
+    s1, s2 = conv_sequences(s1, s2)
     maximum = max(len(s1), len(s2))
     dist = distance(s1, s2)
     sim = maximum - dist
@@ -150,6 +153,7 @@ def normalized_distance(
         s1 = processor(s1)
         s2 = processor(s2)
 
+    s1, s2 = conv_sequences(s1, s2)
     maximum = max(len(s1), len(s2))
     dist = distance(s1, s2)
     norm_dist = dist / maximum if maximum else 0
@@ -196,6 +200,7 @@ def normalized_similarity(
     if is_none(s1) or is_none(s2):
         return 0.0
 
+    s1, s2 = conv_sequences(s1, s2)
     norm_dist = normalized_distance(s1, s2, processor=processor)
     norm_sim = 1 - norm_dist
 
@@ -230,6 +235,7 @@ def editops(
         s1 = processor(s1)
         s2 = processor(s2)
 
+    s1, s2 = conv_sequences(s1, s2)
     ops_list = []
     min_len = min(len(s1), len(s2))
     for i in range(min_len):
