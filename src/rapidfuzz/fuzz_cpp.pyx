@@ -8,6 +8,7 @@ from rapidfuzz cimport (
     RF_SCORER_FLAG_MULTI_STRING_INIT,
     RF_SCORER_FLAG_RESULT_F64,
     RF_SCORER_FLAG_SYMMETRIC,
+    RF_SCORER_NONE_IS_WORST_SCORE,
     RF_Kwargs,
     RF_Scorer,
     RF_ScorerFlags,
@@ -196,13 +197,13 @@ def QRatio(s1, s2, *, processor=None, score_cutoff=None):
 
 
 cdef bool GetScorerFlagsFuzz(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
-    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC | RF_SCORER_NONE_IS_WORST_SCORE
     scorer_flags.optimal_score.f64 = 100
     scorer_flags.worst_score.f64 = 0
     return True
 
 cdef bool GetScorerFlagsFuzzRatio(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
-    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC | RF_SCORER_NONE_IS_WORST_SCORE
     if RatioMultiStringSupport(self):
         scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
 

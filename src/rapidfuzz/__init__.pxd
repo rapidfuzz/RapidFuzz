@@ -15,6 +15,7 @@ cdef extern from "rapidfuzz.h":
     uint32_t RF_SCORER_FLAG_RESULT_I64
     uint32_t RF_SCORER_FLAG_SYMMETRIC
     uint32_t RF_SCORER_FLAG_TRIANGLE_INEQUALITY
+    uint32_t RF_SCORER_NONE_IS_WORST_SCORE
 
     ctypedef struct RF_String:
         void (*dtor) (RF_String*) nogil

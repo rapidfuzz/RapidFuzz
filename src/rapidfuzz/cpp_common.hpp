@@ -151,6 +151,11 @@ struct RF_StringWrapper {
         Py_XDECREF(obj);
     }
 
+    bool is_none() const
+    {
+        return string.data == nullptr;
+    }
+
     size_t size() const noexcept
     {
         return static_cast<size_t>(string.length);

@@ -446,7 +446,8 @@ void run_parallel(int workers, int64_t rows, int64_t step_size, Func&& func)
 template <typename T>
 static Matrix cdist_single_list_impl(const RF_ScorerFlags* scorer_flags, const RF_Kwargs* kwargs,
                                      RF_Scorer* scorer, const std::vector<RF_StringWrapper>& queries,
-                                     MatrixType dtype, int workers, T score_cutoff, T score_hint)
+                                     MatrixType dtype, int workers, T score_cutoff, T score_hint,
+                                     T worst_score)
 {
     (void)scorer_flags;
     int64_t rows = queries.size();
@@ -460,11 +461,19 @@ static Matrix cdist_single_list_impl(const RF_ScorerFlags* scorer_flags, const R
             RF_ScorerWrapper ScorerFunc(scorer_func);
 
             T score;
-            ScorerFunc.call(&queries[row].string, score_cutoff, score_hint, &score);
+            if (queries[row].is_none())
+                score = worst_score;
+            else
+                ScorerFunc.call(&queries[row].string, score_cutoff, score_hint, &score);
+
             matrix.set(row, row, score);
 
             for (int64_t col = row + 1; col < cols; ++col) {
-                ScorerFunc.call(&queries[col].string, score_cutoff, score_hint, &score);
+                if (queries[col].is_none())
+                    score = worst_score;
+                else
+                    ScorerFunc.call(&queries[col].string, score_cutoff, score_hint, &score);
+
                 matrix.set(row, col, score);
                 matrix.set(col, row, score);
             }
@@ -478,7 +487,7 @@ template <typename T>
 static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_Kwargs* kwargs,
                                    RF_Scorer* scorer, const std::vector<RF_StringWrapper>& queries,
                                    const std::vector<RF_StringWrapper>& choices, MatrixType dtype,
-                                   int workers, T score_cutoff, T score_hint)
+                                   int workers, T score_cutoff, T score_hint, T worst_score)
 {
     int64_t rows = queries.size();
     int64_t cols = choices.size();
@@ -490,6 +499,15 @@ static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_
     if (multiStringInit) {
         std::vector<size_t> row_idx(rows);
         std::iota(row_idx.begin(), row_idx.end(), 0);
+        auto none_begin = std::remove_if(row_idx.begin(), row_idx.end(), [&queries](size_t i) {
+            return queries[i].is_none();
+        });
+
+        for (auto it = none_begin; it != row_idx.end(); it++)
+            for (int64_t col = 0; col < cols; ++col)
+                matrix.set(*it, col, worst_score);
+
+        row_idx.erase(none_begin, row_idx.end());
 
         /* sort into blocks fitting simd vectors */
         std::stable_sort(row_idx.begin(), row_idx.end(), [&queries](size_t i1, size_t i2) {
@@ -519,7 +537,7 @@ static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_
         else
             step_size = 256 / 64;
 
-        run_parallel(workers, rows, step_size, [&](int64_t row, int64_t row_end) {
+        run_parallel(workers, row_idx.size(), step_size, [&](int64_t row, int64_t row_end) {
             /* todo add simd support for long sequences */
             for (; row < row_end; ++row) {
                 if (queries[row_idx[row]].size() <= 64) break;
@@ -531,7 +549,11 @@ static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_
 
                 for (int64_t col = 0; col < cols; ++col) {
                     T score;
-                    ScorerFunc.call(&choices[col].string, score_cutoff, score_hint, &score);
+                    if (choices[col].is_none())
+                        score = worst_score;
+                    else
+                        ScorerFunc.call(&choices[col].string, score_cutoff, score_hint, &score);
+
                     matrix.set(row_idx[row], col, score);
                 }
             }
@@ -551,7 +573,13 @@ static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_
             RF_ScorerWrapper ScorerFunc(scorer_func);
 
             for (int64_t col = 0; col < cols; ++col) {
-                ScorerFunc.call(&choices[col].string, score_cutoff, score_hint, scores);
+                if (choices[col].is_none()) {
+                    for (int64_t i = 0; i < row_count; ++i)
+                        scores[i] = worst_score;
+                }
+                else {
+                    ScorerFunc.call(&choices[col].string, score_cutoff, score_hint, scores);
+                }
 
                 for (int64_t i = 0; i < row_count; ++i)
                     matrix.set(row_idx[row + i], col, scores[i]);
@@ -567,7 +595,11 @@ static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_
 
                 for (int64_t col = 0; col < cols; ++col) {
                     T score;
-                    ScorerFunc.call(&choices[col].string, score_cutoff, score_hint, &score);
+                    if (choices[col].is_none())
+                        score = worst_score;
+                    else
+                        ScorerFunc.call(&choices[col].string, score_cutoff, score_hint, &score);
+
                     matrix.set(row, col, score);
                 }
             }

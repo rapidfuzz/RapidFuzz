@@ -611,29 +611,24 @@ def cdist(
     dtype = _dtype_to_type_num(dtype, scorer, scorer_kwargs)
     results = np.zeros((len(queries), len(choices)), dtype=dtype)
 
-    if queries is choices and _is_symmetric(scorer, scorer_kwargs):
-        if processor is None:
-            proc_queries = list(queries)
-        else:
-            proc_queries = [processor(x) for x in queries]
+    if processor is None:
+        proc_choices = list(choices)
+    else:
+        proc_choices = [x if _is_none(x) else processor(x) for x in choices]
 
-        for i, query in enumerate(proc_queries):
+    if queries is choices and _is_symmetric(scorer, scorer_kwargs):
+        for i, query in enumerate(proc_choices):
             results[i, i] = scorer(query, query, score_cutoff=score_cutoff, **scorer_kwargs)
-            for j in range(i + 1, len(proc_queries)):
+            for j in range(i + 1, len(proc_choices)):
                 results[i, j] = results[j, i] = scorer(
                     query,
-                    proc_queries[j],
+                    proc_choices[j],
                     score_cutoff=score_cutoff,
                     **scorer_kwargs,
                 )
     else:
-        if processor is None:
-            proc_choices = list(choices)
-        else:
-            proc_choices = [processor(x) for x in choices]
-
         for i, query in enumerate(queries):
-            proc_query = processor(query) if processor else query
+            proc_query = processor(query) if (processor and not _is_none(query)) else query
             for j, choice in enumerate(proc_choices):
                 results[i, j] = scorer(
                     proc_query,

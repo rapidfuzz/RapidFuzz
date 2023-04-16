@@ -160,6 +160,9 @@ typedef bool (*RF_ScorerFuncInit)(RF_ScorerFunc* self, const RF_Kwargs* kwargs, 
  */
 #define RF_SCORER_FLAG_TRIANGLE_INEQUALITY ((uint32_t)1 << 12 | RF_SCORER_FLAG_SYMMETRIC)
 
+/* when none is passed this is the worst score */
+#define RF_SCORER_NONE_IS_WORST_SCORE ((uint32_t)1 << 13)
+
 /**
  * @brief information associated with a scorer
  */

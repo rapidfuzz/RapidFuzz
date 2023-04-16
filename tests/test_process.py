@@ -332,6 +332,19 @@ def test_none_strings():
     best = process.extractOne(query, choices)
     assert best[0] == choices[1]
 
+    bests = process.extract(query, choices)
+    assert bests[0][0] == choices[1]
+    assert bests[1][0] == choices[2]
+
+    bests = list(process.extract_iter(query, choices))
+    assert bests[0][0] == choices[1]
+    assert bests[1][0] == choices[2]
+
+    scores = process.cdist([query], choices)
+    assert scores[0, 0] == 0
+    assert scores[0, 3] == 0
+    assert scores[0, 4] == 0
+
 
 def test_issue81():
     # this mostly tests whether this segfaults due to incorrect ref counting

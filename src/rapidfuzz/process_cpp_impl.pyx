@@ -33,6 +33,7 @@ from rapidfuzz cimport (
     RF_SCORER_FLAG_RESULT_F64,
     RF_SCORER_FLAG_RESULT_I64,
     RF_SCORER_FLAG_SYMMETRIC,
+    RF_SCORER_NONE_IS_WORST_SCORE,
     SCORER_STRUCT_VERSION,
     RF_Kwargs,
     RF_Preprocess,
@@ -123,9 +124,9 @@ cdef extern from "process_cpp.hpp":
         void* m_matrix
 
     RfMatrix cdist_single_list_impl[T](  const RF_ScorerFlags* scorer_flags, const RF_Kwargs*, RF_Scorer*,
-        const vector[RF_StringWrapper]&, MatrixType, int, T, T) except +
+        const vector[RF_StringWrapper]&, MatrixType, int, T, T, T) except +
     RfMatrix cdist_two_lists_impl[T](    const RF_ScorerFlags* scorer_flags, const RF_Kwargs*, RF_Scorer*,
-        const vector[RF_StringWrapper]&, const vector[RF_StringWrapper]&, MatrixType, int, T, T) except +
+        const vector[RF_StringWrapper]&, const vector[RF_StringWrapper]&, MatrixType, int, T, T, T) except +
 
 cdef inline bool is_none(s):
     if s is None:
@@ -1304,22 +1305,26 @@ cdef inline vector[PyObjectWrapper] preprocess_py(queries, processor) except *:
     # processor has to be called through python
     else:
         for query in queries:
-            proc_query = processor(query)
+            proc_query = query if is_none(query) else processor(query)
             proc_queries.emplace_back(<PyObject*>proc_query)
 
     return move(proc_queries)
 
-cdef inline vector[RF_StringWrapper] preprocess(queries, processor) except *:
+cdef inline vector[RF_StringWrapper] preprocess(const RF_ScorerFlags* scorer_flags, queries, processor) except *:
     cdef vector[RF_StringWrapper] proc_queries
     cdef int64_t queries_len = <int64_t>len(queries)
     cdef RF_String proc_str
     cdef RF_Preprocessor* processor_context = NULL
+    flags = scorer_flags.flags
     proc_queries.reserve(queries_len)
 
     # No processor
     if not processor:
         for query in queries:
-            proc_queries.emplace_back(conv_sequence(query), <PyObject*>query)
+            if is_none(query) and flags & RF_SCORER_NONE_IS_WORST_SCORE:
+                proc_queries.emplace_back()
+            else:
+                proc_queries.emplace_back(conv_sequence(query), <PyObject*>query)
     else:
         processor_capsule = getattr(processor, '_RF_Preprocess', processor)
         if PyCapsule_IsValid(processor_capsule, NULL):
@@ -1328,14 +1333,20 @@ cdef inline vector[RF_StringWrapper] preprocess(queries, processor) except *:
         # use RapidFuzz C-Api
         if processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
             for query in queries:
-                processor_context.preprocess(query, &proc_str)
-                proc_queries.emplace_back(proc_str, <PyObject*>query)
+                if is_none(query) and flags & RF_SCORER_NONE_IS_WORST_SCORE:
+                    proc_queries.emplace_back()
+                else:
+                    processor_context.preprocess(query, &proc_str)
+                    proc_queries.emplace_back(proc_str, <PyObject*>query)
 
         # Call Processor through Python
         else:
             for query in queries:
-                proc_query = processor(query)
-                proc_queries.emplace_back(conv_sequence(proc_query), <PyObject*>proc_query)
+                if is_none(query) and flags & RF_SCORER_NONE_IS_WORST_SCORE:
+                    proc_queries.emplace_back()
+                else:
+                    proc_query = processor(query)
+                    proc_queries.emplace_back(conv_sequence(proc_query), <PyObject*>proc_query)
 
     return move(proc_queries)
 
@@ -1406,29 +1417,31 @@ cdef Matrix cdist_two_lists(
     int c_workers,
     const RF_Kwargs* scorer_kwargs
 ):
-    proc_queries = preprocess(queries, processor)
-    proc_choices = preprocess(choices, processor)
+    proc_queries = preprocess(scorer_flags, queries, processor)
+    proc_choices = preprocess(scorer_flags, choices, processor)
     flags = scorer_flags.flags
     cdef Matrix matrix = Matrix()
 
     if flags & RF_SCORER_FLAG_RESULT_F64:
-        matrix.matrix = cdist_two_lists_impl(
+        matrix.matrix = cdist_two_lists_impl[double](
             scorer_flags,
             scorer_kwargs, scorer, proc_queries, proc_choices,
             dtype_to_type_num_f64(dtype),
             c_workers,
             get_score_cutoff_f64(score_cutoff, scorer_flags),
-            get_score_cutoff_f64(score_hint, scorer_flags)
+            get_score_cutoff_f64(score_hint, scorer_flags),
+            scorer_flags.worst_score.f64
         )
 
     elif flags & RF_SCORER_FLAG_RESULT_I64:
-        matrix.matrix = cdist_two_lists_impl(
+        matrix.matrix = cdist_two_lists_impl[int64_t](
             scorer_flags,
             scorer_kwargs, scorer, proc_queries, proc_choices,
             dtype_to_type_num_i64(dtype),
             c_workers,
             get_score_cutoff_i64(score_cutoff, scorer_flags),
-            get_score_cutoff_i64(score_hint, scorer_flags)
+            get_score_cutoff_i64(score_hint, scorer_flags),
+            scorer_flags.worst_score.i64
         )
     else:
         raise ValueError("scorer does not properly use the C-API")
@@ -1446,28 +1459,30 @@ cdef Matrix cdist_single_list(
     int c_workers,
     const RF_Kwargs* scorer_kwargs
 ):
-    proc_queries = preprocess(queries, processor)
+    proc_queries = preprocess(scorer_flags, queries, processor)
     flags = scorer_flags.flags
     cdef Matrix matrix = Matrix()
 
     if flags & RF_SCORER_FLAG_RESULT_F64:
-        matrix.matrix = cdist_single_list_impl(
+        matrix.matrix = cdist_single_list_impl[double](
             scorer_flags,
             scorer_kwargs, scorer, proc_queries,
             dtype_to_type_num_f64(dtype),
             c_workers,
             get_score_cutoff_f64(score_cutoff, scorer_flags),
-            get_score_cutoff_f64(score_hint, scorer_flags)
+            get_score_cutoff_f64(score_hint, scorer_flags),
+            scorer_flags.worst_score.f64
         )
 
     elif flags & RF_SCORER_FLAG_RESULT_I64:
-        matrix.matrix = cdist_single_list_impl(
+        matrix.matrix = cdist_single_list_impl[int64_t](
             scorer_flags,
             scorer_kwargs, scorer, proc_queries,
             dtype_to_type_num_i64(dtype),
             c_workers,
             get_score_cutoff_i64(score_cutoff, scorer_flags),
-            get_score_cutoff_i64(score_hint, scorer_flags)
+            get_score_cutoff_i64(score_hint, scorer_flags),
+            scorer_flags.worst_score.i64
         )
     else:
         raise ValueError("scorer does not properly use the C-API")

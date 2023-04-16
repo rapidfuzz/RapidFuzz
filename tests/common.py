@@ -86,12 +86,10 @@ def scorer_tester(scorer, s1, s2, **kwargs):
         assert pytest.approx(score1) == extract_iter_res1[0][1]
         assert pytest.approx(score1) == extract_iter_res2[0][1]
 
-    # todo this should be able to handle None similar to the original scorer
-    if not is_none(s1) and not is_none(s2):
-        score6 = process_cpp.cdist([s1], [s2], scorer=scorer, **process_kwargs)[0][0]
-        score7 = process_py.cdist([s1], [s2], scorer=scorer, **process_kwargs)[0][0]
-        assert pytest.approx(score1) == score6
-        assert pytest.approx(score1) == score7
+    score6 = process_cpp.cdist([s1], [s2], scorer=scorer, **process_kwargs)[0][0]
+    score7 = process_py.cdist([s1], [s2], scorer=scorer, **process_kwargs)[0][0]
+    assert pytest.approx(score1) == score6
+    assert pytest.approx(score1) == score7
 
     return score1
 
