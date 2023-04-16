@@ -86,10 +86,24 @@ def scorer_tester(scorer, s1, s2, **kwargs):
         assert pytest.approx(score1) == extract_iter_res1[0][1]
         assert pytest.approx(score1) == extract_iter_res2[0][1]
 
-    score6 = process_cpp.cdist([s1], [s2], scorer=scorer, **process_kwargs)[0][0]
-    score7 = process_py.cdist([s1], [s2], scorer=scorer, **process_kwargs)[0][0]
-    assert pytest.approx(score1) == score6
-    assert pytest.approx(score1) == score7
+    try:
+        import numpy as np
+    except Exception:
+        np = None
+
+    if np is not None:
+        scores = process_cpp.cdist([s1], [s2], scorer=scorer, **process_kwargs)
+        assert np.all(np.isclose(scores, score1))
+
+        scores = process_py.cdist([s1], [s2], scorer=scorer, **process_kwargs)[0][0]
+        assert np.all(np.isclose(scores, score1))
+
+        # probably trigger multi match / simd implementations
+        scores = process_cpp.cdist([s1] * 2, [s2] * 4, scorer=scorer, **process_kwargs)
+        assert np.all(np.isclose(scores, score1))
+
+        scores = process_py.cdist([s1] * 2, [s2] * 4, scorer=scorer, **process_kwargs)[0][0]
+        assert np.all(np.isclose(scores, score1))
 
     return score1
 

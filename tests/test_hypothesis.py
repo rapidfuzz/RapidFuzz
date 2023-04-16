@@ -428,7 +428,7 @@ def test_cdist(queries, choices):
     """
     Test that cdist returns correct results
     """
-
+    pytest.importorskip("numpy")
     reference_matrix = cdist_distance(queries, choices, scorer=metrics_cpp.levenshtein_distance)
     matrix1 = process.cdist(queries, choices, scorer=metrics_cpp.levenshtein_distance)
     matrix2 = process.cdist(queries, choices, scorer=Levenshtein_py.distance)
