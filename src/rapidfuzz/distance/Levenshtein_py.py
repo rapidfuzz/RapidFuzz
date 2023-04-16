@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from typing import Callable, Hashable, Sequence
 
+from rapidfuzz._common_py import conv_sequences
 from rapidfuzz._utils import is_none
 from rapidfuzz.distance import Indel_py as Indel
 from rapidfuzz.distance._initialize_py import Editops, Opcodes
@@ -150,6 +151,7 @@ def distance(
         s1 = processor(s1)
         s2 = processor(s2)
 
+    s1, s2 = conv_sequences(s1, s2)
     if weights is None or weights == (1, 1, 1):
         dist = _uniform_distance(s1, s2)
     elif weights == (1, 1, 2):
@@ -213,6 +215,7 @@ def similarity(
         s1 = processor(s1)
         s2 = processor(s2)
 
+    s1, s2 = conv_sequences(s1, s2)
     weights = weights or (1, 1, 1)
     maximum = _levenshtein_maximum(s1, s2, weights)
     dist = distance(s1, s2, weights=weights)
@@ -275,6 +278,7 @@ def normalized_distance(
         s1 = processor(s1)
         s2 = processor(s2)
 
+    s1, s2 = conv_sequences(s1, s2)
     weights = weights or (1, 1, 1)
     maximum = _levenshtein_maximum(s1, s2, weights)
     dist = distance(s1, s2, weights=weights)
@@ -361,6 +365,7 @@ def normalized_similarity(
         s1 = processor(s1)
         s2 = processor(s2)
 
+    s1, s2 = conv_sequences(s1, s2)
     weights = weights or (1, 1, 1)
     norm_dist = normalized_distance(s1, s2, weights=weights)
     norm_sim = 1.0 - norm_dist
@@ -419,6 +424,7 @@ def editops(
         s1 = processor(s1)
         s2 = processor(s2)
 
+    s1, s2 = conv_sequences(s1, s2)
     raise NotImplementedError
 
 

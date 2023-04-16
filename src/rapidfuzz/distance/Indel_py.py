@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from typing import Callable, Hashable, Sequence
 
+from rapidfuzz._common_py import conv_sequences
 from rapidfuzz._utils import is_none
 from rapidfuzz.distance._initialize_py import Editops, Opcodes
 from rapidfuzz.distance.LCSseq_py import _block_similarity as lcs_seq_block_similarity
@@ -62,6 +63,7 @@ def distance(
         s1 = processor(s1)
         s2 = processor(s2)
 
+    s1, s2 = conv_sequences(s1, s2)
     maximum = len(s1) + len(s2)
     lcs_sim = lcs_seq_similarity(s1, s2)
     dist = maximum - 2 * lcs_sim
@@ -116,6 +118,7 @@ def similarity(
         s1 = processor(s1)
         s2 = processor(s2)
 
+    s1, s2 = conv_sequences(s1, s2)
     maximum = len(s1) + len(s2)
     dist = distance(s1, s2)
     sim = maximum - dist
@@ -160,6 +163,7 @@ def normalized_distance(
         s1 = processor(s1)
         s2 = processor(s2)
 
+    s1, s2 = conv_sequences(s1, s2)
     maximum = len(s1) + len(s2)
     dist = distance(s1, s2)
     norm_dist = dist / maximum if maximum else 0
@@ -235,6 +239,7 @@ def normalized_similarity(
         s1 = processor(s1)
         s2 = processor(s2)
 
+    s1, s2 = conv_sequences(s1, s2)
     norm_dist = normalized_distance(s1, s2)
     norm_sim = 1.0 - norm_dist
     return norm_sim if (score_cutoff is None or norm_sim >= score_cutoff) else 0
@@ -299,6 +304,7 @@ def editops(
         s1 = processor(s1)
         s2 = processor(s2)
 
+    s1, s2 = conv_sequences(s1, s2)
     raise NotImplementedError
 
 

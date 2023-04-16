@@ -206,7 +206,7 @@ def test_issue76():
 
 
 def test_issue90():
-    assert pytest.approx(fuzz_cpp.partial_ratio("ax b", "a b a c b")) == 85.71428
+    assert pytest.approx(fuzz.partial_ratio("ax b", "a b a c b")) == 85.71428
 
 
 def test_issue138():

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from math import ceil
-from typing import Any, Callable, Hashable
+from typing import Any, Callable, Hashable, Sequence
 
 from rapidfuzz._utils import ScorerFlag, add_scorer_attrs, is_none
 from rapidfuzz.distance import ScoreAlignment
@@ -33,10 +33,10 @@ def _norm_distance(dist: int, lensum: int, score_cutoff: float) -> float:
 
 
 def ratio(
-    s1: str | bytes | None,
-    s2: str | bytes | None,
+    s1: Sequence[Hashable] | None,
+    s2: Sequence[Hashable] | None,
     *,
-    processor: Callable[..., str | bytes] | None = None,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: float | None = None,
 ) -> float:
     """
@@ -44,9 +44,9 @@ def ratio(
 
     Parameters
     ----------
-    s1 : str | bytes
+    s1 : Sequence[Hashable]
         First string to compare.
-    s2 : str | bytes
+    s2 : Sequence[Hashable]
         Second string to compare.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before

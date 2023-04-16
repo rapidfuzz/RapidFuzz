@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from typing import Callable, Hashable, Sequence
 
+from rapidfuzz._common_py import conv_sequences
 from rapidfuzz._utils import is_none
 
 
@@ -42,6 +43,7 @@ def distance(
         s1 = processor(s1)
         s2 = processor(s2)
 
+    s1, s2 = conv_sequences(s1, s2)
     maximum = max(len(s1), len(s2))
     sim = similarity(s1, s2)
     dist = maximum - sim
@@ -85,6 +87,7 @@ def similarity(
         s1 = processor(s1)
         s2 = processor(s2)
 
+    s1, s2 = conv_sequences(s1, s2)
     sim = 0
     for ch1, ch2 in zip(reversed(s1), reversed(s2)):
         if ch1 != ch2:
@@ -172,6 +175,7 @@ def normalized_similarity(
         s1 = processor(s1)
         s2 = processor(s2)
 
+    s1, s2 = conv_sequences(s1, s2)
     maximum = max(len(s1), len(s2))
     sim = similarity(s1, s2)
     norm_sim = sim / maximum if maximum else 1.0

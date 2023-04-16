@@ -12,6 +12,14 @@ import pytest
 from rapidfuzz import process_cpp, process_py
 
 
+def _get_scorer_flags_py(scorer: Any, scorer_kwargs: dict[str, Any]) -> tuple[int, int]:
+    params = getattr(scorer, "_RF_ScorerPy", None)
+    if params is not None:
+        flags = params["get_scorer_flags"](**scorer_kwargs)
+        return (flags["worst_score"], flags["optimal_score"])
+    return (0, 100)
+
+
 def is_none(s):
     if s is None:
         return True
@@ -51,16 +59,25 @@ def scorer_tester(scorer, s1, s2, **kwargs):
         assert extractOne_res2 is None
         assert extract_res1 == []
         assert extract_res2 == []
-    # todo add testing with score_cutoff
-    # this is a bit harder, since result elements are filtererd out
-    # if they are worse than score_cutoff
     elif kwargs.get("score_cutoff") is not None:
-        assert extractOne_res1 is None or pytest.approx(score1) == extractOne_res1[1]
-        assert extractOne_res2 is None or pytest.approx(score1) == extractOne_res2[1]
-        assert extract_res1 == [] or pytest.approx(score1) == extract_res1[0][1]
-        assert extract_res2 == [] or pytest.approx(score1) == extract_res2[0][1]
-        assert extract_iter_res1 == [] or pytest.approx(score1) == extract_iter_res1[0][1]
-        assert extract_iter_res2 == [] or pytest.approx(score1) == extract_iter_res2[0][1]
+        worst_score, optimal_score = _get_scorer_flags_py(scorer, process_kwargs.get("scorer_kwargs", {}))
+        lowest_score_worst = optimal_score > worst_score
+        is_filtered = score1 < kwargs["score_cutoff"] if lowest_score_worst else score1 > kwargs["score_cutoff"]
+
+        if is_filtered:
+            assert extractOne_res1 is None
+            assert extractOne_res2 is None
+            assert extract_res1 == []
+            assert extract_res2 == []
+            assert extract_iter_res1 == []
+            assert extract_iter_res2 == []
+        else:
+            assert pytest.approx(score1) == extractOne_res1[1]
+            assert pytest.approx(score1) == extractOne_res2[1]
+            assert pytest.approx(score1) == extract_res1[0][1]
+            assert pytest.approx(score1) == extract_res2[0][1]
+            assert pytest.approx(score1) == extract_iter_res1[0][1]
+            assert pytest.approx(score1) == extract_iter_res2[0][1]
     else:
         assert pytest.approx(score1) == extractOne_res1[1]
         assert pytest.approx(score1) == extractOne_res2[1]
@@ -123,7 +140,7 @@ class GenericScorer:
 
     def _distance(self, s1, s2, **kwargs):
         symmetric = self.get_scorer_flags(s1, s2, **kwargs)["symmetric"]
-        tester = symmetric_scorer_tester if symmetric is True else scorer_tester
+        tester = symmetric_scorer_tester if symmetric else scorer_tester
 
         scores = sorted(tester(scorer.distance, s1, s2, **kwargs) for scorer in self.scorers)
         assert pytest.approx(scores[0]) == scores[-1]
@@ -131,7 +148,7 @@ class GenericScorer:
 
     def _similarity(self, s1, s2, **kwargs):
         symmetric = self.get_scorer_flags(s1, s2, **kwargs)["symmetric"]
-        tester = symmetric_scorer_tester if symmetric is True else scorer_tester
+        tester = symmetric_scorer_tester if symmetric else scorer_tester
 
         scores = sorted(tester(scorer.similarity, s1, s2, **kwargs) for scorer in self.scorers)
         assert pytest.approx(scores[0]) == scores[-1]
@@ -139,7 +156,7 @@ class GenericScorer:
 
     def _normalized_distance(self, s1, s2, **kwargs):
         symmetric = self.get_scorer_flags(s1, s2, **kwargs)["symmetric"]
-        tester = symmetric_scorer_tester if symmetric is True else scorer_tester
+        tester = symmetric_scorer_tester if symmetric else scorer_tester
 
         scores = sorted(tester(scorer.normalized_distance, s1, s2, **kwargs) for scorer in self.scorers)
         assert pytest.approx(scores[0]) == scores[-1]
@@ -147,7 +164,7 @@ class GenericScorer:
 
     def _normalized_similarity(self, s1, s2, **kwargs):
         symmetric = self.get_scorer_flags(s1, s2, **kwargs)["symmetric"]
-        tester = symmetric_scorer_tester if symmetric is True else scorer_tester
+        tester = symmetric_scorer_tester if symmetric else scorer_tester
 
         scores = sorted(tester(scorer.normalized_similarity, s1, s2, **kwargs) for scorer in self.scorers)
         assert pytest.approx(scores[0]) == scores[-1]

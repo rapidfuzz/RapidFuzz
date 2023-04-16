@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from typing import Callable, Hashable, Sequence
 
+from rapidfuzz._common_py import conv_sequences
 from rapidfuzz._utils import is_none
 from rapidfuzz.distance._initialize_py import Editops, Opcodes
 
@@ -46,6 +47,7 @@ def similarity(
     if not s1:
         return 0
 
+    s1, s2 = conv_sequences(s1, s2)
     S = (1 << len(s1)) - 1
     block: dict[Hashable, int] = {}
     block_get = block.get
@@ -137,6 +139,7 @@ def distance(
         s1 = processor(s1)
         s2 = processor(s2)
 
+    s1, s2 = conv_sequences(s1, s2)
     maximum = max(len(s1), len(s2))
     sim = similarity(s1, s2)
     dist = maximum - sim
@@ -184,6 +187,7 @@ def normalized_distance(
     if not s1 or not s2:
         return 0
 
+    s1, s2 = conv_sequences(s1, s2)
     maximum = max(len(s1), len(s2))
     norm_sim = distance(s1, s2) / maximum
     return norm_sim if (score_cutoff is None or norm_sim <= score_cutoff) else 1
