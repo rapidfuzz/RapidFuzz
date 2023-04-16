@@ -1,8 +1,8 @@
 Changelog
 ---------
 
-[3.0.0] -
-^^^^^^^^^^^^^^^^^^^^^
+[3.0.0] - 2023-04-16
+^^^^^^^^^^^^^^^^^^^^
 Changed
 ~~~~~~~
 - allow the usage of ``Hamming`` for different string lengths. Length differences are handled as
@@ -18,10 +18,15 @@ Changed
   prevents naming clashes.
 - remove ``rapidfuzz.string_metric`` module. Replacements for all functions are available in ``rapidfuzz.distance``
 
+Added
+~~~~~
+- added support for arbitrary hashable sequence in the pure Python fallback implementation of all functions in ``rapidfuzz.distance``
+
+
 [2.15.1] - 2023-04-11
 ^^^^^^^^^^^^^^^^^^^^^
 Fixed
-~~~~~~~
+~~~~~
 - fix incorrect tag dispatching implementation leading to AVX2 instructions in the SSE2 code path
 
 Added
@@ -41,7 +46,7 @@ Changed
 - upgrade required Cython version to ``Cython==3.0.0b2``
 
 Fixed
-~~~~~~~
+~~~~~
 - fix handling of non symmetric scorers in pure python version of ``process.cdist``
 - fix default dtype handling when using ``process.cdist`` with pure python scorers
 

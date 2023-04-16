@@ -5,6 +5,7 @@ from __future__ import annotations
 from math import ceil
 from typing import Any, Callable, Hashable, Sequence
 
+from rapidfuzz._common_py import conv_sequences
 from rapidfuzz._utils import ScorerFlag, add_scorer_attrs, is_none
 from rapidfuzz.distance import ScoreAlignment
 from rapidfuzz.distance.Indel_py import (
@@ -84,7 +85,7 @@ def ratio(
     return score * 100
 
 
-def _partial_ratio_short_needle(s1: str | bytes, s2: str | bytes, score_cutoff: float) -> ScoreAlignment:
+def _partial_ratio_short_needle(s1: Sequence[Hashable], s2: Sequence[Hashable], score_cutoff: float) -> ScoreAlignment:
     """
     implementation of partial_ratio for needles <= 64. assumes s1 is already the
     shorter string
@@ -152,10 +153,10 @@ def _partial_ratio_short_needle(s1: str | bytes, s2: str | bytes, score_cutoff: 
 
 
 def partial_ratio(
-    s1: str | bytes | None,
-    s2: str | bytes | None,
+    s1: Sequence[Hashable] | None,
+    s2: Sequence[Hashable] | None,
     *,
-    processor: Callable[..., str | bytes] | None = None,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: float | None = None,
 ) -> float:
     """
@@ -164,9 +165,9 @@ def partial_ratio(
 
     Parameters
     ----------
-    s1 : str | bytes
+    s1 : Sequence[Hashable]
         First string to compare.
-    s2 : str | bytes
+    s2 : Sequence[Hashable]
         Second string to compare.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
@@ -286,6 +287,7 @@ def partial_ratio_alignment(
     if not s1 and not s2:
         return ScoreAlignment(100.0, 0, 0, 0, 0)
 
+    s1, s2 = conv_sequences(s1, s2)
     if len(s1) <= len(s2):
         shorter = s1
         longer = s2
@@ -761,22 +763,23 @@ def WRatio(
 
 
 def QRatio(
-    s1: str | bytes | None,
-    s2: str | bytes | None,
+    s1: Sequence[Hashable] | None,
+    s2: Sequence[Hashable] | None,
     *,
-    processor: Callable[..., str | bytes] | None = None,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: float | None = None,
 ) -> float:
     """
     Calculates a quick ratio between two strings using fuzz.ratio.
-    The only difference to fuzz.ratio is, that this preprocesses
-    the strings by default.
+
+    Since v3.0 this behaves similar to fuzz.ratio with the exception that this
+    returns 0 when comparing two empty strings
 
     Parameters
     ----------
-    s1 : str | bytes
+    s1 : Sequence[Hashable]
         First string to compare.
-    s2 : str | bytes
+    s2 : Sequence[Hashable]
         Second string to compare.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
@@ -793,8 +796,8 @@ def QRatio(
 
     Examples
     --------
-    >>> fuzz.QRatio("this is a test", "THIS is a test!")
-    100.0
+    >>> fuzz.QRatio("this is a test", "this is a test!")
+    96.55171966552734
     """
     if is_none(s1) or is_none(s2):
         return 0
