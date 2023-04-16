@@ -27,7 +27,7 @@ class process:
         res1 = process_cpp.extract_iter(*args, **kwargs)
         res2 = process_py.extract_iter(*args, **kwargs)
 
-        for elem1, elem2 in zip(res1, res2, strict=True):
+        for elem1, elem2 in zip(res1, res2):
             assert elem1 == elem2
             yield elem1
 
