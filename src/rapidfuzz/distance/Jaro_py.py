@@ -97,6 +97,9 @@ def similarity(
         s1 = processor(s1)
         s2 = processor(s2)
 
+    if not s1 and not s2:
+        return 1.0
+
     if score_cutoff is None:
         score_cutoff = 0
 

@@ -10,7 +10,7 @@ def test_hash_special_case():
 
 
 def test_edge_case_lengths():
-    assert pytest.approx(JaroWinkler.similarity("", "")) == 0
+    assert pytest.approx(JaroWinkler.similarity("", "")) == 1.0
     assert pytest.approx(JaroWinkler.similarity("0", "0")) == 1
     assert pytest.approx(JaroWinkler.similarity("00", "00")) == 1
     assert pytest.approx(JaroWinkler.similarity("0", "00")) == 0.85

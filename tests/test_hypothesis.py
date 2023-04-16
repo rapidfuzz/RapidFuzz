@@ -76,6 +76,9 @@ def normalize_distance(dist, s1, s2, weights=(1, 1, 1)):
 
 
 def jaro_similarity(pattern, text):
+    if not pattern and not text:
+        return 1.0
+
     P_flag = [0] * (len(pattern) + 1)
     T_flag = [0] * (len(text) + 1)
 

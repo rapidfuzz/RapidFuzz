@@ -44,6 +44,15 @@ def test_nan(scorer):
 
 
 @pytest.mark.parametrize("scorer", all_scorer_modules)
+def test_empty_strings(scorer):
+    """
+    Test behavior when comparing two empty strings
+    """
+    assert scorer.normalized_distance("", "") == 0.0
+    assert scorer.normalized_similarity("", "") == 1.0
+
+
+@pytest.mark.parametrize("scorer", all_scorer_modules)
 def test_similar_array(scorer):
     """
     arrays should be supported and treated in a compatible way to strings
