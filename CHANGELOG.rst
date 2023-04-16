@@ -24,6 +24,10 @@ Added
 - added support for ``None`` and ``float("nan")`` in ``process.cdist`` as long as the underlying scorer supports it.
   This is the case for all scorers returning normalized results.
 
+Fixed
+~~~~~
+- fix division by zero in simd implementation of normalized metrics leading to incorrect results
+
 [2.15.1] - 2023-04-11
 ^^^^^^^^^^^^^^^^^^^^^
 Fixed
