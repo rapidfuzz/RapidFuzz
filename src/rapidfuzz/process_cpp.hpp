@@ -509,6 +509,9 @@ static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_
 
         row_idx.erase(none_begin, row_idx.end());
 
+        /* all elements are None */
+        if (row_idx.empty()) return matrix;
+
         /* sort into blocks fitting simd vectors */
         std::stable_sort(row_idx.begin(), row_idx.end(), [&queries](size_t i1, size_t i2) {
             size_t len1 = queries[i1].size();
