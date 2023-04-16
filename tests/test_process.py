@@ -340,10 +340,16 @@ def test_none_strings():
     assert bests[0][0] == choices[1]
     assert bests[1][0] == choices[2]
 
-    scores = process.cdist([query], choices)
-    assert scores[0, 0] == 0
-    assert scores[0, 3] == 0
-    assert scores[0, 4] == 0
+    try:
+        import numpy as np
+    except Exception:
+        np = None
+
+    if np is not None:
+        scores = process.cdist([query], choices)
+        assert scores[0, 0] == 0
+        assert scores[0, 3] == 0
+        assert scores[0, 4] == 0
 
 
 def test_issue81():
