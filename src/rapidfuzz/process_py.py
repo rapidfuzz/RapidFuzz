@@ -100,9 +100,9 @@ def extract_iter(
         comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : Any, optional
         Optional argument for a score threshold. When an edit distance is used this represents the maximum
-        edit distance and matches with a `distance <= score_cutoff` are ignored. When a
+        edit distance and matches with a `distance > score_cutoff` are ignored. When a
         normalized edit distance is used this represents the minimal similarity
-        and matches with a `similarity >= score_cutoff` are ignored. Default is None, which deactivates this behaviour.
+        and matches with a `similarity < score_cutoff` are ignored. Default is None, which deactivates this behaviour.
     score_hint : Any, optional
         Optional argument for an expected score to be passed to the scorer.
         This is used to select a faster implementation. Default is None,
@@ -235,9 +235,9 @@ def extractOne(
         comparing them. Default is None, which deactivates this behaviour.
     score_cutoff : Any, optional
         Optional argument for a score threshold. When an edit distance is used this represents the maximum
-        edit distance and matches with a `distance <= score_cutoff` are ignored. When a
+        edit distance and matches with a `distance > score_cutoff` are ignored. When a
         normalized edit distance is used this represents the minimal similarity
-        and matches with a `similarity >= score_cutoff` are ignored. Default is None, which deactivates this behaviour.
+        and matches with a `similarity < score_cutoff` are ignored. Default is None, which deactivates this behaviour.
     score_hint : Any, optional
         Optional argument for an expected score to be passed to the scorer.
         This is used to select a faster implementation. Default is None,
@@ -442,9 +442,9 @@ def extract(
         maximum amount of results to return
     score_cutoff : Any, optional
         Optional argument for a score threshold. When an edit distance is used this represents the maximum
-        edit distance and matches with a `distance <= score_cutoff` are ignored. When a
+        edit distance and matches with a `distance > score_cutoff` are ignored. When a
         normalized edit distance is used this represents the minimal similarity
-        and matches with a `similarity >= score_cutoff` are ignored. Default is None, which deactivates this behaviour.
+        and matches with a `similarity < score_cutoff` are ignored. Default is None, which deactivates this behaviour.
     score_hint : Any, optional
         Optional argument for an expected score to be passed to the scorer.
         This is used to select a faster implementation. Default is None,
