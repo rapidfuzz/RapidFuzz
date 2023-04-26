@@ -304,11 +304,11 @@ def extractOne(
 
     It is possible to specify a processor function which is used to preprocess the strings before comparing them.
 
-    >>> extractOne("abcd", ["abdD"], scorer=ratio)
+    >>> extractOne("abcd", ["abcD"], scorer=ratio)
     ("abcD", 75.0, 0)
-    >>> extractOne("abcd", ["abdD"], scorer=ratio, processor=utils.default_process)
+    >>> extractOne("abcd", ["abcD"], scorer=ratio, processor=utils.default_process)
     ("abcD", 100.0, 0)
-    >>> extractOne("abcd", ["abdD"], scorer=ratio, processor=lambda s: s.upper())
+    >>> extractOne("abcd", ["abcD"], scorer=ratio, processor=lambda s: s.upper())
     ("abcD", 100.0, 0)
 
     When only results with a similarity above a certain threshold are relevant, the parameter score_cutoff can be
