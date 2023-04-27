@@ -122,7 +122,7 @@ def extract_iter(
         * The second value represents the similarity calculated by the scorer. This can be:
 
           * An edit distance (distance is 0 for a perfect match and > 0 for non perfect matches).
-            In this case only choices which have a `distance <= max` are yielded.
+            In this case only choices which have a `distance <= score_cutoff` are yielded.
             An example of a scorer with this behavior is `Levenshtein.distance`.
           * A normalized edit distance (similarity is a score between 0 and 100, with 100 being a perfect match).
             In this case only choices which have a `similarity >= score_cutoff` are yielded.
@@ -464,7 +464,7 @@ def extract(
         * The second value represents the similarity calculated by the scorer. This can be:
 
           * An edit distance (distance is 0 for a perfect match and > 0 for non perfect matches).
-            In this case only choices which have a `distance <= max` are returned.
+            In this case only choices which have a `distance <= score_cutoff` are returned.
             An example of a scorer with this behavior is `Levenshtein.distance`.
           * A normalized edit distance (similarity is a score between 0 and 100, with 100 being a perfect match).
             In this case only choices which have a `similarity >= score_cutoff` are returned.
@@ -477,7 +477,7 @@ def extract(
           * The `index of choice` when choices is a simple iterable like a list
           * The `key of choice` when choices is a mapping like a dict, or a pandas Series
 
-        The list is sorted by `score_cutoff` or `max` depending on the scorer used. The first element in the list
+        The list is sorted by similarity or distance depending on the scorer used. The first element in the list
         has the `highest similarity`/`smallest distance`.
 
     """
