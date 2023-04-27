@@ -89,7 +89,8 @@ pip install .
 ```
 
 ## Usage
-Some simple functions are shown below. A complete documentation of all functions can be found [here](https://maxbachmann.github.io/RapidFuzz/Usage/index.html).
+Some simple functions are shown below. A complete documentation of all functions can be found [here](https://maxbachmann.github.io/RapidFuzz/Usage/index.html).<br>
+Note that from RapidFuzz 3.0.0, strings are not preprocessed(removing all non alphanumeric characters, trimming whitespaces, converting all characters to lower case) by default. Which means that when comparing two strings that have the same characters but different cases("this is a word", "THIS IS A WORD") their similarity score value might be different, so when comparing such strings you might see a difference in score value compared to previous versions. Some examples of string matching with preprocessing can be found [here](https://github.com/dheerajck/RapidFuzz#weighted-ratio).
 
 ### Scorers
 Scorers in RapidFuzz can be found in the modules `fuzz` and `distance`.
@@ -131,6 +132,19 @@ Scorers in RapidFuzz can be found in the modules `fuzz` and `distance`.
 > from rapidfuzz import fuzz
 > fuzz.WRatio("this is a test", "this is a new test!!!")
 85.5
+
+> from rapidfuzz import fuzz, utils
+> # Removing non alpha numeric characters("!") from the string
+> fuzz.WRatio("this is a test", "this is a new test!!!", processor=utils.default_process) # here "this is a new test!!!" is converted to "this is a new test"
+95.0
+> fuzz.WRatio("this is a test", "this is a new test")
+95.0
+
+> # Converting string to lower case
+> fuzz.WRatio("this is a word", "THIS IS A WORD")
+21.42857142857143
+> fuzz.WRatio("this is a word", "THIS IS A WORD", processor=utils.default_process) # here "THIS IS A WORD" is converted to "this is a word"
+100.0
 ```
 
 #### Quick Ratio
@@ -138,6 +152,19 @@ Scorers in RapidFuzz can be found in the modules `fuzz` and `distance`.
 > from rapidfuzz import fuzz
 > fuzz.QRatio("this is a test", "this is a new test!!!")
 80.0
+
+> from rapidfuzz import fuzz, utils
+> # Removing non alpha numeric characters("!") from the string
+> fuzz.QRatio("this is a test", "this is a new test!!!", processor=utils.default_process)
+87.5
+> fuzz.QRatio("this is a test", "this is a new test")
+87.5
+
+> # Converting string to lower case
+> fuzz.QRatio("this is a word", "THIS IS A WORD")
+21.42857142857143
+> fuzz.QRatio("this is a word", "THIS IS A WORD", processor=utils.default_process)
+100.0
 ```
 
 ### Process
@@ -152,6 +179,13 @@ Here are some examples on the usage of processors in RapidFuzz:
 [('New York Jets', 76.92307692307692, 1), ('New York Giants', 64.28571428571428, 2)]
 > process.extractOne("cowboys", choices, scorer=fuzz.WRatio)
 ('Dallas Cowboys', 83.07692307692308, 3)
+
+> # With preprocessing
+> from rapidfuzz import process, fuzz, utils
+> process.extract("new york jets", choices, scorer=fuzz.WRatio, limit=2, processor=utils.default_process)
+[('New York Jets', 100.0, 1), ('New York Giants', 78.57142857142857, 2)]
+> process.extractOne("cowboys", choices, scorer=fuzz.WRatio, processor=utils.default_process)
+('Dallas Cowboys', 90.0, 3)
 ```
 
 The full documentation of processors can be found [here](https://maxbachmann.github.io/RapidFuzz/Usage/process.html)
