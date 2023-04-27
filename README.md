@@ -96,30 +96,48 @@ Scorers in RapidFuzz can be found in the modules `fuzz` and `distance`.
 
 #### Simple Ratio
 ```console
+> from rapidfuzz import fuzz
 > fuzz.ratio("this is a test", "this is a test!")
-96.55171966552734
+96.55172413793103
 ```
 
 #### Partial Ratio
 ```console
+> from rapidfuzz import fuzz
 > fuzz.partial_ratio("this is a test", "this is a test!")
 100.0
 ```
 
 #### Token Sort Ratio
 ```console
+> from rapidfuzz import fuzz
 > fuzz.ratio("fuzzy wuzzy was a bear", "wuzzy fuzzy was a bear")
-90.90908813476562
+90.9090909090909
 > fuzz.token_sort_ratio("fuzzy wuzzy was a bear", "wuzzy fuzzy was a bear")
 100.0
 ```
 
 #### Token Set Ratio
 ```console
+> from rapidfuzz import fuzz
 > fuzz.token_sort_ratio("fuzzy was a bear", "fuzzy fuzzy was a bear")
-83.8709716796875
+84.21052631578947
 > fuzz.token_set_ratio("fuzzy was a bear", "fuzzy fuzzy was a bear")
 100.0
+```
+
+#### Weighted Ratio
+```console
+> from rapidfuzz import fuzz
+> fuzz.WRatio("this is a test", "this is a new test!!!")
+85.5
+```
+
+#### Quick Ratio
+```console
+> from rapidfuzz import fuzz
+> fuzz.QRatio("this is a test", "this is a new test!!!")
+80.0
 ```
 
 ### Process
@@ -131,9 +149,9 @@ Here are some examples on the usage of processors in RapidFuzz:
 > from rapidfuzz import process, fuzz
 > choices = ["Atlanta Falcons", "New York Jets", "New York Giants", "Dallas Cowboys"]
 > process.extract("new york jets", choices, scorer=fuzz.WRatio, limit=2)
-[('New York Jets', 100, 1), ('New York Giants', 78.57142639160156, 2)]
+[('New York Jets', 76.92307692307692, 1), ('New York Giants', 64.28571428571428, 2)]
 > process.extractOne("cowboys", choices, scorer=fuzz.WRatio)
-("Dallas Cowboys", 90, 3)
+('Dallas Cowboys', 83.07692307692308, 3)
 ```
 
 The full documentation of processors can be found [here](https://maxbachmann.github.io/RapidFuzz/Usage/process.html)
