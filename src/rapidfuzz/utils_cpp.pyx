@@ -30,6 +30,7 @@ def default_process(sentence):
 
 
 cdef bool default_process_capi(sentence, RF_String* str_) except False:
+    validate_string(sentence, "sentence must be a String")
     proc_str = conv_sequence(sentence)
     try:
         proc_str = default_process_func(proc_str)

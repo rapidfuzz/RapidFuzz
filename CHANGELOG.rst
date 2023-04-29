@@ -7,6 +7,7 @@ Changed
 ~~~~~~~
 - added keyword argument ``pad`` to Hamming distance. This controls whether sequences of different
   length should be padded or lead to a ``ValueError``
+- improve consistency of exception messages between the C++ and pure Python implementation
 
 Fixed
 ~~~~~
