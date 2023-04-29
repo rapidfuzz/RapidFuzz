@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from rapidfuzz.distance import metrics_cpp, metrics_py
 from tests.distance.common import Hamming
 
@@ -33,6 +35,15 @@ def test_basic():
     assert Hamming.distance("test", "test") == 0
     assert Hamming.distance("aaaa", "bbbb") == 4
     assert Hamming.distance("aaaa", "aaaaa") == 1
+
+
+def test_disable_padding():
+    assert Hamming.distance("", "", pad=False) == 0
+    assert Hamming.distance("test", "test", pad=False) == 0
+    assert Hamming.distance("aaaa", "bbbb", pad=False) == 4
+
+    with pytest.raises(ValueError, match="Sequences are not the same length."):
+        Hamming.distance("aaaa", "aaaaa", pad=False)
 
 
 def test_score_cutoff():

@@ -5,6 +5,8 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(SKBUILD_LINK_LIBRARIES_KEYWORD PRIVATE)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 project(rapidfuzz LANGUAGES C CXX)
@@ -90,7 +92,7 @@ else()
   add_library(Taskflow::Taskflow ALIAS Taskflow)
 endif()
 
-find_package(rapidfuzz 1.11.1 QUIET)
+find_package(rapidfuzz 2.0.0 QUIET)
 if(rapidfuzz_FOUND)
   message(STATUS "Using system supplied version of rapidfuzz-cpp")
 else()

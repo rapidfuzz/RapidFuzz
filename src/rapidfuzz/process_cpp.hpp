@@ -395,7 +395,13 @@ void run_parallel(int workers, int64_t rows, int64_t step_size, Func&& func)
                 throw std::runtime_error("");
             }
 
-            func(row, std::min(row + step_size, rows));
+            try {
+                func(row, std::min(row + step_size, rows));
+            }
+            catch (...) {
+                PyEval_RestoreThread(save);
+                throw;
+            }
         }
 
         PyEval_RestoreThread(save);

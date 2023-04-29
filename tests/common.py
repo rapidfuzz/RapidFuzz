@@ -30,8 +30,22 @@ def is_none(s):
     return False
 
 
+def call_and_maybe_catch(call, *args, **kwargs):
+    try:
+        return call(*args, **kwargs)
+    except AssertionError as e:
+        raise e
+    except Exception as e:
+        return e
+
+
+def compare_exceptions(e1, e2):
+    return type(e1) is type(e2) and str(e1) == str(e2)
+
+
 def scorer_tester(scorer, s1, s2, **kwargs):
-    score1 = scorer(s1, s2, **kwargs)
+    score1 = call_and_maybe_catch(scorer, s1, s2, **kwargs)
+    exception = isinstance(score1, Exception)
 
     temp_kwargs = kwargs.copy()
     process_kwargs = {}
@@ -47,18 +61,27 @@ def scorer_tester(scorer, s1, s2, **kwargs):
     if temp_kwargs:
         process_kwargs["scorer_kwargs"] = temp_kwargs
 
-    extractOne_res1 = process_cpp.extractOne(s1, [s2], scorer=scorer, **process_kwargs)
-    extractOne_res2 = process_py.extractOne(s1, [s2], scorer=scorer, **process_kwargs)
-    extract_res1 = process_cpp.extract(s1, [s2], scorer=scorer, **process_kwargs)
-    extract_res2 = process_py.extract(s1, [s2], scorer=scorer, **process_kwargs)
-    extract_iter_res1 = list(process_cpp.extract_iter(s1, [s2], scorer=scorer, **process_kwargs))
-    extract_iter_res2 = list(process_py.extract_iter(s1, [s2], scorer=scorer, **process_kwargs))
+    extractOne_res1 = call_and_maybe_catch(process_cpp.extractOne, s1, [s2], scorer=scorer, **process_kwargs)
+    extractOne_res2 = call_and_maybe_catch(process_py.extractOne, s1, [s2], scorer=scorer, **process_kwargs)
+    extract_res1 = call_and_maybe_catch(process_cpp.extract, s1, [s2], scorer=scorer, **process_kwargs)
+    extract_res2 = call_and_maybe_catch(process_py.extract, s1, [s2], scorer=scorer, **process_kwargs)
+    extract_iter_res1 = call_and_maybe_catch(list, process_cpp.extract_iter(s1, [s2], scorer=scorer, **process_kwargs))
+    extract_iter_res2 = call_and_maybe_catch(list, process_py.extract_iter(s1, [s2], scorer=scorer, **process_kwargs))
 
-    if is_none(s1) or is_none(s2):
+    if exception:
+        assert compare_exceptions(extractOne_res1, score1)
+        assert compare_exceptions(extractOne_res2, score1)
+        assert compare_exceptions(extract_res1, score1)
+        assert compare_exceptions(extract_res2, score1)
+        assert compare_exceptions(extract_iter_res1, score1)
+        assert compare_exceptions(extract_iter_res2, score1)
+    elif is_none(s1) or is_none(s2):
         assert extractOne_res1 is None
         assert extractOne_res2 is None
         assert extract_res1 == []
         assert extract_res2 == []
+        assert extract_iter_res1 == []
+        assert extract_iter_res2 == []
     elif kwargs.get("score_cutoff") is not None:
         worst_score, optimal_score = _get_scorer_flags_py(scorer, process_kwargs.get("scorer_kwargs", {}))
         lowest_score_worst = optimal_score > worst_score
@@ -92,25 +115,37 @@ def scorer_tester(scorer, s1, s2, **kwargs):
         np = None
 
     if np is not None:
-        scores = process_cpp.cdist([s1], [s2], scorer=scorer, **process_kwargs)
-        assert np.all(np.isclose(scores, score1))
-
-        scores = process_py.cdist([s1], [s2], scorer=scorer, **process_kwargs)[0][0]
-        assert np.all(np.isclose(scores, score1))
-
+        cdist_scores1 = call_and_maybe_catch(process_cpp.cdist, [s1], [s2], scorer=scorer, **process_kwargs)
+        cdist_scores2 = call_and_maybe_catch(process_py.cdist, [s1], [s2], scorer=scorer, **process_kwargs)
         # probably trigger multi match / simd implementations
-        scores = process_cpp.cdist([s1] * 2, [s2] * 4, scorer=scorer, **process_kwargs)
-        assert np.all(np.isclose(scores, score1))
+        cdist_scores3 = call_and_maybe_catch(process_cpp.cdist, [s1] * 2, [s2] * 4, scorer=scorer, **process_kwargs)
+        cdist_scores4 = call_and_maybe_catch(process_py.cdist, [s1] * 2, [s2] * 4, scorer=scorer, **process_kwargs)
 
-        scores = process_py.cdist([s1] * 2, [s2] * 4, scorer=scorer, **process_kwargs)[0][0]
-        assert np.all(np.isclose(scores, score1))
+        if exception:
+            assert compare_exceptions(cdist_scores1, score1)
+            assert compare_exceptions(cdist_scores2, score1)
+            assert compare_exceptions(cdist_scores3, score1)
+            assert compare_exceptions(cdist_scores4, score1)
+        else:
+            assert np.all(np.isclose(cdist_scores1, score1))
+            assert np.all(np.isclose(cdist_scores2, score1))
+            assert np.all(np.isclose(cdist_scores3, score1))
+            assert np.all(np.isclose(cdist_scores4, score1))
+
+    if exception:
+        raise score1
 
     return score1
 
 
 def symmetric_scorer_tester(scorer, s1, s2, **kwargs):
-    score1 = scorer_tester(scorer, s1, s2, **kwargs)
-    score2 = scorer_tester(scorer, s2, s1, **kwargs)
+    score1 = call_and_maybe_catch(scorer_tester, scorer, s1, s2, **kwargs)
+    score2 = call_and_maybe_catch(scorer_tester, scorer, s2, s1, **kwargs)
+
+    if isinstance(score1, Exception):
+        assert compare_exceptions(score1, score2)
+        raise score1
+
     assert pytest.approx(score1) == score2
     return score1
 
@@ -154,7 +189,14 @@ class GenericScorer:
         symmetric = self.get_scorer_flags(s1, s2, **kwargs)["symmetric"]
         tester = symmetric_scorer_tester if symmetric else scorer_tester
 
-        scores = sorted(tester(scorer.distance, s1, s2, **kwargs) for scorer in self.scorers)
+        scores = [call_and_maybe_catch(tester, scorer.distance, s1, s2, **kwargs) for scorer in self.scorers]
+
+        if any(isinstance(score, Exception) for score in scores):
+            for score in scores:
+                assert compare_exceptions(score, scores[0])
+            raise scores[0]
+
+        scores = sorted(scores)
         assert pytest.approx(scores[0]) == scores[-1]
         return scores[0]
 
@@ -162,7 +204,14 @@ class GenericScorer:
         symmetric = self.get_scorer_flags(s1, s2, **kwargs)["symmetric"]
         tester = symmetric_scorer_tester if symmetric else scorer_tester
 
-        scores = sorted(tester(scorer.similarity, s1, s2, **kwargs) for scorer in self.scorers)
+        scores = [call_and_maybe_catch(tester, scorer.similarity, s1, s2, **kwargs) for scorer in self.scorers]
+
+        if any(isinstance(score, Exception) for score in scores):
+            for score in scores:
+                assert compare_exceptions(score, scores[0])
+            raise scores[0]
+
+        scores = sorted(scores)
         assert pytest.approx(scores[0]) == scores[-1]
         return scores[0]
 
@@ -170,7 +219,14 @@ class GenericScorer:
         symmetric = self.get_scorer_flags(s1, s2, **kwargs)["symmetric"]
         tester = symmetric_scorer_tester if symmetric else scorer_tester
 
-        scores = sorted(tester(scorer.normalized_distance, s1, s2, **kwargs) for scorer in self.scorers)
+        scores = [call_and_maybe_catch(tester, scorer.normalized_distance, s1, s2, **kwargs) for scorer in self.scorers]
+
+        if any(isinstance(score, Exception) for score in scores):
+            for score in scores:
+                assert compare_exceptions(score, scores[0])
+            raise scores[0]
+
+        scores = sorted(scores)
         assert pytest.approx(scores[0]) == scores[-1]
         return scores[0]
 
@@ -178,7 +234,16 @@ class GenericScorer:
         symmetric = self.get_scorer_flags(s1, s2, **kwargs)["symmetric"]
         tester = symmetric_scorer_tester if symmetric else scorer_tester
 
-        scores = sorted(tester(scorer.normalized_similarity, s1, s2, **kwargs) for scorer in self.scorers)
+        scores = [
+            call_and_maybe_catch(tester, scorer.normalized_similarity, s1, s2, **kwargs) for scorer in self.scorers
+        ]
+
+        if any(isinstance(score, Exception) for score in scores):
+            for score in scores:
+                assert compare_exceptions(score, scores[0])
+            raise scores[0]
+
+        scores = sorted(scores)
         assert pytest.approx(scores[0]) == scores[-1]
         return scores[0]
 
@@ -188,10 +253,18 @@ class GenericScorer:
         kwargs = {k: v for k, v in kwargs.items() if k != "score_cutoff"}
 
         maximum = self.get_scorer_flags(s1, s2, **kwargs)["maximum"]
-        dist = self._distance(s1, s2, **kwargs)
-        sim = self._similarity(s1, s2, **kwargs)
-        norm_dist = self._normalized_distance(s1, s2, **kwargs)
-        norm_sim = self._normalized_similarity(s1, s2, **kwargs)
+
+        dist = call_and_maybe_catch(self._distance, s1, s2, **kwargs)
+        sim = call_and_maybe_catch(self._similarity, s1, s2, **kwargs)
+        norm_dist = call_and_maybe_catch(self._normalized_distance, s1, s2, **kwargs)
+        norm_sim = call_and_maybe_catch(self._normalized_similarity, s1, s2, **kwargs)
+
+        if isinstance(dist, Exception):
+            assert compare_exceptions(dist, sim)
+            assert compare_exceptions(dist, norm_dist)
+            assert compare_exceptions(dist, norm_sim)
+            raise dist
+
         assert pytest.approx(dist) == maximum - sim
         if maximum != 0:
             assert pytest.approx(dist / maximum) == norm_dist
@@ -200,20 +273,33 @@ class GenericScorer:
             assert pytest.approx(0.0) == norm_dist
             assert pytest.approx(1.0) == norm_sim
 
+        return dist, sim, norm_dist, norm_sim
+
     def distance(self, s1, s2, **kwargs):
-        self._validate(s1, s2, **kwargs)
+        dist, _, _, _ = self._validate(s1, s2, **kwargs)
+        if "score_cutoff" not in kwargs:
+            return dist
+
         return self._distance(s1, s2, **kwargs)
 
     def similarity(self, s1, s2, **kwargs):
-        self._validate(s1, s2, **kwargs)
+        _, sim, _, _ = self._validate(s1, s2, **kwargs)
+        if "score_cutoff" not in kwargs:
+            return sim
+
         return self._similarity(s1, s2, **kwargs)
 
     def normalized_distance(self, s1, s2, **kwargs):
         if not is_none(s1) and not is_none(s2):
-            self._validate(s1, s2, **kwargs)
+            _, _, norm_dist, _ = self._validate(s1, s2, **kwargs)
+            # todo we should be able to handle this in a nicer way
+            if "score_cutoff" not in kwargs:
+                return norm_dist
         return self._normalized_distance(s1, s2, **kwargs)
 
     def normalized_similarity(self, s1, s2, **kwargs):
         if not is_none(s1) and not is_none(s2):
-            self._validate(s1, s2, **kwargs)
+            _, _, _, norm_sim = self._validate(s1, s2, **kwargs)
+            if "score_cutoff" not in kwargs:
+                return norm_sim
         return self._normalized_similarity(s1, s2, **kwargs)

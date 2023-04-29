@@ -1,6 +1,17 @@
 Changelog
 ---------
 
+[3.1.0] - 2023-04-29
+^^^^^^^^^^^^^^^^^^^^
+Changed
+~~~~~~~
+- added keyword argument ``pad`` to Hamming distance. This controls whether sequences of different
+  length should be padded or lead to a ``ValueError``
+
+Fixed
+~~~~~
+- fix missing GIL restore when an exception is thrown inside ``process.cdist``
+
 [3.0.0] - 2023-04-16
 ^^^^^^^^^^^^^^^^^^^^
 Changed

@@ -37,6 +37,7 @@ from libc.math cimport isnan
 from libc.stdint cimport INT64_MAX, int64_t
 from libc.stdlib cimport free, malloc
 from libcpp cimport bool
+from cython.operator cimport dereference
 
 
 cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
@@ -103,17 +104,17 @@ cdef extern from "metrics.hpp":
     bool IndelMultiStringSupport(const RF_Kwargs*) nogil
 
     # Hamming
-    double hamming_normalized_distance_func(  const RF_String&, const RF_String&, double) except + nogil
-    int64_t hamming_distance_func(            const RF_String&, const RF_String&, int64_t) except + nogil
-    double hamming_normalized_similarity_func(const RF_String&, const RF_String&, double) except + nogil
-    int64_t hamming_similarity_func(          const RF_String&, const RF_String&, int64_t) except + nogil
+    double hamming_normalized_distance_func(  const RF_String&, const RF_String&, bool, double) except + nogil
+    int64_t hamming_distance_func(            const RF_String&, const RF_String&, bool, int64_t) except + nogil
+    double hamming_normalized_similarity_func(const RF_String&, const RF_String&, bool, double) except + nogil
+    int64_t hamming_similarity_func(          const RF_String&, const RF_String&, bool, int64_t) except + nogil
 
     bool HammingDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
     bool HammingNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
     bool HammingSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
     bool HammingNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
 
-    RfEditops hamming_editops_func(const RF_String&, const RF_String&) except + nogil
+    RfEditops hamming_editops_func(const RF_String&, const RF_String&, bool) except + nogil
 
     # Optimal String Alignment
     double osa_normalized_distance_func(  const RF_String&, const RF_String&, double) except + nogil
@@ -652,57 +653,67 @@ SetScorerAttrs(indel_normalized_similarity, metrics_py.indel_normalized_similari
 SetFuncAttrs(indel_editops, metrics_py.indel_editops)
 SetFuncAttrs(indel_opcodes, metrics_py.indel_opcodes)
 
-def hamming_distance(s1, s2, *, processor=None, score_cutoff=None):
+def hamming_distance(s1, s2, *, pad=True, processor=None, score_cutoff=None):
     cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, INT64_MAX)
     cdef RF_StringWrapper s1_proc, s2_proc
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
-    return hamming_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+    return hamming_distance_func(s1_proc.string, s2_proc.string, pad, c_score_cutoff)
 
-def hamming_similarity(s1, s2, *, processor=None, score_cutoff=None):
+def hamming_similarity(s1, s2, *, pad=True, processor=None, score_cutoff=None):
     cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, 0)
     cdef RF_StringWrapper s1_proc, s2_proc
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
-    return hamming_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+    return hamming_similarity_func(s1_proc.string, s2_proc.string, pad, c_score_cutoff)
 
-def hamming_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
+def hamming_normalized_distance(s1, s2, *, pad=True, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
     if is_none(s1) or is_none(s2):
         return 1.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 1.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
-    return hamming_normalized_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+    return hamming_normalized_distance_func(s1_proc.string, s2_proc.string, pad, c_score_cutoff)
 
 
-def hamming_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
+def hamming_normalized_similarity(s1, s2, *, pad=True, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
     if is_none(s1) or is_none(s2):
         return 0.0
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
-    return hamming_normalized_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
+    return hamming_normalized_similarity_func(s1_proc.string, s2_proc.string, pad, c_score_cutoff)
 
 
-def hamming_editops(s1, s2, *, processor=None):
+def hamming_editops(s1, s2, *, pad=True, processor=None):
     cdef RF_StringWrapper s1_proc, s2_proc
     cdef Editops ops = Editops.__new__(Editops)
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
-    ops.editops = hamming_editops_func(s1_proc.string, s2_proc.string)
+    ops.editops = hamming_editops_func(s1_proc.string, s2_proc.string, pad)
     return ops
 
 
-def hamming_opcodes(s1, s2, *, processor=None):
+def hamming_opcodes(s1, s2, *, pad=True, processor=None):
     cdef RF_StringWrapper s1_proc, s2_proc
     cdef Editops ops = Editops.__new__(Editops)
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
-    ops.editops = hamming_editops_func(s1_proc.string, s2_proc.string)
+    ops.editops = hamming_editops_func(s1_proc.string, s2_proc.string, pad)
     return ops.as_opcodes()
 
+cdef bool HammingKwargsInit(RF_Kwargs* self, dict kwargs) except False:
+    cdef bool* pad = <bool*>malloc(sizeof(bool))
+
+    if not pad:
+        raise MemoryError
+
+    pad[0] = <bool>kwargs.get("pad", True)
+    self.context = pad
+    self.dtor = KwargsDeinit
+    return True
 
 cdef bool GetScorerFlagsHammingDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
@@ -728,16 +739,16 @@ cdef bool GetScorerFlagsHammingNormalizedSimilarity(const RF_Kwargs* self, RF_Sc
     scorer_flags.worst_score.f64 = 0
     return True
 
-cdef RF_Scorer HammingDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsHammingDistance, HammingDistanceInit)
+cdef RF_Scorer HammingDistanceContext = CreateScorerContext(HammingKwargsInit, GetScorerFlagsHammingDistance, HammingDistanceInit)
 SetScorerAttrs(hamming_distance, metrics_py.hamming_distance, &HammingDistanceContext)
 
-cdef RF_Scorer HammingNormalizedDistanceContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsHammingNormalizedDistance, HammingNormalizedDistanceInit)
+cdef RF_Scorer HammingNormalizedDistanceContext = CreateScorerContext(HammingKwargsInit, GetScorerFlagsHammingNormalizedDistance, HammingNormalizedDistanceInit)
 SetScorerAttrs(hamming_normalized_distance, metrics_py.hamming_normalized_distance, &HammingNormalizedDistanceContext)
 
-cdef RF_Scorer HammingSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsHammingSimilarity, HammingSimilarityInit)
+cdef RF_Scorer HammingSimilarityContext = CreateScorerContext(HammingKwargsInit, GetScorerFlagsHammingSimilarity, HammingSimilarityInit)
 SetScorerAttrs(hamming_similarity, metrics_py.hamming_similarity, &HammingSimilarityContext)
 
-cdef RF_Scorer HammingNormalizedSimilarityContext = CreateScorerContext(NoKwargsInit, GetScorerFlagsHammingNormalizedSimilarity, HammingNormalizedSimilarityInit)
+cdef RF_Scorer HammingNormalizedSimilarityContext = CreateScorerContext(HammingKwargsInit, GetScorerFlagsHammingNormalizedSimilarity, HammingNormalizedSimilarityInit)
 SetScorerAttrs(hamming_normalized_similarity, metrics_py.hamming_normalized_similarity, &HammingNormalizedSimilarityContext)
 
 SetFuncAttrs(hamming_editops, metrics_py.hamming_editops)

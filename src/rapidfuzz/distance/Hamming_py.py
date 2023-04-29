@@ -14,6 +14,7 @@ def distance(
     s1: Sequence[Hashable],
     s2: Sequence[Hashable],
     *,
+    pad: bool = True,
     processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: int | None = None,
 ) -> int:
@@ -29,6 +30,10 @@ def distance(
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
+    pad : bool, optional
+       should strings be padded if there is a length difference.
+       If pad is False and strings have a different length
+       a ValueError is thrown instead. Defaults is True.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
         comparing them. Default is None, which deactivates this behaviour.
@@ -53,6 +58,11 @@ def distance(
         s2 = processor(s2)
 
     s1, s2 = conv_sequences(s1, s2)
+
+    if not pad and len(s1) != len(s2):
+        msg = "Sequences are not the same length."
+        raise ValueError(msg)
+
     min_len = min(len(s1), len(s2))
     dist = max(len(s1), len(s2))
     for i in range(min_len):
@@ -65,6 +75,7 @@ def similarity(
     s1: Sequence[Hashable],
     s2: Sequence[Hashable],
     *,
+    pad: bool = True,
     processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: int | None = None,
 ) -> int:
@@ -79,6 +90,10 @@ def similarity(
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
+    pad : bool, optional
+       should strings be padded if there is a length difference.
+       If pad is False and strings have a different length
+       a ValueError is thrown instead. Defaults is True.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
         comparing them. Default is None, which deactivates this behaviour.
@@ -104,7 +119,7 @@ def similarity(
 
     s1, s2 = conv_sequences(s1, s2)
     maximum = max(len(s1), len(s2))
-    dist = distance(s1, s2)
+    dist = distance(s1, s2, pad=pad)
     sim = maximum - dist
 
     return sim if (score_cutoff is None or sim >= score_cutoff) else 0
@@ -114,6 +129,7 @@ def normalized_distance(
     s1: Sequence[Hashable],
     s2: Sequence[Hashable],
     *,
+    pad: bool = True,
     processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: float | None = None,
 ) -> float:
@@ -128,6 +144,10 @@ def normalized_distance(
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
+    pad : bool, optional
+       should strings be padded if there is a length difference.
+       If pad is False and strings have a different length
+       a ValueError is thrown instead. Defaults is True.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
         comparing them. Default is None, which deactivates this behaviour.
@@ -155,7 +175,7 @@ def normalized_distance(
 
     s1, s2 = conv_sequences(s1, s2)
     maximum = max(len(s1), len(s2))
-    dist = distance(s1, s2)
+    dist = distance(s1, s2, pad=pad)
     norm_dist = dist / maximum if maximum else 0
 
     return norm_dist if (score_cutoff is None or norm_dist <= score_cutoff) else 1.0
@@ -165,6 +185,7 @@ def normalized_similarity(
     s1: Sequence[Hashable],
     s2: Sequence[Hashable],
     *,
+    pad: bool = True,
     processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: float | None = None,
 ) -> float:
@@ -179,6 +200,10 @@ def normalized_similarity(
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
+    pad : bool, optional
+       should strings be padded if there is a length difference.
+       If pad is False and strings have a different length
+       a ValueError is thrown instead. Defaults is True.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
         comparing them. Default is None, which deactivates this behaviour.
@@ -201,7 +226,7 @@ def normalized_similarity(
         return 0.0
 
     s1, s2 = conv_sequences(s1, s2)
-    norm_dist = normalized_distance(s1, s2, processor=processor)
+    norm_dist = normalized_distance(s1, s2, pad=pad, processor=processor)
     norm_sim = 1 - norm_dist
 
     return norm_sim if (score_cutoff is None or norm_sim >= score_cutoff) else 0.0
@@ -211,6 +236,7 @@ def editops(
     s1: Sequence[Hashable],
     s2: Sequence[Hashable],
     *,
+    pad: bool = True,
     processor: Callable[..., Sequence[Hashable]] | None = None,
 ) -> Editops:
     """
@@ -222,6 +248,10 @@ def editops(
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
+    pad : bool, optional
+       should strings be padded if there is a length difference.
+       If pad is False and strings have a different length
+       a ValueError is thrown instead. Defaults is True.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
         comparing them. Default is None, which deactivates this behaviour.
@@ -236,6 +266,11 @@ def editops(
         s2 = processor(s2)
 
     s1, s2 = conv_sequences(s1, s2)
+
+    if not pad and len(s1) != len(s2):
+        msg = "Sequences are not the same length."
+        raise ValueError(msg)
+
     ops_list = []
     min_len = min(len(s1), len(s2))
     for i in range(min_len):
@@ -260,6 +295,7 @@ def opcodes(
     s1: Sequence[Hashable],
     s2: Sequence[Hashable],
     *,
+    pad: bool = True,
     processor: Callable[..., Sequence[Hashable]] | None = None,
 ) -> Opcodes:
     """
@@ -271,6 +307,10 @@ def opcodes(
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
+    pad : bool, optional
+       should strings be padded if there is a length difference.
+       If pad is False and strings have a different length
+       a ValueError is thrown instead. Defaults is True.
     processor: callable, optional
         Optional callable that is used to preprocess the strings before
         comparing them. Default is None, which deactivates this behaviour.
@@ -280,4 +320,4 @@ def opcodes(
     opcodes : Opcodes
         edit operations required to turn s1 into s2
     """
-    return editops(s1, s2, processor=processor).as_opcodes()
+    return editops(s1, s2, pad=pad, processor=processor).as_opcodes()

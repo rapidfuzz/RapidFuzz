@@ -172,56 +172,64 @@ static inline bool DamerauLevenshteinNormalizedSimilarityInit(RF_ScorerFunc* sel
 }
 
 /* Hamming */
-static inline int64_t hamming_distance_func(const RF_String& str1, const RF_String& str2,
+static inline int64_t hamming_distance_func(const RF_String& str1, const RF_String& str2, bool pad,
                                             int64_t score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
-        return rf::hamming_distance(s1, s2, score_cutoff);
+        return rf::hamming_distance(s1, s2, pad, score_cutoff);
     });
 }
-static inline bool HammingDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+static inline bool HammingDistanceInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count,
                                        const RF_String* str)
 {
-    return distance_init<rf::CachedHamming, int64_t>(self, str_count, str);
+    bool pad = *static_cast<bool*>(kwargs->context);
+
+    return distance_init<rf::CachedHamming, int64_t>(self, str_count, str, pad);
 }
 
-static inline double hamming_normalized_distance_func(const RF_String& str1, const RF_String& str2,
+static inline double hamming_normalized_distance_func(const RF_String& str1, const RF_String& str2, bool pad,
                                                       double score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
-        return rf::hamming_normalized_distance(s1, s2, score_cutoff);
+        return rf::hamming_normalized_distance(s1, s2, pad, score_cutoff);
     });
 }
-static inline bool HammingNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
-                                                 const RF_String* str)
+static inline bool HammingNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs,
+                                                 int64_t str_count, const RF_String* str)
 {
-    return normalized_distance_init<rf::CachedHamming, double>(self, str_count, str);
+    bool pad = *static_cast<bool*>(kwargs->context);
+
+    return normalized_distance_init<rf::CachedHamming, double>(self, str_count, str, pad);
 }
 
-static inline int64_t hamming_similarity_func(const RF_String& str1, const RF_String& str2,
+static inline int64_t hamming_similarity_func(const RF_String& str1, const RF_String& str2, bool pad,
                                               int64_t score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
-        return rf::hamming_similarity(s1, s2, score_cutoff);
+        return rf::hamming_similarity(s1, s2, pad, score_cutoff);
     });
 }
-static inline bool HammingSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
+static inline bool HammingSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs, int64_t str_count,
                                          const RF_String* str)
 {
-    return similarity_init<rf::CachedHamming, int64_t>(self, str_count, str);
+    bool pad = *static_cast<bool*>(kwargs->context);
+
+    return similarity_init<rf::CachedHamming, int64_t>(self, str_count, str, pad);
 }
 
 static inline double hamming_normalized_similarity_func(const RF_String& str1, const RF_String& str2,
-                                                        double score_cutoff)
+                                                        bool pad, double score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
-        return rf::hamming_normalized_similarity(s1, s2, score_cutoff);
+        return rf::hamming_normalized_similarity(s1, s2, pad, score_cutoff);
     });
 }
-static inline bool HammingNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int64_t str_count,
-                                                   const RF_String* str)
+static inline bool HammingNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs* kwargs,
+                                                   int64_t str_count, const RF_String* str)
 {
-    return normalized_similarity_init<rf::CachedHamming, double>(self, str_count, str);
+    bool pad = *static_cast<bool*>(kwargs->context);
+
+    return normalized_similarity_init<rf::CachedHamming, double>(self, str_count, str, pad);
 }
 
 /* Indel */
@@ -385,10 +393,10 @@ static inline bool LCSseqNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_
     return normalized_similarity_init<rf::CachedLCSseq, double>(self, str_count, str);
 }
 
-static inline rf::Editops hamming_editops_func(const RF_String& str1, const RF_String& str2)
+static inline rf::Editops hamming_editops_func(const RF_String& str1, const RF_String& str2, bool pad)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
-        return rf::hamming_editops(s1, s2);
+        return rf::hamming_editops(s1, s2, pad);
     });
 }
 
