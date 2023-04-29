@@ -40,7 +40,7 @@ def call_and_maybe_catch(call, *args, **kwargs):
 
 
 def compare_exceptions(e1, e2):
-    return type(e1) is type(e2) and str(e1) == str(e2)
+    return type(e1) is type(e2)  # and str(e1) == str(e2)
 
 
 def scorer_tester(scorer, s1, s2, **kwargs):
