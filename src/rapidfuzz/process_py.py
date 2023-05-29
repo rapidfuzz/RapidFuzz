@@ -560,13 +560,9 @@ def cdist(
         list of all strings the query should be compared
     scorer : Callable, optional
         Optional callable that is used to calculate the matching score between
-        the query and each choice. This can be:
-
-        - a scorer using the RapidFuzz C-API like the builtin scorers in RapidFuzz,
-          which can return a distance or similarity between two strings. Further details can be found here.
-        - a Python function which returns a similarity between two strings in the range 0-100. This is not
-          recommended, since it is far slower than a scorer using the RapidFuzz C-API.
-
+        the query and each choice. This can be any of the scorers included in RapidFuzz
+        (both scorers that calculate the edit distance or the normalized edit distance), or
+        a custom function, which returns a normalized edit distance.
         fuzz.ratio is used by default.
     processor : Callable, optional
         Optional callable that is used to preprocess the strings before
