@@ -1,13 +1,14 @@
 Changelog
 ---------
 
-[3.1.0] - 2023-04-29
+[3.1.0] - 2023-06-02
 ^^^^^^^^^^^^^^^^^^^^
 Changed
 ~~~~~~~
 - added keyword argument ``pad`` to Hamming distance. This controls whether sequences of different
   length should be padded or lead to a ``ValueError``
 - improve consistency of exception messages between the C++ and pure Python implementation
+- upgrade required Cython version to ``Cython==3.0.0b3``
 
 Fixed
 ~~~~~
