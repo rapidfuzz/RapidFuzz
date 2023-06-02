@@ -384,7 +384,7 @@ def extract(
     *,
     scorer: Callable[..., int | float] = WRatio,
     processor: Callable[..., Sequence[Hashable]] | None = None,
-    limit: int | None = None,
+    limit: int | None = 5,
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
@@ -399,7 +399,7 @@ def extract(
     *,
     scorer: Callable[..., int | float] = WRatio,
     processor: Callable[..., Sequence[Hashable]] | None = None,
-    limit: int | None = None,
+    limit: int | None = 5,
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
@@ -438,8 +438,9 @@ def extract(
     processor : Callable, optional
         Optional callable that is used to preprocess the strings before
         comparing them. Default is None, which deactivates this behaviour.
-    limit : int
-        maximum amount of results to return
+    limit : int, optional
+        maximum amount of results to return. None can be passed to disable this behavior.
+        Default is 5.
     score_cutoff : Any, optional
         Optional argument for a score threshold. When an edit distance is used this represents the maximum
         edit distance and matches with a `distance > score_cutoff` are ignored. When a

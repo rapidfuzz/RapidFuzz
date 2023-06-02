@@ -12,6 +12,7 @@ Changed
 Fixed
 ~~~~~
 - fix missing GIL restore when an exception is thrown inside ``process.cdist``
+- fix incorrect type hints for the ``process`` module
 
 [3.0.0] - 2023-04-16
 ^^^^^^^^^^^^^^^^^^^^
