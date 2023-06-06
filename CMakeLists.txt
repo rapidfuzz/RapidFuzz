@@ -72,7 +72,7 @@ check_cpu_arch_x64(RAPIDFUZZ_ARCH_X64)
 
 set(RF_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-find_package(Taskflow 3.0.0 QUIET)
+find_package(Taskflow 3.3.0 QUIET)
 if(Taskflow_FOUND)
   message(STATUS "Using system supplied version of Taskflow")
 else()

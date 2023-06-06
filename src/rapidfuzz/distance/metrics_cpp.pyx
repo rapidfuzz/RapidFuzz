@@ -33,7 +33,7 @@ from cpp_common cimport (
     SetScorerAttrs,
     preprocess_strings,
 )
-from libc.math cimport isnan
+from libcpp.cmath cimport isnan
 from libc.stdint cimport INT64_MAX, int64_t
 from libc.stdlib cimport free, malloc
 from libcpp cimport bool
@@ -177,7 +177,7 @@ cdef inline bool is_none(s):
     if s is None:
         return True
 
-    if isinstance(s, float) and isnan(s):
+    if isinstance(s, float) and isnan(<double>s):
         return True
 
     return False

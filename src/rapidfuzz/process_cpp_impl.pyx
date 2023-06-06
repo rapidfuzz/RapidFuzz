@@ -18,7 +18,7 @@ from cpython.exc cimport PyErr_CheckSignals
 from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.object cimport PyObject
 from cpython.ref cimport Py_INCREF
-from libc.math cimport floor, isnan
+from libcpp.cmath cimport floor, isnan
 from libc.stdint cimport int32_t, int64_t, uint8_t, uint64_t
 from libcpp cimport algorithm, bool
 from libcpp.utility cimport move
@@ -132,7 +132,7 @@ cdef inline bool is_none(s):
     if s is None:
         return True
 
-    if isinstance(s, float) and isnan(s):
+    if isinstance(s, float) and isnan(<double>s):
         return True
 
     return False

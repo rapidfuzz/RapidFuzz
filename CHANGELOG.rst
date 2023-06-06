@@ -1,6 +1,17 @@
 Changelog
 ---------
 
+[3.1.1] - 2023-06-06
+^^^^^^^^^^^^^^^^^^^^
+Changed
+~~~~~~~
+- upgrade to ``taskflow==3.6``
+
+Fixed
+~~~~~
+- replace usage of ``isnan`` with ``std::isnan`` which fixes the build on NetBSD
+
+
 [3.1.0] - 2023-06-02
 ^^^^^^^^^^^^^^^^^^^^
 Changed
