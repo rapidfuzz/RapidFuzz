@@ -34,10 +34,14 @@ Changed
   insertions / deletions
 - remove support for boolean preprocessor functions in ``rapidfuzz.fuzz`` and ``rapidfuzz.process``.
   The processor argument is now always a callable or None.
-- update defaults of the processor argument to be ``None`` everywhere. This changes the defaults of some of
-  the functions in ``rapidfuzz.fuzz`` and ``rapidfuzz.process``.
-- ``rapidfuzz.process`` no longer calls scorers with ``processor=None``. For this reason scorer functions
-  do not need to provide this argument anymore.
+- update defaults of the processor argument to be ``None`` everywhere. For affected functions this can change results, since strings are no longer preprocessed.
+  To get back the old behaviour pass ``processor=utils.default_process`` to these functions.
+  The following functions are affected by this:
+
+  - ``process.extract``, ``process.extract_iter``, ``process.extractOne``
+  - ``fuzz.token_sort_ratio``, ``fuzz.token_set_ratio``, ``fuzz.token_ratio``, ``fuzz.partial_token_sort_ratio``, ``fuzz.partial_token_set_ratio``, ``fuzz.partial_token_ratio``, ``fuzz.WRatio``, ``fuzz.QRatio``
+
+- ``rapidfuzz.process`` no longer calls scorers with ``processor=None``. For this reason user provided scorers no longer require this argument.
 - remove option to pass keyword arguments to scorer via ``**kwargs`` in ``rapidfuzz.process``. They can be passed
   via a ``scorer_kwargs`` argument now. This ensures this does not break when extending function parameters and
   prevents naming clashes.
