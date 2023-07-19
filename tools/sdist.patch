@@ -7,7 +7,7 @@ index 77671b1..7692f90 100644
  requires = [
      "setuptools>=42",
 -    "scikit-build~=0.17.0",
--    "Cython==3.0.0b3"
+-    "Cython==3.0.0"
 +    "scikit-build~=0.17.0"
  ]
  build-backend = "backend"
