@@ -9,7 +9,7 @@ from enum import IntFlag
 from math import isnan
 from typing import Any, Callable
 
-from rapidfuzz._feature_detector import AVX2, supports
+from rapidfuzz._feature_detector import AVX2, SSE2, supports
 
 
 class ScorerFlag(IntFlag):
@@ -82,6 +82,10 @@ def vectorized_import(name: str) -> tuple[Any, list[Any]]:
     """
     if supports(AVX2):
         module = optional_import_module(name + "_avx2")
+        if module is not None:
+            return module
+    elif supports(SSE2):
+        module = optional_import_module(name + "_sse2")
         if module is not None:
             return module
 

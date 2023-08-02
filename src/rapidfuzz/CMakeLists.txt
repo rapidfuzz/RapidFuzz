@@ -31,7 +31,7 @@ function(rf_add_library name)
   endif()
 endfunction(rf_add_library)
 
-if(RAPIDFUZZ_ARCH_X64)
+if(RAPIDFUZZ_ARCH_X64 or RAPIDFUZZ_ARCH_X86)
   create_cython_target(_feature_detector_cpp)
   rf_add_library(_feature_detector_cpp ${_feature_detector_cpp}
                  ${CMAKE_CURRENT_LIST_DIR}/FeatureDetector/CpuInfo.cpp)
@@ -56,7 +56,7 @@ target_include_directories(fuzz_cpp PRIVATE ${RF_BASE_DIR}/rapidfuzz)
 target_link_libraries(fuzz_cpp PRIVATE rapidfuzz::rapidfuzz)
 install(TARGETS fuzz_cpp LIBRARY DESTINATION src/rapidfuzz)
 
-if(RAPIDFUZZ_ARCH_X64)
+if(RAPIDFUZZ_ARCH_X64 or RAPIDFUZZ_ARCH_X86)
   create_cython_target(fuzz_cpp_avx2)
   rf_add_library(fuzz_cpp_avx2 ${fuzz_cpp_avx2})
   target_compile_features(fuzz_cpp_avx2 PUBLIC cxx_std_17)
@@ -71,6 +71,23 @@ if(RAPIDFUZZ_ARCH_X64)
   target_link_libraries(fuzz_cpp_avx2 PRIVATE rapidfuzz::rapidfuzz)
   install(TARGETS fuzz_cpp_avx2 LIBRARY DESTINATION src/rapidfuzz)
 endif()
+
+if(RAPIDFUZZ_ARCH_X86)
+  create_cython_target(fuzz_cpp_sse2)
+  rf_add_library(fuzz_cpp_sse2 ${fuzz_cpp_sse2})
+  target_compile_features(fuzz_cpp_sse2 PUBLIC cxx_std_17)
+
+  if(MSVC)
+    set_target_properties(fuzz_cpp_sse2 PROPERTIES COMPILE_FLAGS "/arch:SSE2")
+  else()
+    set_target_properties(fuzz_cpp_sse2 PROPERTIES COMPILE_FLAGS "-msse2")
+  endif()
+
+  target_include_directories(fuzz_cpp_sse2 PRIVATE ${RF_BASE_DIR}/rapidfuzz)
+  target_link_libraries(fuzz_cpp_sse2 PRIVATE rapidfuzz::rapidfuzz)
+  install(TARGETS fuzz_cpp_sse2 LIBRARY DESTINATION src/rapidfuzz)
+endif()
+
 
 create_cython_target(process_cpp_impl)
 rf_add_library(process_cpp_impl ${process_cpp_impl})

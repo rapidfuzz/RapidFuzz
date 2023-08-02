@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+[3.2.0] - 
+^^^^^^^^^^^^^^^^^^^^
+Changed
+~~~~~~~
+- build x86 with sse2/avx2 runtime detection
+
 [3.1.2] - 2023-07-19
 ^^^^^^^^^^^^^^^^^^^^
 Changed
