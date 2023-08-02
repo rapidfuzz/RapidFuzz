@@ -105,41 +105,59 @@ if(NOT Windows)
       [=[
         #include <atomic>
         #include <cstdint>
+        #include <cstddef>
         std::atomic<int> x{0};
         int main() {
             x.fetch_add(1, std::memory_order_relaxed);
             return 0;
         }
     ]=])
-  string(REPLACE "std::atomic<int>" "std::atomic<std::int8_t>"
-                 ATOMICS8_TEST_SOURCE "${ATOMICS_TEST_SOURCE}")
-  string(REPLACE "std::atomic<int>" "std::atomic<std::int64_t>"
-                 ATOMICS64_TEST_SOURCE "${ATOMICS_TEST_SOURCE}")
+  string(REPLACE "std::atomic<int>" "std::atomic<std::size_t>"
+                 ATOMICS_SIZE_T_TEST_SOURCE "${ATOMICS_TEST_SOURCE}")
+  string(REPLACE "std::atomic<int>" "std::atomic<void*>"
+                 ATOMICS_VOID_PTR_TEST_SOURCE "${ATOMICS_TEST_SOURCE}")
+  string(REPLACE "std::atomic<int>" "std::atomic<unsigned>"
+                 ATOMICS_UNSIGNED_TEST_SOURCE "${ATOMICS_TEST_SOURCE}")
 
   if(APPLE)
     set(CMAKE_REQUIRED_FLAGS "-std=c++11")
   endif()
   check_cxx_source_compiles("${ATOMICS_TEST_SOURCE}"
-                            HAVE_CXX_ATOMICS_WITHOUT_LIB)
-  check_cxx_source_compiles("${ATOMICS8_TEST_SOURCE}"
-                            HAVE_CXX_ATOMICS8_WITHOUT_LIB)
-  check_cxx_source_compiles("${ATOMICS64_TEST_SOURCE}"
-                            HAVE_CXX_ATOMICS64_WITHOUT_LIB)
-  if((NOT HAVE_CXX_ATOMICS_WITHOUT_LIB)
-     OR (NOT HAVE_CXX_ATOMICS8_WITHOUT_LIB)
-     OR (NOT HAVE_CXX_ATOMICS64_WITHOUT_LIB))
+                            HAVE_CXX_ATOMICS_INT_WITHOUT_LIB)
+  check_cxx_source_compiles("${ATOMICS_SIZE_T_TEST_SOURCE}"
+                            HAVE_CXX_ATOMICS_SIZE_T_WITHOUT_LIB)
+  check_cxx_source_compiles("${ATOMICS_VOID_PTR_TEST_SOURCE}"
+                            HAVE_CXX_ATOMICS_VOID_PTR_WITHOUT_LIB)
+  check_cxx_source_compiles("${ATOMICS_UNSIGNED_TEST_SOURCE}"
+                            HAVE_CXX_ATOMICS_UNSIGNED_WITHOUT_LIB)
+  if((NOT HAVE_CXX_ATOMICS_INT_WITHOUT_LIB)
+     OR (NOT HAVE_CXX_ATOMICS_SIZE_T_WITHOUT_LIB)
+     OR (NOT HAVE_CXX_ATOMICS_VOID_PTR_WITHOUT_LIB)
+     OR (NOT HAVE_CXX_ATOMICS_UNSIGNED_WITHOUT_LIB))
     set(CMAKE_REQUIRED_LIBRARIES "atomic")
     check_cxx_source_compiles("${ATOMICS_TEST_SOURCE}"
-                              HAVE_CXX_ATOMICS_WITH_LIB)
-    check_cxx_source_compiles("${ATOMICS8_TEST_SOURCE}"
-                              HAVE_CXX_ATOMICS8_WITH_LIB)
-    check_cxx_source_compiles("${ATOMICS64_TEST_SOURCE}"
-                              HAVE_CXX_ATOMICS64_WITH_LIB)
-    if((NOT HAVE_CXX_ATOMICS_WITH_LIB)
-       OR (NOT HAVE_CXX_ATOMICS8_WITH_LIB)
-       OR (NOT HAVE_CXX_ATOMICS64_WITH_LIB))
+                              HAVE_CXX_ATOMICS_INT_WITH_LIB)
+    check_cxx_source_compiles("${ATOMICS_SIZE_T_TEST_SOURCE}"
+                              HAVE_CXX_ATOMICS_SIZE_T_WITH_LIB)
+    check_cxx_source_compiles("${ATOMICS_VOID_PTR_TEST_SOURCE}"
+                              HAVE_CXX_ATOMICS_VOID_PTR_WITH_LIB)
+    check_cxx_source_compiles("${ATOMICS_UNSIGNED_TEST_SOURCE}"
+                              HAVE_CXX_ATOMICS_UNSIGNED_WITH_LIB)
+    if(NOT HAVE_CXX_ATOMICS_INT_WITH_LIB)
       message(
-        FATAL_ERROR "No native support for std::atomic, or libatomic not found!"
+        FATAL_ERROR "No native support for std::atomic<int>, or libatomic not found!"
+      )
+    elseif(NOT HAVE_CXX_ATOMICS_SIZE_T_WITH_LIB)
+      message(
+        FATAL_ERROR "No native support for std::atomic<size_t>, or libatomic not found!"
+      )
+    elseif(NOT HAVE_CXX_ATOMICS_VOID_PTR_WITH_LIB)
+      message(
+        FATAL_ERROR "No native support for std::atomic<void*>, or libatomic not found!"
+      )
+    elseif(NOT HAVE_CXX_ATOMICS_UNSIGNED_WITH_LIB)
+      message(
+        FATAL_ERROR "No native support for std::atomic<unsigned>, or libatomic not found!"
       )
     else()
       message(STATUS "Linking with libatomic for atomics support")
