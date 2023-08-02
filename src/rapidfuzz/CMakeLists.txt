@@ -31,7 +31,7 @@ function(rf_add_library name)
   endif()
 endfunction(rf_add_library)
 
-if(RAPIDFUZZ_ARCH_X64 or RAPIDFUZZ_ARCH_X86)
+if(RAPIDFUZZ_ARCH_X64 OR RAPIDFUZZ_ARCH_X86)
   create_cython_target(_feature_detector_cpp)
   rf_add_library(_feature_detector_cpp ${_feature_detector_cpp}
                  ${CMAKE_CURRENT_LIST_DIR}/FeatureDetector/CpuInfo.cpp)
@@ -56,7 +56,7 @@ target_include_directories(fuzz_cpp PRIVATE ${RF_BASE_DIR}/rapidfuzz)
 target_link_libraries(fuzz_cpp PRIVATE rapidfuzz::rapidfuzz)
 install(TARGETS fuzz_cpp LIBRARY DESTINATION src/rapidfuzz)
 
-if(RAPIDFUZZ_ARCH_X64 or RAPIDFUZZ_ARCH_X86)
+if(RAPIDFUZZ_ARCH_X64 OR RAPIDFUZZ_ARCH_X86)
   create_cython_target(fuzz_cpp_avx2)
   rf_add_library(fuzz_cpp_avx2 ${fuzz_cpp_avx2})
   target_compile_features(fuzz_cpp_avx2 PUBLIC cxx_std_17)

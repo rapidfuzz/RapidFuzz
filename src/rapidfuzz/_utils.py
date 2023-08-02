@@ -84,7 +84,7 @@ def vectorized_import(name: str) -> tuple[Any, list[Any]]:
         module = optional_import_module(name + "_avx2")
         if module is not None:
             return module
-    elif supports(SSE2):
+    if supports(SSE2):
         module = optional_import_module(name + "_sse2")
         if module is not None:
             return module

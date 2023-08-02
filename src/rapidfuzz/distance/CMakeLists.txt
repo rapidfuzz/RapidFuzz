@@ -50,7 +50,7 @@ target_include_directories(
 target_link_libraries(metrics_cpp PRIVATE rapidfuzz::rapidfuzz)
 install(TARGETS metrics_cpp LIBRARY DESTINATION src/rapidfuzz/distance)
 
-if(RAPIDFUZZ_ARCH_X64 or RAPIDFUZZ_ARCH_X86)
+if(RAPIDFUZZ_ARCH_X64 OR RAPIDFUZZ_ARCH_X86)
   create_cython_target(metrics_cpp_avx2)
   rf_add_library(metrics_cpp_avx2 ${metrics_cpp_avx2})
   target_compile_features(metrics_cpp_avx2 PUBLIC cxx_std_17)
