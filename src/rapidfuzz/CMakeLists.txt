@@ -123,7 +123,7 @@ if(NOT Windows)
     set(CMAKE_REQUIRED_FLAGS "-std=c++11")
   endif()
   check_cxx_source_compiles("${ATOMICS_TEST_SOURCE}"
-                            \\)
+                            HAVE_CXX_ATOMICS_INT_WITHOUT_LIB)
   check_cxx_source_compiles("${ATOMICS_SIZE_T_TEST_SOURCE}"
                             HAVE_CXX_ATOMICS_SIZE_T_WITHOUT_LIB)
   check_cxx_source_compiles("${ATOMICS_VOID_PTR_TEST_SOURCE}"
