@@ -69,6 +69,7 @@ include(FetchContent)
 include(CheckCPUArch)
 
 check_cpu_arch_x64(RAPIDFUZZ_ARCH_X64)
+check_cpu_arch_x86(RAPIDFUZZ_ARCH_X86)
 
 set(RF_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 

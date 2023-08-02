@@ -31,7 +31,7 @@ function(rf_add_library name)
   endif()
 endfunction(rf_add_library)
 
-if(RAPIDFUZZ_ARCH_X64)
+if(RAPIDFUZZ_ARCH_X64 OR RAPIDFUZZ_ARCH_X86)
   create_cython_target(_feature_detector_cpp)
   rf_add_library(_feature_detector_cpp ${_feature_detector_cpp}
                  ${CMAKE_CURRENT_LIST_DIR}/FeatureDetector/CpuInfo.cpp)
@@ -56,7 +56,7 @@ target_include_directories(fuzz_cpp PRIVATE ${RF_BASE_DIR}/rapidfuzz)
 target_link_libraries(fuzz_cpp PRIVATE rapidfuzz::rapidfuzz)
 install(TARGETS fuzz_cpp LIBRARY DESTINATION src/rapidfuzz)
 
-if(RAPIDFUZZ_ARCH_X64)
+if(RAPIDFUZZ_ARCH_X64 OR RAPIDFUZZ_ARCH_X86)
   create_cython_target(fuzz_cpp_avx2)
   rf_add_library(fuzz_cpp_avx2 ${fuzz_cpp_avx2})
   target_compile_features(fuzz_cpp_avx2 PUBLIC cxx_std_17)
@@ -71,6 +71,23 @@ if(RAPIDFUZZ_ARCH_X64)
   target_link_libraries(fuzz_cpp_avx2 PRIVATE rapidfuzz::rapidfuzz)
   install(TARGETS fuzz_cpp_avx2 LIBRARY DESTINATION src/rapidfuzz)
 endif()
+
+if(RAPIDFUZZ_ARCH_X86)
+  create_cython_target(fuzz_cpp_sse2)
+  rf_add_library(fuzz_cpp_sse2 ${fuzz_cpp_sse2})
+  target_compile_features(fuzz_cpp_sse2 PUBLIC cxx_std_17)
+
+  if(MSVC)
+    set_target_properties(fuzz_cpp_sse2 PROPERTIES COMPILE_FLAGS "/arch:SSE2")
+  else()
+    set_target_properties(fuzz_cpp_sse2 PROPERTIES COMPILE_FLAGS "-msse2")
+  endif()
+
+  target_include_directories(fuzz_cpp_sse2 PRIVATE ${RF_BASE_DIR}/rapidfuzz)
+  target_link_libraries(fuzz_cpp_sse2 PRIVATE rapidfuzz::rapidfuzz)
+  install(TARGETS fuzz_cpp_sse2 LIBRARY DESTINATION src/rapidfuzz)
+endif()
+
 
 create_cython_target(process_cpp_impl)
 rf_add_library(process_cpp_impl ${process_cpp_impl})
@@ -88,41 +105,59 @@ if(NOT Windows)
       [=[
         #include <atomic>
         #include <cstdint>
+        #include <cstddef>
         std::atomic<int> x{0};
         int main() {
-            x.fetch_add(1, std::memory_order_relaxed);
+            auto c = x.load(std::memory_order_relaxed);
             return 0;
         }
     ]=])
-  string(REPLACE "std::atomic<int>" "std::atomic<std::int8_t>"
-                 ATOMICS8_TEST_SOURCE "${ATOMICS_TEST_SOURCE}")
-  string(REPLACE "std::atomic<int>" "std::atomic<std::int64_t>"
-                 ATOMICS64_TEST_SOURCE "${ATOMICS_TEST_SOURCE}")
+  string(REPLACE "std::atomic<int>" "std::atomic<std::size_t>"
+                 ATOMICS_SIZE_T_TEST_SOURCE "${ATOMICS_TEST_SOURCE}")
+  string(REPLACE "std::atomic<int>" "std::atomic<void*>"
+                 ATOMICS_VOID_PTR_TEST_SOURCE "${ATOMICS_TEST_SOURCE}")
+  string(REPLACE "std::atomic<int>" "std::atomic<unsigned>"
+                 ATOMICS_UNSIGNED_TEST_SOURCE "${ATOMICS_TEST_SOURCE}")
 
   if(APPLE)
     set(CMAKE_REQUIRED_FLAGS "-std=c++11")
   endif()
   check_cxx_source_compiles("${ATOMICS_TEST_SOURCE}"
-                            HAVE_CXX_ATOMICS_WITHOUT_LIB)
-  check_cxx_source_compiles("${ATOMICS8_TEST_SOURCE}"
-                            HAVE_CXX_ATOMICS8_WITHOUT_LIB)
-  check_cxx_source_compiles("${ATOMICS64_TEST_SOURCE}"
-                            HAVE_CXX_ATOMICS64_WITHOUT_LIB)
-  if((NOT HAVE_CXX_ATOMICS_WITHOUT_LIB)
-     OR (NOT HAVE_CXX_ATOMICS8_WITHOUT_LIB)
-     OR (NOT HAVE_CXX_ATOMICS64_WITHOUT_LIB))
+                            HAVE_CXX_ATOMICS_INT_WITHOUT_LIB)
+  check_cxx_source_compiles("${ATOMICS_SIZE_T_TEST_SOURCE}"
+                            HAVE_CXX_ATOMICS_SIZE_T_WITHOUT_LIB)
+  check_cxx_source_compiles("${ATOMICS_VOID_PTR_TEST_SOURCE}"
+                            HAVE_CXX_ATOMICS_VOID_PTR_WITHOUT_LIB)
+  check_cxx_source_compiles("${ATOMICS_UNSIGNED_TEST_SOURCE}"
+                            HAVE_CXX_ATOMICS_UNSIGNED_WITHOUT_LIB)
+  if((NOT HAVE_CXX_ATOMICS_INT_WITHOUT_LIB)
+     OR (NOT HAVE_CXX_ATOMICS_SIZE_T_WITHOUT_LIB)
+     OR (NOT HAVE_CXX_ATOMICS_VOID_PTR_WITHOUT_LIB)
+     OR (NOT HAVE_CXX_ATOMICS_UNSIGNED_WITHOUT_LIB))
     set(CMAKE_REQUIRED_LIBRARIES "atomic")
     check_cxx_source_compiles("${ATOMICS_TEST_SOURCE}"
-                              HAVE_CXX_ATOMICS_WITH_LIB)
-    check_cxx_source_compiles("${ATOMICS8_TEST_SOURCE}"
-                              HAVE_CXX_ATOMICS8_WITH_LIB)
-    check_cxx_source_compiles("${ATOMICS64_TEST_SOURCE}"
-                              HAVE_CXX_ATOMICS64_WITH_LIB)
-    if((NOT HAVE_CXX_ATOMICS_WITH_LIB)
-       OR (NOT HAVE_CXX_ATOMICS8_WITH_LIB)
-       OR (NOT HAVE_CXX_ATOMICS64_WITH_LIB))
+                              HAVE_CXX_ATOMICS_INT_WITH_LIB)
+    check_cxx_source_compiles("${ATOMICS_SIZE_T_TEST_SOURCE}"
+                              HAVE_CXX_ATOMICS_SIZE_T_WITH_LIB)
+    check_cxx_source_compiles("${ATOMICS_VOID_PTR_TEST_SOURCE}"
+                              HAVE_CXX_ATOMICS_VOID_PTR_WITH_LIB)
+    check_cxx_source_compiles("${ATOMICS_UNSIGNED_TEST_SOURCE}"
+                              HAVE_CXX_ATOMICS_UNSIGNED_WITH_LIB)
+    if(NOT HAVE_CXX_ATOMICS_INT_WITH_LIB)
       message(
-        FATAL_ERROR "No native support for std::atomic, or libatomic not found!"
+        FATAL_ERROR "No native support for std::atomic<int>, or libatomic not found!"
+      )
+    elseif(NOT HAVE_CXX_ATOMICS_SIZE_T_WITH_LIB)
+      message(
+        FATAL_ERROR "No native support for std::atomic<size_t>, or libatomic not found!"
+      )
+    elseif(NOT HAVE_CXX_ATOMICS_VOID_PTR_WITH_LIB)
+      message(
+        FATAL_ERROR "No native support for std::atomic<void*>, or libatomic not found!"
+      )
+    elseif(NOT HAVE_CXX_ATOMICS_UNSIGNED_WITH_LIB)
+      message(
+        FATAL_ERROR "No native support for std::atomic<unsigned>, or libatomic not found!"
       )
     else()
       message(STATUS "Linking with libatomic for atomics support")

@@ -50,7 +50,7 @@ target_include_directories(
 target_link_libraries(metrics_cpp PRIVATE rapidfuzz::rapidfuzz)
 install(TARGETS metrics_cpp LIBRARY DESTINATION src/rapidfuzz/distance)
 
-if(RAPIDFUZZ_ARCH_X64)
+if(RAPIDFUZZ_ARCH_X64 OR RAPIDFUZZ_ARCH_X86)
   create_cython_target(metrics_cpp_avx2)
   rf_add_library(metrics_cpp_avx2 ${metrics_cpp_avx2})
   target_compile_features(metrics_cpp_avx2 PUBLIC cxx_std_17)
@@ -68,3 +68,23 @@ if(RAPIDFUZZ_ARCH_X64)
   target_link_libraries(metrics_cpp_avx2 PRIVATE rapidfuzz::rapidfuzz)
   install(TARGETS metrics_cpp_avx2 LIBRARY DESTINATION src/rapidfuzz/distance)
 endif()
+
+if(RAPIDFUZZ_ARCH_X86)
+  create_cython_target(metrics_cpp_sse2)
+  rf_add_library(metrics_cpp_sse2 ${metrics_cpp_sse2})
+  target_compile_features(metrics_cpp_sse2 PUBLIC cxx_std_17)
+
+  if(MSVC)
+    set_target_properties(metrics_cpp_sse2 PROPERTIES COMPILE_FLAGS
+                                                      "/arch:SSE2")
+  else()
+    set_target_properties(metrics_cpp_sse2 PROPERTIES COMPILE_FLAGS "-msse2")
+  endif()
+
+  target_include_directories(
+    metrics_cpp_sse2 PRIVATE ${RF_BASE_DIR}/rapidfuzz
+                             ${RF_BASE_DIR}/rapidfuzz/distance)
+  target_link_libraries(metrics_cpp_sse2 PRIVATE rapidfuzz::rapidfuzz)
+  install(TARGETS metrics_cpp_sse2 LIBRARY DESTINATION src/rapidfuzz/distance)
+endif()
+
