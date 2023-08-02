@@ -108,7 +108,7 @@ if(NOT Windows)
         #include <cstddef>
         std::atomic<int> x{0};
         int main() {
-            x.fetch_add(1, std::memory_order_relaxed);
+            auto c = x.load(std::memory_order_relaxed)
             return 0;
         }
     ]=])
@@ -123,7 +123,7 @@ if(NOT Windows)
     set(CMAKE_REQUIRED_FLAGS "-std=c++11")
   endif()
   check_cxx_source_compiles("${ATOMICS_TEST_SOURCE}"
-                            HAVE_CXX_ATOMICS_INT_WITHOUT_LIB)
+                            \\)
   check_cxx_source_compiles("${ATOMICS_SIZE_T_TEST_SOURCE}"
                             HAVE_CXX_ATOMICS_SIZE_T_WITHOUT_LIB)
   check_cxx_source_compiles("${ATOMICS_VOID_PTR_TEST_SOURCE}"
