@@ -108,7 +108,7 @@ if(NOT Windows)
         #include <cstddef>
         std::atomic<int> x{0};
         int main() {
-            auto c = x.load(std::memory_order_relaxed)
+            auto c = x.load(std::memory_order_relaxed);
             return 0;
         }
     ]=])
