@@ -38,8 +38,6 @@ class fuzz:
 
     @staticmethod
     def token_sort_ratio(*args, **kwargs):
-        if "processor" not in kwargs:
-            kwargs["processor"] = utils.default_process
         dist1 = symmetric_scorer_tester(fuzz_cpp.token_sort_ratio, *args, **kwargs)
         dist2 = symmetric_scorer_tester(fuzz_py.token_sort_ratio, *args, **kwargs)
         assert pytest.approx(dist1) == dist2
@@ -47,8 +45,6 @@ class fuzz:
 
     @staticmethod
     def token_set_ratio(*args, **kwargs):
-        if "processor" not in kwargs:
-            kwargs["processor"] = utils.default_process
         dist1 = symmetric_scorer_tester(fuzz_cpp.token_set_ratio, *args, **kwargs)
         dist2 = symmetric_scorer_tester(fuzz_py.token_set_ratio, *args, **kwargs)
         assert pytest.approx(dist1) == dist2
@@ -56,8 +52,6 @@ class fuzz:
 
     @staticmethod
     def token_ratio(*args, **kwargs):
-        if "processor" not in kwargs:
-            kwargs["processor"] = utils.default_process
         dist1 = symmetric_scorer_tester(fuzz_cpp.token_ratio, *args, **kwargs)
         dist2 = symmetric_scorer_tester(fuzz_py.token_ratio, *args, **kwargs)
         assert pytest.approx(dist1) == dist2
@@ -65,8 +59,6 @@ class fuzz:
 
     @staticmethod
     def partial_token_sort_ratio(*args, **kwargs):
-        if "processor" not in kwargs:
-            kwargs["processor"] = utils.default_process
         dist1 = symmetric_scorer_tester(fuzz_cpp.partial_token_sort_ratio, *args, **kwargs)
         dist2 = symmetric_scorer_tester(fuzz_py.partial_token_sort_ratio, *args, **kwargs)
         assert pytest.approx(dist1) == dist2
@@ -74,8 +66,6 @@ class fuzz:
 
     @staticmethod
     def partial_token_set_ratio(*args, **kwargs):
-        if "processor" not in kwargs:
-            kwargs["processor"] = utils.default_process
         dist1 = symmetric_scorer_tester(fuzz_cpp.partial_token_set_ratio, *args, **kwargs)
         dist2 = symmetric_scorer_tester(fuzz_py.partial_token_set_ratio, *args, **kwargs)
         assert pytest.approx(dist1) == dist2
@@ -83,8 +73,6 @@ class fuzz:
 
     @staticmethod
     def partial_token_ratio(*args, **kwargs):
-        if "processor" not in kwargs:
-            kwargs["processor"] = utils.default_process
         dist1 = symmetric_scorer_tester(fuzz_cpp.partial_token_ratio, *args, **kwargs)
         dist2 = symmetric_scorer_tester(fuzz_py.partial_token_ratio, *args, **kwargs)
         assert pytest.approx(dist1) == dist2
@@ -92,8 +80,6 @@ class fuzz:
 
     @staticmethod
     def WRatio(*args, **kwargs):
-        if "processor" not in kwargs:
-            kwargs["processor"] = utils.default_process
         dist1 = symmetric_scorer_tester(fuzz_cpp.WRatio, *args, **kwargs)
         dist2 = symmetric_scorer_tester(fuzz_py.WRatio, *args, **kwargs)
         assert pytest.approx(dist1) == dist2
@@ -101,8 +87,6 @@ class fuzz:
 
     @staticmethod
     def QRatio(*args, **kwargs):
-        if "processor" not in kwargs:
-            kwargs["processor"] = utils.default_process
         dist1 = symmetric_scorer_tester(fuzz_cpp.QRatio, *args, **kwargs)
         dist2 = symmetric_scorer_tester(fuzz_py.QRatio, *args, **kwargs)
         assert pytest.approx(dist1) == dist2
@@ -122,9 +106,9 @@ scorers = [
     fuzz.QRatio,
 ]
 
-cpp_scorers = [
-    fuzz_cpp.ratio,
-    fuzz_cpp.partial_ratio,
+hashable_scorers = [
+    fuzz.ratio,
+    fuzz.partial_ratio,
     fuzz_cpp.token_sort_ratio,
     fuzz_cpp.token_set_ratio,
     fuzz_cpp.token_ratio,
@@ -132,7 +116,7 @@ cpp_scorers = [
     fuzz_cpp.partial_token_set_ratio,
     fuzz_cpp.partial_token_ratio,
     fuzz_cpp.WRatio,
-    fuzz_cpp.QRatio,
+    fuzz.QRatio,
 ]
 
 
@@ -163,11 +147,11 @@ def testPartialTokenSetRatio():
 
 
 def testQuickRatioEqual():
-    assert fuzz.QRatio("new york mets", "new york mets") == 100
+    assert fuzz.QRatio("new york mets", "new york mets", processor=utils.default_process) == 100
 
 
 def testQuickRatioCaseInsensitive():
-    assert fuzz.QRatio("new york mets", "new YORK mets") == 100
+    assert fuzz.QRatio("new york mets", "new YORK mets", processor=utils.default_process) == 100
 
 
 def testQuickRatioNotEqual():
@@ -175,11 +159,11 @@ def testQuickRatioNotEqual():
 
 
 def testWRatioEqual():
-    assert fuzz.WRatio("new york mets", "new york mets") == 100
+    assert fuzz.WRatio("new york mets", "new york mets", processor=utils.default_process) == 100
 
 
 def testWRatioCaseInsensitive():
-    assert fuzz.WRatio("new york mets", "new YORK mets") == 100
+    assert fuzz.WRatio("new york mets", "new YORK mets", processor=utils.default_process) == 100
 
 
 def testWRatioPartialMatch():
@@ -279,7 +263,7 @@ def test_invalid_input(scorer):
         scorer(1, 1)
 
 
-@pytest.mark.parametrize("scorer", cpp_scorers)
+@pytest.mark.parametrize("scorer", hashable_scorers)
 def test_array(scorer):
     """
     arrays should be supported and treated in a compatible way to strings
