@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from math import ceil
+import itertools
 from typing import Any, Callable, Hashable, Sequence
 
 from rapidfuzz._common_py import conv_sequences
@@ -31,6 +32,36 @@ fuzz_attribute: dict[str, Callable[..., dict[str, Any]]] = {"get_scorer_flags": 
 def _norm_distance(dist: int, lensum: int, score_cutoff: float) -> float:
     score = (100 - 100 * dist / lensum) if lensum else 100
     return score if score >= score_cutoff else 0
+
+
+def _split_sequence(seq: Sequence[Hashable]) -> list[Sequence[Hashable]]:
+    if isinstance(seq, str) or isinstance(seq, bytes):
+        return seq.split()
+
+    splitted_seq = [[]]
+    for x in seq:
+        ch = x if isinstance(x, str) else chr(x)
+        if ch.isspace():
+            splitted_seq.append([])
+        else:
+            splitted_seq[-1].append(x)
+
+    return [tuple(x) for x in splitted_seq if x]
+
+
+def _join_splitted_sequence(seq_list: list[Sequence[Hashable]]):
+    if not seq_list:
+        return ""
+    if isinstance(next(iter(seq_list)), str):
+        return " ".join(seq_list)
+    if isinstance(next(iter(seq_list)), bytes):
+        return b" ".join(seq_list)
+
+    joined = []
+    for seq in seq_list:
+        joined += seq
+        joined += [ord(' ')]
+    return joined[:-1]
 
 
 def ratio(
@@ -356,8 +387,9 @@ def token_sort_ratio(
         s1 = processor(s1)
         s2 = processor(s2)
 
-    sorted_s1 = " ".join(sorted(s1.split()))
-    sorted_s2 = " ".join(sorted(s2.split()))
+    s1, s2 = conv_sequences(s1, s2)
+    sorted_s1 = _join_splitted_sequence(sorted(_split_sequence(s1)))
+    sorted_s2 = _join_splitted_sequence(sorted(_split_sequence(s2)))
     return ratio(sorted_s1, sorted_s2, score_cutoff=score_cutoff)
 
 
@@ -412,8 +444,10 @@ def token_set_ratio(
     if score_cutoff is None:
         score_cutoff = 0
 
-    tokens_a = set(s1.split())
-    tokens_b = set(s2.split())
+    s1, s2 = conv_sequences(s1, s2)
+
+    tokens_a = set(_split_sequence(s1))
+    tokens_b = set(_split_sequence(s2))
 
     # in FuzzyWuzzy this returns 0. For sake of compatibility return 0 here as well
     # see https://github.com/maxbachmann/RapidFuzz/issues/110
@@ -427,13 +461,13 @@ def token_set_ratio(
     if not intersect and (not diff_ab or not diff_ba):
         return 100
 
-    diff_ab_joined = " ".join(sorted(diff_ab))
-    diff_ba_joined = " ".join(sorted(diff_ba))
+    diff_ab_joined = _join_splitted_sequence(sorted(diff_ab))
+    diff_ba_joined = _join_splitted_sequence(sorted(diff_ba))
 
     ab_len = len(diff_ab_joined)
     ba_len = len(diff_ba_joined)
     # todo is length sum without joining faster?
-    sect_len = len(" ".join(intersect))
+    sect_len = len(_join_splitted_sequence(intersect))
 
     # string length sect+ab <-> sect and sect+ba <-> sect
     sect_ab_len = sect_len + (sect_len != 0) + ab_len
@@ -550,8 +584,9 @@ def partial_token_sort_ratio(
         s1 = processor(s1)
         s2 = processor(s2)
 
-    sorted_s1 = " ".join(sorted(s1.split()))
-    sorted_s2 = " ".join(sorted(s2.split()))
+    s1, s2 = conv_sequences(s1, s2)
+    sorted_s1 = _join_splitted_sequence(sorted(_split_sequence(s1)))
+    sorted_s2 = _join_splitted_sequence(sorted(_split_sequence(s2)))
     return partial_ratio(sorted_s1, sorted_s2, score_cutoff=score_cutoff)
 
 
@@ -596,8 +631,10 @@ def partial_token_set_ratio(
         s1 = processor(s1)
         s2 = processor(s2)
 
-    tokens_a = set(s1.split())
-    tokens_b = set(s2.split())
+    s1, s2 = conv_sequences(s1, s2)
+
+    tokens_a = set(_split_sequence(s1))
+    tokens_b = set(_split_sequence(s2))
     # in FuzzyWuzzy this returns 0. For sake of compatibility return 0 here as well
     # see https://github.com/maxbachmann/RapidFuzz/issues/110
     if not tokens_a or not tokens_b:
@@ -607,8 +644,8 @@ def partial_token_set_ratio(
     if tokens_a.intersection(tokens_b):
         return 100
 
-    diff_ab = " ".join(sorted(tokens_a.difference(tokens_b)))
-    diff_ba = " ".join(sorted(tokens_b.difference(tokens_a)))
+    diff_ab = _join_splitted_sequence(sorted(tokens_a.difference(tokens_b)))
+    diff_ba = _join_splitted_sequence(sorted(tokens_b.difference(tokens_a)))
     return partial_ratio(diff_ab, diff_ba, score_cutoff=score_cutoff)
 
 
@@ -656,8 +693,10 @@ def partial_token_ratio(
     if score_cutoff is None:
         score_cutoff = 0
 
-    tokens_split_a = s1.split()
-    tokens_split_b = s2.split()
+    s1, s2 = conv_sequences(s1, s2)
+
+    tokens_split_a = _split_sequence(s1)
+    tokens_split_b = _split_sequence(s2)
     tokens_a = set(tokens_split_a)
     tokens_b = set(tokens_split_b)
 
@@ -669,8 +708,8 @@ def partial_token_ratio(
     diff_ba = tokens_b.difference(tokens_a)
 
     result = partial_ratio(
-        " ".join(sorted(tokens_split_a)),
-        " ".join(sorted(tokens_split_b)),
+        _join_splitted_sequence(sorted(tokens_split_a)),
+        _join_splitted_sequence(sorted(tokens_split_b)),
         score_cutoff=score_cutoff,
     )
 
@@ -682,8 +721,8 @@ def partial_token_ratio(
     return max(
         result,
         partial_ratio(
-            " ".join(sorted(diff_ab)),
-            " ".join(sorted(diff_ba)),
+            _join_splitted_sequence(sorted(diff_ab)),
+            _join_splitted_sequence(sorted(diff_ba)),
             score_cutoff=score_cutoff,
         ),
     )

@@ -69,6 +69,16 @@ def test_similar_array(scorer):
 
 
 @pytest.mark.parametrize("scorer", all_scorer_modules)
+def test_similar_bytes(scorer):
+    """
+    bytes should be supported and treated in a compatible way to strings
+    """
+    assert scorer.normalized_similarity(b"the wonderful new york mets", b"the wonderful new york mets") == 1.0
+    assert scorer.normalized_similarity("the wonderful new york mets", b"the wonderful new york mets") == 1.0
+    assert scorer.normalized_similarity(b"the wonderful new york mets", "the wonderful new york mets") == 1.0
+
+
+@pytest.mark.parametrize("scorer", all_scorer_modules)
 def test_similar_ord_array(scorer):
     """
     elements in string should behave similar to their underlying unicode number

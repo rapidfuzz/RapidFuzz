@@ -109,13 +109,13 @@ scorers = [
 hashable_scorers = [
     fuzz.ratio,
     fuzz.partial_ratio,
-    fuzz_cpp.token_sort_ratio,
-    fuzz_cpp.token_set_ratio,
-    fuzz_cpp.token_ratio,
-    fuzz_cpp.partial_token_sort_ratio,
-    fuzz_cpp.partial_token_set_ratio,
-    fuzz_cpp.partial_token_ratio,
-    fuzz_cpp.WRatio,
+    fuzz.token_sort_ratio,
+    fuzz.token_set_ratio,
+    fuzz.token_ratio,
+    fuzz.partial_token_sort_ratio,
+    fuzz.partial_token_set_ratio,
+    fuzz.partial_token_ratio,
+    fuzz.WRatio,
     fuzz.QRatio,
 ]
 
@@ -275,6 +275,16 @@ def test_array(scorer):
     )
     assert scorer("the wonderful new york mets", array("u", "the wonderful new york mets"))
     assert scorer(array("u", "the wonderful new york mets"), "the wonderful new york mets")
+
+
+@pytest.mark.parametrize("scorer", hashable_scorers)
+def test_bytes(scorer):
+    """
+    bytes should be supported and treated in a compatible way to strings
+    """
+    assert scorer(b"the wonderful new york mets", b"the wonderful new york mets") == 100
+    assert scorer("the wonderful new york mets", b"the wonderful new york mets") == 100
+    assert scorer(b"the wonderful new york mets", "the wonderful new york mets") == 100
 
 
 @pytest.mark.parametrize("scorer", scorers)
