@@ -106,20 +106,6 @@ scorers = [
     fuzz.QRatio,
 ]
 
-hashable_scorers = [
-    fuzz.ratio,
-    fuzz.partial_ratio,
-    fuzz.token_sort_ratio,
-    fuzz.token_set_ratio,
-    fuzz.token_ratio,
-    fuzz.partial_token_sort_ratio,
-    fuzz.partial_token_set_ratio,
-    fuzz.partial_token_ratio,
-    fuzz.WRatio,
-    fuzz.QRatio,
-]
-
-
 def test_no_processor():
     assert fuzz.ratio("new york mets", "new york mets") == 100
     assert fuzz.ratio("new york mets", "new YORK mets") != 100
@@ -263,7 +249,7 @@ def test_invalid_input(scorer):
         scorer(1, 1)
 
 
-@pytest.mark.parametrize("scorer", hashable_scorers)
+@pytest.mark.parametrize("scorer", scorers)
 def test_array(scorer):
     """
     arrays should be supported and treated in a compatible way to strings
@@ -277,7 +263,7 @@ def test_array(scorer):
     assert scorer(array("u", "the wonderful new york mets"), "the wonderful new york mets")
 
 
-@pytest.mark.parametrize("scorer", hashable_scorers)
+@pytest.mark.parametrize("scorer", scorers)
 def test_bytes(scorer):
     """
     bytes should be supported and treated in a compatible way to strings
