@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+[3.3.0] - 2023-
+^^^^^^^^^^^^^^^^^^^^
+Changed
+~~~~~~~
+- implement the remaining missing features from the C++ implementation in the pure Python implementation
+
 [3.2.0] - 2023-08-02
 ^^^^^^^^^^^^^^^^^^^^
 Changed
