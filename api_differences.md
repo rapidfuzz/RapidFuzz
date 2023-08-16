@@ -13,14 +13,14 @@ This leads to different results depending on the version in use. `RapidFuzz` alw
 fallback implementation and the C++ based implementation to provide consistent matching results.
 
 ## partial_ratio implementation
-`fuzzywuzzy` uses searches fo the optimal matching substring and then calculates the similarity using `ratio`. This substring is searches using either:
+`fuzzywuzzy` searches for the optimal matching substring and then calculates the similarity using `ratio`. This substring is searches using either:
 1) `difflib.SequenceMatcher.get_matching_blocks` (based on Ratcliff and Obershelp algorithm)
 2) `Levenshtein.matching_blocks` (backtracks Levenshtein matrix)
 
 This implementation has a couple of issues:
 1) in the pure Python implementation the automatic junk heuristic of difflib is not deactivated. This heuristic improves the performance for long strings,
 but can lead to completely incorrect results.
-2) the accellerated version backtracks the Levenshtein matrix to find the same alignment found by the Python implementation. However the algorithm just uses
+2) the accelerated version backtracks the Levenshtein matrix to find the same alignment found by the Python implementation. However the algorithm just uses
 one of multiple optimal alignment. There is no guarantee for this alignment to include the longest common substring.
 3) the optimal substring is assumed to start at one of these `matching_blocks`. However this is not guaranteed.
 

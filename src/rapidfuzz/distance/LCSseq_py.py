@@ -5,9 +5,9 @@ from __future__ import annotations
 
 from typing import Callable, Hashable, Sequence
 
-from rapidfuzz._common_py import conv_sequences
+from rapidfuzz._common_py import common_affix, conv_sequences
 from rapidfuzz._utils import is_none
-from rapidfuzz.distance._initialize_py import Editops, Opcodes
+from rapidfuzz.distance._initialize_py import Editop, Editops, Opcodes
 
 
 def similarity(
@@ -254,6 +254,30 @@ def normalized_similarity(
     return norm_sim if (score_cutoff is None or norm_sim >= score_cutoff) else 0
 
 
+def _matrix(s1: Sequence[Hashable], s2: Sequence[Hashable]):
+    if not s1:
+        return (0, [])
+
+    S = (1 << len(s1)) - 1
+    block: dict[Hashable, int] = {}
+    block_get = block.get
+    x = 1
+    for ch1 in s1:
+        block[ch1] = block_get(ch1, 0) | x
+        x <<= 1
+
+    matrix = []
+    for ch2 in s2:
+        Matches = block_get(ch2, 0)
+        u = S & Matches
+        S = (S + u) | (S - u)
+        matrix.append(S)
+
+    # calculate the equivalent of popcount(~S) in C. This breaks for len(s1) == 0
+    sim = bin(S)[-len(s1) :].count("0")
+    return (sim, matrix)
+
+
 def editops(
     s1: Sequence[Hashable],
     s2: Sequence[Hashable],
@@ -298,8 +322,56 @@ def editops(
      insert s1[4] s2[2]
      insert s1[6] s2[5]
     """
-    _ = s1, s2, processor
-    raise NotImplementedError
+    if processor is not None:
+        s1 = processor(s1)
+        s2 = processor(s2)
+
+    s1, s2 = conv_sequences(s1, s2)
+    prefix_len, suffix_len = common_affix(s1, s2)
+    s1 = s1[prefix_len : len(s1) - suffix_len]
+    s2 = s2[prefix_len : len(s2) - suffix_len]
+    sim, matrix = _matrix(s1, s2)
+
+    editops = Editops([], 0, 0)
+    editops._src_len = len(s1) + prefix_len + suffix_len
+    editops._dest_len = len(s2) + prefix_len + suffix_len
+
+    dist = len(s1) + len(s2) - 2 * sim
+    if dist == 0:
+        return editops
+
+    editop_list = [None] * dist
+    col = len(s1)
+    row = len(s2)
+    while row != 0 and col != 0:
+        # deletion
+        if matrix[row - 1] & (1 << (col - 1)):
+            dist -= 1
+            col -= 1
+            editop_list[dist] = Editop("delete", col + prefix_len, row + prefix_len)
+        else:
+            row -= 1
+
+            # insertion
+            if row and not (matrix[row - 1] & (1 << (col - 1))):
+                dist -= 1
+                editop_list[dist] = Editop("insert", col + prefix_len, row + prefix_len)
+            # match
+            else:
+                col -= 1
+
+    while col != 0:
+        dist -= 1
+        col -= 1
+        editop_list[dist] = Editop("delete", col + prefix_len, row + prefix_len)
+
+    while row != 0:
+        dist -= 1
+        row -= 1
+        editop_list[dist] = Editop("insert", col + prefix_len, row + prefix_len)
+
+    editops._editops = editop_list
+    return editops
 
 
 def opcodes(

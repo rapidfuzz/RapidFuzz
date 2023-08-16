@@ -106,6 +106,7 @@ scorers = [
     fuzz.QRatio,
 ]
 
+
 def test_no_processor():
     assert fuzz.ratio("new york mets", "new york mets") == 100
     assert fuzz.ratio("new york mets", "new YORK mets") != 100

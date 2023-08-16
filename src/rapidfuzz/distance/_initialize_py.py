@@ -342,7 +342,7 @@ class Editops:
 
         This is the equivalent of ``[x for x in editops]``
         """
-        return self._editops
+        return [tuple(op) for op in self._editops]
 
     def copy(self) -> Editops:
         """
@@ -472,15 +472,15 @@ class Editops:
 
         for op in self._editops:
             # matches between last and current editop
-            while src_pos < op.dest_pos:
+            while src_pos < op.src_pos:
                 res_str += source_string[src_pos]
                 src_pos += 1
 
             if op.tag == "replace":
-                res_str += destination_string[src_pos]
+                res_str += destination_string[op.dest_pos]
                 src_pos += 1
             elif op.tag == "insert":
-                res_str += destination_string[src_pos]
+                res_str += destination_string[op.dest_pos]
             elif op.tag == "delete":
                 src_pos += 1
 
@@ -618,7 +618,7 @@ class Opcode:
 
     def __repr__(self) -> str:
         return (
-            f"Opcode(tag={self.tag}, src_start={self.src_start}, src_end={self.src_end}, "
+            f"Opcode(tag={self.tag!r}, src_start={self.src_start}, src_end={self.src_end}, "
             f"dest_start={self.dest_start}, dest_end={self.dest_end})"
         )
 
@@ -711,7 +711,7 @@ class Opcodes:
 
         This is the equivalent of ``[x for x in opcodes]``
         """
-        return self._opcodes[::]
+        return [tuple(op) for op in self._opcodes]
 
     def copy(self) -> Opcodes:
         """

@@ -239,7 +239,7 @@ def test_indel_editops(s1, s2):
     """
     test Indel.editops with any sizes
     """
-    ops = metrics_cpp.indel_editops(s1, s2)
+    ops = Indel.editops(s1, s2)
     assert ops.apply(s1, s2) == s2
 
 
@@ -249,7 +249,7 @@ def test_indel_editops_block(s1, s2):
     """
     test Indel.editops for long strings
     """
-    ops = metrics_cpp.indel_editops(s1, s2)
+    ops = Indel.editops(s1, s2)
     assert ops.apply(s1, s2) == s2
 
 
@@ -279,7 +279,7 @@ def test_indel_opcodes(s1, s2):
     """
     test Indel.opcodes with any sizes
     """
-    ops = metrics_cpp.indel_opcodes(s1, s2)
+    ops = Indel.opcodes(s1, s2)
     assert ops.apply(s1, s2) == s2
 
 
@@ -289,7 +289,7 @@ def test_indel_opcodes_block(s1, s2):
     """
     test Indel.opcodes for long strings
     """
-    ops = metrics_cpp.indel_opcodes(s1, s2)
+    ops = Indel.opcodes(s1, s2)
     assert ops.apply(s1, s2) == s2
 
 

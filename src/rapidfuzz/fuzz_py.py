@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from math import ceil
-import itertools
 from typing import Any, Callable, Hashable, Sequence
 
 from rapidfuzz._common_py import conv_sequences
@@ -35,7 +34,7 @@ def _norm_distance(dist: int, lensum: int, score_cutoff: float) -> float:
 
 
 def _split_sequence(seq: Sequence[Hashable]) -> list[Sequence[Hashable]]:
-    if isinstance(seq, str) or isinstance(seq, bytes):
+    if isinstance(seq, (str, bytes)):
         return seq.split()
 
     splitted_seq = [[]]
@@ -60,7 +59,7 @@ def _join_splitted_sequence(seq_list: list[Sequence[Hashable]]):
     joined = []
     for seq in seq_list:
         joined += seq
-        joined += [ord(' ')]
+        joined += [ord(" ")]
     return joined[:-1]
 
 

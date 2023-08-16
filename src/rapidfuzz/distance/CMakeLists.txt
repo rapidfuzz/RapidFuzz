@@ -87,4 +87,3 @@ if(RAPIDFUZZ_ARCH_X86)
   target_link_libraries(metrics_cpp_sse2 PRIVATE rapidfuzz::rapidfuzz)
   install(TARGETS metrics_cpp_sse2 LIBRARY DESTINATION src/rapidfuzz/distance)
 endif()
-

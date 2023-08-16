@@ -88,7 +88,6 @@ if(RAPIDFUZZ_ARCH_X86)
   install(TARGETS fuzz_cpp_sse2 LIBRARY DESTINATION src/rapidfuzz)
 endif()
 
-
 create_cython_target(process_cpp_impl)
 rf_add_library(process_cpp_impl ${process_cpp_impl})
 target_compile_features(process_cpp_impl PUBLIC cxx_std_17)
@@ -145,19 +144,20 @@ if(NOT Windows)
                               HAVE_CXX_ATOMICS_UNSIGNED_WITH_LIB)
     if(NOT HAVE_CXX_ATOMICS_INT_WITH_LIB)
       message(
-        FATAL_ERROR "No native support for std::atomic<int>, or libatomic not found!"
-      )
+        FATAL_ERROR
+          "No native support for std::atomic<int>, or libatomic not found!")
     elseif(NOT HAVE_CXX_ATOMICS_SIZE_T_WITH_LIB)
       message(
-        FATAL_ERROR "No native support for std::atomic<size_t>, or libatomic not found!"
-      )
+        FATAL_ERROR
+          "No native support for std::atomic<size_t>, or libatomic not found!")
     elseif(NOT HAVE_CXX_ATOMICS_VOID_PTR_WITH_LIB)
       message(
-        FATAL_ERROR "No native support for std::atomic<void*>, or libatomic not found!"
-      )
+        FATAL_ERROR
+          "No native support for std::atomic<void*>, or libatomic not found!")
     elseif(NOT HAVE_CXX_ATOMICS_UNSIGNED_WITH_LIB)
       message(
-        FATAL_ERROR "No native support for std::atomic<unsigned>, or libatomic not found!"
+        FATAL_ERROR
+          "No native support for std::atomic<unsigned>, or libatomic not found!"
       )
     else()
       message(STATUS "Linking with libatomic for atomics support")

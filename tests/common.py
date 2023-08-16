@@ -40,7 +40,10 @@ def call_and_maybe_catch(call, *args, **kwargs):
 
 
 def compare_exceptions(e1, e2):
-    return type(e1) is type(e2) and str(e1) == str(e2)
+    try:
+        return str(e1) == str(e2)
+    except Exception:
+        return False
 
 
 def scorer_tester(scorer, s1, s2, **kwargs):
@@ -156,6 +159,8 @@ class Scorer:
     similarity: Any
     normalized_distance: Any
     normalized_similarity: Any
+    editops: Any
+    opcodes: Any
 
 
 class GenericScorer:
@@ -184,6 +189,28 @@ class GenericScorer:
             assert hasattr(scorer.normalized_similarity, "_RF_Scorer")
 
         self.get_scorer_flags = get_scorer_flags
+
+    def _editops(self, s1, s2, **kwargs):
+        results = [call_and_maybe_catch(scorer.editops, s1, s2, **kwargs) for scorer in self.scorers]
+
+        for result in results:
+            assert compare_exceptions(result, results[0])
+
+        if any(isinstance(result, Exception) for result in results):
+            raise results[0]
+
+        return results[0]
+
+    def _opcodes(self, s1, s2, **kwargs):
+        results = [call_and_maybe_catch(scorer.opcodes, s1, s2, **kwargs) for scorer in self.scorers]
+
+        for result in results:
+            assert compare_exceptions(result, results[0])
+
+        if any(isinstance(result, Exception) for result in results):
+            raise results[0]
+
+        return results[0]
 
     def _distance(self, s1, s2, **kwargs):
         symmetric = self.get_scorer_flags(s1, s2, **kwargs)["symmetric"]
@@ -303,3 +330,17 @@ class GenericScorer:
             if "score_cutoff" not in kwargs:
                 return norm_sim
         return self._normalized_similarity(s1, s2, **kwargs)
+
+    def editops(self, s1, s2, **kwargs):
+        editops_ = self._editops(s1, s2, **kwargs)
+        opcodes_ = self._opcodes(s1, s2, **kwargs)
+        assert opcodes_.as_editops() == editops_
+        assert opcodes_ == editops_.as_opcodes()
+        return editops_
+
+    def opcodes(self, s1, s2, **kwargs):
+        editops_ = self._editops(s1, s2, **kwargs)
+        opcodes_ = self._opcodes(s1, s2, **kwargs)
+        assert opcodes_.as_editops() == editops_
+        assert opcodes_ == editops_.as_opcodes()
+        return opcodes_

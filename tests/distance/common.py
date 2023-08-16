@@ -21,6 +21,8 @@ def create_generic_scorer(func_name, get_scorer_flags):
             similarity=getattr(metrics_py, func_name + "_similarity"),
             normalized_distance=getattr(metrics_py, func_name + "_normalized_distance"),
             normalized_similarity=getattr(metrics_py, func_name + "_normalized_similarity"),
+            editops=getattr(metrics_py, func_name + "_editops", None),
+            opcodes=getattr(metrics_py, func_name + "_opcodes", None),
         )
     ]
 
@@ -30,6 +32,8 @@ def create_generic_scorer(func_name, get_scorer_flags):
             similarity=getattr(mod, func_name + "_similarity"),
             normalized_distance=getattr(mod, func_name + "_normalized_distance"),
             normalized_similarity=getattr(mod, func_name + "_normalized_similarity"),
+            editops=getattr(metrics_cpp, func_name + "_editops", None),
+            opcodes=getattr(metrics_cpp, func_name + "_opcodes", None),
         )
         for mod in cpp_scorer_modules
     ]
