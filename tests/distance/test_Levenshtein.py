@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from rapidfuzz.distance import Opcode, Opcodes, metrics_cpp
 from tests.distance.common import Levenshtein
 
 
@@ -82,18 +81,18 @@ def test_Editops():
     """
     basic test for Levenshtein.editops
     """
-    assert metrics_cpp.levenshtein_editops("0", "").as_list() == [("delete", 0, 0)]
-    assert metrics_cpp.levenshtein_editops("", "0").as_list() == [("insert", 0, 0)]
+    assert Levenshtein.editops("0", "").as_list() == [("delete", 0, 0)]
+    assert Levenshtein.editops("", "0").as_list() == [("insert", 0, 0)]
 
-    assert metrics_cpp.levenshtein_editops("00", "0").as_list() == [("delete", 1, 1)]
-    assert metrics_cpp.levenshtein_editops("0", "00").as_list() == [("insert", 1, 1)]
+    assert Levenshtein.editops("00", "0").as_list() == [("delete", 1, 1)]
+    assert Levenshtein.editops("0", "00").as_list() == [("insert", 1, 1)]
 
-    assert metrics_cpp.levenshtein_editops("qabxcd", "abycdf").as_list() == [
+    assert Levenshtein.editops("qabxcd", "abycdf").as_list() == [
         ("delete", 0, 0),
         ("replace", 3, 2),
         ("insert", 6, 5),
     ]
-    assert metrics_cpp.levenshtein_editops("Lorem ipsum.", "XYZLorem ABC iPsum").as_list() == [
+    assert Levenshtein.editops("Lorem ipsum.", "XYZLorem ABC iPsum").as_list() == [
         ("insert", 0, 0),
         ("insert", 0, 1),
         ("insert", 0, 2),
@@ -105,7 +104,7 @@ def test_Editops():
         ("delete", 11, 18),
     ]
 
-    ops = metrics_cpp.levenshtein_editops("aaabaaa", "abbaaabba")
+    ops = Levenshtein.editops("aaabaaa", "abbaaabba")
     assert ops.src_len == 7
     assert ops.dest_len == 9
 
@@ -114,9 +113,7 @@ def test_Opcodes():
     """
     basic test for Levenshtein.opcodes
     """
-    assert metrics_cpp.levenshtein_opcodes("", "abc") == Opcodes(
-        [Opcode(tag="insert", src_start=0, src_end=0, dest_start=0, dest_end=3)], 0, 3
-    )
+    assert Levenshtein.opcodes("", "abc").as_list() == [("insert", 0, 0, 0, 3)]
 
 
 def test_mbleven():

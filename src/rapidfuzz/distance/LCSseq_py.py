@@ -254,7 +254,7 @@ def normalized_similarity(
     return norm_sim if (score_cutoff is None or norm_sim >= score_cutoff) else 0
 
 
-def _matrix(s1: Sequence[Hashable], s2: Sequence[Hashable]):
+def _matrix(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> ([int], int):
     if not s1:
         return (0, [])
 

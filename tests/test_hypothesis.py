@@ -209,7 +209,7 @@ def test_matching_blocks(s1, s2):
     """
     test correct matching block conversion
     """
-    ops = metrics_cpp.levenshtein_editops(s1, s2)
+    ops = Levenshtein.editops(s1, s2)
     assert ops.as_matching_blocks() == ops.as_opcodes().as_matching_blocks()
 
 
@@ -219,7 +219,7 @@ def test_levenshtein_editops(s1, s2):
     """
     test Levenshtein.editops with any sizes
     """
-    ops = metrics_cpp.levenshtein_editops(s1, s2)
+    ops = Levenshtein.editops(s1, s2)
     assert ops.apply(s1, s2) == s2
 
 
@@ -229,7 +229,7 @@ def test_levenshtein_editops_block(s1, s2):
     """
     test Levenshtein.editops for long strings
     """
-    ops = metrics_cpp.levenshtein_editops(s1, s2)
+    ops = Levenshtein.editops(s1, s2)
     assert ops.apply(s1, s2) == s2
 
 
@@ -259,7 +259,7 @@ def test_levenshtein_opcodes(s1, s2):
     """
     test Levenshtein.opcodes with any sizes
     """
-    ops = metrics_cpp.levenshtein_opcodes(s1, s2)
+    ops = Levenshtein.opcodes(s1, s2)
     assert ops.apply(s1, s2) == s2
 
 
@@ -269,7 +269,7 @@ def test_levenshtein_opcodes_block(s1, s2):
     """
     test Levenshtein.opcodes for long strings
     """
-    ops = metrics_cpp.levenshtein_opcodes(s1, s2)
+    ops = Levenshtein.opcodes(s1, s2)
     assert ops.apply(s1, s2) == s2
 
 
