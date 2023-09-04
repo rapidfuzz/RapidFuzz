@@ -5,7 +5,12 @@ Changelog
 ^^^^^^^^^^^^^^^^^^^^
 Changed
 ~~~~~~~
+- upgrade to ``Cython==3.0.2``
 - implement the remaining missing features from the C++ implementation in the pure Python implementation
+
+Added
+~~~~~
+- added support for Python 3.12
 
 [3.2.0] - 2023-08-02
 ^^^^^^^^^^^^^^^^^^^^
@@ -244,7 +249,7 @@ Performance
 
 Fixed
 ~~~~~
-* ignore missing pandas in Python3.11 tests
+* ignore missing pandas in Python 3.11 tests
 
 [2.9.0] - 2022-09-16
 ^^^^^^^^^^^^^^^^^^^^
@@ -317,7 +322,7 @@ Fixed
 ^^^^^^^^^^^^^^^^^^^^
 Changed
 ~~~~~~~
-* Added support for Python3.11
+* Added support for Python 3.11
 
 [2.4.3] - 2022-08-08
 ^^^^^^^^^^^^^^^^^^^^

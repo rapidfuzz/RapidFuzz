@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest hypothesis pandas mypy rapidfuzz_capi Cython==3.0.0
+          pip install pytest hypothesis pandas mypy rapidfuzz_capi Cython==3.0.2
 
       # The cythonized files allow installation from the sdist without cython
       - name: Generate cython
@@ -60,7 +60,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: [auto32, auto64, ARM64]
-        python_tag: ["cp37-*", "cp38-*", "cp39-*", "cp310-*", "cp311-*", "pp37-*", "pp38-*", "pp39-*"]
+        python_tag: ["cp37-*", "cp38-*", "cp39-*", "cp310-*", "cp311-*", "cp312-*", "pp37-*", "pp38-*", "pp39-*"]
         exclude:
           # PyPy only supports x86_64 on Windows
           - arch: auto32
@@ -101,7 +101,7 @@ jobs:
       - uses: actions/setup-python@v4
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.12.1
+        uses: pypa/cibuildwheel@v2.15.0
         with:
           package-dir: rapidfuzz.tar.gz
           output-dir: wheelhouse
@@ -119,7 +119,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: [x86_64, arm64, universal2]
-        python_tag: ["cp37-*", "cp38-*", "cp39-*", "cp310-*", "cp311-*", "pp37-*", "pp38-*", "pp39-*"]
+        python_tag: ["cp37-*", "cp38-*", "cp39-*", "cp310-*", "cp311-*", "cp312-*", "pp37-*", "pp38-*", "pp39-*"]
         exclude:
           # MacOS Arm only supported since Python 3.8
           - arch: arm64
@@ -160,7 +160,7 @@ jobs:
         run: cp dist/*.tar.gz rapidfuzz.tar.gz
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.12.1
+        uses: pypa/cibuildwheel@v2.15.0
         with:
           package-dir: rapidfuzz.tar.gz
           output-dir: wheelhouse
@@ -178,7 +178,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: [auto, aarch64, ppc64le, s390x]
-        python_tag: ["cp37-*", "cp38-*", "cp39-*", "cp310-*", "cp311-*", "pp37-*", "pp38-*", "pp39-*"]
+        python_tag: ["cp37-*", "cp38-*", "cp39-*", "cp310-*", "cp311-*", "cp312-*", "pp37-*", "pp38-*", "pp39-*"]
         exclude:
           # PyPy builds not available for these platforms
           - arch: ppc64le
@@ -217,7 +217,7 @@ jobs:
         name: Set up QEMU
 
       - name: Build wheel
-        uses: pypa/cibuildwheel@v2.12.1
+        uses: pypa/cibuildwheel@v2.15.0
         with:
           package-dir: rapidfuzz.tar.gz
           output-dir: wheelhouse
