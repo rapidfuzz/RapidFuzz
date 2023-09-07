@@ -5,7 +5,6 @@ from itertools import product
 from string import ascii_letters, digits, punctuation
 
 import hypothesis.strategies as st
-import numpy as np
 import pytest
 from hypothesis import assume, given, settings
 
@@ -164,6 +163,7 @@ def partial_ratio_short_needle(s1, s2):
 
 
 def cdist_scorer(queries, choices, scorer):
+    import numpy as np
     matrix = np.zeros((len(queries), len(choices)), dtype=np.uint8)
 
     for i, query in enumerate(queries):
@@ -174,6 +174,7 @@ def cdist_scorer(queries, choices, scorer):
 
 
 def cdist_distance(queries, choices, scorer):
+    import numpy as np
     matrix = np.zeros((len(queries), len(choices)), dtype=np.int32)
 
     for i, query in enumerate(queries):
