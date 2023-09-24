@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+[3.3.1] - 2023-09-25
+^^^^^^^^^^^^^^^^^^^^
+Added
+~~~~~
+- add missing tag for python 3.12 support
+
 [3.3.0] - 2023-09-11
 ^^^^^^^^^^^^^^^^^^^^
 Changed

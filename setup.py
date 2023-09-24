@@ -15,7 +15,7 @@ with open("README.md", encoding="utf8") as f:
 
 setup_args = {
     "name": "rapidfuzz",
-    "version": "3.3.0",
+    "version": "3.3.1",
     "extras_require": {"full": ["numpy"]},
     "url": "https://github.com/maxbachmann/RapidFuzz",
     "author": "Max Bachmann",
@@ -31,6 +31,7 @@ setup_args = {
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "License :: OSI Approved :: MIT License",
     ],
     "packages": ["rapidfuzz", "rapidfuzz.distance", "rapidfuzz.__pyinstaller"],
