@@ -289,7 +289,7 @@ def levenshtein_opcodes(s1, s2, *, processor=None, score_hint=None):
     ops.editops = levenshtein_editops_func(s1_proc.string, s2_proc.string, c_score_hint)
     return ops.as_opcodes()
 
-cdef void KwargsDeinit(RF_Kwargs* self):
+cdef void KwargsDeinit(RF_Kwargs* self) noexcept:
     free(<void*>self.context)
 
 cdef bool LevenshteinKwargsInit(RF_Kwargs* self, dict kwargs) except False:
