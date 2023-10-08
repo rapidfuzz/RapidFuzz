@@ -129,7 +129,7 @@ cdef extern from "metrics.hpp":
 
     bool OSAMultiStringSupport(const RF_Kwargs*) nogil
 
-    # Damerau Levenshtein
+    # Jaro
     double jaro_normalized_distance_func(  const RF_String&, const RF_String&, double) except + nogil
     double jaro_distance_func(             const RF_String&, const RF_String&, double) except + nogil
     double jaro_normalized_similarity_func(const RF_String&, const RF_String&, double) except + nogil
@@ -140,7 +140,9 @@ cdef extern from "metrics.hpp":
     bool JaroSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
     bool JaroNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
 
-    # Damerau Levenshtein
+    bool JaroMultiStringSupport(const RF_Kwargs*) nogil
+
+    # Jaro Winkler
     double jaro_winkler_normalized_distance_func(  const RF_String&, const RF_String&, double, double) except + nogil
     double jaro_winkler_distance_func(             const RF_String&, const RF_String&, double, double) except + nogil
     double jaro_winkler_normalized_similarity_func(const RF_String&, const RF_String&, double, double) except + nogil
@@ -150,6 +152,8 @@ cdef extern from "metrics.hpp":
     bool JaroWinklerNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
     bool JaroWinklerSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
     bool JaroWinklerNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
+
+    bool JaroWinklerMultiStringSupport(const RF_Kwargs*) nogil
 
     # Prefix
     double prefix_normalized_distance_func(  const RF_String&, const RF_String&, double) except + nogil
@@ -879,12 +883,18 @@ def jaro_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
 
 cdef bool GetScorerFlagsJaroDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC | RF_SCORER_NONE_IS_WORST_SCORE
+    if JaroMultiStringSupport(self):
+        scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
+
     scorer_flags.optimal_score.f64 = 0.0
     scorer_flags.worst_score.f64 = 1.0
     return True
 
 cdef bool GetScorerFlagsJaroSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC | RF_SCORER_NONE_IS_WORST_SCORE
+    if JaroMultiStringSupport(self):
+        scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
+
     scorer_flags.optimal_score.f64 = 1.0
     scorer_flags.worst_score.f64 = 0
     return True
@@ -951,12 +961,18 @@ cdef bool JaroWinklerKwargsInit(RF_Kwargs * self, dict kwargs) except False:
 
 cdef bool GetScorerFlagsJaroWinklerDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC | RF_SCORER_NONE_IS_WORST_SCORE
+    if JaroWinklerMultiStringSupport(self):
+        scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
+
     scorer_flags.optimal_score.f64 = 0.0
     scorer_flags.worst_score.f64 = 1.0
     return True
 
 cdef bool GetScorerFlagsJaroWinklerSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     scorer_flags.flags = RF_SCORER_FLAG_RESULT_F64 | RF_SCORER_FLAG_SYMMETRIC | RF_SCORER_NONE_IS_WORST_SCORE
+    if JaroWinklerMultiStringSupport(self):
+        scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
+
     scorer_flags.optimal_score.f64 = 1.0
     scorer_flags.worst_score.f64 = 0
     return True

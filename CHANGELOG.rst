@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+[3.4.0] - 2023-10-
+^^^^^^^^^^^^^^^^^^^^
+Changed
+~~~~~~~
+- add simd implementation for Jaro and Jaro Winkler
+
 [3.3.1] - 2023-09-25
 ^^^^^^^^^^^^^^^^^^^^
 Added
