@@ -5,6 +5,7 @@ Changelog
 ^^^^^^^^^^^^^^^^^^^^
 Changed
 ~~~~~~~
+- upgrade to ``Cython==3.0.3``
 - add simd implementation for Jaro and Jaro Winkler
 
 [3.3.1] - 2023-09-25
