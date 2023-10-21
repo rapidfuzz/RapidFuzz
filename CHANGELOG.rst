@@ -1,136 +1,147 @@
 Changelog
 ---------
 
+[3.5.0] - 2023-10-
+^^^^^^^^^^^^^^^^^^^^
+Changed
+~~~~~~~
+* skip pandas ``pd.NA`` similar to ``None``
+
+Performance
+~~~~~~~~~~~
+* improve performance of simd implementation for ``Indel`` / ``Jaro`` / ``JaroWinkler``
+
+
 [3.4.0] - 2023-10-09
 ^^^^^^^^^^^^^^^^^^^^
 Changed
 ~~~~~~~
-- upgrade to ``Cython==3.0.3``
-- add simd implementation for Jaro and Jaro Winkler
+* upgrade to ``Cython==3.0.3``
+* add simd implementation for Jaro and Jaro Winkler
 
 [3.3.1] - 2023-09-25
 ^^^^^^^^^^^^^^^^^^^^
 Added
 ~~~~~
-- add missing tag for python 3.12 support
+* add missing tag for python 3.12 support
 
 [3.3.0] - 2023-09-11
 ^^^^^^^^^^^^^^^^^^^^
 Changed
 ~~~~~~~
-- upgrade to ``Cython==3.0.2``
-- implement the remaining missing features from the C++ implementation in the pure Python implementation
+* upgrade to ``Cython==3.0.2``
+* implement the remaining missing features from the C++ implementation in the pure Python implementation
 
 Added
 ~~~~~
-- added support for Python 3.12
+* added support for Python 3.12
 
 [3.2.0] - 2023-08-02
 ^^^^^^^^^^^^^^^^^^^^
 Changed
 ~~~~~~~
-- build x86 with sse2/avx2 runtime detection
+* build x86 with sse2/avx2 runtime detection
 
 [3.1.2] - 2023-07-19
 ^^^^^^^^^^^^^^^^^^^^
 Changed
 ~~~~~~~
-- upgrade to ``Cython==3.0.0``
+* upgrade to ``Cython==3.0.0``
 
 [3.1.1] - 2023-06-06
 ^^^^^^^^^^^^^^^^^^^^
 Changed
 ~~~~~~~
-- upgrade to ``taskflow==3.6``
+* upgrade to ``taskflow==3.6``
 
 Fixed
 ~~~~~
-- replace usage of ``isnan`` with ``std::isnan`` which fixes the build on NetBSD
+* replace usage of ``isnan`` with ``std::isnan`` which fixes the build on NetBSD
 
 
 [3.1.0] - 2023-06-02
 ^^^^^^^^^^^^^^^^^^^^
 Changed
 ~~~~~~~
-- added keyword argument ``pad`` to Hamming distance. This controls whether sequences of different
+* added keyword argument ``pad`` to Hamming distance. This controls whether sequences of different
   length should be padded or lead to a ``ValueError``
-- improve consistency of exception messages between the C++ and pure Python implementation
-- upgrade required Cython version to ``Cython==3.0.0b3``
+* improve consistency of exception messages between the C++ and pure Python implementation
+* upgrade required Cython version to ``Cython==3.0.0b3``
 
 Fixed
 ~~~~~
-- fix missing GIL restore when an exception is thrown inside ``process.cdist``
-- fix incorrect type hints for the ``process`` module
+* fix missing GIL restore when an exception is thrown inside ``process.cdist``
+* fix incorrect type hints for the ``process`` module
 
 [3.0.0] - 2023-04-16
 ^^^^^^^^^^^^^^^^^^^^
 Changed
 ~~~~~~~
-- allow the usage of ``Hamming`` for different string lengths. Length differences are handled as
+* allow the usage of ``Hamming`` for different string lengths. Length differences are handled as
   insertions / deletions
-- remove support for boolean preprocessor functions in ``rapidfuzz.fuzz`` and ``rapidfuzz.process``.
-  The processor argument is now always a callable or None.
-- update defaults of the processor argument to be ``None`` everywhere. For affected functions this can change results, since strings are no longer preprocessed.
+* remove support for boolean preprocessor functions in ``rapidfuzz.fuzz`` and ``rapidfuzz.process``.
+  The processor argument is now always a callable or ``None``.
+* update defaults of the processor argument to be ``None`` everywhere. For affected functions this can change results, since strings are no longer preprocessed.
   To get back the old behaviour pass ``processor=utils.default_process`` to these functions.
   The following functions are affected by this:
 
-  - ``process.extract``, ``process.extract_iter``, ``process.extractOne``
-  - ``fuzz.token_sort_ratio``, ``fuzz.token_set_ratio``, ``fuzz.token_ratio``, ``fuzz.partial_token_sort_ratio``, ``fuzz.partial_token_set_ratio``, ``fuzz.partial_token_ratio``, ``fuzz.WRatio``, ``fuzz.QRatio``
+  * ``process.extract``, ``process.extract_iter``, ``process.extractOne``
+  * ``fuzz.token_sort_ratio``, ``fuzz.token_set_ratio``, ``fuzz.token_ratio``, ``fuzz.partial_token_sort_ratio``, ``fuzz.partial_token_set_ratio``, ``fuzz.partial_token_ratio``, ``fuzz.WRatio``, ``fuzz.QRatio``
 
-- ``rapidfuzz.process`` no longer calls scorers with ``processor=None``. For this reason user provided scorers no longer require this argument.
-- remove option to pass keyword arguments to scorer via ``**kwargs`` in ``rapidfuzz.process``. They can be passed
+* ``rapidfuzz.process`` no longer calls scorers with ``processor=None``. For this reason user provided scorers no longer require this argument.
+* remove option to pass keyword arguments to scorer via ``**kwargs`` in ``rapidfuzz.process``. They can be passed
   via a ``scorer_kwargs`` argument now. This ensures this does not break when extending function parameters and
   prevents naming clashes.
-- remove ``rapidfuzz.string_metric`` module. Replacements for all functions are available in ``rapidfuzz.distance``
+* remove ``rapidfuzz.string_metric`` module. Replacements for all functions are available in ``rapidfuzz.distance``
 
 Added
 ~~~~~
-- added support for arbitrary hashable sequence in the pure Python fallback implementation of all functions in ``rapidfuzz.distance``
-- added support for ``None`` and ``float("nan")`` in ``process.cdist`` as long as the underlying scorer supports it.
+* added support for arbitrary hashable sequence in the pure Python fallback implementation of all functions in ``rapidfuzz.distance``
+* added support for ``None`` and ``float("nan")`` in ``process.cdist`` as long as the underlying scorer supports it.
   This is the case for all scorers returning normalized results.
 
 Fixed
 ~~~~~
-- fix division by zero in simd implementation of normalized metrics leading to incorrect results
+* fix division by zero in simd implementation of normalized metrics leading to incorrect results
 
 [2.15.1] - 2023-04-11
 ^^^^^^^^^^^^^^^^^^^^^
 Fixed
 ~~~~~
-- fix incorrect tag dispatching implementation leading to AVX2 instructions in the SSE2 code path
+* fix incorrect tag dispatching implementation leading to AVX2 instructions in the SSE2 code path
 
 Added
 ~~~~~
-- add wheels for windows arm64
+* add wheels for windows arm64
 
 [2.15.0] - 2023-04-01
 ^^^^^^^^^^^^^^^^^^^^^
 Changed
 ~~~~~~~
-- allow the usage of finite generators as choices in ``process.extract``
+* allow the usage of finite generators as choices in ``process.extract``
 
 [2.14.0] - 2023-03-31
 ^^^^^^^^^^^^^^^^^^^^^
 Changed
 ~~~~~~~
-- upgrade required Cython version to ``Cython==3.0.0b2``
+* upgrade required Cython version to ``Cython==3.0.0b2``
 
 Fixed
 ~~~~~
-- fix handling of non symmetric scorers in pure python version of ``process.cdist``
-- fix default dtype handling when using ``process.cdist`` with pure python scorers
+* fix handling of non symmetric scorers in pure python version of ``process.cdist``
+* fix default dtype handling when using ``process.cdist`` with pure python scorers
 
 [2.13.7] - 2022-12-20
 ^^^^^^^^^^^^^^^^^^^^^
 Fixed
 ~~~~~~~
-- fix function signature of ``get_requires_for_build_wheel``
+* fix function signature of ``get_requires_for_build_wheel``
 
 [2.13.6] - 2022-12-11
 ^^^^^^^^^^^^^^^^^^^^^
 Changed
 ~~~~~~~
-- reformat changelog as restructured text to get rig of ``m2r2`` dependency
+* reformat changelog as restructured text to get rig of ``m2r2`` dependency
 
 
 [2.13.5] - 2022-12-11
@@ -147,7 +158,7 @@ Fixed
 ^^^^^^^^^^^^^^^^^^^^^
 Changed
 ~~~~~~~
-* handle ``float("nan")`` similar to None for query / choice, since this is common for
+* handle ``float("nan")`` similar to ``None`` for query / choice, since this is common for
   non-existent data in tools like numpy
 
 Fixed
