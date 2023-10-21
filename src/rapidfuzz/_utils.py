@@ -13,8 +13,9 @@ from rapidfuzz._feature_detector import AVX2, SSE2, supports
 
 try:
     from pandas import NA as pandas_NA
-except:
+except BaseException:
     pandas_NA = None
+
 
 class ScorerFlag(IntFlag):
     RESULT_F64 = 1 << 5

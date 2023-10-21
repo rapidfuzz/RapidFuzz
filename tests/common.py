@@ -13,8 +13,9 @@ from rapidfuzz import process_cpp, process_py
 
 try:
     from pandas import NA as pandas_NA
-except:
+except BaseException:
     pandas_NA = None
+
 
 def _get_scorer_flags_py(scorer: Any, scorer_kwargs: dict[str, Any]) -> tuple[int, int]:
     params = getattr(scorer, "_RF_ScorerPy", None)

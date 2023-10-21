@@ -454,7 +454,7 @@ template <typename T>
 static Matrix cdist_single_list_impl(const RF_ScorerFlags* scorer_flags, const RF_Kwargs* kwargs,
                                      RF_Scorer* scorer, const std::vector<RF_StringWrapper>& queries,
                                      MatrixType dtype, int workers, T score_cutoff, T score_hint,
-                                     T worst_score)
+                                     T score_multiplier, T worst_score)
 {
     (void)scorer_flags;
     int64_t rows = queries.size();
@@ -473,7 +473,7 @@ static Matrix cdist_single_list_impl(const RF_ScorerFlags* scorer_flags, const R
             else
                 ScorerFunc.call(&queries[row].string, score_cutoff, score_hint, &score);
 
-            matrix.set(row, row, score);
+            matrix.set(row, row, score * score_multiplier);
 
             for (int64_t col = row + 1; col < cols; ++col) {
                 if (queries[col].is_none())
@@ -481,8 +481,8 @@ static Matrix cdist_single_list_impl(const RF_ScorerFlags* scorer_flags, const R
                 else
                     ScorerFunc.call(&queries[col].string, score_cutoff, score_hint, &score);
 
-                matrix.set(row, col, score);
-                matrix.set(col, row, score);
+                matrix.set(row, col, score * score_multiplier);
+                matrix.set(col, row, score * score_multiplier);
             }
         }
     });
@@ -494,7 +494,8 @@ template <typename T>
 static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_Kwargs* kwargs,
                                    RF_Scorer* scorer, const std::vector<RF_StringWrapper>& queries,
                                    const std::vector<RF_StringWrapper>& choices, MatrixType dtype,
-                                   int workers, T score_cutoff, T score_hint, T worst_score)
+                                   int workers, T score_cutoff, T score_hint, T score_multiplier,
+                                   T worst_score)
 {
     int64_t rows = queries.size();
     int64_t cols = choices.size();
@@ -564,7 +565,7 @@ static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_
                     else
                         ScorerFunc.call(&choices[col].string, score_cutoff, score_hint, &score);
 
-                    matrix.set(row_idx[row], col, score);
+                    matrix.set(row_idx[row], col, score * score_multiplier);
                 }
             }
 
@@ -592,7 +593,7 @@ static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_
                 }
 
                 for (int64_t i = 0; i < row_count; ++i)
-                    matrix.set(row_idx[row + i], col, scores[i]);
+                    matrix.set(row_idx[row + i], col, scores[i] * score_multiplier);
             }
         });
     }
@@ -610,7 +611,7 @@ static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_
                     else
                         ScorerFunc.call(&choices[col].string, score_cutoff, score_hint, &score);
 
-                    matrix.set(row, col, score);
+                    matrix.set(row, col, score * score_multiplier);
                 }
             }
         });

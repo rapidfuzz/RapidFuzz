@@ -514,9 +514,7 @@ static inline bool JaroDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*, int64
                                     const RF_String* str)
 {
 #ifdef RAPIDFUZZ_X64
-    if (str_count != 1)
-        return multi_distance_init<rf::experimental::MultiJaro, double>(
-            self, str_count, str);
+    if (str_count != 1) return multi_distance_init<rf::experimental::MultiJaro, double>(self, str_count, str);
 #endif
 
     return distance_init<rf::CachedJaro, double>(self, str_count, str);
@@ -534,8 +532,7 @@ static inline bool JaroNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwar
 {
 #ifdef RAPIDFUZZ_X64
     if (str_count != 1)
-        return multi_normalized_distance_init<rf::experimental::MultiJaro, double>(
-            self, str_count, str);
+        return multi_normalized_distance_init<rf::experimental::MultiJaro, double>(self, str_count, str);
 #endif
 
     return normalized_distance_init<rf::CachedJaro, double>(self, str_count, str);
@@ -552,8 +549,7 @@ static inline bool JaroSimilarityInit(RF_ScorerFunc* self, const RF_Kwargs*, int
 {
 #ifdef RAPIDFUZZ_X64
     if (str_count != 1)
-        return multi_similarity_init<rf::experimental::MultiJaro, double>(
-            self, str_count, str);
+        return multi_similarity_init<rf::experimental::MultiJaro, double>(self, str_count, str);
 #endif
 
     return similarity_init<rf::CachedJaro, double>(self, str_count, str);
@@ -571,8 +567,7 @@ static inline bool JaroNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_Kw
 {
 #ifdef RAPIDFUZZ_X64
     if (str_count != 1)
-        return multi_normalized_similarity_init<rf::experimental::MultiJaro, double>(
-            self, str_count, str);
+        return multi_normalized_similarity_init<rf::experimental::MultiJaro, double>(self, str_count, str);
 #endif
 
     return normalized_similarity_init<rf::CachedJaro, double>(self, str_count, str);
@@ -602,8 +597,8 @@ static inline bool JaroWinklerDistanceInit(RF_ScorerFunc* self, const RF_Kwargs*
 
 #ifdef RAPIDFUZZ_X64
     if (str_count != 1)
-        return multi_distance_init<rf::experimental::MultiJaroWinkler, double>(
-            self, str_count, str, prefix_weight);
+        return multi_distance_init<rf::experimental::MultiJaroWinkler, double>(self, str_count, str,
+                                                                               prefix_weight);
 #endif
 
     return distance_init<rf::CachedJaroWinkler, double>(self, str_count, str, prefix_weight);
@@ -623,8 +618,8 @@ static inline bool JaroWinklerNormalizedDistanceInit(RF_ScorerFunc* self, const 
 
 #ifdef RAPIDFUZZ_X64
     if (str_count != 1)
-        return multi_normalized_distance_init<rf::experimental::MultiJaroWinkler, double>(
-            self, str_count, str, prefix_weight);
+        return multi_normalized_distance_init<rf::experimental::MultiJaroWinkler, double>(self, str_count,
+                                                                                          str, prefix_weight);
 #endif
 
     return normalized_distance_init<rf::CachedJaroWinkler, double>(self, str_count, str, prefix_weight);
@@ -644,8 +639,8 @@ static inline bool JaroWinklerSimilarityInit(RF_ScorerFunc* self, const RF_Kwarg
 
 #ifdef RAPIDFUZZ_X64
     if (str_count != 1)
-        return multi_similarity_init<rf::experimental::MultiJaroWinkler, double>(
-            self, str_count, str, prefix_weight);
+        return multi_similarity_init<rf::experimental::MultiJaroWinkler, double>(self, str_count, str,
+                                                                                 prefix_weight);
 #endif
 
     return similarity_init<rf::CachedJaroWinkler, double>(self, str_count, str, prefix_weight);

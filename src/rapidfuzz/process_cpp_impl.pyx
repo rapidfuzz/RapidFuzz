@@ -1418,6 +1418,7 @@ cdef Matrix cdist_two_lists(
     processor,
     score_cutoff,
     score_hint,
+    score_multiplier,
     dtype,
     int c_workers,
     const RF_Kwargs* scorer_kwargs
@@ -1435,7 +1436,8 @@ cdef Matrix cdist_two_lists(
             c_workers,
             get_score_cutoff_f64(score_cutoff, scorer_flags),
             get_score_cutoff_f64(score_hint, scorer_flags),
-            scorer_flags.worst_score.f64
+            <double>score_multiplier,
+            scorer_flags.worst_score.f64,
         )
 
     elif flags & RF_SCORER_FLAG_RESULT_I64:
@@ -1446,6 +1448,7 @@ cdef Matrix cdist_two_lists(
             c_workers,
             get_score_cutoff_i64(score_cutoff, scorer_flags),
             get_score_cutoff_i64(score_hint, scorer_flags),
+            <int64_t>score_multiplier,
             scorer_flags.worst_score.i64
         )
     else:
@@ -1460,6 +1463,7 @@ cdef Matrix cdist_single_list(
     processor,
     score_cutoff,
     score_hint,
+    score_multiplier,
     dtype,
     int c_workers,
     const RF_Kwargs* scorer_kwargs
@@ -1476,6 +1480,7 @@ cdef Matrix cdist_single_list(
             c_workers,
             get_score_cutoff_f64(score_cutoff, scorer_flags),
             get_score_cutoff_f64(score_hint, scorer_flags),
+            <double>score_multiplier,
             scorer_flags.worst_score.f64
         )
 
@@ -1487,6 +1492,7 @@ cdef Matrix cdist_single_list(
             c_workers,
             get_score_cutoff_i64(score_cutoff, scorer_flags),
             get_score_cutoff_i64(score_hint, scorer_flags),
+            <int64_t>score_multiplier,
             scorer_flags.worst_score.i64
         )
     else:
@@ -1497,7 +1503,7 @@ cdef Matrix cdist_single_list(
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef cdist_py(queries, choices, scorer, processor, score_cutoff, dtype, workers, dict scorer_kwargs):
+cdef cdist_py(queries, choices, scorer, processor, score_cutoff, score_multiplier, dtype, workers, dict scorer_kwargs):
     # todo this should handle two similar sequences more efficiently
 
     proc_queries = preprocess_py(queries, processor)
@@ -1512,12 +1518,12 @@ cdef cdist_py(queries, choices, scorer, processor, score_cutoff, dtype, workers,
     for i in range(proc_queries.size()):
         for j in range(proc_choices.size()):
             score = scorer(<object>proc_queries[i].obj, <object>proc_choices[j].obj, **scorer_kwargs)
-            matrix.matrix.set(i, j, score)
+            matrix.matrix.set(i, j, score * <double>score_multiplier)
 
     return matrix
 
 
-def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, score_hint=None, dtype=None, workers=1, scorer_kwargs=None):
+def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, score_hint=None, score_multiplier=1, dtype=None, workers=1, scorer_kwargs=None):
     cdef RF_Scorer* scorer_context = NULL
     cdef RF_ScorerFlags scorer_flags
     cdef bool is_orig_scorer
@@ -1539,10 +1545,12 @@ def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, 
         if scorer_flags.flags & RF_SCORER_FLAG_SYMMETRIC and queries is choices:
             return cdist_single_list(
                 queries, scorer_context, &scorer_flags, processor,
-                score_cutoff, score_hint, dtype, workers, &kwargs_context.kwargs)
+                score_cutoff, score_hint, score_multiplier,
+                dtype, workers, &kwargs_context.kwargs)
         else:
             return cdist_two_lists(
                 queries, choices, scorer_context, &scorer_flags, processor,
-                score_cutoff, score_hint, dtype, workers, &kwargs_context.kwargs)
+                score_cutoff, score_hint, score_multiplier,
+                dtype, workers, &kwargs_context.kwargs)
 
-    return cdist_py(queries, choices, scorer, processor, score_cutoff, dtype, workers, scorer_kwargs)
+    return cdist_py(queries, choices, scorer, processor, score_cutoff, score_multiplier, dtype, workers, scorer_kwargs)

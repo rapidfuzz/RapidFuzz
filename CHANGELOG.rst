@@ -6,11 +6,12 @@ Changelog
 Changed
 ~~~~~~~
 * skip pandas ``pd.NA`` similar to ``None``
+* add ``score_multiplier`` argument to ``process.cdist`` which allows multiplying the end result scores
+  with a constant factor.
 
 Performance
 ~~~~~~~~~~~
 * improve performance of simd implementation for ``Indel`` / ``Jaro`` / ``JaroWinkler``
-
 
 [3.4.0] - 2023-10-09
 ^^^^^^^^^^^^^^^^^^^^
@@ -57,7 +58,6 @@ Changed
 Fixed
 ~~~~~
 * replace usage of ``isnan`` with ``std::isnan`` which fixes the build on NetBSD
-
 
 [3.1.0] - 2023-06-02
 ^^^^^^^^^^^^^^^^^^^^

@@ -4,8 +4,8 @@
 from __future__ import annotations
 
 import heapq
+import numbers
 from contextlib import suppress
-from math import isnan
 from typing import (
     Any,
     Callable,
@@ -29,6 +29,7 @@ def _get_scorer_flags_py(scorer: Any, scorer_kwargs: dict[str, Any]) -> tuple[in
         flags = params["get_scorer_flags"](**scorer_kwargs)
         return (flags["worst_score"], flags["optimal_score"])
     return (0, 100)
+
 
 @overload
 def extract_iter(
@@ -535,6 +536,7 @@ def cdist(
     processor: Callable[..., Sequence[Hashable]] | None = None,
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
+    score_multiplier: int | float = 1,
     dtype: np.dtype | None = None,
     workers: int = 1,
     scorer_kwargs: dict[str, Any] | None = None,
@@ -563,6 +565,11 @@ def cdist(
     score_hint : Any, optional
         Optional argument for an expected score to be passed to the scorer.
         This is used to select a faster implementation. Default is None,
+        which deactivates this behaviour.
+    score_multiplier: Any, optional
+        Optional argument to multiply the calculated score with. This is applied as the final step,
+        so e.g. score_cutoff is applied on the unmodified score. This is mostly useful to map from
+        a floating point range to an integer to reduce the memory usage. Default is 1,
         which deactivates this behaviour.
     dtype : data-type, optional
         The desired data-type for the result array.Depending on the scorer type the following
@@ -604,23 +611,44 @@ def cdist(
 
     if queries is choices and _is_symmetric(scorer, scorer_kwargs):
         for i, query in enumerate(proc_choices):
-            results[i, i] = scorer(query, query, score_cutoff=score_cutoff, **scorer_kwargs)
+            score = scorer(query, query, score_cutoff=score_cutoff, **scorer_kwargs) * score_multiplier
+
+            if issubclass(dtype, numbers.Integral):
+                score = round(score)
+
+            results[i, i] = score
             for j in range(i + 1, len(proc_choices)):
-                results[i, j] = results[j, i] = scorer(
-                    query,
-                    proc_choices[j],
-                    score_cutoff=score_cutoff,
-                    **scorer_kwargs,
+                score = (
+                    scorer(
+                        query,
+                        proc_choices[j],
+                        score_cutoff=score_cutoff,
+                        **scorer_kwargs,
+                    )
+                    * score_multiplier
                 )
+
+                if issubclass(dtype, numbers.Integral):
+                    score = round(score)
+
+                results[i, j] = results[j, i] = score
     else:
         for i, query in enumerate(queries):
             proc_query = processor(query) if (processor and not is_none(query)) else query
             for j, choice in enumerate(proc_choices):
-                results[i, j] = scorer(
-                    proc_query,
-                    choice,
-                    score_cutoff=score_cutoff,
-                    **scorer_kwargs,
+                score = (
+                    scorer(
+                        proc_query,
+                        choice,
+                        score_cutoff=score_cutoff,
+                        **scorer_kwargs,
+                    )
+                    * score_multiplier
                 )
+
+                if issubclass(dtype, numbers.Integral):
+                    score = round(score)
+
+                results[i, j] = score
 
     return results

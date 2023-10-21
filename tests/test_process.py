@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from contextlib import suppress
-
 import pytest
 
 from rapidfuzz import fuzz, process_cpp, process_py
 from rapidfuzz.distance import Levenshtein, Levenshtein_py
+
 
 def wrapped(func):
     from functools import wraps
@@ -44,6 +43,7 @@ class process:
     @staticmethod
     def cdist(*args, **kwargs):
         import numpy as np
+
         res1 = process_cpp.cdist(*args, **kwargs)
         res2 = process_py.cdist(*args, **kwargs)
         assert res1.dtype == res2.dtype
@@ -449,6 +449,32 @@ def test_cdist_not_symmetric():
     expected_res = np.array([[0, 1], [2, 0]])
     assert np.array_equal(
         process.cdist(strings, strings, scorer=Levenshtein.distance, scorer_kwargs={"weights": (1, 2, 1)}),
+        expected_res,
+    )
+
+
+def test_cdist_muliplier():
+    np = pytest.importorskip("numpy")
+    strings = ["test", "test2"]
+    expected_res = np.array([[255, 204], [204, 255]])
+    assert np.array_equal(
+        process.cdist(strings, strings, scorer=Levenshtein.normalized_similarity, score_multiplier=255, dtype=np.uint8),
+        expected_res,
+    )
+    expected_res = np.array([[0, 51], [51, 0]])
+    assert np.array_equal(
+        process.cdist(strings, strings, scorer=Levenshtein.normalized_distance, score_multiplier=255, dtype=np.uint8),
+        expected_res,
+    )
+    # less useful, but test it is working
+    expected_res = np.array([[8, 8], [8, 10]])
+    assert np.array_equal(
+        process.cdist(strings, strings, scorer=Levenshtein.similarity, score_multiplier=2),
+        expected_res,
+    )
+    expected_res = np.array([[0, 2], [2, 0]])
+    assert np.array_equal(
+        process.cdist(strings, strings, scorer=Levenshtein.distance, score_multiplier=2),
         expected_res,
     )
 
