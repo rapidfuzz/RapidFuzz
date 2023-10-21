@@ -11,6 +11,10 @@ from typing import Any, Callable
 
 from rapidfuzz._feature_detector import AVX2, SSE2, supports
 
+try:
+    from pandas import NA as pandas_NA
+except:
+    pandas_NA = None
 
 class ScorerFlag(IntFlag):
     RESULT_F64 = 1 << 5
@@ -51,7 +55,7 @@ def _get_scorer_flags_normalized_similarity(**_kwargs: Any) -> dict[str, Any]:
 
 
 def is_none(s: Any) -> bool:
-    if s is None:
+    if s is None or s is pandas_NA:
         return True
 
     if isinstance(s, float) and isnan(s):

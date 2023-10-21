@@ -45,6 +45,11 @@ from rapidfuzz cimport (
 )
 
 
+try:
+    from pandas import NA as pandas_NA
+except:
+    pandas_NA = None
+
 cdef extern from "process_cpp.hpp":
     cdef cppclass ExtractComp:
         ExtractComp()
@@ -129,7 +134,7 @@ cdef extern from "process_cpp.hpp":
         const vector[RF_StringWrapper]&, const vector[RF_StringWrapper]&, MatrixType, int, T, T, T) except +
 
 cdef inline bool is_none(s):
-    if s is None:
+    if s is None or s is pandas_NA:
         return True
 
     if isinstance(s, float) and isnan(<double>s):

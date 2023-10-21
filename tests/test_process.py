@@ -7,10 +7,6 @@ import pytest
 from rapidfuzz import fuzz, process_cpp, process_py
 from rapidfuzz.distance import Levenshtein, Levenshtein_py
 
-with suppress(BaseException):
-    import numpy as np
-
-
 def wrapped(func):
     from functools import wraps
 
@@ -47,6 +43,7 @@ class process:
 
     @staticmethod
     def cdist(*args, **kwargs):
+        import numpy as np
         res1 = process_cpp.cdist(*args, **kwargs)
         res2 = process_py.cdist(*args, **kwargs)
         assert res1.dtype == res2.dtype
@@ -292,6 +289,38 @@ def test_none_elements():
     assert best == []
 
 
+def test_numpy_nan_elements():
+    """
+    when a np.nan element is used, it is skipped and the index is still correct
+    """
+    np = pytest.importorskip("numpy")
+    best = process.extractOne("test", [np.nan, "tes"])
+    assert best[2] == 1
+    best = process.extractOne(np.nan, [np.nan, "tes"])
+    assert best is None
+
+    best = process.extract("test", [np.nan, "tes"])
+    assert best[0][2] == 1
+    best = process.extract(np.nan, [np.nan, "tes"])
+    assert best == []
+
+
+def test_pandas_nan_elements():
+    """
+    when a pd.NA element is used, it is skipped and the index is still correct
+    """
+    pd = pytest.importorskip("pandas")
+    best = process.extractOne("test", [pd.NA, "tes"])
+    assert best[2] == 1
+    best = process.extractOne(pd.NA, [pd.NA, "tes"])
+    assert best is None
+
+    best = process.extract("test", [pd.NA, "tes"])
+    assert best[0][2] == 1
+    best = process.extract(pd.NA, [pd.NA, "tes"])
+    assert best == []
+
+
 def test_result_order():
     """
     when multiple elements have the same score, the first one should be returned
@@ -405,9 +434,17 @@ def test_wrapped_function(scorer):
     assert process.cdist(["test"], [None], scorer=scorer)[0, 0] == 100
     assert process.cdist(["test"], ["tes"], scorer=scorer)[0, 0] == 100
 
+    try:
+        import pandas as pd
+    except Exception:
+        pd = None
+
+    if pd is not None:
+        assert process.cdist(["test"], [pd.NA], scorer=scorer)[0, 0] == 100
+
 
 def test_cdist_not_symmetric():
-    pytest.importorskip("numpy")
+    np = pytest.importorskip("numpy")
     strings = ["test", "test2"]
     expected_res = np.array([[0, 1], [2, 0]])
     assert np.array_equal(
@@ -434,7 +471,7 @@ def test_generators():
 
 
 def test_cdist_pure_python_dtype():
-    pytest.importorskip("numpy")
+    np = pytest.importorskip("numpy")
     assert process.cdist(["test"], ["test"], scorer=Levenshtein_py.distance).dtype == np.int32
     assert process.cdist(["test"], ["test"], scorer=Levenshtein_py.similarity).dtype == np.int32
     assert process.cdist(["test"], ["test"], scorer=Levenshtein_py.normalized_distance).dtype == np.float32

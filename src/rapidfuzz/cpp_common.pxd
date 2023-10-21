@@ -27,7 +27,6 @@ from rapidfuzz cimport (
 
 from array import array
 
-
 cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
     cpdef enum class EditType:
         None    = 0,

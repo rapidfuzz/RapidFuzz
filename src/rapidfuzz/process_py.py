@@ -17,7 +17,7 @@ from typing import (
     overload,
 )
 
-from rapidfuzz._utils import ScorerFlag
+from rapidfuzz._utils import ScorerFlag, is_none
 from rapidfuzz.fuzz import WRatio, ratio
 
 __all__ = ["extract", "extract_iter", "extractOne", "cdist"]
@@ -29,17 +29,6 @@ def _get_scorer_flags_py(scorer: Any, scorer_kwargs: dict[str, Any]) -> tuple[in
         flags = params["get_scorer_flags"](**scorer_kwargs)
         return (flags["worst_score"], flags["optimal_score"])
     return (0, 100)
-
-
-def _is_none(s: Any) -> bool:
-    if s is None:
-        return True
-
-    if isinstance(s, float) and isnan(s):
-        return True
-
-    return False
-
 
 @overload
 def extract_iter(
@@ -141,7 +130,7 @@ def extract_iter(
     worst_score, optimal_score = _get_scorer_flags_py(scorer, scorer_kwargs)
     lowest_score_worst = optimal_score > worst_score
 
-    if _is_none(query):
+    if is_none(query):
         return
 
     if score_cutoff is None:
@@ -154,7 +143,7 @@ def extract_iter(
     choices_iter: Iterable[tuple[Any, Sequence[Hashable] | None]]
     choices_iter = choices.items() if hasattr(choices, "items") else enumerate(choices)  # type: ignore[union-attr]
     for key, choice in choices_iter:
-        if _is_none(choice):
+        if is_none(choice):
             continue
 
         if processor is None:
@@ -334,7 +323,7 @@ def extractOne(
     worst_score, optimal_score = _get_scorer_flags_py(scorer, scorer_kwargs)
     lowest_score_worst = optimal_score > worst_score
 
-    if _is_none(query):
+    if is_none(query):
         return None
 
     if score_cutoff is None:
@@ -349,7 +338,7 @@ def extractOne(
     choices_iter: Iterable[tuple[Any, Sequence[Hashable] | None]]
     choices_iter = choices.items() if hasattr(choices, "items") else enumerate(choices)  # type: ignore[union-attr]
     for key, choice in choices_iter:
-        if _is_none(choice):
+        if is_none(choice):
             continue
 
         if processor is None:
@@ -611,7 +600,7 @@ def cdist(
     if processor is None:
         proc_choices = list(choices)
     else:
-        proc_choices = [x if _is_none(x) else processor(x) for x in choices]
+        proc_choices = [x if is_none(x) else processor(x) for x in choices]
 
     if queries is choices and _is_symmetric(scorer, scorer_kwargs):
         for i, query in enumerate(proc_choices):
@@ -625,7 +614,7 @@ def cdist(
                 )
     else:
         for i, query in enumerate(queries):
-            proc_query = processor(query) if (processor and not _is_none(query)) else query
+            proc_query = processor(query) if (processor and not is_none(query)) else query
             for j, choice in enumerate(proc_choices):
                 results[i, j] = scorer(
                     proc_query,

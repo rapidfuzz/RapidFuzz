@@ -11,6 +11,10 @@ import pytest
 
 from rapidfuzz import process_cpp, process_py
 
+try:
+    from pandas import NA as pandas_NA
+except:
+    pandas_NA = None
 
 def _get_scorer_flags_py(scorer: Any, scorer_kwargs: dict[str, Any]) -> tuple[int, int]:
     params = getattr(scorer, "_RF_ScorerPy", None)
@@ -21,7 +25,7 @@ def _get_scorer_flags_py(scorer: Any, scorer_kwargs: dict[str, Any]) -> tuple[in
 
 
 def is_none(s):
-    if s is None:
+    if s is None or s is pandas_NA:
         return True
 
     if isinstance(s, float) and isnan(s):
