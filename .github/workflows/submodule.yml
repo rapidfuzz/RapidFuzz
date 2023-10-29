@@ -1,0 +1,28 @@
+name: Submodule Test
+
+on:
+  push:
+    paths-ignore:
+      - 'docs/**'
+
+jobs:
+  tests:
+    name: "test if submodules are up to date"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: "actions/checkout@v3"
+        with:
+          submodules: 'true'
+      - uses: "actions/setup-python@v4"
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install GitPython
+
+      - name: test submodule version
+        run: |
+          python tools/test_submodules.py
