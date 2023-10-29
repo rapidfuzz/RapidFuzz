@@ -15,7 +15,7 @@ with open("README.md", encoding="utf8") as f:
 
 setup_args = {
     "name": "rapidfuzz",
-    "version": "3.4.0",
+    "version": "3.5.0",
     "extras_require": {"full": ["numpy"]},
     "url": "https://github.com/maxbachmann/RapidFuzz",
     "author": "Max Bachmann",
@@ -48,7 +48,7 @@ setup_args = {
         "rapidfuzz": ["*.pyi", "py.typed", "__init__.pxd", "rapidfuzz.h"],
         "rapidfuzz.distance": ["*.pyi"],
     },
-    "python_requires": ">=3.7",
+    "python_requires": ">=3.8",
 }
 
 

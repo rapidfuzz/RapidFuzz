@@ -8,6 +8,7 @@ Changed
 * skip pandas ``pd.NA`` similar to ``None``
 * add ``score_multiplier`` argument to ``process.cdist`` which allows multiplying the end result scores
   with a constant factor.
+* drop support for Python 3.7
 
 Performance
 ~~~~~~~~~~~
