@@ -13,6 +13,7 @@ Performance
 ~~~~~~~~~~~
 * improve performance of simd implementation for ``LCS`` / ``Indel`` / ``Jaro`` / ``JaroWinkler``
 * improve performance of Jaro and Jaro Winkler for long sequences
+* implement ``process.extract`` with ``limit=1`` using ``process.extractOne`` which can be faster
 
 [3.4.0] - 2023-10-09
 ^^^^^^^^^^^^^^^^^^^^

@@ -958,6 +958,7 @@ cdef inline py_extract_list(query, choices, scorer, processor, int64_t limit, do
 def extract(query, choices, *, scorer=WRatio, processor=None, limit=5, score_cutoff=None, score_hint=None, scorer_kwargs=None):
     cdef RF_Scorer* scorer_context = NULL
     cdef RF_ScorerFlags scorer_flags
+    cdef int64_t c_limit
     scorer_kwargs = scorer_kwargs.copy() if scorer_kwargs else {}
 
     if is_none(query):
@@ -972,6 +973,21 @@ def extract(query, choices, *, scorer=WRatio, processor=None, limit=5, score_cut
         choices = list(choices)
         if limit is None or limit > len(choices):
             limit = len(choices)
+
+    c_limit = limit
+    if c_limit == 1:
+        res = extractOne(
+            query,
+            choices,
+            processor=processor,
+            scorer=scorer,
+            score_cutoff=score_cutoff,
+            score_hint=score_hint,
+            scorer_kwargs=scorer_kwargs,
+        )
+        if res is None:
+            return []
+        return [res]
 
     # preprocess the query
     if callable(processor):
@@ -988,10 +1004,10 @@ def extract(query, choices, *, scorer=WRatio, processor=None, limit=5, score_cut
 
         if hasattr(choices, "items"):
             return extract_dict(query, choices, scorer_context, &scorer_flags,
-                processor, limit, score_cutoff, score_hint, &kwargs_context.kwargs)
+                processor, c_limit, score_cutoff, score_hint, &kwargs_context.kwargs)
         else:
             return extract_list(query, choices, scorer_context, &scorer_flags,
-                processor, limit, score_cutoff, score_hint, &kwargs_context.kwargs)
+                processor, c_limit, score_cutoff, score_hint, &kwargs_context.kwargs)
 
 
     worst_score, optimal_score = get_scorer_flags_py(scorer, scorer_kwargs)
@@ -1002,9 +1018,9 @@ def extract(query, choices, *, scorer=WRatio, processor=None, limit=5, score_cut
     scorer_kwargs["score_cutoff"] = score_cutoff
 
     if hasattr(choices, "items"):
-        return py_extract_dict(query, choices, scorer, processor, limit, score_cutoff, worst_score, optimal_score, scorer_kwargs)
+        return py_extract_dict(query, choices, scorer, processor, c_limit, score_cutoff, worst_score, optimal_score, scorer_kwargs)
     else:
-        return py_extract_list(query, choices, scorer, processor, limit, score_cutoff, worst_score, optimal_score, scorer_kwargs)
+        return py_extract_list(query, choices, scorer, processor, c_limit, score_cutoff, worst_score, optimal_score, scorer_kwargs)
 
 
 def extract_iter(query, choices, *, scorer=WRatio, processor=None, score_cutoff=None, score_hint=None, scorer_kwargs=None):

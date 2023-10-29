@@ -476,6 +476,20 @@ def extract(
     worst_score, optimal_score = _get_scorer_flags_py(scorer, scorer_kwargs)
     lowest_score_worst = optimal_score > worst_score
 
+    if limit == 1:
+        res = extractOne(
+            query,
+            choices,
+            processor=processor,
+            scorer=scorer,
+            score_cutoff=score_cutoff,
+            score_hint=score_hint,
+            scorer_kwargs=scorer_kwargs,
+        )
+        if res is None:
+            return []
+        return [res]
+
     result_iter = extract_iter(
         query,
         choices,

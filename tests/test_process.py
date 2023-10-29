@@ -490,6 +490,7 @@ def test_generators():
         yield from choices
 
     search = "aaa"
+    # do not call process.extract, since the first call would consume the generator
     res1 = process_cpp.extract(search, generate_choices())
     res2 = process_py.extract(search, generate_choices())
     assert res1 == res2
