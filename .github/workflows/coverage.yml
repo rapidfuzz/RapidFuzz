@@ -1,0 +1,46 @@
+name: Coverage of Test Build
+
+on:
+  push:
+    paths-ignore:
+      - 'docs/**'
+
+jobs:
+  tests:
+    name: "Generate coverage report for tests"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: "actions/checkout@v3"
+        with:
+          submodules: 'true'
+      - uses: "actions/setup-python@v4"
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest hypothesis pandas coverage cython
+
+      - name: Generate cython
+        run: |
+          chmod +x ./src/rapidfuzz/generate.sh
+          ./src/rapidfuzz/generate.sh
+
+      # for cython tests inplace installation is required
+      - name: build
+        run: CXXFLAGS=-DCYTHON_TRACE_NOGIL=1 pip install -e . -v
+
+      - name: Test with pytest and generate coverage info
+        run: |
+          PYTHONPATH=$(pwd)/src coverage run -m pytest tests
+          coverage xml
+          coverage report
+
+      - uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          flags: unittests
+          fail_ci_if_error: true
+          verbose: true
