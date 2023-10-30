@@ -4,7 +4,7 @@ from array import array
 
 import pytest
 
-from rapidfuzz import fuzz_cpp, fuzz_py, utils
+from rapidfuzz import fuzz_cpp, fuzz_py, utils_cpp, utils_py
 from rapidfuzz.distance import ScoreAlignment
 
 from .common import symmetric_scorer_tester
@@ -134,11 +134,13 @@ def testPartialTokenSetRatio():
 
 
 def testQuickRatioEqual():
-    assert fuzz.QRatio("new york mets", "new york mets", processor=utils.default_process) == 100
+    assert fuzz.QRatio("new york mets", "new york mets", processor=utils_cpp.default_process) == 100
+    assert fuzz.QRatio("new york mets", "new york mets", processor=utils_py.default_process) == 100
 
 
 def testQuickRatioCaseInsensitive():
-    assert fuzz.QRatio("new york mets", "new YORK mets", processor=utils.default_process) == 100
+    assert fuzz.QRatio("new york mets", "new YORK mets", processor=utils_cpp.default_process) == 100
+    assert fuzz.QRatio("new york mets", "new YORK mets", processor=utils_py.default_process) == 100
 
 
 def testQuickRatioNotEqual():
@@ -146,11 +148,13 @@ def testQuickRatioNotEqual():
 
 
 def testWRatioEqual():
-    assert fuzz.WRatio("new york mets", "new york mets", processor=utils.default_process) == 100
+    assert fuzz.WRatio("new york mets", "new york mets", processor=utils_cpp.default_process) == 100
+    assert fuzz.WRatio("new york mets", "new york mets", processor=utils_py.default_process) == 100
 
 
 def testWRatioCaseInsensitive():
-    assert fuzz.WRatio("new york mets", "new YORK mets", processor=utils.default_process) == 100
+    assert fuzz.WRatio("new york mets", "new YORK mets", processor=utils_cpp.default_process) == 100
+    assert fuzz.WRatio("new york mets", "new YORK mets", processor=utils_py.default_process) == 100
 
 
 def testWRatioPartialMatch():
@@ -304,7 +308,7 @@ def test_simple_unicode_tests(scorer):
     assert scorer(s1, s1) == 100
 
 
-@pytest.mark.parametrize("processor", [utils.default_process, lambda s: utils.default_process(s)])
+@pytest.mark.parametrize("processor", [utils_cpp.default_process, lambda s: utils_cpp.default_process(s), utils_py.default_process, lambda s: utils_py.default_process(s)])
 @pytest.mark.parametrize("scorer", scorers)
 def test_scorer_case_insensitive(processor, scorer):
     """

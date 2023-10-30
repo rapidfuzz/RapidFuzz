@@ -8,7 +8,7 @@ import hypothesis.strategies as st
 import pytest
 from hypothesis import assume, given, settings
 
-from rapidfuzz import fuzz, process, utils
+from rapidfuzz import fuzz, process, utils_cpp, utils_py
 from rapidfuzz.distance import Levenshtein_py, metrics_cpp
 from tests.distance.common import Indel, JaroWinkler, Levenshtein
 
@@ -203,7 +203,7 @@ SCORERS = [
 
 FULL_SCORERS = [fuzz.ratio, fuzz.WRatio, fuzz.QRatio]
 
-PROCESSORS = [lambda x: x, utils.default_process]
+PROCESSORS = [lambda x: x, utils_cpp.default_process, utils_py.default_process]
 
 
 @given(s1=st.text(), s2=st.text())
@@ -401,7 +401,8 @@ def test_multiple_processor_runs(sentence):
     Test that running a preprocessor on a sentence
     a second time does not change the result
     """
-    assert utils.default_process(sentence) == utils.default_process(utils.default_process(sentence))
+    assert utils_py.default_process(sentence) == utils_py.default_process(utils_py.default_process(sentence))
+    assert utils_cpp.default_process(sentence) == utils_cpp.default_process(utils_cpp.default_process(sentence))
 
 
 @pytest.mark.parametrize(("scorer", "processor"), list(product(FULL_SCORERS, PROCESSORS)))

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from rapidfuzz import utils
+from rapidfuzz import utils_cpp, utils_py
 
 
 def test_fullProcess():
@@ -24,4 +24,5 @@ def test_fullProcess():
     ]
 
     for string, proc_string in zip(mixed_strings, mixed_strings_proc):
-        assert utils.default_process(string) == proc_string
+        assert utils_cpp.default_process(string) == proc_string
+        assert utils_py.default_process(string) == proc_string
