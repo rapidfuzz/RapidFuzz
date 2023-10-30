@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from rapidfuzz import utils_cpp, utils_py
 from rapidfuzz.distance import metrics_cpp
 from tests.distance.common import OSA
 
@@ -73,3 +74,8 @@ def test_simple_unicode_tests():
     s2 = "ABCD"
     assert OSA.distance(s1, s2) == 4
     assert OSA.distance(s1, s1) == 0
+
+
+def testCaseInsensitive():
+    assert OSA.distance("new york mets", "new YORK mets", processor=utils_cpp.default_process) == 0
+    assert OSA.distance("new york mets", "new YORK mets", processor=utils_py.default_process) == 0

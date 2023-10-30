@@ -308,7 +308,15 @@ def test_simple_unicode_tests(scorer):
     assert scorer(s1, s1) == 100
 
 
-@pytest.mark.parametrize("processor", [utils_cpp.default_process, lambda s: utils_cpp.default_process(s), utils_py.default_process, lambda s: utils_py.default_process(s)])
+@pytest.mark.parametrize(
+    "processor",
+    [
+        utils_cpp.default_process,
+        lambda s: utils_cpp.default_process(s),
+        utils_py.default_process,
+        lambda s: utils_py.default_process(s),
+    ],
+)
 @pytest.mark.parametrize("scorer", scorers)
 def test_scorer_case_insensitive(processor, scorer):
     """

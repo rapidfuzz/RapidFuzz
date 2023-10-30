@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from rapidfuzz import utils_cpp, utils_py
 from tests.distance.common import Levenshtein
 
 
@@ -123,3 +124,8 @@ def test_mbleven():
     assert Levenshtein.distance("0", "101", score_cutoff=1) == 2
     assert Levenshtein.distance("0", "101", score_cutoff=2) == 2
     assert Levenshtein.distance("0", "101", score_cutoff=3) == 2
+
+
+def testCaseInsensitive():
+    assert Levenshtein.distance("new york mets", "new YORK mets", processor=utils_cpp.default_process) == 0
+    assert Levenshtein.distance("new york mets", "new YORK mets", processor=utils_py.default_process) == 0

@@ -332,6 +332,17 @@ def test_result_order():
     assert best[0][2] == 0
 
 
+def test_extract_limits():
+    """
+    test process.extract with special limits
+    """
+    bests = process.extract("test", ["tes", "tes"], limit=1, score_cutoff=100)
+    assert bests == []
+
+    bests = process.extract("test", ["te", "test"], limit=None, scorer=Levenshtein.distance)
+    assert bests == [("test", 0, 1), ("te", 2, 0)]
+
+
 def test_empty_strings():
     choices = [
         "",

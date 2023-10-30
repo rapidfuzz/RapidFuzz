@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+from rapidfuzz import utils_cpp, utils_py
 from tests.distance.common import JaroWinkler
 
 
@@ -33,3 +34,14 @@ def test_edge_case_lengths():
         "00000000000000000000000000000000000000000000000000000000000000"
     )
     assert pytest.approx(JaroWinkler.similarity(s2, s1)) == 0.852344
+
+
+def testCaseInsensitive():
+    assert (
+        pytest.approx(JaroWinkler.similarity("new york mets", "new YORK mets", processor=utils_cpp.default_process))
+        == 1.0
+    )
+    assert (
+        pytest.approx(JaroWinkler.similarity("new york mets", "new YORK mets", processor=utils_py.default_process))
+        == 1.0
+    )

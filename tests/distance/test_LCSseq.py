@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from rapidfuzz import utils_cpp, utils_py
 from tests.distance.common import LCSseq
 
 
@@ -41,3 +42,8 @@ def test_Editops():
     ops = LCSseq.editops("aaabaaa", "abbaaabba")
     assert ops.src_len == 7
     assert ops.dest_len == 9
+
+
+def testCaseInsensitive():
+    assert LCSseq.distance("new york mets", "new YORK mets", processor=utils_cpp.default_process) == 0
+    assert LCSseq.distance("new york mets", "new YORK mets", processor=utils_py.default_process) == 0

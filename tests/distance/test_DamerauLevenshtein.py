@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+from rapidfuzz import utils_cpp, utils_py
 from tests.distance.common import DamerauLevenshtein
 
 
@@ -28,3 +29,8 @@ from tests.distance.common import DamerauLevenshtein
 )
 def test_distance(left, right, distance):
     assert DamerauLevenshtein.distance(left, right) == distance
+
+
+def testCaseInsensitive():
+    assert DamerauLevenshtein.distance("new york mets", "new YORK mets", processor=utils_cpp.default_process) == 0
+    assert DamerauLevenshtein.distance("new york mets", "new YORK mets", processor=utils_py.default_process) == 0

@@ -111,7 +111,7 @@ repos:
   rev: "v2.2.4"
   hooks:
   - id: codespell
-    exclude: ".supp$"
+    exclude: ".*/test_.*.py"
     args: ["-x", ".codespell-ignore-lines"]
 
 # Check for common shell mistakes

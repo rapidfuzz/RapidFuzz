@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from rapidfuzz import utils_cpp, utils_py
 from tests.distance.common import Indel
 
 
@@ -53,3 +54,8 @@ def test_Editops():
     ops = Indel.editops("aaabaaa", "abbaaabba")
     assert ops.src_len == 7
     assert ops.dest_len == 9
+
+
+def testCaseInsensitive():
+    assert Indel.distance("new york mets", "new YORK mets", processor=utils_cpp.default_process) == 0
+    assert Indel.distance("new york mets", "new YORK mets", processor=utils_py.default_process) == 0
