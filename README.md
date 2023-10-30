@@ -24,6 +24,10 @@
     <img src="https://img.shields.io/badge/-documentation-blue"
          alt="Documentation">
   </a>
+  <a href="https://codecov.io/gh/maxbachmann/RapidFuzz">
+    <img src="https://codecov.io/gh/maxbachmann/RapidFuzz/graph/badge.svg?token=1IJLT65K8B"
+         alt="Code Coverage">
+  </a>
   <a href="https://github.com/maxbachmann/RapidFuzz/blob/main/LICENSE">
     <img src="https://img.shields.io/github/license/maxbachmann/rapidfuzz"
          alt="GitHub license">
