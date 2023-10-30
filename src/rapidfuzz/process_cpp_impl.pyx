@@ -35,6 +35,7 @@ from rapidfuzz cimport (
     RF_SCORER_FLAG_SYMMETRIC,
     RF_SCORER_NONE_IS_WORST_SCORE,
     SCORER_STRUCT_VERSION,
+    PREPROCESSOR_STRUCT_VERSION,
     RF_Kwargs,
     RF_Preprocess,
     RF_Preprocessor,
@@ -167,7 +168,7 @@ cdef inline vector[DictStringElem] preprocess_dict(queries, processor) except *:
             processor_context = <RF_Preprocessor*>PyCapsule_GetPointer(processor_capsule, NULL)
 
         # use RapidFuzz C-Api
-        if processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
+        if processor_context != NULL and processor_context.version == PREPROCESSOR_STRUCT_VERSION:
             for i, (query_key, query) in enumerate(queries.items()):
                 if is_none(query):
                     continue
@@ -218,7 +219,7 @@ cdef inline vector[ListStringElem] preprocess_list(queries, processor) except *:
             processor_context = <RF_Preprocessor*>PyCapsule_GetPointer(processor_capsule, NULL)
 
         # use RapidFuzz C-Api
-        if processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
+        if processor_context != NULL and processor_context.version == PREPROCESSOR_STRUCT_VERSION:
             for i, query in enumerate(queries):
                 if is_none(query):
                     continue
@@ -284,7 +285,7 @@ cdef inline extractOne_dict_f64(
 
         if processor is None:
             proc_choice = move(RF_StringWrapper(conv_sequence(choice)))
-        elif processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
+        elif processor_context != NULL and processor_context.version == PREPROCESSOR_STRUCT_VERSION:
             processor_context.preprocess(choice, &proc_str)
             proc_choice = move(RF_StringWrapper(proc_str))
         else:
@@ -355,7 +356,7 @@ cdef inline extractOne_dict_i64(
 
         if processor is None:
             proc_choice = move(RF_StringWrapper(conv_sequence(choice)))
-        elif processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
+        elif processor_context != NULL and processor_context.version == PREPROCESSOR_STRUCT_VERSION:
             processor_context.preprocess(choice, &proc_str)
             proc_choice = move(RF_StringWrapper(proc_str))
         else:
@@ -447,7 +448,7 @@ cdef inline extractOne_list_f64(
 
         if processor is None:
             proc_choice = move(RF_StringWrapper(conv_sequence(choice)))
-        elif processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
+        elif processor_context != NULL and processor_context.version == PREPROCESSOR_STRUCT_VERSION:
             processor_context.preprocess(choice, &proc_str)
             proc_choice = move(RF_StringWrapper(proc_str))
         else:
@@ -516,7 +517,7 @@ cdef inline extractOne_list_i64(
 
         if processor is None:
             proc_choice = move(RF_StringWrapper(conv_sequence(choice)))
-        elif processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
+        elif processor_context != NULL and processor_context.version == PREPROCESSOR_STRUCT_VERSION:
             processor_context.preprocess(choice, &proc_str)
             proc_choice = move(RF_StringWrapper(proc_str))
         else:
@@ -1052,7 +1053,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=None, score_cutoff=
                 continue
 
             # use RapidFuzz C-Api
-            if processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
+            if processor_context != NULL and processor_context.version == PREPROCESSOR_STRUCT_VERSION:
                 processor_context.preprocess(choice, &proc_str)
                 choice_proc = RF_StringWrapper(proc_str)
             elif processor is not None:
@@ -1095,7 +1096,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=None, score_cutoff=
                 continue
 
             # use RapidFuzz C-Api
-            if processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
+            if processor_context != NULL and processor_context.version == PREPROCESSOR_STRUCT_VERSION:
                 processor_context.preprocess(choice, &proc_str)
                 choice_proc = RF_StringWrapper(proc_str)
             elif processor is not None:
@@ -1138,7 +1139,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=None, score_cutoff=
                 continue
 
             # use RapidFuzz C-Api
-            if processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
+            if processor_context != NULL and processor_context.version == PREPROCESSOR_STRUCT_VERSION:
                 processor_context.preprocess(choice, &proc_str)
                 choice_proc = RF_StringWrapper(proc_str)
             elif processor is not None:
@@ -1181,7 +1182,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=None, score_cutoff=
                 continue
 
             # use RapidFuzz C-Api
-            if processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
+            if processor_context != NULL and processor_context.version == PREPROCESSOR_STRUCT_VERSION:
                 processor_context.preprocess(choice, &proc_str)
                 choice_proc = RF_StringWrapper(proc_str)
             elif processor is not None:
@@ -1352,7 +1353,7 @@ cdef inline vector[RF_StringWrapper] preprocess(const RF_ScorerFlags* scorer_fla
             processor_context = <RF_Preprocessor*>PyCapsule_GetPointer(processor_capsule, NULL)
 
         # use RapidFuzz C-Api
-        if processor_context != NULL and processor_context.version == SCORER_STRUCT_VERSION:
+        if processor_context != NULL and processor_context.version == PREPROCESSOR_STRUCT_VERSION:
             for query in queries:
                 if is_none(query) and flags & RF_SCORER_NONE_IS_WORST_SCORE:
                     proc_queries.emplace_back()

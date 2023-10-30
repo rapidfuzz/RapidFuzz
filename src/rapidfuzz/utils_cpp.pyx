@@ -12,7 +12,7 @@ from cpp_common cimport (
 )
 from libcpp cimport bool
 
-from rapidfuzz cimport PREPROCESSOR_STRUCT_VERSION, RF_Preprocessor, RF_String
+from rapidfuzz cimport RF_Preprocessor, RF_String
 
 from array import array
 
