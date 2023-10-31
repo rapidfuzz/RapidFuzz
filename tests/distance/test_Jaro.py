@@ -11,6 +11,9 @@ def test_hash_special_case():
 
 
 def test_edge_case_lengths():
+    """
+    these are largely found by fuzz tests and implemented here as regression tests
+    """
     assert pytest.approx(Jaro.similarity("", "")) == 1
     assert pytest.approx(Jaro.similarity("0", "0")) == 1
     assert pytest.approx(Jaro.similarity("00", "00")) == 1
@@ -19,6 +22,14 @@ def test_edge_case_lengths():
     assert pytest.approx(Jaro.similarity("0" * 65, "0" * 65)) == 1
     assert pytest.approx(Jaro.similarity("0" * 64, "0" * 65)) == 0.994872
     assert pytest.approx(Jaro.similarity("0" * 63, "0" * 65)) == 0.989744
+
+    s1 = "000000001"
+    s2 = "0000010"
+    assert pytest.approx(Jaro.similarity(s1, s2)) == 0.878307
+
+    s1 = "01234567"
+    s2 = "0" * 170 + "7654321" + "0" * 200
+    assert pytest.approx(Jaro.similarity(s1, s2)) == 0.548740
 
     s1 = "10000000000000000000000000000000000000000000000000000000000000020"
     s2 = "00000000000000000000000000000000000000000000000000000000000000000"

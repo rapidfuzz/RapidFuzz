@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-[3.5.0] - 2023-10-30
+[3.5.0] - 2023-10-31
 ^^^^^^^^^^^^^^^^^^^^
 Changed
 ~~~~~~~
@@ -19,6 +19,7 @@ Performance
 Fixed
 ~~~~~
 * the preprocessing function was always called through Python due to a broken C-API version check
+* fix wraparound issue in simd implementation of Jaro and Jaro Winkler
 
 [3.4.0] - 2023-10-09
 ^^^^^^^^^^^^^^^^^^^^
