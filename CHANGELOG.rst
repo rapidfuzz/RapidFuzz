@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+[3.5.1] - 2023-10-31
+^^^^^^^^^^^^^^^^^^^^
+Fixed
+~~~~~
+* fix compilation failure on macOS
+
 [3.5.0] - 2023-10-31
 ^^^^^^^^^^^^^^^^^^^^
 Changed
