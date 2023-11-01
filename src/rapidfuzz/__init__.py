@@ -6,12 +6,12 @@ from __future__ import annotations
 __author__: str = "Max Bachmann"
 __license__: str = "MIT"
 
-import importlib.metadata as importlib_metadata
+import importlib.metadata
 
 try:
-    __version__ = importlib_metadata.version(__package__ or __name__)
-except importlib_metadata.PackageNotFoundError:
-    __version__ = "0.0.0"
+    __version__: str = importlib.metadata.version(__package__ or __name__)
+except importlib.metadata.PackageNotFoundError:
+    __version__: str = "0.0.0"
 
 from rapidfuzz import distance, fuzz, process, utils
 
