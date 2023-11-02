@@ -25,7 +25,7 @@
          alt="Documentation">
   </a>
   <a href="https://codecov.io/gh/maxbachmann/RapidFuzz">
-    <img src="https://codecov.io/gh/maxbachmann/RapidFuzz/graph/badge.svg?token=1IJLT65K8B"
+    <img src="https://codecov.io/gh/maxbachmann/RapidFuzz/branch/main/graph/badge.svg?token=1IJLT65K8B"
          alt="Code Coverage">
   </a>
   <a href="https://github.com/maxbachmann/RapidFuzz/blob/main/LICENSE">
