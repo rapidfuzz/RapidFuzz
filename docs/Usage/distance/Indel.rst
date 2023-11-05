@@ -33,7 +33,7 @@ Performance
 The following image shows a benchmark of the Indel distance in RapidFuzz
 and python-Levenshtein. Similar to the normal Levenshtein distance
 python-Levenshtein uses an implementation with a time complexity of ``O(NM)``,
-while RapidFuzz has a time complexity of ``O([N/64]M)``.
+while RapidFuzz has a time complexity of ``O([score_cutoff/64]M)`` (and never worse than ``O([N/64]M)``).
 
 .. image:: img/indel_levenshtein.svg
     :align: center
@@ -74,4 +74,4 @@ The following implementation is used with a worst-case performance of ``O([N/64]
   a blockwise implementation of the Hyyrös' lcs algorithm is used, which calculates
   the Levenshtein distance in parallel (64 characters at a time).
   The algorithm is described by :cite:t:`2004:hyrroe`. The time complexity of this
-  algorithm is ``O([N/64]M)``.
+  algorithm is ``O([score_cutoff/64]M)``.
