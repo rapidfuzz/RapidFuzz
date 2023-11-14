@@ -30,7 +30,7 @@ Opcodes
    Jaro
    JaroWinkler
    Levenshtein
-   LCS
+   LCSseq
    OSA
    Prefix
    Postfix
