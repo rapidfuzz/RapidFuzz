@@ -6,24 +6,24 @@ Functions
 
 distance
 ~~~~~~~~
-.. autofunction:: rapidfuzz.distance.LCS.distance
+.. autofunction:: rapidfuzz.distance.LCSseq.distance
 
 normalized_distance
 ~~~~~~~~~~~~~~~~~~~
-.. autofunction:: rapidfuzz.distance.LCS.normalized_distance
+.. autofunction:: rapidfuzz.distance.LCSseq.normalized_distance
 
 similarity
 ~~~~~~~~~~
-.. autofunction:: rapidfuzz.distance.LCS.similarity
+.. autofunction:: rapidfuzz.distance.LCSseq.similarity
 
 normalized_similarity
 ~~~~~~~~~~~~~~~~~~~~~
-.. autofunction:: rapidfuzz.distance.LCS.normalized_similarity
+.. autofunction:: rapidfuzz.distance.LCSseq.normalized_similarity
 
 editops
 ~~~~~~~
-.. autofunction:: rapidfuzz.distance.LCS.editops
+.. autofunction:: rapidfuzz.distance.LCSseq.editops
 
 opcodes
 ~~~~~~~
-.. autofunction:: rapidfuzz.distance.LCS.opcodes
+.. autofunction:: rapidfuzz.distance.LCSseq.opcodes
