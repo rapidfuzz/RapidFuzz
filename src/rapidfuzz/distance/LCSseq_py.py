@@ -305,7 +305,7 @@ def editops(
     Notes
     -----
     The alignment is calculated using an algorithm of Heikki Hyyrö, which is
-    described [6]_. It has a time complexity and memory usage of ``O([N/64] * M)``.
+    described in [6]_. It has a time complexity and memory usage of ``O([N/64] * M)``.
 
     References
     ----------
@@ -401,7 +401,7 @@ def opcodes(
     Notes
     -----
     The alignment is calculated using an algorithm of Heikki Hyyrö, which is
-    described [7]_. It has a time complexity and memory usage of ``O([N/64] * M)``.
+    described in [7]_. It has a time complexity and memory usage of ``O([N/64] * M)``.
 
     References
     ----------
