@@ -153,7 +153,7 @@ def normalized_distance(
     score_cutoff: float | None = None,
 ) -> float:
     """
-    Calculates a normalized Damerau-Levenshtein similarity in the range [1, 0].
+    Calculates a normalized Damerau-Levenshtein distance in the range [1, 0].
 
     This is calculated as ``distance / max(len1, len2)``.
 
