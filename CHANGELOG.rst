@@ -3,6 +3,10 @@ Changelog
 
 [3.6.0] - 2023-11-
 ^^^^^^^^^^^^^^^^^^^^
+Fixed
+~~~~~
+- fix pure python fallback implementation of ``fuzz.token_set_ratio``
+
 Performance
 ~~~~~~~~~~~
 * add banded implementation of LCS / Indel. This improves the runtime from ``O((|s1|/64) * |s2|)`` to ``O((score_cutoff/64) * |s2|)``

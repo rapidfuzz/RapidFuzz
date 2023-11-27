@@ -127,6 +127,7 @@ def testPartialTokenSortRatio():
 
 def testTokenSetRatio():
     assert fuzz.token_set_ratio("new york mets vs atlanta braves", "atlanta braves vs new york mets") == 100
+    assert fuzz.token_set_ratio("js", "vue js") == 100
 
 
 def testPartialTokenSetRatio():

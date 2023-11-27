@@ -457,7 +457,8 @@ def token_set_ratio(
     diff_ab = tokens_a.difference(tokens_b)
     diff_ba = tokens_b.difference(tokens_a)
 
-    if not intersect and (not diff_ab or not diff_ba):
+    # one sentence is part of the other one
+    if intersect and (not diff_ab or not diff_ba):
         return 100
 
     diff_ab_joined = _join_splitted_sequence(sorted(diff_ab))
