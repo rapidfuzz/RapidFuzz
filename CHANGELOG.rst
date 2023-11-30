@@ -6,6 +6,7 @@ Changelog
 Fixed
 ~~~~~
 - fix pure python fallback implementation of ``fuzz.token_set_ratio``
+- properly link with ``-latomic`` if ``std::atomic<uint64_t>`` is not natively supported
 
 Performance
 ~~~~~~~~~~~

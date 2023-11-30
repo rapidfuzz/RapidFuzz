@@ -117,6 +117,8 @@ if(NOT Windows)
                  ATOMICS_VOID_PTR_TEST_SOURCE "${ATOMICS_TEST_SOURCE}")
   string(REPLACE "std::atomic<int>" "std::atomic<unsigned>"
                  ATOMICS_UNSIGNED_TEST_SOURCE "${ATOMICS_TEST_SOURCE}")
+  string(REPLACE "std::atomic<int>" "std::atomic<uint64_t>"
+                 ATOMICS_UINT64_TEST_SOURCE "${ATOMICS_TEST_SOURCE}")
 
   if(APPLE)
     set(CMAKE_REQUIRED_FLAGS "-std=c++11")
@@ -129,10 +131,13 @@ if(NOT Windows)
                             HAVE_CXX_ATOMICS_VOID_PTR_WITHOUT_LIB)
   check_cxx_source_compiles("${ATOMICS_UNSIGNED_TEST_SOURCE}"
                             HAVE_CXX_ATOMICS_UNSIGNED_WITHOUT_LIB)
+  check_cxx_source_compiles("${ATOMICS_UINT64_TEST_SOURCE}"
+                            HAVE_CXX_ATOMICS_UINT64_WITHOUT_LIB)
   if((NOT HAVE_CXX_ATOMICS_INT_WITHOUT_LIB)
      OR (NOT HAVE_CXX_ATOMICS_SIZE_T_WITHOUT_LIB)
      OR (NOT HAVE_CXX_ATOMICS_VOID_PTR_WITHOUT_LIB)
-     OR (NOT HAVE_CXX_ATOMICS_UNSIGNED_WITHOUT_LIB))
+     OR (NOT HAVE_CXX_ATOMICS_UNSIGNED_WITHOUT_LIB)
+     OR (NOT HAVE_CXX_ATOMICS_UINT64_WITHOUT_LIB))
     set(CMAKE_REQUIRED_LIBRARIES "atomic")
     check_cxx_source_compiles("${ATOMICS_TEST_SOURCE}"
                               HAVE_CXX_ATOMICS_INT_WITH_LIB)
@@ -142,6 +147,8 @@ if(NOT Windows)
                               HAVE_CXX_ATOMICS_VOID_PTR_WITH_LIB)
     check_cxx_source_compiles("${ATOMICS_UNSIGNED_TEST_SOURCE}"
                               HAVE_CXX_ATOMICS_UNSIGNED_WITH_LIB)
+    check_cxx_source_compiles("${ATOMICS_UINT64_TEST_SOURCE}"
+                              HAVE_CXX_ATOMICS_UINT64_WITH_LIB)
     if(NOT HAVE_CXX_ATOMICS_INT_WITH_LIB)
       message(
         FATAL_ERROR
@@ -158,6 +165,11 @@ if(NOT Windows)
       message(
         FATAL_ERROR
           "No native support for std::atomic<unsigned>, or libatomic not found!"
+      )
+    elseif(NOT HAVE_CXX_ATOMICS_UINT64_WITH_LIB)
+      message(
+        FATAL_ERROR
+          "No native support for std::atomic<uint64>, or libatomic not found!"
       )
     else()
       message(STATUS "Linking with libatomic for atomics support")
