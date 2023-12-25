@@ -941,8 +941,8 @@ cdef inline extract_dict_size_t(
 
     cdef vector[DictMatchElem[size_t]] results = extract_dict_impl[size_t](
         scorer_kwargs, scorer_flags, scorer, proc_query, proc_choices,
-        get_score_cutoff_i64(score_cutoff, scorer_flags),
-        get_score_cutoff_i64(score_hint, scorer_flags)
+        get_score_cutoff_size_t(score_cutoff, scorer_flags),
+        get_score_cutoff_size_t(score_hint, scorer_flags)
     )
 
     # due to score_cutoff not always completely filled
@@ -1086,8 +1086,8 @@ cdef inline extract_list_size_t(
 
     cdef vector[ListMatchElem[size_t]] results = extract_list_impl[size_t](
         scorer_kwargs, scorer_flags, scorer, proc_query, proc_choices,
-        get_score_cutoff_i64(score_cutoff, scorer_flags),
-        get_score_cutoff_i64(score_hint, scorer_flags)
+        get_score_cutoff_size_t(score_cutoff, scorer_flags),
+        get_score_cutoff_size_t(score_hint, scorer_flags)
     )
 
     # due to score_cutoff not always completely filled
@@ -1711,6 +1711,11 @@ cdef inline MatrixType dtype_to_type_num_i64(dtype) except MatrixType.UNDEFINED:
         return MatrixType.INT32
     return <MatrixType>dtype
 
+cdef inline MatrixType dtype_to_type_num_size_t(dtype) except MatrixType.UNDEFINED:
+    if dtype is None:
+        return MatrixType.UINT32
+    return <MatrixType>dtype
+
 cdef inline MatrixType dtype_to_type_num_py(dtype, scorer, dict scorer_kwargs) except MatrixType.UNDEFINED:
     import numpy as np
 
@@ -1789,12 +1794,12 @@ cdef Matrix cdist_two_lists(
         matrix.matrix = cdist_two_lists_impl[size_t](
             scorer_flags,
             scorer_kwargs, scorer, proc_queries, proc_choices,
-            dtype_to_type_num_i64(dtype),
+            dtype_to_type_num_size_t(dtype),
             c_workers,
-            get_score_cutoff_i64(score_cutoff, scorer_flags),
-            get_score_cutoff_i64(score_hint, scorer_flags),
+            get_score_cutoff_size_t(score_cutoff, scorer_flags),
+            get_score_cutoff_size_t(score_hint, scorer_flags),
             <size_t>score_multiplier,
-            scorer_flags.worst_score.i64
+            scorer_flags.worst_score.sizet
         )
     elif flags & RF_SCORER_FLAG_RESULT_I64:
         matrix.matrix = cdist_two_lists_impl[int64_t](
@@ -1843,12 +1848,12 @@ cdef Matrix cdist_single_list(
         matrix.matrix = cdist_single_list_impl[size_t](
             scorer_flags,
             scorer_kwargs, scorer, proc_queries,
-            dtype_to_type_num_i64(dtype),
+            dtype_to_type_num_size_t(dtype),
             c_workers,
-            get_score_cutoff_i64(score_cutoff, scorer_flags),
-            get_score_cutoff_i64(score_hint, scorer_flags),
+            get_score_cutoff_size_t(score_cutoff, scorer_flags),
+            get_score_cutoff_size_t(score_hint, scorer_flags),
             <size_t>score_multiplier,
-            scorer_flags.worst_score.i64
+            scorer_flags.worst_score.sizet
         )
     elif flags & RF_SCORER_FLAG_RESULT_I64:
         matrix.matrix = cdist_single_list_impl[int64_t](
