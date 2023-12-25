@@ -186,7 +186,7 @@ cdef inline bool is_none(s):
 
     return False
 
-cdef size_t get_score_cutoff_size_t(score_cutoff,  default) except -1:
+cdef size_t get_score_cutoff_size_t(score_cutoff,  default) except? -1:
     cdef size_t c_score_cutoff = default
     if score_cutoff is None:
         return c_score_cutoff
@@ -205,7 +205,7 @@ cdef double get_score_cutoff_f64(score_cutoff, double default) except -1:
 
     return c_score_cutoff
 
-cdef size_t get_score_hint_size_t(score_hint, size_t default) except -1:
+cdef size_t get_score_hint_size_t(score_hint, size_t default) except? -1:
     cdef size_t c_score_hint = default
     if score_hint is None:
         return c_score_hint
