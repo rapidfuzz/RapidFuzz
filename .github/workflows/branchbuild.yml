@@ -121,6 +121,7 @@ jobs:
       - name: Test with pytest and backtrace in case of SegFault
         if: runner.os == 'Linux'
         run: |
+          sudo apt update && sudo apt install systemd-coredump
           tools/seg_wrapper.sh pytest tests
       - name: Test with pytest
         if: runner.os != 'Linux'
