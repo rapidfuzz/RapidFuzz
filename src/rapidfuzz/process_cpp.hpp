@@ -269,6 +269,11 @@ int64_t any_round(int64_t score)
     return score;
 }
 
+size_t any_round(size_t score)
+{
+    return score;
+}
+
 enum class MatrixType {
     UNDEFINED,
     FLOAT32,

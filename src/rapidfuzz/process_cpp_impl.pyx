@@ -94,6 +94,7 @@ cdef extern from "process_cpp.hpp":
 
         void call(const RF_String*, double, double, double*) except +
         void call(const RF_String*, int64_t, int64_t, int64_t*) except +
+        void call(const RF_String*, size_t, size_t, size_t*) except +
 
     cdef vector[DictMatchElem[T]] extract_dict_impl[T](
         const RF_Kwargs*, const RF_ScorerFlags*, RF_Scorer*,
@@ -1070,7 +1071,7 @@ cdef inline extract_list_i64(
     return result_list
 
 
-cdef inline extract_list_i64(
+cdef inline extract_list_size_t(
     query, choices,
     RF_Scorer* scorer,
     const RF_ScorerFlags* scorer_flags,
@@ -1352,7 +1353,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=None, score_cutoff=
                 if score <= c_score_cutoff:
                     yield (choice, score, choice_key)
 
-    def extract_iter_dict_i64():
+    def extract_iter_dict_size_t():
         """
         implementation of extract_iter for dict, scorer using RapidFuzz C-API with the result type
         size_t
@@ -1481,7 +1482,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=None, score_cutoff=
                 if score <= c_score_cutoff:
                     yield (choice, score, i)
 
-    def extract_iter_list_i64():
+    def extract_iter_list_size_t():
         """
         implementation of extract_iter for list, scorer using RapidFuzz C-API with the result type
         size_t
