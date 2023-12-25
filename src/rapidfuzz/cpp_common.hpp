@@ -406,6 +406,7 @@ static inline bool normalized_similarity_func_wrapper(const RF_ScorerFunc* self,
 // todo cleanup
 typedef bool (*func_f64)(const struct _RF_ScorerFunc*, const RF_String*, int64_t, double, double, double*);
 typedef bool (*func_i64)(const struct _RF_ScorerFunc*, const RF_String*, int64_t, int64_t, int64_t, int64_t*);
+typedef bool (*func_size_t)(const struct _RF_ScorerFunc*, const RF_String*, int64_t, size_t, size_t, size_t*);
 
 static inline void assign_callback(RF_ScorerFunc& context, func_f64 func)
 {
@@ -415,6 +416,11 @@ static inline void assign_callback(RF_ScorerFunc& context, func_f64 func)
 static inline void assign_callback(RF_ScorerFunc& context, func_i64 func)
 {
     context.call.i64 = func;
+}
+
+static inline void assign_callback(RF_ScorerFunc& context, func_size_t func)
+{
+    context.call.sizet = func;
 }
 
 template <template <typename> class CachedScorer, typename T, typename Sentence1, typename... Args>

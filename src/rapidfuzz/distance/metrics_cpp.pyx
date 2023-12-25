@@ -8,7 +8,7 @@ from rapidfuzz cimport (
     RF_SCORER_FLAG_MULTI_STRING_CALL,
     RF_SCORER_FLAG_MULTI_STRING_INIT,
     RF_SCORER_FLAG_RESULT_F64,
-    RF_SCORER_FLAG_RESULT_I64,
+    RF_SCORER_FLAG_RESULT_SIZE_T,
     RF_SCORER_FLAG_SYMMETRIC,
     RF_SCORER_NONE_IS_WORST_SCORE,
     RF_Kwargs,
@@ -34,7 +34,7 @@ from cpp_common cimport (
     preprocess_strings,
 )
 from libcpp.cmath cimport isnan
-from libc.stdint cimport INT64_MAX, int64_t
+from libc.stdint cimport SIZE_MAX, int64_t
 from libc.stdlib cimport free, malloc
 from libcpp cimport bool
 from cython.operator cimport dereference
@@ -42,18 +42,18 @@ from cython.operator cimport dereference
 
 cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
     cdef struct LevenshteinWeightTable:
-        int64_t insert_cost
-        int64_t delete_cost
-        int64_t replace_cost
+        size_t insert_cost
+        size_t delete_cost
+        size_t replace_cost
 
 cdef extern from "metrics.hpp":
     # Levenshtein
-    double levenshtein_normalized_distance_func(  const RF_String&, const RF_String&, int64_t, int64_t, int64_t, double, double) except + nogil
-    int64_t levenshtein_distance_func(            const RF_String&, const RF_String&, int64_t, int64_t, int64_t, int64_t, int64_t) except + nogil
-    double levenshtein_normalized_similarity_func(const RF_String&, const RF_String&, int64_t, int64_t, int64_t, double, double) except + nogil
-    int64_t levenshtein_similarity_func(          const RF_String&, const RF_String&, int64_t, int64_t, int64_t, int64_t, int64_t) except + nogil
+    double levenshtein_normalized_distance_func(  const RF_String&, const RF_String&, size_t, size_t, size_t, double, double) except + nogil
+    size_t levenshtein_distance_func(            const RF_String&, const RF_String&, size_t, size_t, size_t, size_t, size_t) except + nogil
+    double levenshtein_normalized_similarity_func(const RF_String&, const RF_String&, size_t, size_t, size_t, double, double) except + nogil
+    size_t levenshtein_similarity_func(          const RF_String&, const RF_String&, size_t, size_t, size_t, size_t, size_t) except + nogil
 
-    RfEditops levenshtein_editops_func(const RF_String&, const RF_String&, int64_t) except + nogil
+    RfEditops levenshtein_editops_func(const RF_String&, const RF_String&, size_t) except + nogil
 
     bool LevenshteinDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
     bool LevenshteinNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
@@ -64,9 +64,9 @@ cdef extern from "metrics.hpp":
 
     # Damerau Levenshtein
     double damerau_levenshtein_normalized_distance_func(  const RF_String&, const RF_String&, double) except + nogil
-    int64_t damerau_levenshtein_distance_func(            const RF_String&, const RF_String&, int64_t) except + nogil
+    size_t damerau_levenshtein_distance_func(            const RF_String&, const RF_String&, size_t) except + nogil
     double damerau_levenshtein_normalized_similarity_func(const RF_String&, const RF_String&, double) except + nogil
-    int64_t damerau_levenshtein_similarity_func(          const RF_String&, const RF_String&, int64_t) except + nogil
+    size_t damerau_levenshtein_similarity_func(          const RF_String&, const RF_String&, size_t) except + nogil
 
     bool DamerauLevenshteinDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
     bool DamerauLevenshteinNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
@@ -75,9 +75,9 @@ cdef extern from "metrics.hpp":
 
     # LCS
     double lcs_seq_normalized_distance_func(  const RF_String&, const RF_String&, double) except + nogil
-    int64_t lcs_seq_distance_func(            const RF_String&, const RF_String&, int64_t) except + nogil
+    size_t lcs_seq_distance_func(            const RF_String&, const RF_String&, size_t) except + nogil
     double lcs_seq_normalized_similarity_func(const RF_String&, const RF_String&, double) except + nogil
-    int64_t lcs_seq_similarity_func(          const RF_String&, const RF_String&, int64_t) except + nogil
+    size_t lcs_seq_similarity_func(          const RF_String&, const RF_String&, size_t) except + nogil
 
     RfEditops lcs_seq_editops_func(const RF_String&, const RF_String&) except + nogil
 
@@ -90,9 +90,9 @@ cdef extern from "metrics.hpp":
 
     # Indel
     double indel_normalized_distance_func(  const RF_String&, const RF_String&, double) except + nogil
-    int64_t indel_distance_func(            const RF_String&, const RF_String&, int64_t) except + nogil
+    size_t indel_distance_func(            const RF_String&, const RF_String&, size_t) except + nogil
     double indel_normalized_similarity_func(const RF_String&, const RF_String&, double) except + nogil
-    int64_t indel_similarity_func(          const RF_String&, const RF_String&, int64_t) except + nogil
+    size_t indel_similarity_func(          const RF_String&, const RF_String&, size_t) except + nogil
 
     RfEditops indel_editops_func(const RF_String&, const RF_String&) except + nogil
 
@@ -105,9 +105,9 @@ cdef extern from "metrics.hpp":
 
     # Hamming
     double hamming_normalized_distance_func(  const RF_String&, const RF_String&, bool, double) except + nogil
-    int64_t hamming_distance_func(            const RF_String&, const RF_String&, bool, int64_t) except + nogil
+    size_t hamming_distance_func(            const RF_String&, const RF_String&, bool, size_t) except + nogil
     double hamming_normalized_similarity_func(const RF_String&, const RF_String&, bool, double) except + nogil
-    int64_t hamming_similarity_func(          const RF_String&, const RF_String&, bool, int64_t) except + nogil
+    size_t hamming_similarity_func(          const RF_String&, const RF_String&, bool, size_t) except + nogil
 
     bool HammingDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
     bool HammingNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
@@ -118,9 +118,9 @@ cdef extern from "metrics.hpp":
 
     # Optimal String Alignment
     double osa_normalized_distance_func(  const RF_String&, const RF_String&, double) except + nogil
-    int64_t osa_distance_func(            const RF_String&, const RF_String&, int64_t) except + nogil
+    size_t osa_distance_func(            const RF_String&, const RF_String&, size_t) except + nogil
     double osa_normalized_similarity_func(const RF_String&, const RF_String&, double) except + nogil
-    int64_t osa_similarity_func(          const RF_String&, const RF_String&, int64_t) except + nogil
+    size_t osa_similarity_func(          const RF_String&, const RF_String&, size_t) except + nogil
 
     bool OSADistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
     bool OSANormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
@@ -157,9 +157,9 @@ cdef extern from "metrics.hpp":
 
     # Prefix
     double prefix_normalized_distance_func(  const RF_String&, const RF_String&, double) except + nogil
-    int64_t prefix_distance_func(            const RF_String&, const RF_String&, int64_t) except + nogil
+    size_t prefix_distance_func(            const RF_String&, const RF_String&, size_t) except + nogil
     double prefix_normalized_similarity_func(const RF_String&, const RF_String&, double) except + nogil
-    int64_t prefix_similarity_func(          const RF_String&, const RF_String&, int64_t) except + nogil
+    size_t prefix_similarity_func(          const RF_String&, const RF_String&, size_t) except + nogil
 
     bool PrefixDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
     bool PrefixNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
@@ -168,9 +168,9 @@ cdef extern from "metrics.hpp":
 
     # Postfix
     double postfix_normalized_distance_func(  const RF_String&, const RF_String&, double) except + nogil
-    int64_t postfix_distance_func(            const RF_String&, const RF_String&, int64_t) except + nogil
+    size_t postfix_distance_func(            const RF_String&, const RF_String&, size_t) except + nogil
     double postfix_normalized_similarity_func(const RF_String&, const RF_String&, double) except + nogil
-    int64_t postfix_similarity_func(          const RF_String&, const RF_String&, int64_t) except + nogil
+    size_t postfix_similarity_func(          const RF_String&, const RF_String&, size_t) except + nogil
 
     bool PostfixDistanceInit(            RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
     bool PostfixNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
@@ -186,15 +186,12 @@ cdef inline bool is_none(s):
 
     return False
 
-cdef int64_t get_score_cutoff_i64(score_cutoff, int64_t default) except -1:
-    cdef int64_t c_score_cutoff = default
+cdef size_t get_score_cutoff_size_t(score_cutoff,  default) except -1:
+    cdef size_t c_score_cutoff = default
     if score_cutoff is None:
         return c_score_cutoff
 
     c_score_cutoff = score_cutoff
-    if c_score_cutoff < 0:
-        raise ValueError("score_cutoff has to be >= 0")
-
     return c_score_cutoff
 
 cdef double get_score_cutoff_f64(score_cutoff, double default) except -1:
@@ -208,40 +205,37 @@ cdef double get_score_cutoff_f64(score_cutoff, double default) except -1:
 
     return c_score_cutoff
 
-cdef int64_t get_score_hint_i64(score_hint, int64_t default) except -1:
-    cdef int64_t c_score_hint = default
+cdef size_t get_score_hint_size_t(score_hint, size_t default) except -1:
+    cdef size_t c_score_hint = default
     if score_hint is None:
         return c_score_hint
 
     c_score_hint = score_hint
-    if c_score_hint < 0:
-        raise ValueError("score_hint has to be >= 0")
-
     return c_score_hint
 
 
 def levenshtein_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None, score_hint=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    cdef int64_t insertion, deletion, substitution
+    cdef size_t insertion, deletion, substitution
     insertion = deletion = substitution = 1
     if weights is not None:
         insertion, deletion, substitution = weights
 
-    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, INT64_MAX)
-    cdef int64_t c_score_hint = get_score_cutoff_i64(score_hint, INT64_MAX)
+    cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, SIZE_MAX)
+    cdef size_t c_score_hint = get_score_cutoff_size_t(score_hint, SIZE_MAX)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return levenshtein_distance_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff, c_score_hint)
 
 
 def levenshtein_similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None, score_hint=None):
     cdef RF_StringWrapper s1_proc, s2_proc
-    cdef int64_t insertion, deletion, substitution
+    cdef size_t insertion, deletion, substitution
     insertion = deletion = substitution = 1
     if weights is not None:
         insertion, deletion, substitution = weights
 
-    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, 0)
-    cdef int64_t c_score_hint = get_score_cutoff_i64(score_hint, 0)
+    cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, 0)
+    cdef size_t c_score_hint = get_score_cutoff_size_t(score_hint, 0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return levenshtein_similarity_func(s1_proc.string, s2_proc.string, insertion, deletion, substitution, c_score_cutoff, c_score_hint)
 
@@ -251,7 +245,7 @@ def levenshtein_normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, 
     if is_none(s1) or is_none(s2):
         return 1.0
 
-    cdef int64_t insertion, deletion, substitution
+    cdef size_t insertion, deletion, substitution
     insertion = deletion = substitution = 1
     if weights is not None:
         insertion, deletion, substitution = weights
@@ -267,7 +261,7 @@ def levenshtein_normalized_similarity(s1, s2, *, weights=(1,1,1), processor=None
     if is_none(s1) or is_none(s2):
         return 0.0
 
-    cdef int64_t insertion, deletion, substitution
+    cdef size_t insertion, deletion, substitution
     insertion = deletion = substitution = 1
     if weights is not None:
         insertion, deletion, substitution = weights
@@ -281,7 +275,7 @@ def levenshtein_normalized_similarity(s1, s2, *, weights=(1,1,1), processor=None
 def levenshtein_editops(s1, s2, *, processor=None, score_hint=None):
     cdef RF_StringWrapper s1_proc, s2_proc
     cdef Editops ops = Editops.__new__(Editops)
-    cdef int64_t c_score_hint = get_score_hint_i64(score_hint, INT64_MAX)
+    cdef size_t c_score_hint = get_score_hint_size_t(score_hint, SIZE_MAX)
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     ops.editops = levenshtein_editops_func(s1_proc.string, s2_proc.string, c_score_hint)
@@ -291,7 +285,7 @@ def levenshtein_editops(s1, s2, *, processor=None, score_hint=None):
 def levenshtein_opcodes(s1, s2, *, processor=None, score_hint=None):
     cdef RF_StringWrapper s1_proc, s2_proc
     cdef Editops ops = Editops.__new__(Editops)
-    cdef int64_t c_score_hint = get_score_hint_i64(score_hint, INT64_MAX)
+    cdef size_t c_score_hint = get_score_hint_size_t(score_hint, SIZE_MAX)
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     ops.editops = levenshtein_editops_func(s1_proc.string, s2_proc.string, c_score_hint)
@@ -301,7 +295,7 @@ cdef void KwargsDeinit(RF_Kwargs* self) noexcept:
     free(<void*>self.context)
 
 cdef bool LevenshteinKwargsInit(RF_Kwargs* self, dict kwargs) except False:
-    cdef int64_t insertion, deletion, substitution
+    cdef size_t insertion, deletion, substitution
     cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>malloc(sizeof(LevenshteinWeightTable))
 
     if not weights:
@@ -317,26 +311,26 @@ cdef bool LevenshteinKwargsInit(RF_Kwargs* self, dict kwargs) except False:
 
 cdef bool GetScorerFlagsLevenshteinDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>self.context
-    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_SIZE_T
     if weights.insert_cost == weights.delete_cost:
         scorer_flags.flags |= RF_SCORER_FLAG_SYMMETRIC
     if LevenshteinMultiStringSupport(self):
         scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
 
-    scorer_flags.optimal_score.i64 = 0
-    scorer_flags.worst_score.i64 = INT64_MAX
+    scorer_flags.optimal_score.sizet = 0
+    scorer_flags.worst_score.sizet = SIZE_MAX
     return True
 
 cdef bool GetScorerFlagsLevenshteinSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
     cdef LevenshteinWeightTable* weights = <LevenshteinWeightTable*>self.context
-    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_SIZE_T
     if weights.insert_cost == weights.delete_cost:
         scorer_flags.flags |= RF_SCORER_FLAG_SYMMETRIC
     if LevenshteinMultiStringSupport(self):
         scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
 
-    scorer_flags.optimal_score.i64 = INT64_MAX
-    scorer_flags.worst_score.i64 = 0
+    scorer_flags.optimal_score.sizet = SIZE_MAX
+    scorer_flags.worst_score.sizet = 0
     return True
 
 cdef bool GetScorerFlagsLevenshteinNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
@@ -379,14 +373,14 @@ SetFuncAttrs(levenshtein_editops, metrics_py.levenshtein_editops)
 SetFuncAttrs(levenshtein_opcodes, metrics_py.levenshtein_opcodes)
 
 def damerau_levenshtein_distance(s1, s2, *, processor=None, score_cutoff=None):
-    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, INT64_MAX)
+    cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, SIZE_MAX)
     cdef RF_StringWrapper s1_proc, s2_proc
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return damerau_levenshtein_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
 def damerau_levenshtein_similarity(s1, s2, *, processor=None, score_cutoff=None):
-    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, 0)
+    cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, 0)
     cdef RF_StringWrapper s1_proc, s2_proc
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return damerau_levenshtein_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
@@ -412,9 +406,9 @@ def damerau_levenshtein_normalized_similarity(s1, s2, *, processor=None, score_c
     return damerau_levenshtein_normalized_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 cdef bool GetScorerFlagsDamerauLevenshteinDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
-    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
-    scorer_flags.optimal_score.i64 = 0
-    scorer_flags.worst_score.i64 = INT64_MAX
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_SIZE_T | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.sizet = 0
+    scorer_flags.worst_score.sizet = SIZE_MAX
     return True
 
 cdef bool GetScorerFlagsDamerauLevenshteinNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
@@ -424,9 +418,9 @@ cdef bool GetScorerFlagsDamerauLevenshteinNormalizedDistance(const RF_Kwargs* se
     return True
 
 cdef bool GetScorerFlagsDamerauLevenshteinSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
-    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
-    scorer_flags.optimal_score.i64 = INT64_MAX
-    scorer_flags.worst_score.i64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_SIZE_T | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.sizet = SIZE_MAX
+    scorer_flags.worst_score.sizet = 0
     return True
 
 cdef bool GetScorerFlagsDamerauLevenshteinNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
@@ -449,14 +443,14 @@ SetScorerAttrs(damerau_levenshtein_normalized_similarity, metrics_py.damerau_lev
 
 
 def lcs_seq_distance(s1, s2, *, processor=None, score_cutoff=None):
-    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, INT64_MAX)
+    cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, SIZE_MAX)
     cdef RF_StringWrapper s1_proc, s2_proc
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return lcs_seq_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
 def lcs_seq_similarity(s1, s2, *, processor=None, score_cutoff=None):
-    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, 0)
+    cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, 0)
     cdef RF_StringWrapper s1_proc, s2_proc
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return lcs_seq_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
@@ -501,12 +495,12 @@ def lcs_seq_opcodes(s1, s2, *, processor=None):
 
 
 cdef bool GetScorerFlagsLCSseqDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
-    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_SIZE_T | RF_SCORER_FLAG_SYMMETRIC
     if LCSseqMultiStringSupport(self):
         scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
 
-    scorer_flags.optimal_score.i64 = 0
-    scorer_flags.worst_score.i64 = INT64_MAX
+    scorer_flags.optimal_score.sizet = 0
+    scorer_flags.worst_score.sizet = SIZE_MAX
     return True
 
 cdef bool GetScorerFlagsLCSseqNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
@@ -519,12 +513,12 @@ cdef bool GetScorerFlagsLCSseqNormalizedDistance(const RF_Kwargs* self, RF_Score
     return True
 
 cdef bool GetScorerFlagsLCSseqSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
-    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_SIZE_T | RF_SCORER_FLAG_SYMMETRIC
     if LCSseqMultiStringSupport(self):
         scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
 
-    scorer_flags.optimal_score.i64 = INT64_MAX
-    scorer_flags.worst_score.i64 = 0
+    scorer_flags.optimal_score.sizet = SIZE_MAX
+    scorer_flags.worst_score.sizet = 0
     return True
 
 cdef bool GetScorerFlagsLCSseqNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
@@ -552,14 +546,14 @@ SetFuncAttrs(lcs_seq_editops, metrics_py.lcs_seq_editops)
 SetFuncAttrs(lcs_seq_opcodes, metrics_py.lcs_seq_opcodes)
 
 def indel_distance(s1, s2, *, processor=None, score_cutoff=None):
-    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, INT64_MAX)
+    cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, SIZE_MAX)
     cdef RF_StringWrapper s1_proc, s2_proc
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return indel_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
 def indel_similarity(s1, s2, *, processor=None, score_cutoff=None):
-    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, 0)
+    cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, 0)
     cdef RF_StringWrapper s1_proc, s2_proc
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return indel_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
@@ -604,12 +598,12 @@ def indel_opcodes(s1, s2, *, processor=None):
 
 
 cdef bool GetScorerFlagsIndelDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
-    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_SIZE_T | RF_SCORER_FLAG_SYMMETRIC
     if IndelMultiStringSupport(self):
         scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
 
-    scorer_flags.optimal_score.i64 = 0
-    scorer_flags.worst_score.i64 = INT64_MAX
+    scorer_flags.optimal_score.sizet = 0
+    scorer_flags.worst_score.sizet = SIZE_MAX
     return True
 
 
@@ -623,12 +617,12 @@ cdef bool GetScorerFlagsIndelNormalizedDistance(const RF_Kwargs* self, RF_Scorer
     return True
 
 cdef bool GetScorerFlagsIndelSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
-    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_SIZE_T | RF_SCORER_FLAG_SYMMETRIC
     if IndelMultiStringSupport(self):
         scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
 
-    scorer_flags.optimal_score.i64 = INT64_MAX
-    scorer_flags.worst_score.i64 = 0
+    scorer_flags.optimal_score.sizet = SIZE_MAX
+    scorer_flags.worst_score.sizet = 0
     return True
 
 
@@ -658,14 +652,14 @@ SetFuncAttrs(indel_editops, metrics_py.indel_editops)
 SetFuncAttrs(indel_opcodes, metrics_py.indel_opcodes)
 
 def hamming_distance(s1, s2, *, pad=True, processor=None, score_cutoff=None):
-    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, INT64_MAX)
+    cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, SIZE_MAX)
     cdef RF_StringWrapper s1_proc, s2_proc
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return hamming_distance_func(s1_proc.string, s2_proc.string, pad, c_score_cutoff)
 
 def hamming_similarity(s1, s2, *, pad=True, processor=None, score_cutoff=None):
-    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, 0)
+    cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, 0)
     cdef RF_StringWrapper s1_proc, s2_proc
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
@@ -720,9 +714,9 @@ cdef bool HammingKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     return True
 
 cdef bool GetScorerFlagsHammingDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
-    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
-    scorer_flags.optimal_score.i64 = 0
-    scorer_flags.worst_score.i64 = INT64_MAX
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_SIZE_T | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.sizet = 0
+    scorer_flags.worst_score.sizet = SIZE_MAX
     return True
 
 cdef bool GetScorerFlagsHammingNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
@@ -732,9 +726,9 @@ cdef bool GetScorerFlagsHammingNormalizedDistance(const RF_Kwargs* self, RF_Scor
     return True
 
 cdef bool GetScorerFlagsHammingSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
-    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
-    scorer_flags.optimal_score.i64 = INT64_MAX
-    scorer_flags.worst_score.i64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_SIZE_T | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.sizet = SIZE_MAX
+    scorer_flags.worst_score.sizet = 0
     return True
 
 cdef bool GetScorerFlagsHammingNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
@@ -759,14 +753,14 @@ SetFuncAttrs(hamming_editops, metrics_py.hamming_editops)
 SetFuncAttrs(hamming_opcodes, metrics_py.hamming_opcodes)
 
 def osa_distance(s1, s2, *, processor=None, score_cutoff=None):
-    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, INT64_MAX)
+    cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, SIZE_MAX)
     cdef RF_StringWrapper s1_proc, s2_proc
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return osa_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 def osa_similarity(s1, s2, *, processor=None, score_cutoff=None):
-    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, 0)
+    cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, 0)
     cdef RF_StringWrapper s1_proc, s2_proc
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
@@ -793,12 +787,12 @@ def osa_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
 
 
 cdef bool GetScorerFlagsOSADistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
-    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_SIZE_T | RF_SCORER_FLAG_SYMMETRIC
     if OSAMultiStringSupport(self):
         scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
 
-    scorer_flags.optimal_score.i64 = 0
-    scorer_flags.worst_score.i64 = INT64_MAX
+    scorer_flags.optimal_score.sizet = 0
+    scorer_flags.worst_score.sizet = SIZE_MAX
     return True
 
 cdef bool GetScorerFlagsOSANormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
@@ -811,12 +805,12 @@ cdef bool GetScorerFlagsOSANormalizedDistance(const RF_Kwargs* self, RF_ScorerFl
     return True
 
 cdef bool GetScorerFlagsOSASimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
-    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_SIZE_T | RF_SCORER_FLAG_SYMMETRIC
     if OSAMultiStringSupport(self):
         scorer_flags.flags |= RF_SCORER_FLAG_MULTI_STRING_INIT
 
-    scorer_flags.optimal_score.i64 = INT64_MAX
-    scorer_flags.worst_score.i64 = 0
+    scorer_flags.optimal_score.sizet = SIZE_MAX
+    scorer_flags.worst_score.sizet = 0
     return True
 
 cdef bool GetScorerFlagsOSANormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
@@ -990,14 +984,14 @@ SetScorerAttrs(jaro_winkler_normalized_similarity, metrics_py.jaro_winkler_norma
 ###############################################
 
 def postfix_distance(s1, s2, *, processor=None, score_cutoff=None):
-    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, INT64_MAX)
+    cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, SIZE_MAX)
     cdef RF_StringWrapper s1_proc, s2_proc
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return postfix_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 def postfix_similarity(s1, s2, *, processor=None, score_cutoff=None):
-    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, 0)
+    cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, 0)
     cdef RF_StringWrapper s1_proc, s2_proc
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
@@ -1023,9 +1017,9 @@ def postfix_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     return postfix_normalized_similarity_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 cdef bool GetScorerFlagsPostfixDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
-    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
-    scorer_flags.optimal_score.i64 = 0
-    scorer_flags.worst_score.i64 = INT64_MAX
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_SIZE_T | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.sizet = 0
+    scorer_flags.worst_score.sizet = SIZE_MAX
     return True
 
 cdef bool GetScorerFlagsPostfixNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
@@ -1035,9 +1029,9 @@ cdef bool GetScorerFlagsPostfixNormalizedDistance(const RF_Kwargs* self, RF_Scor
     return True
 
 cdef bool GetScorerFlagsPostfixSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
-    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
-    scorer_flags.optimal_score.i64 = INT64_MAX
-    scorer_flags.worst_score.i64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_SIZE_T | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.sizet = SIZE_MAX
+    scorer_flags.worst_score.sizet = 0
     return True
 
 cdef bool GetScorerFlagsPostfixNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
@@ -1064,14 +1058,14 @@ SetScorerAttrs(postfix_normalized_similarity, metrics_py.postfix_normalized_simi
 ###############################################
 
 def prefix_distance(s1, s2, *, processor=None, score_cutoff=None):
-    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, INT64_MAX)
+    cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, SIZE_MAX)
     cdef RF_StringWrapper s1_proc, s2_proc
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return prefix_distance_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 def prefix_similarity(s1, s2, *, processor=None, score_cutoff=None):
-    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, 0)
+    cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, 0)
     cdef RF_StringWrapper s1_proc, s2_proc
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
@@ -1098,9 +1092,9 @@ def prefix_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
 
 
 cdef bool GetScorerFlagsPrefixDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
-    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
-    scorer_flags.optimal_score.i64 = 0
-    scorer_flags.worst_score.i64 = INT64_MAX
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_SIZE_T | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.sizet = 0
+    scorer_flags.worst_score.sizet = SIZE_MAX
     return True
 
 cdef bool GetScorerFlagsPrefixNormalizedDistance(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
@@ -1110,9 +1104,9 @@ cdef bool GetScorerFlagsPrefixNormalizedDistance(const RF_Kwargs* self, RF_Score
     return True
 
 cdef bool GetScorerFlagsPrefixSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
-    scorer_flags.flags = RF_SCORER_FLAG_RESULT_I64 | RF_SCORER_FLAG_SYMMETRIC
-    scorer_flags.optimal_score.i64 = INT64_MAX
-    scorer_flags.worst_score.i64 = 0
+    scorer_flags.flags = RF_SCORER_FLAG_RESULT_SIZE_T | RF_SCORER_FLAG_SYMMETRIC
+    scorer_flags.optimal_score.sizet = SIZE_MAX
+    scorer_flags.worst_score.sizet = 0
     return True
 
 cdef bool GetScorerFlagsPrefixNormalizedSimilarity(const RF_Kwargs* self, RF_ScorerFlags* scorer_flags) except False nogil:
