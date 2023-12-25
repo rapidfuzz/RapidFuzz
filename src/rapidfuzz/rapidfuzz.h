@@ -156,7 +156,7 @@ typedef bool (*RF_ScorerFuncInit)(RF_ScorerFunc* self, const RF_Kwargs* kwargs, 
 #define RF_SCORER_FLAG_RESULT_I64 ((uint32_t)1 << 6)
 
 /* scorer returns result as size_t */
-#define RF_SCORER_FLAG_RESULT_SIZE_T ((uint32_t)1 << 6)
+#define RF_SCORER_FLAG_RESULT_SIZE_T ((uint32_t)1 << 7)
 
 /* scorer is symmetric: scorer(a, b) == scorer(b, a) */
 #define RF_SCORER_FLAG_SYMMETRIC ((uint32_t)1 << 11)

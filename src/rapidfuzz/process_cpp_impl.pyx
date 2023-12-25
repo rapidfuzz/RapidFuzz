@@ -1727,6 +1727,8 @@ cdef inline MatrixType dtype_to_type_num_py(dtype, scorer, dict scorer_kwargs) e
         flags = params["get_scorer_flags"](**scorer_kwargs)
         if <int>flags["flags"] & RF_SCORER_FLAG_RESULT_I64:
             return MatrixType.INT32
+        if <int>flags["flags"] & RF_SCORER_FLAG_RESULT_SIZE_T:
+            return MatrixType.UINT32
         return MatrixType.FLOAT32
 
     return MatrixType.FLOAT32

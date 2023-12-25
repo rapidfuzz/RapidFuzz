@@ -74,6 +74,9 @@ struct ExtractComp {
         if (m_scorer_flags->flags & RF_SCORER_FLAG_RESULT_F64) {
             return is_first(a, b, m_scorer_flags->optimal_score.f64, m_scorer_flags->worst_score.f64);
         }
+        if (m_scorer_flags->flags & RF_SCORER_FLAG_RESULT_SIZE_T) {
+            return is_first(a, b, m_scorer_flags->optimal_score.sizet, m_scorer_flags->worst_score.sizet);
+        }
         else {
             return is_first(a, b, m_scorer_flags->optimal_score.i64, m_scorer_flags->worst_score.i64);
         }

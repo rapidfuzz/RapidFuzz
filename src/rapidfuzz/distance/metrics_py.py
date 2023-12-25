@@ -196,7 +196,7 @@ __all__ += [
 
 
 def _get_scorer_flags_levenshtein_distance(weights: tuple[int, int, int] | None = (1, 1, 1)) -> dict[str, Any]:
-    flags = ScorerFlag.RESULT_I64
+    flags = ScorerFlag.RESULT_SIZE_T
     if weights is None or weights[0] == weights[1]:
         flags |= ScorerFlag.SYMMETRIC
 
@@ -208,7 +208,7 @@ def _get_scorer_flags_levenshtein_distance(weights: tuple[int, int, int] | None 
 
 
 def _get_scorer_flags_levenshtein_similarity(weights: tuple[int, int, int] | None = (1, 1, 1)) -> dict[str, Any]:
-    flags = ScorerFlag.RESULT_I64
+    flags = ScorerFlag.RESULT_SIZE_T
     if weights is None or weights[0] == weights[1]:
         flags |= ScorerFlag.SYMMETRIC
 

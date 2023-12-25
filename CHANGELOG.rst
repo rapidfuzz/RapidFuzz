@@ -15,6 +15,7 @@ Performance
 Changed
 ~~~~~~~
 * upgrade to ``Cython==3.0.7``
+* cdist for many metrics now returns a matrix of ``uint32`` instead of ``int32`` by default
 
 [3.5.2] - 2023-11-02
 ^^^^^^^^^^^^^^^^^^^^

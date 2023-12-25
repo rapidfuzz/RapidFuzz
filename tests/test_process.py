@@ -510,7 +510,7 @@ def test_generators():
 
 def test_cdist_pure_python_dtype():
     np = pytest.importorskip("numpy")
-    assert process.cdist(["test"], ["test"], scorer=Levenshtein_py.distance).dtype == np.int32
-    assert process.cdist(["test"], ["test"], scorer=Levenshtein_py.similarity).dtype == np.int32
+    assert process.cdist(["test"], ["test"], scorer=Levenshtein_py.distance).dtype == np.uint32
+    assert process.cdist(["test"], ["test"], scorer=Levenshtein_py.similarity).dtype == np.uint32
     assert process.cdist(["test"], ["test"], scorer=Levenshtein_py.normalized_distance).dtype == np.float32
     assert process.cdist(["test"], ["test"], scorer=Levenshtein_py.normalized_similarity).dtype == np.float32

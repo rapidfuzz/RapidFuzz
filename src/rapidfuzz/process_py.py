@@ -527,6 +527,8 @@ def _dtype_to_type_num(
         flags = params["get_scorer_flags"](**scorer_kwargs)
         if flags["flags"] & ScorerFlag.RESULT_I64:
             return np.int32
+        if flags["flags"] & ScorerFlag.RESULT_SIZE_T:
+            return np.uint32
         return np.float32
 
     return np.float32
