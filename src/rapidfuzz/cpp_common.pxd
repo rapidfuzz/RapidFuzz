@@ -368,6 +368,24 @@ cdef inline int64_t get_score_cutoff_i64(score_cutoff, const RF_ScorerFlags* sco
 
     return c_score_cutoff
 
+cdef inline size_t get_score_cutoff_size_t(score_cutoff, const RF_ScorerFlags* scorer_flags) except *:
+    cdef size_t worst_score = scorer_flags.worst_score.sizet
+    cdef size_t optimal_score = scorer_flags.optimal_score.sizet
+    cdef size_t c_score_cutoff = worst_score
+
+    if score_cutoff is not None:
+        c_score_cutoff = score_cutoff
+        if optimal_score > worst_score:
+            # e.g. 0.0 - 100.0
+            if c_score_cutoff < worst_score or c_score_cutoff > optimal_score:
+                raise TypeError(f"score_cutoff has to be in the range of {worst_score} - {optimal_score}")
+        else:
+            # e.g. DBL_MAX - 0
+            if c_score_cutoff > worst_score or c_score_cutoff < optimal_score:
+                raise TypeError(f"score_cutoff has to be in the range of {optimal_score} - {worst_score}")
+
+    return c_score_cutoff
+
 cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except *:
     cdef RF_Preprocessor* preprocess_context = NULL
 

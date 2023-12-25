@@ -100,8 +100,9 @@ typedef struct _RF_ScorerFunc {
      * @brief Calculate edit distance
      *
      * @note has to be specified using RF_SCORER_FLAG_*:
-     * - RF_SCORER_FLAG_RESULT_F64 -> call_f64
-     * - RF_SCORER_FLAG_RESULT_I64 -> call_i64
+     * - RF_SCORER_FLAG_RESULT_F64 -> call.f64
+     * - RF_SCORER_FLAG_RESULT_I64 -> call.i64
+     * - RF_SCORER_FLAG_RESULT_SIZE_T -> call.sizet
      *
      * @param[in] self pointer to RF_ScorerFunc instance
      * @param[in] str string to calculate distance with `strings` passed into `ctor`
@@ -116,6 +117,8 @@ typedef struct _RF_ScorerFunc {
                     double score_cutoff, double score_hint, double* result);
         bool (*i64)(const struct _RF_ScorerFunc* self, const RF_String* str, int64_t str_count,
                     int64_t score_cutoff, int64_t score_hint, int64_t* result);
+        bool (*sizet)(const struct _RF_ScorerFunc* self, const RF_String* str, int64_t str_count,
+                    size_t score_cutoff, size_t score_hint, size_t* result);
     } call;
 
     /* members */
@@ -152,6 +155,9 @@ typedef bool (*RF_ScorerFuncInit)(RF_ScorerFunc* self, const RF_Kwargs* kwargs, 
 /* scorer returns result as int64_t */
 #define RF_SCORER_FLAG_RESULT_I64 ((uint32_t)1 << 6)
 
+/* scorer returns result as size_t */
+#define RF_SCORER_FLAG_RESULT_SIZE_T ((uint32_t)1 << 6)
+
 /* scorer is symmetric: scorer(a, b) == scorer(b, a) */
 #define RF_SCORER_FLAG_SYMMETRIC ((uint32_t)1 << 11)
 
@@ -177,6 +183,7 @@ typedef struct _RF_ScorerFlags {
     union {
         double f64;
         int64_t i64;
+        size_t sizet;
     } optimal_score;
 
     /**
@@ -185,6 +192,7 @@ typedef struct _RF_ScorerFlags {
     union {
         double f64;
         int64_t i64;
+        size_t sizet;
     } worst_score;
 } RF_ScorerFlags;
 

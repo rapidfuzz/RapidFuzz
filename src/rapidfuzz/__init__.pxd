@@ -13,6 +13,7 @@ cdef extern from "rapidfuzz.h":
     uint32_t RF_SCORER_FLAG_MULTI_STRING_CALL
     uint32_t RF_SCORER_FLAG_RESULT_F64
     uint32_t RF_SCORER_FLAG_RESULT_I64
+    uint32_t RF_SCORER_FLAG_RESULT_SIZE_T
     uint32_t RF_SCORER_FLAG_SYMMETRIC
     uint32_t RF_SCORER_FLAG_TRIANGLE_INEQUALITY
     uint32_t RF_SCORER_NONE_IS_WORST_SCORE
@@ -41,8 +42,9 @@ cdef extern from "rapidfuzz.h":
     ctypedef bool (*RF_KwargsInit) (RF_Kwargs*, dict) except False
 
     ctypedef union _RF_ScorerFunc_union:
-        bool (*f64) (const RF_ScorerFunc*, const RF_String*, int64_t, double, double*) except False nogil
-        bool (*i64) (const RF_ScorerFunc*, const RF_String*, int64_t, int64_t, int64_t*) except False nogil
+        bool (*f64) (const RF_ScorerFunc*, const RF_String*, int64_t, double, double, double*) except False nogil
+        bool (*i64) (const RF_ScorerFunc*, const RF_String*, int64_t, int64_t, int64_t, int64_t*) except False nogil
+        bool (*sizet) (const RF_ScorerFunc*, const RF_String*, int64_t, size_t, size_t, size_t*) except False nogil
 
     ctypedef struct RF_ScorerFunc:
         void (*dtor) (RF_ScorerFunc*) nogil
@@ -55,10 +57,12 @@ cdef extern from "rapidfuzz.h":
     ctypedef union _RF_RF_ScorerFlags_OptimalScore_union:
         double  f64
         int64_t i64
+        size_t sizet
 
     ctypedef union _RF_RF_ScorerFlags_WorstScore_union:
         double  f64
         int64_t i64
+        size_t sizet
 
     ctypedef struct RF_ScorerFlags:
         uint32_t flags

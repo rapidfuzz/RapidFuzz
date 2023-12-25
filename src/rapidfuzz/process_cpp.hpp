@@ -4,9 +4,9 @@
 #include "taskflow/algorithm/for_each.hpp"
 #include "taskflow/taskflow.hpp"
 #include <atomic>
-#include <chrono>
 #include <exception>
-#include <numeric>
+#include <stdexcept>
+#include <vector>
 using namespace std::chrono_literals;
 
 template <typename T>
@@ -150,6 +150,11 @@ struct RF_ScorerWrapper {
     {
         PyErr2RuntimeExn(scorer_func.call.i64(&scorer_func, str, 1, score_cutoff, score_hint, result));
     }
+
+    void call(const RF_String* str, size_t score_cutoff, size_t score_hint, size_t* result) const
+    {
+        PyErr2RuntimeExn(scorer_func.call.sizet(&scorer_func, str, 1, score_cutoff, score_hint, result));
+    }
 };
 
 template <typename T>
@@ -157,6 +162,9 @@ bool is_lowest_score_worst(const RF_ScorerFlags* scorer_flags)
 {
     if (std::is_same<T, double>::value) {
         return scorer_flags->optimal_score.f64 > scorer_flags->worst_score.f64;
+    }
+    else if (std::is_same<T, size_t>::value) {
+        return scorer_flags->optimal_score.sizet > scorer_flags->worst_score.sizet;
     }
     else {
         return scorer_flags->optimal_score.i64 > scorer_flags->worst_score.i64;
@@ -168,6 +176,9 @@ T get_optimal_score(const RF_ScorerFlags* scorer_flags)
 {
     if (std::is_same<T, double>::value) {
         return (T)scorer_flags->optimal_score.f64;
+    }
+    else if (std::is_same<T, size_t>::value) {
+        return (T)scorer_flags->optimal_score.sizet;
     }
     else {
         return (T)scorer_flags->optimal_score.i64;
