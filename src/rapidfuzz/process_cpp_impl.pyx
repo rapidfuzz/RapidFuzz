@@ -137,6 +137,7 @@ cdef extern from "process_cpp.hpp":
     RfMatrix cdist_two_lists_impl[T](    const RF_ScorerFlags* scorer_flags, const RF_Kwargs*, RF_Scorer*,
         const vector[RF_StringWrapper]&, const vector[RF_StringWrapper]&, MatrixType, int, T, T, T) except +
 
+
 cdef inline bool is_none(s):
     if s is None or s is pandas_NA:
         return True
@@ -145,6 +146,7 @@ cdef inline bool is_none(s):
         return True
 
     return False
+
 
 cdef inline vector[DictStringElem] preprocess_dict(queries, processor) except *:
     cdef vector[DictStringElem] proc_queries
@@ -198,6 +200,7 @@ cdef inline vector[DictStringElem] preprocess_dict(queries, processor) except *:
 
     return move(proc_queries)
 
+
 cdef inline vector[ListStringElem] preprocess_list(queries, processor) except *:
     cdef vector[ListStringElem] proc_queries
     cdef int64_t queries_len = <int64_t>len(queries)
@@ -247,6 +250,7 @@ cdef inline vector[ListStringElem] preprocess_list(queries, processor) except *:
 
     return move(proc_queries)
 
+
 cdef inline extractOne_dict_f64(
     query, choices, RF_Scorer* scorer, const RF_ScorerFlags* scorer_flags,
     processor,
@@ -264,8 +268,8 @@ cdef inline extractOne_dict_f64(
             processor_context = <RF_Preprocessor*>PyCapsule_GetPointer(processor_capsule, NULL)
 
     cdef RF_StringWrapper proc_query = move(RF_StringWrapper(conv_sequence(query)))
-    cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, scorer_flags)
-    cdef double c_score_hint = get_score_cutoff_f64(score_hint, scorer_flags)
+    cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, scorer_flags.worst_score.f64, scorer_flags.optimal_score.f64)
+    cdef double c_score_hint = get_score_cutoff_f64(score_hint, scorer_flags.worst_score.f64, scorer_flags.optimal_score.f64)
 
     cdef RF_ScorerFunc scorer_func
     scorer.scorer_func_init(&scorer_func, scorer_kwargs, 1, &proc_query.string)
@@ -335,8 +339,8 @@ cdef inline extractOne_dict_i64(
             processor_context = <RF_Preprocessor*>PyCapsule_GetPointer(processor_capsule, NULL)
 
     cdef RF_StringWrapper proc_query = move(RF_StringWrapper(conv_sequence(query)))
-    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, scorer_flags)
-    cdef int64_t c_score_hint = get_score_cutoff_i64(score_hint, scorer_flags)
+    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, scorer_flags.worst_score.i64, scorer_flags.optimal_score.i64)
+    cdef int64_t c_score_hint = get_score_cutoff_i64(score_hint, scorer_flags.worst_score.i64, scorer_flags.optimal_score.i64)
 
     cdef RF_ScorerFunc scorer_func
     scorer.scorer_func_init(&scorer_func, scorer_kwargs, 1, &proc_query.string)
@@ -406,8 +410,8 @@ cdef inline extractOne_dict_size_t(
             processor_context = <RF_Preprocessor*>PyCapsule_GetPointer(processor_capsule, NULL)
 
     cdef RF_StringWrapper proc_query = move(RF_StringWrapper(conv_sequence(query)))
-    cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, scorer_flags)
-    cdef size_t c_score_hint = get_score_cutoff_size_t(score_hint, scorer_flags)
+    cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, scorer_flags.worst_score.sizet, scorer_flags.optimal_score.sizet)
+    cdef size_t c_score_hint = get_score_cutoff_size_t(score_hint, scorer_flags.worst_score.sizet, scorer_flags.optimal_score.sizet)
 
     cdef RF_ScorerFunc scorer_func
     scorer.scorer_func_init(&scorer_func, scorer_kwargs, 1, &proc_query.string)
@@ -503,8 +507,8 @@ cdef inline extractOne_list_f64(
             processor_context = <RF_Preprocessor*>PyCapsule_GetPointer(processor_capsule, NULL)
 
     cdef RF_StringWrapper proc_query = move(RF_StringWrapper(conv_sequence(query)))
-    cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, scorer_flags)
-    cdef double c_score_hint = get_score_cutoff_f64(score_hint, scorer_flags)
+    cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, scorer_flags.worst_score.f64, scorer_flags.optimal_score.f64)
+    cdef double c_score_hint = get_score_cutoff_f64(score_hint, scorer_flags.worst_score.f64, scorer_flags.optimal_score.f64)
 
     cdef RF_ScorerFunc scorer_func
     scorer.scorer_func_init(&scorer_func, scorer_kwargs, 1, &proc_query.string)
@@ -572,8 +576,8 @@ cdef inline extractOne_list_i64(
             processor_context = <RF_Preprocessor*>PyCapsule_GetPointer(processor_capsule, NULL)
 
     cdef RF_StringWrapper proc_query = move(RF_StringWrapper(conv_sequence(query)))
-    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, scorer_flags)
-    cdef int64_t c_score_hint = get_score_cutoff_i64(score_hint, scorer_flags)
+    cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, scorer_flags.worst_score.i64, scorer_flags.optimal_score.i64)
+    cdef int64_t c_score_hint = get_score_cutoff_i64(score_hint, scorer_flags.worst_score.i64, scorer_flags.optimal_score.i64)
 
     cdef RF_ScorerFunc scorer_func
     scorer.scorer_func_init(&scorer_func, scorer_kwargs, 1, &proc_query.string)
@@ -641,8 +645,8 @@ cdef inline extractOne_list_size_t(
             processor_context = <RF_Preprocessor*>PyCapsule_GetPointer(processor_capsule, NULL)
 
     cdef RF_StringWrapper proc_query = move(RF_StringWrapper(conv_sequence(query)))
-    cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, scorer_flags)
-    cdef size_t c_score_hint = get_score_cutoff_size_t(score_hint, scorer_flags)
+    cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, scorer_flags.worst_score.sizet, scorer_flags.optimal_score.sizet)
+    cdef size_t c_score_hint = get_score_cutoff_size_t(score_hint, scorer_flags.worst_score.sizet, scorer_flags.optimal_score.sizet)
 
     cdef RF_ScorerFunc scorer_func
     scorer.scorer_func_init(&scorer_func, scorer_kwargs, 1, &proc_query.string)
@@ -863,8 +867,8 @@ cdef inline extract_dict_f64(
 
     cdef vector[DictMatchElem[double]] results = extract_dict_impl[double](
         scorer_kwargs, scorer_flags, scorer, proc_query, proc_choices,
-        get_score_cutoff_f64(score_cutoff, scorer_flags),
-        get_score_cutoff_f64(score_hint, scorer_flags)
+        get_score_cutoff_f64(score_cutoff, scorer_flags.worst_score.f64, scorer_flags.optimal_score.f64),
+        get_score_cutoff_f64(score_hint, scorer_flags.worst_score.f64, scorer_flags.optimal_score.f64)
     )
 
     # due to score_cutoff not always completely filled
@@ -902,8 +906,8 @@ cdef inline extract_dict_i64(
 
     cdef vector[DictMatchElem[int64_t]] results = extract_dict_impl[int64_t](
         scorer_kwargs, scorer_flags, scorer, proc_query, proc_choices,
-        get_score_cutoff_i64(score_cutoff, scorer_flags),
-        get_score_cutoff_i64(score_hint, scorer_flags)
+        get_score_cutoff_i64(score_cutoff, scorer_flags.worst_score.i64, scorer_flags.optimal_score.i64),
+        get_score_cutoff_i64(score_hint, scorer_flags.worst_score.i64, scorer_flags.optimal_score.i64)
     )
 
     # due to score_cutoff not always completely filled
@@ -941,8 +945,8 @@ cdef inline extract_dict_size_t(
 
     cdef vector[DictMatchElem[size_t]] results = extract_dict_impl[size_t](
         scorer_kwargs, scorer_flags, scorer, proc_query, proc_choices,
-        get_score_cutoff_size_t(score_cutoff, scorer_flags),
-        get_score_cutoff_size_t(score_hint, scorer_flags)
+        get_score_cutoff_size_t(score_cutoff, scorer_flags.worst_score.sizet, scorer_flags.optimal_score.sizet),
+        get_score_cutoff_size_t(score_hint, scorer_flags.worst_score.sizet, scorer_flags.optimal_score.sizet)
     )
 
     # due to score_cutoff not always completely filled
@@ -1008,8 +1012,8 @@ cdef inline extract_list_f64(
 
     cdef vector[ListMatchElem[double]] results = extract_list_impl[double](
         scorer_kwargs, scorer_flags, scorer, proc_query, proc_choices,
-        get_score_cutoff_f64(score_cutoff, scorer_flags),
-        get_score_cutoff_f64(score_hint, scorer_flags)
+        get_score_cutoff_f64(score_cutoff, scorer_flags.worst_score.f64, scorer_flags.optimal_score.f64),
+        get_score_cutoff_f64(score_hint, scorer_flags.worst_score.f64, scorer_flags.optimal_score.f64)
     )
 
     # due to score_cutoff not always completely filled
@@ -1047,8 +1051,8 @@ cdef inline extract_list_i64(
 
     cdef vector[ListMatchElem[int64_t]] results = extract_list_impl[int64_t](
         scorer_kwargs, scorer_flags, scorer, proc_query, proc_choices,
-        get_score_cutoff_i64(score_cutoff, scorer_flags),
-        get_score_cutoff_i64(score_hint, scorer_flags)
+        get_score_cutoff_i64(score_cutoff, scorer_flags.worst_score.i64, scorer_flags.optimal_score.i64),
+        get_score_cutoff_i64(score_hint, scorer_flags.worst_score.i64, scorer_flags.optimal_score.i64)
     )
 
     # due to score_cutoff not always completely filled
@@ -1086,8 +1090,8 @@ cdef inline extract_list_size_t(
 
     cdef vector[ListMatchElem[size_t]] results = extract_list_impl[size_t](
         scorer_kwargs, scorer_flags, scorer, proc_query, proc_choices,
-        get_score_cutoff_size_t(score_cutoff, scorer_flags),
-        get_score_cutoff_size_t(score_hint, scorer_flags)
+        get_score_cutoff_size_t(score_cutoff, scorer_flags.worst_score.sizet, scorer_flags.optimal_score.sizet),
+        get_score_cutoff_size_t(score_hint, scorer_flags.worst_score.sizet, scorer_flags.optimal_score.sizet)
     )
 
     # due to score_cutoff not always completely filled
@@ -1273,8 +1277,8 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=None, score_cutoff=
         float64
         """
         cdef RF_String proc_str
-        cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, &scorer_flags)
-        cdef double c_score_hint = get_score_cutoff_f64(score_hint, &scorer_flags)
+        cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, scorer_flags.worst_score.f64, scorer_flags.optimal_score.f64)
+        cdef double c_score_hint = get_score_cutoff_f64(score_hint, scorer_flags.worst_score.f64, scorer_flags.optimal_score.f64)
         query_proc = RF_StringWrapper(conv_sequence(query))
 
         cdef RF_ScorerFunc scorer_func
@@ -1316,8 +1320,8 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=None, score_cutoff=
         int64_t
         """
         cdef RF_String proc_str
-        cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, &scorer_flags)
-        cdef int64_t c_score_hint = get_score_cutoff_i64(score_hint, &scorer_flags)
+        cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, scorer_flags.worst_score.i64, scorer_flags.optimal_score.i64)
+        cdef int64_t c_score_hint = get_score_cutoff_i64(score_hint, scorer_flags.worst_score.i64, scorer_flags.optimal_score.i64)
         query_proc = RF_StringWrapper(conv_sequence(query))
 
         cdef RF_ScorerFunc scorer_func
@@ -1359,8 +1363,8 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=None, score_cutoff=
         size_t
         """
         cdef RF_String proc_str
-        cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, &scorer_flags)
-        cdef size_t c_score_hint = get_score_cutoff_size_t(score_hint, &scorer_flags)
+        cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, scorer_flags.worst_score.sizet, scorer_flags.optimal_score.sizet)
+        cdef size_t c_score_hint = get_score_cutoff_size_t(score_hint, scorer_flags.worst_score.sizet, scorer_flags.optimal_score.sizet)
         query_proc = RF_StringWrapper(conv_sequence(query))
 
         cdef RF_ScorerFunc scorer_func
@@ -1402,8 +1406,8 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=None, score_cutoff=
         float64
         """
         cdef RF_String proc_str
-        cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, &scorer_flags)
-        cdef double c_score_hint = get_score_cutoff_f64(score_hint, &scorer_flags)
+        cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, scorer_flags.worst_score.f64, scorer_flags.optimal_score.f64)
+        cdef double c_score_hint = get_score_cutoff_f64(score_hint, scorer_flags.worst_score.f64, scorer_flags.optimal_score.f64)
         query_proc = RF_StringWrapper(conv_sequence(query))
 
         cdef RF_ScorerFunc scorer_func
@@ -1445,8 +1449,8 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=None, score_cutoff=
         int64_t
         """
         cdef RF_String proc_str
-        cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, &scorer_flags)
-        cdef int64_t c_score_hint = get_score_cutoff_i64(score_hint, &scorer_flags)
+        cdef int64_t c_score_cutoff = get_score_cutoff_i64(score_cutoff, scorer_flags.worst_score.i64, scorer_flags.optimal_score.i64)
+        cdef int64_t c_score_hint = get_score_cutoff_i64(score_hint, scorer_flags.worst_score.i64, scorer_flags.optimal_score.i64)
         query_proc = RF_StringWrapper(conv_sequence(query))
 
         cdef RF_ScorerFunc scorer_func
@@ -1488,8 +1492,8 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=None, score_cutoff=
         size_t
         """
         cdef RF_String proc_str
-        cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, &scorer_flags)
-        cdef size_t c_score_hint = get_score_cutoff_size_t(score_hint, &scorer_flags)
+        cdef size_t c_score_cutoff = get_score_cutoff_size_t(score_cutoff, scorer_flags.worst_score.sizet, scorer_flags.optimal_score.sizet)
+        cdef size_t c_score_hint = get_score_cutoff_size_t(score_hint, scorer_flags.worst_score.sizet, scorer_flags.optimal_score.sizet)
         query_proc = RF_StringWrapper(conv_sequence(query))
 
         cdef RF_ScorerFunc scorer_func
@@ -1787,8 +1791,8 @@ cdef Matrix cdist_two_lists(
             scorer_kwargs, scorer, proc_queries, proc_choices,
             dtype_to_type_num_f64(dtype),
             c_workers,
-            get_score_cutoff_f64(score_cutoff, scorer_flags),
-            get_score_cutoff_f64(score_hint, scorer_flags),
+            get_score_cutoff_f64(score_cutoff, scorer_flags.worst_score.f64, scorer_flags.optimal_score.f64),
+            get_score_cutoff_f64(score_hint, scorer_flags.worst_score.f64, scorer_flags.optimal_score.f64),
             <double>score_multiplier,
             scorer_flags.worst_score.f64,
         )
@@ -1798,8 +1802,8 @@ cdef Matrix cdist_two_lists(
             scorer_kwargs, scorer, proc_queries, proc_choices,
             dtype_to_type_num_size_t(dtype),
             c_workers,
-            get_score_cutoff_size_t(score_cutoff, scorer_flags),
-            get_score_cutoff_size_t(score_hint, scorer_flags),
+            get_score_cutoff_size_t(score_cutoff, scorer_flags.worst_score.sizet, scorer_flags.optimal_score.sizet),
+            get_score_cutoff_size_t(score_hint, scorer_flags.worst_score.sizet, scorer_flags.optimal_score.sizet),
             <size_t>score_multiplier,
             scorer_flags.worst_score.sizet
         )
@@ -1809,8 +1813,8 @@ cdef Matrix cdist_two_lists(
             scorer_kwargs, scorer, proc_queries, proc_choices,
             dtype_to_type_num_i64(dtype),
             c_workers,
-            get_score_cutoff_i64(score_cutoff, scorer_flags),
-            get_score_cutoff_i64(score_hint, scorer_flags),
+            get_score_cutoff_i64(score_cutoff, scorer_flags.worst_score.i64, scorer_flags.optimal_score.i64),
+            get_score_cutoff_i64(score_hint, scorer_flags.worst_score.i64, scorer_flags.optimal_score.i64),
             <int64_t>score_multiplier,
             scorer_flags.worst_score.i64
         )
@@ -1841,8 +1845,8 @@ cdef Matrix cdist_single_list(
             scorer_kwargs, scorer, proc_queries,
             dtype_to_type_num_f64(dtype),
             c_workers,
-            get_score_cutoff_f64(score_cutoff, scorer_flags),
-            get_score_cutoff_f64(score_hint, scorer_flags),
+            get_score_cutoff_f64(score_cutoff, scorer_flags.worst_score.f64, scorer_flags.optimal_score.f64),
+            get_score_cutoff_f64(score_hint, scorer_flags.worst_score.f64, scorer_flags.optimal_score.f64),
             <double>score_multiplier,
             scorer_flags.worst_score.f64
         )
@@ -1852,8 +1856,8 @@ cdef Matrix cdist_single_list(
             scorer_kwargs, scorer, proc_queries,
             dtype_to_type_num_size_t(dtype),
             c_workers,
-            get_score_cutoff_size_t(score_cutoff, scorer_flags),
-            get_score_cutoff_size_t(score_hint, scorer_flags),
+            get_score_cutoff_size_t(score_cutoff, scorer_flags.worst_score.sizet, scorer_flags.optimal_score.sizet),
+            get_score_cutoff_size_t(score_hint, scorer_flags.worst_score.sizet, scorer_flags.optimal_score.sizet),
             <size_t>score_multiplier,
             scorer_flags.worst_score.sizet
         )
@@ -1863,8 +1867,8 @@ cdef Matrix cdist_single_list(
             scorer_kwargs, scorer, proc_queries,
             dtype_to_type_num_i64(dtype),
             c_workers,
-            get_score_cutoff_i64(score_cutoff, scorer_flags),
-            get_score_cutoff_i64(score_hint, scorer_flags),
+            get_score_cutoff_i64(score_cutoff, scorer_flags.worst_score.i64, scorer_flags.optimal_score.i64),
+            get_score_cutoff_i64(score_hint, scorer_flags.worst_score.i64, scorer_flags.optimal_score.i64),
             <int64_t>score_multiplier,
             scorer_flags.worst_score.i64
         )

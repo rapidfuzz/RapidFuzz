@@ -34,6 +34,10 @@ from libcpp cimport bool
 
 from array import array
 
+try:
+    from pandas import NA as pandas_NA
+except:
+    pandas_NA = None
 
 cdef extern from "fuzz_cpp.hpp":
     double ratio_func(                    const RF_String&, const RF_String&, double) except + nogil
@@ -63,7 +67,7 @@ cdef extern from "fuzz_cpp.hpp":
     bool RatioMultiStringSupport(const RF_Kwargs*) nogil
 
 cdef inline bool is_none(s):
-    if s is None:
+    if s is None or s is pandas_NA:
         return True
 
     if isinstance(s, float) and isnan(<double>s):
