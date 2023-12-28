@@ -1,11 +1,11 @@
 <h1 align="center">
-<img src="https://raw.githubusercontent.com/maxbachmann/RapidFuzz/main/docs/img/RapidFuzz.svg?sanitize=true" alt="RapidFuzz" width="400">
+<img src="https://raw.githubusercontent.com/rapidfuzz/RapidFuzz/main/docs/img/RapidFuzz.svg?sanitize=true" alt="RapidFuzz" width="400">
 </h1>
 <h4 align="center">Rapid fuzzy string matching in Python and C++ using the Levenshtein Distance</h4>
 
 <p align="center">
-  <a href="https://github.com/maxbachmann/RapidFuzz/actions">
-    <img src="https://github.com/maxbachmann/RapidFuzz/workflows/Test%20Build/badge.svg"
+  <a href="https://github.com/rapidfuzz/RapidFuzz/actions">
+    <img src="https://github.com/rapidfuzz/RapidFuzz/workflows/Test%20Build/badge.svg"
          alt="Continuous Integration">
   </a>
   <a href="https://pypi.org/project/rapidfuzz/">
@@ -20,16 +20,16 @@
     <img src="https://img.shields.io/pypi/pyversions/rapidfuzz"
          alt="Python versions">
   </a><br/>
-  <a href="https://maxbachmann.github.io/RapidFuzz">
+  <a href="https://rapidfuzz.github.io/RapidFuzz">
     <img src="https://img.shields.io/badge/-documentation-blue"
          alt="Documentation">
   </a>
-  <a href="https://codecov.io/gh/maxbachmann/RapidFuzz">
-    <img src="https://codecov.io/gh/maxbachmann/RapidFuzz/branch/main/graph/badge.svg?token=1IJLT65K8B"
+  <a href="https://codecov.io/gh/rapidfuzz/RapidFuzz">
+    <img src="https://codecov.io/gh/rapidfuzz/RapidFuzz/branch/main/graph/badge.svg?token=1IJLT65K8B"
          alt="Code Coverage">
   </a>
-  <a href="https://github.com/maxbachmann/RapidFuzz/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/maxbachmann/rapidfuzz"
+  <a href="https://github.com/rapidfuzz/RapidFuzz/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/rapidfuzz/rapidfuzz"
          alt="GitHub license">
   </a>
 </p>
@@ -47,9 +47,9 @@
 RapidFuzz is a fast string matching library for Python and C++, which is using the string similarity calculations from [FuzzyWuzzy](https://github.com/seatgeek/fuzzywuzzy). However there are a couple of aspects that set RapidFuzz apart from FuzzyWuzzy:
 1) It is MIT licensed so it can be used whichever License you might want to choose for your project, while you're forced to adopt the GPL license when using FuzzyWuzzy
 2) It provides many string_metrics like hamming or jaro_winkler, which are not included in FuzzyWuzzy
-3) It is mostly written in C++ and on top of this comes with a lot of Algorithmic improvements to make string matching even faster, while still providing the same results. For detailed benchmarks check the [documentation](https://maxbachmann.github.io/RapidFuzz)
+3) It is mostly written in C++ and on top of this comes with a lot of Algorithmic improvements to make string matching even faster, while still providing the same results. For detailed benchmarks check the [documentation](https://rapidfuzz.github.io/RapidFuzz)
 4) Fixes multiple bugs in the `partial_ratio` implementation
-5) It can be largely used as a drop in replacement for `fuzzywuzzy`. However there are a couple API differences described [here](https://github.com/maxbachmann/RapidFuzz/blob/main/api_differences.md)
+5) It can be largely used as a drop in replacement for `fuzzywuzzy`. However there are a couple API differences described [here](https://github.com/rapidfuzz/RapidFuzz/blob/main/api_differences.md)
 
 ## Requirements
 
@@ -88,13 +88,13 @@ conda install -c conda-forge rapidfuzz
 RapidFuzz can be installed directly from the source distribution by cloning the repository. This requires a C++17 capable compiler.
 
 ```bash
-git clone --recursive https://github.com/maxbachmann/rapidfuzz.git
+git clone --recursive https://github.com/rapidfuzz/rapidfuzz.git
 cd rapidfuzz
 pip install .
 ```
 
 ## Usage
-Some simple functions are shown below. A complete documentation of all functions can be found [here](https://maxbachmann.github.io/RapidFuzz/Usage/index.html).<br>
+Some simple functions are shown below. A complete documentation of all functions can be found [here](https://rapidfuzz.github.io/RapidFuzz/Usage/index.html).<br>
 Note that from RapidFuzz 3.0.0, strings are not preprocessed(removing all non alphanumeric characters, trimming whitespaces, converting all characters to lower case) by default. Which means that when comparing two strings that have the same characters but different cases("this is a word", "THIS IS A WORD") their similarity score value might be different, so when comparing such strings you might see a difference in score value compared to previous versions. Some examples of string matching with preprocessing can be found [here](#weighted-ratio).
 
 ### Scorers
@@ -193,12 +193,12 @@ Here are some examples on the usage of processors in RapidFuzz:
 ('Dallas Cowboys', 90.0, 3)
 ```
 
-The full documentation of processors can be found [here](https://maxbachmann.github.io/RapidFuzz/Usage/process.html)
+The full documentation of processors can be found [here](https://rapidfuzz.github.io/RapidFuzz/Usage/process.html)
 
 ## Benchmark
 
 The following benchmark gives a quick performance comparison between RapidFuzz and FuzzyWuzzy.
-More detailed benchmarks for the string metrics can be found in the [documentation](https://maxbachmann.github.io/RapidFuzz). For this simple comparison I generated a list of 10.000 strings with length 10, that is compared to a sample of 100 elements from this list:
+More detailed benchmarks for the string metrics can be found in the [documentation](https://rapidfuzz.github.io/RapidFuzz). For this simple comparison I generated a list of 10.000 strings with length 10, that is compared to a sample of 100 elements from this list:
 ```python
 words = [
     "".join(random.choice(string.ascii_letters + string.digits) for _ in range(10))
@@ -216,7 +216,7 @@ for sample in samples:
 ```
 The following graph shows how many elements are processed per second with each of the scorers. There are big performance differences between the different scorers. However each of the scorers is faster in RapidFuzz
 
-<img src="https://raw.githubusercontent.com/maxbachmann/RapidFuzz/main/docs/img/scorer.svg?sanitize=true" alt="Benchmark Scorer">
+<img src="https://raw.githubusercontent.com/rapidfuzz/RapidFuzz/main/docs/img/scorer.svg?sanitize=true" alt="Benchmark Scorer">
 
 The second benchmark compares the performance when the scorers are used in combination with cdist in the following
 way:
@@ -225,7 +225,7 @@ cdist(samples, words, scorer=scorer)
 ```
 The following graph shows how many elements are processed per second with each of the scorers. In RapidFuzz the usage of scorers through processors like `cdist` is a lot faster than directly using it. That's why they should be used whenever possible.
 
-<img src="https://raw.githubusercontent.com/maxbachmann/RapidFuzz/main/docs/img/cdist.svg?sanitize=true" alt="Benchmark cdist">
+<img src="https://raw.githubusercontent.com/rapidfuzz/RapidFuzz/main/docs/img/cdist.svg?sanitize=true" alt="Benchmark cdist">
 
 
 ## Support the project

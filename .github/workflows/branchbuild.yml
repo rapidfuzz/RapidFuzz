@@ -43,7 +43,7 @@ jobs:
 
       - name: Install rapidfuzz-cpp
         run: |
-          git clone https://github.com/maxbachmann/rapidfuzz-cpp.git
+          git clone https://github.com/rapidfuzz/rapidfuzz-cpp.git
           cd rapidfuzz-cpp
           git checkout v1.0.1
           mkdir build && cd build

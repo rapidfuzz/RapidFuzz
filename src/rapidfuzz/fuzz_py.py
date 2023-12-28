@@ -449,7 +449,7 @@ def token_set_ratio(
     tokens_b = set(_split_sequence(s2))
 
     # in FuzzyWuzzy this returns 0. For sake of compatibility return 0 here as well
-    # see https://github.com/maxbachmann/RapidFuzz/issues/110
+    # see https://github.com/rapidfuzz/RapidFuzz/issues/110
     if not tokens_a or not tokens_b:
         return 0
 
@@ -636,7 +636,7 @@ def partial_token_set_ratio(
     tokens_a = set(_split_sequence(s1))
     tokens_b = set(_split_sequence(s2))
     # in FuzzyWuzzy this returns 0. For sake of compatibility return 0 here as well
-    # see https://github.com/maxbachmann/RapidFuzz/issues/110
+    # see https://github.com/rapidfuzz/RapidFuzz/issues/110
     if not tokens_a or not tokens_b:
         return 0
 
@@ -771,7 +771,7 @@ def WRatio(
         s2 = processor(s2)
 
     # in FuzzyWuzzy this returns 0. For sake of compatibility return 0 here as well
-    # see https://github.com/maxbachmann/RapidFuzz/issues/110
+    # see https://github.com/rapidfuzz/RapidFuzz/issues/110
     if not s1 or not s2:
         return 0
 
@@ -845,7 +845,7 @@ def QRatio(
         s1 = processor(s1)
         s2 = processor(s2)
     # in FuzzyWuzzy this returns 0. For sake of compatibility return 0 here as well
-    # see https://github.com/maxbachmann/RapidFuzz/issues/110
+    # see https://github.com/rapidfuzz/RapidFuzz/issues/110
     if not s1 or not s2:
         return 0
 

@@ -45,6 +45,6 @@ repository. This requires a C++17 capable compiler.
 
 .. code-block:: sh
 
-   git clone --recursive https://github.com/maxbachmann/rapidfuzz.git
+   git clone --recursive https://github.com/rapidfuzz/rapidfuzz.git
    cd rapidfuzz
    pip install .

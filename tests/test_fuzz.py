@@ -225,7 +225,7 @@ def test_issue231():
 def test_empty_string():
     """
     when both strings are empty this is either a perfect match or no match
-    See https://github.com/maxbachmann/RapidFuzz/issues/110
+    See https://github.com/rapidfuzz/RapidFuzz/issues/110
     """
     # perfect match
     assert fuzz.ratio("", "") == 100

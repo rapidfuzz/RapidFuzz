@@ -11,13 +11,13 @@ Got a question or problem?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For questions you can reach us using
-`github discussions <https://github.com/maxbachmann/RapidFuzz/discussions>`__.
+`github discussions <https://github.com/rapidfuzz/RapidFuzz/discussions>`__.
 
 Found a bug?
 ^^^^^^^^^^^^
 
 If you found a bug in the source code, you can help us by submitting an issue
-to the `issue tracker <https://github.com/maxbachmann/rapidfuzz/issues>`__
+to the `issue tracker <https://github.com/rapidfuzz/rapidfuzz/issues>`__
 in our GitHub repository. Even better, you can submit a Pull Request with a fix.
 However, before doing so, please read the :ref:`submission-guidelines`.
 

@@ -25,7 +25,7 @@ where compiling a C extension is not possible.
 
 Open source
 -----------
-Distributed under a :ref:`MIT License <my-license-label>`, RapidFuzz is developed and maintained `publicly on GitHub <https://github.com/maxbachmann/RapidFuzz>`_.
+Distributed under a :ref:`MIT License <my-license-label>`, RapidFuzz is developed and maintained `publicly on GitHub <https://github.com/rapidfuzz/RapidFuzz>`_.
 
 
 .. toctree::
@@ -42,6 +42,6 @@ Distributed under a :ref:`MIT License <my-license-label>`, RapidFuzz is develope
    changelog_link
    License
    References
-   GitHub Repository <https://github.com/maxbachmann/RapidFuzz>
+   GitHub Repository <https://github.com/rapidfuzz/RapidFuzz>
 
 .. |header-image| image:: img/RapidFuzz.svg

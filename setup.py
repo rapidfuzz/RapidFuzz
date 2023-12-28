@@ -17,7 +17,7 @@ setup_args = {
     "name": "rapidfuzz",
     "version": "3.6.0",
     "extras_require": {"full": ["numpy"]},
-    "url": "https://github.com/maxbachmann/RapidFuzz",
+    "url": "https://github.com/rapidfuzz/RapidFuzz",
     "author": "Max Bachmann",
     "author_email": "pypi@maxbachmann.de",
     "description": "rapid fuzzy string matching",
