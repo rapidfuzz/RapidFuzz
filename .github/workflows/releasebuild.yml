@@ -178,7 +178,7 @@ jobs:
     env:
       CIBW_ARCHS_LINUX: ${{matrix.arch}}
       CIBW_BUILD: ${{matrix.python_tag}}
-      CIBW_TEST_SKIP: "{*_{aarch64,ppc64le,s390x,i686},*musllinux_*,pp38-*}"
+      #CIBW_TEST_SKIP: "{*_{aarch64,ppc64le,s390x,i686},*musllinux_*,pp38-*}"
       #CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_REQUIRES: pytest hypothesis
       CIBW_TEST_COMMAND: pytest {package}/tests
