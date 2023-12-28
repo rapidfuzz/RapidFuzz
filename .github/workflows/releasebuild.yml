@@ -1,11 +1,9 @@
 name: Full Build
 
 on:
-  release:
-    types:
-      - published
-
-  workflow_dispatch:
+  push:
+    paths-ignore:
+      - 'docs/**'
 
 jobs:
   build_sdist:
