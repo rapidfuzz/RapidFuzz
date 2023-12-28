@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+[3.6.0] - 2023-12-28
+^^^^^^^^^^^^^^^^^^^^
+Fixed
+~~~~~
+- fix overflow error on systems with ``sizeof(size_t) < 8``
+
 [3.6.0] - 2023-12-26
 ^^^^^^^^^^^^^^^^^^^^
 Fixed

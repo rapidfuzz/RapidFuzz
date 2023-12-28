@@ -29,6 +29,13 @@ def test_empty_string():
     assert Levenshtein.distance("", "", weights=(3, 7, 5)) == 0
 
 
+def test_score_cutoff_overflow():
+    """
+    when score_cutoff was out of bounds for size_t we had an overflow error
+    """
+    assert Levenshtein.distance("", "") == 0
+    assert Levenshtein.distance("", "", score_cutoff=2**63) == 0
+
 def test_cross_type_matching():
     """
     strings should always be interpreted in the same way

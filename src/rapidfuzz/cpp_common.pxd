@@ -4,7 +4,7 @@
 from cpython.object cimport PyObject
 from cpython.pycapsule cimport PyCapsule_GetPointer, PyCapsule_IsValid, PyCapsule_New
 from libc.stddef cimport wchar_t
-from libc.stdint cimport int64_t, uint64_t, SIZE_MAX
+from libc.stdint cimport int64_t, uint64_t, SIZE_MAX, UINT64_MAX
 from libc.stdlib cimport free, malloc
 from libcpp cimport bool
 from libcpp.utility cimport move, pair
@@ -352,7 +352,6 @@ cdef inline int64_t get_score_cutoff_i64(score_cutoff, int64_t worst_score, int6
     cdef int64_t c_score_cutoff = worst_score
 
     if score_cutoff is not None:
-        c_score_cutoff = score_cutoff
         if optimal_score > worst_score:
             # e.g. 0.0 - 100.0
             if c_score_cutoff < worst_score or c_score_cutoff > optimal_score:
@@ -365,10 +364,13 @@ cdef inline int64_t get_score_cutoff_i64(score_cutoff, int64_t worst_score, int6
     return c_score_cutoff
 
 cdef inline size_t get_score_cutoff_size_t(score_cutoff, size_t worst_score, size_t optimal_score) except *:
-    cdef size_t c_score_cutoff = worst_score
+    cdef uint64_t c_score_cutoff = worst_score
 
     if score_cutoff is not None:
         c_score_cutoff = score_cutoff
+        if c_score_cutoff > SIZE_MAX:
+            c_score_cutoff=  SIZE_MAX
+
         if optimal_score > worst_score:
             # e.g. 0.0 - 100.0
             if c_score_cutoff < worst_score or c_score_cutoff > optimal_score:
@@ -378,7 +380,7 @@ cdef inline size_t get_score_cutoff_size_t(score_cutoff, size_t worst_score, siz
             if c_score_cutoff > worst_score or c_score_cutoff < optimal_score:
                 raise TypeError(f"score_cutoff has to be in the range of {optimal_score} - {worst_score}")
 
-    return c_score_cutoff
+    return <size_t>c_score_cutoff
 
 cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except *:
     cdef RF_Preprocessor* preprocess_context = NULL
