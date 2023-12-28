@@ -44,8 +44,9 @@ def test_disable_padding():
     assert Hamming.distance("aaaa", "bbbb", pad=False) == 4
 
     with pytest.raises(ValueError, match="Sequences are not the same length."):
-        Hamming.distance("aaaa", "aaaaa", pad=False)
+        Hamming.distance("aaaa", "aaaaa", catch_exceptions=True, pad=False)
 
+    # todo
     with pytest.raises(ValueError, match="Sequences are not the same length."):
         metrics_cpp.hamming_editops("aaaa", "aaaaa", pad=False)
 

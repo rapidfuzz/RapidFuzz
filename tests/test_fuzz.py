@@ -252,7 +252,7 @@ def test_invalid_input(scorer):
     when invalid types are passed to a scorer an exception should be thrown
     """
     with pytest.raises(TypeError):
-        scorer(1, 1)
+        scorer(1, 1, catch_exceptions=True)
 
 
 @pytest.mark.parametrize("scorer", scorers)
