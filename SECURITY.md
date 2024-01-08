@@ -4,7 +4,7 @@ If you believe you have found a security vulnerability in the project, please re
 
 **Please do not report security vulnerabilities through public GitHub issues, discussions, or pull requests.**
 
-Instead, please send an email to security@maxbachmann.de or report it via https://tidelift.com/security.
+Instead, please send an email to oss@maxbachmann.de.
 
 Please include as much of the information listed below as you can to help us better understand and resolve the issue:
 
