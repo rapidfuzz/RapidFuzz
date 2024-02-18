@@ -105,7 +105,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: artifact-windows-${{ matrix.arch }}-${{ matrix.python_tag }}
+          name: artifact-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
 
   build_wheels_macos:
@@ -156,7 +156,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: artifact-macos-${{ matrix.arch }}-${{ matrix.python_tag }}
+          name: artifact-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
 
   build_wheels_linux:
@@ -211,7 +211,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: artifact-linux-${{ matrix.arch }}-${{ matrix.python_tag }}
+          name: artifact-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
 
   deploy-wheels:
