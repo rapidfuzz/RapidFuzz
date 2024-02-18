@@ -48,8 +48,9 @@ jobs:
         run: |
           tools/seg_wrapper.sh pytest tests
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
+          name: artifact-sdist
           path: dist/*.tar.gz
 
   build_wheels_windows:
@@ -85,9 +86,9 @@ jobs:
       CIBW_BUILD_VERBOSITY: 3
 
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: artifact
+          name: artifact-sdist
           path: dist
 
       - name: Copy wheel
@@ -102,8 +103,9 @@ jobs:
           output-dir: wheelhouse
 
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
+          name: artifact-windows-${{ matrix.arch }}-${{ matrix.python_tag }}
           path: ./wheelhouse/*.whl
 
   build_wheels_macos:
@@ -135,9 +137,9 @@ jobs:
       CIBW_BUILD_VERBOSITY: 3
 
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: artifact
+          name: artifact-sdist
           path: dist
 
       - uses: actions/setup-python@v4
@@ -152,8 +154,9 @@ jobs:
           output-dir: wheelhouse
 
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
+          name: artifact-macos-${{ matrix.arch }}-${{ matrix.python_tag }}
           path: ./wheelhouse/*.whl
 
   build_wheels_linux:
@@ -186,9 +189,9 @@ jobs:
       CIBW_BUILD_VERBOSITY: 3
 
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: artifact
+          name: artifact-sdist
           path: dist
 
       - uses: actions/setup-python@v4
@@ -206,8 +209,9 @@ jobs:
           output-dir: wheelhouse
 
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
+          name: artifact-linux-${{ matrix.arch }}-${{ matrix.python_tag }}
           path: ./wheelhouse/*.whl
 
   deploy-wheels:
@@ -219,9 +223,10 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: artifact
           path: dist
+          pattern: artifact-*
+          merge-multiple: true
 
       - uses: pypa/gh-action-pypi-publish@v1.8.11
