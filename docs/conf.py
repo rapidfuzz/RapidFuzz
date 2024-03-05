@@ -4,6 +4,8 @@
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+from __future__ import annotations
+
 # -- Path setup --------------------------------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -16,8 +18,6 @@
 
 
 # -- Project information -----------------------------------------------------
-from __future__ import annotations
-
 import rapidfuzz
 
 project = "RapidFuzz"
