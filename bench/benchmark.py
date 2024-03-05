@@ -121,6 +121,7 @@ def run_benchmarks_rapidfuzz(rapidfuzz_version, func_name, dataset, result_df):
                 [sys.executable, "-m", "pip", "install", f"rapidfuzz=={version}"],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
+                check=False,
             )
             # older versions are likely not installable
             if res.returncode:

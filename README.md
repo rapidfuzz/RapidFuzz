@@ -211,8 +211,8 @@ The first benchmark compares the performance of the scorers in FuzzyWuzzy and Ra
 from Python in the following way:
 ```python3
 for sample in samples:
-  for word in words:
-    scorer(sample, word)
+    for word in words:
+        scorer(sample, word)
 ```
 The following graph shows how many elements are processed per second with each of the scorers. There are big performance differences between the different scorers. However each of the scorers is faster in RapidFuzz
 

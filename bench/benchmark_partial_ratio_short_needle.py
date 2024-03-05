@@ -43,7 +43,7 @@ time_fuzzywuzzy = (
         list(range(64, 256, 2)),
         count,
     )
-    + [np.NaN] * 128
+    + [np.nan] * 128
 )
 
 results = pd.DataFrame(

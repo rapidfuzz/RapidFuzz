@@ -15,7 +15,7 @@
 repos:
 # Standard hooks
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: "v4.4.0"
+  rev: "v4.5.0"
   hooks:
   - id: check-added-large-files
   - id: check-case-conflict
@@ -38,7 +38,7 @@ repos:
 
 # Also code format the docs
 - repo: https://github.com/asottile/blacken-docs
-  rev: "1.13.0"
+  rev: "1.16.0"
   hooks:
   - id: blacken-docs
     additional_dependencies:
@@ -46,12 +46,12 @@ repos:
 
 # Changes tabs to spaces
 - repo: https://github.com/Lucas-C/pre-commit-hooks
-  rev: "v1.5.1"
+  rev: "v1.5.5"
   hooks:
   - id: remove-tabs
 
 - repo: https://github.com/sirosen/texthooks
-  rev: "0.5.0"
+  rev: "0.6.4"
   hooks:
   - id: fix-ligatures
   - id: fix-smartquotes
@@ -101,14 +101,14 @@ repos:
     additional_dependencies: [cmake, ninja]
 
 - repo: https://github.com/charliermarsh/ruff-pre-commit
-  rev: v0.0.261
+  rev: v0.3.0
   hooks:
   - id: ruff
     args: ["--fix", "--show-fixes"]
 
 # Check for spelling
 - repo: https://github.com/codespell-project/codespell
-  rev: "v2.2.4"
+  rev: "v2.2.6"
   hooks:
   - id: codespell
     exclude: ".*/test_.*.py"
@@ -116,7 +116,7 @@ repos:
 
 # Check for common shell mistakes
 - repo: https://github.com/shellcheck-py/shellcheck-py
-  rev: "v0.9.0.2"
+  rev: "v0.9.0.6"
   hooks:
   - id: shellcheck
 
@@ -131,7 +131,7 @@ repos:
 
 # Clang format the codebase automatically
 - repo: https://github.com/pre-commit/mirrors-clang-format
-  rev: "v16.0.0"
+  rev: "v17.0.6"
   hooks:
   - id: clang-format
     types_or: [c++, c]

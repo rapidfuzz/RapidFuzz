@@ -42,7 +42,7 @@ def _list_to_editops(
         blocks.append(Editop(edit_type, src_pos, dest_pos))
 
     # validate order of editops
-    for i in range(0, len(blocks) - 1):
+    for i in range(len(blocks) - 1):
         if blocks[i + 1].src_pos < blocks[i].src_pos or blocks[i + 1].dest_pos < blocks[i].dest_pos:
             msg = "List of edit operations out of order"
             raise ValueError(msg)
@@ -104,7 +104,7 @@ def _list_to_opcodes(
     if blocks[-1].src_end != src_len or blocks[-1].dest_end != dest_len:
         msg = "List of edit operations does not end at the string ends"
         raise ValueError(msg)
-    for i in range(0, len(blocks) - 1):
+    for i in range(len(blocks) - 1):
         if blocks[i + 1].src_start != blocks[i].src_end or blocks[i + 1].dest_start != blocks[i].dest_end:
             msg = "List of edit operations is not continuous"
             raise ValueError(msg)
