@@ -1,6 +1,7 @@
 """
 rapid string matching library
 """
+
 from __future__ import annotations
 
 __author__: str = "Max Bachmann"

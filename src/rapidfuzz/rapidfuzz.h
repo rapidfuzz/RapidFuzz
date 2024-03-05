@@ -118,7 +118,7 @@ typedef struct _RF_ScorerFunc {
         bool (*i64)(const struct _RF_ScorerFunc* self, const RF_String* str, int64_t str_count,
                     int64_t score_cutoff, int64_t score_hint, int64_t* result);
         bool (*sizet)(const struct _RF_ScorerFunc* self, const RF_String* str, int64_t str_count,
-                    size_t score_cutoff, size_t score_hint, size_t* result);
+                      size_t score_cutoff, size_t score_hint, size_t* result);
     } call;
 
     /* members */

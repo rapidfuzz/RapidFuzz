@@ -41,8 +41,7 @@ def extract_iter(
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
-) -> Iterable[tuple[Sequence[Hashable], int | float, int]]:
-    ...
+) -> Iterable[tuple[Sequence[Hashable], int | float, int]]: ...
 
 
 @overload
@@ -55,8 +54,7 @@ def extract_iter(
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
-) -> Iterable[tuple[Sequence[Hashable], int | float, Any]]:
-    ...
+) -> Iterable[tuple[Sequence[Hashable], int | float, Any]]: ...
 
 
 def extract_iter(
@@ -175,8 +173,7 @@ def extractOne(
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
-) -> tuple[Sequence[Hashable], int | float, int] | None:
-    ...
+) -> tuple[Sequence[Hashable], int | float, int] | None: ...
 
 
 @overload
@@ -189,8 +186,7 @@ def extractOne(
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
-) -> tuple[Sequence[Hashable], int | float, Any] | None:
-    ...
+) -> tuple[Sequence[Hashable], int | float, Any] | None: ...
 
 
 def extractOne(
@@ -378,8 +374,7 @@ def extract(
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
-) -> list[tuple[Sequence[Hashable], int | float, int]]:
-    ...
+) -> list[tuple[Sequence[Hashable], int | float, int]]: ...
 
 
 @overload
@@ -393,8 +388,7 @@ def extract(
     score_cutoff: int | float | None = None,
     score_hint: int | float | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
-) -> list[tuple[Sequence[Hashable], int | float, Any]]:
-    ...
+) -> list[tuple[Sequence[Hashable], int | float, Any]]: ...
 
 
 def extract(

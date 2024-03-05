@@ -7,6 +7,7 @@ This benchmark suite has the following goals:
 - Showcase performance which ideally would be representative of performances of applications running
   on production
 """
+
 from __future__ import annotations
 
 import json

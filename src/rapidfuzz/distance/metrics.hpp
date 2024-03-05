@@ -2,9 +2,9 @@
 #include "cpp_common.hpp"
 
 /* Levenshtein */
-static inline size_t levenshtein_distance_func(const RF_String& str1, const RF_String& str2,
-                                                size_t insertion, size_t deletion, size_t substitution,
-                                                size_t score_cutoff, size_t score_hint)
+static inline size_t levenshtein_distance_func(const RF_String& str1, const RF_String& str2, size_t insertion,
+                                               size_t deletion, size_t substitution, size_t score_cutoff,
+                                               size_t score_hint)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rf::levenshtein_distance(s1, s2, {insertion, deletion, substitution}, score_cutoff,
@@ -64,8 +64,8 @@ static inline bool LevenshteinNormalizedDistanceInit(RF_ScorerFunc* self, const 
 }
 
 static inline size_t levenshtein_similarity_func(const RF_String& str1, const RF_String& str2,
-                                                  size_t insertion, size_t deletion, size_t substitution,
-                                                  size_t score_cutoff, size_t score_hint)
+                                                 size_t insertion, size_t deletion, size_t substitution,
+                                                 size_t score_cutoff, size_t score_hint)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rf::levenshtein_similarity(s1, s2, {insertion, deletion, substitution}, score_cutoff,
@@ -116,7 +116,7 @@ static inline bool LevenshteinNormalizedSimilarityInit(RF_ScorerFunc* self, cons
 
 /* Damerau Levenshtein */
 static inline size_t damerau_levenshtein_distance_func(const RF_String& str1, const RF_String& str2,
-                                                        size_t score_cutoff)
+                                                       size_t score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rf::experimental::damerau_levenshtein_distance(s1, s2, score_cutoff);
@@ -143,7 +143,7 @@ static inline bool DamerauLevenshteinNormalizedDistanceInit(RF_ScorerFunc* self,
 }
 
 static inline size_t damerau_levenshtein_similarity_func(const RF_String& str1, const RF_String& str2,
-                                                          size_t score_cutoff)
+                                                         size_t score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rf::experimental::damerau_levenshtein_similarity(s1, s2, score_cutoff);
@@ -173,7 +173,7 @@ static inline bool DamerauLevenshteinNormalizedSimilarityInit(RF_ScorerFunc* sel
 
 /* Hamming */
 static inline size_t hamming_distance_func(const RF_String& str1, const RF_String& str2, bool pad,
-                                            size_t score_cutoff)
+                                           size_t score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rf::hamming_distance(s1, s2, pad, score_cutoff);
@@ -203,7 +203,7 @@ static inline bool HammingNormalizedDistanceInit(RF_ScorerFunc* self, const RF_K
 }
 
 static inline size_t hamming_similarity_func(const RF_String& str1, const RF_String& str2, bool pad,
-                                              size_t score_cutoff)
+                                             size_t score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rf::hamming_similarity(s1, s2, pad, score_cutoff);
@@ -276,8 +276,7 @@ static inline bool IndelNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kwa
     return normalized_distance_init<rf::CachedIndel, double>(self, str_count, str);
 }
 
-static inline size_t indel_similarity_func(const RF_String& str1, const RF_String& str2,
-                                            size_t score_cutoff)
+static inline size_t indel_similarity_func(const RF_String& str1, const RF_String& str2, size_t score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rf::indel_similarity(s1, s2, score_cutoff);
@@ -313,8 +312,7 @@ static inline bool IndelNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_K
 }
 
 /* LCSseq */
-static inline size_t lcs_seq_distance_func(const RF_String& str1, const RF_String& str2,
-                                            size_t score_cutoff)
+static inline size_t lcs_seq_distance_func(const RF_String& str1, const RF_String& str2, size_t score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rf::lcs_seq_distance(s1, s2, score_cutoff);
@@ -358,7 +356,7 @@ static inline bool LCSseqNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kw
 }
 
 static inline size_t lcs_seq_similarity_func(const RF_String& str1, const RF_String& str2,
-                                              size_t score_cutoff)
+                                             size_t score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rf::lcs_seq_similarity(s1, s2, score_cutoff);
@@ -702,8 +700,7 @@ static inline bool PrefixNormalizedDistanceInit(RF_ScorerFunc* self, const RF_Kw
     return normalized_distance_init<rf::CachedPrefix, double>(self, str_count, str);
 }
 
-static inline size_t prefix_similarity_func(const RF_String& str1, const RF_String& str2,
-                                             size_t score_cutoff)
+static inline size_t prefix_similarity_func(const RF_String& str1, const RF_String& str2, size_t score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rf::prefix_similarity(s1, s2, score_cutoff);
@@ -729,8 +726,7 @@ static inline bool PrefixNormalizedSimilarityInit(RF_ScorerFunc* self, const RF_
 }
 
 /* Postfix */
-static inline size_t postfix_distance_func(const RF_String& str1, const RF_String& str2,
-                                            size_t score_cutoff)
+static inline size_t postfix_distance_func(const RF_String& str1, const RF_String& str2, size_t score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rf::postfix_distance(s1, s2, score_cutoff);
@@ -756,7 +752,7 @@ static inline bool PostfixNormalizedDistanceInit(RF_ScorerFunc* self, const RF_K
 }
 
 static inline size_t postfix_similarity_func(const RF_String& str1, const RF_String& str2,
-                                              size_t score_cutoff)
+                                             size_t score_cutoff)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
         return rf::postfix_similarity(s1, s2, score_cutoff);

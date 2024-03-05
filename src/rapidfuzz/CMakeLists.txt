@@ -169,8 +169,7 @@ if(NOT Windows)
     elseif(NOT HAVE_CXX_ATOMICS_UINT64_WITH_LIB)
       message(
         FATAL_ERROR
-          "No native support for std::atomic<uint64>, or libatomic not found!"
-      )
+          "No native support for std::atomic<uint64>, or libatomic not found!")
     else()
       message(STATUS "Linking with libatomic for atomics support")
       unset(CMAKE_REQUIRED_LIBRARIES)
