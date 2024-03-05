@@ -22,7 +22,6 @@ from tests.distance.common import DamerauLevenshtein
         ("ab", "ba", 1),
         ("ab", "cde", 3),
         ("ab", "ac", 1),
-        ("ab", "ba", 1),
         ("ab", "bc", 2),
         ("ca", "abc", 2),
     ],

@@ -269,7 +269,10 @@ class GenericScorer:
         symmetric = self.get_scorer_flags(s1, s2, **kwargs)["symmetric"]
         tester = symmetric_scorer_tester if symmetric else scorer_tester
 
-        scores = [call_and_maybe_catch(tester, scorer.similarity, s1, s2, **kwargs) for scorer in self.scorers]
+        scores = [
+            call_and_maybe_catch(tester, scorer.similarity, s1, s2, catch_exceptions=catch_exceptions, **kwargs)
+            for scorer in self.scorers
+        ]
 
         if any(isinstance(score, Exception) for score in scores):
             for score in scores:

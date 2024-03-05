@@ -10,7 +10,6 @@ from typing import (
     Mapping,
     Sequence,
     TypeVar,
-    Union,
     overload,
 )
 
@@ -20,7 +19,7 @@ _StringType = Sequence[Hashable]
 _AnyStringType = TypeVar("_AnyStringType", bound=_StringType)
 _S1 = TypeVar("_S1")
 _S2 = TypeVar("_S2")
-_ResultType = Union[int, float]
+_ResultType = int | float
 
 @overload
 def extractOne(

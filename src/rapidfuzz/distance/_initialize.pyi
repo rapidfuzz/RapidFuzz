@@ -3,12 +3,9 @@
 
 from __future__ import annotations
 
-from typing import Iterator, List, Tuple, Union
+from typing import Iterator
 
-_AnyOpList = Union[
-    List[Union[Editop, Tuple[str, int, int]]],
-    List[Union[Opcode, Tuple[str, int, int, int, int]]],
-]
+_AnyOpList = list[Editop | tuple[str, int, int]] | list[Opcode | tuple[str, int, int, int, int]]
 
 class MatchingBlock:
     a: int
