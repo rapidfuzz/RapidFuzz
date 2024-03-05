@@ -1,18 +1,30 @@
 Changelog
 ---------
 
+[3.6.2] - 2024-03-05
+^^^^^^^^^^^^^^^^^^^^
+
+Changed
+~~~~~~~
+* upgrade to ``Cython==3.0.9``
+
+Fixed
+~~~~~
+* upgrade ``rapidfuzz-cpp`` which includes a fix for build issues on some compilers
+* fix some issues with the sphinx config
+
 [3.6.1] - 2023-12-28
 ^^^^^^^^^^^^^^^^^^^^
 Fixed
 ~~~~~
-- fix overflow error on systems with ``sizeof(size_t) < 8``
+* fix overflow error on systems with ``sizeof(size_t) < 8``
 
 [3.6.0] - 2023-12-26
 ^^^^^^^^^^^^^^^^^^^^
 Fixed
 ~~~~~
-- fix pure python fallback implementation of ``fuzz.token_set_ratio``
-- properly link with ``-latomic`` if ``std::atomic<uint64_t>`` is not natively supported
+* fix pure python fallback implementation of ``fuzz.token_set_ratio``
+* properly link with ``-latomic`` if ``std::atomic<uint64_t>`` is not natively supported
 
 Performance
 ~~~~~~~~~~~
