@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: "actions/checkout@v3"
+      - uses: "actions/checkout@v4"
         with:
           submodules: 'true'
       # checkout never fetches tags for submodules so do it manually
@@ -19,7 +19,7 @@ jobs:
         run: |
           git submodule foreach --recursive 'git fetch --tags'
 
-      - uses: "actions/setup-python@v4"
+      - uses: "actions/setup-python@v5"
         with:
           python-version: "3.11"
 
