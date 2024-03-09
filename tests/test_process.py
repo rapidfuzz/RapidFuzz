@@ -4,6 +4,7 @@ import pytest
 
 from rapidfuzz import fuzz, process_cpp, process_py
 from rapidfuzz.distance import Levenshtein, Levenshtein_py
+from rapidfuzz.utils import default_process
 
 
 def wrapped(func):
@@ -278,14 +279,64 @@ def test_none_elements():
     """
     when a None element is used, it is skipped and the index is still correct
     """
+    # no processor
     best = process.extractOne("test", [None, "tes"])
     assert best[2] == 1
     best = process.extractOne(None, [None, "tes"])
     assert best is None
+    best = process.extractOne("test", {0: None, 1: "tes"})
+    assert best[2] == 1
+    best = process.extractOne(None, {0: None, 1: "tes"})
+    assert best is None
 
+    # C++ processor
+    best = process.extractOne("test", [None, "tes"], processor=default_process)
+    assert best[2] == 1
+    best = process.extractOne(None, [None, "tes"], processor=default_process)
+    assert best is None
+    best = process.extractOne("test", {0: None, 1: "tes"}, processor=default_process)
+    assert best[2] == 1
+    best = process.extractOne(None, {0: None, 1: "tes"}, processor=default_process)
+    assert best is None
+
+    # python processor
+    best = process.extractOne("test", [None, "tes"], processor=lambda s: s)
+    assert best[2] == 1
+    best = process.extractOne(None, [None, "tes"], processor=lambda s: s)
+    assert best is None
+    best = process.extractOne("test", {0: None, 1: "tes"}, processor=lambda s: s)
+    assert best[2] == 1
+    best = process.extractOne(None, {0: None, 1: "tes"}, processor=lambda s: s)
+    assert best is None
+
+    # no processor
     best = process.extract("test", [None, "tes"])
     assert best[0][2] == 1
     best = process.extract(None, [None, "tes"])
+    assert best == []
+    best = process.extract("test", {0: None, 1: "tes"})
+    assert best[0][2] == 1
+    best = process.extract(None, {0: None, 1: "tes"})
+    assert best == []
+
+    # C++ processor
+    best = process.extract("test", [None, "tes"], processor=default_process)
+    assert best[0][2] == 1
+    best = process.extract(None, [None, "tes"], processor=default_process)
+    assert best == []
+    best = process.extract("test", {0: None, 1: "tes"}, processor=default_process)
+    assert best[0][2] == 1
+    best = process.extract(None, {0: None, 1: "tes"}, processor=default_process)
+    assert best == []
+
+    # python processor
+    best = process.extract("test", [None, "tes"], processor=lambda s: s)
+    assert best[0][2] == 1
+    best = process.extract(None, [None, "tes"], processor=lambda s: s)
+    assert best == []
+    best = process.extract("test", {0: None, 1: "tes"}, processor=lambda s: s)
+    assert best[0][2] == 1
+    best = process.extract(None, {0: None, 1: "tes"}, processor=lambda s: s)
     assert best == []
 
 
@@ -294,14 +345,64 @@ def test_numpy_nan_elements():
     when a np.nan element is used, it is skipped and the index is still correct
     """
     np = pytest.importorskip("numpy")
+    # no processor
     best = process.extractOne("test", [np.nan, "tes"])
     assert best[2] == 1
     best = process.extractOne(np.nan, [np.nan, "tes"])
     assert best is None
+    best = process.extractOne("test", {0: np.nan, 1: "tes"})
+    assert best[2] == 1
+    best = process.extractOne(np.nan, {0: np.nan, 1: "tes"})
+    assert best is None
 
+    # C++ processor
+    best = process.extractOne("test", [np.nan, "tes"], processor=default_process)
+    assert best[2] == 1
+    best = process.extractOne(np.nan, [np.nan, "tes"], processor=default_process)
+    assert best is None
+    best = process.extractOne("test", {0: np.nan, 1: "tes"}, processor=default_process)
+    assert best[2] == 1
+    best = process.extractOne(np.nan, {0: np.nan, 1: "tes"}, processor=default_process)
+    assert best is None
+
+    # python processor
+    best = process.extractOne("test", [np.nan, "tes"], processor=lambda s: s)
+    assert best[2] == 1
+    best = process.extractOne(np.nan, [np.nan, "tes"], processor=lambda s: s)
+    assert best is None
+    best = process.extractOne("test", {0: np.nan, 1: "tes"}, processor=lambda s: s)
+    assert best[2] == 1
+    best = process.extractOne(np.nan, {0: np.nan, 1: "tes"}, processor=lambda s: s)
+    assert best is None
+
+    # no processor
     best = process.extract("test", [np.nan, "tes"])
     assert best[0][2] == 1
     best = process.extract(np.nan, [np.nan, "tes"])
+    assert best == []
+    best = process.extract("test", {0: np.nan, 1: "tes"})
+    assert best[0][2] == 1
+    best = process.extract(np.nan, {0: np.nan, 1: "tes"})
+    assert best == []
+
+    # C++ processor
+    best = process.extract("test", [np.nan, "tes"], processor=default_process)
+    assert best[0][2] == 1
+    best = process.extract(np.nan, [np.nan, "tes"], processor=default_process)
+    assert best == []
+    best = process.extract("test", {0: np.nan, 1: "tes"}, processor=default_process)
+    assert best[0][2] == 1
+    best = process.extract(np.nan, {0: np.nan, 1: "tes"}, processor=default_process)
+    assert best == []
+
+    # python processor
+    best = process.extract("test", [np.nan, "tes"], processor=lambda s: s)
+    assert best[0][2] == 1
+    best = process.extract(np.nan, [np.nan, "tes"], processor=lambda s: s)
+    assert best == []
+    best = process.extract("test", {0: np.nan, 1: "tes"}, processor=lambda s: s)
+    assert best[0][2] == 1
+    best = process.extract(np.nan, {0: np.nan, 1: "tes"}, processor=lambda s: s)
     assert best == []
 
 
@@ -310,14 +411,64 @@ def test_pandas_nan_elements():
     when a pd.NA element is used, it is skipped and the index is still correct
     """
     pd = pytest.importorskip("pandas")
+    # no processor
     best = process.extractOne("test", [pd.NA, "tes"])
     assert best[2] == 1
     best = process.extractOne(pd.NA, [pd.NA, "tes"])
     assert best is None
+    best = process.extractOne("test", {0: pd.NA, 1: "tes"})
+    assert best[2] == 1
+    best = process.extractOne(pd.NA, {0: pd.NA, 1: "tes"})
+    assert best is None
 
+    # C++ processor
+    best = process.extractOne("test", [pd.NA, "tes"], processor=default_process)
+    assert best[2] == 1
+    best = process.extractOne(pd.NA, [pd.NA, "tes"], processor=default_process)
+    assert best is None
+    best = process.extractOne("test", {0: pd.NA, 1: "tes"}, processor=default_process)
+    assert best[2] == 1
+    best = process.extractOne(pd.NA, {0: pd.NA, 1: "tes"}, processor=default_process)
+    assert best is None
+
+    # python processor
+    best = process.extractOne("test", [pd.NA, "tes"], processor=lambda s: s)
+    assert best[2] == 1
+    best = process.extractOne(pd.NA, [pd.NA, "tes"], processor=lambda s: s)
+    assert best is None
+    best = process.extractOne("test", {0: pd.NA, 1: "tes"}, processor=lambda s: s)
+    assert best[2] == 1
+    best = process.extractOne(pd.NA, {0: pd.NA, 1: "tes"}, processor=lambda s: s)
+    assert best is None
+
+    # no processor
     best = process.extract("test", [pd.NA, "tes"])
     assert best[0][2] == 1
     best = process.extract(pd.NA, [pd.NA, "tes"])
+    assert best == []
+    best = process.extract("test", {0: pd.NA, 1: "tes"})
+    assert best[0][2] == 1
+    best = process.extract(pd.NA, {0: pd.NA, 1: "tes"})
+    assert best == []
+
+    # C++ processor
+    best = process.extract("test", [pd.NA, "tes"], processor=default_process)
+    assert best[0][2] == 1
+    best = process.extract(pd.NA, [pd.NA, "tes"], processor=default_process)
+    assert best == []
+    best = process.extract("test", {0: pd.NA, 1: "tes"}, processor=default_process)
+    assert best[0][2] == 1
+    best = process.extract(pd.NA, {0: pd.NA, 1: "tes"}, processor=default_process)
+    assert best == []
+
+    # python processor
+    best = process.extract("test", [pd.NA, "tes"], processor=lambda s: s)
+    assert best[0][2] == 1
+    best = process.extract(pd.NA, [pd.NA, "tes"], processor=lambda s: s)
+    assert best == []
+    best = process.extract("test", {0: pd.NA, 1: "tes"}, processor=lambda s: s)
+    assert best[0][2] == 1
+    best = process.extract(pd.NA, {0: pd.NA, 1: "tes"}, processor=lambda s: s)
     assert best == []
 
 
