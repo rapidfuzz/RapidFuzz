@@ -193,6 +193,28 @@ def test_with_processor():
     best = process.extractOne(query, events, processor=lambda event: event[0])
     assert best[0] == events[0]
 
+    best = process.extract(query, events, processor=lambda event: event[0])[0]
+    assert best[0] == events[0]
+
+    eventsDict = {i: elem for i, elem in enumerate(events)}
+    best = process.extractOne(query, eventsDict, processor=lambda event: event[0])
+    assert best[0] == events[0]
+
+    best = process.extract(query, eventsDict, processor=lambda event: event[0])[0]
+    assert best[0] == events[0]
+
+    best = process.extractOne("new york mets", ["new YORK mets"])
+    assert 72 < best[1] < 73
+
+    best = process.extract("new york mets", ["new YORK mets"])[0]
+    assert 72 < best[1] < 73
+
+    best = process.extractOne("new york mets", ["new YORK mets"], processor=default_process)
+    assert best[1] == 100
+
+    best = process.extract("new york mets", ["new YORK mets"], processor=default_process)[0]
+    assert best[1] == 100
+
 
 def test_with_scorer():
     choices = [
