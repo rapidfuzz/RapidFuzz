@@ -229,4 +229,4 @@ jobs:
           pattern: artifact-*
           merge-multiple: true
 
-      - uses: pypa/gh-action-pypi-publish@v1.8.12
+      - uses: pypa/gh-action-pypi-publish@v1.8.14
