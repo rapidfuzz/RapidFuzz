@@ -57,7 +57,7 @@ uint32_t UnicodeDefaultProcess(uint32_t ch)
      */
     const _PyUnicode_TypeRecord* ctype = gettyperecord(ch);
 
-    /* non alphanumeric characyers are replaces with whitespaces */
+    /* non alphanumeric characters are replaced with whitespaces */
     if (!is_alnum(ctype->flags)) return ' ';
 
     if (ctype->flags & EXTENDED_CASE_MASK) {
