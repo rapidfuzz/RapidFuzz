@@ -97,7 +97,7 @@ jobs:
       - uses: actions/setup-python@v5
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.16.5
+        uses: pypa/cibuildwheel@v2.17.0
         with:
           package-dir: rapidfuzz.tar.gz
           output-dir: wheelhouse
@@ -148,7 +148,7 @@ jobs:
         run: cp dist/*.tar.gz rapidfuzz.tar.gz
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.16.5
+        uses: pypa/cibuildwheel@v2.17.0
         with:
           package-dir: rapidfuzz.tar.gz
           output-dir: wheelhouse
@@ -203,7 +203,7 @@ jobs:
         name: Set up QEMU
 
       - name: Build wheel
-        uses: pypa/cibuildwheel@v2.16.5
+        uses: pypa/cibuildwheel@v2.17.0
         with:
           package-dir: rapidfuzz.tar.gz
           output-dir: wheelhouse
