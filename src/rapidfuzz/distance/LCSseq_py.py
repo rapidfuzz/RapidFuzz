@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Callable, Hashable, Sequence
+from typing import Callable, Hashable, Sequence, Any
 
 from rapidfuzz._common_py import common_affix, conv_sequences
 from rapidfuzz._utils import is_none, setupPandas
@@ -256,7 +256,7 @@ def normalized_similarity(
     return norm_sim if (score_cutoff is None or norm_sim >= score_cutoff) else 0
 
 
-def _matrix(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> ([int], int):
+def _matrix(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> tuple[int, list[int]]:
     if not s1:
         return (0, [])
 
@@ -342,7 +342,7 @@ def editops(
     if dist == 0:
         return editops
 
-    editop_list = [None] * dist
+    editop_list: Any = [None] * dist
     col = len(s1)
     row = len(s2)
     while row != 0 and col != 0:

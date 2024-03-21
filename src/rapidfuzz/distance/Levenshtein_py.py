@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Callable, Hashable, Sequence
+from typing import Callable, Hashable, Sequence, Any
 
 from rapidfuzz._common_py import common_affix, conv_sequences
 from rapidfuzz._utils import is_none, setupPandas
@@ -100,7 +100,7 @@ def distance(
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
-    weights : Tuple[int, int, int] or None, optional
+    weights : tuple[int, int, int] or None, optional
         The weights for the three operations in the form
         (insertion, deletion, substitution). Default is (1, 1, 1),
         which gives all three operations a weight of 1.
@@ -184,7 +184,7 @@ def similarity(
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
-    weights : Tuple[int, int, int] or None, optional
+    weights : tuple[int, int, int] or None, optional
         The weights for the three operations in the form
         (insertion, deletion, substitution). Default is (1, 1, 1),
         which gives all three operations a weight of 1.
@@ -245,7 +245,7 @@ def normalized_distance(
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
-    weights : Tuple[int, int, int] or None, optional
+    weights : tuple[int, int, int] or None, optional
         The weights for the three operations in the form
         (insertion, deletion, substitution). Default is (1, 1, 1),
         which gives all three operations a weight of 1.
@@ -308,7 +308,7 @@ def normalized_similarity(
         First string to compare.
     s2 : Sequence[Hashable]
         Second string to compare.
-    weights : Tuple[int, int, int] or None, optional
+    weights : tuple[int, int, int] or None, optional
         The weights for the three operations in the form
         (insertion, deletion, substitution). Default is (1, 1, 1),
         which gives all three operations a weight of 1.
@@ -374,7 +374,7 @@ def normalized_similarity(
     return norm_sim if (score_cutoff is None or norm_sim >= score_cutoff) else 0
 
 
-def _matrix(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> int:
+def _matrix(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> tuple[int, list[int], list[int]]:
     if not s1:
         return (len(s2), [], [])
 
@@ -480,7 +480,7 @@ def editops(
     if dist == 0:
         return editops
 
-    editop_list = [None] * dist
+    editop_list: Any = [None] * dist
     col = len(s1)
     row = len(s2)
     while row != 0 and col != 0:

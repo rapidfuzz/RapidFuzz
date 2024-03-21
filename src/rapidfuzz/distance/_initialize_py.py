@@ -901,6 +901,6 @@ class ScoreAlignment:
 
 if TYPE_CHECKING:
     _AnyOpList = Union[
-        Sequence[Union[Editop, Tuple[str, int, int]]],
-        Sequence[Union[Opcode, Tuple[str, int, int, int, int]]],
+        Sequence[Union[Editop, tuple[str, int, int]]],
+        Sequence[Union[Opcode, tuple[str, int, int, int, int]]],
     ]

@@ -102,7 +102,7 @@ def extract_iter(
 
     Yields
     -------
-    Tuple[Sequence[Hashable], Any, Any]
+    tuple[Sequence[Hashable], Any, Any]
         Yields similarity between the query and each choice in form of a Tuple with 3 elements.
         The values stored in the tuple depend on the types of the input arguments.
 
@@ -237,7 +237,7 @@ def extractOne(
 
     Returns
     -------
-    Tuple[Sequence[Hashable], Any, Any]
+    tuple[Sequence[Hashable], Any, Any]
         Returns the best match in form of a Tuple with 3 elements. The values stored in the
         tuple depend on the types of the input arguments.
 
@@ -445,7 +445,7 @@ def extract(
 
     Returns
     -------
-    List[Tuple[Sequence[Hashable], Any, Any]]
+    list[tuple[Sequence[Hashable], Any, Any]]
         The return type is always a List of Tuples with 3 elements. However the values stored in the
         tuple depend on the types of the input arguments.
 

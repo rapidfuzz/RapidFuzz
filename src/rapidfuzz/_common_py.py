@@ -35,7 +35,7 @@ def conv_sequence(s: Sequence[Hashable]) -> Sequence[Hashable]:
     return res
 
 
-def conv_sequences(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> Sequence[Hashable]:
+def conv_sequences(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> tuple[Sequence[Hashable], Sequence[Hashable]]:
     if isinstance(s1, str) and isinstance(s2, str):
         return s1, s2
 
@@ -67,7 +67,7 @@ def common_suffix(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> int:
     return suffix_len
 
 
-def common_affix(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> (int, int):
+def common_affix(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> tuple[int, int]:
     prefix_len = common_prefix(s1, s2)
     suffix_len = common_suffix(s1[prefix_len:], s2[prefix_len:])
     return (prefix_len, suffix_len)
