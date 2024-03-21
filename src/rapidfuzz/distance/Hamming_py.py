@@ -6,7 +6,7 @@ from __future__ import annotations
 from typing import Callable, Hashable, Sequence
 
 from rapidfuzz._common_py import conv_sequences
-from rapidfuzz._utils import is_none
+from rapidfuzz._utils import is_none, setupPandas
 from rapidfuzz.distance._initialize_py import Editop, Editops, Opcodes
 
 
@@ -166,6 +166,7 @@ def normalized_distance(
     ValueError
         If s1 and s2 have a different length
     """
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 1.0
 
@@ -222,6 +223,7 @@ def normalized_similarity(
     ValueError
         If s1 and s2 have a different length
     """
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0.0
 

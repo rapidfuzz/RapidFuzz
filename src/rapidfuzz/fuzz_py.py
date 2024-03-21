@@ -6,7 +6,7 @@ from math import ceil
 from typing import Any, Callable, Hashable, Sequence
 
 from rapidfuzz._common_py import conv_sequences
-from rapidfuzz._utils import ScorerFlag, add_scorer_attrs, is_none
+from rapidfuzz._utils import ScorerFlag, add_scorer_attrs, is_none, setupPandas
 from rapidfuzz.distance import ScoreAlignment
 from rapidfuzz.distance.Indel_py import (
     _block_normalized_similarity as indel_block_normalized_similarity,
@@ -105,6 +105,7 @@ def ratio(
     >>> fuzz.ratio("this is a test", "this is a test!")
     96.55171966552734
     """
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0
 
@@ -304,6 +305,7 @@ def partial_ratio_alignment(
     >>> fuzz.ratio(s1[res.src_start:res.src_end], s2[res.dest_start:res.dest_end])
     83.33333333333334
     """
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return None
 
@@ -379,6 +381,7 @@ def token_sort_ratio(
     >>> fuzz.token_sort_ratio("fuzzy wuzzy was a bear", "wuzzy fuzzy was a bear")
     100.0
     """
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0
 
@@ -433,6 +436,7 @@ def token_set_ratio(
     >>> fuzz.token_set_ratio("fuzzy was a bear", "fuzzy fuzzy was a bear")
     100.0
     """
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0
 
@@ -530,6 +534,7 @@ def token_ratio(
     -----
     .. image:: img/token_ratio.svg
     """
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0
 
@@ -577,6 +582,7 @@ def partial_token_sort_ratio(
     -----
     .. image:: img/partial_token_sort_ratio.svg
     """
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0
 
@@ -624,6 +630,7 @@ def partial_token_set_ratio(
     -----
     .. image:: img/partial_token_set_ratio.svg
     """
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0
 
@@ -683,6 +690,7 @@ def partial_token_ratio(
     -----
     .. image:: img/partial_token_ratio.svg
     """
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0
 
@@ -761,6 +769,7 @@ def WRatio(
     -----
     .. image:: img/WRatio.svg
     """
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0
 
@@ -838,6 +847,7 @@ def QRatio(
     >>> fuzz.QRatio("this is a test", "this is a test!")
     96.55171966552734
     """
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0
 

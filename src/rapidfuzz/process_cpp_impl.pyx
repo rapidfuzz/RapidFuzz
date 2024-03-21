@@ -27,6 +27,7 @@ from libcpp.vector cimport vector
 
 import heapq
 from array import array
+import sys
 
 from cpython.pycapsule cimport PyCapsule_GetPointer, PyCapsule_IsValid
 
@@ -47,11 +48,16 @@ from rapidfuzz cimport (
     RF_String,
 )
 
+pandas_NA = None
 
-try:
-    from pandas import NA as pandas_NA
-except:
-    pandas_NA = None
+cdef inline void setupPandas() noexcept:
+    global pandas_NA
+    if pandas_NA is None:
+        pandas = sys.modules.get('pandas')
+        if hasattr(pandas, 'NA'):
+            pandas_NA = pandas.NA
+
+setupPandas()
 
 cdef extern from "process_cpp.hpp":
     cdef cppclass ExtractComp:
@@ -814,6 +820,8 @@ def extractOne(query, choices, *, scorer=WRatio, processor=None, score_cutoff=No
 
     scorer_kwargs = scorer_kwargs.copy() if scorer_kwargs else {}
 
+    setupPandas()
+
     if is_none(query):
         return None
 
@@ -1203,6 +1211,8 @@ def extract(query, choices, *, scorer=WRatio, processor=None, limit=5, score_cut
     cdef int64_t c_limit
     scorer_kwargs = scorer_kwargs.copy() if scorer_kwargs else {}
 
+    setupPandas()
+
     if is_none(query):
         return []
 
@@ -1580,6 +1590,8 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=None, score_cutoff=
 
     scorer_kwargs = scorer_kwargs.copy() if scorer_kwargs else {}
 
+    setupPandas()
+
     if is_none(query):
         # finish generator
         return
@@ -1904,6 +1916,8 @@ def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, 
     cdef RF_Scorer* scorer_context = NULL
     cdef RF_ScorerFlags scorer_flags
     cdef bool is_orig_scorer
+
+    setupPandas()
 
     scorer_kwargs = scorer_kwargs.copy() if scorer_kwargs else {}
 

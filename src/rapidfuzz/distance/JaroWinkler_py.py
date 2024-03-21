@@ -6,7 +6,7 @@ from __future__ import annotations
 from typing import Callable, Hashable, Sequence
 
 from rapidfuzz._common_py import conv_sequences
-from rapidfuzz._utils import is_none
+from rapidfuzz._utils import is_none, setupPandas
 from rapidfuzz.distance import Jaro_py as Jaro
 
 
@@ -48,6 +48,7 @@ def similarity(
     ValueError
         If prefix_weight is invalid
     """
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0.0
 
@@ -171,6 +172,7 @@ def distance(
     ValueError
         If prefix_weight is invalid
     """
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 1.0
 

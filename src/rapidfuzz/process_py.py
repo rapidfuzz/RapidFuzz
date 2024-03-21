@@ -15,9 +15,10 @@ from typing import (
     Mapping,
     Sequence,
     overload,
+    TYPE_CHECKING
 )
 
-from rapidfuzz._utils import ScorerFlag, is_none
+from rapidfuzz._utils import ScorerFlag, is_none, setupPandas
 from rapidfuzz.fuzz import WRatio, ratio
 
 __all__ = ["extract", "extract_iter", "extractOne", "cdist"]
@@ -128,6 +129,8 @@ def extract_iter(
     scorer_kwargs = scorer_kwargs or {}
     worst_score, optimal_score = _get_scorer_flags_py(scorer, scorer_kwargs)
     lowest_score_worst = optimal_score > worst_score
+
+    setupPandas()
 
     if is_none(query):
         return
@@ -320,6 +323,8 @@ def extractOne(
     worst_score, optimal_score = _get_scorer_flags_py(scorer, scorer_kwargs)
     lowest_score_worst = optimal_score > worst_score
 
+    setupPandas()
+
     if is_none(query):
         return None
 
@@ -502,8 +507,9 @@ def extract(
     return heapq.nsmallest(limit, result_iter, key=lambda i: i[1])
 
 
-with suppress(BaseException):
-    import numpy as np
+if TYPE_CHECKING:
+    with suppress(BaseException):
+        import numpy as np
 
 
 def _dtype_to_type_num(
@@ -613,6 +619,8 @@ def cdist(
     scorer_kwargs = scorer_kwargs or {}
     dtype = _dtype_to_type_num(dtype, scorer, scorer_kwargs)
     results = np.zeros((len(queries), len(choices)), dtype=dtype)
+
+    setupPandas()
 
     if processor is None:
         proc_choices = list(choices)

@@ -6,7 +6,7 @@ from __future__ import annotations
 from typing import Callable, Hashable, Sequence
 
 from rapidfuzz._common_py import conv_sequences
-from rapidfuzz._utils import is_none
+from rapidfuzz._utils import is_none, setupPandas
 
 
 def _jaro_calculate_similarity(pattern_len: int, text_len: int, common_chars: int, transpositions: int) -> float:
@@ -90,6 +90,7 @@ def similarity(
     similarity : float
         similarity between s1 and s2 as a float between 0 and 1.0
     """
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0.0
 
@@ -211,6 +212,7 @@ def distance(
     distance : float
         distance between s1 and s2 as a float between 1.0 and 0.0
     """
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 1.0
 

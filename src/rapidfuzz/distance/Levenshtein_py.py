@@ -6,7 +6,7 @@ from __future__ import annotations
 from typing import Callable, Hashable, Sequence
 
 from rapidfuzz._common_py import common_affix, conv_sequences
-from rapidfuzz._utils import is_none
+from rapidfuzz._utils import is_none, setupPandas
 from rapidfuzz.distance import Indel_py as Indel
 from rapidfuzz.distance._initialize_py import Editop, Editops, Opcodes
 
@@ -271,6 +271,7 @@ def normalized_distance(
         If unsupported weights are provided a ValueError is thrown
     """
     _ = score_hint
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 1.0
 
@@ -358,6 +359,7 @@ def normalized_similarity(
     0.81818181818181
     """
     _ = score_hint
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0.0
 

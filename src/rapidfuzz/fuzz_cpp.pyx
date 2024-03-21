@@ -17,8 +17,8 @@ from rapidfuzz cimport (
 )
 
 # required for preprocess_strings
-
 from array import array
+import sys
 
 from cpp_common cimport (
     CreateScorerContext,
@@ -32,12 +32,16 @@ from libcpp.cmath cimport isnan
 from libc.stdint cimport int64_t, uint32_t
 from libcpp cimport bool
 
-from array import array
+pandas_NA = None
 
-try:
-    from pandas import NA as pandas_NA
-except:
-    pandas_NA = None
+cdef inline void setupPandas() noexcept:
+    global pandas_NA
+    if pandas_NA is None:
+        pandas = sys.modules.get('pandas')
+        if hasattr(pandas, 'NA'):
+            pandas_NA = pandas.NA
+
+setupPandas()
 
 cdef extern from "fuzz_cpp.hpp":
     double ratio_func(                    const RF_String&, const RF_String&, double) except + nogil
@@ -79,6 +83,7 @@ def ratio(s1, s2, *, processor=None, score_cutoff=None):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0
 
@@ -90,6 +95,7 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0
 
@@ -101,6 +107,7 @@ def partial_ratio_alignment(s1, s2, *, processor=None, score_cutoff=None):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return None
 
@@ -117,6 +124,7 @@ def token_sort_ratio(s1, s2, *, processor=None, score_cutoff=None):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0
 
@@ -128,6 +136,7 @@ def token_set_ratio(s1, s2, *, processor=None, score_cutoff=None):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0
 
@@ -139,6 +148,7 @@ def token_ratio(s1, s2, *, processor=None, score_cutoff=None):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0
 
@@ -150,6 +160,7 @@ def partial_token_sort_ratio(s1, s2, *, processor=None, score_cutoff=None):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0
 
@@ -161,6 +172,7 @@ def partial_token_set_ratio(s1, s2, *, processor=None, score_cutoff=None):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0
 
@@ -172,6 +184,7 @@ def partial_token_ratio(s1, s2, *, processor=None, score_cutoff=None):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0
 
@@ -183,6 +196,7 @@ def WRatio(s1, s2, *, processor=None, score_cutoff=None):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0
 
@@ -193,6 +207,7 @@ def QRatio(s1, s2, *, processor=None, score_cutoff=None):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0
 

@@ -6,7 +6,7 @@ from __future__ import annotations
 from typing import Callable, Hashable, Sequence
 
 from rapidfuzz._common_py import conv_sequences
-from rapidfuzz._utils import is_none
+from rapidfuzz._utils import is_none, setupPandas
 
 
 def _damerau_levenshtein_distance_zhao(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> int:
@@ -176,6 +176,7 @@ def normalized_distance(
     norm_dist : float
         normalized distance between s1 and s2 as a float between 0 and 1.0
     """
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 1.0
 
@@ -221,6 +222,7 @@ def normalized_similarity(
     norm_sim : float
         normalized similarity between s1 and s2 as a float between 0 and 1.0
     """
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0.0
 

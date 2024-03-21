@@ -5,19 +5,24 @@ from __future__ import annotations
 
 import importlib
 import os
-from enum import IntFlag
+import sys
 from math import isnan
 from typing import Any, Callable
 
 from rapidfuzz._feature_detector import AVX2, SSE2, supports
 
-try:
-    from pandas import NA as pandas_NA
-except BaseException:
-    pandas_NA = None
+pandas_NA = None
 
+def setupPandas():
+    global pandas_NA
+    if pandas_NA is None:
+        pandas = sys.modules.get('pandas')
+        if hasattr(pandas, 'NA'):
+            pandas_NA = pandas.NA
 
-class ScorerFlag(IntFlag):
+setupPandas()
+
+class ScorerFlag:
     RESULT_F64 = 1 << 5
     RESULT_I64 = 1 << 6
     RESULT_SIZE_T = 1 << 7

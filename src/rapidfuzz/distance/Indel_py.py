@@ -6,7 +6,7 @@ from __future__ import annotations
 from typing import Callable, Hashable, Sequence
 
 from rapidfuzz._common_py import conv_sequences
-from rapidfuzz._utils import is_none
+from rapidfuzz._utils import is_none, setupPandas
 from rapidfuzz.distance._initialize_py import Editops, Opcodes
 from rapidfuzz.distance.LCSseq_py import _block_similarity as lcs_seq_block_similarity
 from rapidfuzz.distance.LCSseq_py import editops as lcs_seq_editops
@@ -158,6 +158,7 @@ def normalized_distance(
     norm_dist : float
         normalized distance between s1 and s2 as a float between 0 and 1.0
     """
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 1.0
 
@@ -234,6 +235,7 @@ def normalized_similarity(
     >>> Indel.normalized_similarity(["lewenstein"], ["levenshtein"], processor=lambda s: s[0])
     0.8571428571428572
     """
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0.0
 

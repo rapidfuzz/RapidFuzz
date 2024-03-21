@@ -3,6 +3,7 @@
 
 from . import metrics_py
 from ._initialize_cpp import Editops
+import sys
 
 from rapidfuzz cimport (
     RF_SCORER_FLAG_MULTI_STRING_CALL,
@@ -21,13 +22,18 @@ from rapidfuzz cimport (
 
 from ._initialize_cpp cimport Editops, RfEditops
 
-try:
-    from pandas import NA as pandas_NA
-except:
-    pandas_NA = None
+pandas_NA = None
+
+cdef inline void setupPandas() noexcept:
+    global pandas_NA
+    if pandas_NA is None:
+        pandas = sys.modules.get('pandas')
+        if hasattr(pandas, 'NA'):
+            pandas_NA = pandas.NA
+
+setupPandas()
 
 # required for preprocess_strings
-
 from array import array
 
 from cpp_common cimport (
@@ -223,6 +229,7 @@ def levenshtein_similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cut
 
 def levenshtein_normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None, score_hint=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 1.0
 
@@ -239,6 +246,7 @@ def levenshtein_normalized_distance(s1, s2, *, weights=(1,1,1), processor=None, 
 
 def levenshtein_normalized_similarity(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None, score_hint=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0.0
 
@@ -369,6 +377,7 @@ def damerau_levenshtein_similarity(s1, s2, *, processor=None, score_cutoff=None)
 
 def damerau_levenshtein_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 1.0
 
@@ -379,6 +388,7 @@ def damerau_levenshtein_normalized_distance(s1, s2, *, processor=None, score_cut
 
 def damerau_levenshtein_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0.0
 
@@ -439,6 +449,7 @@ def lcs_seq_similarity(s1, s2, *, processor=None, score_cutoff=None):
 
 def lcs_seq_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 1.0
 
@@ -449,6 +460,7 @@ def lcs_seq_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
 
 def lcs_seq_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0.0
 
@@ -542,6 +554,7 @@ def indel_similarity(s1, s2, *, processor=None, score_cutoff=None):
 
 def indel_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 1.0
 
@@ -552,6 +565,7 @@ def indel_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
 
 def indel_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0.0
 
@@ -648,6 +662,7 @@ def hamming_similarity(s1, s2, *, pad=True, processor=None, score_cutoff=None):
 
 def hamming_normalized_distance(s1, s2, *, pad=True, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 1.0
 
@@ -658,6 +673,7 @@ def hamming_normalized_distance(s1, s2, *, pad=True, processor=None, score_cutof
 
 def hamming_normalized_similarity(s1, s2, *, pad=True, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0.0
 
@@ -749,6 +765,7 @@ def osa_similarity(s1, s2, *, processor=None, score_cutoff=None):
 
 def osa_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 1.0
 
@@ -759,6 +776,7 @@ def osa_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
 
 def osa_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0.0
 
@@ -821,6 +839,7 @@ SetScorerAttrs(osa_normalized_similarity, metrics_py.osa_normalized_similarity, 
 
 def jaro_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 1.0
 
@@ -830,6 +849,7 @@ def jaro_distance(s1, s2, *, processor=None, score_cutoff=None):
 
 def jaro_similarity(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0.0
 
@@ -839,6 +859,7 @@ def jaro_similarity(s1, s2, *, processor=None, score_cutoff=None):
 
 def jaro_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 1.0
 
@@ -849,6 +870,7 @@ def jaro_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
 
 def jaro_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0.0
 
@@ -889,6 +911,7 @@ SetScorerAttrs(jaro_normalized_similarity, metrics_py.jaro_normalized_similarity
 
 def jaro_winkler_distance(s1, s2, *, double prefix_weight=0.1, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 1.0
 
@@ -898,6 +921,7 @@ def jaro_winkler_distance(s1, s2, *, double prefix_weight=0.1, processor=None, s
 
 def jaro_winkler_similarity(s1, s2, *, double prefix_weight=0.1, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0.0
 
@@ -907,6 +931,7 @@ def jaro_winkler_similarity(s1, s2, *, double prefix_weight=0.1, processor=None,
 
 def jaro_winkler_normalized_distance(s1, s2, *, double prefix_weight=0.1, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 1.0
 
@@ -916,6 +941,7 @@ def jaro_winkler_normalized_distance(s1, s2, *, double prefix_weight=0.1, proces
 
 def jaro_winkler_normalized_similarity(s1, s2, *, double prefix_weight=0.1, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0.0
 
@@ -980,6 +1006,7 @@ def postfix_similarity(s1, s2, *, processor=None, score_cutoff=None):
 
 def postfix_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 1.0
 
@@ -990,6 +1017,7 @@ def postfix_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
 
 def postfix_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0.0
 
@@ -1054,6 +1082,7 @@ def prefix_similarity(s1, s2, *, processor=None, score_cutoff=None):
 
 def prefix_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 1.0
 
@@ -1064,6 +1093,7 @@ def prefix_normalized_distance(s1, s2, *, processor=None, score_cutoff=None):
 
 def prefix_normalized_similarity(s1, s2, *, processor=None, score_cutoff=None):
     cdef RF_StringWrapper s1_proc, s2_proc
+    setupPandas()
     if is_none(s1) or is_none(s2):
         return 0.0
 
