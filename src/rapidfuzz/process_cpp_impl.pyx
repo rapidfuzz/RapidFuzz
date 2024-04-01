@@ -142,6 +142,9 @@ cdef extern from "process_cpp.hpp":
         const vector[RF_StringWrapper]&, MatrixType, int, T, T, T) except +
     RfMatrix cdist_two_lists_impl[T](    const RF_ScorerFlags* scorer_flags, const RF_Kwargs*, RF_Scorer*,
         const vector[RF_StringWrapper]&, const vector[RF_StringWrapper]&, MatrixType, int, T, T, T) except +
+    RfMatrix cpdist_cpp_impl[T](    const RF_Kwargs*, RF_Scorer*,
+        const vector[RF_StringWrapper]&, const vector[RF_StringWrapper]&, MatrixType, int, T, T, T) except +
+
 
 
 cdef inline bool is_none(s):
@@ -1780,6 +1783,58 @@ cdef class Matrix:
     def __releasebuffer__(self, Py_buffer *buffer):
         pass
 
+cdef Matrix cpdist_cpp(
+    queries, choices,
+    RF_Scorer* scorer,
+    const RF_ScorerFlags* scorer_flags,
+    processor,
+    score_cutoff,
+    score_hint,
+    score_multiplier,
+    dtype,
+    int c_workers,
+    const RF_Kwargs* scorer_kwargs
+):
+    proc_queries = preprocess(scorer_flags, queries, processor)
+    proc_choices = preprocess(scorer_flags, choices, processor)
+    flags = scorer_flags.flags
+    cdef Matrix matrix = Matrix()
+
+    if flags & RF_SCORER_FLAG_RESULT_F64:
+        matrix.matrix = cpdist_cpp_impl[double](
+            scorer_kwargs, scorer, proc_queries, proc_choices,
+            dtype_to_type_num_f64(dtype),
+            c_workers,
+            get_score_cutoff_f64(score_cutoff, scorer_flags.worst_score.f64, scorer_flags.optimal_score.f64),
+            get_score_cutoff_f64(score_hint, scorer_flags.worst_score.f64, scorer_flags.optimal_score.f64),
+            <double>score_multiplier,
+            scorer_flags.worst_score.f64
+        )
+    elif flags & RF_SCORER_FLAG_RESULT_SIZE_T:
+        matrix.matrix = cpdist_cpp_impl[size_t](
+            scorer_kwargs, scorer, proc_queries, proc_choices,
+            dtype_to_type_num_size_t(dtype),
+            c_workers,
+            get_score_cutoff_size_t(score_cutoff, scorer_flags.worst_score.sizet, scorer_flags.optimal_score.sizet),
+            get_score_cutoff_size_t(score_hint, scorer_flags.worst_score.sizet, scorer_flags.optimal_score.sizet),
+            <size_t>score_multiplier,
+            scorer_flags.worst_score.sizet
+        )
+    elif flags & RF_SCORER_FLAG_RESULT_I64:
+        matrix.matrix = cpdist_cpp_impl[int64_t](
+            scorer_kwargs, scorer, proc_queries, proc_choices,
+            dtype_to_type_num_i64(dtype),
+            c_workers,
+            get_score_cutoff_i64(score_cutoff, scorer_flags.worst_score.i64, scorer_flags.optimal_score.i64),
+            get_score_cutoff_i64(score_hint, scorer_flags.worst_score.i64, scorer_flags.optimal_score.i64),
+            <int64_t>score_multiplier,
+            scorer_flags.worst_score.i64
+        )
+    else:
+        raise ValueError("scorer does not properly use the C-API")
+
+    return matrix
+
 cdef Matrix cdist_two_lists(
     queries, choices,
     RF_Scorer* scorer,
@@ -1911,7 +1966,6 @@ cdef cdist_py(queries, choices, scorer, processor, score_cutoff, score_multiplie
 
     return matrix
 
-
 def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, score_hint=None, score_multiplier=1, dtype=None, workers=1, scorer_kwargs=None):
     cdef RF_Scorer* scorer_context = NULL
     cdef RF_ScorerFlags scorer_flags
@@ -1945,3 +1999,52 @@ def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, 
                 dtype, workers, &kwargs_context.kwargs)
 
     return cdist_py(queries, choices, scorer, processor, score_cutoff, score_multiplier, dtype, workers, scorer_kwargs)
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef cpdist_py(queries, choices, scorer, processor, score_cutoff, score_multiplier, dtype, workers, dict scorer_kwargs):
+    # todo this should handle two similar sequences more efficiently
+
+    proc_queries = preprocess_py(queries, processor)
+    proc_choices = preprocess_py(choices, processor)
+    cdef double score
+    cdef Matrix matrix = Matrix()
+    c_dtype = dtype_to_type_num_py(dtype, scorer, scorer_kwargs)
+    matrix.matrix = RfMatrix(c_dtype, proc_queries.size(), 1)
+
+    scorer_kwargs["score_cutoff"] = score_cutoff
+
+    for i in range(proc_queries.size()):
+        score = scorer(<object>proc_queries[i].obj, <object>proc_choices[i].obj, **scorer_kwargs)
+        matrix.matrix.set(i, 0, score * <double>score_multiplier)
+
+    return matrix
+
+def cpdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, score_hint=None, score_multiplier=1, dtype=None, workers=1, scorer_kwargs=None):
+    assert len(queries) == len(choices), "Length of queries and choices must be the same!"
+
+    cdef RF_Scorer* scorer_context = NULL
+    cdef RF_ScorerFlags scorer_flags
+    cdef bool is_orig_scorer
+
+    setupPandas()
+
+    scorer_kwargs = scorer_kwargs.copy() if scorer_kwargs else {}
+
+    scorer_capsule = getattr(scorer, '_RF_Scorer', scorer)
+    if PyCapsule_IsValid(scorer_capsule, NULL):
+        scorer_context = <RF_Scorer*>PyCapsule_GetPointer(scorer_capsule, NULL)
+
+    is_orig_scorer = getattr(scorer, '_RF_OriginalScorer', None) is scorer
+
+    if is_orig_scorer and scorer_context and scorer_context.version == SCORER_STRUCT_VERSION:
+        kwargs_context = RF_KwargsWrapper()
+        scorer_context.kwargs_init(&kwargs_context.kwargs, scorer_kwargs)
+        scorer_context.get_scorer_flags(&kwargs_context.kwargs, &scorer_flags)
+
+        return cpdist_cpp(
+            queries, choices, scorer_context, &scorer_flags, processor,
+            score_cutoff, score_hint, score_multiplier,
+            dtype, workers, &kwargs_context.kwargs)
+
+    return cpdist_py(queries, choices, scorer, processor, score_cutoff, score_multiplier, dtype, workers, scorer_kwargs)

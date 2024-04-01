@@ -113,3 +113,16 @@ def cdist(
     workers: int = 1,
     scorer_kwargs: dict[str, Any] | None = None,
 ) -> Any: ...
+
+def cpdist(
+    queries: Iterable[_S1],
+    choices: Iterable[_S2],
+    *,
+    scorer: Callable[..., _ResultType] = ratio,
+    processor: Callable[..., _StringType] | None = None,
+    score_cutoff: _ResultType | None = None,
+    score_hint: _ResultType | None = None,
+    dtype: int | None = None,
+    workers: int = 1,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> Any: ...

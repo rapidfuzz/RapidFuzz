@@ -670,3 +670,108 @@ def cdist(
                 results[i, j] = score
 
     return results
+
+def cpdist(
+    queries: Collection[Sequence[Hashable] | None],
+    choices: Collection[Sequence[Hashable] | None],
+    *,
+    scorer: Callable[..., int | float] = ratio,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: int | float | None = None,
+    score_hint: int | float | None = None,
+    score_multiplier: int | float = 1,
+    dtype: np.dtype | None = None,
+    workers: int = 1,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> np.ndarray:
+    """
+    Compute pairwise distance/similarity between corresponding elements in the two collection of inputs.
+
+    Parameters
+    ----------
+    queries : Collection[Sequence[Hashable]]
+        list of all strings the queries
+    choices : Collection[Sequence[Hashable]]
+        list of all pairwise strings the query should be compared. Must be the same length as the queries.
+    scorer : Callable, optional
+        Optional callable that is used to calculate the matching score between
+        the query and each choice. This can be any of the scorers included in RapidFuzz
+        (both scorers that calculate the edit distance or the normalized edit distance), or
+        a custom function, which returns a normalized edit distance.
+        fuzz.ratio is used by default.
+    processor : Callable, optional
+        Optional callable that is used to preprocess the strings before
+        comparing them. Default is None, which deactivates this behaviour.
+    score_cutoff : Any, optional
+        Optional argument for a score threshold to be passed to the scorer.
+        Default is None, which deactivates this behaviour.
+    score_hint : Any, optional
+        Optional argument for an expected score to be passed to the scorer.
+        This is used to select a faster implementation. Default is None,
+        which deactivates this behaviour.
+    score_multiplier: Any, optional
+        Optional argument to multiply the calculated score with. This is applied as the final step,
+        so e.g. score_cutoff is applied on the unmodified score. This is mostly useful to map from
+        a floating point range to an integer to reduce the memory usage. Default is 1,
+        which deactivates this behaviour.
+    dtype : data-type, optional
+        The desired data-type for the result array.Depending on the scorer type the following
+        dtypes are supported:
+
+        - similarity:
+          - np.float32, np.float64
+          - np.uint8 -> stores fixed point representation of the result scaled to a range 0-100
+        - distance:
+          - np.int8, np.int16, np.int32, np.int64
+
+        If not given, then the type will be np.float32 for similarities and np.int32 for distances.
+    workers : int, optional
+        The calculation is subdivided into workers sections and evaluated in parallel.
+        Supply -1 to use all available CPU cores.
+        This argument is only available for scorers using the RapidFuzz C-API so far, since it
+        releases the Python GIL.
+    scorer_kwargs : dict[str, Any], optional
+        any other named parameters are passed to the scorer. This can be used to pass
+        e.g. weights to `Levenshtein.distance`
+
+    Returns
+    -------
+    ndarray
+        Returns a matrix of size (n x 1) of dtype with the distance/similarity between each pair
+        of the two collections of inputs.
+    """
+    import numpy as np
+
+    _ = workers, score_hint
+    scorer_kwargs = scorer_kwargs or {}
+    dtype = _dtype_to_type_num(dtype, scorer, scorer_kwargs)
+    results = np.zeros((len(queries), 1), dtype=dtype)
+
+    setupPandas()
+
+    if processor is None:
+        proc_choices = list(choices)
+        proc_queries = list(queries)
+    else:
+        proc_choices = [x if is_none(x) else processor(x) for x in choices]
+        proc_queries = [x if is_none(x) else processor(x) for x in queries]
+
+    for i, (proc_query, proc_choice) in enumerate(zip(proc_queries, proc_choices)):
+        score = scorer(
+            proc_query,
+            proc_choice,
+            score_cutoff=score_cutoff,
+            **scorer_kwargs,
+        )
+
+        # Apply score multiplier
+        score *= score_multiplier
+
+        # Store the score in the results matrix
+        results[i, 0] = score
+
+    # Round the results matrix if dtype is integral
+    if issubclass(dtype, numbers.Integral):
+        results = np.round(results)
+
+    return results
