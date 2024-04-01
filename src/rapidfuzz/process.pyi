@@ -107,3 +107,22 @@ try:
 
 except ImportError:
     pass
+
+try:
+    import numpy as np
+
+    def cpdist(
+        queries: Iterable[_S1],
+        choices: Iterable[_S2],
+        *,
+        scorer: Callable[..., _ResultType] = ratio,
+        processor: Callable[..., _StringType] | None = None,
+        score_cutoff: _ResultType | None = None,
+        score_hint: _ResultType | None = None,
+        dtype: np.dtype | None = None,
+        workers: int = 1,
+        scorer_kwargs: dict[str, Any] | None = None,
+    ) -> np.ndarray: ...
+
+except ImportError:
+    pass

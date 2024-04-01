@@ -17,9 +17,10 @@ from rapidfuzz.process_cpp_impl import UINT16 as _UINT16
 from rapidfuzz.process_cpp_impl import UINT32 as _UINT32
 from rapidfuzz.process_cpp_impl import UINT64 as _UINT64
 from rapidfuzz.process_cpp_impl import cdist as _cdist
+from rapidfuzz.process_cpp_impl import cpdist as _cpdist
 from rapidfuzz.process_cpp_impl import extract, extract_iter, extractOne
 
-__all__ = ["extract", "extract_iter", "extractOne", "cdist"]
+__all__ = ["extract", "extract_iter", "extractOne", "cdist", "cpdist"]
 
 if TYPE_CHECKING:
     import numpy as np
@@ -73,6 +74,38 @@ def cdist(
     dtype = _dtype_to_type_num(dtype)
     return np.asarray(
         _cdist(
+            queries,
+            choices,
+            scorer=scorer,
+            processor=processor,
+            score_cutoff=score_cutoff,
+            score_hint=score_hint,
+            score_multiplier=score_multiplier,
+            dtype=dtype,
+            workers=workers,
+            **kwargs,
+        )
+    )
+
+
+def cpdist(
+    queries: Collection[Sequence[Hashable] | None],
+    choices: Collection[Sequence[Hashable] | None],
+    *,
+    scorer: Callable[..., int | float] = ratio,
+    processor: Callable[..., Sequence[Hashable]] | None = None,
+    score_cutoff: int | float | None = None,
+    score_hint: int | float | None = None,
+    score_multiplier: int | float = 1,
+    dtype: np.dtype | None = None,
+    workers: int = 1,
+    **kwargs: Any,
+) -> np.ndarray:
+    import numpy as np
+
+    dtype = _dtype_to_type_num(dtype)
+    return np.asarray(
+        _cpdist(
             queries,
             choices,
             scorer=scorer,

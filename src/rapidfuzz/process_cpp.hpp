@@ -638,3 +638,37 @@ static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_
 
     return matrix;
 }
+
+template <typename T>
+static Matrix cpdist_cpp_impl(const RF_Kwargs* kwargs,
+                                   RF_Scorer* scorer, const std::vector<RF_StringWrapper>& queries,
+                                   const std::vector<RF_StringWrapper>& choices, MatrixType dtype,
+                                   int workers, T score_cutoff, T score_hint, T score_multiplier, T worst_score)
+{
+    int64_t rows = queries.size();
+    int64_t cols = 1;
+    Matrix matrix(dtype, static_cast<size_t>(rows), static_cast<size_t>(cols));
+
+    if (queries.empty() || choices.empty()) return matrix;
+
+    // TODO: Adjust the batch size based on the query, choices & hardware available
+    const int batchSize = 16;
+
+    run_parallel(workers, rows, batchSize, [&](int64_t row, int64_t row_end) {
+        for (; row < row_end; ++row) {
+            RF_ScorerFunc scorer_func;
+            PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, 1, &queries[row].string));
+            RF_ScorerWrapper ScorerFunc(scorer_func);
+
+            T score;
+            if (choices[row].is_none() || queries[row].is_none())
+                score = worst_score;
+            else
+                ScorerFunc.call(&choices[row].string, score_cutoff, score_hint, &score);
+
+            matrix.set(row, 0, score * score_multiplier);
+        }
+    });
+
+    return matrix;
+}
