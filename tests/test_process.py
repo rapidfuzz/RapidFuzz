@@ -6,7 +6,6 @@ from rapidfuzz import fuzz, process_cpp, process_py
 from rapidfuzz.distance import Levenshtein, Levenshtein_py
 from rapidfuzz.utils import default_process
 
-
 def wrapped(func):
     from functools import wraps
 
@@ -47,6 +46,18 @@ class process:
 
         res1 = process_cpp.cdist(*args, **kwargs)
         res2 = process_py.cdist(*args, **kwargs)
+        assert res1.dtype == res2.dtype
+        assert res1.shape == res2.shape
+        if res1.size and res2.size:
+            assert np.array_equal(res1, res2)
+        return res1
+
+    @staticmethod
+    def cpdist(*args, **kwargs):
+        import numpy as np
+
+        res1 = process_cpp.cpdist(*args, **kwargs)
+        res2 = process_py.cpdist(*args, **kwargs)
         assert res1.dtype == res2.dtype
         assert res1.shape == res2.shape
         if res1.size and res2.size:
@@ -564,6 +575,11 @@ def test_none_strings():
         assert scores[0, 3] == 0
         assert scores[0, 4] == 0
 
+    if np is not None:
+        scores = process.cpdist(choices, choices)
+        assert scores[0, 0] == 0
+        assert scores[3, 0] == 0
+        assert scores[4, 0] == 0
 
 def test_issue81():
     # this mostly tests whether this segfaults due to incorrect ref counting
@@ -610,6 +626,11 @@ def test_cdist_empty_seq(scorer):
     assert process.cdist(["a", "b"], [], scorer=scorer).shape == (2, 0)
 
 
+@pytest.mark.parametrize("scorer", [fuzz.ratio, fuzz.WRatio, custom_scorer])
+def test_cpdist_empty_seq(scorer):
+    pytest.importorskip("numpy")
+    assert process.cpdist([], [], scorer=scorer).shape == (0, 1)
+
 @pytest.mark.parametrize("scorer", [fuzz.ratio])
 def test_wrapped_function(scorer):
     pytest.importorskip("numpy")
@@ -617,6 +638,9 @@ def test_wrapped_function(scorer):
     assert process.cdist(["test"], [float("nan")], scorer=scorer)[0, 0] == 100
     assert process.cdist(["test"], [None], scorer=scorer)[0, 0] == 100
     assert process.cdist(["test"], ["tes"], scorer=scorer)[0, 0] == 100
+    assert process.cpdist(["test"], [float("nan")], scorer=scorer)[0, 0] == 100
+    assert process.cpdist(["test"], [None], scorer=scorer)[0, 0] == 100
+    assert process.cpdist(["test"], ["tes"], scorer=scorer)[0, 0] == 100
 
     try:
         import pandas as pd
@@ -625,6 +649,7 @@ def test_wrapped_function(scorer):
 
     if pd is not None:
         assert process.cdist(["test"], [pd.NA], scorer=scorer)[0, 0] == 100
+        assert process.cpdist(["test"], [pd.NA], scorer=scorer)[0, 0] == 100
 
 
 def test_cdist_not_symmetric():
@@ -636,8 +661,30 @@ def test_cdist_not_symmetric():
         expected_res,
     )
 
+def test_cpdist_not_same_length():
+    np = pytest.importorskip("numpy")
+    with pytest.raises(AssertionError):
+        process.cpdist(["a", "b"], [])
+    with pytest.raises(AssertionError):
+        process.cpdist(["a", "b"], ["f"])
 
-def test_cdist_muliplier():
+def test_cpdist_multiplier():
+    np = pytest.importorskip("numpy")
+    string1 = ["test"]
+    string2 = ["test2"]
+    expected_res = np.array([[204]])
+    assert np.array_equal(
+        process.cpdist(string1, string2, scorer=Levenshtein.normalized_similarity, score_multiplier=255, dtype=np.uint8),
+        expected_res,
+    )
+    expected_res = np.array([[51]])
+    assert np.array_equal(
+        process.cdist(string1, string2, scorer=Levenshtein.normalized_distance, score_multiplier=255, dtype=np.uint8),
+        expected_res,
+    )
+
+
+def test_cdist_multiplier():
     np = pytest.importorskip("numpy")
     strings = ["test", "test2"]
     expected_res = np.array([[255, 204], [204, 255]])
@@ -687,3 +734,10 @@ def test_cdist_pure_python_dtype():
     assert process.cdist(["test"], ["test"], scorer=Levenshtein_py.similarity).dtype == np.uint32
     assert process.cdist(["test"], ["test"], scorer=Levenshtein_py.normalized_distance).dtype == np.float32
     assert process.cdist(["test"], ["test"], scorer=Levenshtein_py.normalized_similarity).dtype == np.float32
+
+def test_cpdist_pure_python_dtype():
+    np = pytest.importorskip("numpy")
+    assert process.cpdist(["test"], ["test"], scorer=Levenshtein_py.distance).dtype == np.uint32
+    assert process.cpdist(["test"], ["test"], scorer=Levenshtein_py.similarity).dtype == np.uint32
+    assert process.cpdist(["test"], ["test"], scorer=Levenshtein_py.normalized_distance).dtype == np.float32
+    assert process.cpdist(["test"], ["test"], scorer=Levenshtein_py.normalized_similarity).dtype == np.float32
