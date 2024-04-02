@@ -4,6 +4,7 @@ on:
   push:
     paths-ignore:
       - 'docs/**'
+  pull_request:
 
 jobs:
   no_cython_install:
