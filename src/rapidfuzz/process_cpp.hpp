@@ -640,10 +640,10 @@ static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_
 }
 
 template <typename T>
-static Matrix cpdist_cpp_impl(const RF_Kwargs* kwargs,
-                                   RF_Scorer* scorer, const std::vector<RF_StringWrapper>& queries,
-                                   const std::vector<RF_StringWrapper>& choices, MatrixType dtype,
-                                   int workers, T score_cutoff, T score_hint, T score_multiplier, T worst_score)
+static Matrix cpdist_cpp_impl(const RF_Kwargs* kwargs, RF_Scorer* scorer,
+                              const std::vector<RF_StringWrapper>& queries,
+                              const std::vector<RF_StringWrapper>& choices, MatrixType dtype, int workers,
+                              T score_cutoff, T score_hint, T score_multiplier, T worst_score)
 {
     int64_t rows = queries.size();
     int64_t cols = 1;

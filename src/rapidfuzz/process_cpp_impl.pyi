@@ -109,11 +109,11 @@ def cdist(
     processor: Callable[..., _StringType] | None = None,
     score_cutoff: _ResultType | None = None,
     score_hint: _ResultType | None = None,
+    score_multiplier: _ResultType | None = None,
     dtype: int | None = None,
     workers: int = 1,
     scorer_kwargs: dict[str, Any] | None = None,
 ) -> Any: ...
-
 def cpdist(
     queries: Iterable[_S1],
     choices: Iterable[_S2],
@@ -122,6 +122,7 @@ def cpdist(
     processor: Callable[..., _StringType] | None = None,
     score_cutoff: _ResultType | None = None,
     score_hint: _ResultType | None = None,
+    score_multiplier: _ResultType | None = None,
     dtype: int | None = None,
     workers: int = 1,
     scorer_kwargs: dict[str, Any] | None = None,

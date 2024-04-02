@@ -13,14 +13,17 @@ from rapidfuzz._feature_detector import AVX2, SSE2, supports
 
 pandas_NA = None
 
+
 def setupPandas():
     global pandas_NA
     if pandas_NA is None:
-        pandas = sys.modules.get('pandas')
-        if hasattr(pandas, 'NA'):
+        pandas = sys.modules.get("pandas")
+        if hasattr(pandas, "NA"):
             pandas_NA = pandas.NA
 
+
 setupPandas()
+
 
 class ScorerFlag:
     RESULT_F64 = 1 << 5

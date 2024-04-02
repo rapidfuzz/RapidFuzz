@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterator, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Iterator, Sequence, Union
 
 
 def _list_to_editops(
