@@ -104,17 +104,16 @@ def cpdist(
     import numpy as np
 
     dtype = _dtype_to_type_num(dtype)
-    return np.asarray(
-        _cpdist(
-            queries,
-            choices,
-            scorer=scorer,
-            processor=processor,
-            score_cutoff=score_cutoff,
-            score_hint=score_hint,
-            score_multiplier=score_multiplier,
-            dtype=dtype,
-            workers=workers,
-            **kwargs,
-        )
+    distance_matrix = _cpdist(
+        queries,
+        choices,
+        scorer=scorer,
+        processor=processor,
+        score_cutoff=score_cutoff,
+        score_hint=score_hint,
+        score_multiplier=score_multiplier,
+        dtype=dtype,
+        workers=workers,
+        **kwargs,
     )
+    return np.asarray(distance_matrix).flatten()

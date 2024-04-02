@@ -7,6 +7,7 @@ import heapq
 import numbers
 from contextlib import suppress
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Collection,
@@ -15,7 +16,6 @@ from typing import (
     Mapping,
     Sequence,
     overload,
-    TYPE_CHECKING
 )
 
 from rapidfuzz._utils import ScorerFlag, is_none, setupPandas
@@ -588,7 +588,7 @@ def cdist(
         a floating point range to an integer to reduce the memory usage. Default is 1,
         which deactivates this behaviour.
     dtype : data-type, optional
-        The desired data-type for the result array.Depending on the scorer type the following
+        The desired data-type for the result array. Depending on the scorer type the following
         dtypes are supported:
 
         - similarity:
@@ -671,6 +671,7 @@ def cdist(
 
     return results
 
+
 def cpdist(
     queries: Collection[Sequence[Hashable] | None],
     choices: Collection[Sequence[Hashable] | None],
@@ -715,7 +716,7 @@ def cpdist(
         a floating point range to an integer to reduce the memory usage. Default is 1,
         which deactivates this behaviour.
     dtype : data-type, optional
-        The desired data-type for the result array.Depending on the scorer type the following
+        The desired data-type for the result array. Depending on the scorer type the following
         dtypes are supported:
 
         - similarity:
@@ -742,10 +743,14 @@ def cpdist(
     """
     import numpy as np
 
+    if len(queries) != len(choices):
+        error_message = "Length of queries and choices must be the same!"
+        raise ValueError(error_message)
+
     _ = workers, score_hint
     scorer_kwargs = scorer_kwargs or {}
     dtype = _dtype_to_type_num(dtype, scorer, scorer_kwargs)
-    results = np.zeros((len(queries), 1), dtype=dtype)
+    results = np.zeros((len(queries),), dtype=dtype)
 
     setupPandas()
 
@@ -767,11 +772,11 @@ def cpdist(
         # Apply score multiplier
         score *= score_multiplier
 
-        # Store the score in the results matrix
-        results[i, 0] = score
+        # Round the result if dtype is integral
+        if issubclass(dtype, numbers.Integral):
+            score = round(score)
 
-    # Round the results matrix if dtype is integral
-    if issubclass(dtype, numbers.Integral):
-        results = np.round(results)
+        # Store the score in the results matrix
+        results[i] = score
 
     return results

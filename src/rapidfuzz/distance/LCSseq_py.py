@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Callable, Hashable, Sequence, Any
+from typing import Any, Callable, Hashable, Sequence
 
 from rapidfuzz._common_py import common_affix, conv_sequences
 from rapidfuzz._utils import is_none, setupPandas

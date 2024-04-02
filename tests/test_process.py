@@ -6,6 +6,7 @@ from rapidfuzz import fuzz, process_cpp, process_py
 from rapidfuzz.distance import Levenshtein, Levenshtein_py
 from rapidfuzz.utils import default_process
 
+
 def wrapped(func):
     from functools import wraps
 
@@ -207,7 +208,7 @@ def test_with_processor():
     best = process.extract(query, events, processor=lambda event: event[0])[0]
     assert best[0] == events[0]
 
-    eventsDict = {i: elem for i, elem in enumerate(events)}
+    eventsDict = dict(enumerate(events))
     best = process.extractOne(query, eventsDict, processor=lambda event: event[0])
     assert best[0] == events[0]
 
@@ -577,9 +578,10 @@ def test_none_strings():
 
     if np is not None:
         scores = process.cpdist(choices, choices)
-        assert scores[0, 0] == 0
-        assert scores[3, 0] == 0
-        assert scores[4, 0] == 0
+        assert scores[0] == 0
+        assert scores[3] == 0
+        assert scores[4] == 0
+
 
 def test_issue81():
     # this mostly tests whether this segfaults due to incorrect ref counting
@@ -629,7 +631,8 @@ def test_cdist_empty_seq(scorer):
 @pytest.mark.parametrize("scorer", [fuzz.ratio, fuzz.WRatio, custom_scorer])
 def test_cpdist_empty_seq(scorer):
     pytest.importorskip("numpy")
-    assert process.cpdist([], [], scorer=scorer).shape == (0, 1)
+    assert process.cpdist([], [], scorer=scorer).shape == (0,)
+
 
 @pytest.mark.parametrize("scorer", [fuzz.ratio])
 def test_wrapped_function(scorer):
@@ -638,9 +641,9 @@ def test_wrapped_function(scorer):
     assert process.cdist(["test"], [float("nan")], scorer=scorer)[0, 0] == 100
     assert process.cdist(["test"], [None], scorer=scorer)[0, 0] == 100
     assert process.cdist(["test"], ["tes"], scorer=scorer)[0, 0] == 100
-    assert process.cpdist(["test"], [float("nan")], scorer=scorer)[0, 0] == 100
-    assert process.cpdist(["test"], [None], scorer=scorer)[0, 0] == 100
-    assert process.cpdist(["test"], ["tes"], scorer=scorer)[0, 0] == 100
+    assert process.cpdist(["test"], [float("nan")], scorer=scorer)[0] == 100
+    assert process.cpdist(["test"], [None], scorer=scorer)[0] == 100
+    assert process.cpdist(["test"], ["tes"], scorer=scorer)[0] == 100
 
     try:
         import pandas as pd
@@ -649,7 +652,7 @@ def test_wrapped_function(scorer):
 
     if pd is not None:
         assert process.cdist(["test"], [pd.NA], scorer=scorer)[0, 0] == 100
-        assert process.cpdist(["test"], [pd.NA], scorer=scorer)[0, 0] == 100
+        assert process.cpdist(["test"], [pd.NA], scorer=scorer)[0] == 100
 
 
 def test_cdist_not_symmetric():
@@ -661,25 +664,28 @@ def test_cdist_not_symmetric():
         expected_res,
     )
 
+
 def test_cpdist_not_same_length():
-    np = pytest.importorskip("numpy")
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError, match="Length of queries and choices must be the same!"):
         process.cpdist(["a", "b"], [])
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError, match="Length of queries and choices must be the same!"):
         process.cpdist(["a", "b"], ["f"])
+
 
 def test_cpdist_multiplier():
     np = pytest.importorskip("numpy")
     string1 = ["test"]
     string2 = ["test2"]
-    expected_res = np.array([[204]])
+    expected_res = np.array([204])
     assert np.array_equal(
-        process.cpdist(string1, string2, scorer=Levenshtein.normalized_similarity, score_multiplier=255, dtype=np.uint8),
+        process.cpdist(
+            string1, string2, scorer=Levenshtein.normalized_similarity, score_multiplier=255, dtype=np.uint8
+        ),
         expected_res,
     )
-    expected_res = np.array([[51]])
+    expected_res = np.array([51])
     assert np.array_equal(
-        process.cdist(string1, string2, scorer=Levenshtein.normalized_distance, score_multiplier=255, dtype=np.uint8),
+        process.cpdist(string1, string2, scorer=Levenshtein.normalized_distance, score_multiplier=255, dtype=np.uint8),
         expected_res,
     )
 
@@ -735,9 +741,22 @@ def test_cdist_pure_python_dtype():
     assert process.cdist(["test"], ["test"], scorer=Levenshtein_py.normalized_distance).dtype == np.float32
     assert process.cdist(["test"], ["test"], scorer=Levenshtein_py.normalized_similarity).dtype == np.float32
 
+
 def test_cpdist_pure_python_dtype():
     np = pytest.importorskip("numpy")
     assert process.cpdist(["test"], ["test"], scorer=Levenshtein_py.distance).dtype == np.uint32
     assert process.cpdist(["test"], ["test"], scorer=Levenshtein_py.similarity).dtype == np.uint32
     assert process.cpdist(["test"], ["test"], scorer=Levenshtein_py.normalized_distance).dtype == np.float32
     assert process.cpdist(["test"], ["test"], scorer=Levenshtein_py.normalized_similarity).dtype == np.float32
+
+
+def test_cpdist_integral_dtype_rounding():
+    np = pytest.importorskip("numpy")
+    str1 = ["1 2 33 5"]
+    str2 = ["1 22 33 55"]
+    float_result = process.cpdist(str1, str2, dtype=np.float32)[0]
+    int_result = process.cpdist(str1, str2, dtype=np.uint32)[0]
+    # Check that the float result should be rounded up when in integer format
+    assert float_result % 1 >= 0.5
+    # Check if the rounded float result is equal to the integer result
+    assert round(float_result) == int_result

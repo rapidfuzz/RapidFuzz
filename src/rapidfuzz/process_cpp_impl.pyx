@@ -2003,7 +2003,6 @@ def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef cpdist_py(queries, choices, scorer, processor, score_cutoff, score_multiplier, dtype, workers, dict scorer_kwargs):
-    # todo this should handle two similar sequences more efficiently
 
     proc_queries = preprocess_py(queries, processor)
     proc_choices = preprocess_py(choices, processor)
@@ -2021,7 +2020,10 @@ cdef cpdist_py(queries, choices, scorer, processor, score_cutoff, score_multipli
     return matrix
 
 def cpdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, score_hint=None, score_multiplier=1, dtype=None, workers=1, scorer_kwargs=None):
-    assert len(queries) == len(choices), "Length of queries and choices must be the same!"
+
+    if len(queries) != len(choices):
+        error_message = "Length of queries and choices must be the same!"
+        raise ValueError(error_message)
 
     cdef RF_Scorer* scorer_context = NULL
     cdef RF_ScorerFlags scorer_flags
