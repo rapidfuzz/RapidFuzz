@@ -50,7 +50,7 @@ def benchmark():
     sample_rate = len(words) // 2
     words1 = words[:sample_rate]
     words2 = words[sample_rate::]
-    total = len(words1) + len(words2)
+    total = len(words1)
 
     print("System:", get_platform())
     print("Words :", len(words1))
