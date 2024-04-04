@@ -7,6 +7,7 @@ from libc.stddef cimport wchar_t
 from libc.stdint cimport int64_t, uint64_t, SIZE_MAX, UINT64_MAX
 from libc.stdlib cimport free, malloc
 from libcpp cimport bool
+from libcpp.cmath cimport isnan
 from libcpp.utility cimport move, pair
 from libcpp.vector cimport vector
 
@@ -25,7 +26,10 @@ from rapidfuzz cimport (
     RF_StringType,
 )
 
+# these are only for the cython compiler
+# each module still has to define them on it's own
 from array import array
+pandas_NA = None
 
 cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
     cpdef enum class EditType:
@@ -323,6 +327,34 @@ cdef inline RF_String hash_sequence(seq) except *:
 
     s_proc.dtor = default_string_deinit
     return s_proc
+
+cdef inline bool is_none(s) noexcept:
+    if s is None or s is pandas_NA:
+        return True
+
+    if isinstance(s, float) and isnan(<double>s):
+        return True
+
+    return False
+
+cdef inline RF_String convert_none(s) noexcept:
+    cdef RF_String s_proc
+    s_proc.length = 0
+    s_proc.data = NULL
+    return s_proc
+
+# todo we will probably want to clean up the various methods of
+# converting strings. This has to be done carefully, since especially with preprocessor functions
+# the none check is often required before calling the preprocessing functions to keep the current behaviour
+cdef inline RF_String conv_sequence_with_none(seq) except *:
+    if is_valid_string(seq):
+        return move(convert_string(seq))
+    elif is_none(seq):
+        return move(convert_none(seq))
+    elif isinstance(seq, array):
+        return move(hash_array(seq))
+    else:
+        return move(hash_sequence(seq))
 
 cdef inline RF_String conv_sequence(seq) except *:
     if is_valid_string(seq):

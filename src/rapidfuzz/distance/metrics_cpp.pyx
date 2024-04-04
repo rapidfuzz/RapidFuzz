@@ -45,6 +45,7 @@ from cpp_common cimport (
     preprocess_strings,
     get_score_cutoff_f64,
     get_score_cutoff_size_t,
+    is_none
 )
 from libcpp.cmath cimport isnan
 from libc.stdint cimport SIZE_MAX, int64_t
@@ -189,16 +190,6 @@ cdef extern from "metrics.hpp":
     bool PostfixNormalizedDistanceInit(  RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
     bool PostfixSimilarityInit(          RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
     bool PostfixNormalizedSimilarityInit(RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
-
-
-cdef inline bool is_none(s):
-    if s is None or s is pandas_NA:
-        return True
-
-    if isinstance(s, float) and isnan(<double>s):
-        return True
-
-    return False
 
 
 def levenshtein_distance(s1, s2, *, weights=(1,1,1), processor=None, score_cutoff=None, score_hint=None):

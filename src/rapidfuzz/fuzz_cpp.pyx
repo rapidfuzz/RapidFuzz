@@ -27,6 +27,7 @@ from cpp_common cimport (
     RfScoreAlignment,
     SetScorerAttrs,
     preprocess_strings,
+    is_none
 )
 from libcpp.cmath cimport isnan
 from libc.stdint cimport int64_t, uint32_t
@@ -69,15 +70,6 @@ cdef extern from "fuzz_cpp.hpp":
     bool QRatioInit(                RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
 
     bool RatioMultiStringSupport(const RF_Kwargs*) nogil
-
-cdef inline bool is_none(s):
-    if s is None or s is pandas_NA:
-        return True
-
-    if isinstance(s, float) and isnan(<double>s):
-        return True
-
-    return False
 
 def ratio(s1, s2, *, processor=None, score_cutoff=None):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff

@@ -8,10 +8,12 @@ from cpp_common cimport (
     PyObjectWrapper,
     RF_KwargsWrapper,
     RF_StringWrapper,
+    conv_sequence_with_none,
     conv_sequence,
     get_score_cutoff_f64,
     get_score_cutoff_i64,
     get_score_cutoff_size_t,
+    is_none
 )
 from cpython cimport Py_buffer
 from cpython.buffer cimport PyBUF_F_CONTIGUOUS, PyBUF_ND, PyBUF_SIMPLE
@@ -147,17 +149,6 @@ cdef extern from "process_cpp.hpp":
         const vector[RF_StringWrapper]&, const vector[RF_StringWrapper]&, MatrixType, int, T, T, T) except +
 
 
-
-cdef inline bool is_none(s):
-    if s is None or s is pandas_NA:
-        return True
-
-    if isinstance(s, float) and isnan(<double>s):
-        return True
-
-    return False
-
-
 cdef inline vector[DictStringElem] preprocess_dict(queries, processor) except *:
     cdef vector[DictStringElem] proc_queries
     cdef int64_t queries_len = <int64_t>len(queries)
@@ -169,13 +160,15 @@ cdef inline vector[DictStringElem] preprocess_dict(queries, processor) except *:
     # No processor
     if not processor:
         for i, (query_key, query) in enumerate(queries.items()):
-            if is_none(query):
+            proc_str = conv_sequence_with_none(query)
+            if proc_str.data == NULL:
                 continue
+
             proc_queries.emplace_back(
                 i,
                 move(PyObjectWrapper(query_key)),
                 move(PyObjectWrapper(query)),
-                move(RF_StringWrapper(conv_sequence(query)))
+                move(RF_StringWrapper(proc_str))
             )
     else:
         processor_capsule = getattr(processor, '_RF_Preprocess', processor)
@@ -222,12 +215,14 @@ cdef inline vector[ListStringElem] preprocess_list(queries, processor) except *:
     # No processor
     if not processor:
         for i, query in enumerate(queries):
-            if is_none(query):
+            proc_str = conv_sequence_with_none(query)
+            if proc_str.data == NULL:
                 continue
+
             proc_queries.emplace_back(
                 i,
                 move(PyObjectWrapper(query)),
-                move(RF_StringWrapper(conv_sequence(query)))
+                move(RF_StringWrapper(proc_str))
             )
     else:
         processor_capsule = getattr(processor, '_RF_Preprocess', processor)
@@ -1692,10 +1687,14 @@ cdef inline vector[RF_StringWrapper] preprocess(const RF_ScorerFlags* scorer_fla
     # No processor
     if not processor:
         for query in queries:
-            if is_none(query) and flags & RF_SCORER_NONE_IS_WORST_SCORE:
-                proc_queries.emplace_back()
+            proc_str = conv_sequence_with_none(query)
+            if proc_str.data == NULL:
+                if flags & RF_SCORER_NONE_IS_WORST_SCORE:
+                    proc_queries.emplace_back()
+                else:
+                    raise ValueError(f"passed unsupported element {query}")
             else:
-                proc_queries.emplace_back(conv_sequence(query), <PyObject*>query)
+                proc_queries.emplace_back(proc_str, <PyObject*>query)
     else:
         processor_capsule = getattr(processor, '_RF_Preprocess', processor)
         if PyCapsule_IsValid(processor_capsule, NULL):
