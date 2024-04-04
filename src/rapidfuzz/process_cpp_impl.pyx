@@ -137,6 +137,7 @@ cdef extern from "process_cpp.hpp":
         size_t m_rows
         size_t m_cols
         void* m_matrix
+        bool vector_output
 
     RfMatrix cdist_single_list_impl[T](  const RF_ScorerFlags* scorer_flags, const RF_Kwargs*, RF_Scorer*,
         const vector[RF_StringWrapper]&, MatrixType, int, T, T, T) except +
@@ -1758,22 +1759,33 @@ from libcpp.vector cimport vector
 
 
 cdef class Matrix:
+
+    cdef RfMatrix matrix
     cdef Py_ssize_t shape[2]
     cdef Py_ssize_t strides[2]
-    cdef RfMatrix matrix
+    cdef bint vector_output
+
+    def __cinit__(self, bint vector_output=False):
+        self.vector_output = vector_output
 
     def __getbuffer__(self, Py_buffer *buffer, int flags):
-        self.shape[0] = self.matrix.m_rows
-        self.shape[1] = self.matrix.m_cols
-        self.strides[1] = self.matrix.get_dtype_size()
-        self.strides[0] = self.matrix.m_cols * self.strides[1]
+
+        if self.vector_output:
+            self.shape[0] = self.matrix.m_rows
+            self.strides[0] = self.matrix.get_dtype_size()
+            buffer.ndim = 1
+        else:
+            self.shape[0] = self.matrix.m_rows
+            self.shape[1] = self.matrix.m_cols
+            self.strides[1] = self.matrix.get_dtype_size()
+            self.strides[0] = self.matrix.m_cols * self.strides[1]
+            buffer.ndim = 2
 
         buffer.buf = <char *>self.matrix.m_matrix
         buffer.format = <char *>self.matrix.get_format()
         buffer.internal = NULL
         buffer.itemsize = self.matrix.get_dtype_size()
         buffer.len = self.matrix.m_rows * self.matrix.m_cols * self.matrix.get_dtype_size()
-        buffer.ndim = 2
         buffer.obj = self
         buffer.readonly = 0
         buffer.shape = self.shape
@@ -1798,7 +1810,7 @@ cdef Matrix cpdist_cpp(
     proc_queries = preprocess(scorer_flags, queries, processor)
     proc_choices = preprocess(scorer_flags, choices, processor)
     flags = scorer_flags.flags
-    cdef Matrix matrix = Matrix()
+    cdef Matrix matrix = Matrix(vector_output=True)
 
     if flags & RF_SCORER_FLAG_RESULT_F64:
         matrix.matrix = cpdist_cpp_impl[double](
@@ -2007,7 +2019,7 @@ cdef cpdist_py(queries, choices, scorer, processor, score_cutoff, score_multipli
     proc_queries = preprocess_py(queries, processor)
     proc_choices = preprocess_py(choices, processor)
     cdef double score
-    cdef Matrix matrix = Matrix()
+    cdef Matrix matrix = Matrix(vector_output=True)
     c_dtype = dtype_to_type_num_py(dtype, scorer, scorer_kwargs)
     matrix.matrix = RfMatrix(c_dtype, proc_queries.size(), 1)
 

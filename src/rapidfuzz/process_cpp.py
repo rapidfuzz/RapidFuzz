@@ -116,4 +116,4 @@ def cpdist(
         workers=workers,
         **kwargs,
     )
-    return np.asarray(distance_matrix).flatten()
+    return np.asarray(distance_matrix)
