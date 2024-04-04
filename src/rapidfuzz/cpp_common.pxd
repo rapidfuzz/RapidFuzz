@@ -6,6 +6,7 @@ from cpython.pycapsule cimport PyCapsule_GetPointer, PyCapsule_IsValid, PyCapsul
 from libc.stddef cimport wchar_t
 from libc.stdint cimport int64_t, uint64_t, SIZE_MAX, UINT64_MAX
 from libc.stdlib cimport free, malloc
+from libc.math cimport NAN
 from libcpp cimport bool
 from libcpp.cmath cimport isnan
 from libcpp.utility cimport move, pair
@@ -250,9 +251,8 @@ cdef extern from "cpp_common.hpp":
     RF_String convert_string(object py_str)
     void validate_string(object py_str, const char* err) except +
 
-cdef inline RF_String hash_array(arr) except *:
+cdef inline bool hash_array(arr, RF_String* s_proc) except False:
     # TODO on Cpython this does not require any copies
-    cdef RF_String s_proc
     cdef Py_UCS4 typecode = <Py_UCS4>arr.typecode
     s_proc.length = <int64_t>len(arr)
 
@@ -297,11 +297,10 @@ cdef inline RF_String hash_array(arr) except *:
         raise
 
     s_proc.dtor = default_string_deinit
-    return s_proc
+    return True
 
 
-cdef inline RF_String hash_sequence(seq) except *:
-    cdef RF_String s_proc
+cdef inline bool hash_sequence(seq, RF_String* s_proc) except False:
     s_proc.length = <int64_t>len(seq)
 
     s_proc.data = malloc(s_proc.length * sizeof(uint64_t))
@@ -326,7 +325,7 @@ cdef inline RF_String hash_sequence(seq) except *:
         raise
 
     s_proc.dtor = default_string_deinit
-    return s_proc
+    return True
 
 cdef inline bool is_none(s) noexcept:
     if s is None or s is pandas_NA:
@@ -337,32 +336,32 @@ cdef inline bool is_none(s) noexcept:
 
     return False
 
-cdef inline RF_String convert_none(s) noexcept:
-    cdef RF_String s_proc
-    s_proc.length = 0
-    s_proc.data = NULL
-    return s_proc
-
 # todo we will probably want to clean up the various methods of
 # converting strings. This has to be done carefully, since especially with preprocessor functions
 # the none check is often required before calling the preprocessing functions to keep the current behaviour
-cdef inline RF_String conv_sequence_with_none(seq) except *:
+cdef inline bool conv_sequence_with_none(seq, RF_String* c_seq) except False:
     if is_valid_string(seq):
-        return move(convert_string(seq))
+        c_seq[0] = move(convert_string(seq))
     elif is_none(seq):
-        return move(convert_none(seq))
+        c_seq.length = 0
+        c_seq.data = NULL
     elif isinstance(seq, array):
-        return move(hash_array(seq))
+        hash_array(seq, c_seq)
     else:
-        return move(hash_sequence(seq))
+        hash_sequence(seq, c_seq)
+
+    return True
 
 cdef inline RF_String conv_sequence(seq) except *:
+    cdef RF_String c_seq
     if is_valid_string(seq):
-        return move(convert_string(seq))
+        c_seq = move(convert_string(seq))
     elif isinstance(seq, array):
-        return move(hash_array(seq))
+        hash_array(seq, &c_seq)
     else:
-        return move(hash_sequence(seq))
+        hash_sequence(seq, &c_seq)
+
+    return move(c_seq)
 
 cdef inline double get_score_cutoff_f64(score_cutoff, float worst_score, float optimal_score) except *:
     cdef float c_score_cutoff = worst_score
@@ -401,7 +400,7 @@ cdef inline size_t get_score_cutoff_size_t(score_cutoff, size_t worst_score, siz
     if score_cutoff is not None:
         c_score_cutoff = score_cutoff
         if c_score_cutoff > SIZE_MAX:
-            c_score_cutoff=  SIZE_MAX
+            c_score_cutoff = SIZE_MAX
 
         if optimal_score > worst_score:
             # e.g. 0.0 - 100.0
@@ -414,7 +413,7 @@ cdef inline size_t get_score_cutoff_size_t(score_cutoff, size_t worst_score, siz
 
     return <size_t>c_score_cutoff
 
-cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except *:
+cdef inline bool preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc, RF_StringWrapper* s2_proc) except False:
     cdef RF_Preprocessor* preprocess_context = NULL
 
     if not processor:
@@ -433,6 +432,8 @@ cdef inline void preprocess_strings(s1, s2, processor, RF_StringWrapper* s1_proc
             s1_proc[0] = RF_StringWrapper(conv_sequence(s1), s1)
             s2 = processor(s2)
             s2_proc[0] = RF_StringWrapper(conv_sequence(s2), s2)
+
+    return True
 
 cdef inline bool NoKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     if len(kwargs):

@@ -160,7 +160,7 @@ cdef inline vector[DictStringElem] preprocess_dict(queries, processor) except *:
     # No processor
     if not processor:
         for i, (query_key, query) in enumerate(queries.items()):
-            proc_str = conv_sequence_with_none(query)
+            conv_sequence_with_none(query, &proc_str)
             if proc_str.data == NULL:
                 continue
 
@@ -215,7 +215,7 @@ cdef inline vector[ListStringElem] preprocess_list(queries, processor) except *:
     # No processor
     if not processor:
         for i, query in enumerate(queries):
-            proc_str = conv_sequence_with_none(query)
+            conv_sequence_with_none(query, &proc_str)
             if proc_str.data == NULL:
                 continue
 
@@ -1687,7 +1687,7 @@ cdef inline vector[RF_StringWrapper] preprocess(const RF_ScorerFlags* scorer_fla
     # No processor
     if not processor:
         for query in queries:
-            proc_str = conv_sequence_with_none(query)
+            conv_sequence_with_none(query, &proc_str)
             if proc_str.data == NULL:
                 if flags & RF_SCORER_NONE_IS_WORST_SCORE:
                     proc_queries.emplace_back()

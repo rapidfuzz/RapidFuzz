@@ -5,10 +5,6 @@ from cpp_common cimport (
     CreateProcessorContext,
     SetProcessorAttrs,
     conv_sequence,
-    convert_string,
-    hash_array,
-    hash_sequence,
-    is_valid_string,
 )
 from libcpp cimport bool
 
