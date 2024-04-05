@@ -52,6 +52,14 @@ cdef extern from "rapidfuzz.h":
 
         void* context
 
+    ctypedef union _RF_UncachedScorerFunc_union:
+        bool (*f64) (const RF_String*, const RF_String*, const RF_Kwargs*, double, double, double*) except False nogil
+        bool (*i64) (const RF_String*, const RF_String*, const RF_Kwargs*, int64_t, int64_t, int64_t*) except False nogil
+        bool (*sizet) (const RF_String*, const RF_String*, const RF_Kwargs*, size_t, size_t, size_t*) except False nogil
+
+    ctypedef struct RF_UncachedScorerFunc:
+        _RF_UncachedScorerFunc_union call
+
     ctypedef bool (*RF_ScorerFuncInit) (RF_ScorerFunc*, const RF_Kwargs*, int64_t, const RF_String*) except False nogil
 
     ctypedef union _RF_RF_ScorerFlags_OptimalScore_union:
@@ -78,3 +86,4 @@ cdef extern from "rapidfuzz.h":
         RF_KwargsInit kwargs_init
         RF_GetScorerFlags get_scorer_flags
         RF_ScorerFuncInit scorer_func_init
+        RF_UncachedScorerFunc uncached_scorer_func

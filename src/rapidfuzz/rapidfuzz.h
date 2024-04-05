@@ -126,6 +126,20 @@ typedef struct _RF_ScorerFunc {
 } RF_ScorerFunc;
 
 /**
+ * @brief struct describing a Scorer
+ */
+typedef struct _RF_UncachedScorerFunc {
+    union {
+        bool (*f64)(const RF_String* str1, const RF_String* str2, const RF_Kwargs* kwargs,
+                    double score_cutoff, double score_hint, double* result);
+        bool (*i64)(const RF_String* str1, const RF_String* str2, const RF_Kwargs* kwargs,
+                    int64_t score_cutoff, int64_t score_hint, int64_t* result);
+        bool (*sizet)(const RF_String* str1, const RF_String* str2, const RF_Kwargs* kwargs,
+                      size_t score_cutoff, size_t score_hint, size_t* result);
+    } call;
+} RF_UncachedScorerFunc;
+
+/**
  * @brief construct RF_ScorerFunc.
  *
  * @param[out] self constructed RF_ScorerFunc instance
@@ -210,11 +224,12 @@ typedef bool (*RF_GetScorerFlags)(const RF_Kwargs* kwargs, RF_ScorerFlags* score
  * @brief struct describing a Scorer callback function.
  */
 typedef struct {
-#define SCORER_STRUCT_VERSION ((uint32_t)2)
+#define SCORER_STRUCT_VERSION ((uint32_t)3)
     uint32_t version;                   /**< version number of the structure. Set to SCORER_STRUCT_VERSION */
     RF_KwargsInit kwargs_init;          /**< keyword argument constructor */
     RF_GetScorerFlags get_scorer_flags; /**< function to retrieve additional information about the scorer */
     RF_ScorerFuncInit scorer_func_init; /**< scorer constructor */
+    RF_UncachedScorerFunc uncached_scorer_func; /**< uncached scorer */
 } RF_Scorer;
 
 #ifdef __cplusplus

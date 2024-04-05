@@ -160,6 +160,44 @@ struct RF_ScorerWrapper {
     }
 };
 
+struct RF_UncachedScorerWrapper {
+    RF_UncachedScorerFunc scorer_func;
+
+    explicit RF_UncachedScorerWrapper(RF_UncachedScorerFunc scorer_func_) : scorer_func(scorer_func_)
+    {}
+
+    RF_UncachedScorerWrapper(const RF_UncachedScorerWrapper&) = delete;
+    RF_UncachedScorerWrapper& operator=(const RF_UncachedScorerWrapper&) = delete;
+
+    RF_UncachedScorerWrapper(RF_UncachedScorerWrapper&& other) : scorer_func(other.scorer_func)
+    {}
+
+    RF_UncachedScorerWrapper& operator=(RF_UncachedScorerWrapper&& other)
+    {
+        if (&other != this) scorer_func = other.scorer_func;
+
+        return *this;
+    };
+
+    void call(const RF_String* str1, const RF_String* str2, const RF_Kwargs* kwargs, double score_cutoff,
+              double score_hint, double* result) const
+    {
+        PyErr2RuntimeExn(scorer_func.call.f64(str1, str2, kwargs, score_cutoff, score_hint, result));
+    }
+
+    void call(const RF_String* str1, const RF_String* str2, const RF_Kwargs* kwargs, int64_t score_cutoff,
+              int64_t score_hint, int64_t* result) const
+    {
+        PyErr2RuntimeExn(scorer_func.call.i64(str1, str2, kwargs, score_cutoff, score_hint, result));
+    }
+
+    void call(const RF_String* str1, const RF_String* str2, const RF_Kwargs* kwargs, size_t score_cutoff,
+              size_t score_hint, size_t* result) const
+    {
+        PyErr2RuntimeExn(scorer_func.call.sizet(str1, str2, kwargs, score_cutoff, score_hint, result));
+    }
+};
+
 template <typename T>
 bool is_lowest_score_worst(const RF_ScorerFlags* scorer_flags)
 {
@@ -656,15 +694,13 @@ static Matrix cpdist_cpp_impl(const RF_Kwargs* kwargs, RF_Scorer* scorer,
 
     run_parallel(workers, rows, batchSize, [&](int64_t row, int64_t row_end) {
         for (; row < row_end; ++row) {
-            RF_ScorerFunc scorer_func;
-            PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, 1, &queries[row].string));
-            RF_ScorerWrapper ScorerFunc(scorer_func);
-
             T score;
             if (choices[row].is_none() || queries[row].is_none())
                 score = worst_score;
             else
-                ScorerFunc.call(&choices[row].string, score_cutoff, score_hint, &score);
+                RF_UncachedScorerWrapper(scorer->uncached_scorer_func)
+                    .call(&queries[row].string, &choices[row].string, kwargs, score_cutoff, score_hint,
+                          &score);
 
             matrix.set(row, 0, score * score_multiplier);
         }

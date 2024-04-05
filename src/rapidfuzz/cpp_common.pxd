@@ -23,6 +23,7 @@ from rapidfuzz cimport (
     RF_Scorer,
     RF_ScorerFlags,
     RF_ScorerFuncInit,
+    RF_UncachedScorerFunc,
     RF_String,
     RF_StringType,
 )
@@ -443,12 +444,13 @@ cdef inline bool NoKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     self.dtor = NULL
     return True
 
-cdef inline RF_Scorer CreateScorerContext(RF_KwargsInit kwargs_init, RF_GetScorerFlags get_scorer_flags, RF_ScorerFuncInit scorer_func_init):
+cdef inline RF_Scorer CreateScorerContext(RF_KwargsInit kwargs_init, RF_GetScorerFlags get_scorer_flags, RF_ScorerFuncInit scorer_func_init, RF_UncachedScorerFunc uncached_scorer_func):
     cdef RF_Scorer context
     context.version = SCORER_STRUCT_VERSION
     context.kwargs_init = kwargs_init
     context.get_scorer_flags = get_scorer_flags
     context.scorer_func_init = scorer_func_init
+    context.uncached_scorer_func = uncached_scorer_func
     return context
 
 cdef inline void SetFuncAttrs(cpp_func, py_func):
