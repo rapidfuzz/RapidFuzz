@@ -666,6 +666,7 @@ def test_cdist_not_symmetric():
 
 
 def test_cpdist_not_same_length():
+    pytest.importorskip("numpy")
     with pytest.raises(ValueError, match="Length of queries and choices must be the same!"):
         process.cpdist(["a", "b"], [])
     with pytest.raises(ValueError, match="Length of queries and choices must be the same!"):
