@@ -9,6 +9,16 @@ from tests.distance.common import JaroWinkler
 def test_hash_special_case():
     assert pytest.approx(JaroWinkler.similarity([0, -1], [0, -2])) == 0.666666
 
+def test_large_prefix_weight():
+    assert pytest.approx(JaroWinkler.similarity('milyarder', 'milyarderlik',prefix_weight=0.5)) == 1.0
+    assert pytest.approx(JaroWinkler.similarity('milyarder', 'milyarderlik',prefix_weight=1.0)) == 1.0
+
+def test_invalid_prefix_weight():
+    with pytest.raises(ValueError, match="prefix_weight has to be in the range 0.0 - 1.0"):
+        JaroWinkler.similarity('milyarder', 'milyarderlik',prefix_weight=-0.1)
+
+    with pytest.raises(ValueError, match="prefix_weight has to be in the range 0.0 - 1.0"):
+        JaroWinkler.similarity('milyarder', 'milyarderlik',prefix_weight=1.1)
 
 def test_edge_case_lengths():
     """

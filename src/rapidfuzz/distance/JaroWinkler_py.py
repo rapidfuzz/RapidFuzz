@@ -59,6 +59,9 @@ def similarity(
     if score_cutoff is None:
         score_cutoff = 0
 
+    if prefix_weight > 1.0 or prefix_weight < 0.0:
+        raise ValueError("prefix_weight has to be in the range 0.0 - 1.0")
+
     s1, s2 = conv_sequences(s1, s2)
     P_len = len(s1)
     T_len = len(s2)
@@ -83,6 +86,7 @@ def similarity(
     Sim = Jaro.similarity(s1, s2, score_cutoff=jaro_score_cutoff)
     if Sim > 0.7:
         Sim += prefix * prefix_weight * (1.0 - Sim)
+        Sim = min(Sim, 1.0)
 
     return Sim if Sim >= score_cutoff else 0
 

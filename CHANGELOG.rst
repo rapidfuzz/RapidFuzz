@@ -1,9 +1,20 @@
 Changelog
 ---------
 
+[3.8.0] - 2024-04-06
+^^^^^^^^^^^^^^^^^^^^
+Added
+~~~~~
+* added ``process.cpdist`` which allows pairwise comparision of two collection of inputs
+
+Fixed
+~~~~~
+- fix some minor errors in the type hints
+- fix potentially incorrect results of JaroWinkler when using high prefix weights
+
+
 [3.7.0] - 2024-03-21
 ^^^^^^^^^^^^^^^^^^^^
-
 Changed
 ~~~~~~~
 * reduce importtime
