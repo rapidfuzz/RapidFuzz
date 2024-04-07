@@ -39,14 +39,12 @@ jobs:
 
     steps:
       - uses: "actions/checkout@v4"
-        with:
-          submodules: 'true'
 
       - name: Install rapidfuzz-cpp
         run: |
           git clone https://github.com/rapidfuzz/rapidfuzz-cpp.git
           cd rapidfuzz-cpp
-          git checkout v1.0.1
+          git checkout v3.0.3
           mkdir build && cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release
           cmake --build .
@@ -56,7 +54,7 @@ jobs:
         run: |
           git clone https://github.com/taskflow/taskflow.git
           cd taskflow
-          git checkout v2.7.0
+          git checkout v3.7.0
           mkdir build && cd build
           cmake .. -DTF_BUILD_TESTS=0 -DTF_BUILD_EXAMPLES=0
           cmake --build .
