@@ -138,14 +138,14 @@ jobs:
         with:
           python-version: "${{ matrix.python-version }}"
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest hypothesis pandas mypy pyinstaller[hook_testing]
-
       - name: build
         run: |
           pip install . -v
+
+      - name: Install testing dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest hypothesis pandas mypy pyinstaller[hook_testing]
 
       #- name: Test type stubs
       #  run: |
@@ -183,14 +183,14 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest hypothesis pandas mypy pyinstaller[hook_testing]
-
       - name: build
         run: |
           pip install . -v
+
+      - name: Install testing dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest hypothesis pandas mypy pyinstaller[hook_testing]
 
       - name: Test on nehalem which does not support avx2
         run: ./sde/sde -nhm -- pytest tests
