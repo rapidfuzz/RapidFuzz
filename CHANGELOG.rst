@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+[3.8.1] - 2024-04-07
+^^^^^^^^^^^^^^^^^^^^
+Fixed
+~~~~~
+* use the correct version of `rapidfuzz-cpp` when building against a system installed version
+
+
 [3.8.0] - 2024-04-06
 ^^^^^^^^^^^^^^^^^^^^
 Added
