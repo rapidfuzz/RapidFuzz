@@ -5,6 +5,10 @@ cdist
 ----------
 .. autofunction:: rapidfuzz.process.cdist
 
+cpdist
+----------
+.. autofunction:: rapidfuzz.process.cpdist
+
 extract
 -------
 .. autofunction:: rapidfuzz.process.extract
