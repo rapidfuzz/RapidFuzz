@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest hypothesis pandas Cython==3.0.10
+          pip install Cython==3.0.10
 
       - name: Generate cython
         run: |
@@ -32,6 +32,10 @@ jobs:
           pip install build; python -m build --sdist
           # test whether tarball contains all files required for compiling
           pip install dist/rapidfuzz-*.tar.gz -v
+
+      - name: Install testing dependencies
+        run: |
+          pip install pytest hypothesis pandas
 
       - name: Test with pytest
         run: |
@@ -64,14 +68,14 @@ jobs:
           cmake --build .
           sudo cmake --build . --target install
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest hypothesis pandas
-
       - name: build
         run: |
           pip install . -v
+
+      - name: Install testing dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest hypothesis pandas
 
       - name: Test with pytest
         run: |
@@ -104,14 +108,14 @@ jobs:
           cmake --build .
           sudo cmake --build . --target install
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest hypothesis pandas
-
       - name: build
         run: |
           pip install . -v
+
+      - name: Install testing dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest hypothesis pandas
 
       - name: Test with pytest
         run: |
