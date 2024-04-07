@@ -686,14 +686,14 @@ def cpdist(
     scorer_kwargs: dict[str, Any] | None = None,
 ) -> np.ndarray:
     """
-    Compute pairwise distance/similarity between corresponding elements of the two input lists of strings.
+    Compute the pairwise distance/similarity between corresponding elements of the queries & choices.
 
     Parameters
     ----------
     queries : Collection[Sequence[Hashable]]
-        list of all strings the queries
+        list of strings used to compute the distance/similarity.
     choices : Collection[Sequence[Hashable]]
-        list of all pairwise strings the query should be compared. Must be the same length as the queries.
+        list of strings the queries should be compared with. Must be the same length as the queries.
     scorer : Callable, optional
         Optional callable that is used to calculate the matching score between
         the query and each choice. This can be any of the scorers included in RapidFuzz
