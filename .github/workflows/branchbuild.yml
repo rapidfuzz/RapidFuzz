@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install numpy rapidfuzz_capi Cython==3.0.9
+          pip install pytest hypothesis pandas Cython==3.0.10
 
       - name: Generate cython
         run: |
@@ -64,6 +64,11 @@ jobs:
           cmake --build .
           sudo cmake --build . --target install
 
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest hypothesis pandas
+
       - name: build
         run: |
           pip install . -v
@@ -98,6 +103,11 @@ jobs:
           cmake .. -DTF_BUILD_TESTS=0 -DTF_BUILD_EXAMPLES=0
           cmake --build .
           sudo cmake --build . --target install
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest hypothesis pandas
 
       - name: build
         run: |
