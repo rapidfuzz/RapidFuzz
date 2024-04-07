@@ -686,7 +686,7 @@ def cpdist(
     scorer_kwargs: dict[str, Any] | None = None,
 ) -> np.ndarray:
     """
-    Compute pairwise distance/similarity between corresponding elements in the two collection of inputs.
+    Compute pairwise distance/similarity between corresponding elements of the two input lists of strings.
 
     Parameters
     ----------
