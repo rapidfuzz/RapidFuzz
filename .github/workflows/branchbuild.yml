@@ -33,6 +33,10 @@ jobs:
           # test whether tarball contains all files required for compiling
           pip install dist/rapidfuzz-*.tar.gz -v
 
+      - name: Test with pytest
+        run: |
+          pytest tests
+
   system_install:
     name: "Test installation using system supplied libs"
     runs-on: "ubuntu-latest"
@@ -44,7 +48,7 @@ jobs:
         run: |
           git clone https://github.com/rapidfuzz/rapidfuzz-cpp.git
           cd rapidfuzz-cpp
-          git checkout v3.0.3
+          git checkout v3.0.4
           mkdir build && cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release
           cmake --build .
@@ -63,6 +67,10 @@ jobs:
       - name: build
         run: |
           pip install . -v
+
+      - name: Test with pytest
+        run: |
+          pytest tests
 
   system_install2:
     name: "Test installation using newest version of Taskflow"
@@ -86,6 +94,10 @@ jobs:
       - name: build
         run: |
           pip install . -v
+
+      - name: Test with pytest
+        run: |
+          pytest tests
 
   tests:
     name: "Python ${{ matrix.python-version }}"
