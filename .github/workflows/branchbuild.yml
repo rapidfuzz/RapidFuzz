@@ -54,7 +54,7 @@ jobs:
         run: |
           git clone https://github.com/taskflow/taskflow.git
           cd taskflow
-          git checkout v3.7.0
+          git checkout v3.6.0
           mkdir build && cd build
           cmake .. -DTF_BUILD_TESTS=0 -DTF_BUILD_EXAMPLES=0
           cmake --build .
