@@ -1,22 +1,9 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
-
 from __future__ import annotations
 
 import heapq
 import numbers
-from contextlib import suppress
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Collection,
-    Hashable,
-    Iterable,
-    Mapping,
-    Sequence,
-    overload,
-)
 
 from rapidfuzz._utils import ScorerFlag, is_none, setupPandas
 from rapidfuzz.fuzz import WRatio, ratio
@@ -24,7 +11,7 @@ from rapidfuzz.fuzz import WRatio, ratio
 __all__ = ["extract", "extract_iter", "extractOne", "cdist"]
 
 
-def _get_scorer_flags_py(scorer: Any, scorer_kwargs: dict[str, Any]) -> tuple[int, int]:
+def _get_scorer_flags_py(scorer, scorer_kwargs):
     params = getattr(scorer, "_RF_ScorerPy", None)
     if params is not None:
         flags = params["get_scorer_flags"](**scorer_kwargs)
@@ -32,42 +19,16 @@ def _get_scorer_flags_py(scorer: Any, scorer_kwargs: dict[str, Any]) -> tuple[in
     return (0, 100)
 
 
-@overload
 def extract_iter(
-    query: Sequence[Hashable] | None,
-    choices: Iterable[Sequence[Hashable] | None],
+    query,
+    choices,
     *,
-    scorer: Callable[..., int | float] = WRatio,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: int | float | None = None,
-    score_hint: int | float | None = None,
-    scorer_kwargs: dict[str, Any] | None = None,
-) -> Iterable[tuple[Sequence[Hashable], int | float, int]]: ...
-
-
-@overload
-def extract_iter(
-    query: Sequence[Hashable] | None,
-    choices: Mapping[Any, Sequence[Hashable] | None],
-    *,
-    scorer: Callable[..., int | float] = WRatio,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: int | float | None = None,
-    score_hint: int | float | None = None,
-    scorer_kwargs: dict[str, Any] | None = None,
-) -> Iterable[tuple[Sequence[Hashable], int | float, Any]]: ...
-
-
-def extract_iter(
-    query: Sequence[Hashable] | None,
-    choices: Iterable[Sequence[Hashable] | None] | Mapping[Any, Sequence[Hashable] | None],
-    *,
-    scorer: Callable[..., int | float] = WRatio,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: int | float | None = None,
-    score_hint: int | float | None = None,
-    scorer_kwargs: dict[str, Any] | None = None,
-) -> Iterable[tuple[Sequence[Hashable], int | float, Any]]:
+    scorer=WRatio,
+    processor=None,
+    score_cutoff=None,
+    score_hint=None,
+    scorer_kwargs=None,
+):
     """
     Find the best match in a list of choices
 
@@ -142,8 +103,7 @@ def extract_iter(
     if processor is not None:
         query = processor(query)
 
-    choices_iter: Iterable[tuple[Any, Sequence[Hashable] | None]]
-    choices_iter = choices.items() if hasattr(choices, "items") else enumerate(choices)  # type: ignore[union-attr]
+    choices_iter = choices.items() if hasattr(choices, "items") else enumerate(choices)
     for key, choice in choices_iter:
         if is_none(choice):
             continue
@@ -166,42 +126,16 @@ def extract_iter(
                 yield (choice, score, key)
 
 
-@overload
 def extractOne(
-    query: Sequence[Hashable] | None,
-    choices: Iterable[Sequence[Hashable] | None],
+    query,
+    choices,
     *,
-    scorer: Callable[..., int | float] = WRatio,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: int | float | None = None,
-    score_hint: int | float | None = None,
-    scorer_kwargs: dict[str, Any] | None = None,
-) -> tuple[Sequence[Hashable], int | float, int] | None: ...
-
-
-@overload
-def extractOne(
-    query: Sequence[Hashable] | None,
-    choices: Mapping[Any, Sequence[Hashable] | None],
-    *,
-    scorer: Callable[..., int | float] = WRatio,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: int | float | None = None,
-    score_hint: int | float | None = None,
-    scorer_kwargs: dict[str, Any] | None = None,
-) -> tuple[Sequence[Hashable], int | float, Any] | None: ...
-
-
-def extractOne(
-    query: Sequence[Hashable] | None,
-    choices: Iterable[Sequence[Hashable] | None] | Mapping[Any, Sequence[Hashable] | None],
-    *,
-    scorer: Callable[..., int | float] = WRatio,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: int | float | None = None,
-    score_hint: int | float | None = None,
-    scorer_kwargs: dict[str, Any] | None = None,
-) -> tuple[Sequence[Hashable], int | float, Any] | None:
+    scorer=WRatio,
+    processor=None,
+    score_cutoff=None,
+    score_hint=None,
+    scorer_kwargs=None,
+):
     """
     Find the best match in a list of choices. When multiple elements have the same similarity,
     the first element is returned.
@@ -335,10 +269,9 @@ def extractOne(
     if processor is not None:
         query = processor(query)
 
-    result: tuple[Sequence[Hashable], int | float, Any] | None = None
+    result = None
 
-    choices_iter: Iterable[tuple[Any, Sequence[Hashable] | None]]
-    choices_iter = choices.items() if hasattr(choices, "items") else enumerate(choices)  # type: ignore[union-attr]
+    choices_iter = choices.items() if hasattr(choices, "items") else enumerate(choices)
     for key, choice in choices_iter:
         if is_none(choice):
             continue
@@ -368,45 +301,17 @@ def extractOne(
     return result
 
 
-@overload
 def extract(
-    query: Sequence[Hashable] | None,
-    choices: Collection[Sequence[Hashable] | None],
+    query,
+    choices,
     *,
-    scorer: Callable[..., int | float] = WRatio,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    limit: int | None = 5,
-    score_cutoff: int | float | None = None,
-    score_hint: int | float | None = None,
-    scorer_kwargs: dict[str, Any] | None = None,
-) -> list[tuple[Sequence[Hashable], int | float, int]]: ...
-
-
-@overload
-def extract(
-    query: Sequence[Hashable] | None,
-    choices: Mapping[Any, Sequence[Hashable] | None],
-    *,
-    scorer: Callable[..., int | float] = WRatio,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    limit: int | None = 5,
-    score_cutoff: int | float | None = None,
-    score_hint: int | float | None = None,
-    scorer_kwargs: dict[str, Any] | None = None,
-) -> list[tuple[Sequence[Hashable], int | float, Any]]: ...
-
-
-def extract(
-    query: Sequence[Hashable] | None,
-    choices: Collection[Sequence[Hashable] | None] | Mapping[Any, Sequence[Hashable] | None],
-    *,
-    scorer: Callable[..., int | float] = WRatio,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    limit: int | None = 5,
-    score_cutoff: int | float | None = None,
-    score_hint: int | float | None = None,
-    scorer_kwargs: dict[str, Any] | None = None,
-) -> list[tuple[Sequence[Hashable], int | float, Any]]:
+    scorer=WRatio,
+    processor=None,
+    limit=5,
+    score_cutoff=None,
+    score_hint=None,
+    scorer_kwargs=None,
+):
     """
     Find the best matches in a list of choices. The list is sorted by the similarity.
     When multiple choices have the same similarity, they are sorted by their index
@@ -507,16 +412,11 @@ def extract(
     return heapq.nsmallest(limit, result_iter, key=lambda i: i[1])
 
 
-if TYPE_CHECKING:
-    with suppress(BaseException):
-        import numpy as np
-
-
 def _dtype_to_type_num(
-    dtype: np.dtype | None,
-    scorer: Callable[..., int | float],
-    scorer_kwargs: dict[str, Any],
-) -> np.dtype:
+    dtype,
+    scorer,
+    scorer_kwargs,
+):
     import numpy as np
 
     if dtype is not None:
@@ -534,7 +434,7 @@ def _dtype_to_type_num(
     return np.float32
 
 
-def _is_symmetric(scorer: Callable[..., int | float], scorer_kwargs: dict[str, Any]) -> bool:
+def _is_symmetric(scorer, scorer_kwargs):
     params = getattr(scorer, "_RF_ScorerPy", None)
     if params is not None:
         flags = params["get_scorer_flags"](**scorer_kwargs)
@@ -545,18 +445,18 @@ def _is_symmetric(scorer: Callable[..., int | float], scorer_kwargs: dict[str, A
 
 
 def cdist(
-    queries: Collection[Sequence[Hashable] | None],
-    choices: Collection[Sequence[Hashable] | None],
+    queries,
+    choices,
     *,
-    scorer: Callable[..., int | float] = ratio,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: int | float | None = None,
-    score_hint: int | float | None = None,
-    score_multiplier: int | float = 1,
-    dtype: np.dtype | None = None,
-    workers: int = 1,
-    scorer_kwargs: dict[str, Any] | None = None,
-) -> np.ndarray:
+    scorer=ratio,
+    processor=None,
+    score_cutoff=None,
+    score_hint=None,
+    score_multiplier=1,
+    dtype=None,
+    workers=1,
+    scorer_kwargs=None,
+):
     """
     Compute distance/similarity between each pair of the two collections of inputs.
 
@@ -673,18 +573,18 @@ def cdist(
 
 
 def cpdist(
-    queries: Collection[Sequence[Hashable] | None],
-    choices: Collection[Sequence[Hashable] | None],
+    queries,
+    choices,
     *,
-    scorer: Callable[..., int | float] = ratio,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: int | float | None = None,
-    score_hint: int | float | None = None,
-    score_multiplier: int | float = 1,
-    dtype: np.dtype | None = None,
-    workers: int = 1,
-    scorer_kwargs: dict[str, Any] | None = None,
-) -> np.ndarray:
+    scorer=ratio,
+    processor=None,
+    score_cutoff=None,
+    score_hint=None,
+    score_multiplier=1,
+    dtype=None,
+    workers=1,
+    scorer_kwargs=None,
+):
     """
     Compute the pairwise distance/similarity between corresponding elements of the queries & choices.
 

@@ -1,9 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
-
 from __future__ import annotations
-
-from typing import Callable, Hashable, Sequence
 
 from rapidfuzz._common_py import conv_sequences
 from rapidfuzz._utils import is_none, setupPandas
@@ -11,13 +8,13 @@ from rapidfuzz.distance import Jaro_py as Jaro
 
 
 def similarity(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    prefix_weight: float = 0.1,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    prefix_weight=0.1,
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates the jaro winkler similarity
 
@@ -93,13 +90,13 @@ def similarity(
 
 
 def normalized_similarity(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    prefix_weight: float = 0.1,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    prefix_weight=0.1,
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates the normalized jaro winkler similarity
 
@@ -140,13 +137,13 @@ def normalized_similarity(
 
 
 def distance(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    prefix_weight: float = 0.1,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    prefix_weight=0.1,
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates the jaro winkler distance
 
@@ -192,13 +189,13 @@ def distance(
 
 
 def normalized_distance(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    prefix_weight: float = 0.1,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    prefix_weight=0.1,
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates the normalized jaro winkler distance
 

@@ -1,9 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
-
 from __future__ import annotations
-
-from typing import TYPE_CHECKING, Any, Callable, Collection, Hashable, Sequence
 
 from rapidfuzz.fuzz import ratio
 from rapidfuzz.process_cpp_impl import FLOAT32 as _FLOAT32
@@ -22,11 +19,8 @@ from rapidfuzz.process_cpp_impl import extract, extract_iter, extractOne
 
 __all__ = ["extract", "extract_iter", "extractOne", "cdist", "cpdist"]
 
-if TYPE_CHECKING:
-    import numpy as np
 
-
-def _dtype_to_type_num(dtype: np.dtype | None) -> int | None:
+def _dtype_to_type_num(dtype):
     import numpy as np
 
     if dtype is None:
@@ -57,18 +51,18 @@ def _dtype_to_type_num(dtype: np.dtype | None) -> int | None:
 
 
 def cdist(
-    queries: Collection[Sequence[Hashable] | None],
-    choices: Collection[Sequence[Hashable] | None],
+    queries,
+    choices,
     *,
-    scorer: Callable[..., int | float] = ratio,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: int | float | None = None,
-    score_hint: int | float | None = None,
-    score_multiplier: int | float = 1,
-    dtype: np.dtype | None = None,
-    workers: int = 1,
-    **kwargs: Any,
-) -> np.ndarray:
+    scorer=ratio,
+    processor=None,
+    score_cutoff=None,
+    score_hint=None,
+    score_multiplier=1,
+    dtype=None,
+    workers=1,
+    **kwargs,
+):
     import numpy as np
 
     dtype = _dtype_to_type_num(dtype)
@@ -89,18 +83,18 @@ def cdist(
 
 
 def cpdist(
-    queries: Collection[Sequence[Hashable] | None],
-    choices: Collection[Sequence[Hashable] | None],
+    queries,
+    choices,
     *,
-    scorer: Callable[..., int | float] = ratio,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: int | float | None = None,
-    score_hint: int | float | None = None,
-    score_multiplier: int | float = 1,
-    dtype: np.dtype | None = None,
-    workers: int = 1,
-    **kwargs: Any,
-) -> np.ndarray:
+    scorer=ratio,
+    processor=None,
+    score_cutoff=None,
+    score_hint=None,
+    score_multiplier=1,
+    dtype=None,
+    workers=1,
+    **kwargs,
+):
     import numpy as np
 
     dtype = _dtype_to_type_num(dtype)

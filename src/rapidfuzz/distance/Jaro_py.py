@@ -1,15 +1,12 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
-
 from __future__ import annotations
-
-from typing import Callable, Hashable, Sequence
 
 from rapidfuzz._common_py import conv_sequences
 from rapidfuzz._utils import is_none, setupPandas
 
 
-def _jaro_calculate_similarity(pattern_len: int, text_len: int, common_chars: int, transpositions: int) -> float:
+def _jaro_calculate_similarity(pattern_len, text_len, common_chars, transpositions):
     transpositions //= 2
     sim = 0.0
     sim += common_chars / pattern_len
@@ -18,7 +15,7 @@ def _jaro_calculate_similarity(pattern_len: int, text_len: int, common_chars: in
     return sim / 3.0
 
 
-def _jaro_length_filter(pattern_len: int, text_len: int, score_cutoff: float) -> bool:
+def _jaro_length_filter(pattern_len, text_len, score_cutoff):
     """
     filter matches below score_cutoff based on string lengths
     """
@@ -29,7 +26,7 @@ def _jaro_length_filter(pattern_len: int, text_len: int, score_cutoff: float) ->
     return sim >= score_cutoff
 
 
-def _jaro_common_char_filter(pattern_len: int, text_len: int, common_chars: int, score_cutoff: float) -> bool:
+def _jaro_common_char_filter(pattern_len, text_len, common_chars, score_cutoff):
     """
     filter matches below score_cutoff based on string lengths and common characters
     """
@@ -40,7 +37,7 @@ def _jaro_common_char_filter(pattern_len: int, text_len: int, common_chars: int,
     return sim >= score_cutoff
 
 
-def _jaro_bounds(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> tuple[Sequence[Hashable], Sequence[Hashable], int]:
+def _jaro_bounds(s1, s2):
     """
     find bounds and skip out of bound parts of the sequences
     """
@@ -62,12 +59,12 @@ def _jaro_bounds(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> tuple[Sequen
 
 
 def similarity(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates the jaro similarity
 
@@ -152,12 +149,12 @@ def similarity(
 
 
 def normalized_similarity(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates the normalized jaro similarity
 
@@ -184,12 +181,12 @@ def normalized_similarity(
 
 
 def distance(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates the jaro distance
 
@@ -227,12 +224,12 @@ def distance(
 
 
 def normalized_distance(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates the normalized jaro distance
 

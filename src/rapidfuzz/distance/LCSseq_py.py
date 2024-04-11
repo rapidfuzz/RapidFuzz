@@ -1,22 +1,19 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
-
 from __future__ import annotations
-
-from typing import Any, Callable, Hashable, Sequence
 
 from rapidfuzz._common_py import common_affix, conv_sequences
 from rapidfuzz._utils import is_none, setupPandas
-from rapidfuzz.distance._initialize_py import Editop, Editops, Opcodes
+from rapidfuzz.distance._initialize_py import Editop, Editops
 
 
 def similarity(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: int | None = None,
-) -> int:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates the length of the longest common subsequence
 
@@ -49,7 +46,7 @@ def similarity(
 
     s1, s2 = conv_sequences(s1, s2)
     S = (1 << len(s1)) - 1
-    block: dict[Hashable, int] = {}
+    block = {}
     block_get = block.get
     x = 1
     for ch1 in s1:
@@ -67,11 +64,11 @@ def similarity(
 
 
 def _block_similarity(
-    block: dict[Hashable, int],
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
-    score_cutoff: int | None = None,
-) -> int:
+    block,
+    s1,
+    s2,
+    score_cutoff=None,
+):
     if not s1:
         return 0
 
@@ -89,12 +86,12 @@ def _block_similarity(
 
 
 def distance(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: int | None = None,
-) -> int:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates the LCS distance in the range [0, max].
 
@@ -147,12 +144,12 @@ def distance(
 
 
 def normalized_distance(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates a normalized LCS similarity in the range [1, 0].
 
@@ -195,12 +192,12 @@ def normalized_distance(
 
 
 def normalized_similarity(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates a normalized LCS similarity in the range [0, 1].
 
@@ -256,12 +253,12 @@ def normalized_similarity(
     return norm_sim if (score_cutoff is None or norm_sim >= score_cutoff) else 0
 
 
-def _matrix(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> tuple[int, list[int]]:
+def _matrix(s1, s2):
     if not s1:
         return (0, [])
 
     S = (1 << len(s1)) - 1
-    block: dict[Hashable, int] = {}
+    block = {}
     block_get = block.get
     x = 1
     for ch1 in s1:
@@ -281,11 +278,11 @@ def _matrix(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> tuple[int, list[i
 
 
 def editops(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-) -> Editops:
+    processor=None,
+):
     """
     Return Editops describing how to turn s1 into s2.
 
@@ -342,7 +339,7 @@ def editops(
     if dist == 0:
         return editops
 
-    editop_list: Any = [None] * dist
+    editop_list = [None] * dist
     col = len(s1)
     row = len(s2)
     while row != 0 and col != 0:
@@ -377,11 +374,11 @@ def editops(
 
 
 def opcodes(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-) -> Opcodes:
+    processor=None,
+):
     """
     Return Opcodes describing how to turn s1 into s2.
 

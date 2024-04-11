@@ -1,17 +1,14 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
-
 from __future__ import annotations
-
-from typing import Callable, Hashable, Sequence
 
 from rapidfuzz._common_py import conv_sequences
 from rapidfuzz._utils import is_none, setupPandas
 
 
-def _damerau_levenshtein_distance_zhao(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> int:
+def _damerau_levenshtein_distance_zhao(s1, s2):
     maxVal = max(len(s1), len(s2)) + 1
-    last_row_id: dict[Hashable, int] = {}
+    last_row_id = {}
     last_row_id_get = last_row_id.get
     size = len(s2) + 2
     FR = [maxVal] * size
@@ -56,12 +53,12 @@ def _damerau_levenshtein_distance_zhao(s1: Sequence[Hashable], s2: Sequence[Hash
 
 
 def distance(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: int | None = None,
-) -> int:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates the Damerau-Levenshtein distance.
 
@@ -103,12 +100,12 @@ def distance(
 
 
 def similarity(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: int | None = None,
-) -> int:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates the Damerau-Levenshtein similarity in the range [max, 0].
 
@@ -146,12 +143,12 @@ def similarity(
 
 
 def normalized_distance(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates a normalized Damerau-Levenshtein distance in the range [1, 0].
 
@@ -192,12 +189,12 @@ def normalized_distance(
 
 
 def normalized_similarity(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates a normalized Damerau-Levenshtein similarity in the range [0, 1].
 

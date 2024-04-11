@@ -1,21 +1,18 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
-
 from __future__ import annotations
-
-from typing import Callable, Hashable, Sequence
 
 from rapidfuzz._common_py import conv_sequences
 from rapidfuzz._utils import is_none, setupPandas
 
 
 def distance(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: int | None = None,
-) -> int:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates the Prefix distance between two strings.
 
@@ -52,12 +49,12 @@ def distance(
 
 
 def similarity(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: int | None = None,
-) -> int:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates the prefix similarity between two strings.
 
@@ -98,12 +95,12 @@ def similarity(
 
 
 def normalized_distance(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates a normalized prefix similarity in the range [1, 0].
 
@@ -139,12 +136,12 @@ def normalized_distance(
 
 
 def normalized_similarity(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates a normalized prefix similarity in the range [0, 1].
 

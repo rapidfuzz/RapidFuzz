@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from math import ceil
-from typing import Any, Callable, Hashable, Sequence
 
 from rapidfuzz._common_py import conv_sequences
 from rapidfuzz._utils import ScorerFlag, add_scorer_attrs, is_none, setupPandas
@@ -17,7 +16,7 @@ from rapidfuzz.distance.Indel_py import (
 )
 
 
-def get_scorer_flags_fuzz(**_kwargs: Any) -> dict[str, Any]:
+def get_scorer_flags_fuzz(**_kwargs):
     return {
         "optimal_score": 100,
         "worst_score": 0,
@@ -25,15 +24,15 @@ def get_scorer_flags_fuzz(**_kwargs: Any) -> dict[str, Any]:
     }
 
 
-fuzz_attribute: dict[str, Callable[..., dict[str, Any]]] = {"get_scorer_flags": get_scorer_flags_fuzz}
+fuzz_attribute = {"get_scorer_flags": get_scorer_flags_fuzz}
 
 
-def _norm_distance(dist: int, lensum: int, score_cutoff: float) -> float:
+def _norm_distance(dist, lensum, score_cutoff):
     score = (100 - 100 * dist / lensum) if lensum else 100
     return score if score >= score_cutoff else 0
 
 
-def _split_sequence(seq: Sequence[Hashable]) -> list[Sequence[Hashable]]:
+def _split_sequence(seq):
     if isinstance(seq, (str, bytes)):
         return seq.split()
 
@@ -48,7 +47,7 @@ def _split_sequence(seq: Sequence[Hashable]) -> list[Sequence[Hashable]]:
     return [tuple(x) for x in splitted_seq if x]
 
 
-def _join_splitted_sequence(seq_list: list[Sequence[Hashable]]):
+def _join_splitted_sequence(seq_list):
     if not seq_list:
         return ""
     if isinstance(next(iter(seq_list)), str):
@@ -64,12 +63,12 @@ def _join_splitted_sequence(seq_list: list[Sequence[Hashable]]):
 
 
 def ratio(
-    s1: Sequence[Hashable] | None,
-    s2: Sequence[Hashable] | None,
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates the normalized Indel distance.
 
@@ -116,7 +115,7 @@ def ratio(
     return score * 100
 
 
-def _partial_ratio_short_needle(s1: Sequence[Hashable], s2: Sequence[Hashable], score_cutoff: float) -> ScoreAlignment:
+def _partial_ratio_short_needle(s1, s2, score_cutoff):
     """
     implementation of partial_ratio for needles <= 64. assumes s1 is already the
     shorter string
@@ -127,7 +126,7 @@ def _partial_ratio_short_needle(s1: Sequence[Hashable], s2: Sequence[Hashable], 
 
     res = ScoreAlignment(0, 0, len1, 0, len1)
 
-    block: dict[Hashable, int] = {}
+    block = {}
     block_get = block.get
     x = 1
     for ch1 in s1:
@@ -184,12 +183,12 @@ def _partial_ratio_short_needle(s1: Sequence[Hashable], s2: Sequence[Hashable], 
 
 
 def partial_ratio(
-    s1: Sequence[Hashable] | None,
-    s2: Sequence[Hashable] | None,
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Searches for the optimal alignment of the shorter string in the
     longer string and returns the fuzz.ratio for this alignment.
@@ -262,12 +261,12 @@ def partial_ratio(
 
 
 def partial_ratio_alignment(
-    s1: str | bytes | None,
-    s2: str | bytes | None,
+    s1,
+    s2,
     *,
-    processor: Callable[..., str | bytes] | None = None,
-    score_cutoff: float | None = None,
-) -> ScoreAlignment | None:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Searches for the optimal alignment of the shorter string in the
     longer string and returns the fuzz.ratio and the corresponding
@@ -344,12 +343,12 @@ def partial_ratio_alignment(
 
 
 def token_sort_ratio(
-    s1: str | None,
-    s2: str | None,
+    s1,
+    s2,
     *,
-    processor: Callable[..., str] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Sorts the words in the strings and calculates the fuzz.ratio between them
 
@@ -396,12 +395,12 @@ def token_sort_ratio(
 
 
 def token_set_ratio(
-    s1: str | None,
-    s2: str | None,
+    s1,
+    s2,
     *,
-    processor: Callable[..., str] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Compares the words in the strings based on unique and common words between them
     using fuzz.ratio
@@ -501,12 +500,12 @@ def token_set_ratio(
 
 
 def token_ratio(
-    s1: str | None,
-    s2: str | None,
+    s1,
+    s2,
     *,
-    processor: Callable[..., str] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Helper method that returns the maximum of fuzz.token_set_ratio and fuzz.token_sort_ratio
     (faster than manually executing the two functions)
@@ -550,12 +549,12 @@ def token_ratio(
 
 
 def partial_token_sort_ratio(
-    s1: str | None,
-    s2: str | None,
+    s1,
+    s2,
     *,
-    processor: Callable[..., str] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     sorts the words in the strings and calculates the fuzz.partial_ratio between them
 
@@ -597,12 +596,12 @@ def partial_token_sort_ratio(
 
 
 def partial_token_set_ratio(
-    s1: str | None,
-    s2: str | None,
+    s1,
+    s2,
     *,
-    processor: Callable[..., str] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Compares the words in the strings based on unique and common words between them
     using fuzz.partial_ratio
@@ -657,12 +656,12 @@ def partial_token_set_ratio(
 
 
 def partial_token_ratio(
-    s1: str | None,
-    s2: str | None,
+    s1,
+    s2,
     *,
-    processor: Callable[..., str] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Helper method that returns the maximum of fuzz.partial_token_set_ratio and
     fuzz.partial_token_sort_ratio (faster than manually executing the two functions)
@@ -737,12 +736,12 @@ def partial_token_ratio(
 
 
 def WRatio(
-    s1: str | None,
-    s2: str | None,
+    s1,
+    s2,
     *,
-    processor: Callable[..., str] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates a weighted ratio based on the other ratio algorithms
 
@@ -811,12 +810,12 @@ def WRatio(
 
 
 def QRatio(
-    s1: Sequence[Hashable] | None,
-    s2: Sequence[Hashable] | None,
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates a quick ratio between two strings using fuzz.ratio.
 

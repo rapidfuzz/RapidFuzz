@@ -1,13 +1,9 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
-
 from __future__ import annotations
-
-from typing import Callable, Hashable, Sequence
 
 from rapidfuzz._common_py import conv_sequences
 from rapidfuzz._utils import is_none, setupPandas
-from rapidfuzz.distance._initialize_py import Editops, Opcodes
 from rapidfuzz.distance.LCSseq_py import _block_similarity as lcs_seq_block_similarity
 from rapidfuzz.distance.LCSseq_py import editops as lcs_seq_editops
 from rapidfuzz.distance.LCSseq_py import opcodes as lcs_seq_opcodes
@@ -15,12 +11,12 @@ from rapidfuzz.distance.LCSseq_py import similarity as lcs_seq_similarity
 
 
 def distance(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: int | None = None,
-) -> int:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates the minimum number of insertions and deletions
     required to change one sequence into the other. This is equivalent to the
@@ -73,11 +69,11 @@ def distance(
 
 
 def _block_distance(
-    block: dict[Hashable, int],
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
-    score_cutoff: int | None = None,
-) -> int:
+    block,
+    s1,
+    s2,
+    score_cutoff=None,
+):
     maximum = len(s1) + len(s2)
     lcs_sim = lcs_seq_block_similarity(block, s1, s2)
     dist = maximum - 2 * lcs_sim
@@ -85,12 +81,12 @@ def _block_distance(
 
 
 def similarity(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: int | None = None,
-) -> int:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates the Indel similarity in the range [max, 0].
 
@@ -128,12 +124,12 @@ def similarity(
 
 
 def normalized_distance(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates a normalized levenshtein similarity in the range [1, 0].
 
@@ -174,11 +170,11 @@ def normalized_distance(
 
 
 def _block_normalized_distance(
-    block: dict[Hashable, int],
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
-    score_cutoff: float | None = None,
-) -> float:
+    block,
+    s1,
+    s2,
+    score_cutoff=None,
+):
     maximum = len(s1) + len(s2)
     dist = _block_distance(block, s1, s2)
     norm_dist = dist / maximum if maximum else 0
@@ -186,12 +182,12 @@ def _block_normalized_distance(
 
 
 def normalized_similarity(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates a normalized indel similarity in the range [0, 1].
 
@@ -250,22 +246,22 @@ def normalized_similarity(
 
 
 def _block_normalized_similarity(
-    block: dict[Hashable, int],
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
-    score_cutoff: float | None = None,
-) -> float:
+    block,
+    s1,
+    s2,
+    score_cutoff=None,
+):
     norm_dist = _block_normalized_distance(block, s1, s2)
     norm_sim = 1.0 - norm_dist
     return norm_sim if (score_cutoff is None or norm_sim >= score_cutoff) else 0
 
 
 def editops(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-) -> Editops:
+    processor=None,
+):
     """
     Return Editops describing how to turn s1 into s2.
 
@@ -308,11 +304,11 @@ def editops(
 
 
 def opcodes(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-) -> Opcodes:
+    processor=None,
+):
     """
     Return Opcodes describing how to turn s1 into s2.
 

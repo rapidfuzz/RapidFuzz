@@ -1,15 +1,12 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
-
 from __future__ import annotations
-
-from typing import Callable, Hashable, Sequence
 
 from rapidfuzz._common_py import conv_sequences
 from rapidfuzz._utils import is_none, setupPandas
 
 
-def _osa_distance_hyrroe2003(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> int:
+def _osa_distance_hyrroe2003(s1, s2):
     if not s1:
         return len(s2)
 
@@ -20,7 +17,7 @@ def _osa_distance_hyrroe2003(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> 
     currDist = len(s1)
     mask = 1 << (len(s1) - 1)
 
-    block: dict[Hashable, int] = {}
+    block = {}
     block_get = block.get
     x = 1
     for ch1 in s1:
@@ -53,12 +50,12 @@ def _osa_distance_hyrroe2003(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> 
 
 
 def distance(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: int | None = None,
-) -> int:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates the optimal string alignment (OSA) distance.
 
@@ -102,12 +99,12 @@ def distance(
 
 
 def similarity(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: int | None = None,
-) -> int:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates the optimal string alignment (OSA) similarity in the range [max, 0].
 
@@ -145,12 +142,12 @@ def similarity(
 
 
 def normalized_distance(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates a normalized optimal string alignment (OSA) similarity in the range [1, 0].
 
@@ -191,12 +188,12 @@ def normalized_distance(
 
 
 def normalized_similarity(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates a normalized optimal string alignment (OSA) similarity in the range [0, 1].
 

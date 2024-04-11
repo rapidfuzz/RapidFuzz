@@ -1,23 +1,20 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Max Bachmann
-
 from __future__ import annotations
-
-from typing import Callable, Hashable, Sequence
 
 from rapidfuzz._common_py import conv_sequences
 from rapidfuzz._utils import is_none, setupPandas
-from rapidfuzz.distance._initialize_py import Editop, Editops, Opcodes
+from rapidfuzz.distance._initialize_py import Editop, Editops
 
 
 def distance(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    pad: bool = True,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: int | None = None,
-) -> int:
+    pad=True,
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates the Hamming distance between two strings.
     The hamming distance is defined as the number of positions
@@ -72,13 +69,13 @@ def distance(
 
 
 def similarity(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    pad: bool = True,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: int | None = None,
-) -> int:
+    pad=True,
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates the Hamming similarity between two strings.
 
@@ -126,13 +123,13 @@ def similarity(
 
 
 def normalized_distance(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    pad: bool = True,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    pad=True,
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates a normalized Hamming similarity in the range [1, 0].
 
@@ -183,13 +180,13 @@ def normalized_distance(
 
 
 def normalized_similarity(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    pad: bool = True,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-    score_cutoff: float | None = None,
-) -> float:
+    pad=True,
+    processor=None,
+    score_cutoff=None,
+):
     """
     Calculates a normalized Hamming similarity in the range [0, 1].
 
@@ -235,12 +232,12 @@ def normalized_similarity(
 
 
 def editops(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    pad: bool = True,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-) -> Editops:
+    pad=True,
+    processor=None,
+):
     """
     Return Editops describing how to turn s1 into s2.
 
@@ -294,12 +291,12 @@ def editops(
 
 
 def opcodes(
-    s1: Sequence[Hashable],
-    s2: Sequence[Hashable],
+    s1,
+    s2,
     *,
-    pad: bool = True,
-    processor: Callable[..., Sequence[Hashable]] | None = None,
-) -> Opcodes:
+    pad=True,
+    processor=None,
+):
     """
     Return Opcodes describing how to turn s1 into s2.
 
