@@ -5,14 +5,14 @@ Changelog
 ^^^^^^^^^^^^^^^^^^^^
 Fixed
 ~~~~~
-* use the correct version of `rapidfuzz-cpp` when building against a system installed version
+* use the correct version of ``rapidfuzz-cpp`` when building against a system installed version
 
 
 [3.8.0] - 2024-04-06
 ^^^^^^^^^^^^^^^^^^^^
 Added
 ~~~~~
-* added ``process.cpdist`` which allows pairwise comparision of two collection of inputs
+* added ``process.cpdist`` which allows pairwise comparison of two collection of inputs
 
 Fixed
 ~~~~~

@@ -948,7 +948,8 @@ def jaro_winkler_distance(s1, s2, *, double prefix_weight=0.1, processor=None, s
         return 1.0
 
     if prefix_weight > 1.0 or prefix_weight < 0.0:
-        raise ValueError("prefix_weight has to be in the range 0.0 - 1.0")
+        msg = "prefix_weight has to be in the range 0.0 - 1.0"
+        raise ValueError(msg)
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 1.0, 0.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
@@ -961,7 +962,8 @@ def jaro_winkler_similarity(s1, s2, *, double prefix_weight=0.1, processor=None,
         return 0.0
 
     if prefix_weight > 1.0 or prefix_weight < 0.0:
-        raise ValueError("prefix_weight has to be in the range 0.0 - 1.0")
+        msg = "prefix_weight has to be in the range 0.0 - 1.0"
+        raise ValueError(msg)
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0, 1.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
@@ -974,7 +976,8 @@ def jaro_winkler_normalized_distance(s1, s2, *, double prefix_weight=0.1, proces
         return 1.0
 
     if prefix_weight > 1.0 or prefix_weight < 0.0:
-        raise ValueError("prefix_weight has to be in the range 0.0 - 1.0")
+        msg = "prefix_weight has to be in the range 0.0 - 1.0"
+        raise ValueError(msg)
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 1.0, 0.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
@@ -987,7 +990,8 @@ def jaro_winkler_normalized_similarity(s1, s2, *, double prefix_weight=0.1, proc
         return 0.0
 
     if prefix_weight > 1.0 or prefix_weight < 0.0:
-        raise ValueError("prefix_weight has to be in the range 0.0 - 1.0")
+        msg = "prefix_weight has to be in the range 0.0 - 1.0"
+        raise ValueError(msg)
 
     cdef double c_score_cutoff = get_score_cutoff_f64(score_cutoff, 0.0, 1.0)
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
@@ -1002,7 +1006,8 @@ cdef bool JaroWinklerKwargsInit(RF_Kwargs * self, dict kwargs) except False:
     prefix_weight[0] = kwargs.get("prefix_weight", 0.1)
     if prefix_weight[0] > 1.0 or prefix_weight[0] < 0.0:
         free(prefix_weight)
-        raise ValueError("prefix_weight has to be in the range 0.0 - 1.0")
+        msg = "prefix_weight has to be in the range 0.0 - 1.0"
+        raise ValueError(msg)
 
     self.context = prefix_weight
     self.dtor = KwargsDeinit
