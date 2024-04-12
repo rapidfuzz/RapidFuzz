@@ -18,12 +18,24 @@ from rapidfuzz.fuzz import WRatio, ratio
 _StringType = Sequence[Hashable]
 _S1 = TypeVar("_S1")
 _S2 = TypeVar("_S2")
+_KeyType = TypeVar("_KeyType")
 _ResultType = int | float
 
 @overload
 def extractOne(
     query: _S1,
-    choices: Iterable[_S2],
+    choices: Mapping[_KeyType, _S2 | None],
+    *,
+    scorer: Callable[..., _ResultType] = WRatio,
+    processor: Callable[..., _StringType] | None = None,
+    score_cutoff: _ResultType | None = None,
+    score_hint: _ResultType | None = None,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> tuple[_S2, _ResultType, _KeyType]: ...
+@overload
+def extractOne(
+    query: _S1,
+    choices: Iterable[_S2 | None],
     *,
     scorer: Callable[..., _ResultType] = WRatio,
     processor: Callable[..., _StringType] | None = None,
@@ -32,20 +44,21 @@ def extractOne(
     scorer_kwargs: dict[str, Any] | None = None,
 ) -> tuple[_S2, _ResultType, int]: ...
 @overload
-def extractOne(
+def extract(
     query: _S1,
-    choices: Mapping[Any, _S2],
+    choices: Mapping[_KeyType, _S2 | None],
     *,
     scorer: Callable[..., _ResultType] = WRatio,
     processor: Callable[..., _StringType] | None = None,
+    limit: int | None = 5,
     score_cutoff: _ResultType | None = None,
     score_hint: _ResultType | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
-) -> tuple[_S2, _ResultType, Any]: ...
+) -> list[tuple[_S2, _ResultType, _KeyType]]: ...
 @overload
 def extract(
     query: _S1,
-    choices: Collection[_S2],
+    choices: Collection[_S2 | None],
     *,
     scorer: Callable[..., _ResultType] = WRatio,
     processor: Callable[..., _StringType] | None = None,
@@ -55,21 +68,20 @@ def extract(
     scorer_kwargs: dict[str, Any] | None = None,
 ) -> list[tuple[_S2, _ResultType, int]]: ...
 @overload
-def extract(
+def extract_iter(
     query: _S1,
-    choices: Mapping[Any, _S2],
+    choices: Mapping[_KeyType, _S2 | None],
     *,
     scorer: Callable[..., _ResultType] = WRatio,
     processor: Callable[..., _StringType] | None = None,
-    limit: int | None = 5,
     score_cutoff: _ResultType | None = None,
     score_hint: _ResultType | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
-) -> list[tuple[_S2, _ResultType, Any]]: ...
+) -> Generator[tuple[_S2, _ResultType, _KeyType], None, None]: ...
 @overload
 def extract_iter(
     query: _S1,
-    choices: Iterable[_S2],
+    choices: Iterable[_S2 | None],
     *,
     scorer: Callable[..., _ResultType] = WRatio,
     processor: Callable[..., _StringType] | None = None,
@@ -77,17 +89,6 @@ def extract_iter(
     score_hint: _ResultType | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
 ) -> Generator[tuple[_S2, _ResultType, int], None, None]: ...
-@overload
-def extract_iter(
-    query: _S1,
-    choices: Mapping[Any, _S2],
-    *,
-    scorer: Callable[..., _ResultType] = WRatio,
-    processor: Callable[..., _StringType] | None = None,
-    score_cutoff: _ResultType | None = None,
-    score_hint: _ResultType | None = None,
-    scorer_kwargs: dict[str, Any] | None = None,
-) -> Generator[tuple[_S2, _ResultType, Any], None, None]: ...
 
 try:
     import numpy as np
