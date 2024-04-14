@@ -16,79 +16,79 @@ from typing import (
 from rapidfuzz.fuzz import WRatio, ratio
 
 _StringType = Sequence[Hashable]
-_AnyStringType = TypeVar("_AnyStringType", bound=_StringType)
-_S1 = TypeVar("_S1")
-_S2 = TypeVar("_S2")
-_ResultType = int | float
+_StringType1 = TypeVar("_StringType1", bound=Sequence[Hashable])
+_StringType2 = TypeVar("_StringType2", bound=Sequence[Hashable])
+_KeyType = TypeVar("_KeyType")
+_ResultType = TypeVar("_ResultType")
 
 @overload
 def extractOne(
-    query: _S1,
-    choices: Iterable[_S2],
+    query: _StringType1 | None,
+    choices: Mapping[_KeyType, _StringType2 | None],
     *,
     scorer: Callable[..., _ResultType] = WRatio,
     processor: Callable[..., _StringType] | None = None,
-    score_cutoff: _ResultType | None = None,
-    score_hint: _ResultType | None = None,
+    score_cutoff: float | None = None,
+    score_hint: float | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
-) -> tuple[_S2, _ResultType, int]: ...
+) -> tuple[_StringType2, _ResultType, _KeyType]: ...
 @overload
 def extractOne(
-    query: _S1,
-    choices: Mapping[Any, _S2],
+    query: _StringType1 | None,
+    choices: Iterable[_StringType2 | None],
     *,
     scorer: Callable[..., _ResultType] = WRatio,
     processor: Callable[..., _StringType] | None = None,
-    score_cutoff: _ResultType | None = None,
-    score_hint: _ResultType | None = None,
+    score_cutoff: float | None = None,
+    score_hint: float | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
-) -> tuple[_S2, _ResultType, Any]: ...
+) -> tuple[_StringType2, _ResultType, int]: ...
 @overload
 def extract(
-    query: _S1,
-    choices: Collection[_S2],
+    query: _StringType1 | None,
+    choices: Mapping[_KeyType, _StringType2 | None],
     *,
     scorer: Callable[..., _ResultType] = WRatio,
     processor: Callable[..., _StringType] | None = None,
     limit: int | None = 5,
-    score_cutoff: _ResultType | None = None,
-    score_hint: _ResultType | None = None,
+    score_cutoff: float | None = None,
+    score_hint: float | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
-) -> list[tuple[_S2, _ResultType, int]]: ...
+) -> list[tuple[_StringType2, _ResultType, _KeyType]]: ...
 @overload
 def extract(
-    query: _S1,
-    choices: Mapping[Any, _S2],
+    query: _StringType1 | None,
+    choices: Collection[_StringType2 | None],
     *,
     scorer: Callable[..., _ResultType] = WRatio,
     processor: Callable[..., _StringType] | None = None,
     limit: int | None = 5,
-    score_cutoff: _ResultType | None = None,
-    score_hint: _ResultType | None = None,
+    score_cutoff: float | None = None,
+    score_hint: float | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
-) -> list[tuple[_S2, _ResultType, Any]]: ...
+) -> list[tuple[_StringType2, _ResultType, int]]: ...
 @overload
 def extract_iter(
-    query: _S1,
-    choices: Iterable[_S2],
+    query: _StringType1 | None,
+    choices: Iterable[_StringType2 | None],
     *,
     scorer: Callable[..., _ResultType] = WRatio,
     processor: Callable[..., _StringType] | None = None,
-    score_cutoff: _ResultType | None = None,
-    score_hint: _ResultType | None = None,
+    score_cutoff: float | None = None,
+    score_hint: float | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
-) -> Generator[tuple[_S2, _ResultType, int], None, None]: ...
+) -> Generator[tuple[_StringType2, _ResultType, int], None, None]: ...
 @overload
 def extract_iter(
-    query: _S1,
-    choices: Mapping[Any, _S2],
+    query: _StringType1 | None,
+    choices: Mapping[_KeyType, _StringType2 | None],
     *,
     scorer: Callable[..., _ResultType] = WRatio,
     processor: Callable[..., _StringType] | None = None,
-    score_cutoff: _ResultType | None = None,
-    score_hint: _ResultType | None = None,
+    score_cutoff: float | None = None,
+    score_hint: float | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
-) -> Generator[tuple[_S2, _ResultType, Any], None, None]: ...
+) -> Generator[tuple[_StringType2, _ResultType, _KeyType], None, None]: ...
 
 FLOAT32: int
 FLOAT64: int
@@ -101,29 +101,34 @@ UINT16: int
 UINT32: int
 UINT64: int
 
-def cdist(
-    queries: Iterable[_S1],
-    choices: Iterable[_S2],
-    *,
-    scorer: Callable[..., _ResultType] = ratio,
-    processor: Callable[..., _StringType] | None = None,
-    score_cutoff: _ResultType | None = None,
-    score_hint: _ResultType | None = None,
-    score_multiplier: _ResultType | None = None,
-    dtype: int | None = None,
-    workers: int = 1,
-    scorer_kwargs: dict[str, Any] | None = None,
-) -> Any: ...
-def cpdist(
-    queries: Iterable[_S1],
-    choices: Iterable[_S2],
-    *,
-    scorer: Callable[..., _ResultType] = ratio,
-    processor: Callable[..., _StringType] | None = None,
-    score_cutoff: _ResultType | None = None,
-    score_hint: _ResultType | None = None,
-    score_multiplier: _ResultType | None = None,
-    dtype: int | None = None,
-    workers: int = 1,
-    scorer_kwargs: dict[str, Any] | None = None,
-) -> Any: ...
+try:
+    import numpy as np
+
+    def cdist(
+        queries: Iterable[_StringType1],
+        choices: Iterable[_StringType2],
+        *,
+        scorer: Callable[..., _ResultType] = ratio,
+        processor: Callable[..., _StringType] | None = None,
+        score_cutoff: float | None = None,
+        score_hint: float | None = None,
+        score_multiplier: float | None = None,
+        dtype: int | None = None,
+        workers: int = 1,
+        scorer_kwargs: dict[str, Any] | None = None,
+    ) -> np.ndarray: ...
+    def cpdist(
+        queries: Iterable[_StringType1],
+        choices: Iterable[_StringType2],
+        *,
+        scorer: Callable[..., _ResultType] = ratio,
+        processor: Callable[..., _StringType] | None = None,
+        score_cutoff: float | None = None,
+        score_hint: float | None = None,
+        score_multiplier: float | None = None,
+        dtype: int | None = None,
+        workers: int = 1,
+        scorer_kwargs: dict[str, Any] | None = None,
+    ) -> np.ndarray: ...
+except ImportError:
+    pass
