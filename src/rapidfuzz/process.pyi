@@ -19,7 +19,7 @@ _StringType = Sequence[Hashable]
 _StringType1 = TypeVar("_StringType1", bound=Sequence[Hashable])
 _StringType2 = TypeVar("_StringType2", bound=Sequence[Hashable])
 _KeyType = TypeVar("_KeyType")
-_ResultType = TypeVar("_ResultType")
+_ResultType = TypeVar("_ResultType", int, float)
 
 @overload
 def extractOne(
