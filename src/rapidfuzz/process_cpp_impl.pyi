@@ -101,35 +101,29 @@ UINT16: int
 UINT32: int
 UINT64: int
 
-try:
-    import numpy as np
-
-    def cdist(
-        queries: Iterable[_StringType1],
-        choices: Iterable[_StringType2],
-        *,
-        scorer: Callable[..., _ResultType] = ratio,
-        processor: Callable[..., _StringType] | None = None,
-        score_cutoff: float | None = None,
-        score_hint: float | None = None,
-        score_multiplier: float | None = None,
-        dtype: int | None = None,
-        workers: int = 1,
-        scorer_kwargs: dict[str, Any] | None = None,
-    ) -> np.ndarray: ...
-    def cpdist(
-        queries: Iterable[_StringType1],
-        choices: Iterable[_StringType2],
-        *,
-        scorer: Callable[..., _ResultType] = ratio,
-        processor: Callable[..., _StringType] | None = None,
-        score_cutoff: float | None = None,
-        score_hint: float | None = None,
-        score_multiplier: float | None = None,
-        dtype: int | None = None,
-        workers: int = 1,
-        scorer_kwargs: dict[str, Any] | None = None,
-    ) -> np.ndarray: ...
-
-except ImportError:
-    pass
+def cdist(
+    queries: Iterable[_StringType1],
+    choices: Iterable[_StringType2],
+    *,
+    scorer: Callable[..., _ResultType] = ratio,
+    processor: Callable[..., _StringType] | None = None,
+    score_cutoff: float | None = None,
+    score_hint: float | None = None,
+    score_multiplier: float | None = None,
+    dtype: int | None = None,
+    workers: int = 1,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> Any: ...
+def cpdist(
+    queries: Iterable[_StringType1],
+    choices: Iterable[_StringType2],
+    *,
+    scorer: Callable[..., _ResultType] = ratio,
+    processor: Callable[..., _StringType] | None = None,
+    score_cutoff: float | None = None,
+    score_hint: float | None = None,
+    score_multiplier: float | None = None,
+    dtype: int | None = None,
+    workers: int = 1,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> Any: ...
