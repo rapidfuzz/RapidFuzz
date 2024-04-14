@@ -28,8 +28,8 @@ def extractOne(
     *,
     scorer: Callable[..., _ResultType] = WRatio,
     processor: Callable[..., _StringType] | None = None,
-    score_cutoff: float | None = None,
-    score_hint: float | None = None,
+    score_cutoff: _ResultType | None = None,
+    score_hint: _ResultType | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
 ) -> tuple[_StringType2, _ResultType, _KeyType]: ...
 @overload
@@ -39,8 +39,8 @@ def extractOne(
     *,
     scorer: Callable[..., _ResultType] = WRatio,
     processor: Callable[..., _StringType] | None = None,
-    score_cutoff: float | None = None,
-    score_hint: float | None = None,
+    score_cutoff: _ResultType | None = None,
+    score_hint: _ResultType | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
 ) -> tuple[_StringType2, _ResultType, int]: ...
 @overload
@@ -51,8 +51,8 @@ def extract(
     scorer: Callable[..., _ResultType] = WRatio,
     processor: Callable[..., _StringType] | None = None,
     limit: int | None = 5,
-    score_cutoff: float | None = None,
-    score_hint: float | None = None,
+    score_cutoff: _ResultType | None = None,
+    score_hint: _ResultType | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
 ) -> list[tuple[_StringType2, _ResultType, _KeyType]]: ...
 @overload
@@ -63,8 +63,8 @@ def extract(
     scorer: Callable[..., _ResultType] = WRatio,
     processor: Callable[..., _StringType] | None = None,
     limit: int | None = 5,
-    score_cutoff: float | None = None,
-    score_hint: float | None = None,
+    score_cutoff: _ResultType | None = None,
+    score_hint: _ResultType | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
 ) -> list[tuple[_StringType2, _ResultType, int]]: ...
 @overload
@@ -74,8 +74,8 @@ def extract_iter(
     *,
     scorer: Callable[..., _ResultType] = WRatio,
     processor: Callable[..., _StringType] | None = None,
-    score_cutoff: float | None = None,
-    score_hint: float | None = None,
+    score_cutoff: _ResultType | None = None,
+    score_hint: _ResultType | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
 ) -> Generator[tuple[_StringType2, _ResultType, int], None, None]: ...
 @overload
@@ -85,8 +85,8 @@ def extract_iter(
     *,
     scorer: Callable[..., _ResultType] = WRatio,
     processor: Callable[..., _StringType] | None = None,
-    score_cutoff: float | None = None,
-    score_hint: float | None = None,
+    score_cutoff: _ResultType | None = None,
+    score_hint: _ResultType | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
 ) -> Generator[tuple[_StringType2, _ResultType, _KeyType], None, None]: ...
 
@@ -107,9 +107,9 @@ def cdist(
     *,
     scorer: Callable[..., _ResultType] = ratio,
     processor: Callable[..., _StringType] | None = None,
-    score_cutoff: float | None = None,
-    score_hint: float | None = None,
-    score_multiplier: float | None = None,
+    score_cutoff: _ResultType | None = None,
+    score_hint: _ResultType | None = None,
+    score_multiplier: _ResultType | None = None,
     dtype: int | None = None,
     workers: int = 1,
     scorer_kwargs: dict[str, Any] | None = None,
@@ -120,9 +120,9 @@ def cpdist(
     *,
     scorer: Callable[..., _ResultType] = ratio,
     processor: Callable[..., _StringType] | None = None,
-    score_cutoff: float | None = None,
-    score_hint: float | None = None,
-    score_multiplier: float | None = None,
+    score_cutoff: _ResultType | None = None,
+    score_hint: _ResultType | None = None,
+    score_multiplier: _ResultType | None = None,
     dtype: int | None = None,
     workers: int = 1,
     scorer_kwargs: dict[str, Any] | None = None,
