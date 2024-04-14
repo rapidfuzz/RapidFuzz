@@ -105,7 +105,6 @@ try:
         workers: int = 1,
         scorer_kwargs: dict[str, Any] | None = None,
     ) -> np.ndarray: ...
-
     def cpdist(
         queries: Iterable[_StringType1],
         choices: Iterable[_StringType2],

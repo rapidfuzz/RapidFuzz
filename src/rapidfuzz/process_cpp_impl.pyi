@@ -130,5 +130,6 @@ try:
         workers: int = 1,
         scorer_kwargs: dict[str, Any] | None = None,
     ) -> np.ndarray: ...
+
 except ImportError:
     pass
