@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
-from typing import Hashable, Sequence
+from typing import Hashable, Sequence, TypeVar
 
-def default_process(sentence: Sequence[Hashable]) -> Sequence[Hashable]: ...
+_StringType = TypeVar("_StringType", bound=Sequence[Hashable])
+
+def default_process(sentence: _StringType) -> _StringType: ...
