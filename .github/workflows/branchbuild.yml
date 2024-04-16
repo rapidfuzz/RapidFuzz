@@ -159,9 +159,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest hypothesis pandas mypy pyinstaller[hook_testing]
 
-      #- name: Test type stubs
-      #  run: |
-      #    python -m mypy.stubtest rapidfuzz --ignore-missing-stub
+      - name: Test type stubs
+        run: |
+          python tools/test_scorer_typing.py
 
       - name: Test with pytest and backtrace in case of SegFault
         if: runner.os == 'Linux'
