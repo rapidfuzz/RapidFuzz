@@ -162,6 +162,7 @@ jobs:
       - name: Test type stubs
         run: |
           python tools/test_scorer_typing.py
+          python -m mypy tools/test_process_typing.py --warn-unused-ignores
 
       - name: Test with pytest and backtrace in case of SegFault
         if: runner.os == 'Linux'
