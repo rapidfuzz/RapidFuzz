@@ -11,7 +11,6 @@ from typing import (
     Protocol,
     Sequence,
     TypeVar,
-    cast,
     overload,
 )
 
@@ -35,14 +34,58 @@ class _Scorer(Protocol[_StringType1_contra, _StringType2_contra, _ResultType_con
         self, __s1: _StringType1_contra, __s2: _StringType2_contra, *, score_cutoff: _ResultType_contra | None
     ) -> _ResultType_co: ...
 
-_default_scorer: _Scorer[Any, Any, Any, Any] = cast(_Scorer[Any, Any, Any, Any], WRatio)
-
+# mypy wants defaults to be valid for every possible parameterization of a generic function
+# so add separate overloads for the default version
+@overload
+def extractOne(
+    query: Sequence[Hashable] | None,
+    choices: Mapping[_KeyType, _StringType2 | None],
+    *,
+    scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = WRatio,
+    processor: None = None,
+    score_cutoff: float | None = None,
+    score_hint: float | None = None,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> tuple[_StringType2, float, _KeyType]: ...
+@overload
+def extractOne(
+    query: Sequence[Hashable] | None,
+    choices: Iterable[_StringType2 | None],
+    *,
+    scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = WRatio,
+    processor: None = None,
+    score_cutoff: float | None = None,
+    score_hint: float | None = None,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> tuple[_StringType2, float, int]: ...
+@overload
+def extractOne(
+    query: _UnprocessedType1 | None,
+    choices: Mapping[_KeyType, _UnprocessedType2 | None],
+    *,
+    scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = WRatio,
+    processor: Callable[[_UnprocessedType1 | _UnprocessedType2], Sequence[Hashable]],
+    score_cutoff: float | None = None,
+    score_hint: float | None = None,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> tuple[_UnprocessedType2, float, _KeyType]: ...
+@overload
+def extractOne(
+    query: _UnprocessedType1 | None,
+    choices: Iterable[_UnprocessedType2 | None],
+    *,
+    scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = WRatio,
+    processor: Callable[[_UnprocessedType1 | _UnprocessedType2], Sequence[Hashable]],
+    score_cutoff: float | None = None,
+    score_hint: float | None = None,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> tuple[_UnprocessedType2, float, int]: ...
 @overload
 def extractOne(
     query: _StringType1 | None,
     choices: Mapping[_KeyType, _StringType2 | None],
     *,
-    scorer: _Scorer[_StringType1, _StringType2, _ResultType, _ResultType] = _default_scorer,
+    scorer: _Scorer[_StringType1, _StringType2, _ResultType, _ResultType],
     processor: None = None,
     score_cutoff: _ResultType | None = None,
     score_hint: _ResultType | None = None,
@@ -53,7 +96,7 @@ def extractOne(
     query: _StringType1 | None,
     choices: Iterable[_StringType2 | None],
     *,
-    scorer: _Scorer[_StringType1, _StringType2, _ResultType, _ResultType] = _default_scorer,
+    scorer: _Scorer[_StringType1, _StringType2, _ResultType, _ResultType],
     processor: None = None,
     score_cutoff: _ResultType | None = None,
     score_hint: _ResultType | None = None,
@@ -64,7 +107,7 @@ def extractOne(
     query: _UnprocessedType1 | None,
     choices: Mapping[_KeyType, _UnprocessedType2 | None],
     *,
-    scorer: _Scorer[_StringType1, _StringType1, _ResultType, _ResultType] = _default_scorer,
+    scorer: _Scorer[_StringType1, _StringType1, _ResultType, _ResultType],
     processor: Callable[[_UnprocessedType1 | _UnprocessedType2], _StringType1],
     score_cutoff: _ResultType | None = None,
     score_hint: _ResultType | None = None,
@@ -75,18 +118,65 @@ def extractOne(
     query: _UnprocessedType1 | None,
     choices: Iterable[_UnprocessedType2 | None],
     *,
-    scorer: _Scorer[_StringType1, _StringType1, _ResultType, _ResultType] = _default_scorer,
+    scorer: _Scorer[_StringType1, _StringType1, _ResultType, _ResultType],
     processor: Callable[[_UnprocessedType1 | _UnprocessedType2], _StringType1],
     score_cutoff: _ResultType | None = None,
     score_hint: _ResultType | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
 ) -> tuple[_UnprocessedType2, _ResultType, int]: ...
+
+# mypy wants defaults to be valid for every possible parameterization of a generic function
+# so add separate overloads for the default version
+@overload
+def extract(
+    query: Sequence[Hashable] | None,
+    choices: Mapping[_KeyType, _StringType2 | None],
+    *,
+    scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = WRatio,
+    processor: None = None,
+    score_cutoff: float | None = None,
+    score_hint: float | None = None,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> list[tuple[_StringType2, float, _KeyType]]: ...
+@overload
+def extract(
+    query: Sequence[Hashable] | None,
+    choices: Iterable[_StringType2 | None],
+    *,
+    scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = WRatio,
+    processor: None = None,
+    score_cutoff: float | None = None,
+    score_hint: float | None = None,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> list[tuple[_StringType2, float, int]]: ...
+@overload
+def extract(
+    query: _UnprocessedType1 | None,
+    choices: Mapping[_KeyType, _UnprocessedType2 | None],
+    *,
+    scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = WRatio,
+    processor: Callable[[_UnprocessedType1 | _UnprocessedType2], Sequence[Hashable]],
+    score_cutoff: float | None = None,
+    score_hint: float | None = None,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> list[tuple[_UnprocessedType2, float, _KeyType]]: ...
+@overload
+def extract(
+    query: _UnprocessedType1 | None,
+    choices: Iterable[_UnprocessedType2 | None],
+    *,
+    scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = WRatio,
+    processor: Callable[[_UnprocessedType1 | _UnprocessedType2], Sequence[Hashable]],
+    score_cutoff: float | None = None,
+    score_hint: float | None = None,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> list[tuple[_UnprocessedType2, float, int]]: ...
 @overload
 def extract(
     query: _StringType1 | None,
     choices: Mapping[_KeyType, _StringType2 | None],
     *,
-    scorer: _Scorer[_StringType1, _StringType2, _ResultType, _ResultType] = _default_scorer,
+    scorer: _Scorer[_StringType1, _StringType2, _ResultType, _ResultType],
     processor: None = None,
     limit: int | None = 5,
     score_cutoff: _ResultType | None = None,
@@ -98,7 +188,7 @@ def extract(
     query: _StringType1 | None,
     choices: Collection[_StringType2 | None],
     *,
-    scorer: _Scorer[_StringType1, _StringType2, _ResultType, _ResultType] = _default_scorer,
+    scorer: _Scorer[_StringType1, _StringType2, _ResultType, _ResultType],
     processor: None = None,
     limit: int | None = 5,
     score_cutoff: _ResultType | None = None,
@@ -110,7 +200,7 @@ def extract(
     query: _UnprocessedType1 | None,
     choices: Mapping[_KeyType, _UnprocessedType2 | None],
     *,
-    scorer: _Scorer[_StringType1, _StringType1, _ResultType, _ResultType] = _default_scorer,
+    scorer: _Scorer[_StringType1, _StringType1, _ResultType, _ResultType],
     processor: Callable[[_UnprocessedType1 | _UnprocessedType2], _StringType1],
     limit: int | None = 5,
     score_cutoff: _ResultType | None = None,
@@ -122,19 +212,66 @@ def extract(
     query: _UnprocessedType1 | None,
     choices: Collection[_UnprocessedType2 | None],
     *,
-    scorer: _Scorer[_StringType1, _StringType1, _ResultType, _ResultType] = _default_scorer,
+    scorer: _Scorer[_StringType1, _StringType1, _ResultType, _ResultType],
     processor: Callable[[_UnprocessedType1 | _UnprocessedType2], _StringType1],
     limit: int | None = 5,
     score_cutoff: _ResultType | None = None,
     score_hint: _ResultType | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
 ) -> list[tuple[_UnprocessedType2, _ResultType, int]]: ...
+
+# mypy wants defaults to be valid for every possible parameterization of a generic function
+# so add separate overloads for the default version
+@overload
+def extract_iter(
+    query: Sequence[Hashable] | None,
+    choices: Mapping[_KeyType, _StringType2 | None],
+    *,
+    scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = WRatio,
+    processor: None = None,
+    score_cutoff: float | None = None,
+    score_hint: float | None = None,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> Generator[tuple[_StringType2, float, _KeyType], None, None]: ...
+@overload
+def extract_iter(
+    query: Sequence[Hashable] | None,
+    choices: Iterable[_StringType2 | None],
+    *,
+    scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = WRatio,
+    processor: None = None,
+    score_cutoff: float | None = None,
+    score_hint: float | None = None,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> Generator[tuple[_StringType2, float, int], None, None]: ...
+@overload
+def extract_iter(
+    query: _UnprocessedType1 | None,
+    choices: Mapping[_KeyType, _UnprocessedType2 | None],
+    *,
+    scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = WRatio,
+    processor: Callable[[_UnprocessedType1 | _UnprocessedType2], Sequence[Hashable]],
+    score_cutoff: float | None = None,
+    score_hint: float | None = None,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> Generator[tuple[_UnprocessedType2, float, _KeyType], None, None]: ...
+@overload
+def extract_iter(
+    query: _UnprocessedType1 | None,
+    choices: Iterable[_UnprocessedType2 | None],
+    *,
+    scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = WRatio,
+    processor: Callable[[_UnprocessedType1 | _UnprocessedType2], Sequence[Hashable]],
+    score_cutoff: float | None = None,
+    score_hint: float | None = None,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> Generator[tuple[_UnprocessedType2, float, int], None, None]: ...
 @overload
 def extract_iter(
     query: _StringType1 | None,
     choices: Mapping[_KeyType, _StringType2 | None],
     *,
-    scorer: _Scorer[_StringType1, _StringType2, _ResultType, _ResultType] = _default_scorer,
+    scorer: _Scorer[_StringType1, _StringType2, _ResultType, _ResultType],
     processor: None = None,
     score_cutoff: _ResultType | None = None,
     score_hint: _ResultType | None = None,
@@ -145,7 +282,7 @@ def extract_iter(
     query: _StringType1 | None,
     choices: Iterable[_StringType2 | None],
     *,
-    scorer: _Scorer[_StringType1, _StringType2, _ResultType, _ResultType] = _default_scorer,
+    scorer: _Scorer[_StringType1, _StringType2, _ResultType, _ResultType],
     processor: None = None,
     score_cutoff: _ResultType | None = None,
     score_hint: _ResultType | None = None,
@@ -156,7 +293,7 @@ def extract_iter(
     query: _UnprocessedType1 | None,
     choices: Mapping[_KeyType, _UnprocessedType2 | None],
     *,
-    scorer: _Scorer[_StringType1, _StringType1, _ResultType, _ResultType] = _default_scorer,
+    scorer: _Scorer[_StringType1, _StringType1, _ResultType, _ResultType],
     processor: Callable[[_UnprocessedType1 | _UnprocessedType2], _StringType1],
     score_cutoff: _ResultType | None = None,
     score_hint: _ResultType | None = None,
@@ -167,7 +304,7 @@ def extract_iter(
     query: _UnprocessedType1 | None,
     choices: Iterable[_UnprocessedType2 | None],
     *,
-    scorer: _Scorer[_StringType1, _StringType1, _ResultType, _ResultType] = _default_scorer,
+    scorer: _Scorer[_StringType1, _StringType1, _ResultType, _ResultType],
     processor: Callable[[_UnprocessedType1 | _UnprocessedType2], _StringType1],
     score_cutoff: _ResultType | None = None,
     score_hint: _ResultType | None = None,
@@ -182,7 +319,7 @@ try:
         choices: Iterable[_StringType2],
         *,
         scorer: Callable[..., _ResultType] = ratio,
-        processor: Callable[..., _StringType] | None = None,
+        processor: Callable[..., Sequence[Hashable]] | None = None,
         score_cutoff: _ResultType | None = None,
         score_hint: _ResultType | None = None,
         dtype: np.dtype | None = None,
@@ -194,7 +331,7 @@ try:
         choices: Iterable[_StringType2],
         *,
         scorer: Callable[..., _ResultType] = ratio,
-        processor: Callable[..., _StringType] | None = None,
+        processor: Callable[..., Sequence[Hashable]] | None = None,
         score_cutoff: _ResultType | None = None,
         score_hint: _ResultType | None = None,
         dtype: np.dtype | None = None,

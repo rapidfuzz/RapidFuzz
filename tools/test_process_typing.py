@@ -54,7 +54,8 @@ def invalid_scorer_str5(s1: str, s2: int, score_cutoff: float | None) -> float:
 def test_extractOne():
     a: tuple[str, float, int] = process.extractOne("", [""])
     a = process.extractOne("", [""], scorer=fuzz.ratio)
-    b: tuple[str, int, int] = process.extractOne("", [""], scorer=fuzz.ratio)  # type: ignore [call-overload]
+    b: tuple[str, int, int] = process.extractOne("", [""], scorer=fuzz.ratio)  # type: ignore [assignment]
+    b = process.extractOne("", [""])  # type: ignore [assignment]
     b = process.extractOne("", [""], scorer=Levenshtein.distance)
     a = process.extractOne(1, [""], scorer=fuzz.ratio)  # type: ignore [call-overload]
     a = process.extractOne("", [1], scorer=fuzz.ratio)  # type: ignore [call-overload]
@@ -81,7 +82,8 @@ def test_extractOne():
 def test_extract():
     a: list[tuple[str, float, int]] = process.extract("", [""])
     a = process.extract("", [""], scorer=fuzz.ratio)
-    b: list[tuple[str, int, int]] = process.extract("", [""], scorer=fuzz.ratio)  # type: ignore [call-overload]
+    b: list[tuple[str, int, int]] = process.extract("", [""], scorer=fuzz.ratio)  # type: ignore [assignment]
+    b = process.extract("", [""])  # type: ignore [assignment]
     b = process.extract("", [""], scorer=Levenshtein.distance)
     a = process.extract(1, [""], scorer=fuzz.ratio)  # type: ignore [call-overload]
     a = process.extract("", [1], scorer=fuzz.ratio)  # type: ignore [call-overload]
@@ -108,7 +110,8 @@ def test_extract():
 def test_extract_iter():
     a: Generator[tuple[str, float, int], None, None] = process.extract_iter("", [""])
     a = process.extract_iter("", [""], scorer=fuzz.ratio)
-    b: Generator[tuple[str, int, int], None, None] = process.extract_iter("", [""], scorer=fuzz.ratio)  # type: ignore [call-overload]
+    b: Generator[tuple[str, int, int], None, None] = process.extract_iter("", [""], scorer=fuzz.ratio)  # type: ignore [assignment]
+    b = process.extract_iter("", [""])  # type: ignore [assignment]
     b = process.extract_iter("", [""], scorer=Levenshtein.distance)
     a = process.extract_iter(1, [""], scorer=fuzz.ratio)  # type: ignore [call-overload]
     a = process.extract_iter("", [1], scorer=fuzz.ratio)  # type: ignore [call-overload]
