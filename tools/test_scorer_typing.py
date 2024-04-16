@@ -65,6 +65,17 @@ def test_scorer(scorer, res_type):
 
         print(f"testing {scorer}")
         subprocess.run(["python", "-m", "mypy", str(f_name), "--warn-unused-ignores"], check=True)
+        subprocess.run(
+            [
+                "python",
+                "-m",
+                "pyright",
+                "-p",
+                str(Path(__file__).resolve().parent / "test_process_typing.py"),
+                str(f_name),
+            ],
+            check=True,
+        )
 
 
 for module in ("DamerauLevenshtein", "Hamming", "Indel", "LCSseq", "Levenshtein", "OSA", "Postfix", "Prefix"):
