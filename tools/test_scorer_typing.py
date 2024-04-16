@@ -7,7 +7,7 @@ from tempfile import TemporaryDirectory
 scorer_test_boilerplate = """
 from __future__ import annotations
 
-from rapidfuzz.distance import *
+from rapidfuzz.distance import *  # pyright: ignore [reportWildcardImportFromLibrary]
 from rapidfuzz import fuzz
 
 def string_preprocessor(a: str) -> str:
