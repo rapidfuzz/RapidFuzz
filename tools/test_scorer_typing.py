@@ -8,6 +8,7 @@ scorer_test_boilerplate = """
 from __future__ import annotations
 
 from rapidfuzz.distance import *
+from rapidfuzz import fuzz
 
 def string_preprocessor(a: str) -> str:
     return a
@@ -77,3 +78,14 @@ for module in ("Jaro", "JaroWinkler"):
     test_scorer(f"{module}.similarity", float)
     test_scorer(f"{module}.normalized_distance", float)
     test_scorer(f"{module}.normalized_similarity", float)
+
+test_scorer("fuzz.ratio", float)
+test_scorer("fuzz.partial_ratio", float)
+test_scorer("fuzz.token_ratio", float)
+test_scorer("fuzz.token_set_ratio", float)
+test_scorer("fuzz.token_sort_ratio", float)
+test_scorer("fuzz.partial_token_ratio", float)
+test_scorer("fuzz.partial_token_set_ratio", float)
+test_scorer("fuzz.partial_token_sort_ratio", float)
+test_scorer("fuzz.WRatio", float)
+test_scorer("fuzz.QRatio", float)
