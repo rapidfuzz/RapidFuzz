@@ -15,7 +15,7 @@ pandas_NA = None
 
 
 def setupPandas():
-    global pandas_NA
+    global pandas_NA  # noqa: PLW0603
     if pandas_NA is None:
         pandas = sys.modules.get("pandas")
         if hasattr(pandas, "NA"):
