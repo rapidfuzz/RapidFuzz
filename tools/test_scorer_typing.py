@@ -15,7 +15,7 @@ def string_preprocessor(a: str) -> str:
 
 class MyClass:
     def __init__(self) -> None:
-         self.a: str = ""
+        self.a: str = ""
 
 """
 
@@ -23,16 +23,16 @@ scorer_test_int = (
     scorer_test_boilerplate
     + """
 def test():
-    a: int = {scorer}("", "")
-    a = {scorer}("", 1)  # type: ignore [call-overload]
-    a = {scorer}(1, "")  # type: ignore [call-overload]
-    a = {scorer}(list(""), "")
-    a = {scorer}("", list(""))
-    a = {scorer}("", "", score_cutoff=0.5)  # type: ignore [call-overload]
-    a = {scorer}("", "", processor=string_preprocessor)
-    a = {scorer}("", list(""), processor=string_preprocessor)  # type: ignore [arg-type]
-    a = {scorer}(list(""), "", processor=string_preprocessor)  # type: ignore [arg-type]
-    a = {scorer}(MyClass(), MyClass(), processor=lambda x: x.a)
+    _a: int = {scorer}("", "")
+    _a = {scorer}("", 1)  # type: ignore [call-overload]
+    _a = {scorer}(1, "")  # type: ignore [call-overload]
+    _a = {scorer}(list(""), "")
+    _a = {scorer}("", list(""))
+    _a = {scorer}("", "", score_cutoff=0.5)  # type: ignore [call-overload]
+    _a = {scorer}("", "", processor=string_preprocessor)
+    _a = {scorer}("", list(""), processor=string_preprocessor)  # type: ignore [arg-type]
+    _a = {scorer}(list(""), "", processor=string_preprocessor)  # type: ignore [arg-type]
+    _a = {scorer}(MyClass(), MyClass(), processor=lambda x: x.a)
 """
 )
 
@@ -40,16 +40,16 @@ scorer_test_float = (
     scorer_test_boilerplate
     + """
 def test():
-    a: float = {scorer}("", "")
-    b: int = {scorer}("", "")  # type: ignore [assignment]
-    a = {scorer}("", 1)  # type: ignore [call-overload]
-    a = {scorer}(1, "")  # type: ignore [call-overload]
-    a = {scorer}(list(""), "")
-    a = {scorer}("", list(""))
-    a = {scorer}("", "", processor=string_preprocessor)
-    a = {scorer}("", list(""), processor=string_preprocessor)  # type: ignore [arg-type]
-    a = {scorer}(list(""), "", processor=string_preprocessor)  # type: ignore [arg-type]
-    a = {scorer}(MyClass(), MyClass(), processor=lambda x: x.a)
+    _a: float = {scorer}("", "")
+    _b: int = {scorer}("", "")  # type: ignore [assignment]
+    _a = {scorer}("", 1)  # type: ignore [call-overload]
+    _a = {scorer}(1, "")  # type: ignore [call-overload]
+    _a = {scorer}(list(""), "")
+    _a = {scorer}("", list(""))
+    _a = {scorer}("", "", processor=string_preprocessor)
+    _a = {scorer}("", list(""), processor=string_preprocessor)  # type: ignore [arg-type]
+    _a = {scorer}(list(""), "", processor=string_preprocessor)  # type: ignore [arg-type]
+    _a = {scorer}(MyClass(), MyClass(), processor=lambda x: x.a)
 """
 )
 
