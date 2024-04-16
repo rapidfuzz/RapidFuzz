@@ -71,7 +71,7 @@ def test_scorer(scorer, res_type):
                 "-m",
                 "pyright",
                 "-p",
-                str(Path(__file__).resolve().parent / "test_process_typing.py"),
+                str(Path(__file__).resolve().parent / "pyrightconfig.json"),
                 str(f_name),
             ],
             check=True,
