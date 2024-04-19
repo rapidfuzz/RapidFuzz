@@ -434,6 +434,12 @@ def token_set_ratio(
     83.8709716796875
     >>> fuzz.token_set_ratio("fuzzy was a bear", "fuzzy fuzzy was a bear")
     100.0
+    # Returns 100.0 if one string is a subset of the other, regardless of extra content in the longer string
+    >>> fuzz.token_set_ratio("fuzzy was a bear but not a dog", "fuzzy was a bear")
+    100.0
+    # Score is reduced only when there is explicit disagreement in the two strings
+    >>> fuzz.token_set_ratio("fuzzy was a bear but not a dog", "fuzzy was a bear but not a cat")
+    92.3076923076923
     """
     setupPandas()
     if is_none(s1) or is_none(s2):
