@@ -1,6 +1,14 @@
 Changelog
 ---------
 
+[3.9.0] - 2024-04-
+^^^^^^^^^^^^^^^^^^^^
+Changed
+~~~~~
+* significantly improve type hints for the library
+
+
+
 [3.8.1] - 2024-04-07
 ^^^^^^^^^^^^^^^^^^^^
 Fixed
