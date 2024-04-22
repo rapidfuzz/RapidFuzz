@@ -314,24 +314,104 @@ def extract_iter(
 try:
     import numpy as np
 
+    @overload
     def cdist(
-        queries: Iterable[_StringType1],
-        choices: Iterable[_StringType2],
+        queries: Iterable[Sequence[Hashable] | None],
+        choices: Iterable[Sequence[Hashable] | None],
         *,
-        scorer: Callable[..., _ResultType] = ratio,
-        processor: Callable[..., Sequence[Hashable]] | None = None,
+        scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = ratio,
+        processor: None = None,
+        score_cutoff: float | None = None,
+        score_hint: float | None = None,
+        dtype: np.dtype | None = None,
+        workers: int = 1,
+        scorer_kwargs: dict[str, Any] | None = None,
+    ) -> np.ndarray: ...
+    @overload
+    def cdist(
+        queries: Iterable[_UnprocessedType1 | None],
+        choices: Iterable[_UnprocessedType2 | None],
+        *,
+        scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = ratio,
+        processor: Callable[[_UnprocessedType1 | _UnprocessedType2], Sequence[Hashable]],
+        score_cutoff: float | None = None,
+        score_hint: float | None = None,
+        dtype: np.dtype | None = None,
+        workers: int = 1,
+        scorer_kwargs: dict[str, Any] | None = None,
+    ) -> np.ndarray: ...
+    @overload
+    def cdist(
+        queries: Iterable[_StringType1 | None],
+        choices: Iterable[_StringType2 | None],
+        *,
+        scorer: _Scorer[_StringType1, _StringType2, _ResultType, _ResultType],
+        processor: None = None,
         score_cutoff: _ResultType | None = None,
         score_hint: _ResultType | None = None,
         dtype: np.dtype | None = None,
         workers: int = 1,
         scorer_kwargs: dict[str, Any] | None = None,
     ) -> np.ndarray: ...
-    def cpdist(
-        queries: Iterable[_StringType1],
-        choices: Iterable[_StringType2],
+    @overload
+    def cdist(
+        queries: Iterable[_UnprocessedType1 | None],
+        choices: Iterable[_UnprocessedType2 | None],
         *,
-        scorer: Callable[..., _ResultType] = ratio,
-        processor: Callable[..., Sequence[Hashable]] | None = None,
+        scorer: _Scorer[_StringType1, _StringType1, _ResultType, _ResultType],
+        processor: Callable[[_UnprocessedType1 | _UnprocessedType2], _StringType1],
+        score_cutoff: _ResultType | None = None,
+        score_hint: _ResultType | None = None,
+        dtype: np.dtype | None = None,
+        workers: int = 1,
+        scorer_kwargs: dict[str, Any] | None = None,
+    ) -> np.ndarray: ...
+    @overload
+    def cpdist(
+        queries: Iterable[Sequence[Hashable] | None],
+        choices: Iterable[Sequence[Hashable] | None],
+        *,
+        scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = ratio,
+        processor: None = None,
+        score_cutoff: float | None = None,
+        score_hint: float | None = None,
+        dtype: np.dtype | None = None,
+        workers: int = 1,
+        scorer_kwargs: dict[str, Any] | None = None,
+    ) -> np.ndarray: ...
+    @overload
+    def cpdist(
+        queries: Iterable[_UnprocessedType1 | None],
+        choices: Iterable[_UnprocessedType2 | None],
+        *,
+        scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = ratio,
+        processor: Callable[[_UnprocessedType1 | _UnprocessedType2], Sequence[Hashable]],
+        score_cutoff: float | None = None,
+        score_hint: float | None = None,
+        dtype: np.dtype | None = None,
+        workers: int = 1,
+        scorer_kwargs: dict[str, Any] | None = None,
+    ) -> np.ndarray: ...
+    @overload
+    def cpdist(
+        queries: Iterable[_StringType1 | None],
+        choices: Iterable[_StringType2 | None],
+        *,
+        scorer: _Scorer[_StringType1, _StringType2, _ResultType, _ResultType],
+        processor: None = None,
+        score_cutoff: _ResultType | None = None,
+        score_hint: _ResultType | None = None,
+        dtype: np.dtype | None = None,
+        workers: int = 1,
+        scorer_kwargs: dict[str, Any] | None = None,
+    ) -> np.ndarray: ...
+    @overload
+    def cpdist(
+        queries: Iterable[_UnprocessedType1 | None],
+        choices: Iterable[_UnprocessedType2 | None],
+        *,
+        scorer: _Scorer[_StringType1, _StringType1, _ResultType, _ResultType],
+        processor: Callable[[_UnprocessedType1 | _UnprocessedType2], _StringType1],
         score_cutoff: _ResultType | None = None,
         score_hint: _ResultType | None = None,
         dtype: np.dtype | None = None,

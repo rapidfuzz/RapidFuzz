@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from typing import Generator, Hashable, Sequence
 
+import numpy as np
+import numpy.typing as npt
+
 from rapidfuzz import fuzz, process
 from rapidfuzz.distance import Levenshtein
 
@@ -135,3 +138,59 @@ def test_extract_iter():
     _c = process.extract_iter("", [list("")], scorer=valid_scorer_str1)  # type: ignore [call-overload]
     _a = process.extract_iter(list(""), [""], scorer=valid_scorer_seq1)
     _c = process.extract_iter("", [list("")], scorer=valid_scorer_seq1)
+
+
+def test_cdist():
+    _a: npt.NDArray[np.float32] = process.cdist([""], [""])
+    _a = process.cdist([""], [""], scorer=fuzz.ratio)
+    # todo these should be be rejected, but I didn't find a way to properly type the return type so far
+    # _b: npt.NDArray[np.int32] = process.cdist([""], [""], scorer=fuzz.ratio)  type: ignore [assignment]
+    # _b = process.cdist([""], [""])  type: ignore [assignment]
+    _b: npt.NDArray[np.int32] = process.cdist([""], [""], scorer=Levenshtein.distance)
+    _a = process.cdist([1], [""], scorer=fuzz.ratio)  # type: ignore [list-item]
+    _a = process.cdist([""], [1], scorer=fuzz.ratio)  # type: ignore [list-item]
+    _a = process.cdist([list("")], [""], scorer=fuzz.ratio)
+    _a = process.cdist([""], [""], processor=string_preprocessor)
+    _a = process.cdist([list("")], [""], processor=string_preprocessor)  # type: ignore [arg-type]
+    _a = process.cdist([""], [list("")], processor=string_preprocessor)  # type: ignore [arg-type]
+    _a = process.cdist([MyClass()], [MyClass()], processor=lambda x: x.a)
+    _a = process.cdist([""], [""], scorer=valid_scorer_str1)
+    _a = process.cdist([""], [""], scorer=valid_scorer_str2)
+    _a = process.cdist([""], [""], scorer=valid_scorer_str3)
+    _a = process.cdist([""], [""], scorer=invalid_scorer_str1)  # type: ignore [arg-type]
+    _a = process.cdist([""], [""], scorer=invalid_scorer_str2)  # type: ignore [arg-type]
+    _a = process.cdist([""], [""], scorer=invalid_scorer_str3)  # type: ignore [arg-type]
+    _a = process.cdist([""], [""], scorer=invalid_scorer_str4)  # type: ignore [arg-type]
+    _a = process.cdist([""], [""], scorer=invalid_scorer_str5)  # type: ignore [arg-type]
+    _a = process.cdist([list("")], [""], scorer=valid_scorer_str1)  # type: ignore [arg-type]
+    _a = process.cdist([""], [list("")], scorer=valid_scorer_str1)  # type: ignore [arg-type]
+    _a = process.cdist([list("")], [""], scorer=valid_scorer_seq1)
+    _a = process.cdist([""], [list("")], scorer=valid_scorer_seq1)
+
+
+def test_cpdist():
+    _a: npt.NDArray[np.float32] = process.cpdist([""], [""])
+    _a = process.cpdist([""], [""], scorer=fuzz.ratio)
+    # todo these should be be rejected, but I didn't find a way to properly type the return type so far
+    # _b: npt.NDArray[np.int32] = process.cdist([""], [""], scorer=fuzz.ratio)  type: ignore [assignment]
+    # _b = process.cdist([""], [""])  type: ignore [assignment]
+    _b: npt.NDArray[np.int32] = process.cpdist([""], [""], scorer=Levenshtein.distance)
+    _a = process.cpdist([1], [""], scorer=fuzz.ratio)  # type: ignore [list-item]
+    _a = process.cpdist([""], [1], scorer=fuzz.ratio)  # type: ignore [list-item]
+    _a = process.cpdist([list("")], [""], scorer=fuzz.ratio)
+    _a = process.cpdist([""], [""], processor=string_preprocessor)
+    _a = process.cpdist([list("")], [""], processor=string_preprocessor)  # type: ignore [arg-type]
+    _a = process.cpdist([""], [list("")], processor=string_preprocessor)  # type: ignore [arg-type]
+    _a = process.cpdist([MyClass()], [MyClass()], processor=lambda x: x.a)
+    _a = process.cpdist([""], [""], scorer=valid_scorer_str1)
+    _a = process.cpdist([""], [""], scorer=valid_scorer_str2)
+    _a = process.cpdist([""], [""], scorer=valid_scorer_str3)
+    _a = process.cpdist([""], [""], scorer=invalid_scorer_str1)  # type: ignore [arg-type]
+    _a = process.cpdist([""], [""], scorer=invalid_scorer_str2)  # type: ignore [arg-type]
+    _a = process.cpdist([""], [""], scorer=invalid_scorer_str3)  # type: ignore [arg-type]
+    _a = process.cpdist([""], [""], scorer=invalid_scorer_str4)  # type: ignore [arg-type]
+    _a = process.cpdist([""], [""], scorer=invalid_scorer_str5)  # type: ignore [arg-type]
+    _a = process.cpdist([list("")], [""], scorer=valid_scorer_str1)  # type: ignore [arg-type]
+    _a = process.cpdist([""], [list("")], scorer=valid_scorer_str1)  # type: ignore [arg-type]
+    _a = process.cpdist([list("")], [""], scorer=valid_scorer_seq1)
+    _a = process.cpdist([""], [list("")], scorer=valid_scorer_seq1)

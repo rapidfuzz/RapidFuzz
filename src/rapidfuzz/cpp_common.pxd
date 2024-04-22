@@ -444,7 +444,7 @@ cdef inline bool NoKwargsInit(RF_Kwargs* self, dict kwargs) except False:
     self.dtor = NULL
     return True
 
-cdef inline RF_Scorer CreateScorerContext(RF_KwargsInit kwargs_init, RF_GetScorerFlags get_scorer_flags, RF_ScorerFuncInit scorer_func_init, RF_UncachedScorerFunc uncached_scorer_func):
+cdef inline RF_Scorer CreateScorerContext(RF_KwargsInit kwargs_init, RF_GetScorerFlags get_scorer_flags, RF_ScorerFuncInit scorer_func_init, RF_UncachedScorerFunc uncached_scorer_func) noexcept:
     cdef RF_Scorer context
     context.version = SCORER_STRUCT_VERSION
     context.kwargs_init = kwargs_init
@@ -453,12 +453,12 @@ cdef inline RF_Scorer CreateScorerContext(RF_KwargsInit kwargs_init, RF_GetScore
     context.uncached_scorer_func = uncached_scorer_func
     return context
 
-cdef inline void SetFuncAttrs(cpp_func, py_func):
+cdef inline void SetFuncAttrs(cpp_func, py_func) except *:
     cpp_func.__name__ = py_func.__name__
     cpp_func.__qualname__ = py_func.__qualname__
     cpp_func.__doc__ = py_func.__doc__
 
-cdef inline void SetScorerAttrs(cpp_func, py_func, RF_Scorer* context):
+cdef inline void SetScorerAttrs(cpp_func, py_func, RF_Scorer* context) except *:
     SetFuncAttrs(cpp_func, py_func)
     cpp_func._RF_Scorer = PyCapsule_New(context, NULL, NULL)
     cpp_func._RF_ScorerPy = py_func._RF_ScorerPy
@@ -466,12 +466,12 @@ cdef inline void SetScorerAttrs(cpp_func, py_func, RF_Scorer* context):
     # used to detect the function hasn't been wrapped afterwards
     cpp_func._RF_OriginalScorer = cpp_func
 
-cdef inline RF_Preprocessor CreateProcessorContext(RF_Preprocess preprocess):
+cdef inline RF_Preprocessor CreateProcessorContext(RF_Preprocess preprocess) except *:
     cdef RF_Preprocessor context
     context.version = PREPROCESSOR_STRUCT_VERSION
     context.preprocess = preprocess
     return context
 
-cdef inline void SetProcessorAttrs(cpp_func, py_func, RF_Preprocessor* context):
+cdef inline void SetProcessorAttrs(cpp_func, py_func, RF_Preprocessor* context) except *:
     SetFuncAttrs(cpp_func, py_func)
     cpp_func._RF_Preprocess = PyCapsule_New(context, NULL, NULL)

@@ -5,4 +5,7 @@
     "reportImplicitStringConcatenation": "error",
     "reportUnnecessaryTypeIgnoreComment": "error",
     "reportUnusedImport": "none",
+    // I couldn't find a way to properly type the return value of
+    // process.cdist and process.cpdist
+    "reportUnknownMemberType": "none",
 }
