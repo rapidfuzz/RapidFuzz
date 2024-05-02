@@ -1,12 +1,15 @@
 Changelog
 ---------
 
-[3.9.0] - 2024-04-
+[3.9.0] - 2024-05-02
 ^^^^^^^^^^^^^^^^^^^^
 Changed
-~~~~~
+~~~~~~~
 * significantly improve type hints for the library
 
+Fixed
+~~~~~
+* fix cmake version parsing 
 
 
 [3.8.1] - 2024-04-07
