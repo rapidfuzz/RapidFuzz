@@ -109,9 +109,9 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_wheels_macos:
-    name: Build wheel on macos-latest/${{matrix.arch}}/${{matrix.python_tag}}
+    name: Build wheel on macos-13/${{matrix.arch}}/${{matrix.python_tag}}
     needs: [build_sdist]
-    runs-on: macos-latest
+    runs-on: macos-13
     strategy:
       fail-fast: false
       matrix:
