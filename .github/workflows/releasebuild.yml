@@ -93,7 +93,7 @@ jobs:
         run: cp dist/*.tar.gz rapidfuzz.tar.gz
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.18.0
+        uses: pypa/cibuildwheel@v2.17.0
         with:
           package-dir: rapidfuzz.tar.gz
           output-dir: wheelhouse
