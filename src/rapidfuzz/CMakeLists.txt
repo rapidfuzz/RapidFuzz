@@ -57,19 +57,22 @@ target_link_libraries(fuzz_cpp PRIVATE rapidfuzz::rapidfuzz)
 install(TARGETS fuzz_cpp LIBRARY DESTINATION src/rapidfuzz)
 
 if(RAPIDFUZZ_ARCH_X64 OR RAPIDFUZZ_ARCH_X86)
-  create_cython_target(fuzz_cpp_avx2)
-  rf_add_library(fuzz_cpp_avx2 ${fuzz_cpp_avx2})
-  target_compile_features(fuzz_cpp_avx2 PUBLIC cxx_std_17)
+  # on macOs this generates illegal instructions https://github.com/rapidfuzz/RapidFuzz/issues/383
+  if(NOT APPLE)
+    create_cython_target(fuzz_cpp_avx2)
+    rf_add_library(fuzz_cpp_avx2 ${fuzz_cpp_avx2})
+    target_compile_features(fuzz_cpp_avx2 PUBLIC cxx_std_17)
 
-  if(MSVC)
-    set_target_properties(fuzz_cpp_avx2 PROPERTIES COMPILE_FLAGS "/arch:AVX2")
-  else()
-    set_target_properties(fuzz_cpp_avx2 PROPERTIES COMPILE_FLAGS "-mavx2")
+    if(MSVC)
+      set_target_properties(fuzz_cpp_avx2 PROPERTIES COMPILE_FLAGS "/arch:AVX2")
+    else()
+      set_target_properties(fuzz_cpp_avx2 PROPERTIES COMPILE_FLAGS "-mavx2")
+    endif()
+
+    target_include_directories(fuzz_cpp_avx2 PRIVATE ${RF_BASE_DIR}/rapidfuzz)
+    target_link_libraries(fuzz_cpp_avx2 PRIVATE rapidfuzz::rapidfuzz)
+    install(TARGETS fuzz_cpp_avx2 LIBRARY DESTINATION src/rapidfuzz)
   endif()
-
-  target_include_directories(fuzz_cpp_avx2 PRIVATE ${RF_BASE_DIR}/rapidfuzz)
-  target_link_libraries(fuzz_cpp_avx2 PRIVATE rapidfuzz::rapidfuzz)
-  install(TARGETS fuzz_cpp_avx2 LIBRARY DESTINATION src/rapidfuzz)
 endif()
 
 if(RAPIDFUZZ_ARCH_X86)

@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+[3.9.1] - 2024-05-19
+^^^^^^^^^^^^^^^^^^^^
+Fixed
+~~~~~
+* disable AVX2 on MacOS since it did lead to illegal instructions being generated
+
+
 [3.9.0] - 2024-05-02
 ^^^^^^^^^^^^^^^^^^^^
 Changed
