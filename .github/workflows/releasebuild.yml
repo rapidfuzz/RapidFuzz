@@ -54,36 +54,21 @@ jobs:
           path: dist/*.tar.gz
 
   build_wheels_windows:
-    name: Build wheel on windows-latest/${{matrix.arch}}/${{matrix.python_tag}}
+    name: Build wheel on windows-latest/${{matrix.arch}}
     needs: [build_sdist]
     runs-on: windows-latest
     strategy:
       fail-fast: false
       matrix:
         arch: [auto32, auto64, ARM64]
-        python_tag: ["cp38-*", "cp39-*", "cp310-*", "cp311-*", "cp312-*", "pp38-*", "pp39-*"]
-        exclude:
-          # PyPy only supports x86_64 on Windows
-          - arch: auto32
-            python_tag: "pp38-*"
-          - arch: auto32
-            python_tag: "pp39-*"
-
-          # ARM64 only supported only supported on cpython >= 3.9
-          - arch: ARM64
-            python_tag: "pp38-*"
-          - arch: ARM64
-            python_tag: "pp39-*"
-          - arch: ARM64
-            python_tag: "cp38-*"
     env:
-      CIBW_BUILD: ${{matrix.python_tag}}
       CIBW_ARCHS: ${{matrix.arch}}
       CIBW_TEST_SKIP: "*-win32"
       #CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_REQUIRES: pytest hypothesis
       CIBW_TEST_COMMAND: pytest {package}/tests
       CIBW_BUILD_VERBOSITY: 3
+      CIBW_PROJECT_REQUIRES_PYTHON: ">=3.8"
 
     steps:
       - uses: actions/download-artifact@v4
@@ -109,28 +94,21 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_wheels_macos:
-    name: Build wheel on ${{ matrix.os }}/native/${{matrix.python_tag}}
+    name: Build wheel on ${{ matrix.os }}/native
     needs: [build_sdist]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [macos-13, macos-14]
-        python_tag: ["cp38-*", "cp39-*", "cp310-*", "cp311-*", "cp312-*", "pp38-*", "pp39-*"]
-        exclude:
-          # PyPy not supported on MacOS Arm
-          - os: macos-14
-            python_tag: "pp38-*"
-          - os: macos-14
-            python_tag: "pp39-*"
     env:
-      CIBW_BUILD: ${{matrix.python_tag}}
       CIBW_ARCHS: native
       CIBW_TEST_SKIP: "pp*-macosx_*"
       #CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_REQUIRES: pytest hypothesis
       CIBW_TEST_COMMAND: pytest {package}/tests
       CIBW_BUILD_VERBOSITY: 3
+      CIBW_PROJECT_REQUIRES_PYTHON: ">=3.8"
 
     steps:
       - uses: actions/download-artifact@v4
@@ -163,17 +141,21 @@ jobs:
       fail-fast: false
       matrix:
         arch: [auto, aarch64, ppc64le, s390x]
-        python_tag: ["cp38-*", "cp39-*", "cp310-*", "cp311-*", "cp312-*", "pp38-*", "pp39-*"]
+        python_tag: ["cp38-*", "cp39-*", "cp310-*", "cp311-*", "cp312-*", "pp38-*", "pp39-*", "pp310-*"]
         exclude:
           # PyPy builds not available for these platforms
           - arch: ppc64le
             python_tag: "pp38-*"
           - arch: ppc64le
             python_tag: "pp39-*"
+          - arch: ppc64le
+            python_tag: "pp310-*"
           - arch: s390x
             python_tag: "pp38-*"
           - arch: s390x
             python_tag: "pp39-*"
+          - arch: s390x
+            python_tag: "pp310-*"
     env:
       CIBW_ARCHS_LINUX: ${{matrix.arch}}
       CIBW_BUILD: ${{matrix.python_tag}}
