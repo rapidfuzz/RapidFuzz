@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+[3.9.2] - 2024-05-28
+^^^^^^^^^^^^^^^^^^^^
+Fixed
+~~~~~
+* fix supported versions of taskflow in cmake to be in the range v3.3 - v3.7
+
+
 [3.9.1] - 2024-05-19
 ^^^^^^^^^^^^^^^^^^^^
 Fixed
