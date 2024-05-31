@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+[3.9.3] - 2024-
+^^^^^^^^^^^^^^^^^^^^
+Fixed
+~~~~~
+* fix None handling for queries in ``process.cdist`` for scorers not supporting SIMD
+
 [3.9.2] - 2024-05-28
 ^^^^^^^^^^^^^^^^^^^^
 Fixed
@@ -23,7 +29,7 @@ Changed
 
 Fixed
 ~~~~~
-* fix cmake version parsing 
+* fix cmake version parsing
 
 
 [3.8.1] - 2024-04-07

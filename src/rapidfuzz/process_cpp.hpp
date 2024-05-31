@@ -657,6 +657,14 @@ static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_
     else {
         run_parallel(workers, rows, 1, [&](int64_t row, int64_t row_end) {
             for (; row < row_end; ++row) {
+                if(queries[row].is_none())
+                {
+                    for (int64_t col = 0; col < cols; ++col)
+                        matrix.set(row, col, worst_score * score_multiplier);
+
+                    continue;
+                }
+
                 RF_ScorerFunc scorer_func;
                 PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, 1, &queries[row].string));
                 RF_ScorerWrapper ScorerFunc(scorer_func);
