@@ -570,7 +570,7 @@ static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_
 
         for (auto it = none_begin; it != row_idx.end(); it++)
             for (int64_t col = 0; col < cols; ++col)
-                matrix.set(*it, col, worst_score);
+                matrix.set(*it, col, worst_score * score_multiplier);
 
         row_idx.erase(none_begin, row_idx.end());
 
