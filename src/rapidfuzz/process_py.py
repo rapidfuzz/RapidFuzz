@@ -528,8 +528,8 @@ def cdist(
         proc_choices = [x if is_none(x) else processor(x) for x in choices]
 
     if queries is choices and _is_symmetric(scorer, scorer_kwargs):
-        for i, query in enumerate(proc_choices):
-            score = scorer(query, query, score_cutoff=score_cutoff, **scorer_kwargs) * score_multiplier
+        for i, proc_query in enumerate(proc_choices):
+            score = scorer(proc_query, proc_query, score_cutoff=score_cutoff, **scorer_kwargs) * score_multiplier
 
             if issubclass(dtype, numbers.Integral):
                 score = round(score)
@@ -538,7 +538,7 @@ def cdist(
             for j in range(i + 1, len(proc_choices)):
                 score = (
                     scorer(
-                        query,
+                        proc_query,
                         proc_choices[j],
                         score_cutoff=score_cutoff,
                         **scorer_kwargs,
