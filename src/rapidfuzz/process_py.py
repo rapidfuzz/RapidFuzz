@@ -654,14 +654,9 @@ def cpdist(
 
     setupPandas()
 
-    if processor is None:
-        proc_choices = list(choices)
-        proc_queries = list(queries)
-    else:
-        proc_choices = [x if is_none(x) else processor(x) for x in choices]
-        proc_queries = [x if is_none(x) else processor(x) for x in queries]
-
-    for i, (proc_query, proc_choice) in enumerate(zip(proc_queries, proc_choices)):
+    for i, (query, choice) in enumerate(zip(queries, choices)):
+        proc_query = processor(query) if (processor and not is_none(query)) else query
+        proc_choice = processor(choice) if (processor and not is_none(choice)) else choice
         score = scorer(
             proc_query,
             proc_choice,
