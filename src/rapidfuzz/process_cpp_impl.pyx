@@ -1758,7 +1758,6 @@ from libcpp.vector cimport vector
 
 
 cdef class Matrix:
-
     cdef RfMatrix matrix
     cdef Py_ssize_t shape[2]
     cdef Py_ssize_t strides[2]
@@ -1768,7 +1767,6 @@ cdef class Matrix:
         self.vector_output = vector_output
 
     def __getbuffer__(self, Py_buffer *buffer, int flags):
-
         if self.vector_output:
             self.shape[0] = self.matrix.m_rows
             self.strides[0] = self.matrix.get_dtype_size()

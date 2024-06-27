@@ -675,3 +675,135 @@ def cpdist(
         results[i] = score
 
     return results
+
+
+class Compare:
+    def __init__(self, choices, scorer, *, processor=None, scorer_kwargs=None):
+        setupPandas()
+
+        if processor is None:
+            self.proc_choices = list(choices)
+        else:
+            self.proc_choices = [x if is_none(x) else processor(x) for x in choices]
+
+        self.choices = choices
+        self.scorer = scorer
+        self.processor = processor
+        self.scorer_kwargs = scorer_kwargs or {}
+
+    def all(
+        self,
+        queries,
+        *,
+        score_cutoff=None,
+        score_hint=None,
+        score_multiplier=1,
+        dtype=None,
+        workers=1,
+        keepdims=False
+    ):
+        import numpy as np
+        setupPandas()
+
+        _ = workers, score_hint
+        dtype = _dtype_to_type_num(dtype, self.scorer, self.scorer_kwargs)
+        results = np.zeros((len(queries), len(self.proc_choices)), dtype=dtype)
+
+        if queries is self.choices and _is_symmetric(self.scorer, self.scorer_kwargs):
+            for i, proc_query in enumerate(self.proc_choices):
+                score = self.scorer(proc_query, proc_query, score_cutoff=score_cutoff, **self.scorer_kwargs) * score_multiplier
+
+                if issubclass(dtype, numbers.Integral):
+                    score = round(score)
+
+                results[i, i] = score
+                for j in range(i + 1, len(self.proc_choices)):
+                    score = (
+                        self.scorer(
+                            proc_query,
+                            self.proc_choices[j],
+                            score_cutoff=score_cutoff,
+                            **self.scorer_kwargs,
+                        )
+                        * score_multiplier
+                    )
+
+                    if issubclass(dtype, numbers.Integral):
+                        score = round(score)
+
+                    results[i, j] = results[j, i] = score
+        else:
+            for i, query in enumerate(queries):
+                proc_query = self.processor(query) if (self.processor and not is_none(query)) else query
+                for j, choice in enumerate(self.proc_choices):
+                    score = (
+                        self.scorer(
+                            proc_query,
+                            choice,
+                            score_cutoff=score_cutoff,
+                            **self.scorer_kwargs,
+                        )
+                        * score_multiplier
+                    )
+
+                    if issubclass(dtype, numbers.Integral):
+                        score = round(score)
+
+                    results[i, j] = score
+
+        return results if keepdims else np.squeeze(results)
+
+    def max(
+        self,
+        queries,
+        *,
+        score_cutoff=None,
+        score_hint=None,
+        score_multiplier=1,
+        dtype=None,
+        workers=1,
+        axis=None,
+        initial=..., keepdims=False
+    ):
+        pass
+
+
+ def all(
+        self,
+        queries,
+        *,
+        score_cutoff=None,
+        score_hint=None,
+        score_multiplier=1,
+        dtype=None,
+        workers=1,
+    )
+
+def max(
+    self,
+    queries,
+    *,
+    score_cutoff=None,
+    score_hint=None,
+    score_multiplier=1,
+    dtype=None,
+    workers=1,
+    axis=None,
+    initial=..., keepdims=False
+):
+
+class Compare:
+    def __init__(self, choices, scorer, *, processor=None, scorer_kwargs=None):
+
+
+
+   def all(queries)
+   def max(queries, axis=None, keepdims=False)
+   def sorted(queries, axis=None, keepdims=False, limit=None)
+
+
+  1 2 3
+1
+2
+3
+
