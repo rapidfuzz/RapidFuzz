@@ -1,7 +1,14 @@
 Changelog
 ---------
 
-[3.9.3] - 2024-06-31
+[3.9.4] - 2024-07-02
+^^^^^^^^^^^^^^^^^^^^
+Fixed
+~~~~~
+* fix bug in ``Levenshtein.editops`` and ``Levenshtein.opcodes`` which could lead
+  to incorrect results and crashes for some inputs
+
+[3.9.3] - 2024-05-31
 ^^^^^^^^^^^^^^^^^^^^
 Fixed
 ~~~~~
