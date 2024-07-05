@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+[3.9.5] -
+^^^^^^^^^^^^^^^^^^^^
+Fixed
+~~~~~
+* include simd binaries in pyinstaller builds
+
 [3.9.4] - 2024-07-02
 ^^^^^^^^^^^^^^^^^^^^
 Fixed
