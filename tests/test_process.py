@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 
 from rapidfuzz import fuzz, process_cpp, process_py
-from rapidfuzz.distance import Levenshtein, Levenshtein_py, DamerauLevenshtein
+from rapidfuzz.distance import DamerauLevenshtein, Levenshtein, Levenshtein_py
 from rapidfuzz.utils import default_process
 
 
@@ -576,7 +576,7 @@ def test_none_strings():
         assert scores[0, 3] == 0
         assert scores[0, 4] == 0
 
-        scores = process.cdist(['', None], ['', None], scorer=DamerauLevenshtein.normalized_similarity)
+        scores = process.cdist(["", None], ["", None], scorer=DamerauLevenshtein.normalized_similarity)
         assert scores[0, 0] == 1
         assert scores[0, 1] == 0
         assert scores[1, 0] == 0
@@ -586,7 +586,6 @@ def test_none_strings():
         assert scores[0] == 0
         assert scores[3] == 0
         assert scores[4] == 0
-
 
 
 def test_issue81():

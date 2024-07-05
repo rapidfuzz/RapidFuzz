@@ -657,8 +657,7 @@ static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_
     else {
         run_parallel(workers, rows, 1, [&](int64_t row, int64_t row_end) {
             for (; row < row_end; ++row) {
-                if(queries[row].is_none())
-                {
+                if (queries[row].is_none()) {
                     for (int64_t col = 0; col < cols; ++col)
                         matrix.set(row, col, worst_score * score_multiplier);
 

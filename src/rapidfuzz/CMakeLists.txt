@@ -57,7 +57,8 @@ target_link_libraries(fuzz_cpp PRIVATE rapidfuzz::rapidfuzz)
 install(TARGETS fuzz_cpp LIBRARY DESTINATION src/rapidfuzz)
 
 if(RAPIDFUZZ_ARCH_X64 OR RAPIDFUZZ_ARCH_X86)
-  # on macOs this generates illegal instructions https://github.com/rapidfuzz/RapidFuzz/issues/383
+  # on macOs this generates illegal instructions
+  # https://github.com/rapidfuzz/RapidFuzz/issues/383
   if(NOT APPLE)
     create_cython_target(fuzz_cpp_avx2)
     rf_add_library(fuzz_cpp_avx2 ${fuzz_cpp_avx2})

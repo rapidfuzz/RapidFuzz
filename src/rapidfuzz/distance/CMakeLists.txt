@@ -51,7 +51,8 @@ target_link_libraries(metrics_cpp PRIVATE rapidfuzz::rapidfuzz)
 install(TARGETS metrics_cpp LIBRARY DESTINATION src/rapidfuzz/distance)
 
 if(RAPIDFUZZ_ARCH_X64 OR RAPIDFUZZ_ARCH_X86)
-  # on macOs this generates illegal instructions https://github.com/rapidfuzz/RapidFuzz/issues/383
+  # on macOs this generates illegal instructions
+  # https://github.com/rapidfuzz/RapidFuzz/issues/383
   if(NOT APPLE)
     create_cython_target(metrics_cpp_avx2)
     rf_add_library(metrics_cpp_avx2 ${metrics_cpp_avx2})
@@ -66,7 +67,7 @@ if(RAPIDFUZZ_ARCH_X64 OR RAPIDFUZZ_ARCH_X86)
 
     target_include_directories(
       metrics_cpp_avx2 PRIVATE ${RF_BASE_DIR}/rapidfuzz
-                              ${RF_BASE_DIR}/rapidfuzz/distance)
+                               ${RF_BASE_DIR}/rapidfuzz/distance)
     target_link_libraries(metrics_cpp_avx2 PRIVATE rapidfuzz::rapidfuzz)
     install(TARGETS metrics_cpp_avx2 LIBRARY DESTINATION src/rapidfuzz/distance)
   endif()
