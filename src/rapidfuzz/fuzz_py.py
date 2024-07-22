@@ -115,10 +115,9 @@ def ratio(
     return score * 100
 
 
-def _partial_ratio_short_needle(s1, s2, score_cutoff):
+def _partial_ratio_impl(s1, s2, score_cutoff):
     """
-    implementation of partial_ratio for needles <= 64. assumes s1 is already the
-    shorter string
+    implementation of partial_ratio. This assumes s1 is already the shorter string
     """
     s1_char_set = set(s1)
     len1 = len(s1)
@@ -326,10 +325,10 @@ def partial_ratio_alignment(
         shorter = s2
         longer = s1
 
-    res = _partial_ratio_short_needle(shorter, longer, score_cutoff / 100)
+    res = _partial_ratio_impl(shorter, longer, score_cutoff / 100)
     if res.score != 100 and len(s1) == len(s2):
         score_cutoff = max(score_cutoff, res.score)
-        res2 = _partial_ratio_short_needle(longer, shorter, score_cutoff / 100)
+        res2 = _partial_ratio_impl(longer, shorter, score_cutoff / 100)
         if res2.score > res.score:
             res = ScoreAlignment(res2.score, res2.dest_start, res2.dest_end, res2.src_start, res2.src_end)
 
