@@ -70,7 +70,7 @@ def ratio(
     score_cutoff=None,
 ):
     """
-    Calculates the normalized Indel distance.
+    Calculates the normalized Indel similarity.
 
     Parameters
     ----------
@@ -93,7 +93,7 @@ def ratio(
 
     See Also
     --------
-    rapidfuzz.distance.Indel.normalized_distance : Normalized Indel distance
+    rapidfuzz.distance.Indel.normalized_similarity : Normalized Indel similarity
 
     Notes
     -----
