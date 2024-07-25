@@ -16,6 +16,7 @@ get_requires_for_build_sdist = _orig.get_requires_for_build_sdist
 
 cmake_wheels = {
     "win_amd64",
+    "win_arm64",
     "win32",
     "musllinux_1_1_x86_64",
     "musllinux_1_1_s390x",
@@ -27,13 +28,14 @@ cmake_wheels = {
     "manylinux_2_17_aarch64",
     "manylinux_2_17_x86_64",
     "manylinux_2_17_i686",
-    "manylinux_2_5_x86_64",
-    "manylinux_2_5_i686",
+    "manylinux_2_12_x86_64",
+    "manylinux_2_12_i686",
     "macosx_10_10_universal2",
 }
 
 ninja_wheels = {
     "win_amd64",
+    "win_arm64",
     "win32",
     "musllinux_1_1_x86_64",
     "musllinux_1_1_s390x",
