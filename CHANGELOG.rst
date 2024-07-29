@@ -1,11 +1,12 @@
 Changelog
 ---------
 
-[3.9.5] -
+[3.9.5] - 2024-07-29
 ^^^^^^^^^^^^^^^^^^^^
 Fixed
 ~~~~~
 * include simd binaries in pyinstaller builds
+* fix builds with setuptools 72 by upgrading `scikit-build`
 
 [3.9.4] - 2024-07-02
 ^^^^^^^^^^^^^^^^^^^^
