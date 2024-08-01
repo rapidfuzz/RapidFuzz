@@ -1,11 +1,80 @@
 [build-system]
 requires = [
-    "setuptools>=42",
-    "scikit-build~=0.18.0",
+    "scikit-build-core @ git@github.com:scikit-build/scikit-build-core.git",
     "Cython >=3.0.11, <3.1.0"
 ]
-build-backend = "backend"
-backend-path = ["_custom_build"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "RapidFuzz"
+dynamic = ["version"]
+dependencies = [
+  "rapidfuzz >= 3.8.0, < 4.0.0"
+]
+requires-python = ">= 3.8"
+authors = [
+  {name = "Max Bachmann", email = "pypi@maxbachmann.de"},
+]
+description = "Python extension for computing string edit distances and similarities."
+readme = "README.md"
+classifiers=[
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "License :: OSI Approved :: MIT License",
+]
+Homepage = "https://github.com/rapidfuzz/RapidFuzz"
+Documentation = "https://rapidfuzz.github.io/RapidFuzz/"
+Repository = "https://github.com/rapidfuzz/RapidFuzz.git"
+Issues = "https://github.com/rapidfuzz/RapidFuzz/issues"
+Changelog = "https://github.com/rapidfuzz/RapidFuzz/blob/main/CHANGELOG.rst"
+
+[project.entry-points.pyinstaller40]
+hook-dirs = "rapidfuzz.__pyinstaller:get_hook_dirs"
+tests = "rapidfuzz.__pyinstaller:get_PyInstaller_tests"
+
+[tool.scikit-build]
+sdist.include = [
+  "src/rapidfuzz/*.cxx",
+  "src/rapidfuzz/distance/*.cxx",
+]
+sdist.exclude = [
+  ".github"
+]
+wheel.exclude = [
+  "**.pyx",
+  "**.cxx",
+  "**.cpp",
+  "**.hpp",
+  "CMakeLists.txt",
+  "generate.sh"
+]
+wheel.cmake = false
+
+[[tool.scikit-build.overrides]]
+if.any.system-cmake = ">=3.15"
+if.any.cmake-wheel = true
+wheel.cmake = true
+
+[tool.scikit-build.overrides]
+if.failed = true
+wheel.cmake = false
+
+[[tool.scikit-build.overrides]]
+if.any.env.CIBUILDWHEEL = "1"
+if.any.env.CONDA_BUILD = "1"
+if.any.env.PIWHEELS_BUILD = "1"
+if.any.env.RAPIDFUZZ_BUILD_EXTENSION = "1"
+wheel.cmake = true
+error-message = "failed to build C++ Extension in a packaged build"
+
+[tool.scikit-build.metadata.version]
+provider = "scikit_build_core.metadata.regex"
+input = "src/rapidfuzz/__init__.py"
+
 
 [tool.black]
 line-length = 120
