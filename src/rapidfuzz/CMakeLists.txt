@@ -4,13 +4,17 @@ function(create_cython_target _name)
         ${CMAKE_CURRENT_LIST_DIR}/${_name}.cxx
         PARENT_SCOPE)
   else()
-    find_package(Cython REQUIRED)
-    # should use target_include_directories once this is supported by
-    # scikit-build
-    include_directories(${RF_BASE_DIR}/rapidfuzz)
-    add_cython_target(${_name} CXX)
+    add_custom_command(
+      OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${_name}.cxx"
+      MAIN_DEPENDENCY "${CMAKE_CURRENT_LIST_DIR}/${_name}.pyx"
+      VERBATIM
+      COMMAND
+        Python::Interpreter -m cython "${CMAKE_CURRENT_LIST_DIR}/${_name}.pyx"
+        --cplus -I "${CMAKE_CURRENT_LIST_DIR}"
+        --output-file "${CMAKE_CURRENT_BINARY_DIR}/${_name}.cxx")
+
     set(${_name}
-        ${_name}
+        ${CMAKE_CURRENT_BINARY_DIR}/${_name}.cxx
         PARENT_SCOPE)
   endif()
 endfunction(create_cython_target)
@@ -39,7 +43,7 @@ if(RAPIDFUZZ_ARCH_X64 OR RAPIDFUZZ_ARCH_X86)
   target_include_directories(_feature_detector_cpp
                              PRIVATE ${RF_BASE_DIR}/rapidfuzz)
   target_link_libraries(_feature_detector_cpp PRIVATE rapidfuzz::rapidfuzz)
-  install(TARGETS _feature_detector_cpp LIBRARY DESTINATION src/rapidfuzz)
+  install(TARGETS _feature_detector_cpp DESTINATION rapidfuzz)
 endif()
 
 create_cython_target(utils_cpp)
@@ -47,14 +51,14 @@ rf_add_library(utils_cpp ${utils_cpp} ${CMAKE_CURRENT_LIST_DIR}/utils.cpp)
 target_compile_features(utils_cpp PUBLIC cxx_std_17)
 target_include_directories(utils_cpp PRIVATE ${RF_BASE_DIR}/rapidfuzz)
 target_link_libraries(utils_cpp PRIVATE rapidfuzz::rapidfuzz)
-install(TARGETS utils_cpp LIBRARY DESTINATION src/rapidfuzz)
+install(TARGETS utils_cpp DESTINATION rapidfuzz)
 
 create_cython_target(fuzz_cpp)
 rf_add_library(fuzz_cpp ${fuzz_cpp})
 target_compile_features(fuzz_cpp PUBLIC cxx_std_17)
 target_include_directories(fuzz_cpp PRIVATE ${RF_BASE_DIR}/rapidfuzz)
 target_link_libraries(fuzz_cpp PRIVATE rapidfuzz::rapidfuzz)
-install(TARGETS fuzz_cpp LIBRARY DESTINATION src/rapidfuzz)
+install(TARGETS fuzz_cpp DESTINATION rapidfuzz)
 
 if(RAPIDFUZZ_ARCH_X64 OR RAPIDFUZZ_ARCH_X86)
   # on macOs this generates illegal instructions
@@ -72,7 +76,7 @@ if(RAPIDFUZZ_ARCH_X64 OR RAPIDFUZZ_ARCH_X86)
 
     target_include_directories(fuzz_cpp_avx2 PRIVATE ${RF_BASE_DIR}/rapidfuzz)
     target_link_libraries(fuzz_cpp_avx2 PRIVATE rapidfuzz::rapidfuzz)
-    install(TARGETS fuzz_cpp_avx2 LIBRARY DESTINATION src/rapidfuzz)
+    install(TARGETS fuzz_cpp_avx2 DESTINATION rapidfuzz)
   endif()
 endif()
 
@@ -89,7 +93,7 @@ if(RAPIDFUZZ_ARCH_X86)
 
   target_include_directories(fuzz_cpp_sse2 PRIVATE ${RF_BASE_DIR}/rapidfuzz)
   target_link_libraries(fuzz_cpp_sse2 PRIVATE rapidfuzz::rapidfuzz)
-  install(TARGETS fuzz_cpp_sse2 LIBRARY DESTINATION src/rapidfuzz)
+  install(TARGETS fuzz_cpp_sse2 DESTINATION rapidfuzz)
 endif()
 
 create_cython_target(process_cpp_impl)
@@ -185,4 +189,4 @@ if(NOT Windows)
   endif()
 endif()
 
-install(TARGETS process_cpp_impl LIBRARY DESTINATION src/rapidfuzz)
+install(TARGETS process_cpp_impl DESTINATION rapidfuzz)
