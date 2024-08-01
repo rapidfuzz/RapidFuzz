@@ -4,14 +4,17 @@ function(create_cython_target _name)
         ${CMAKE_CURRENT_LIST_DIR}/${_name}.cxx
         PARENT_SCOPE)
   else()
-    find_package(Cython REQUIRED)
-    # should use target_include_directories once this is supported by
-    # scikit-build
-    include_directories(${RF_BASE_DIR}/rapidfuzz
-                        ${RF_BASE_DIR}/rapidfuzz/distance)
-    add_cython_target(${_name} CXX)
+    add_custom_command(
+      OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${_name}.cxx"
+      MAIN_DEPENDENCY "${CMAKE_CURRENT_LIST_DIR}/${_name}.pyx"
+      VERBATIM
+      COMMAND
+        Python::Interpreter -m cython "${CMAKE_CURRENT_LIST_DIR}/${_name}.pyx"
+        --cplus -I "${CMAKE_CURRENT_LIST_DIR}/.."
+        --output-file "${CMAKE_CURRENT_BINARY_DIR}/${_name}.cxx")
+
     set(${_name}
-        ${_name}
+        ${CMAKE_CURRENT_BINARY_DIR}/${_name}.cxx
         PARENT_SCOPE)
   endif()
 endfunction(create_cython_target)
@@ -39,7 +42,7 @@ target_include_directories(
   _initialize_cpp PRIVATE ${RF_BASE_DIR}/rapidfuzz
                           ${RF_BASE_DIR}/rapidfuzz/distance)
 target_link_libraries(_initialize_cpp PRIVATE rapidfuzz::rapidfuzz)
-install(TARGETS _initialize_cpp LIBRARY DESTINATION src/rapidfuzz/distance)
+install(TARGETS _initialize_cpp DESTINATION rapidfuzz/distance)
 
 create_cython_target(metrics_cpp)
 rf_add_library(metrics_cpp ${metrics_cpp})
@@ -48,7 +51,7 @@ target_include_directories(
   metrics_cpp PRIVATE ${RF_BASE_DIR}/rapidfuzz
                       ${RF_BASE_DIR}/rapidfuzz/distance)
 target_link_libraries(metrics_cpp PRIVATE rapidfuzz::rapidfuzz)
-install(TARGETS metrics_cpp LIBRARY DESTINATION src/rapidfuzz/distance)
+install(TARGETS metrics_cpp DESTINATION rapidfuzz/distance)
 
 if(RAPIDFUZZ_ARCH_X64 OR RAPIDFUZZ_ARCH_X86)
   # on macOs this generates illegal instructions
@@ -69,7 +72,7 @@ if(RAPIDFUZZ_ARCH_X64 OR RAPIDFUZZ_ARCH_X86)
       metrics_cpp_avx2 PRIVATE ${RF_BASE_DIR}/rapidfuzz
                                ${RF_BASE_DIR}/rapidfuzz/distance)
     target_link_libraries(metrics_cpp_avx2 PRIVATE rapidfuzz::rapidfuzz)
-    install(TARGETS metrics_cpp_avx2 LIBRARY DESTINATION src/rapidfuzz/distance)
+    install(TARGETS metrics_cpp_avx2 DESTINATION rapidfuzz/distance)
   endif()
 endif()
 
@@ -89,5 +92,5 @@ if(RAPIDFUZZ_ARCH_X86)
     metrics_cpp_sse2 PRIVATE ${RF_BASE_DIR}/rapidfuzz
                              ${RF_BASE_DIR}/rapidfuzz/distance)
   target_link_libraries(metrics_cpp_sse2 PRIVATE rapidfuzz::rapidfuzz)
-  install(TARGETS metrics_cpp_sse2 LIBRARY DESTINATION src/rapidfuzz/distance)
+  install(TARGETS metrics_cpp_sse2 DESTINATION rapidfuzz/distance)
 endif()
