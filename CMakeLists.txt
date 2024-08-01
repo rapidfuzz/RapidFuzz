@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12...3.29)
+cmake_minimum_required(VERSION 3.15...3.30)
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
