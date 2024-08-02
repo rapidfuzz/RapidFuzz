@@ -8,9 +8,6 @@ build-backend = "scikit_build_core.build"
 [project]
 name = "RapidFuzz"
 dynamic = ["version"]
-dependencies = [
-  "rapidfuzz >= 3.8.0, < 4.0.0"
-]
 requires-python = ">= 3.8"
 authors = [
   {name = "Max Bachmann", email = "pypi@maxbachmann.de"},
