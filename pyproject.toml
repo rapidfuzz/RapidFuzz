@@ -69,10 +69,10 @@ if.failed = true
 wheel.cmake = false
 
 [[tool.scikit-build.overrides]]
-if.any.env.CIBUILDWHEEL = "1"
-if.any.env.CONDA_BUILD = "1"
-if.any.env.PIWHEELS_BUILD = "1"
-if.any.env.RAPIDFUZZ_BUILD_EXTENSION = "1"
+if.any.env.CIBUILDWHEEL = true
+if.any.env.CONDA_BUILD = true
+if.any.env.PIWHEELS_BUILD = true
+if.any.env.RAPIDFUZZ_BUILD_EXTENSION = true
 wheel.cmake = true
 error-message = "failed to build C++ Extension in a packaged build"
 
