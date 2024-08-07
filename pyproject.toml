@@ -39,6 +39,7 @@ hook-dirs = "rapidfuzz.__pyinstaller:get_hook_dirs"
 tests = "rapidfuzz.__pyinstaller:get_PyInstaller_tests"
 
 [tool.scikit-build]
+minimum-version = "build-system.requires"
 sdist.include = [
   "src/rapidfuzz/*.cxx",
   "src/rapidfuzz/distance/*.cxx",
