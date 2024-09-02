@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+[3.9.7] - 2024-09-02
+^^^^^^^^^^^^^^^^^^^^
+Fixed
+~~~~~~~
+* fix crash in ``cdist`` due to Visual Studio upgrade
+
+
 [3.9.6] - 2024-08-06
 ^^^^^^^^^^^^^^^^^^^^
 Changed

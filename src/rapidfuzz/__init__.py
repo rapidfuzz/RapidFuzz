@@ -6,7 +6,7 @@ from __future__ import annotations
 
 __author__: str = "Max Bachmann"
 __license__: str = "MIT"
-__version__: str = "3.9.6"
+__version__: str = "3.9.7"
 
 from rapidfuzz import distance, fuzz, process, utils
 
