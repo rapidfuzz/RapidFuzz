@@ -68,6 +68,7 @@ wheel.cmake = true
 [[tool.scikit-build.overrides]]
 if.failed = true
 wheel.cmake = false
+messages.after-success = "failed to build C++ Extension, falling back to pure Python Extension"
 
 [[tool.scikit-build.overrides]]
 if.any.env.CIBUILDWHEEL = true
