@@ -5,9 +5,9 @@ index 517f32d..1e855ed 100644
 @@ -1,7 +1,6 @@
  [build-system]
  requires = [
--    "scikit-build-core>=0.10.0",
+-    "scikit-build-core>=0.10.1",
 -    "Cython >=3.0.11, <3.1.0"
-+    "scikit-build-core>=0.10.0"
++    "scikit-build-core>=0.10.1"
  ]
  build-backend = "scikit_build_core.build"
 

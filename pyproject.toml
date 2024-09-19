@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "scikit-build-core>=0.10.0",
+    "scikit-build-core>=0.10.1",
     "Cython >=3.0.11, <3.1.0"
 ]
 build-backend = "scikit_build_core.build"
@@ -8,7 +8,7 @@ build-backend = "scikit_build_core.build"
 [project]
 name = "RapidFuzz"
 dynamic = ["version"]
-requires-python = ">= 3.8"
+requires-python = ">= 3.9"
 authors = [
   {name = "Max Bachmann", email = "pypi@maxbachmann.de"},
 ]
@@ -16,11 +16,11 @@ description = "rapid fuzzy string matching"
 readme = "README.md"
 classifiers=[
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "License :: OSI Approved :: MIT License",
 ]
 Homepage = "https://github.com/rapidfuzz/RapidFuzz"
