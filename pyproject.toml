@@ -12,7 +12,7 @@ line-length = 120
 
 [tool.mypy]
 files = ["src"]
-python_version = "3.8"
+python_version = "3.9"
 warn_unused_configs = true
 show_error_codes = true
 enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
@@ -28,7 +28,7 @@ xfail_strict = true
 log_cli_level = "info"
 
 [tool.pylint]
-py-version = "3.8"
+py-version = "3.9"
 
 [tool.pylint.reports]
 output-format = "colorized"
@@ -46,7 +46,7 @@ disable = [
 ]
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py39"
 src = ["src"]
 exclude = []
 

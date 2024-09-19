@@ -53,7 +53,7 @@ RapidFuzz is a fast string matching library for Python and C++, which is using t
 
 ## Requirements
 
-- Python 3.8 or later
+- Python 3.9 or later
 - On Windows the [Visual C++ 2019 redistributable](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) is required
 
 ## Installation

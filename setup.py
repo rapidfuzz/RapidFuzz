@@ -26,11 +26,11 @@ setup_args = {
     "license": "MIT",
     "classifiers": [
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
         "License :: OSI Approved :: MIT License",
     ],
     "packages": ["rapidfuzz", "rapidfuzz.distance", "rapidfuzz.__pyinstaller"],
@@ -47,7 +47,7 @@ setup_args = {
         "rapidfuzz": ["*.pyi", "py.typed", "__init__.pxd", "rapidfuzz.h"],
         "rapidfuzz.distance": ["*.pyi"],
     },
-    "python_requires": ">=3.8",
+    "python_requires": ">=3.9",
 }
 
 

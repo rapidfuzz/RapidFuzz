@@ -68,7 +68,7 @@ jobs:
       CIBW_TEST_REQUIRES: pytest hypothesis
       CIBW_TEST_COMMAND: pytest {package}/tests
       CIBW_BUILD_VERBOSITY: 3
-      CIBW_PROJECT_REQUIRES_PYTHON: ">=3.8"
+      CIBW_PROJECT_REQUIRES_PYTHON: ">=3.9"
 
     steps:
       - uses: actions/download-artifact@v4
@@ -108,7 +108,7 @@ jobs:
       CIBW_TEST_REQUIRES: pytest hypothesis
       CIBW_TEST_COMMAND: pytest {package}/tests
       CIBW_BUILD_VERBOSITY: 3
-      CIBW_PROJECT_REQUIRES_PYTHON: ">=3.8"
+      CIBW_PROJECT_REQUIRES_PYTHON: ">=3.9"
 
     steps:
       - uses: actions/download-artifact@v4
@@ -141,17 +141,13 @@ jobs:
       fail-fast: false
       matrix:
         arch: [auto, aarch64, ppc64le, s390x]
-        python_tag: ["cp38-*", "cp39-*", "cp310-*", "cp311-*", "cp312-*", "cp313-*", "pp38-*", "pp39-*", "pp310-*"]
+        python_tag: ["cp39-*", "cp310-*", "cp311-*", "cp312-*", "cp313-*", "pp39-*", "pp310-*"]
         exclude:
           # PyPy builds not available for these platforms
-          - arch: ppc64le
-            python_tag: "pp38-*"
           - arch: ppc64le
             python_tag: "pp39-*"
           - arch: ppc64le
             python_tag: "pp310-*"
-          - arch: s390x
-            python_tag: "pp38-*"
           - arch: s390x
             python_tag: "pp39-*"
           - arch: s390x
@@ -159,7 +155,7 @@ jobs:
     env:
       CIBW_ARCHS_LINUX: ${{matrix.arch}}
       CIBW_BUILD: ${{matrix.python_tag}}
-      CIBW_TEST_SKIP: "{*_{aarch64,ppc64le,s390x},*musllinux_*,pp38-*}"
+      CIBW_TEST_SKIP: "{*_{aarch64,ppc64le,s390x},*musllinux_*}"
       #CIBW_TEST_REQUIRES: pytest hypothesis pandas
       CIBW_TEST_REQUIRES: pytest hypothesis
       CIBW_TEST_COMMAND: pytest {package}/tests
