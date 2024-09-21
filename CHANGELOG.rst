@@ -1,12 +1,18 @@
 Changelog
 ---------
 
+[3.10.0] - 2024-09-21
+^^^^^^^^^^^^^^^^^^^^^
+Fixed
+~~~~~
+- drop support for Python 3.8
+- switch build system to `scikit-build-core`
+
 [3.9.7] - 2024-09-02
 ^^^^^^^^^^^^^^^^^^^^
 Fixed
-~~~~~~~
+~~~~~
 * fix crash in ``cdist`` due to Visual Studio upgrade
-
 
 [3.9.6] - 2024-08-06
 ^^^^^^^^^^^^^^^^^^^^
@@ -41,13 +47,11 @@ Fixed
 ~~~~~
 * fix supported versions of taskflow in cmake to be in the range v3.3 - v3.7
 
-
 [3.9.1] - 2024-05-19
 ^^^^^^^^^^^^^^^^^^^^
 Fixed
 ~~~~~
 * disable AVX2 on MacOS since it did lead to illegal instructions being generated
-
 
 [3.9.0] - 2024-05-02
 ^^^^^^^^^^^^^^^^^^^^
@@ -59,13 +63,11 @@ Fixed
 ~~~~~
 * fix cmake version parsing
 
-
 [3.8.1] - 2024-04-07
 ^^^^^^^^^^^^^^^^^^^^
 Fixed
 ~~~~~
 * use the correct version of ``rapidfuzz-cpp`` when building against a system installed version
-
 
 [3.8.0] - 2024-04-06
 ^^^^^^^^^^^^^^^^^^^^
@@ -77,7 +79,6 @@ Fixed
 ~~~~~
 - fix some minor errors in the type hints
 - fix potentially incorrect results of JaroWinkler when using high prefix weights
-
 
 [3.7.0] - 2024-03-21
 ^^^^^^^^^^^^^^^^^^^^
