@@ -59,7 +59,7 @@ wheel.exclude = [
 ]
 wheel.packages = ["src/rapidfuzz"]
 wheel.cmake = false
-messages.after-success = "{yellow}Cmake unavailable, falling back to pure Python Extension"
+messages.after-success = "{yellow}CMake unavailable, falling back to pure Python Extension"
 
 [[tool.scikit-build.overrides]]
 if.any.system-cmake = ">=3.15"
