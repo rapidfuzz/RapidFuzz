@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "scikit-build-core>=0.10.1",
+    "scikit-build-core>=0.10.7",
     "Cython >=3.0.11, <3.1.0"
 ]
 build-backend = "scikit_build_core.build"
@@ -67,6 +67,10 @@ wheel.cmake = true
 
 [[tool.scikit-build.overrides]]
 if.failed = true
+if.env.CIBUILDWHEEL = false
+if.env.CONDA_BUILD = false
+if.env.PIWHEELS_BUILD = false
+if.env.RAPIDFUZZ_BUILD_EXTENSION = false
 wheel.cmake = false
 messages.after-success = "failed to build C++ Extension, falling back to pure Python Extension"
 
