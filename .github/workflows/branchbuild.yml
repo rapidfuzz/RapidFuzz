@@ -148,6 +148,7 @@ jobs:
           submodules: 'true'
       - uses: "actions/setup-python@v5"
         with:
+          allow-prereleases: true
           python-version: "${{ matrix.python-version }}"
 
       - name: build
