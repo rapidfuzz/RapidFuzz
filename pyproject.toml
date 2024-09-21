@@ -72,7 +72,7 @@ if.env.CONDA_BUILD = false
 if.env.PIWHEELS_BUILD = false
 if.env.RAPIDFUZZ_BUILD_EXTENSION = false
 wheel.cmake = false
-messages.after-success = "failed to build C++ Extension, falling back to pure Python Extension"
+messages.after-success = "{yellow}failed to build C++ Extension, falling back to pure Python Extension"
 
 [[tool.scikit-build.overrides]]
 if.any.env.CIBUILDWHEEL = true
@@ -80,7 +80,7 @@ if.any.env.CONDA_BUILD = true
 if.any.env.PIWHEELS_BUILD = true
 if.any.env.RAPIDFUZZ_BUILD_EXTENSION = true
 wheel.cmake = true
-messages.after-failure = "failed to build C++ Extension in a packaged build"
+messages.after-failure = "{red}failed to build C++ Extension in a packaged build"
 
 [tool.scikit-build.metadata.version]
 provider = "scikit_build_core.metadata.regex"
