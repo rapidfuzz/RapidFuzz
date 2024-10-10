@@ -47,14 +47,16 @@ def get_platform():
 
 def benchmark():
     words = ["".join(random.choice(string.ascii_letters + string.digits) for _ in range(10)) for _ in range(10000)]
-    sample_rate = len(words) // 100
+    len_words = len(words)
+    sample_rate = len_words // 100
     sample = words[::sample_rate]
+    len_sample = len(sample)
 
-    total = len(words) * len(sample)
+    total = len_words * len_sample
 
     print("System:", get_platform())
-    print("Words :", len(words))
-    print("Sample:", len(sample))
+    print("Words :", len_words)
+    print("Sample:", len_sample)
     print("Total : %s calls\n" % total)
 
     def wrap(f):
