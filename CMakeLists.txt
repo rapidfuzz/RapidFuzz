@@ -77,7 +77,10 @@ check_cpu_arch_x86(RAPIDFUZZ_ARCH_X86)
 
 set(RF_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-find_package(Taskflow 3.7.0 QUIET)
+find_package(Taskflow 3.8.0 QUIET)
+if(NOT Taskflow_FOUND)
+  find_package(Taskflow 3.7.0 QUIET)
+endif()
 if(NOT Taskflow_FOUND)
   find_package(Taskflow 3.6.0 QUIET)
 endif()
