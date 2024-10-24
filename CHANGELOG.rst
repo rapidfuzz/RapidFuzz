@@ -6,6 +6,7 @@ Changelog
 Fixed
 ~~~~~
 - fix compilation on clang-19
+- fix incorrect results in simd optimized implementation of Levenshtein and OSA on 32bit targets
 
 Added
 ~~~~~
