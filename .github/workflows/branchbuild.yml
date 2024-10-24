@@ -60,7 +60,7 @@ jobs:
         run: |
           git clone https://github.com/rapidfuzz/rapidfuzz-cpp.git
           cd rapidfuzz-cpp
-          git checkout v3.1.0
+          git checkout v3.1.1
           mkdir build && cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release
           cmake --build .
@@ -104,7 +104,7 @@ jobs:
         run: |
           git clone https://github.com/rapidfuzz/rapidfuzz-cpp.git
           cd rapidfuzz-cpp
-          git checkout v3.1.0
+          git checkout v3.1.1
           mkdir build && cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release
           cmake --build .
