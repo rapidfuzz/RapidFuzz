@@ -10,7 +10,7 @@
 #include <cwctype>
 #include <limits>
 #include <stdint.h>
-#include <string>
+#include <vector>
 
 uint32_t UnicodeDefaultProcess(uint32_t ch);
 
@@ -80,11 +80,10 @@ int64_t default_process(CharT* str, int64_t len)
 }
 
 template <typename CharT>
-std::basic_string<CharT> default_process(std::basic_string<CharT> s)
+std::vector<CharT> default_process_copy(CharT* str_, int64_t len_)
 {
-    std::basic_string<CharT> str(s);
-
-    int64_t len = default_process(&str[0], str.size());
+    std::vector<CharT> str(str_, str_ + len_);
+    int64_t len = default_process(str.data(), str.size());
     str.resize(len);
     return str;
 }

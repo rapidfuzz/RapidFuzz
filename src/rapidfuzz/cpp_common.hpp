@@ -708,7 +708,7 @@ static inline bool multi_normalized_distance_init(RF_ScorerFunc* self, int64_t s
 static inline PyObject* opcodes_apply(const rf::Opcodes& ops, const RF_String& str1, const RF_String& str2)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
-        auto proc_str = rf::opcodes_apply<uint32_t>(ops, s1, s2);
+        auto proc_str = rf::opcodes_apply_vec<uint32_t>(ops, s1, s2);
         return PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, proc_str.data(), (Py_ssize_t)proc_str.size());
     });
 }
@@ -716,7 +716,7 @@ static inline PyObject* opcodes_apply(const rf::Opcodes& ops, const RF_String& s
 static inline PyObject* editops_apply(const rf::Editops& ops, const RF_String& str1, const RF_String& str2)
 {
     return visitor(str1, str2, [&](auto s1, auto s2) {
-        auto proc_str = rf::editops_apply<uint32_t>(ops, s1, s2);
+        auto proc_str = rf::editops_apply_vec<uint32_t>(ops, s1, s2);
         return PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, proc_str.data(), (Py_ssize_t)proc_str.size());
     });
 }
