@@ -7,6 +7,9 @@ Fixed
 ~~~~~
 - fix compilation on clang-19
 
+Added
+~~~~~
+* added support for taskflow 3.8.0
 
 [3.10.0] - 2024-09-21
 ^^^^^^^^^^^^^^^^^^^^^
