@@ -1,8 +1,8 @@
 #pragma once
 #include "cpp_common.hpp"
 #include "rapidfuzz.h"
-#include "taskflow/algorithm/for_each.hpp"
 #include "taskflow/taskflow.hpp"
+#include "taskflow/algorithm/for_each.hpp"
 #include <atomic>
 #include <exception>
 #include <stdexcept>

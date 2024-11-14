@@ -1,6 +1,17 @@
 Changelog
 ---------
 
+[3.10.1] - 2024-10-24
+^^^^^^^^^^^^^^^^^^^^^
+Fixed
+~~~~~
+- fix compilation on clang-19
+- fix incorrect results in simd optimized implementation of Levenshtein and OSA on 32bit targets
+
+Added
+~~~~~
+* added support for taskflow 3.8.0
+
 [3.10.0] - 2024-09-21
 ^^^^^^^^^^^^^^^^^^^^^
 Fixed
