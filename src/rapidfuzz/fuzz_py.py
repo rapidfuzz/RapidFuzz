@@ -117,7 +117,7 @@ def ratio(
 
 def _partial_ratio_impl(s1, s2, score_cutoff):
     """
-    implementation of partial_ratio. This assumes len(s1) <= len(s2) is already the shorter string
+    implementation of partial_ratio. This assumes len(s1) <= len(s2).
     """
     s1_char_set = set(s1)
     len1 = len(s1)
