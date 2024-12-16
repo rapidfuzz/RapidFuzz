@@ -57,6 +57,10 @@ jobs:
     name: Build wheels on ubuntu-latest
     needs: [build_sdist]
     runs-on: ubuntu-latest
+    env:
+      CIBW_TEST_REQUIRES: pytest hypothesis
+      CIBW_TEST_COMMAND: pytest {package}/tests
+      CIBW_BUILD_VERBOSITY: 3
 
     steps:
       - uses: actions/download-artifact@v4
