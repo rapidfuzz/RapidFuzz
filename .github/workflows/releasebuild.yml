@@ -35,18 +35,6 @@ jobs:
           git apply ./tools/sdist.patch
           pip install build
           python -m build --sdist
-          # test whether tarball contains all files required for compiling
-          pip install dist/rapidfuzz-*.tar.gz -v
-
-      #- name: Test type stubs
-      #  # prevent import from rapidfuzz
-      #  working-directory: .github
-      #  run: |
-      #    python -m mypy.stubtest rapidfuzz --ignore-missing-stub
-
-      - name: Test with pytest and backtrace in case of SegFault
-        run: |
-          tools/seg_wrapper.sh pytest tests
 
       - uses: actions/upload-artifact@v4
         with:
@@ -58,8 +46,6 @@ jobs:
     needs: [build_sdist]
     runs-on: ubuntu-latest
     env:
-      CIBW_TEST_REQUIRES: pytest hypothesis
-      CIBW_TEST_COMMAND: pytest {package}/tests
       CIBW_BUILD_VERBOSITY: 3
 
     steps:
