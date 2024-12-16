@@ -54,7 +54,7 @@ jobs:
           path: dist/*.tar.gz
 
   build_wheels_linux:
-    name: Build wheels on ubuntu-latest/${{matrix.arch}}/${{matrix.python_tag}}
+    name: Build wheels on ubuntu-latest
     needs: [build_sdist]
     runs-on: ubuntu-latest
     env:
