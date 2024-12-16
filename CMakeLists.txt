@@ -34,8 +34,11 @@ if(MSVC)
   # VS 2022 17.10 or newer, but using an older runtime, mutexes can crash
   add_compile_options(/D_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR)
 else()
-  add_compile_options(-Wall -Wextra -pedantic -Wno-psabi -fexceptions)
+  add_compile_options(-Wall -Wextra -pedantic -Wno-psabi)
+endif()
 
+if(EMSCRIPTEN)
+  add_compile_options(-fexceptions)
   add_link_options(-fexceptions)
 endif()
 
