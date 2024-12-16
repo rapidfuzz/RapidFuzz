@@ -61,30 +61,6 @@ wheel.packages = ["src/rapidfuzz"]
 wheel.cmake = false
 messages.after-success = "{yellow}CMake unavailable, falling back to pure Python Extension"
 
-[[tool.scikit-build.overrides]]
-if.any.system-cmake = ">=3.15"
-if.any.cmake-wheel = true
-wheel.cmake = true
-messages.after-success = "{green}C++ Extension built successfully"
-
-[[tool.scikit-build.overrides]]
-if.failed = true
-if.env.CIBUILDWHEEL = false
-if.env.CONDA_BUILD = false
-if.env.PIWHEELS_BUILD = false
-if.env.RAPIDFUZZ_BUILD_EXTENSION = false
-wheel.cmake = false
-messages.after-success = "{yellow}Failed to build C++ Extension, falling back to pure Python Extension"
-
-[[tool.scikit-build.overrides]]
-if.any.env.CIBUILDWHEEL = true
-if.any.env.CONDA_BUILD = true
-if.any.env.PIWHEELS_BUILD = true
-if.any.env.RAPIDFUZZ_BUILD_EXTENSION = true
-wheel.cmake = true
-messages.after-success = "{green}C++ Extension built successfully"
-messages.after-failure = "{red}Failed to build C++ Extension in a packaged build"
-
 [tool.scikit-build.metadata.version]
 provider = "scikit_build_core.metadata.regex"
 input = "src/rapidfuzz/__init__.py"
