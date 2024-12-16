@@ -34,38 +34,8 @@ jobs:
         run: |
           git apply ./tools/sdist.patch
           pip install build
-          python -m build --sdist
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: artifact-sdist
-          path: dist/*.tar.gz
-
-  build_wheels_linux:
-    name: Build wheels on ubuntu-latest
-    needs: [build_sdist]
-    runs-on: ubuntu-latest
-    env:
-      CIBW_BUILD_VERBOSITY: 3
-
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: artifact-sdist
-          path: dist
-
-      # Set up the version of Python that supports pyodide
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Copy wheel
-        run: cp dist/*.tar.gz rapidfuzz.tar.gz
-
-      - name: Build wheel
-        run: pip wheel .
-      
-
+          pip wheel .
+          
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
