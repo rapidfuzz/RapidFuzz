@@ -37,6 +37,11 @@ else()
   add_compile_options(-Wall -Wextra -pedantic -Wno-psabi)
 endif()
 
+if(EMSCRIPTEN)
+  add_compile_options(-fexceptions)
+  add_link_options(-fexceptions)
+endif()
+
 if(CMAKE_VERSION VERSION_LESS 3.18)
   find_package(
     Python

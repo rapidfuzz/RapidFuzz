@@ -188,6 +188,41 @@ jobs:
           name: artifact-${{ github.job }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
 
+  build_wheels_pyodide:
+    name: Build wheels on ubuntu-latest/pyodide
+    needs: [build_sdist]
+    runs-on: ubuntu-latest
+    env:
+      CIBW_TEST_REQUIRES: pytest hypothesis
+      CIBW_TEST_COMMAND: pytest {package}/tests
+      CIBW_PLATFORM: pyodide
+      CIBW_BUILD_VERBOSITY: 3
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: artifact-sdist
+          path: dist
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Copy wheel
+        run: cp dist/*.tar.gz rapidfuzz.tar.gz
+
+      - name: Build wheel
+        uses: pypa/cibuildwheel@v2.22.0
+        with:
+          package-dir: rapidfuzz.tar.gz
+          output-dir: wheelhouse
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: pyodide-wheel
+          path: ./wheelhouse/*.whl
+
   deploy-wheels:
     if: github.event_name == 'release' && github.event.action == 'published'
     needs: [build_wheels_windows, build_wheels_macos, build_wheels_linux, build_sdist]
