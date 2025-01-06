@@ -1208,7 +1208,7 @@ def extract(query, choices, *, scorer=WRatio, processor=None, limit=5, score_cut
     cdef RF_Scorer* scorer_context = NULL
     cdef RF_ScorerFlags scorer_flags
     cdef int64_t c_limit
-    cdef int64_t choices_len = <int64_t>len(choices)
+    cdef int64_t choices_len
     scorer_kwargs = scorer_kwargs.copy() if scorer_kwargs else {}
 
     setupPandas()
@@ -1217,6 +1217,7 @@ def extract(query, choices, *, scorer=WRatio, processor=None, limit=5, score_cut
         return []
 
     try:
+        choices_len = <int64_t>len(choices)
         if limit is None or limit > choices_len:
             limit = choices_len
     except TypeError:
