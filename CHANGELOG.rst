@@ -1,6 +1,16 @@
 Changelog
 ---------
 
+[3.11.0] - 2024-12-17
+^^^^^^^^^^^^^^^^^^^^^
+Performance
+~~~~~~~~~~~
+- improve calculation of min score inside partial_ratio so it can skip more alignments
+
+Added
+~~~~~
+- added build support for emscripten
+
 [3.10.1] - 2024-10-24
 ^^^^^^^^^^^^^^^^^^^^^
 Fixed

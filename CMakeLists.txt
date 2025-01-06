@@ -37,6 +37,11 @@ else()
   add_compile_options(-Wall -Wextra -pedantic -Wno-psabi)
 endif()
 
+if(EMSCRIPTEN)
+  add_compile_options(-fexceptions)
+  add_link_options(-fexceptions)
+endif()
+
 if(CMAKE_VERSION VERSION_LESS 3.18)
   find_package(
     Python
@@ -110,7 +115,7 @@ else()
   add_library(Taskflow::Taskflow ALIAS Taskflow)
 endif()
 
-find_package(rapidfuzz 3.1.1 QUIET)
+find_package(rapidfuzz 3.2.0 QUIET)
 if(rapidfuzz_FOUND)
   message(STATUS "Using system supplied version of rapidfuzz-cpp")
 else()
