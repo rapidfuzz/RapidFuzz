@@ -1218,15 +1218,14 @@ def extract(query, choices, *, scorer=WRatio, processor=None, limit=5, score_cut
 
     try:
         choices_len = <int64_t>len(choices)
-        if limit is None or limit > choices_len:
-            limit = choices_len
     except TypeError:
         # handle generators. In Theory we could retrieve the length later on while
         # preprocessing the choices, but this is good enough for now
         choices = list(choices)
         choices_len = <int64_t>len(choices)
-        if limit is None or limit > choices_len:
-            limit = choices_len
+
+    if limit is None or limit > choices_len:
+        limit = choices_len
 
     c_limit = limit
     if c_limit == 1:
