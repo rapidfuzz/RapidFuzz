@@ -47,17 +47,14 @@ def get_platform():
 
 def benchmark():
     words = ["".join(random.choice(string.ascii_letters + string.digits) for _ in range(8)) for _ in range(1000000)]
-    len_words = len(words)
-    sample_rate = len_words // 2
+    sample_rate = len(words) // 2
     words1 = words[:sample_rate]
     words2 = words[sample_rate::]
-    len_words1 = len(words1)
-    len_words2 = len(words2)
-    total = len_words1
+    total = len(words1)
 
     print("System:", get_platform())
-    print("Words :", len_words1)
-    print("Sample:", len_words2)
+    print("Words :", len(words1))
+    print("Sample:", len(words2))
     print("Total : %s calls\n" % total)
 
     def wrap_cpdist(scorer):
