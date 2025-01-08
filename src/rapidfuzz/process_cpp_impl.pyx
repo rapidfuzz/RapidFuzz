@@ -1224,10 +1224,10 @@ def extract(query, choices, *, scorer=WRatio, processor=None, limit=5, score_cut
         choices = list(choices)
         choices_len = <int64_t>len(choices)
 
-    if limit is None or limit > choices_len:
-        limit = choices_len
+    c_limit = choices_len
+    if limit is not None:
+        c_limit = min(c_limit, <int64_t>limit)
 
-    c_limit = limit
     if c_limit == 1:
         res = extractOne(
             query,
