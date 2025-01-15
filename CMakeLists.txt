@@ -30,8 +30,8 @@ endif()
 if(MSVC)
   add_compile_options(/W4 /bigobj /wd4127)
 
-  # NOTE: _DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR is temporary. When building on
-  # VS 2022 17.10 or newer, but using an older runtime, mutexes can crash
+  # NOTE: _DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR is temporary. When building on VS
+  # 2022 17.10 or newer, but using an older runtime, mutexes can crash
   add_compile_options(/D_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR)
 else()
   add_compile_options(-Wall -Wextra -pedantic -Wno-psabi)

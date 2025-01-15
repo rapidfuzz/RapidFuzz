@@ -12,6 +12,11 @@
 #
 # See https://github.com/pre-commit/pre-commit
 
+exclude: |
+    (?x)(
+        tools/sdist.patch
+    )
+
 repos:
 # Standard hooks
 - repo: https://github.com/pre-commit/pre-commit-hooks

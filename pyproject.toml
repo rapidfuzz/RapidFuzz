@@ -54,8 +54,7 @@ wheel.exclude = [
   "**.cpp",
   "**.hpp",
   "**.h",
-  "CMakeLists.txt",
-  "generate.sh"
+  "CMakeLists.txt"
 ]
 wheel.packages = ["src/rapidfuzz"]
 wheel.cmake = false
@@ -162,7 +161,6 @@ select = [
 extend-ignore = [
   "PLR",    # Design related pylint codes
   "E501",   # Line too long
-  "PT004",  # Use underscore for non-returning fixture (use usefixture instead)
   "PTH123", # use pathlib instead of builtin open
 ]
 unfixable = [
@@ -171,6 +169,7 @@ unfixable = [
 ]
 flake8-unused-arguments.ignore-variadic-names = true
 isort.required-imports = ["from __future__ import annotations"]
+isort.combine-as-imports = true
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["T20"]

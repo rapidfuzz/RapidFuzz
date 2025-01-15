@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Iterator
+from collections.abc import Iterator
 
 _AnyOpList = list[Editop | tuple[str, int, int]] | list[Opcode | tuple[str, int, int, int, int]]
 

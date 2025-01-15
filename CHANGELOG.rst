@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+[3.12.0] - 2025-01-16
+^^^^^^^^^^^^^^^^^^^^^
+Changed
+~~~~~~~~~~~
+- generate code for fallback imports to be better parseable for tools bundling Python
+  applications into a single binary (examples are cx-freeze and pyinstaller)
+
 [3.11.0] - 2024-12-17
 ^^^^^^^^^^^^^^^^^^^^^
 Performance
@@ -27,7 +34,7 @@ Added
 Fixed
 ~~~~~
 - drop support for Python 3.8
-- switch build system to `scikit-build-core`
+- switch build system to ``scikit-build-core``
 
 [3.9.7] - 2024-09-02
 ^^^^^^^^^^^^^^^^^^^^
@@ -47,7 +54,7 @@ Changed
 Fixed
 ~~~~~
 * include simd binaries in pyinstaller builds
-* fix builds with setuptools 72 by upgrading `scikit-build`
+* fix builds with setuptools 72 by upgrading ``scikit-build``
 
 [3.9.4] - 2024-07-02
 ^^^^^^^^^^^^^^^^^^^^

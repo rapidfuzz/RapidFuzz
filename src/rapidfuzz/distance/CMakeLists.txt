@@ -10,8 +10,8 @@ function(create_cython_target _name)
       VERBATIM
       COMMAND
         Python::Interpreter -m cython "${CMAKE_CURRENT_LIST_DIR}/${_name}.pyx"
-        --cplus -I "${CMAKE_CURRENT_LIST_DIR}/.."
-        --output-file "${CMAKE_CURRENT_BINARY_DIR}/${_name}.cxx")
+        --cplus -I "${CMAKE_CURRENT_LIST_DIR}/.." --output-file
+        "${CMAKE_CURRENT_BINARY_DIR}/${_name}.cxx")
 
     set(${_name}
         ${CMAKE_CURRENT_BINARY_DIR}/${_name}.cxx
