@@ -3,7 +3,8 @@
 
 from __future__ import annotations
 
-from typing import Callable, Hashable, Sequence, TypeVar, overload
+from collections.abc import Hashable, Sequence
+from typing import Callable, TypeVar, overload
 
 _UnprocessedType1 = TypeVar("_UnprocessedType1")
 _UnprocessedType2 = TypeVar("_UnprocessedType2")

@@ -9,7 +9,8 @@ substitutions required to transform s1 into s2.
 
 from __future__ import annotations
 
-from typing import Callable, Hashable, Sequence, TypeVar, overload
+from collections.abc import Hashable, Sequence
+from typing import Callable, TypeVar, overload
 
 from rapidfuzz.distance import Editops, Opcodes
 

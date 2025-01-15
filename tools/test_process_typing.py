@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Generator, Hashable, Sequence
+from collections.abc import Generator, Hashable, Sequence
 
 import numpy as np
 import numpy.typing as npt

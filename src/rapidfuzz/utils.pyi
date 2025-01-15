@@ -3,7 +3,8 @@
 
 from __future__ import annotations
 
-from typing import Hashable, Sequence, TypeVar
+from collections.abc import Hashable, Sequence
+from typing import TypeVar
 
 _StringType = TypeVar("_StringType", bound=Sequence[Hashable])
 

@@ -24,8 +24,8 @@ jobs:
 
       - name: Generate cython
         run: |
-          chmod +x ./src/rapidfuzz/generate.sh
-          ./src/rapidfuzz/generate.sh
+          chmod +x ./tools/generate_cython.sh
+          ./tools/generate_cython.sh
 
       # for cython tests inplace installation is required
       - name: build

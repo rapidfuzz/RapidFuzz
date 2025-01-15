@@ -1,15 +1,10 @@
 from __future__ import annotations
 
+from collections.abc import Collection, Generator, Hashable, Iterable, Mapping, Sequence
 from typing import (
     Any,
     Callable,
-    Collection,
-    Generator,
-    Hashable,
-    Iterable,
-    Mapping,
     Protocol,
-    Sequence,
     TypeVar,
     overload,
 )

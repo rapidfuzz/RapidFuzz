@@ -26,3 +26,4 @@ BraceWrapping:
 AllowAllConstructorInitializersOnNextLine: true
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 AllowShortCaseLabelsOnASingleLine: true
+SortIncludes: false

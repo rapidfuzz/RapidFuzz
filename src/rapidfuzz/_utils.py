@@ -3,13 +3,9 @@
 
 from __future__ import annotations
 
-import importlib
-import os
 import sys
 from math import isnan
 from typing import Any, Callable
-
-from rapidfuzz._feature_detector import AVX2, SSE2, supports
 
 pandas_NA = None
 
@@ -78,66 +74,6 @@ def add_scorer_attrs(func: Any, cached_scorer_call: dict[str, Callable[..., dict
     func._RF_ScorerPy = cached_scorer_call
     # used to detect the function hasn't been wrapped afterwards
     func._RF_OriginalScorer = func
-
-
-def optional_import_module(module: str) -> Any:
-    """
-    try to import module. Return None on failure
-    """
-    try:
-        return importlib.import_module(module)
-    except Exception:
-        return None
-
-
-def vectorized_import(name: str) -> tuple[Any, list[Any]]:
-    """
-    import module best fitting for current CPU
-    """
-    if supports(AVX2):
-        module = optional_import_module(name + "_avx2")
-        if module is not None:
-            return module
-    if supports(SSE2):
-        module = optional_import_module(name + "_sse2")
-        if module is not None:
-            return module
-
-    return importlib.import_module(name)
-
-
-def fallback_import(
-    module: str,
-    name: str,
-) -> Any:
-    """
-    import library function and possibly fall back to a pure Python version
-    when no C++ implementation is available
-    """
-    impl = os.environ.get("RAPIDFUZZ_IMPLEMENTATION")
-
-    py_mod = importlib.import_module(module + "_py")
-    py_func = getattr(py_mod, name)
-    if not py_func:
-        msg = f"cannot import name {name!r} from {py_mod.__name!r} ({py_mod.__file__})"
-        raise ImportError(msg)
-
-    if impl == "cpp":
-        cpp_mod = vectorized_import(module + "_cpp")
-    elif impl == "python":
-        return py_func
-    else:
-        try:
-            cpp_mod = vectorized_import(module + "_cpp")
-        except Exception:
-            return py_func
-
-    cpp_func = getattr(cpp_mod, name)
-    if not cpp_func:
-        msg = f"cannot import name {name!r} from {cpp_mod.__name!r} ({cpp_mod.__file__})"
-        raise ImportError(msg)
-
-    return cpp_func
 
 
 default_distance_attribute: dict[str, Callable[..., dict[str, Any]]] = {"get_scorer_flags": _get_scorer_flags_distance}

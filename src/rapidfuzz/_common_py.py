@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from array import array
-from typing import Hashable, Sequence
+from collections.abc import Hashable, Sequence
 
 
 def conv_sequence(s: Sequence[Hashable]) -> Sequence[Hashable]:

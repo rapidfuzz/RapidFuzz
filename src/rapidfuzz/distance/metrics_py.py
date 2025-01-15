@@ -5,115 +5,102 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
-from rapidfuzz._utils import ScorerFlag, add_scorer_attrs
-from rapidfuzz._utils import default_distance_attribute as dist_attr
-from rapidfuzz._utils import default_normalized_distance_attribute as norm_dist_attr
-from rapidfuzz._utils import default_normalized_similarity_attribute as norm_sim_attr
-from rapidfuzz._utils import default_similarity_attribute as sim_attr
+from rapidfuzz._utils import (
+    ScorerFlag,
+    add_scorer_attrs,
+    default_distance_attribute as dist_attr,
+    default_normalized_distance_attribute as norm_dist_attr,
+    default_normalized_similarity_attribute as norm_sim_attr,
+    default_similarity_attribute as sim_attr,
+)
 
 # DamerauLevenshtein
 from rapidfuzz.distance.DamerauLevenshtein_py import (
     distance as damerau_levenshtein_distance,
-)
-from rapidfuzz.distance.DamerauLevenshtein_py import (
     normalized_distance as damerau_levenshtein_normalized_distance,
-)
-from rapidfuzz.distance.DamerauLevenshtein_py import (
     normalized_similarity as damerau_levenshtein_normalized_similarity,
-)
-from rapidfuzz.distance.DamerauLevenshtein_py import (
     similarity as damerau_levenshtein_similarity,
 )
 
 # Hamming
-from rapidfuzz.distance.Hamming_py import distance as hamming_distance
-from rapidfuzz.distance.Hamming_py import editops as hamming_editops
 from rapidfuzz.distance.Hamming_py import (
+    distance as hamming_distance,
+    editops as hamming_editops,
     normalized_distance as hamming_normalized_distance,
-)
-from rapidfuzz.distance.Hamming_py import (
     normalized_similarity as hamming_normalized_similarity,
+    opcodes as hamming_opcodes,
+    similarity as hamming_similarity,
 )
-from rapidfuzz.distance.Hamming_py import opcodes as hamming_opcodes
-from rapidfuzz.distance.Hamming_py import similarity as hamming_similarity
 
 # Indel
-from rapidfuzz.distance.Indel_py import distance as indel_distance
-from rapidfuzz.distance.Indel_py import editops as indel_editops
-from rapidfuzz.distance.Indel_py import normalized_distance as indel_normalized_distance
 from rapidfuzz.distance.Indel_py import (
+    distance as indel_distance,
+    editops as indel_editops,
+    normalized_distance as indel_normalized_distance,
     normalized_similarity as indel_normalized_similarity,
+    opcodes as indel_opcodes,
+    similarity as indel_similarity,
 )
-from rapidfuzz.distance.Indel_py import opcodes as indel_opcodes
-from rapidfuzz.distance.Indel_py import similarity as indel_similarity
 
 # Jaro
-from rapidfuzz.distance.Jaro_py import distance as jaro_distance
-from rapidfuzz.distance.Jaro_py import normalized_distance as jaro_normalized_distance
 from rapidfuzz.distance.Jaro_py import (
+    distance as jaro_distance,
+    normalized_distance as jaro_normalized_distance,
     normalized_similarity as jaro_normalized_similarity,
+    similarity as jaro_similarity,
 )
-from rapidfuzz.distance.Jaro_py import similarity as jaro_similarity
 
 # JaroWinkler
-from rapidfuzz.distance.JaroWinkler_py import distance as jaro_winkler_distance
 from rapidfuzz.distance.JaroWinkler_py import (
+    distance as jaro_winkler_distance,
     normalized_distance as jaro_winkler_normalized_distance,
-)
-from rapidfuzz.distance.JaroWinkler_py import (
     normalized_similarity as jaro_winkler_normalized_similarity,
+    similarity as jaro_winkler_similarity,
 )
-from rapidfuzz.distance.JaroWinkler_py import similarity as jaro_winkler_similarity
 
 # LCSseq
-from rapidfuzz.distance.LCSseq_py import distance as lcs_seq_distance
-from rapidfuzz.distance.LCSseq_py import editops as lcs_seq_editops
 from rapidfuzz.distance.LCSseq_py import (
+    distance as lcs_seq_distance,
+    editops as lcs_seq_editops,
     normalized_distance as lcs_seq_normalized_distance,
-)
-from rapidfuzz.distance.LCSseq_py import (
     normalized_similarity as lcs_seq_normalized_similarity,
+    opcodes as lcs_seq_opcodes,
+    similarity as lcs_seq_similarity,
 )
-from rapidfuzz.distance.LCSseq_py import opcodes as lcs_seq_opcodes
-from rapidfuzz.distance.LCSseq_py import similarity as lcs_seq_similarity
 
 # Levenshtein
-from rapidfuzz.distance.Levenshtein_py import distance as levenshtein_distance
-from rapidfuzz.distance.Levenshtein_py import editops as levenshtein_editops
 from rapidfuzz.distance.Levenshtein_py import (
+    distance as levenshtein_distance,
+    editops as levenshtein_editops,
     normalized_distance as levenshtein_normalized_distance,
-)
-from rapidfuzz.distance.Levenshtein_py import (
     normalized_similarity as levenshtein_normalized_similarity,
+    opcodes as levenshtein_opcodes,
+    similarity as levenshtein_similarity,
 )
-from rapidfuzz.distance.Levenshtein_py import opcodes as levenshtein_opcodes
-from rapidfuzz.distance.Levenshtein_py import similarity as levenshtein_similarity
 
 # OSA
-from rapidfuzz.distance.OSA_py import distance as osa_distance
-from rapidfuzz.distance.OSA_py import normalized_distance as osa_normalized_distance
-from rapidfuzz.distance.OSA_py import normalized_similarity as osa_normalized_similarity
-from rapidfuzz.distance.OSA_py import similarity as osa_similarity
+from rapidfuzz.distance.OSA_py import (
+    distance as osa_distance,
+    normalized_distance as osa_normalized_distance,
+    normalized_similarity as osa_normalized_similarity,
+    similarity as osa_similarity,
+)
 
 # Postfix
-from rapidfuzz.distance.Postfix_py import distance as postfix_distance
 from rapidfuzz.distance.Postfix_py import (
+    distance as postfix_distance,
     normalized_distance as postfix_normalized_distance,
-)
-from rapidfuzz.distance.Postfix_py import (
     normalized_similarity as postfix_normalized_similarity,
+    similarity as postfix_similarity,
 )
-from rapidfuzz.distance.Postfix_py import similarity as postfix_similarity
 
 # Prefix
-from rapidfuzz.distance.Prefix_py import distance as prefix_distance
 from rapidfuzz.distance.Prefix_py import (
+    distance as prefix_distance,
     normalized_distance as prefix_normalized_distance,
-)
-from rapidfuzz.distance.Prefix_py import (
     normalized_similarity as prefix_normalized_similarity,
+    similarity as prefix_similarity,
 )
-from rapidfuzz.distance.Prefix_py import similarity as prefix_similarity
 
 __all__ = []
 

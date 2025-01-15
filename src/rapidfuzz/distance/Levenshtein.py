@@ -1,19 +1,115 @@
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2022 Max Bachmann
-"""
-The Levenshtein (edit) distance is a string metric to measure the
-difference between two strings/sequences s1 and s2.
-It's defined as the minimum number of insertions, deletions or
-substitutions required to transform s1 into s2.
-"""
+# Copyright (C) 2025 Max Bachmann
 from __future__ import annotations
 
-from rapidfuzz._utils import fallback_import as _fallback_import
+import contextlib
+import os
 
-_mod = "rapidfuzz.distance.metrics"
-distance = _fallback_import(_mod, "levenshtein_distance")
-similarity = _fallback_import(_mod, "levenshtein_similarity")
-normalized_distance = _fallback_import(_mod, "levenshtein_normalized_distance")
-normalized_similarity = _fallback_import(_mod, "levenshtein_normalized_similarity")
-editops = _fallback_import(_mod, "levenshtein_editops")
-opcodes = _fallback_import(_mod, "levenshtein_opcodes")
+from rapidfuzz._feature_detector import AVX2, SSE2, supports
+
+__all__ = [
+    "distance",
+    "editops",
+    "normalized_distance",
+    "normalized_similarity",
+    "opcodes",
+    "similarity",
+]
+
+_impl = os.environ.get("RAPIDFUZZ_IMPLEMENTATION")
+if _impl == "cpp":
+    imported = False
+    if supports(AVX2):
+        with contextlib.suppress(ImportError):
+            from rapidfuzz.distance.metrics_cpp_avx2 import (  # pyright: ignore[reportMissingImports]
+                levenshtein_distance as distance,
+                levenshtein_editops as editops,
+                levenshtein_normalized_distance as normalized_distance,
+                levenshtein_normalized_similarity as normalized_similarity,
+                levenshtein_opcodes as opcodes,
+                levenshtein_similarity as similarity,
+            )
+
+            imported = True
+
+    if not imported and supports(SSE2):
+        with contextlib.suppress(ImportError):
+            from rapidfuzz.distance.metrics_cpp_sse2 import (  # pyright: ignore[reportMissingImports]
+                levenshtein_distance as distance,
+                levenshtein_editops as editops,
+                levenshtein_normalized_distance as normalized_distance,
+                levenshtein_normalized_similarity as normalized_similarity,
+                levenshtein_opcodes as opcodes,
+                levenshtein_similarity as similarity,
+            )
+
+            imported = True
+
+    if not imported:
+        from rapidfuzz.distance.metrics_cpp import (  # pyright: ignore[reportMissingImports]
+            levenshtein_distance as distance,
+            levenshtein_editops as editops,
+            levenshtein_normalized_distance as normalized_distance,
+            levenshtein_normalized_similarity as normalized_similarity,
+            levenshtein_opcodes as opcodes,
+            levenshtein_similarity as similarity,
+        )
+elif _impl == "python":
+    from rapidfuzz.distance.metrics_py import (
+        levenshtein_distance as distance,
+        levenshtein_editops as editops,
+        levenshtein_normalized_distance as normalized_distance,
+        levenshtein_normalized_similarity as normalized_similarity,
+        levenshtein_opcodes as opcodes,
+        levenshtein_similarity as similarity,
+    )
+else:
+    imported = False
+    if supports(AVX2):
+        with contextlib.suppress(ImportError):
+            from rapidfuzz.distance.metrics_cpp_avx2 import (  # pyright: ignore[reportMissingImports]
+                levenshtein_distance as distance,
+                levenshtein_editops as editops,
+                levenshtein_normalized_distance as normalized_distance,
+                levenshtein_normalized_similarity as normalized_similarity,
+                levenshtein_opcodes as opcodes,
+                levenshtein_similarity as similarity,
+            )
+
+            imported = True
+
+    if not imported and supports(SSE2):
+        with contextlib.suppress(ImportError):
+            from rapidfuzz.distance.metrics_cpp_sse2 import (  # pyright: ignore[reportMissingImports]
+                levenshtein_distance as distance,
+                levenshtein_editops as editops,
+                levenshtein_normalized_distance as normalized_distance,
+                levenshtein_normalized_similarity as normalized_similarity,
+                levenshtein_opcodes as opcodes,
+                levenshtein_similarity as similarity,
+            )
+
+            imported = True
+
+    if not imported:
+        with contextlib.suppress(ImportError):
+            from rapidfuzz.distance.metrics_cpp import (  # pyright: ignore[reportMissingImports]
+                levenshtein_distance as distance,
+                levenshtein_editops as editops,
+                levenshtein_normalized_distance as normalized_distance,
+                levenshtein_normalized_similarity as normalized_similarity,
+                levenshtein_opcodes as opcodes,
+                levenshtein_similarity as similarity,
+            )
+
+            imported = True
+
+    if not imported:
+        from rapidfuzz.distance.metrics_py import (
+            levenshtein_distance as distance,
+            levenshtein_editops as editops,
+            levenshtein_normalized_distance as normalized_distance,
+            levenshtein_normalized_similarity as normalized_similarity,
+            levenshtein_opcodes as opcodes,
+            levenshtein_similarity as similarity,
+        )

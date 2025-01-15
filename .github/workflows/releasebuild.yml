@@ -27,8 +27,8 @@ jobs:
       # The cythonized files allow installation from the sdist without cython
       - name: Generate cython
         run: |
-          chmod +x ./src/rapidfuzz/generate.sh
-          ./src/rapidfuzz/generate.sh
+          chmod +x ./tools/generate_cython.sh
+          ./tools/generate_cython.sh
 
       - name: Build sdist
         run: |

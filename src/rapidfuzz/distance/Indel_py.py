@@ -4,10 +4,12 @@ from __future__ import annotations
 
 from rapidfuzz._common_py import conv_sequences
 from rapidfuzz._utils import is_none, setupPandas
-from rapidfuzz.distance.LCSseq_py import _block_similarity as lcs_seq_block_similarity
-from rapidfuzz.distance.LCSseq_py import editops as lcs_seq_editops
-from rapidfuzz.distance.LCSseq_py import opcodes as lcs_seq_opcodes
-from rapidfuzz.distance.LCSseq_py import similarity as lcs_seq_similarity
+from rapidfuzz.distance.LCSseq_py import (
+    _block_similarity as lcs_seq_block_similarity,
+    editops as lcs_seq_editops,
+    opcodes as lcs_seq_opcodes,
+    similarity as lcs_seq_similarity,
+)
 
 
 def distance(

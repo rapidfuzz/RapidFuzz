@@ -1,5 +1,5 @@
 #!/bin/sh
-curdir="${0%/*}"
+curdir="${0%/*}/../src/rapidfuzz"
 
 generate_cython()
 {
