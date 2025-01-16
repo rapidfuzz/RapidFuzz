@@ -176,6 +176,7 @@ jobs:
         if: runner.os != 'Linux'
         run: |
           pytest tests
+
       - name: test pyinstaller packaging
         run: |
           python -m PyInstaller.utils.run_tests --include_only rapidfuzz.
