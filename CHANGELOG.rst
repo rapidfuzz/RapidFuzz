@@ -5,25 +5,29 @@ Changelog
 ^^^^^^^^^^^^^^^^^^^^^
 Changed
 ~~~~~~~~~~~
-- generate code for fallback imports to be better parseable for tools bundling Python
+* generate code for fallback imports to be better parseable for tools bundling Python
   applications into a single binary (examples are cx-freeze and pyinstaller)
+
+Added
+~~~~~
+* added support for taskflow 3.9.0
 
 [3.11.0] - 2024-12-17
 ^^^^^^^^^^^^^^^^^^^^^
 Performance
 ~~~~~~~~~~~
-- improve calculation of min score inside partial_ratio so it can skip more alignments
+* improve calculation of min score inside partial_ratio so it can skip more alignments
 
 Added
 ~~~~~
-- added build support for emscripten
+* added build support for emscripten
 
 [3.10.1] - 2024-10-24
 ^^^^^^^^^^^^^^^^^^^^^
 Fixed
 ~~~~~
-- fix compilation on clang-19
-- fix incorrect results in simd optimized implementation of Levenshtein and OSA on 32bit targets
+* fix compilation on clang-19
+* fix incorrect results in simd optimized implementation of Levenshtein and OSA on 32bit targets
 
 Added
 ~~~~~
@@ -33,8 +37,8 @@ Added
 ^^^^^^^^^^^^^^^^^^^^^
 Fixed
 ~~~~~
-- drop support for Python 3.8
-- switch build system to ``scikit-build-core``
+* drop support for Python 3.8
+* switch build system to ``scikit-build-core``
 
 [3.9.7] - 2024-09-02
 ^^^^^^^^^^^^^^^^^^^^
@@ -105,8 +109,8 @@ Added
 
 Fixed
 ~~~~~
-- fix some minor errors in the type hints
-- fix potentially incorrect results of JaroWinkler when using high prefix weights
+* fix some minor errors in the type hints
+* fix potentially incorrect results of JaroWinkler when using high prefix weights
 
 [3.7.0] - 2024-03-21
 ^^^^^^^^^^^^^^^^^^^^
