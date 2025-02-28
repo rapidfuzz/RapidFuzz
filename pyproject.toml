@@ -23,6 +23,8 @@ classifiers=[
   "Programming Language :: Python :: 3.13",
   "License :: OSI Approved :: MIT License",
 ]
+
+[project.urls]
 Homepage = "https://github.com/rapidfuzz/RapidFuzz"
 Documentation = "https://rapidfuzz.github.io/RapidFuzz/"
 Repository = "https://github.com/rapidfuzz/RapidFuzz.git"
