@@ -7,7 +7,7 @@ index 517f32d..1e855ed 100644
  requires = [
 -    "scikit-build-core>=0.11",
 -    "Cython >=3.0.11, <3.1.0"
-+    "scikit-build-core>=0.10.7"
++    "scikit-build-core>=0.11"
  ]
  build-backend = "scikit_build_core.build"
 
