@@ -7,6 +7,10 @@ Added
 ~~~~~
 * added wheels for pypy 3.11
 
+Changed
+~~~~~~~
+* upgrade to ``Cython==3.0.12``
+
 [3.12.1] - 2025-01-30
 ^^^^^^^^^^^^^^^^^^^^^
 Fixed
