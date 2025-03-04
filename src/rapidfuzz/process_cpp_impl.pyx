@@ -3,11 +3,14 @@
 
 from rapidfuzz.fuzz import WRatio, ratio
 
+from . import process_py
+
 cimport cython
 from cpp_common cimport (
     PyObjectWrapper,
     RF_KwargsWrapper,
     RF_StringWrapper,
+    SetFuncAttrs,
     conv_sequence_with_none,
     conv_sequence,
     get_score_cutoff_f64,
@@ -858,6 +861,7 @@ def extractOne(query, choices, *, scorer=WRatio, processor=None, score_cutoff=No
     else:
         return py_extractOne_list(query, choices, scorer, processor, score_cutoff, worst_score, optimal_score, scorer_kwargs)
 
+SetFuncAttrs(extractOne, process_py.extractOne)
 
 cdef inline extract_dict_f64(
     query, choices,
@@ -1275,6 +1279,7 @@ def extract(query, choices, *, scorer=WRatio, processor=None, limit=5, score_cut
     else:
         return py_extract_list(query, choices, scorer, processor, c_limit, score_cutoff, worst_score, optimal_score, scorer_kwargs)
 
+SetFuncAttrs(extract, process_py.extract)
 
 def extract_iter(query, choices, *, scorer=WRatio, processor=None, score_cutoff=None, score_hint=None, scorer_kwargs=None):
     cdef RF_Scorer* scorer_context = NULL
@@ -1649,6 +1654,7 @@ def extract_iter(query, choices, *, scorer=WRatio, processor=None, score_cutoff=
     else:
         yield from py_extract_iter_list(worst_score, optimal_score)
 
+SetFuncAttrs(extract_iter, process_py.extract_iter)
 
 FLOAT32 = MatrixType.FLOAT32
 FLOAT64 = MatrixType.FLOAT64
@@ -2013,6 +2019,8 @@ def cdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None, 
 
     return cdist_py(queries, choices, scorer, processor, score_cutoff, score_multiplier, dtype, workers, scorer_kwargs)
 
+SetFuncAttrs(cdist, process_py.cdist)
+
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef cpdist_py(queries, choices, scorer, processor, score_cutoff, score_multiplier, dtype, workers, dict scorer_kwargs):
@@ -2063,3 +2071,5 @@ def cpdist(queries, choices, *, scorer=ratio, processor=None, score_cutoff=None,
             dtype, workers, &kwargs_context.kwargs)
 
     return cpdist_py(queries, choices, scorer, processor, score_cutoff, score_multiplier, dtype, workers, scorer_kwargs)
+
+SetFuncAttrs(cpdist, process_py.cpdist)

@@ -86,6 +86,9 @@ def cdist(
     )
 
 
+cdist.__doc__ = _cdist.__doc__
+
+
 def cpdist(
     queries,
     choices,
@@ -115,3 +118,6 @@ def cpdist(
         **kwargs,
     )
     return np.asarray(distance_matrix)
+
+
+cpdist.__doc__ = _cpdist.__doc__
