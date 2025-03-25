@@ -14,7 +14,7 @@ authors = [
 ]
 description = "rapid fuzzy string matching"
 readme = "README.md"
-license = "MIT"
+license = {text= "MIT"}
 classifiers=[
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.9",
