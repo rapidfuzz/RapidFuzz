@@ -59,13 +59,13 @@ def test_similar_array(scorer):
     """
     assert (
         scorer.normalized_similarity(
-            array("u", "the wonderful new york mets"),
-            array("u", "the wonderful new york mets"),
+            array("w", "the wonderful new york mets"),
+            array("w", "the wonderful new york mets"),
         )
         == 1.0
     )
-    assert scorer.normalized_similarity("the wonderful new york mets", array("u", "the wonderful new york mets")) == 1.0
-    assert scorer.normalized_similarity(array("u", "the wonderful new york mets"), "the wonderful new york mets") == 1.0
+    assert scorer.normalized_similarity("the wonderful new york mets", array("w", "the wonderful new york mets")) == 1.0
+    assert scorer.normalized_similarity(array("w", "the wonderful new york mets"), "the wonderful new york mets") == 1.0
 
 
 @pytest.mark.parametrize("scorer", all_scorer_modules)
