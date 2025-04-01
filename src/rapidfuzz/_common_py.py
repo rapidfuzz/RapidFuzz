@@ -15,7 +15,7 @@ def conv_sequence(s: Sequence[Hashable]) -> Sequence[Hashable]:
         return s
 
     if isinstance(s, array):
-        if s.typecode == "u":
+        if s.typecode in ("u", "w"):
             return [ord(x) for x in s]
 
         return s

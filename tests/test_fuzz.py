@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from array import array
 
 import pytest
@@ -255,6 +256,13 @@ def test_invalid_input(scorer):
         scorer(1, 1, catch_exceptions=True)
 
 
+def unicodeArray(text):
+    if sys.version_info >= (3, 13, 0):
+        return array("w", [c for c in text])
+    else:
+        return array("u", text)
+
+
 @pytest.mark.parametrize("scorer", scorers)
 def test_array(scorer):
     """
@@ -262,11 +270,11 @@ def test_array(scorer):
     """
     # todo add support in pure python implementation
     assert scorer(
-        array("w", "the wonderful new york mets").encode("utf-32"),
-        array("w", "the wonderful new york mets").encode("utf-32"),
+        unicodeArray("the wonderful new york mets"),
+        unicodeArray("the wonderful new york mets"),
     )
-    assert scorer("the wonderful new york mets", array("w", "the wonderful new york mets").encode("utf-32"))
-    assert scorer(array("w", "the wonderful new york mets").encode("utf-32"), "the wonderful new york mets")
+    assert scorer("the wonderful new york mets", unicodeArray("the wonderful new york mets"))
+    assert scorer(unicodeArray("the wonderful new york mets"), "the wonderful new york mets")
 
 
 @pytest.mark.parametrize("scorer", scorers)

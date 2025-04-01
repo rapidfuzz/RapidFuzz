@@ -264,34 +264,18 @@ cdef inline bool hash_array(arr, RF_String* s_proc) except False:
 
     try:
         # ignore signed/unsigned, since it is not relevant in any of the algorithms
-        if typecode in {'b', 'B'}: # signed/unsigned char
-            s_proc.kind = RF_StringType.RF_UINT64
-            for i in range(s_proc.length):
-                (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
-        elif typecode == 'u': # 'u' wchar_t
-            s_proc.kind = RF_StringType.RF_UINT64
-            for i in range(s_proc.length):
-                (<uint64_t*>s_proc.data)[i] = <uint64_t><Py_UCS4>arr[i]
-        elif typecode in {'h', 'H'}: #  signed/unsigned short
-            s_proc.kind = RF_StringType.RF_UINT64
-            for i in range(s_proc.length):
-                (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
-        elif typecode in {'i', 'I'}: # signed/unsigned int
-            s_proc.kind = RF_StringType.RF_UINT64
-            for i in range(s_proc.length):
-                (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
-        elif typecode in {'l', 'L'}: # signed/unsigned long
-            s_proc.kind = RF_StringType.RF_UINT64
-            for i in range(s_proc.length):
-                (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
-        elif typecode in {'q', 'Q'}: # signed/unsigned long long
-            s_proc.kind = RF_StringType.RF_UINT64
-            for i in range(s_proc.length):
-                (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
-        else: # float/double are hashed
+        if typecode in {'f', 'd'}: # float/double are hashed
             s_proc.kind = RF_StringType.RF_UINT64
             for i in range(s_proc.length):
                 (<uint64_t*>s_proc.data)[i] = <uint64_t>hash(arr[i])
+        elif typecode in ('u', 'w'): # 'u' wchar_t
+            s_proc.kind = RF_StringType.RF_UINT64
+            for i in range(s_proc.length):
+                (<uint64_t*>s_proc.data)[i] = <uint64_t><Py_UCS4>arr[i]
+        else:
+            s_proc.kind = RF_StringType.RF_UINT64
+            for i in range(s_proc.length):
+                (<uint64_t*>s_proc.data)[i] = <uint64_t>arr[i]
     except Exception as e:
         free(s_proc.data)
         s_proc.data = NULL

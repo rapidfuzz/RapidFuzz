@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from array import array
 
 import pytest
@@ -52,6 +53,13 @@ def test_empty_strings(scorer):
     assert scorer.normalized_similarity("", "") == 1.0
 
 
+def unicodeArray(text):
+    if sys.version_info >= (3, 13, 0):
+        return array("w", [c for c in text])
+    else:
+        return array("u", text)
+
+
 @pytest.mark.parametrize("scorer", all_scorer_modules)
 def test_similar_array(scorer):
     """
@@ -59,13 +67,17 @@ def test_similar_array(scorer):
     """
     assert (
         scorer.normalized_similarity(
-            array("w", "the wonderful new york mets".encode("utf-32")),
-            array("w", "the wonderful new york mets".encode("utf-32")),
+            unicodeArray("the wonderful new york mets"),
+            unicodeArray("the wonderful new york mets"),
         )
         == 1.0
     )
-    assert scorer.normalized_similarity("the wonderful new york mets", array("w", "the wonderful new york mets").encode("utf-32")) == 1.0
-    assert scorer.normalized_similarity(array("w", "the wonderful new york mets").encode("utf-32"), "the wonderful new york mets") == 1.0
+    assert (
+        scorer.normalized_similarity("the wonderful new york mets", unicodeArray("the wonderful new york mets")) == 1.0
+    )
+    assert (
+        scorer.normalized_similarity(unicodeArray("the wonderful new york mets"), "the wonderful new york mets") == 1.0
+    )
 
 
 @pytest.mark.parametrize("scorer", all_scorer_modules)
