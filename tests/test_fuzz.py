@@ -262,11 +262,11 @@ def test_array(scorer):
     """
     # todo add support in pure python implementation
     assert scorer(
-        array("w", "the wonderful new york mets"),
-        array("w", "the wonderful new york mets"),
+        array("w", "the wonderful new york mets").encode("utf-32"),
+        array("w", "the wonderful new york mets").encode("utf-32"),
     )
-    assert scorer("the wonderful new york mets", array("w", "the wonderful new york mets"))
-    assert scorer(array("w", "the wonderful new york mets"), "the wonderful new york mets")
+    assert scorer("the wonderful new york mets", array("w", "the wonderful new york mets").encode("utf-32"))
+    assert scorer(array("w", "the wonderful new york mets").encode("utf-32"), "the wonderful new york mets")
 
 
 @pytest.mark.parametrize("scorer", scorers)
