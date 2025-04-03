@@ -721,6 +721,10 @@ def test_cdist_multiplier():
         expected_res,
     )
 
+def test_str_dtype():
+    np = pytest.importorskip("numpy")
+    assert process.cdist(["test"], ["test"], scorer=fuzz.ratio, dtype='uint8').dtype == np.uint8
+    assert process.cpdist(["test"], ["test"], scorer=fuzz.ratio, dtype='uint8').dtype == np.uint8
 
 def test_generators():
     """

@@ -1,11 +1,12 @@
 Changelog
 ---------
 
-[3.13.0] - 2025-
+[3.13.0] - 2025-04-03
 ^^^^^^^^^^^^^^^^^^^^^
 Added
 ~~~~~
 * add support for arrays of type 'w'
+* add support for any DTypeLike as dtype in ``cdist`` and ``cpdist``
 
 [3.12.2] - 2025-03-02
 ^^^^^^^^^^^^^^^^^^^^^

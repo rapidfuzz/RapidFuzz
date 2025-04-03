@@ -29,28 +29,30 @@ def _dtype_to_type_num(dtype):
 
     if dtype is None:
         return None
-    if dtype is np.int32:
+
+    dtype = np.dtype(dtype)
+    if dtype == np.int32:
         return _INT32
-    if dtype is np.int8:
+    if dtype == np.int8:
         return _INT8
-    if dtype is np.int16:
+    if dtype == np.int16:
         return _INT16
-    if dtype is np.int64:
+    if dtype == np.int64:
         return _INT64
-    if dtype is np.uint8:
+    if dtype == np.uint8:
         return _UINT8
-    if dtype is np.uint16:
+    if dtype == np.uint16:
         return _UINT16
-    if dtype is np.uint32:
+    if dtype == np.uint32:
         return _UINT32
-    if dtype is np.uint64:
+    if dtype == np.uint64:
         return _UINT64
-    if dtype is np.float32:
+    if dtype == np.float32:
         return _FLOAT32
-    if dtype is np.float64:
+    if dtype == np.float64:
         return _FLOAT64
 
-    msg = "unsupported dtype"
+    msg = f"unsupported dtype: {dtype}"
     raise TypeError(msg)
 
 

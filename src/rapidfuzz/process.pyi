@@ -312,6 +312,7 @@ def extract_iter(
 
 try:
     import numpy as np
+    from numpy.typing import DTypeLike
 
     @overload
     def cdist(
@@ -323,7 +324,7 @@ try:
         score_cutoff: float | None = None,
         score_hint: float | None = None,
         score_multiplier: float = 1,
-        dtype: np.dtype | None = None,
+        dtype: DTypeLike | None = None,
         workers: int = 1,
         scorer_kwargs: dict[str, Any] | None = None,
     ) -> np.ndarray: ...
@@ -337,7 +338,7 @@ try:
         score_cutoff: float | None = None,
         score_hint: float | None = None,
         score_multiplier: float = 1,
-        dtype: np.dtype | None = None,
+        dtype: DTypeLike | None = None,
         workers: int = 1,
         scorer_kwargs: dict[str, Any] | None = None,
     ) -> np.ndarray: ...
@@ -351,7 +352,7 @@ try:
         score_cutoff: _ResultType | None = None,
         score_hint: _ResultType | None = None,
         score_multiplier: _ResultType = 1,
-        dtype: np.dtype | None = None,
+        dtype: DTypeLike | None = None,
         workers: int = 1,
         scorer_kwargs: dict[str, Any] | None = None,
     ) -> np.ndarray: ...
@@ -365,7 +366,7 @@ try:
         score_cutoff: _ResultType | None = None,
         score_hint: _ResultType | None = None,
         score_multiplier: _ResultType = 1,
-        dtype: np.dtype | None = None,
+        dtype: DTypeLike | None = None,
         workers: int = 1,
         scorer_kwargs: dict[str, Any] | None = None,
     ) -> np.ndarray: ...
@@ -379,7 +380,7 @@ try:
         score_cutoff: float | None = None,
         score_hint: float | None = None,
         score_multiplier: float = 1,
-        dtype: np.dtype | None = None,
+        dtype: DTypeLike | None = None,
         workers: int = 1,
         scorer_kwargs: dict[str, Any] | None = None,
     ) -> np.ndarray: ...
@@ -393,7 +394,7 @@ try:
         score_cutoff: float | None = None,
         score_hint: float | None = None,
         score_multiplier: float = 1,
-        dtype: np.dtype | None = None,
+        dtype: DTypeLike | None = None,
         workers: int = 1,
         scorer_kwargs: dict[str, Any] | None = None,
     ) -> np.ndarray: ...
@@ -407,7 +408,7 @@ try:
         score_cutoff: _ResultType | None = None,
         score_hint: _ResultType | None = None,
         score_multiplier: _ResultType = 1,
-        dtype: np.dtype | None = None,
+        dtype: DTypeLike | None = None,
         workers: int = 1,
         scorer_kwargs: dict[str, Any] | None = None,
     ) -> np.ndarray: ...
@@ -421,7 +422,7 @@ try:
         score_cutoff: _ResultType | None = None,
         score_hint: _ResultType | None = None,
         score_multiplier: _ResultType = 1,
-        dtype: np.dtype | None = None,
+        dtype: DTypeLike | None = None,
         workers: int = 1,
         scorer_kwargs: dict[str, Any] | None = None,
     ) -> np.ndarray: ...

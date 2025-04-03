@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import heapq
-import numbers
 
 from rapidfuzz._utils import ScorerFlag, is_none, setupPandas
 from rapidfuzz.fuzz import WRatio, ratio
@@ -420,7 +419,7 @@ def _dtype_to_type_num(
     import numpy as np
 
     if dtype is not None:
-        return dtype
+        return np.dtype(dtype)
 
     params = getattr(scorer, "_RF_ScorerPy", None)
     if params is not None:
@@ -531,7 +530,7 @@ def cdist(
         for i, proc_query in enumerate(proc_choices):
             score = scorer(proc_query, proc_query, score_cutoff=score_cutoff, **scorer_kwargs) * score_multiplier
 
-            if issubclass(dtype, numbers.Integral):
+            if np.issubdtype(dtype, np.integer):
                 score = round(score)
 
             results[i, i] = score
@@ -546,7 +545,7 @@ def cdist(
                     * score_multiplier
                 )
 
-                if issubclass(dtype, numbers.Integral):
+                if np.issubdtype(dtype, np.integer):
                     score = round(score)
 
                 results[i, j] = results[j, i] = score
@@ -564,7 +563,7 @@ def cdist(
                     * score_multiplier
                 )
 
-                if issubclass(dtype, numbers.Integral):
+                if np.issubdtype(dtype, np.integer):
                     score = round(score)
 
                 results[i, j] = score
@@ -671,7 +670,7 @@ def cpdist(
         score *= score_multiplier
 
         # Round the result if dtype is integral
-        if issubclass(dtype, numbers.Integral):
+        if np.issubdtype(dtype, np.integer):
             score = round(score)
 
         # Store the score in the results matrix
