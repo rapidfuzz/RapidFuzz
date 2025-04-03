@@ -8,6 +8,10 @@ Added
 * add support for arrays of type 'w'
 * add support for any DTypeLike as dtype in ``cdist`` and ``cpdist``
 
+Changed
+~~~~~~~
+* upgrade to ``rapidfuzz-cpp==3.3.2``
+
 [3.12.2] - 2025-03-02
 ^^^^^^^^^^^^^^^^^^^^^
 Added
