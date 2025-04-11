@@ -4,4 +4,4 @@ from __future__ import annotations
 import os
 
 os.environ["RAPIDFUZZ_IMPLEMENTATION"] = "cpp"
-import rapidfuzz  # noqa: E402, F401
+import rapidfuzz  # noqa: F401

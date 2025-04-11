@@ -7,7 +7,7 @@ import heapq
 from rapidfuzz._utils import ScorerFlag, is_none, setupPandas
 from rapidfuzz.fuzz import WRatio, ratio
 
-__all__ = ["extract", "extract_iter", "extractOne", "cdist"]
+__all__ = ["cdist", "extract", "extractOne", "extract_iter"]
 
 
 def _get_scorer_flags_py(scorer, scorer_kwargs):

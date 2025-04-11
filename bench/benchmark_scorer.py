@@ -55,7 +55,7 @@ def benchmark():
     print("System:", get_platform())
     print("Words :", len(words))
     print("Sample:", len(sample))
-    print("Total : %s calls\n" % total)
+    print(f"Total : {total} calls\n")
 
     def wrap(f):
         def func():

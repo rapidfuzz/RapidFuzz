@@ -64,10 +64,7 @@ def is_none(s: Any) -> bool:
     if s is None or s is pandas_NA:
         return True
 
-    if isinstance(s, float) and isnan(s):
-        return True
-
-    return False
+    return isinstance(s, float) and isnan(s)
 
 
 def add_scorer_attrs(func: Any, cached_scorer_call: dict[str, Callable[..., dict[str, Any]]]):

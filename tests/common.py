@@ -30,10 +30,7 @@ def is_none(s):
     if s is None or s is pandas_NA:
         return True
 
-    if isinstance(s, float) and isnan(s):
-        return True
-
-    return False
+    return isinstance(s, float) and isnan(s)
 
 
 def call_and_maybe_catch(call, *args, catch_exceptions=False, **kwargs):

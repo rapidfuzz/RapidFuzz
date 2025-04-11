@@ -258,9 +258,8 @@ def test_invalid_input(scorer):
 
 def unicodeArray(text):
     if sys.version_info >= (3, 13, 0):
-        return array("w", [c for c in text])
-    else:
-        return array("u", text)
+        return array("w", list(text))
+    return array("u", text)
 
 
 @pytest.mark.parametrize("scorer", scorers)

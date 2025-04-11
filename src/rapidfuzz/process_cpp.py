@@ -21,7 +21,7 @@ from rapidfuzz.process_cpp_impl import (
     extractOne,
 )
 
-__all__ = ["extract", "extract_iter", "extractOne", "cdist", "cpdist"]
+__all__ = ["cdist", "cpdist", "extract", "extractOne", "extract_iter"]
 
 
 def _dtype_to_type_num(dtype):

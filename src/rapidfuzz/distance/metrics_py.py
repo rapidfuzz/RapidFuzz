@@ -246,11 +246,11 @@ add_scorer_attrs(levenshtein_normalized_similarity, levenshtein_norm_sim_attr)
 
 __all__ += [
     "levenshtein_distance",
+    "levenshtein_editops",
     "levenshtein_normalized_distance",
     "levenshtein_normalized_similarity",
-    "levenshtein_similarity",
-    "levenshtein_editops",
     "levenshtein_opcodes",
+    "levenshtein_similarity",
 ]
 
 
@@ -261,11 +261,11 @@ add_scorer_attrs(lcs_seq_normalized_similarity, norm_sim_attr)
 
 __all__ += [
     "lcs_seq_distance",
+    "lcs_seq_editops",
     "lcs_seq_normalized_distance",
     "lcs_seq_normalized_similarity",
-    "lcs_seq_similarity",
-    "lcs_seq_editops",
     "lcs_seq_opcodes",
+    "lcs_seq_similarity",
 ]
 
 
@@ -276,11 +276,11 @@ add_scorer_attrs(indel_normalized_similarity, norm_sim_attr)
 
 __all__ += [
     "indel_distance",
+    "indel_editops",
     "indel_normalized_distance",
     "indel_normalized_similarity",
-    "indel_similarity",
-    "indel_editops",
     "indel_opcodes",
+    "indel_similarity",
 ]
 
 
@@ -291,9 +291,9 @@ add_scorer_attrs(hamming_normalized_similarity, norm_sim_attr)
 
 __all__ += [
     "hamming_distance",
+    "hamming_editops",
     "hamming_normalized_distance",
     "hamming_normalized_similarity",
-    "hamming_similarity",
-    "hamming_editops",
     "hamming_opcodes",
+    "hamming_similarity",
 ]

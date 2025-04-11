@@ -44,7 +44,7 @@ that it does not provide the optional argument `force_ascii` which removes any n
 - `fuzz.UWRatio`
 - `fuzz.UQRatio`
 
-With the exception `fuzz.UWRatio` and `fuzz.UQRatio` of all have `force_ascii` enabled forthe peprocessing function by default.
+With the exception `fuzz.UWRatio` and `fuzz.UQRatio` of all have `force_ascii` enabled for the peprocessing function by default.
 
 In `RapidFuzz` no scorer preprocesses strings by default to keep the interface consistent. However a preprocessing function can be provided using the `processor` argument. In addition the functions `fuzz.UWRatio` and `fuzz.UQRatio` do not exist, since they are the same as  `fuzz.WRatio` / `fuzz.QRatio` with `force_ascii` disabled. Since in `RapidFuzz` the `force_ascii` argument does not exist these functions do not provide any value.
 

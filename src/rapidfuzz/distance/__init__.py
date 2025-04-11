@@ -18,20 +18,20 @@ from . import (
 from ._initialize import Editop, Editops, MatchingBlock, Opcode, Opcodes, ScoreAlignment
 
 __all__ = [
+    "OSA",
+    "DamerauLevenshtein",
     "Editop",
     "Editops",
-    "Opcode",
-    "Opcodes",
-    "ScoreAlignment",
-    "MatchingBlock",
-    "DamerauLevenshtein",
     "Hamming",
     "Indel",
     "Jaro",
     "JaroWinkler",
     "LCSseq",
     "Levenshtein",
-    "OSA",
-    "Prefix",
+    "MatchingBlock",
+    "Opcode",
+    "Opcodes",
     "Postfix",
+    "Prefix",
+    "ScoreAlignment",
 ]

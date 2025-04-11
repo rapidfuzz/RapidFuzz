@@ -55,7 +55,7 @@ def benchmark():
     print("System:", get_platform())
     print("Words :", len(words1))
     print("Sample:", len(words2))
-    print("Total : %s calls\n" % total)
+    print(f"Total : {total} calls\n")
 
     def wrap_cpdist(scorer):
         from rapidfuzz.process import cpdist
