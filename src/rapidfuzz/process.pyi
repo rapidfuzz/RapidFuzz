@@ -311,8 +311,7 @@ def extract_iter(
 ) -> Generator[tuple[_UnprocessedType2, _ResultType, int], None, None]: ...
 
 try:
-    import numpy as np
-    from numpy.typing import DTypeLike
+    import numpy.typing as npt
 
     @overload
     def cdist(
@@ -324,10 +323,10 @@ try:
         score_cutoff: float | None = None,
         score_hint: float | None = None,
         score_multiplier: float = 1,
-        dtype: DTypeLike | None = None,
+        dtype: npt.DTypeLike | None = None,
         workers: int = 1,
         scorer_kwargs: dict[str, Any] | None = None,
-    ) -> np.ndarray: ...
+    ) -> npt.NDArray[Any]: ...
     @overload
     def cdist(
         queries: Iterable[_UnprocessedType1 | None],
@@ -338,10 +337,10 @@ try:
         score_cutoff: float | None = None,
         score_hint: float | None = None,
         score_multiplier: float = 1,
-        dtype: DTypeLike | None = None,
+        dtype: npt.DTypeLike | None = None,
         workers: int = 1,
         scorer_kwargs: dict[str, Any] | None = None,
-    ) -> np.ndarray: ...
+    ) -> npt.NDArray[Any]: ...
     @overload
     def cdist(
         queries: Iterable[_StringType1 | None],
@@ -352,10 +351,10 @@ try:
         score_cutoff: _ResultType | None = None,
         score_hint: _ResultType | None = None,
         score_multiplier: _ResultType = 1,
-        dtype: DTypeLike | None = None,
+        dtype: npt.DTypeLike | None = None,
         workers: int = 1,
         scorer_kwargs: dict[str, Any] | None = None,
-    ) -> np.ndarray: ...
+    ) -> npt.NDArray[Any]: ...
     @overload
     def cdist(
         queries: Iterable[_UnprocessedType1 | None],
@@ -366,10 +365,10 @@ try:
         score_cutoff: _ResultType | None = None,
         score_hint: _ResultType | None = None,
         score_multiplier: _ResultType = 1,
-        dtype: DTypeLike | None = None,
+        dtype: npt.DTypeLike | None = None,
         workers: int = 1,
         scorer_kwargs: dict[str, Any] | None = None,
-    ) -> np.ndarray: ...
+    ) -> npt.NDArray[Any]: ...
     @overload
     def cpdist(
         queries: Iterable[Sequence[Hashable] | None],
@@ -380,10 +379,10 @@ try:
         score_cutoff: float | None = None,
         score_hint: float | None = None,
         score_multiplier: float = 1,
-        dtype: DTypeLike | None = None,
+        dtype: npt.DTypeLike | None = None,
         workers: int = 1,
         scorer_kwargs: dict[str, Any] | None = None,
-    ) -> np.ndarray: ...
+    ) -> npt.NDArray[Any]: ...
     @overload
     def cpdist(
         queries: Iterable[_UnprocessedType1 | None],
@@ -394,10 +393,10 @@ try:
         score_cutoff: float | None = None,
         score_hint: float | None = None,
         score_multiplier: float = 1,
-        dtype: DTypeLike | None = None,
+        dtype: npt.DTypeLike | None = None,
         workers: int = 1,
         scorer_kwargs: dict[str, Any] | None = None,
-    ) -> np.ndarray: ...
+    ) -> npt.NDArray[Any]: ...
     @overload
     def cpdist(
         queries: Iterable[_StringType1 | None],
@@ -408,10 +407,10 @@ try:
         score_cutoff: _ResultType | None = None,
         score_hint: _ResultType | None = None,
         score_multiplier: _ResultType = 1,
-        dtype: DTypeLike | None = None,
+        dtype: npt.DTypeLike | None = None,
         workers: int = 1,
         scorer_kwargs: dict[str, Any] | None = None,
-    ) -> np.ndarray: ...
+    ) -> npt.NDArray[Any]: ...
     @overload
     def cpdist(
         queries: Iterable[_UnprocessedType1 | None],
@@ -422,10 +421,10 @@ try:
         score_cutoff: _ResultType | None = None,
         score_hint: _ResultType | None = None,
         score_multiplier: _ResultType = 1,
-        dtype: DTypeLike | None = None,
+        dtype: npt.DTypeLike | None = None,
         workers: int = 1,
         scorer_kwargs: dict[str, Any] | None = None,
-    ) -> np.ndarray: ...
+    ) -> npt.NDArray[Any]: ...
 
 except ImportError:
     pass
