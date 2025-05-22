@@ -18,7 +18,7 @@ jobs:
 
       - uses: "actions/setup-python@v5"
         with:
-          python-version: "3.12"
+          python-version: "3.13"
 
       - name: Install dependencies
         run: |
@@ -54,7 +54,7 @@ jobs:
 
       - uses: "actions/setup-python@v5"
         with:
-          python-version: "3.12"
+          python-version: "3.13"
 
       - name: Install rapidfuzz-cpp
         run: |
@@ -98,7 +98,7 @@ jobs:
 
       - uses: "actions/setup-python@v5"
         with:
-          python-version: "3.12"
+          python-version: "3.13"
 
       - name: Install rapidfuzz-cpp
         run: |
@@ -139,7 +139,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.13t"]
         os: [ubuntu-latest, windows-latest, macos-13]
 
     steps:
@@ -205,7 +205,7 @@ jobs:
 
       - uses: "actions/setup-python@v5"
         with:
-          python-version: "3.11"
+          python-version: "3.13"
 
       - name: build
         run: |
