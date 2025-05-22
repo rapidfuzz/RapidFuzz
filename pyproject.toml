@@ -179,3 +179,10 @@ isort.combine-as-imports = true
 "tools/test_process_typing.py" = ["ARG001"]
 "_custom_build/backend.py" = ["T20"]
 "setup.py" = ["T20"]
+
+[tool.cibuildwheel]
+enable = ["cpython-freethreading", "pypy"]
+# in theory some tests require numpy / pandas as well. However those don't provider
+# wheels for all target platforms
+test-requires = ["pytest", "hypothesis"]
+test-command = "pytest {package}/tests"
