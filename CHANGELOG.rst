@@ -1,6 +1,16 @@
 Changelog
 ---------
 
+[3.14.0] - 2025-
+^^^^^^^^^^^^^^^^^^^^^
+Changed
+~~~~~~~
+* upgrade to ``Cython==3.1.1``. This enables compilation with free threaded python.
+
+Fixed
+~~~~~
+* remove unused hook-dirs from pyinstaller config to fix a warning
+
 [3.13.0] - 2025-04-03
 ^^^^^^^^^^^^^^^^^^^^^
 Added
