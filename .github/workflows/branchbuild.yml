@@ -182,7 +182,7 @@ jobs:
           python -m PyInstaller.utils.run_tests --include_only rapidfuzz.
 
       - name: test cx_freeze packaging
-        if: matrix.python-version != '3.13'
+        if: matrix.python-version != '3.13' && matrix.python-version != '3.13t'
         working-directory: tests/freezeTools
         run: |
           pip install cx_freeze
