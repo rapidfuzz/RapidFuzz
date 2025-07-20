@@ -41,7 +41,7 @@ def extractOne(
     score_cutoff: float | None = None,
     score_hint: float | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
-) -> tuple[_StringType2, float, _KeyType]: ...
+) -> tuple[_StringType2, float, _KeyType] | None: ...
 @overload
 def extractOne(
     query: Sequence[Hashable] | None,
@@ -52,7 +52,7 @@ def extractOne(
     score_cutoff: float | None = None,
     score_hint: float | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
-) -> tuple[_StringType2, float, int]: ...
+) -> tuple[_StringType2, float, int] | None: ...
 @overload
 def extractOne(
     query: _UnprocessedType1 | None,
@@ -63,7 +63,7 @@ def extractOne(
     score_cutoff: float | None = None,
     score_hint: float | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
-) -> tuple[_UnprocessedType2, float, _KeyType]: ...
+) -> tuple[_UnprocessedType2, float, _KeyType] | None: ...
 @overload
 def extractOne(
     query: _UnprocessedType1 | None,
@@ -74,7 +74,7 @@ def extractOne(
     score_cutoff: float | None = None,
     score_hint: float | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
-) -> tuple[_UnprocessedType2, float, int]: ...
+) -> tuple[_UnprocessedType2, float, int] | None: ...
 @overload
 def extractOne(
     query: _StringType1 | None,
@@ -85,7 +85,7 @@ def extractOne(
     score_cutoff: _ResultType | None = None,
     score_hint: _ResultType | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
-) -> tuple[_StringType2, _ResultType, _KeyType]: ...
+) -> tuple[_StringType2, _ResultType, _KeyType] | None: ...
 @overload
 def extractOne(
     query: _StringType1 | None,
@@ -96,7 +96,7 @@ def extractOne(
     score_cutoff: _ResultType | None = None,
     score_hint: _ResultType | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
-) -> tuple[_StringType2, _ResultType, int]: ...
+) -> tuple[_StringType2, _ResultType, int] | None: ...
 @overload
 def extractOne(
     query: _UnprocessedType1 | None,
@@ -107,7 +107,7 @@ def extractOne(
     score_cutoff: _ResultType | None = None,
     score_hint: _ResultType | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
-) -> tuple[_UnprocessedType2, _ResultType, _KeyType]: ...
+) -> tuple[_UnprocessedType2, _ResultType, _KeyType] | None: ...
 @overload
 def extractOne(
     query: _UnprocessedType1 | None,
@@ -118,7 +118,7 @@ def extractOne(
     score_cutoff: _ResultType | None = None,
     score_hint: _ResultType | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
-) -> tuple[_UnprocessedType2, _ResultType, int]: ...
+) -> tuple[_UnprocessedType2, _ResultType, int] | None: ...
 
 # mypy wants defaults to be valid for every possible parameterization of a generic function
 # so add separate overloads for the default version
