@@ -54,15 +54,14 @@ jobs:
           path: dist/*.tar.gz
 
   build_wheels_windows:
-    name: Build wheel on windows-latest/${{matrix.arch}}
+    name: Build wheel on ${{ matrix.os }}/auto
     needs: [build_sdist]
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        arch: [auto32, auto64, ARM64]
+        os: [windows-latest, windows-11-arm]
     env:
-      CIBW_ARCHS: ${{matrix.arch}}
       CIBW_TEST_SKIP: "*-win32"
       CIBW_BUILD_VERBOSITY: 3
 
@@ -90,7 +89,7 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_wheels_macos:
-    name: Build wheel on ${{ matrix.os }}/native
+    name: Build wheel on ${{ matrix.os }}/auto
     needs: [build_sdist]
     runs-on: ${{ matrix.os }}
     strategy:
@@ -98,7 +97,6 @@ jobs:
       matrix:
         os: [macos-13, macos-14]
     env:
-      CIBW_ARCHS: native
       CIBW_TEST_SKIP: "pp*-macosx_*"
       CIBW_BUILD_VERBOSITY: 3
 
@@ -132,7 +130,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [auto, aarch64, ppc64le, s390x]
+        arch: [auto, ppc64le, s390x]
         python_tag: ["cp39-*", "cp310-*", "cp311-*", "cp312-*", "cp313-*", "cp314-*"]
     env:
       CIBW_ARCHS_LINUX: ${{matrix.arch}}
@@ -171,13 +169,49 @@ jobs:
           name: artifact-${{ github.job }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
 
+  build_wheels_linux_arm:
+    name: Build wheels on ubuntu-24.04-arm/aarch64/${{matrix.python_tag}}
+    needs: [build_sdist]
+    runs-on: ubuntu-24.04-arm
+    strategy:
+      fail-fast: false
+      matrix:
+        python_tag: ["cp39-*", "cp310-*", "cp311-*", "cp312-*", "cp313-*", "cp314-*"]
+    env:
+      CIBW_BUILD: ${{matrix.python_tag}}
+      CIBW_TEST_SKIP: "{*_{aarch64,ppc64le,s390x},*musllinux_*}"
+      CIBW_BUILD_VERBOSITY: 3
+
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          name: artifact-sdist
+          path: dist
+
+      - uses: actions/setup-python@v5
+
+      - name: Copy wheel
+        run: cp dist/*.tar.gz rapidfuzz.tar.gz
+
+      - name: Build wheel
+        uses: pypa/cibuildwheel@v3.1.4
+        with:
+          package-dir: rapidfuzz.tar.gz
+          output-dir: wheelhouse
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-${{ github.job }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
+
   build_wheels_pyodide:
     name: Build wheels on ubuntu-latest/pyodide
     needs: [build_sdist]
     runs-on: ubuntu-latest
     env:
       CIBW_PLATFORM: pyodide
-      CIBW_BUILD_VERBOSITY: 3
+      #CIBW_BUILD_VERBOSITY: 3
 
     steps:
       - uses: actions/download-artifact@v5
