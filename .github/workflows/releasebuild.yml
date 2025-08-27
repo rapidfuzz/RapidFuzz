@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest hypothesis pandas mypy Cython==3.1.1
+          pip install pytest hypothesis pandas mypy Cython==3.1.3
 
       # The cythonized files allow installation from the sdist without cython
       - name: Generate cython
@@ -131,7 +131,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: [auto, ppc64le, s390x]
-        python_tag: ["cp39-*", "cp310-*", "cp311-*", "cp312-*", "cp313-*", "cp314-*"]
+        python_tag: ["cp310-*", "cp311-*", "cp312-*", "cp313-*", "cp314-*"]
     env:
       CIBW_ARCHS_LINUX: ${{matrix.arch}}
       CIBW_BUILD: ${{matrix.python_tag}}
@@ -170,14 +170,16 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_wheels_linux_arm:
-    name: Build wheels on ubuntu-24.04-arm/aarch64/${{matrix.python_tag}}
+    name: Build wheels on ubuntu-24.04-arm/${{matrix.arch}}/${{matrix.python_tag}}
     needs: [build_sdist]
     runs-on: ubuntu-24.04-arm
     strategy:
       fail-fast: false
       matrix:
-        python_tag: ["cp39-*", "cp310-*", "cp311-*", "cp312-*", "cp313-*", "cp314-*"]
+        arch: [aarch64, armv7l]
+        python_tag: ["cp310-*", "cp311-*", "cp312-*", "cp313-*", "cp314-*"]
     env:
+      CIBW_ARCHS_LINUX: ${{matrix.arch}}
       CIBW_BUILD: ${{matrix.python_tag}}
       CIBW_TEST_SKIP: "{*_{aarch64,ppc64le,s390x},*musllinux_*}"
       CIBW_BUILD_VERBOSITY: 3

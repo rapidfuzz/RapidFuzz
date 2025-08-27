@@ -5,10 +5,18 @@ Changelog
 ^^^^^^^^^^^^^^^^^^^^^
 Changed
 ~~~~~~~
-* upgrade to ``Cython==3.1.1``. This enables compilation with free threaded python.
+* upgrade to ``Cython==3.1.3``. This enables compilation with free threaded python.
+* upgrade to ``rapidfuzz-cpp==3.3.``
+
+Added
+~~~~~
+* add support for freethreaded Python
 * add python 3.14 wheels
-* add wheels for freethreaded Python
-* upgrade to ``rapidfuzz-cpp==3.3.3``
+
+Removed
+~~~~~~~
+* dropped support for Python3.9
+* drop 32 bit linux wheels
 
 Fixed
 ~~~~~
