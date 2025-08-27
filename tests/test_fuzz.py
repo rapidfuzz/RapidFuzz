@@ -173,6 +173,10 @@ def testWRatioUnicode():
     assert fuzz.WRatio("new york mets", "new york mets") == 100
 
 
+def test_issue452():
+    assert pytest.approx(fuzz.WRatio("hello", "hello" + "abcde"*7)) == 90
+
+
 def testQRatioUnicode():
     assert fuzz.WRatio("new york mets", "new york mets") == 100
 

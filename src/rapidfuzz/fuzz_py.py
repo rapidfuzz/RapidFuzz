@@ -802,7 +802,7 @@ def WRatio(
             token_ratio(s1, s2, score_cutoff=score_cutoff, processor=None) * UNBASE_SCALE,
         )
 
-    PARTIAL_SCALE = 0.9 if len_ratio < 8.0 else 0.6
+    PARTIAL_SCALE = 0.9 if len_ratio <= 8.0 else 0.6
     score_cutoff = max(score_cutoff, end_ratio) / PARTIAL_SCALE
     end_ratio = max(end_ratio, partial_ratio(s1, s2, score_cutoff=score_cutoff) * PARTIAL_SCALE)
 

@@ -1,17 +1,19 @@
 Changelog
 ---------
 
-[3.14.0] - 2025-
+[3.14.0] - 2025-08-27
 ^^^^^^^^^^^^^^^^^^^^^
 Changed
 ~~~~~~~
 * upgrade to ``Cython==3.1.1``. This enables compilation with free threaded python.
 * add python 3.14 wheels
 * add wheels for freethreaded Python
+* upgrade to ``rapidfuzz-cpp==3.3.3``
 
 Fixed
 ~~~~~
 * remove unused hook-dirs from pyinstaller config to fix a warning
+* fixed WRatio for a length ratio of exactly 8.0
 
 [3.13.0] - 2025-04-03
 ^^^^^^^^^^^^^^^^^^^^^
