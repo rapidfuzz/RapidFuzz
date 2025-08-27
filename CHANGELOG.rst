@@ -6,6 +6,8 @@ Changelog
 Changed
 ~~~~~~~
 * upgrade to ``Cython==3.1.1``. This enables compilation with free threaded python.
+* add python 3.14 wheels
+* add wheels for freethreaded Python
 
 Fixed
 ~~~~~
