@@ -61,7 +61,7 @@ def test_extractOne():
     _b = process.extractOne("", [""])  # type: ignore [assignment]
     _b = process.extractOne("", [""], scorer=Levenshtein.distance)
     _a = process.extractOne(1, [""], scorer=fuzz.ratio)  # type: ignore [call-overload]
-    _a = process.extractOne("", [1], scorer=fuzz.ratio)  # type: ignore [call-overload]
+    _a = process.extractOne("", [1], scorer=fuzz.ratio)  # type: ignore [list-item]
     _a = process.extractOne(list(""), [""], scorer=fuzz.ratio)
     _c: tuple[list[str], float, int] | None = process.extractOne("", [list("")], scorer=fuzz.ratio)
     _a = process.extractOne("", [""], processor=string_preprocessor)
@@ -71,13 +71,13 @@ def test_extractOne():
     _a = process.extractOne("", [""], scorer=valid_scorer_str1)
     _a = process.extractOne("", [""], scorer=valid_scorer_str2)
     _a = process.extractOne("", [""], scorer=valid_scorer_str3)
-    _a = process.extractOne("", [""], scorer=invalid_scorer_str1)  # type: ignore [call-overload]
-    _a = process.extractOne("", [""], scorer=invalid_scorer_str2)  # type: ignore [call-overload]
-    _a = process.extractOne("", [""], scorer=invalid_scorer_str3)  # type: ignore [call-overload]
-    _a = process.extractOne("", [""], scorer=invalid_scorer_str4)  # type: ignore [call-overload]
-    _a = process.extractOne("", [""], scorer=invalid_scorer_str5)  # type: ignore [call-overload]
-    _a = process.extractOne(list(""), [""], scorer=valid_scorer_str1)  # type: ignore [call-overload]
-    _c = process.extractOne("", [list("")], scorer=valid_scorer_str1)  # type: ignore [call-overload]
+    _a = process.extractOne("", [""], scorer=invalid_scorer_str1)  # type: ignore [arg-type]
+    _a = process.extractOne("", [""], scorer=invalid_scorer_str2)  # type: ignore [arg-type]
+    _a = process.extractOne("", [""], scorer=invalid_scorer_str3)  # type: ignore [arg-type]
+    _a = process.extractOne("", [""], scorer=invalid_scorer_str4)  # type: ignore [arg-type]
+    _a = process.extractOne("", [""], scorer=invalid_scorer_str5)  # type: ignore [arg-type]
+    _a = process.extractOne(list(""), [""], scorer=valid_scorer_str1)  # type: ignore [arg-type]
+    _c = process.extractOne("", [list("")], scorer=valid_scorer_str1)  # type: ignore [arg-type]
     _a = process.extractOne(list(""), [""], scorer=valid_scorer_seq1)
     _c = process.extractOne("", [list("")], scorer=valid_scorer_seq1)
 
@@ -89,7 +89,7 @@ def test_extract():
     _b = process.extract("", [""])  # type: ignore [assignment]
     _b = process.extract("", [""], scorer=Levenshtein.distance)
     _a = process.extract(1, [""], scorer=fuzz.ratio)  # type: ignore [call-overload]
-    _a = process.extract("", [1], scorer=fuzz.ratio)  # type: ignore [call-overload]
+    _a = process.extract("", [1], scorer=fuzz.ratio)  # type: ignore [list-item]
     _a = process.extract(list(""), [""], scorer=fuzz.ratio)
     _c: list[tuple[list[str], float, int]] = process.extract("", [list("")], scorer=fuzz.ratio)
     _a = process.extract("", [""], processor=string_preprocessor)
@@ -99,13 +99,13 @@ def test_extract():
     _a = process.extract("", [""], scorer=valid_scorer_str1)
     _a = process.extract("", [""], scorer=valid_scorer_str2)
     _a = process.extract("", [""], scorer=valid_scorer_str3)
-    _a = process.extract("", [""], scorer=invalid_scorer_str1)  # type: ignore [call-overload]
-    _a = process.extract("", [""], scorer=invalid_scorer_str2)  # type: ignore [call-overload]
-    _a = process.extract("", [""], scorer=invalid_scorer_str3)  # type: ignore [call-overload]
-    _a = process.extract("", [""], scorer=invalid_scorer_str4)  # type: ignore [call-overload]
-    _a = process.extract("", [""], scorer=invalid_scorer_str5)  # type: ignore [call-overload]
-    _a = process.extract(list(""), [""], scorer=valid_scorer_str1)  # type: ignore [call-overload]
-    _c = process.extract("", [list("")], scorer=valid_scorer_str1)  # type: ignore [call-overload]
+    _a = process.extract("", [""], scorer=invalid_scorer_str1)  # type: ignore [arg-type]
+    _a = process.extract("", [""], scorer=invalid_scorer_str2)  # type: ignore [arg-type]
+    _a = process.extract("", [""], scorer=invalid_scorer_str3)  # type: ignore [arg-type]
+    _a = process.extract("", [""], scorer=invalid_scorer_str4)  # type: ignore [arg-type]
+    _a = process.extract("", [""], scorer=invalid_scorer_str5)  # type: ignore [arg-type]
+    _a = process.extract(list(""), [""], scorer=valid_scorer_str1)  # type: ignore [arg-type]
+    _c = process.extract("", [list("")], scorer=valid_scorer_str1)  # type: ignore [arg-type]
     _a = process.extract(list(""), [""], scorer=valid_scorer_seq1)
     _c = process.extract("", [list("")], scorer=valid_scorer_seq1)
 
@@ -117,7 +117,7 @@ def test_extract_iter():
     _b = process.extract_iter("", [""])  # type: ignore [assignment]
     _b = process.extract_iter("", [""], scorer=Levenshtein.distance)
     _a = process.extract_iter(1, [""], scorer=fuzz.ratio)  # type: ignore [call-overload]
-    _a = process.extract_iter("", [1], scorer=fuzz.ratio)  # type: ignore [call-overload]
+    _a = process.extract_iter("", [1], scorer=fuzz.ratio)  # type: ignore [list-item]
     _a = process.extract_iter(list(""), [""], scorer=fuzz.ratio)
     _c: Generator[tuple[list[str], float, int], None, None] = process.extract_iter("", [list("")], scorer=fuzz.ratio)
     _a = process.extract_iter("", [""], processor=string_preprocessor)
@@ -129,13 +129,13 @@ def test_extract_iter():
     _a = process.extract_iter("", [""], scorer=valid_scorer_str1)
     _a = process.extract_iter("", [""], scorer=valid_scorer_str2)
     _a = process.extract_iter("", [""], scorer=valid_scorer_str3)
-    _a = process.extract_iter("", [""], scorer=invalid_scorer_str1)  # type: ignore [call-overload]
-    _a = process.extract_iter("", [""], scorer=invalid_scorer_str2)  # type: ignore [call-overload]
-    _a = process.extract_iter("", [""], scorer=invalid_scorer_str3)  # type: ignore [call-overload]
-    _a = process.extract_iter("", [""], scorer=invalid_scorer_str4)  # type: ignore [call-overload]
-    _a = process.extract_iter("", [""], scorer=invalid_scorer_str5)  # type: ignore [call-overload]
-    _a = process.extract_iter(list(""), [""], scorer=valid_scorer_str1)  # type: ignore [call-overload]
-    _c = process.extract_iter("", [list("")], scorer=valid_scorer_str1)  # type: ignore [call-overload]
+    _a = process.extract_iter("", [""], scorer=invalid_scorer_str1)  # type: ignore [arg-type]
+    _a = process.extract_iter("", [""], scorer=invalid_scorer_str2)  # type: ignore [arg-type]
+    _a = process.extract_iter("", [""], scorer=invalid_scorer_str3)  # type: ignore [arg-type]
+    _a = process.extract_iter("", [""], scorer=invalid_scorer_str4)  # type: ignore [arg-type]
+    _a = process.extract_iter("", [""], scorer=invalid_scorer_str5)  # type: ignore [arg-type]
+    _a = process.extract_iter(list(""), [""], scorer=valid_scorer_str1)  # type: ignore [arg-type]
+    _c = process.extract_iter("", [list("")], scorer=valid_scorer_str1)  # type: ignore [arg-type]
     _a = process.extract_iter(list(""), [""], scorer=valid_scorer_seq1)
     _c = process.extract_iter("", [list("")], scorer=valid_scorer_seq1)
 
