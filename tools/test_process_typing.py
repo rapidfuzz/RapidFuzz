@@ -55,19 +55,19 @@ def invalid_scorer_str5(s1: str, s2: int, score_cutoff: float | None = None) -> 
 
 
 def test_extractOne():
-    _a: tuple[str, float, int] = process.extractOne("", [""])
+    _a: tuple[str, float, int] | None = process.extractOne("", [""])
     _a = process.extractOne("", [""], scorer=fuzz.ratio)
-    _b: tuple[str, int, int] = process.extractOne("", [""], scorer=fuzz.ratio)  # type: ignore [assignment]
+    _b: tuple[str, int, int] | None = process.extractOne("", [""], scorer=fuzz.ratio)  # type: ignore [assignment]
     _b = process.extractOne("", [""])  # type: ignore [assignment]
     _b = process.extractOne("", [""], scorer=Levenshtein.distance)
     _a = process.extractOne(1, [""], scorer=fuzz.ratio)  # type: ignore [call-overload]
     _a = process.extractOne("", [1], scorer=fuzz.ratio)  # type: ignore [call-overload]
     _a = process.extractOne(list(""), [""], scorer=fuzz.ratio)
-    _c: tuple[list[str], float, int] = process.extractOne("", [list("")], scorer=fuzz.ratio)
+    _c: tuple[list[str], float, int] | None = process.extractOne("", [list("")], scorer=fuzz.ratio)
     _a = process.extractOne("", [""], processor=string_preprocessor)
     _a = process.extractOne(list(""), [""], processor=string_preprocessor)  # type: ignore [arg-type]
     _c = process.extractOne("", [list("")], processor=string_preprocessor)  # type: ignore [arg-type]
-    _d: tuple[MyClass, float, int] = process.extractOne(MyClass(), [MyClass()], processor=lambda x: x.a)
+    _d: tuple[MyClass, float, int] | None = process.extractOne(MyClass(), [MyClass()], processor=lambda x: x.a)
     _a = process.extractOne("", [""], scorer=valid_scorer_str1)
     _a = process.extractOne("", [""], scorer=valid_scorer_str2)
     _a = process.extractOne("", [""], scorer=valid_scorer_str3)
