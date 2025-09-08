@@ -1,5 +1,5 @@
 # distutils: language=c++
-# cython: language_level=3, binding=True, linetrace=True
+# cython: language_level=3, binding=True
 
 from cpp_common cimport (
     CreateProcessorContext,

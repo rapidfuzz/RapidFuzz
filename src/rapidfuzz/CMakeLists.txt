@@ -4,14 +4,20 @@ function(create_cython_target _name)
         ${CMAKE_CURRENT_LIST_DIR}/${_name}.cxx
         PARENT_SCOPE)
   else()
+    set(cython_linetrace_options "")
+    if(CYTHON_TRACE OR CYTHON_TRACE_NOGIL)
+      set(cython_linetrace_options "-X" "linetrace=True")
+    endif()
+
     add_custom_command(
       OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${_name}.cxx"
       MAIN_DEPENDENCY "${CMAKE_CURRENT_LIST_DIR}/${_name}.pyx"
       VERBATIM
       COMMAND
-        Python::Interpreter -m cython "${CMAKE_CURRENT_LIST_DIR}/${_name}.pyx"
-        --cplus -I "${CMAKE_CURRENT_LIST_DIR}" --output-file
-        "${CMAKE_CURRENT_BINARY_DIR}/${_name}.cxx")
+        Python::Interpreter -m cython ${cython_linetrace_options}
+        "${CMAKE_CURRENT_LIST_DIR}/${_name}.pyx" --cplus
+        -I "${CMAKE_CURRENT_LIST_DIR}"
+        --output-file "${CMAKE_CURRENT_BINARY_DIR}/${_name}.cxx")
 
     set(${_name}
         ${CMAKE_CURRENT_BINARY_DIR}/${_name}.cxx

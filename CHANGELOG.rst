@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+[3.14.1] - 2025-09-08
+^^^^^^^^^^^^^^^^^^^^^
+Fixed
+~~~~~
+* Fully disable line tracing in release builds
+
 [3.14.0] - 2025-08-27
 ^^^^^^^^^^^^^^^^^^^^^
 Changed

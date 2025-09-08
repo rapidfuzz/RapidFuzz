@@ -1,5 +1,5 @@
 # distutils: language=c++
-# cython: language_level=3, binding=True, linetrace=True
+# cython: language_level=3, binding=True
 
 from cpp_common cimport EditType, RfEditOp, RfOpcode, convert_string, is_valid_string
 from cpython.list cimport PyList_New, PyList_SET_ITEM
