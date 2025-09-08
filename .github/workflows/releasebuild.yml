@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           submodules: 'true'
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
@@ -74,7 +74,7 @@ jobs:
       - name: Copy wheel
         run: copy dist/*.tar.gz rapidfuzz.tar.gz
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.1.4
@@ -106,7 +106,7 @@ jobs:
           name: artifact-sdist
           path: dist
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
 
       - name: Copy wheel
         run: cp dist/*.tar.gz rapidfuzz.tar.gz
@@ -144,7 +144,7 @@ jobs:
           name: artifact-sdist
           path: dist
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
 
       - name: Copy wheel
         run: cp dist/*.tar.gz rapidfuzz.tar.gz
@@ -190,7 +190,7 @@ jobs:
           name: artifact-sdist
           path: dist
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
 
       - name: Copy wheel
         run: cp dist/*.tar.gz rapidfuzz.tar.gz
@@ -221,7 +221,7 @@ jobs:
           name: artifact-sdist
           path: dist
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -255,4 +255,4 @@ jobs:
           pattern: artifact-*
           merge-multiple: true
 
-      - uses: pypa/gh-action-pypi-publish@v1.12.4
+      - uses: pypa/gh-action-pypi-publish@v1.13.0
