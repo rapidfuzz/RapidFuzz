@@ -174,7 +174,7 @@ def testWRatioUnicode():
 
 
 def test_issue452():
-    assert pytest.approx(fuzz.WRatio("hello", "hello" + "abcde"*7)) == 90
+    assert pytest.approx(fuzz.WRatio("hello", "hello" + "abcde" * 7)) == 90
 
 
 def testQRatioUnicode():
