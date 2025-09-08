@@ -1,5 +1,4 @@
 # distutils: language=c++
-# cython: language_level=3, binding=True
 
 from . import fuzz_py
 from .distance._initialize_cpp import ScoreAlignment

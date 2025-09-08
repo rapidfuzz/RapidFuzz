@@ -1,5 +1,4 @@
 # distutils: language=c++
-# cython: language_level=3, binding=True
 
 from . import metrics_py
 from ._initialize_cpp import Editops
