@@ -1,5 +1,4 @@
 # distutils: language=c++
-# cython: language_level=3, binding=True
 
 from cpython.object cimport PyObject
 from cpython.pycapsule cimport PyCapsule_GetPointer, PyCapsule_IsValid, PyCapsule_New
