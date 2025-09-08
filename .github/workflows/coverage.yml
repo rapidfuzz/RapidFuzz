@@ -22,11 +22,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest hypothesis pandas coverage cython
 
-      - name: Generate cython
-        run: |
-          chmod +x ./tools/generate_cython.sh
-          ./tools/generate_cython.sh
-
       # for cython tests inplace installation is required
       - name: build
         run: CMAKE_ARGS=-DCYTHON_TRACE_NOGIL=1 pip install -e . -v
