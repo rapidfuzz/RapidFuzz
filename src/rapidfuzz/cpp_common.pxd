@@ -1,5 +1,3 @@
-# distutils: language=c++
-
 from cpython.object cimport PyObject
 from cpython.pycapsule cimport PyCapsule_GetPointer, PyCapsule_IsValid, PyCapsule_New
 from libc.stddef cimport wchar_t

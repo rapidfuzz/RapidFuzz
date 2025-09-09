@@ -1,5 +1,3 @@
-# distutils: language=c++
-
 from cpp_common cimport RfEditops, RfOpcodes
 from libcpp cimport bool
 from libcpp.vector cimport vector

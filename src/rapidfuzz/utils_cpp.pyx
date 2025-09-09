@@ -1,5 +1,3 @@
-# distutils: language=c++
-
 from cpp_common cimport (
     CreateProcessorContext,
     SetProcessorAttrs,

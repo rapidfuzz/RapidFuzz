@@ -1,5 +1,3 @@
-# distutils: language=c++
-
 from . import fuzz_py
 from .distance._initialize_cpp import ScoreAlignment
 
