@@ -1,5 +1,3 @@
-# distutils: language=c++
-
 from rapidfuzz.fuzz import WRatio, ratio
 
 from . import process_py

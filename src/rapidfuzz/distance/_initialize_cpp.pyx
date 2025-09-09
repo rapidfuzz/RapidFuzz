@@ -1,5 +1,3 @@
-# distutils: language=c++
-
 from cpp_common cimport EditType, RfEditOp, RfOpcode, convert_string, is_valid_string
 from cpython.list cimport PyList_New, PyList_SET_ITEM
 from cpython.pycapsule cimport PyCapsule_GetPointer, PyCapsule_IsValid, PyCapsule_New

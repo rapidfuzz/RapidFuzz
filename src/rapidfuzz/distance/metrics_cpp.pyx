@@ -1,5 +1,3 @@
-# distutils: language=c++
-
 from . import metrics_py
 from ._initialize_cpp import Editops
 import sys
