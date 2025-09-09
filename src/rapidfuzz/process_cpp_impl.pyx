@@ -118,7 +118,7 @@ cdef extern from "process_cpp.hpp":
     cdef bool is_lowest_score_worst[T](const RF_ScorerFlags* scorer_flags)
     cdef T get_optimal_score[T](const RF_ScorerFlags* scorer_flags)
 
-    cpdef enum class MatrixType:
+    cdef enum class MatrixType:
         UNDEFINED = 0
         FLOAT32 = 1
         FLOAT64 = 2
