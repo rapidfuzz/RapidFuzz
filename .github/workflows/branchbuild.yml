@@ -141,6 +141,9 @@ jobs:
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.13t"]
         os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, windows-11-arm, macos-13, macos-14]
+        exclude:
+          - python-version: "3.10"
+            os: windows-11-arm
 
     steps:
       - uses: "actions/checkout@v5"
