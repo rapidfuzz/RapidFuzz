@@ -24,7 +24,7 @@ jobs:
 
       # for cython tests inplace installation is required
       - name: build
-        run: CMAKE_ARGS=-DCYTHON_TRACE_NOGIL=1 pip install -e . -v
+        run: CMAKE_ARGS=-DRAPIDFUZZ_ENABLE_COVERAGE=1 pip install -e . -v
 
       - name: Test with pytest and generate coverage info
         run: |
