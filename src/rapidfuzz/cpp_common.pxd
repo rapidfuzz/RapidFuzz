@@ -34,7 +34,7 @@ from array import array
 pandas_NA = None
 
 cdef extern from "rapidfuzz/details/types.hpp" namespace "rapidfuzz" nogil:
-    cpdef enum class EditType:
+    cdef enum class EditType:
         None    = 0,
         Replace = 1,
         Insert  = 2,
