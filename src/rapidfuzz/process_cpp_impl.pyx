@@ -1,4 +1,5 @@
 # distutils: language=c++
+# cython: language_level=3, binding=True
 
 from rapidfuzz.fuzz import WRatio, ratio
 
