@@ -1,3 +1,5 @@
+#cython: freethreading_compatible = True
+
 from libc.stdint cimport uint32_t
 
 cdef extern from "FeatureDetector/CpuInfo.hpp":

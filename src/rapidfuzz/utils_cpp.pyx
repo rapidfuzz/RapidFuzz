@@ -1,3 +1,5 @@
+#cython: freethreading_compatible = True
+
 from cpp_common cimport (
     CreateProcessorContext,
     SetProcessorAttrs,
