@@ -25,7 +25,7 @@ jobs:
       - name: Generate cython
         run: |
           chmod +x ./tools/generate_cython.sh
-          ./tools/generate_cython.sh
+          ./tools/generate_cython.sh --linetrace
 
       # for cython tests inplace installation is required
       - name: build

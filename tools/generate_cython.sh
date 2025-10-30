@@ -1,9 +1,15 @@
 #!/bin/sh
 curdir="${0%/*}/../src/rapidfuzz"
 
+linetrace_flag=""
+if [ "$1" = "--linetrace" ]; then
+  linetrace_flag="-X linetrace=True"
+  echo "Line tracing enabled"
+fi
+
 generate_cython()
 {
-  python -m cython -I "$curdir" --cplus "$curdir"/"$1".pyx -o "$curdir"/"$1".cxx || exit 1
+  python -m cython -I "$curdir" --cplus $linetrace_flag "$curdir"/"$1".pyx -o "$curdir"/"$1".cxx || exit 1
   echo "Generated $curdir/$1.cxx"
 }
 
