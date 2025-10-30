@@ -22,6 +22,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest hypothesis pandas coverage cython
 
+      - name: Generate cython
+        run: |
+          chmod +x ./tools/generate_cython.sh
+          ./tools/generate_cython.sh --linetrace
+
       # for cython tests inplace installation is required
       - name: build
         run: CMAKE_ARGS=-DRAPIDFUZZ_ENABLE_COVERAGE=1 pip install -e . -v

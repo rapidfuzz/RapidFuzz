@@ -95,7 +95,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-13, macos-14]
+        os: [macos-15-intel, macos-14]
     env:
       CIBW_TEST_SKIP: "pp*-macosx_*"
       CIBW_BUILD_VERBOSITY: 3
