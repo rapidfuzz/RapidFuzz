@@ -19,7 +19,7 @@ Fixed
 Changed
 ~~~~~~~
 * upgrade to ``Cython==3.1.3``. This enables compilation with free threaded python.
-* upgrade to ``rapidfuzz-cpp==3.3.``
+* upgrade to ``rapidfuzz-cpp==3.3.3``
 
 Added
 ~~~~~
