@@ -242,7 +242,7 @@ jobs:
 
   deploy-wheels:
     if: github.event_name == 'release' && github.event.action == 'published'
-    needs: [build_wheels_windows, build_wheels_macos, build_wheels_linux, build_sdist]
+    needs: [build_wheels_windows, build_wheels_macos, build_wheels_linux, build_wheels_arm, build_sdist]
     name: deploy wheels to pypi
     runs-on: ubuntu-latest
     environment: pypi-release
