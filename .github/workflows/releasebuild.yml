@@ -131,7 +131,17 @@ jobs:
       fail-fast: false
       matrix:
         arch: [auto, ppc64le, s390x]
-        python_tag: ["cp310-*", "cp311-*", "cp312-*", "cp313-*", "cp314-*"]
+        python_tag: ["cp310-*", "cp311-*", "cp312-*", "cp313-*", "cp314-*", "cp313t-*", "cp314t-*", "pp310-*", "pp311-*"]
+        exclude:
+          # PyPy builds not available for these platforms
+          - arch: ppc64le
+            python_tag: "pp310-*"
+          - arch: ppc64le
+            python_tag: "pp311-*"
+          - arch: s390x
+            python_tag: "pp310-*"
+          - arch: s390x
+            python_tag: "pp311-*"
     env:
       CIBW_ARCHS_LINUX: ${{matrix.arch}}
       CIBW_BUILD: ${{matrix.python_tag}}
@@ -177,10 +187,8 @@ jobs:
       fail-fast: false
       matrix:
         arch: [aarch64, armv7l]
-        python_tag: ["cp310-*", "cp311-*", "cp312-*", "cp313-*", "cp314-*"]
     env:
       CIBW_ARCHS_LINUX: ${{matrix.arch}}
-      CIBW_BUILD: ${{matrix.python_tag}}
       CIBW_TEST_SKIP: "{*_{aarch64,ppc64le,s390x},*musllinux_*}"
       CIBW_BUILD_VERBOSITY: 3
 
