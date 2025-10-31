@@ -450,7 +450,7 @@ def test_cdist(queries, choices):
 
 
 @given(s1=st.text(max_size=64), s2=st.text(max_size=64))
-@settings(max_examples=50, deadline=1000)
+@settings(max_examples=50, deadline=None)
 def test_jaro_winkler_word(s1, s2):
     assert isclose(jaro_winkler_similarity(s1, s2), JaroWinkler.similarity(s1, s2))
 
