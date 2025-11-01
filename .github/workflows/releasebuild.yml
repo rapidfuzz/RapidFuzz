@@ -124,28 +124,11 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_wheels_linux:
-    name: Build wheels on ubuntu-latest/${{matrix.arch}}/${{matrix.python_tag}}
+    name: Build wheels on ubuntu-latest/auto/auto
     needs: [build_sdist]
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [auto, ppc64le, s390x]
-        python_tag: ["cp310-*", "cp311-*", "cp312-*", "cp313-*", "cp314-*", "cp313t-*", "cp314t-*", "pp310-*", "pp311-*"]
-        exclude:
-          # PyPy builds not available for these platforms
-          - arch: ppc64le
-            python_tag: "pp310-*"
-          - arch: ppc64le
-            python_tag: "pp311-*"
-          - arch: s390x
-            python_tag: "pp310-*"
-          - arch: s390x
-            python_tag: "pp311-*"
     env:
-      CIBW_ARCHS_LINUX: ${{matrix.arch}}
-      CIBW_BUILD: ${{matrix.python_tag}}
-      CIBW_TEST_SKIP: "{*_{aarch64,ppc64le,s390x},*musllinux_*}"
+      CIBW_TEST_SKIP: "{*musllinux_*}"
       CIBW_BUILD_VERBOSITY: 3
 
     steps:
@@ -158,14 +141,6 @@ jobs:
 
       - name: Copy wheel
         run: cp dist/*.tar.gz rapidfuzz.tar.gz
-
-      - uses: docker/setup-qemu-action@v3
-        name: Set up QEMU
-        with:
-          # This should be temporary
-          # xref https://github.com/docker/setup-qemu-action/issues/188
-          # xref https://github.com/tonistiigi/binfmt/issues/215
-          image: tonistiigi/binfmt:qemu-v8.1.5
 
       - name: Build wheel
         uses: pypa/cibuildwheel@v3.2.1
@@ -189,7 +164,7 @@ jobs:
         arch: [aarch64, armv7l]
     env:
       CIBW_ARCHS_LINUX: ${{matrix.arch}}
-      CIBW_TEST_SKIP: "{*_{aarch64,ppc64le,s390x},*musllinux_*}"
+      CIBW_TEST_SKIP: "{*_aarch64,*musllinux_*}"
       CIBW_BUILD_VERBOSITY: 3
 
     steps:

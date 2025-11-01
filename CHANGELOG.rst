@@ -1,5 +1,14 @@
 Changelog
 ---------
+[3.14.3] - 2025-11-01
+^^^^^^^^^^^^^^^^^^^^^
+Fixed
+~~~~~~~
+* add missing pypy and freethreaded linux wheels
+
+Removed
+~~~~~~~
+* drop s390x and ppc64le wheels since they are virtually unused and require extremly long to build under emulation
 
 [3.14.2] - 2025-10-30
 ^^^^^^^^^^^^^^^^^^^^^
