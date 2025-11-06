@@ -53,17 +53,43 @@ jobs:
           name: artifact-sdist
           path: dist/*.tar.gz
 
-  build_wheels_windows:
-    name: Build wheel on ${{ matrix.os }}/auto
+  build_wheels:
+    name: Build wheel for ${{ matrix.os }}
     needs: [build_sdist]
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.runs-on }}
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, windows-11-arm]
-    env:
-      CIBW_TEST_SKIP: "*-win32"
-      CIBW_BUILD_VERBOSITY: 3
+        include:
+          - os: linux-intel
+            runs-on: ubuntu-latest
+          - os: linux-arm
+            runs-on: ubuntu-24.04-arm
+          - os: windows-intel
+            runs-on: windows-latest
+          - os: windows-arm
+            runs-on: windows-11-arm
+          - os: macos-intel
+            # macos-15-intel is the last x86_64 runner
+            runs-on: macos-15-intel
+          - os: macos-arm
+            # macos-14+ (including latest) are ARM64 runners
+            runs-on: macos-latest
+          - os: android-intel
+            runs-on: ubuntu-latest
+            platform: android
+          - os: android-arm
+            # GitHub Actions doesn’t currently support the Android emulator on any ARM
+            # runner. So we build on a non-ARM runner, which will skip the tests.
+            runs-on: ubuntu-latest
+            platform: android
+            archs: arm64_v8a
+          - os: ios
+            runs-on: macos-latest
+            platform: ios
+          - os: pyodide
+            runs-on: ubuntu-latest
+            platform: pyodide
 
     steps:
       - uses: actions/download-artifact@v6
@@ -74,158 +100,24 @@ jobs:
       - name: Copy wheel
         run: copy dist/*.tar.gz rapidfuzz.tar.gz
 
-      - uses: actions/setup-python@v6
-
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.2.1
+        env:
+          CIBW_PLATFORM: ${{ matrix.platform || 'auto' }}
+          CIBW_ARCHS: ${{ matrix.archs || 'auto' }}
+          CIBW_BUILD_VERBOSITY: 3
         with:
           package-dir: rapidfuzz.tar.gz
           output-dir: wheelhouse
 
-      - name: Upload wheels
-        uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v5
         with:
-          name: artifact-${{ github.job }}-${{ strategy.job-index }}
-          path: ./wheelhouse/*.whl
-
-  build_wheels_macos:
-    name: Build wheel on ${{ matrix.os }}/auto
-    needs: [build_sdist]
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-15-intel, macos-14]
-    env:
-      CIBW_TEST_SKIP: "pp*-macosx_*"
-      CIBW_BUILD_VERBOSITY: 3
-
-    steps:
-      - uses: actions/download-artifact@v6
-        with:
-          name: artifact-sdist
-          path: dist
-
-      - uses: actions/setup-python@v6
-
-      - name: Copy wheel
-        run: cp dist/*.tar.gz rapidfuzz.tar.gz
-
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v3.2.1
-        with:
-          package-dir: rapidfuzz.tar.gz
-          output-dir: wheelhouse
-
-      - name: Upload wheels
-        uses: actions/upload-artifact@v5
-        with:
-          name: artifact-${{ github.job }}-${{ strategy.job-index }}
-          path: ./wheelhouse/*.whl
-
-  build_wheels_linux:
-    name: Build wheels on ubuntu-latest/auto/auto
-    needs: [build_sdist]
-    runs-on: ubuntu-latest
-    env:
-      CIBW_TEST_SKIP: "{*musllinux_*}"
-      CIBW_BUILD_VERBOSITY: 3
-
-    steps:
-      - uses: actions/download-artifact@v6
-        with:
-          name: artifact-sdist
-          path: dist
-
-      - uses: actions/setup-python@v6
-
-      - name: Copy wheel
-        run: cp dist/*.tar.gz rapidfuzz.tar.gz
-
-      - name: Build wheel
-        uses: pypa/cibuildwheel@v3.2.1
-        with:
-          package-dir: rapidfuzz.tar.gz
-          output-dir: wheelhouse
-
-      - name: Upload wheels
-        uses: actions/upload-artifact@v5
-        with:
-          name: artifact-${{ github.job }}-${{ strategy.job-index }}
-          path: ./wheelhouse/*.whl
-
-  build_wheels_linux_arm:
-    name: Build wheels on ubuntu-24.04-arm/${{matrix.arch}}/${{matrix.python_tag}}
-    needs: [build_sdist]
-    runs-on: ubuntu-24.04-arm
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [aarch64, armv7l]
-    env:
-      CIBW_ARCHS_LINUX: ${{matrix.arch}}
-      CIBW_TEST_SKIP: "{*_aarch64,*musllinux_*}"
-      CIBW_BUILD_VERBOSITY: 3
-
-    steps:
-      - uses: actions/download-artifact@v6
-        with:
-          name: artifact-sdist
-          path: dist
-
-      - uses: actions/setup-python@v6
-
-      - name: Copy wheel
-        run: cp dist/*.tar.gz rapidfuzz.tar.gz
-
-      - name: Build wheel
-        uses: pypa/cibuildwheel@v3.2.1
-        with:
-          package-dir: rapidfuzz.tar.gz
-          output-dir: wheelhouse
-
-      - name: Upload wheels
-        uses: actions/upload-artifact@v5
-        with:
-          name: artifact-${{ github.job }}-${{ strategy.job-index }}
-          path: ./wheelhouse/*.whl
-
-  build_wheels_pyodide:
-    name: Build wheels on ubuntu-latest/pyodide
-    needs: [build_sdist]
-    runs-on: ubuntu-latest
-    env:
-      CIBW_PLATFORM: pyodide
-      #CIBW_BUILD_VERBOSITY: 3
-
-    steps:
-      - uses: actions/download-artifact@v6
-        with:
-          name: artifact-sdist
-          path: dist
-
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-
-      - name: Copy wheel
-        run: cp dist/*.tar.gz rapidfuzz.tar.gz
-
-      - name: Build wheel
-        uses: pypa/cibuildwheel@v3.2.1
-        with:
-          package-dir: rapidfuzz.tar.gz
-          output-dir: wheelhouse
-
-      - name: Upload wheels
-        uses: actions/upload-artifact@v5
-        with:
-          name: pyodide-wheel
+          name: artifact-${{ matrix.os }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
 
   deploy-wheels:
     if: github.event_name == 'release' && github.event.action == 'published'
-    needs: [build_wheels_windows, build_wheels_macos, build_wheels_linux, build_wheels_linux_arm, build_sdist]
+    needs: [build_wheels]
     name: deploy wheels to pypi
     runs-on: ubuntu-latest
     environment: pypi-release
