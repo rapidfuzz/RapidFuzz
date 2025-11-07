@@ -78,15 +78,15 @@ jobs:
           - os: android-intel
             runs-on: ubuntu-latest
             platform: android
-          - os: android-arm
-            # GitHub Actions doesn’t currently support the Android emulator on any ARM
-            # runner. So we build on a non-ARM runner, which will skip the tests.
-            runs-on: ubuntu-latest
-            platform: android
-            archs: arm64_v8a
-          - os: ios
-            runs-on: macos-latest
-            platform: ios
+          #- os: android-arm
+          #  # GitHub Actions doesn’t currently support the Android emulator on any ARM
+          #  # runner. So we build on a non-ARM runner, which will skip the tests.
+          #  runs-on: ubuntu-latest
+          #  platform: android
+          #  archs: arm64_v8a
+          #- os: ios
+          #  runs-on: macos-latest
+          #  platform: ios
           - os: pyodide
             runs-on: ubuntu-latest
             platform: pyodide
@@ -106,7 +106,6 @@ jobs:
         env:
           CIBW_PLATFORM: ${{ matrix.platform || 'auto' }}
           CIBW_ARCHS: ${{ matrix.archs || 'auto' }}
-          CIBW_BUILD_VERBOSITY: 3
         with:
           package-dir: rapidfuzz.tar.gz
           output-dir: wheelhouse
