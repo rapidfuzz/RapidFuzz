@@ -98,7 +98,8 @@ jobs:
           path: dist
 
       - name: Copy wheel
-        run: copy dist/*.tar.gz rapidfuzz.tar.gz
+        shell: bash
+        run: cp dist/*.tar.gz rapidfuzz.tar.gz
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.2.1
