@@ -12,7 +12,7 @@ jobs:
     name: Build source distribution
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: 'true'
       - uses: actions/setup-python@v6
@@ -48,7 +48,7 @@ jobs:
         run: |
           tools/seg_wrapper.sh pytest tests
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: artifact-sdist
           path: dist/*.tar.gz
@@ -92,7 +92,7 @@ jobs:
             platform: pyodide
 
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: artifact-sdist
           path: dist
@@ -102,7 +102,7 @@ jobs:
         run: cp dist/*.tar.gz rapidfuzz.tar.gz
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v3.2.1
+        uses: pypa/cibuildwheel@v3.3.0
         env:
           CIBW_PLATFORM: ${{ matrix.platform || 'auto' }}
           CIBW_ARCHS: ${{ matrix.archs || 'auto' }}
@@ -110,7 +110,7 @@ jobs:
           package-dir: rapidfuzz.tar.gz
           output-dir: wheelhouse
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: artifact-${{ matrix.os }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
@@ -124,7 +124,7 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           path: dist
           pattern: artifact-*
