@@ -38,10 +38,21 @@ def extractOne(
     *,
     scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = WRatio,
     processor: None = None,
-    score_cutoff: float | None = None,
+    score_cutoff: float,
     score_hint: float | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
 ) -> tuple[_StringType2, float, _KeyType] | None: ...
+@overload
+def extractOne(
+    query: Sequence[Hashable] | None,
+    choices: Mapping[_KeyType, _StringType2 | None],
+    *,
+    scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = WRatio,
+    processor: None = None,
+    score_cutoff: None = None,
+    score_hint: float | None = None,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> tuple[_StringType2, float, _KeyType]: ...
 @overload
 def extractOne(
     query: Sequence[Hashable] | None,
@@ -49,10 +60,21 @@ def extractOne(
     *,
     scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = WRatio,
     processor: None = None,
-    score_cutoff: float | None = None,
+    score_cutoff: float,
     score_hint: float | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
 ) -> tuple[_StringType2, float, int] | None: ...
+@overload
+def extractOne(
+    query: Sequence[Hashable] | None,
+    choices: Iterable[_StringType2 | None],
+    *,
+    scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = WRatio,
+    processor: None = None,
+    score_cutoff: None = None,
+    score_hint: float | None = None,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> tuple[_StringType2, float, int]: ...
 @overload
 def extractOne(
     query: _UnprocessedType1 | None,
@@ -60,10 +82,21 @@ def extractOne(
     *,
     scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = WRatio,
     processor: Callable[[_UnprocessedType1 | _UnprocessedType2], Sequence[Hashable]],
-    score_cutoff: float | None = None,
+    score_cutoff: float,
     score_hint: float | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
 ) -> tuple[_UnprocessedType2, float, _KeyType] | None: ...
+@overload
+def extractOne(
+    query: _UnprocessedType1 | None,
+    choices: Mapping[_KeyType, _UnprocessedType2 | None],
+    *,
+    scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = WRatio,
+    processor: Callable[[_UnprocessedType1 | _UnprocessedType2], Sequence[Hashable]],
+    score_cutoff: None = None,
+    score_hint: float | None = None,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> tuple[_UnprocessedType2, float, _KeyType]: ...
 @overload
 def extractOne(
     query: _UnprocessedType1 | None,
@@ -71,10 +104,21 @@ def extractOne(
     *,
     scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = WRatio,
     processor: Callable[[_UnprocessedType1 | _UnprocessedType2], Sequence[Hashable]],
-    score_cutoff: float | None = None,
+    score_cutoff: float,
     score_hint: float | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
 ) -> tuple[_UnprocessedType2, float, int] | None: ...
+@overload
+def extractOne(
+    query: _UnprocessedType1 | None,
+    choices: Iterable[_UnprocessedType2 | None],
+    *,
+    scorer: _Scorer[Sequence[Hashable], Sequence[Hashable], float, float] = WRatio,
+    processor: Callable[[_UnprocessedType1 | _UnprocessedType2], Sequence[Hashable]],
+    score_cutoff: None = None,
+    score_hint: float | None = None,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> tuple[_UnprocessedType2, float, int]: ...
 @overload
 def extractOne(
     query: _StringType1 | None,
@@ -82,10 +126,21 @@ def extractOne(
     *,
     scorer: _Scorer[_StringType1, _StringType2, _ResultType, _ResultType],
     processor: None = None,
-    score_cutoff: _ResultType | None = None,
+    score_cutoff: _ResultType,
     score_hint: _ResultType | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
 ) -> tuple[_StringType2, _ResultType, _KeyType] | None: ...
+@overload
+def extractOne(
+    query: _StringType1 | None,
+    choices: Mapping[_KeyType, _StringType2 | None],
+    *,
+    scorer: _Scorer[_StringType1, _StringType2, _ResultType, _ResultType],
+    processor: None = None,
+    score_cutoff: None = None,
+    score_hint: _ResultType | None = None,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> tuple[_StringType2, _ResultType, _KeyType]: ...
 @overload
 def extractOne(
     query: _StringType1 | None,
@@ -93,10 +148,21 @@ def extractOne(
     *,
     scorer: _Scorer[_StringType1, _StringType2, _ResultType, _ResultType],
     processor: None = None,
-    score_cutoff: _ResultType | None = None,
+    score_cutoff: _ResultType,
     score_hint: _ResultType | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
 ) -> tuple[_StringType2, _ResultType, int] | None: ...
+@overload
+def extractOne(
+    query: _StringType1 | None,
+    choices: Iterable[_StringType2 | None],
+    *,
+    scorer: _Scorer[_StringType1, _StringType2, _ResultType, _ResultType],
+    processor: None = None,
+    score_cutoff: None = None,
+    score_hint: _ResultType | None = None,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> tuple[_StringType2, _ResultType, int]: ...
 @overload
 def extractOne(
     query: _UnprocessedType1 | None,
@@ -104,10 +170,21 @@ def extractOne(
     *,
     scorer: _Scorer[_StringType1, _StringType1, _ResultType, _ResultType],
     processor: Callable[[_UnprocessedType1 | _UnprocessedType2], _StringType1],
-    score_cutoff: _ResultType | None = None,
+    score_cutoff: _ResultType,
     score_hint: _ResultType | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
 ) -> tuple[_UnprocessedType2, _ResultType, _KeyType] | None: ...
+@overload
+def extractOne(
+    query: _UnprocessedType1 | None,
+    choices: Mapping[_KeyType, _UnprocessedType2 | None],
+    *,
+    scorer: _Scorer[_StringType1, _StringType1, _ResultType, _ResultType],
+    processor: Callable[[_UnprocessedType1 | _UnprocessedType2], _StringType1],
+    score_cutoff: None = None,
+    score_hint: _ResultType | None = None,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> tuple[_UnprocessedType2, _ResultType, _KeyType]: ...
 @overload
 def extractOne(
     query: _UnprocessedType1 | None,
@@ -115,10 +192,21 @@ def extractOne(
     *,
     scorer: _Scorer[_StringType1, _StringType1, _ResultType, _ResultType],
     processor: Callable[[_UnprocessedType1 | _UnprocessedType2], _StringType1],
-    score_cutoff: _ResultType | None = None,
+    score_cutoff: _ResultType,
     score_hint: _ResultType | None = None,
     scorer_kwargs: dict[str, Any] | None = None,
 ) -> tuple[_UnprocessedType2, _ResultType, int] | None: ...
+@overload
+def extractOne(
+    query: _UnprocessedType1 | None,
+    choices: Iterable[_UnprocessedType2 | None],
+    *,
+    scorer: _Scorer[_StringType1, _StringType1, _ResultType, _ResultType],
+    processor: Callable[[_UnprocessedType1 | _UnprocessedType2], _StringType1],
+    score_cutoff: None = None,
+    score_hint: _ResultType | None = None,
+    scorer_kwargs: dict[str, Any] | None = None,
+) -> tuple[_UnprocessedType2, _ResultType, int]: ...
 
 # mypy wants defaults to be valid for every possible parameterization of a generic function
 # so add separate overloads for the default version
