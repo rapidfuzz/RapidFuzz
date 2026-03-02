@@ -381,3 +381,99 @@ def testIssue257():
     assert pytest.approx(score) == 98.46153846153847
     score = fuzz.partial_ratio(s2, s1)
     assert pytest.approx(score) == 98.46153846153847
+
+
+class TestScorerParameter:
+    """Tests for the scorer parameter in partial_ratio and downstream functions."""
+
+    def test_partial_ratio_default_is_indel(self):
+        """Default scorer should be indel."""
+        # Test both Python and C++ implementations directly
+        for impl in [fuzz_py, fuzz_cpp]:
+            result1 = impl.partial_ratio("abc", "abcdef")
+            result2 = impl.partial_ratio("abc", "abcdef", scorer="indel")
+            assert result1 == result2
+
+    def test_partial_ratio_levenshtein_differs(self):
+        """Levenshtein scorer should give different results for substitutions."""
+        # From the user's example: different results for substitutions
+        a = "34cdef16z"
+        c = "09cdef78"
+        for impl in [fuzz_py, fuzz_cpp]:
+            result_indel = impl.partial_ratio(a, c, scorer="indel")
+            result_lev = impl.partial_ratio(a, c, scorer="levenshtein")
+            # Indel: 57.14, Levenshtein: 50.0
+            assert pytest.approx(result_indel, rel=0.01) == 57.14
+            assert pytest.approx(result_lev, rel=0.01) == 50.0
+            assert result_indel != result_lev
+
+    def test_partial_ratio_alignment_with_scorer(self):
+        """partial_ratio_alignment should accept scorer parameter."""
+        a = "34cdef16z"
+        c = "09cdef78"
+        for impl in [fuzz_py, fuzz_cpp]:
+            alignment_indel = impl.partial_ratio_alignment(a, c, scorer="indel")
+            alignment_lev = impl.partial_ratio_alignment(a, c, scorer="levenshtein")
+            assert alignment_indel is not None
+            assert alignment_lev is not None
+            assert pytest.approx(alignment_indel.score, rel=0.01) == 57.14
+            assert pytest.approx(alignment_lev.score, rel=0.01) == 50.0
+
+    def test_invalid_scorer_raises(self):
+        """Invalid scorer should raise ValueError."""
+        with pytest.raises(ValueError):
+            fuzz_py.partial_ratio("abc", "def", scorer="invalid")
+
+    def test_partial_token_sort_ratio_with_scorer(self):
+        """partial_token_sort_ratio should accept scorer parameter."""
+        for impl in [fuzz_py, fuzz_cpp]:
+            result_indel = impl.partial_token_sort_ratio("abc def", "fed cba", scorer="indel")
+            result_lev = impl.partial_token_sort_ratio("abc def", "fed cba", scorer="levenshtein")
+            assert 0 <= result_indel <= 100
+            assert 0 <= result_lev <= 100
+
+    def test_partial_token_set_ratio_with_scorer(self):
+        """partial_token_set_ratio should accept scorer parameter."""
+        for impl in [fuzz_py, fuzz_cpp]:
+            result_indel = impl.partial_token_set_ratio("abc xyz", "def xyz", scorer="indel")
+            result_lev = impl.partial_token_set_ratio("abc xyz", "def xyz", scorer="levenshtein")
+            # With common word "xyz", both should return 100
+            assert result_indel == 100
+            assert result_lev == 100
+
+    def test_partial_token_ratio_with_scorer(self):
+        """partial_token_ratio should accept scorer parameter."""
+        for impl in [fuzz_py, fuzz_cpp]:
+            result_indel = impl.partial_token_ratio("abc def", "fed cba", scorer="indel")
+            result_lev = impl.partial_token_ratio("abc def", "fed cba", scorer="levenshtein")
+            assert 0 <= result_indel <= 100
+            assert 0 <= result_lev <= 100
+
+    def test_wratio_with_scorer(self):
+        """WRatio should accept scorer parameter."""
+        for impl in [fuzz_py, fuzz_cpp]:
+            result_indel = impl.WRatio("test string", "testing strings", scorer="indel")
+            result_lev = impl.WRatio("test string", "testing strings", scorer="levenshtein")
+            assert 0 <= result_indel <= 100
+            assert 0 <= result_lev <= 100
+
+    def test_scorer_with_score_cutoff(self):
+        """Scorer parameter should work with score_cutoff."""
+        a = "34cdef16z"
+        c = "09cdef78"
+        for impl in [fuzz_py, fuzz_cpp]:
+            # Levenshtein gives 50.0, so cutoff of 55 should return 0
+            result = impl.partial_ratio(a, c, scorer="levenshtein", score_cutoff=55)
+            assert result == 0
+            # But indel gives 57.14, so cutoff of 55 should return the score
+            result = impl.partial_ratio(a, c, scorer="indel", score_cutoff=55)
+            assert pytest.approx(result, rel=0.01) == 57.14
+
+    def test_cpp_and_py_consistency(self):
+        """C++ and Python implementations should give same results for scorer parameter."""
+        a = "34cdef16z"
+        c = "09cdef78"
+        for scorer_val in ["indel", "levenshtein"]:
+            py_result = fuzz_py.partial_ratio(a, c, scorer=scorer_val)
+            cpp_result = fuzz_cpp.partial_ratio(a, c, scorer=scorer_val)
+            assert pytest.approx(py_result) == cpp_result
