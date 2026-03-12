@@ -12,6 +12,27 @@ from rapidfuzz.distance.Indel_py import (
     distance as indel_distance,
     normalized_similarity as indel_normalized_similarity,
 )
+from rapidfuzz.distance.Levenshtein_py import (
+    normalized_similarity as levenshtein_normalized_similarity,
+)
+
+
+def _levenshtein_block_normalized_similarity(block, s1, s2, score_cutoff=None):
+    """
+    Fallback block normalized similarity for Levenshtein.
+    Note: This doesn't use the block optimization, it's a simple wrapper.
+    """
+    return levenshtein_normalized_similarity(s1, s2, score_cutoff=score_cutoff)
+
+
+def _get_scorer_func(scorer):
+    """Get the appropriate block normalized similarity function for the given scorer type."""
+    if scorer is None or scorer == "indel":
+        return indel_block_normalized_similarity
+    elif scorer == "levenshtein":
+        return _levenshtein_block_normalized_similarity
+    else:
+        raise ValueError(f"Unknown scorer: {scorer!r}. Valid options are 'indel' or 'levenshtein'.")
 
 
 def get_scorer_flags_fuzz(**_kwargs):
@@ -113,7 +134,7 @@ def ratio(
     return score * 100
 
 
-def _partial_ratio_impl(s1, s2, score_cutoff):
+def _partial_ratio_impl(s1, s2, score_cutoff, scorer_func):
     """
     implementation of partial_ratio. This assumes len(s1) <= len(s2).
     """
@@ -136,7 +157,7 @@ def _partial_ratio_impl(s1, s2, score_cutoff):
             continue
 
         # todo cache map
-        ls_ratio = indel_block_normalized_similarity(block, s1, s2[:i], score_cutoff=score_cutoff)
+        ls_ratio = scorer_func(block, s1, s2[:i], score_cutoff=score_cutoff)
         if ls_ratio > res.score:
             res.score = score_cutoff = ls_ratio
             res.dest_start = 0
@@ -151,7 +172,7 @@ def _partial_ratio_impl(s1, s2, score_cutoff):
             continue
 
         # todo cache map
-        ls_ratio = indel_block_normalized_similarity(block, s1, s2[i : i + len1], score_cutoff=score_cutoff)
+        ls_ratio = scorer_func(block, s1, s2[i : i + len1], score_cutoff=score_cutoff)
         if ls_ratio > res.score:
             res.score = score_cutoff = ls_ratio
             res.dest_start = i
@@ -166,7 +187,7 @@ def _partial_ratio_impl(s1, s2, score_cutoff):
             continue
 
         # todo cache map
-        ls_ratio = indel_block_normalized_similarity(block, s1, s2[i:], score_cutoff=score_cutoff)
+        ls_ratio = scorer_func(block, s1, s2[i:], score_cutoff=score_cutoff)
         if ls_ratio > res.score:
             res.score = score_cutoff = ls_ratio
             res.dest_start = i
@@ -185,6 +206,7 @@ def partial_ratio(
     *,
     processor=None,
     score_cutoff=None,
+    scorer="indel",
 ):
     """
     Searches for the optimal alignment of the shorter string in the
@@ -203,6 +225,10 @@ def partial_ratio(
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
         which deactivates this behaviour.
+    scorer : str, optional
+        The scoring algorithm to use. Options are "indel" (default) or "levenshtein".
+        - "indel": Uses Indel distance (substitution costs 2, i.e., delete + insert)
+        - "levenshtein": Uses Levenshtein distance (substitution costs 1)
 
     Returns
     -------
@@ -249,8 +275,10 @@ def partial_ratio(
     --------
     >>> fuzz.partial_ratio("this is a test", "this is a test!")
     100.0
+    >>> fuzz.partial_ratio("abc", "abd", scorer="levenshtein")
+    66.66666666666667
     """
-    alignment = partial_ratio_alignment(s1, s2, processor=processor, score_cutoff=score_cutoff)
+    alignment = partial_ratio_alignment(s1, s2, processor=processor, score_cutoff=score_cutoff, scorer=scorer)
     if alignment is None:
         return 0
 
@@ -263,6 +291,7 @@ def partial_ratio_alignment(
     *,
     processor=None,
     score_cutoff=None,
+    scorer="indel",
 ):
     """
     Searches for the optimal alignment of the shorter string in the
@@ -282,6 +311,10 @@ def partial_ratio_alignment(
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff None is returned instead. Default is 0,
         which deactivates this behaviour.
+    scorer : str, optional
+        The scoring algorithm to use. Options are "indel" (default) or "levenshtein".
+        - "indel": Uses Indel distance (substitution costs 2, i.e., delete + insert)
+        - "levenshtein": Uses Levenshtein distance (substitution costs 1)
 
     Returns
     -------
@@ -312,6 +345,8 @@ def partial_ratio_alignment(
     if score_cutoff is None:
         score_cutoff = 0
 
+    scorer_func = _get_scorer_func(scorer)
+
     if not s1 and not s2:
         return ScoreAlignment(100.0, 0, 0, 0, 0)
     s1, s2 = conv_sequences(s1, s2)
@@ -324,10 +359,10 @@ def partial_ratio_alignment(
         shorter = s2
         longer = s1
 
-    res = _partial_ratio_impl(shorter, longer, score_cutoff / 100)
+    res = _partial_ratio_impl(shorter, longer, score_cutoff / 100, scorer_func)
     if res.score != 100 and len1 == len2:
         score_cutoff = max(score_cutoff, res.score)
-        res2 = _partial_ratio_impl(longer, shorter, score_cutoff / 100)
+        res2 = _partial_ratio_impl(longer, shorter, score_cutoff / 100, scorer_func)
         if res2.score > res.score:
             res = ScoreAlignment(res2.score, res2.dest_start, res2.dest_end, res2.src_start, res2.src_end)
 
@@ -558,6 +593,7 @@ def partial_token_sort_ratio(
     *,
     processor=None,
     score_cutoff=None,
+    scorer="indel",
 ):
     """
     sorts the words in the strings and calculates the fuzz.partial_ratio between them
@@ -575,6 +611,8 @@ def partial_token_sort_ratio(
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
         which deactivates this behaviour.
+    scorer : str, optional
+        The scoring algorithm to use. Options are "indel" (default) or "levenshtein".
 
     Returns
     -------
@@ -596,7 +634,7 @@ def partial_token_sort_ratio(
     s1, s2 = conv_sequences(s1, s2)
     sorted_s1 = _join_splitted_sequence(sorted(_split_sequence(s1)))
     sorted_s2 = _join_splitted_sequence(sorted(_split_sequence(s2)))
-    return partial_ratio(sorted_s1, sorted_s2, score_cutoff=score_cutoff)
+    return partial_ratio(sorted_s1, sorted_s2, score_cutoff=score_cutoff, scorer=scorer)
 
 
 def partial_token_set_ratio(
@@ -605,6 +643,7 @@ def partial_token_set_ratio(
     *,
     processor=None,
     score_cutoff=None,
+    scorer="indel",
 ):
     """
     Compares the words in the strings based on unique and common words between them
@@ -623,6 +662,8 @@ def partial_token_set_ratio(
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
         which deactivates this behaviour.
+    scorer : str, optional
+        The scoring algorithm to use. Options are "indel" (default) or "levenshtein".
 
     Returns
     -------
@@ -656,7 +697,7 @@ def partial_token_set_ratio(
 
     diff_ab = _join_splitted_sequence(sorted(tokens_a.difference(tokens_b)))
     diff_ba = _join_splitted_sequence(sorted(tokens_b.difference(tokens_a)))
-    return partial_ratio(diff_ab, diff_ba, score_cutoff=score_cutoff)
+    return partial_ratio(diff_ab, diff_ba, score_cutoff=score_cutoff, scorer=scorer)
 
 
 def partial_token_ratio(
@@ -665,6 +706,7 @@ def partial_token_ratio(
     *,
     processor=None,
     score_cutoff=None,
+    scorer="indel",
 ):
     """
     Helper method that returns the maximum of fuzz.partial_token_set_ratio and
@@ -683,6 +725,8 @@ def partial_token_ratio(
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
         which deactivates this behaviour.
+    scorer : str, optional
+        The scoring algorithm to use. Options are "indel" (default) or "levenshtein".
 
     Returns
     -------
@@ -722,6 +766,7 @@ def partial_token_ratio(
         _join_splitted_sequence(sorted(tokens_split_a)),
         _join_splitted_sequence(sorted(tokens_split_b)),
         score_cutoff=score_cutoff,
+        scorer=scorer,
     )
 
     # do not calculate the same partial_ratio twice
@@ -735,6 +780,7 @@ def partial_token_ratio(
             _join_splitted_sequence(sorted(diff_ab)),
             _join_splitted_sequence(sorted(diff_ba)),
             score_cutoff=score_cutoff,
+            scorer=scorer,
         ),
     )
 
@@ -745,6 +791,7 @@ def WRatio(
     *,
     processor=None,
     score_cutoff=None,
+    scorer="indel",
 ):
     """
     Calculates a weighted ratio based on the other ratio algorithms
@@ -762,6 +809,8 @@ def WRatio(
         Optional argument for a score threshold as a float between 0 and 100.
         For ratio < score_cutoff 0 is returned instead. Default is 0,
         which deactivates this behaviour.
+    scorer : str, optional
+        The scoring algorithm to use. Options are "indel" (default) or "levenshtein".
 
     Returns
     -------
@@ -804,12 +853,12 @@ def WRatio(
 
     PARTIAL_SCALE = 0.9 if len_ratio <= 8.0 else 0.6
     score_cutoff = max(score_cutoff, end_ratio) / PARTIAL_SCALE
-    end_ratio = max(end_ratio, partial_ratio(s1, s2, score_cutoff=score_cutoff) * PARTIAL_SCALE)
+    end_ratio = max(end_ratio, partial_ratio(s1, s2, score_cutoff=score_cutoff, scorer=scorer) * PARTIAL_SCALE)
 
     score_cutoff = max(score_cutoff, end_ratio) / UNBASE_SCALE
     return max(
         end_ratio,
-        partial_token_ratio(s1, s2, score_cutoff=score_cutoff, processor=None) * UNBASE_SCALE * PARTIAL_SCALE,
+        partial_token_ratio(s1, s2, score_cutoff=score_cutoff, processor=None, scorer=scorer) * UNBASE_SCALE * PARTIAL_SCALE,
     )
 
 
