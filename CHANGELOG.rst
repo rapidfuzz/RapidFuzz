@@ -1,9 +1,24 @@
 Changelog
 ---------
+[3.14.4] - 2026-04-06
+^^^^^^^^^^^^^^^^^^^^^
+Added
+~~~~~
+* add risc64 wheels
+* add support for taskflow 4.0.0
+
+Changed
+~~~~~~~
+* upgrade to ``Cython==3.2.4``.
+
+Fixed
+~~~~~
+* fix type hints for extractOne when no score_cutoff is provided
+
 [3.14.3] - 2025-11-01
 ^^^^^^^^^^^^^^^^^^^^^
 Fixed
-~~~~~~~
+~~~~~
 * add missing pypy and freethreaded linux wheels
 
 Removed
