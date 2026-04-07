@@ -1,5 +1,12 @@
 Changelog
 ---------
+[3.14.5] - 2026-08-07
+^^^^^^^^^^^^^^^^^^^^^
+Fixed
+~~~~~
+* fix release ci attempting to upload a pyodide wheel
+
+
 [3.14.4] - 2026-04-06
 ^^^^^^^^^^^^^^^^^^^^^
 Added

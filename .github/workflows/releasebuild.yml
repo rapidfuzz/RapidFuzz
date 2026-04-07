@@ -90,9 +90,10 @@ jobs:
           #- os: ios
           #  runs-on: macos-latest
           #  platform: ios
-          - os: pyodide
-            runs-on: ubuntu-latest
-            platform: pyodide
+          # no official wheel support on pypi
+          #- os: pyodide
+          #  runs-on: ubuntu-latest
+          #  platform: pyodide
 
     steps:
       - uses: actions/download-artifact@v8
@@ -127,6 +128,37 @@ jobs:
         with:
           name: artifact-${{ matrix.os }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
+
+  build_wheels_pyodide:
+    name: Build wheels on ubuntu-latest/pyodide
+    needs: [build_sdist]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: artifact-sdist
+          path: dist
+
+      - name: Copy wheel
+        run: cp dist/*.tar.gz rapidfuzz.tar.gz
+
+      - name: Build wheels
+        if: matrix.archs != 'riscv64'
+        uses: pypa/cibuildwheel@v3.4.1
+        env:
+          CIBW_PLATFORM: pyodide
+          CIBW_ARCHS: auto
+        with:
+          package-dir: rapidfuzz.tar.gz
+          output-dir: wheelhouse
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v7
+        with:
+          name: pyodide-wheel
+          path: ./wheelhouse/*.whl
+
 
   deploy-wheels:
     if: github.event_name == 'release' && github.event.action == 'published'
