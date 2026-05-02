@@ -68,6 +68,12 @@ jobs:
           - os: linux-riscv64
             runs-on: ubuntu-24.04-riscv
             archs: riscv64
+          - os: linux-s390x
+            runs-on: ubuntu-xxx-s390x
+            archs: s390x
+          - os: linux-ppc64le
+            runs-on: ubuntu-xxx-ppc64le
+            archs: ppc64le
           - os: windows-intel
             runs-on: windows-latest
           - os: windows-arm
