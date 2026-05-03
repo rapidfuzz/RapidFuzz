@@ -112,7 +112,6 @@ jobs:
         run: cp dist/*.tar.gz rapidfuzz.tar.gz
 
       - name: Build wheels
-        if: matrix.archs != 'riscv64'
         uses: pypa/cibuildwheel@v3.4.1
         env:
           CIBW_PLATFORM: ${{ matrix.platform || 'auto' }}
@@ -120,15 +119,6 @@ jobs:
         with:
           package-dir: rapidfuzz.tar.gz
           output-dir: wheelhouse
-
-      - name: Build wheels (riscv64 native)
-        if: matrix.archs == 'riscv64'
-        run: |
-          export PATH="$(ls -d /opt/python-3.1*/bin 2>/dev/null | sort -V | tail -1):$PATH"
-          python3 -m pip install pipx
-          pipx run cibuildwheel rapidfuzz.tar.gz --output-dir wheelhouse
-        env:
-          CIBW_ARCHS: riscv64
 
       - uses: actions/upload-artifact@v7
         with:
