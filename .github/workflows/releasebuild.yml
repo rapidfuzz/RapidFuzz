@@ -111,7 +111,13 @@ jobs:
         shell: bash
         run: cp dist/*.tar.gz rapidfuzz.tar.gz
 
+      - uses: IBM/setup-python-pz@291287e36d7c893a50c857d8bc014d67edd58ada
+        if: matrix.archs == 'ppc64le' || matrix.archs == 's390x'
+        with:
+          python-version: '3.11'
+
       - name: Build wheels
+        if: matrix.archs != 'ppc64le' && matrix.archs != 's390x'
         uses: pypa/cibuildwheel@v3.4.1
         env:
           CIBW_PLATFORM: ${{ matrix.platform || 'auto' }}
@@ -119,6 +125,15 @@ jobs:
         with:
           package-dir: rapidfuzz.tar.gz
           output-dir: wheelhouse
+      
+      - name: Build Wheel (ppc64le and s390x)
+        if: matrix.archs == 'ppc64le' || matrix.archs =='s390x'
+        env:
+          CIBW_PLATFORM: linux
+          CIBW_ARCHS: ${{ matrix.archs }}
+        run: |
+          python -m pip install cibuildwheel==3.4.1
+          python -m cibuildwheel --output-dir wheelhouse rapidfuzz.tar.gz
 
       - uses: actions/upload-artifact@v7
         with:
