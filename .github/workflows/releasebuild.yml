@@ -118,7 +118,7 @@ jobs:
 
       - name: Build wheels
         if: matrix.archs != 'ppc64le' && matrix.archs != 's390x'
-        uses: pypa/cibuildwheel@v3.4.1
+        uses: pypa/cibuildwheel@v4.1.0
         env:
           CIBW_PLATFORM: ${{ matrix.platform || 'auto' }}
           CIBW_ARCHS: ${{ matrix.archs || 'auto' }}
@@ -156,7 +156,7 @@ jobs:
 
       - name: Build wheels
         if: matrix.archs != 'riscv64'
-        uses: pypa/cibuildwheel@v3.4.1
+        uses: pypa/cibuildwheel@v4.1.0
         env:
           CIBW_PLATFORM: pyodide
           CIBW_ARCHS: auto
