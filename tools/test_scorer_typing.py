@@ -71,7 +71,7 @@ def test_scorer(scorer, res_type):
                 "mypy",
                 str(f_name), "--warn-unused-ignores",
                 "--config-file",
-                str(Path(__file__).resolve().parent / "pyproject.toml"),
+                str(Path(__file__).resolve().parent.parent / "pyproject.toml"),
             ],
             check=True
         )
