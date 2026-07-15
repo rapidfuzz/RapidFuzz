@@ -283,42 +283,13 @@ auto visitor(const RF_String& str1, const RF_String& str2, Func&& f, Args&&... a
 
 static inline bool is_valid_string(PyObject* py_str)
 {
-    bool is_string = false;
-
-    if (PyBytes_Check(py_str))
-        is_string = true;
-    else if (PyUnicode_Check(py_str)) {
-        // PEP 623 deprecates legacy strings and therefore
-        // deprecates e.g. PyUnicode_READY in Python 3.10
-#if PY_VERSION_HEX < PYTHON_VERSION(3, 10, 0)
-        if (PyUnicode_READY(py_str)) {
-            // cython will use the exception set by PyUnicode_READY
-            throw std::runtime_error("");
-        }
-#endif
-        is_string = true;
-    }
-
-    return is_string;
+    return PyBytes_Check(py_str) || PyUnicode_Check(py_str);
 }
 
 static inline void validate_string(PyObject* py_str, const char* err)
 {
-    if (PyBytes_Check(py_str))
-        return;
-    else if (PyUnicode_Check(py_str)) {
-        // PEP 623 deprecates legacy strings and therefore
-        // deprecates e.g. PyUnicode_READY in Python 3.10
-#if PY_VERSION_HEX < PYTHON_VERSION(3, 10, 0)
-        if (PyUnicode_READY(py_str)) {
-            // cython will use the exception set by PyUnicode_READY
-            throw std::runtime_error("");
-        }
-#endif
-        return;
-    }
-
-    throw PythonTypeError(err);
+    if (!PyBytes_Check(py_str) && !PyUnicode_Check(py_str))
+        throw PythonTypeError(err);
 }
 
 static inline RF_String convert_string(PyObject* py_str)
