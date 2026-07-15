@@ -216,6 +216,42 @@ def test_issue196():
     assert fuzz.WRatio("South Korea", "North Korea", score_cutoff=85.5) == 0.0
 
 
+def test_wratio_score_cutoff():
+    """
+    WRatio returned scores below score_cutoff when its internally scaled
+    score_cutoff exceeded 100
+    """
+    assert fuzz.WRatio("b", " b daadabbb") == 60.0
+    assert fuzz.WRatio("b", " b daadabbb", score_cutoff=59.9) == 60.0
+    assert fuzz.WRatio("b", " b daadabbb", score_cutoff=61) == 0.0
+
+
+@pytest.mark.parametrize("impl", [fuzz_cpp, fuzz_py])
+@pytest.mark.parametrize(
+    "scorer_name",
+    [
+        "ratio",
+        "partial_ratio",
+        "token_sort_ratio",
+        "token_set_ratio",
+        "token_ratio",
+        "partial_token_sort_ratio",
+        "partial_token_set_ratio",
+        "partial_token_ratio",
+        "WRatio",
+        "QRatio",
+    ],
+)
+def test_score_cutoff_above_100(impl, scorer_name):
+    """
+    a score_cutoff above 100 can never be reached
+    """
+    scorer = getattr(impl, scorer_name)
+    assert scorer("abcd", "abcd") == 100.0
+    assert scorer("abcd", "abcd", score_cutoff=100) == 100.0
+    assert scorer("abcd", "abcd", score_cutoff=100.1) == 0.0
+
+
 def test_issue231():
     str1 = "er merkantilismus förderte handle und verkehr mit teils marktkonformen, teils dirigistischen maßnahmen."
     str2 = "ils marktkonformen, teils dirigistischen maßnahmen. an der schwelle zum 19. jahrhundert entstand ein neu"

@@ -145,7 +145,8 @@ def similarity(
             if s1[i] != s2[j]:
                 trans_count += 1
 
-    return _jaro_calculate_similarity(pattern_len, text_len, common_chars, trans_count)
+    sim = _jaro_calculate_similarity(pattern_len, text_len, common_chars, trans_count)
+    return sim if sim >= score_cutoff else 0
 
 
 def normalized_similarity(

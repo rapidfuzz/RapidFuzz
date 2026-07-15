@@ -10,6 +10,20 @@ def test_basic():
     assert LCSseq.distance("aaaa", "bbbb") == 4
 
 
+def test_empty_string():
+    """
+    the normalized results against a single empty string were inverted in the
+    pure Python fallback
+    """
+    assert LCSseq.distance("abc", "") == 3
+    assert LCSseq.normalized_distance("abc", "") == 1.0
+    assert LCSseq.normalized_similarity("abc", "") == 0.0
+    assert LCSseq.normalized_distance("abc", "", score_cutoff=0.5) == 1.0
+
+    assert LCSseq.normalized_distance("", "") == 0.0
+    assert LCSseq.normalized_similarity("", "") == 1.0
+
+
 def test_Editops():
     """
     basic test for LCSseq.editops
