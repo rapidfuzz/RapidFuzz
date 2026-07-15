@@ -101,6 +101,12 @@ enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
 strict = true
 disallow_untyped_defs = false
 
+# disable due to typing errors when requiring 3.11 support
+[[tool.mypy.overrides]]
+module = "numpy.*"
+follow_imports = "skip"
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = ["tests"]
