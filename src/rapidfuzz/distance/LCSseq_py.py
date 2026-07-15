@@ -182,7 +182,7 @@ def normalized_distance(
         s1 = processor(s1)
         s2 = processor(s2)
 
-    if not s1 or not s2:
+    if not s1 and not s2:
         return 0
 
     s1, s2 = conv_sequences(s1, s2)

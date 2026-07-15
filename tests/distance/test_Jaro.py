@@ -47,6 +47,18 @@ def test_edge_case_lengths():
     assert pytest.approx(Jaro.similarity(s2, s1)) == 0.8359375
 
 
+def test_score_cutoff():
+    """
+    score_cutoff was not applied to the exact similarity in the pure Python
+    fallback when the coarse filters passed. The transpositions in "abcd"/"dcba"
+    place the exact similarity (0.5) below the coarse upper bound (0.66)
+    """
+    assert pytest.approx(Jaro.similarity("abcd", "dcba")) == 0.5
+    assert pytest.approx(Jaro.similarity("abcd", "dcba", score_cutoff=0.5)) == 0.5
+    assert Jaro.similarity("abcd", "dcba", score_cutoff=0.6) == 0.0
+    assert Jaro.normalized_similarity("abcd", "dcba", score_cutoff=0.6) == 0.0
+
+
 def testCaseInsensitive():
     assert pytest.approx(Jaro.similarity("new york mets", "new YORK mets", processor=utils_cpp.default_process)) == 1.0
     assert pytest.approx(Jaro.similarity("new york mets", "new YORK mets", processor=utils_py.default_process)) == 1.0

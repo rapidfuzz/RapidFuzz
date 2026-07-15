@@ -450,6 +450,9 @@ def token_set_ratio(
     if score_cutoff is None:
         score_cutoff = 0
 
+    if score_cutoff > 100:
+        return 0
+
     s1, s2 = conv_sequences(s1, s2)
 
     tokens_a = set(_split_sequence(s1))
@@ -641,6 +644,9 @@ def partial_token_set_ratio(
         s1 = processor(s1)
         s2 = processor(s2)
 
+    if score_cutoff is not None and score_cutoff > 100:
+        return 0
+
     s1, s2 = conv_sequences(s1, s2)
 
     tokens_a = set(_split_sequence(s1))
@@ -703,6 +709,9 @@ def partial_token_ratio(
 
     if score_cutoff is None:
         score_cutoff = 0
+
+    if score_cutoff > 100:
+        return 0
 
     s1, s2 = conv_sequences(s1, s2)
 
@@ -789,6 +798,9 @@ def WRatio(
 
     if score_cutoff is None:
         score_cutoff = 0
+
+    if score_cutoff > 100:
+        return 0
 
     len1 = len(s1)
     len2 = len(s2)
