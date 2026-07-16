@@ -5,6 +5,7 @@ Changelog
 Fixed
 ~~~~~
 * dropped support for Python 3.10
+* fix some divergences in the pure Python fallback
 
 
 [3.14.5] - 2026-04-07
