@@ -4,12 +4,13 @@
 from __future__ import annotations
 
 from collections.abc import Hashable, Sequence
-from typing import Callable, TypeVar, overload
+from typing import Callable, Literal, TypeVar, overload
 
 from rapidfuzz.distance import ScoreAlignment
 
 _UnprocessedType1 = TypeVar("_UnprocessedType1")
 _UnprocessedType2 = TypeVar("_UnprocessedType2")
+_ScorerType = Literal["indel", "levenshtein"]
 
 @overload
 def ratio(
@@ -34,6 +35,7 @@ def partial_ratio(
     *,
     processor: None = None,
     score_cutoff: float | None = 0,
+    scorer: _ScorerType = "indel",
 ) -> float: ...
 @overload
 def partial_ratio(
@@ -42,6 +44,7 @@ def partial_ratio(
     *,
     processor: Callable[[_UnprocessedType1 | _UnprocessedType2], Sequence[Hashable]],
     score_cutoff: float | None = 0,
+    scorer: _ScorerType = "indel",
 ) -> float: ...
 @overload
 def partial_ratio_alignment(
@@ -50,6 +53,7 @@ def partial_ratio_alignment(
     *,
     processor: None = None,
     score_cutoff: float | None = 0,
+    scorer: _ScorerType = "indel",
 ) -> ScoreAlignment | None: ...
 @overload
 def partial_ratio_alignment(
@@ -58,6 +62,7 @@ def partial_ratio_alignment(
     *,
     processor: Callable[[_UnprocessedType1 | _UnprocessedType2], Sequence[Hashable]],
     score_cutoff: float | None = 0,
+    scorer: _ScorerType = "indel",
 ) -> ScoreAlignment | None: ...
 @overload
 def token_sort_ratio(
@@ -114,6 +119,7 @@ def partial_token_sort_ratio(
     *,
     processor: None = None,
     score_cutoff: float | None = 0,
+    scorer: _ScorerType = "indel",
 ) -> float: ...
 @overload
 def partial_token_sort_ratio(
@@ -122,6 +128,7 @@ def partial_token_sort_ratio(
     *,
     processor: Callable[[_UnprocessedType1 | _UnprocessedType2], Sequence[Hashable]],
     score_cutoff: float | None = 0,
+    scorer: _ScorerType = "indel",
 ) -> float: ...
 @overload
 def partial_token_set_ratio(
@@ -130,6 +137,7 @@ def partial_token_set_ratio(
     *,
     processor: None = None,
     score_cutoff: float | None = 0,
+    scorer: _ScorerType = "indel",
 ) -> float: ...
 @overload
 def partial_token_set_ratio(
@@ -138,6 +146,7 @@ def partial_token_set_ratio(
     *,
     processor: Callable[[_UnprocessedType1 | _UnprocessedType2], Sequence[Hashable]],
     score_cutoff: float | None = 0,
+    scorer: _ScorerType = "indel",
 ) -> float: ...
 @overload
 def partial_token_ratio(
@@ -146,6 +155,7 @@ def partial_token_ratio(
     *,
     processor: None = None,
     score_cutoff: float | None = 0,
+    scorer: _ScorerType = "indel",
 ) -> float: ...
 @overload
 def partial_token_ratio(
@@ -154,6 +164,7 @@ def partial_token_ratio(
     *,
     processor: Callable[[_UnprocessedType1 | _UnprocessedType2], Sequence[Hashable]],
     score_cutoff: float | None = 0,
+    scorer: _ScorerType = "indel",
 ) -> float: ...
 @overload
 def WRatio(
@@ -162,6 +173,7 @@ def WRatio(
     *,
     processor: None = None,
     score_cutoff: float | None = 0,
+    scorer: _ScorerType = "indel",
 ) -> float: ...
 @overload
 def WRatio(
@@ -170,6 +182,7 @@ def WRatio(
     *,
     processor: Callable[[_UnprocessedType1 | _UnprocessedType2], Sequence[Hashable]],
     score_cutoff: float | None = 0,
+    scorer: _ScorerType = "indel",
 ) -> float: ...
 @overload
 def QRatio(
