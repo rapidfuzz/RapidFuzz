@@ -12,7 +12,7 @@ __all__ = ["distance", "normalized_distance", "normalized_similarity", "similari
 
 _impl = os.environ.get("RAPIDFUZZ_IMPLEMENTATION")
 if _impl == "cpp":
-    imported = False
+    _imported = False
     if supports(AVX2):
         with contextlib.suppress(ImportError):
             from rapidfuzz.distance.metrics_cpp_avx2 import (  # pyright: ignore[reportMissingImports]
@@ -22,9 +22,9 @@ if _impl == "cpp":
                 jaro_similarity as similarity,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported and supports(SSE2):
+    if not _imported and supports(SSE2):
         with contextlib.suppress(ImportError):
             from rapidfuzz.distance.metrics_cpp_sse2 import (  # pyright: ignore[reportMissingImports]
                 jaro_distance as distance,
@@ -33,9 +33,9 @@ if _impl == "cpp":
                 jaro_similarity as similarity,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported:
+    if not _imported:
         from rapidfuzz.distance.metrics_cpp import (  # pyright: ignore[reportMissingImports]
             jaro_distance as distance,
             jaro_normalized_distance as normalized_distance,
@@ -50,7 +50,7 @@ elif _impl == "python":
         jaro_similarity as similarity,
     )
 else:
-    imported = False
+    _imported = False
     if supports(AVX2):
         with contextlib.suppress(ImportError):
             from rapidfuzz.distance.metrics_cpp_avx2 import (  # pyright: ignore[reportMissingImports]
@@ -60,9 +60,9 @@ else:
                 jaro_similarity as similarity,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported and supports(SSE2):
+    if not _imported and supports(SSE2):
         with contextlib.suppress(ImportError):
             from rapidfuzz.distance.metrics_cpp_sse2 import (  # pyright: ignore[reportMissingImports]
                 jaro_distance as distance,
@@ -71,9 +71,9 @@ else:
                 jaro_similarity as similarity,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported:
+    if not _imported:
         with contextlib.suppress(ImportError):
             from rapidfuzz.distance.metrics_cpp import (  # pyright: ignore[reportMissingImports]
                 jaro_distance as distance,
@@ -82,9 +82,9 @@ else:
                 jaro_similarity as similarity,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported:
+    if not _imported:
         from rapidfuzz.distance.metrics_py import (
             jaro_distance as distance,
             jaro_normalized_distance as normalized_distance,

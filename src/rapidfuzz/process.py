@@ -12,7 +12,7 @@ __all__ = ["cdist", "cpdist", "extract", "extractOne", "extract_iter"]
 
 _impl = os.environ.get("RAPIDFUZZ_IMPLEMENTATION")
 if _impl == "cpp":
-    imported = False
+    _imported = False
     if supports(AVX2):
         with contextlib.suppress(ImportError):
             from rapidfuzz.process_cpp_avx2 import (  # pyright: ignore[reportMissingImports]
@@ -23,9 +23,9 @@ if _impl == "cpp":
                 extractOne,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported and supports(SSE2):
+    if not _imported and supports(SSE2):
         with contextlib.suppress(ImportError):
             from rapidfuzz.process_cpp_sse2 import (  # pyright: ignore[reportMissingImports]
                 cdist,
@@ -35,9 +35,9 @@ if _impl == "cpp":
                 extractOne,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported:
+    if not _imported:
         from rapidfuzz.process_cpp import (  # pyright: ignore[reportMissingImports]
             cdist,
             cpdist,
@@ -48,7 +48,7 @@ if _impl == "cpp":
 elif _impl == "python":
     from rapidfuzz.process_py import cdist, cpdist, extract, extract_iter, extractOne
 else:
-    imported = False
+    _imported = False
     if supports(AVX2):
         with contextlib.suppress(ImportError):
             from rapidfuzz.process_cpp_avx2 import (  # pyright: ignore[reportMissingImports]
@@ -59,9 +59,9 @@ else:
                 extractOne,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported and supports(SSE2):
+    if not _imported and supports(SSE2):
         with contextlib.suppress(ImportError):
             from rapidfuzz.process_cpp_sse2 import (  # pyright: ignore[reportMissingImports]
                 cdist,
@@ -71,9 +71,9 @@ else:
                 extractOne,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported:
+    if not _imported:
         with contextlib.suppress(ImportError):
             from rapidfuzz.process_cpp import (  # pyright: ignore[reportMissingImports]
                 cdist,
@@ -83,9 +83,9 @@ else:
                 extractOne,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported:
+    if not _imported:
         from rapidfuzz.process_py import (
             cdist,
             cpdist,

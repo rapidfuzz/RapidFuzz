@@ -12,7 +12,7 @@ __all__ = ["Editop", "Editops", "MatchingBlock", "Opcode", "Opcodes", "ScoreAlig
 
 _impl = os.environ.get("RAPIDFUZZ_IMPLEMENTATION")
 if _impl == "cpp":
-    imported = False
+    _imported = False
     if supports(AVX2):
         with contextlib.suppress(ImportError):
             from rapidfuzz.distance._initialize_cpp_avx2 import (  # pyright: ignore[reportMissingImports]
@@ -24,9 +24,9 @@ if _impl == "cpp":
                 ScoreAlignment,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported and supports(SSE2):
+    if not _imported and supports(SSE2):
         with contextlib.suppress(ImportError):
             from rapidfuzz.distance._initialize_cpp_sse2 import (  # pyright: ignore[reportMissingImports]
                 Editop,
@@ -37,9 +37,9 @@ if _impl == "cpp":
                 ScoreAlignment,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported:
+    if not _imported:
         from rapidfuzz.distance._initialize_cpp import (  # pyright: ignore[reportMissingImports]
             Editop,
             Editops,
@@ -58,7 +58,7 @@ elif _impl == "python":
         ScoreAlignment,
     )
 else:
-    imported = False
+    _imported = False
     if supports(AVX2):
         with contextlib.suppress(ImportError):
             from rapidfuzz.distance._initialize_cpp_avx2 import (  # pyright: ignore[reportMissingImports]
@@ -70,9 +70,9 @@ else:
                 ScoreAlignment,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported and supports(SSE2):
+    if not _imported and supports(SSE2):
         with contextlib.suppress(ImportError):
             from rapidfuzz.distance._initialize_cpp_sse2 import (  # pyright: ignore[reportMissingImports]
                 Editop,
@@ -83,9 +83,9 @@ else:
                 ScoreAlignment,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported:
+    if not _imported:
         with contextlib.suppress(ImportError):
             from rapidfuzz.distance._initialize_cpp import (  # pyright: ignore[reportMissingImports]
                 Editop,
@@ -96,9 +96,9 @@ else:
                 ScoreAlignment,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported:
+    if not _imported:
         from rapidfuzz.distance._initialize_py import (
             Editop,
             Editops,

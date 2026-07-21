@@ -10,6 +10,6 @@ except ImportError:
     SSE2 = 1
     AVX2 = 2
 
-    def supports(features):
+    def supports(features: int) -> bool:
         _ = features
         return False

@@ -19,7 +19,7 @@ __all__ = [
 
 _impl = os.environ.get("RAPIDFUZZ_IMPLEMENTATION")
 if _impl == "cpp":
-    imported = False
+    _imported = False
     if supports(AVX2):
         with contextlib.suppress(ImportError):
             from rapidfuzz.distance.metrics_cpp_avx2 import (  # pyright: ignore[reportMissingImports]
@@ -31,9 +31,9 @@ if _impl == "cpp":
                 lcs_seq_similarity as similarity,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported and supports(SSE2):
+    if not _imported and supports(SSE2):
         with contextlib.suppress(ImportError):
             from rapidfuzz.distance.metrics_cpp_sse2 import (  # pyright: ignore[reportMissingImports]
                 lcs_seq_distance as distance,
@@ -44,9 +44,9 @@ if _impl == "cpp":
                 lcs_seq_similarity as similarity,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported:
+    if not _imported:
         from rapidfuzz.distance.metrics_cpp import (  # pyright: ignore[reportMissingImports]
             lcs_seq_distance as distance,
             lcs_seq_editops as editops,
@@ -65,7 +65,7 @@ elif _impl == "python":
         lcs_seq_similarity as similarity,
     )
 else:
-    imported = False
+    _imported = False
     if supports(AVX2):
         with contextlib.suppress(ImportError):
             from rapidfuzz.distance.metrics_cpp_avx2 import (  # pyright: ignore[reportMissingImports]
@@ -77,9 +77,9 @@ else:
                 lcs_seq_similarity as similarity,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported and supports(SSE2):
+    if not _imported and supports(SSE2):
         with contextlib.suppress(ImportError):
             from rapidfuzz.distance.metrics_cpp_sse2 import (  # pyright: ignore[reportMissingImports]
                 lcs_seq_distance as distance,
@@ -90,9 +90,9 @@ else:
                 lcs_seq_similarity as similarity,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported:
+    if not _imported:
         with contextlib.suppress(ImportError):
             from rapidfuzz.distance.metrics_cpp import (  # pyright: ignore[reportMissingImports]
                 lcs_seq_distance as distance,
@@ -103,9 +103,9 @@ else:
                 lcs_seq_similarity as similarity,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported:
+    if not _imported:
         from rapidfuzz.distance.metrics_py import (
             lcs_seq_distance as distance,
             lcs_seq_editops as editops,

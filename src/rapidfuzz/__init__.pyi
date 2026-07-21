@@ -10,3 +10,5 @@ from rapidfuzz import (
     process as process,
     utils as utils,
 )
+
+def get_include() -> str: ...

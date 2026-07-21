@@ -10,7 +10,7 @@ from typing import Any, Callable
 pandas_NA = None
 
 
-def setupPandas():
+def setupPandas() -> None:
     global pandas_NA  # noqa: PLW0603
     if pandas_NA is None:
         pandas = sys.modules.get("pandas")
@@ -67,7 +67,7 @@ def is_none(s: Any) -> bool:
     return isinstance(s, float) and isnan(s)
 
 
-def add_scorer_attrs(func: Any, cached_scorer_call: dict[str, Callable[..., dict[str, Any]]]):
+def add_scorer_attrs(func: Any, cached_scorer_call: dict[str, Callable[..., dict[str, Any]]]) -> None:
     func._RF_ScorerPy = cached_scorer_call
     # used to detect the function hasn't been wrapped afterwards
     func._RF_OriginalScorer = func

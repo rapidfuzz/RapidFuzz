@@ -24,7 +24,7 @@ __all__ = [
 
 _impl = os.environ.get("RAPIDFUZZ_IMPLEMENTATION")
 if _impl == "cpp":
-    imported = False
+    _imported = False
     if supports(AVX2):
         with contextlib.suppress(ImportError):
             from rapidfuzz.fuzz_cpp_avx2 import (  # pyright: ignore[reportMissingImports]
@@ -41,9 +41,9 @@ if _impl == "cpp":
                 token_sort_ratio,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported and supports(SSE2):
+    if not _imported and supports(SSE2):
         with contextlib.suppress(ImportError):
             from rapidfuzz.fuzz_cpp_sse2 import (  # pyright: ignore[reportMissingImports]
                 QRatio,
@@ -59,9 +59,9 @@ if _impl == "cpp":
                 token_sort_ratio,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported:
+    if not _imported:
         from rapidfuzz.fuzz_cpp import (  # pyright: ignore[reportMissingImports]
             QRatio,
             WRatio,
@@ -90,7 +90,7 @@ elif _impl == "python":
         token_sort_ratio,
     )
 else:
-    imported = False
+    _imported = False
     if supports(AVX2):
         with contextlib.suppress(ImportError):
             from rapidfuzz.fuzz_cpp_avx2 import (  # pyright: ignore[reportMissingImports]
@@ -107,9 +107,9 @@ else:
                 token_sort_ratio,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported and supports(SSE2):
+    if not _imported and supports(SSE2):
         with contextlib.suppress(ImportError):
             from rapidfuzz.fuzz_cpp_sse2 import (  # pyright: ignore[reportMissingImports]
                 QRatio,
@@ -125,9 +125,9 @@ else:
                 token_sort_ratio,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported:
+    if not _imported:
         with contextlib.suppress(ImportError):
             from rapidfuzz.fuzz_cpp import (  # pyright: ignore[reportMissingImports]
                 QRatio,
@@ -143,9 +143,9 @@ else:
                 token_sort_ratio,
             )
 
-            imported = True
+            _imported = True
 
-    if not imported:
+    if not _imported:
         from rapidfuzz.fuzz_py import (
             QRatio,
             WRatio,

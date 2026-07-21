@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import subprocess
+from pathlib import Path
 
 from PyInstaller import __main__ as pyi_main
 
 
 # Test out the package by importing it, then running functions from it.
-def test_pyi_hooksample(tmp_path):
+def test_pyi_hooksample(tmp_path: Path) -> None:
     app_name = "userapp"
     workpath = tmp_path / "build"
     distpath = tmp_path / "dist"

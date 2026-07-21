@@ -94,7 +94,7 @@ line-length = 120
 
 [tool.pyrefly]
 project-includes = ["src/rapidfuzz"]
-project-excludes = ["**/*_py.py"]
+project-excludes = ["**/*_py.py", "**/*_cpp.py"]
 
 [tool.mypy]
 files = ["src"]
@@ -166,6 +166,7 @@ extend-ignore = [
   "PLR",    # Design related pylint codes
   "E501",   # Line too long
   "PTH123", # use pathlib instead of builtin open
+  "ISC001", # conflicts with ruff formatter
 ]
 unfixable = [
   "T20",  # Removes print statements

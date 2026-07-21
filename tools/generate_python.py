@@ -25,39 +25,39 @@ __all__ = [
 
 _impl = os.environ.get("RAPIDFUZZ_IMPLEMENTATION")
 if _impl == "cpp":
-    imported = False
+    _imported = False
     if supports(AVX2):
         with contextlib.suppress(ImportError):
             from {module}_cpp_avx2 import {includes} # pyright: ignore[reportMissingImports]
-            imported = True
+            _imported = True
 
-    if not imported and supports(SSE2):
+    if not _imported and supports(SSE2):
         with contextlib.suppress(ImportError):
             from {module}_cpp_sse2 import {includes} # pyright: ignore[reportMissingImports]
-            imported = True
+            _imported = True
 
-    if not imported:
+    if not _imported:
         from {module}_cpp import {includes} # pyright: ignore[reportMissingImports]
 elif _impl == "python":
     from {module}_py import {includes}
 else:
-    imported = False
+    _imported = False
     if supports(AVX2):
         with contextlib.suppress(ImportError):
             from {module}_cpp_avx2 import {includes} # pyright: ignore[reportMissingImports]
-            imported = True
+            _imported = True
 
-    if not imported and supports(SSE2):
+    if not _imported and supports(SSE2):
         with contextlib.suppress(ImportError):
             from {module}_cpp_sse2 import {includes} # pyright: ignore[reportMissingImports]
-            imported = True
+            _imported = True
 
-    if not imported:
+    if not _imported:
         with contextlib.suppress(ImportError):
             from {module}_cpp import {includes} # pyright: ignore[reportMissingImports]
-            imported = True
+            _imported = True
 
-    if not imported:
+    if not _imported:
         from {module}_py import {includes}
 """
 
@@ -72,10 +72,10 @@ def generate(module, importModule, includes):
     print(f"generating {path}")
     if isinstance(includes, list):
         includesStr = ", ".join(includes)
-        exportStr = ", ".join(f'"{x}"' for x in includes)
+        exportStr = ", ".join(f'"{x}"' for x in sorted(includes))
     else:
         includesStr = ", ".join(f"{k} as {v}" for k, v in includes.items())
-        exportStr = ", ".join(f'"{x}"' for x in includes.values())
+        exportStr = ", ".join(f'"{x}"' for x in sorted(includes.values()))
 
     formatted = format.format(module=importModule, includes=includesStr, exports=exportStr)
 
