@@ -125,7 +125,7 @@ jobs:
         with:
           package-dir: rapidfuzz.tar.gz
           output-dir: wheelhouse
-      
+
       - name: Build Wheel (ppc64le and s390x)
         if: matrix.archs == 'ppc64le' || matrix.archs =='s390x'
         env:

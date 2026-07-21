@@ -288,8 +288,7 @@ static inline bool is_valid_string(PyObject* py_str)
 
 static inline void validate_string(PyObject* py_str, const char* err)
 {
-    if (!PyBytes_Check(py_str) && !PyUnicode_Check(py_str))
-        throw PythonTypeError(err);
+    if (!PyBytes_Check(py_str) && !PyUnicode_Check(py_str)) throw PythonTypeError(err);
 }
 
 static inline RF_String convert_string(PyObject* py_str)

@@ -9,7 +9,7 @@ fi
 
 generate_cython()
 {
-  python -m cython -I "$curdir" --cplus $linetrace_flag "$curdir"/"$1".pyx -o "$curdir"/"$1".cxx || exit 1
+  python -m cython -I "$curdir" --cplus "$linetrace_flag" "$curdir"/"$1".pyx -o "$curdir"/"$1".cxx || exit 1
   echo "Generated $curdir/$1.cxx"
 }
 

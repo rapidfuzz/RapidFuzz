@@ -69,11 +69,12 @@ def test_scorer(scorer, res_type):
                 "python",
                 "-m",
                 "mypy",
-                str(f_name), "--warn-unused-ignores",
+                str(f_name),
+                "--warn-unused-ignores",
                 "--config-file",
                 str(Path(__file__).resolve().parent.parent / "pyproject.toml"),
             ],
-            check=True
+            check=True,
         )
         subprocess.run(
             [
