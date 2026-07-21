@@ -180,8 +180,8 @@ isort.combine-as-imports = true
 "setup.py" = ["T20"]
 
 [tool.cibuildwheel]
-enable = ["cpython-freethreading", "pypy"]
+enable = ["pypy"]
 # in theory some tests require numpy / pandas as well. However those don't provider
 # wheels for all target platforms
-test-requires = ["pytest", "hypothesis"]
+test-requires = ["pytest", "hypothesis==6.155.7"]
 test-command = "pytest {package}/tests"
