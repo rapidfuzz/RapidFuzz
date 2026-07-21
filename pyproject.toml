@@ -92,6 +92,10 @@ input = "src/rapidfuzz/__init__.py"
 [tool.black]
 line-length = 120
 
+[tool.pyrefly]
+project-includes = ["src/rapidfuzz"]
+project-excludes = ["**/*_py.py"]
+
 [tool.mypy]
 files = ["src"]
 python_version = "3.12"

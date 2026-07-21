@@ -165,7 +165,7 @@ jobs:
           python tools/test_scorer_typing.py
           python -m mypy tools/test_process_typing.py --warn-unused-ignores
           python -m pyright -p tools/pyrightconfig.json tools/test_process_typing.py
-          pyrefly coverage check --output-format=github src/rapidfuzz
+          pyrefly coverage check --output-format=github
 
       - name: Test with pytest and backtrace in case of SegFault
         if: runner.os == 'Linux'
