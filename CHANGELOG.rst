@@ -4,9 +4,12 @@ Changelog
 ^^^^^^^^^^^^^^^^^^^^^
 Fixed
 ~~~~~
-* dropped support for Python 3.10
 * fix some divergences in the pure Python fallback
 
+Removed
+~~~~~~~
+* dropped support for Python 3.10
+* dropped wheels for experimental Python 3.13 free threadedd
 
 [3.14.5] - 2026-04-07
 ^^^^^^^^^^^^^^^^^^^^^
@@ -106,7 +109,7 @@ Fixed
 [3.12.0] - 2025-01-16
 ^^^^^^^^^^^^^^^^^^^^^
 Changed
-~~~~~~~~~~~
+~~~~~~~
 * generate code for fallback imports to be better parseable for tools bundling Python
   applications into a single binary (examples are cx-freeze and pyinstaller)
 
