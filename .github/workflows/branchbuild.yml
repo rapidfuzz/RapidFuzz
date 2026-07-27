@@ -16,7 +16,7 @@ jobs:
         with:
           submodules: 'true'
 
-      - uses: "actions/setup-python@v6"
+      - uses: "actions/setup-python@v7"
         with:
           python-version: "3.13"
 
@@ -52,7 +52,7 @@ jobs:
     steps:
       - uses: "actions/checkout@v7"
 
-      - uses: "actions/setup-python@v6"
+      - uses: "actions/setup-python@v7"
         with:
           python-version: "3.13"
 
@@ -96,7 +96,7 @@ jobs:
     steps:
       - uses: "actions/checkout@v7"
 
-      - uses: "actions/setup-python@v6"
+      - uses: "actions/setup-python@v7"
         with:
           python-version: "3.13"
 
@@ -146,7 +146,7 @@ jobs:
       - uses: "actions/checkout@v7"
         with:
           submodules: 'true'
-      - uses: "actions/setup-python@v6"
+      - uses: "actions/setup-python@v7"
         with:
           allow-prereleases: true
           python-version: "${{ matrix.python-version }}"
@@ -204,7 +204,7 @@ jobs:
           repository: rapidfuzz/intel-sde
           path: sde
 
-      - uses: "actions/setup-python@v6"
+      - uses: "actions/setup-python@v7"
         with:
           python-version: "3.13"
 
