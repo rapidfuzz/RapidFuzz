@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           submodules: 'true'
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
 
@@ -118,7 +118,7 @@ jobs:
 
       - name: Build wheels
         if: matrix.archs != 'ppc64le' && matrix.archs != 's390x'
-        uses: pypa/cibuildwheel@v4.1.0
+        uses: pypa/cibuildwheel@v4.1.1
         env:
           CIBW_PLATFORM: ${{ matrix.platform || 'auto' }}
           CIBW_ARCHS: ${{ matrix.archs || 'auto' }}
@@ -156,7 +156,7 @@ jobs:
 
       - name: Build wheels
         if: matrix.archs != 'riscv64'
-        uses: pypa/cibuildwheel@v4.1.0
+        uses: pypa/cibuildwheel@v4.1.1
         env:
           CIBW_PLATFORM: pyodide
           CIBW_ARCHS: auto
