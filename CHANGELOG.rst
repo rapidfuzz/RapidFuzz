@@ -5,6 +5,7 @@ Changelog
 Fixed
 ~~~~~
 * fix some divergences in the pure Python fallback
+* fix compatibility with new Cython versions
 
 Removed
 ~~~~~~~
