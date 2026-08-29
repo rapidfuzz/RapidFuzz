@@ -6,6 +6,8 @@ Fixed
 ~~~~~
 * fix some divergences in the pure Python fallback
 * fix compatibility with new Cython versions
+* fixed potential out of bound access inside Editops.remove_subsequence
+* fixed handling python fallback implementation of Editops.remove_subsequence
 
 Removed
 ~~~~~~~

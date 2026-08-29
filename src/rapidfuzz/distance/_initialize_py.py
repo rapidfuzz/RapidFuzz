@@ -409,8 +409,12 @@ class Editops:
 
         for sop in subsequence:
             while op_pos != len(self) and sop != self._editops[op_pos]:
-                result[result_pos] = self._editops[op_pos]
-                result[result_pos].src_pos += offset
+                if result_pos >= len(result._editops):
+                    msg = "subsequence is not a subsequence"
+                    raise ValueError(msg)
+
+                op = self._editops[op_pos]
+                result._editops[result_pos] = Editop(op.tag, op.src_pos + offset, op.dest_pos)
                 result_pos += 1
                 op_pos += 1
 
@@ -428,8 +432,8 @@ class Editops:
 
         # add remaining elements
         while op_pos != len(self):
-            result[result_pos] = self._editops[op_pos]
-            result[result_pos].src_pos += offset
+            op = self._editops[op_pos]
+            result._editops[result_pos] = Editop(op.tag, op.src_pos + offset, op.dest_pos)
             result_pos += 1
             op_pos += 1
 

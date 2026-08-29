@@ -362,3 +362,37 @@ def test_editops_reversible(s1, s2):
         del ops[random.randrange(len(ops))]
         assert Opcodes(ops.as_list(), ops.src_len, ops.dest_len) == ops.as_opcodes()
         assert ops == ops.as_opcodes().as_editops()
+
+
+@pytest.mark.parametrize("module", [distance_py, distance_cpp])
+@pytest.mark.parametrize(
+    ("subsequence_list", "expected"),
+    [
+        ([("delete", 1, 1), ("insert", 6, 5)], [("replace", 1, 1), ("insert", 3, 3)]),
+        ([("delete", 1, 1)], [("replace", 1, 1), ("insert", 3, 3), ("insert", 5, 5)]),
+    ],
+)
+def test_editops_remove_subsequence_does_not_modify_source(module, subsequence_list, expected):
+    """remove_subsequence must not mutate the Editops it is called on"""
+    ops = module.Editops([("delete", 1, 1), ("replace", 2, 1), ("insert", 4, 3), ("insert", 6, 5)], 7, 9)
+    ops_before = ops.as_list()
+
+    result = ops.remove_subsequence(module.Editops(subsequence_list, 7, 9))
+
+    assert result.as_list() == expected
+    assert ops.as_list() == ops_before
+
+
+@pytest.mark.parametrize("module", [distance_py, distance_cpp])
+def test_remove_non_subsequence(module):
+    """
+    test invalid remove sequence from https://github.com/rapidfuzz/Levenshtein/issues/96
+    """
+    edit_operations = Levenshtein.editops("a", "").as_list()
+    not_a_subsequence = Levenshtein.editops("", "a").as_list()
+
+    str_len = 2**32
+    with pytest.raises(ValueError, match="subsequence is not a subsequence"):
+        module.Editops(edit_operations, str_len, str_len).remove_subsequence(
+            module.Editops(not_a_subsequence, str_len, str_len)
+        )
