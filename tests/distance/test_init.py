@@ -445,7 +445,8 @@ def test_remove_non_subsequence(module):
     edit_operations = Levenshtein.editops("a", "").as_list()
     not_a_subsequence = Levenshtein.editops("", "a").as_list()
 
-    str_len = 2**32
+    # use the largest value that still fits into a 32-bit size_t
+    str_len = 2**32 - 1
     with pytest.raises(ValueError, match="subsequence is not a subsequence"):
         module.Editops(edit_operations, str_len, str_len).remove_subsequence(
             module.Editops(not_a_subsequence, str_len, str_len)
