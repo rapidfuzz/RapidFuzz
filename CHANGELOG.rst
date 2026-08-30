@@ -12,7 +12,7 @@ Fixed
 Removed
 ~~~~~~~
 * dropped support for Python 3.10
-* dropped wheels for experimental Python 3.13 free threadedd
+* dropped wheels for experimental Python 3.13 free threaded
 
 [3.14.5] - 2026-04-07
 ^^^^^^^^^^^^^^^^^^^^^
