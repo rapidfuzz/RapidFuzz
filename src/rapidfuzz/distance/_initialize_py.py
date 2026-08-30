@@ -336,7 +336,7 @@ class Editops:
         x = Editops.__new__(Editops)
         x._src_len = self._src_len
         x._dest_len = self._dest_len
-        x._editops = self._editops[::]
+        x._editops = [Editop(op.tag, op.src_pos, op.dest_pos) for op in self._editops]
         return x
 
     def inverse(self):
@@ -510,7 +510,8 @@ class Editops:
 
     def __getitem__(self, key):
         if isinstance(key, int):
-            return self._editops[key]
+            op = self._editops[key]
+            return Editop(op.tag, op.src_pos, op.dest_pos)
 
         start, stop, step = key.indices(len(self._editops))
         if step < 0:
@@ -520,11 +521,12 @@ class Editops:
         x = Editops.__new__(Editops)
         x._src_len = self._src_len
         x._dest_len = self._dest_len
-        x._editops = self._editops[start:stop:step]
+        x._editops = [Editop(op.tag, op.src_pos, op.dest_pos) for op in self._editops[start:stop:step]]
         return x
 
     def __iter__(self):
-        yield from self._editops
+        for op in self._editops:
+            yield Editop(op.tag, op.src_pos, op.dest_pos)
 
     def __repr__(self):
         return (
@@ -709,7 +711,7 @@ class Opcodes:
         x = Opcodes.__new__(Opcodes)
         x._src_len = self._src_len
         x._dest_len = self._dest_len
-        x._opcodes = self._opcodes[::]
+        x._opcodes = [Opcode(op.tag, op.src_start, op.src_end, op.dest_start, op.dest_end) for op in self._opcodes]
         return x
 
     def inverse(self):
@@ -807,13 +809,15 @@ class Opcodes:
 
     def __getitem__(self, key):
         if isinstance(key, int):
-            return self._opcodes[key]
+            op = self._opcodes[key]
+            return Opcode(op.tag, op.src_start, op.src_end, op.dest_start, op.dest_end)
 
         msg = "Expected index"
         raise TypeError(msg)
 
     def __iter__(self):
-        yield from self._opcodes
+        for op in self._opcodes:
+            yield Opcode(op.tag, op.src_start, op.src_end, op.dest_start, op.dest_end)
 
     def __repr__(self):
         return (

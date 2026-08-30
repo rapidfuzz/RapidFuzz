@@ -179,6 +179,30 @@ def test_editops_inversion(module):
     ]
 
 
+@pytest.mark.parametrize("module", [distance_py, distance_cpp])
+def test_editops_access_returns_independent_copies(module):
+    """
+    indexing, slicing, iterating or copying an Editops must hand back Editop
+    objects that are independent of the ones stored internally. Mutating one
+    must not corrupt the Editops it came from
+    """
+    ops = module.Editops([("delete", 1, 1), ("replace", 2, 1)], 7, 9)
+    ops_before = ops.as_list()
+
+    ops[0].src_pos = 999
+    assert ops.as_list() == ops_before
+
+    ops[:][0].src_pos = 999
+    assert ops.as_list() == ops_before
+
+    for op in ops:
+        op.src_pos = 999
+    assert ops.as_list() == ops_before
+
+    ops.copy()[0].src_pos = 999
+    assert ops.as_list() == ops_before
+
+
 def test_opcodes_comparison():
     """
     test comparison with Opcodes
@@ -263,6 +287,36 @@ def test_opcode_inversion(module):
         ("delete", 5, 8, 6, 6),
         ("equal", 8, 9, 6, 7),
     ]
+
+
+@pytest.mark.parametrize("module", [distance_py, distance_cpp])
+def test_opcodes_access_returns_independent_copies(module):
+    """
+    indexing, iterating or copying an Opcodes must hand back Opcode objects
+    that are independent of the ones stored internally. Mutating one must
+    not corrupt the Opcodes it came from
+    """
+    ops = module.Opcodes(
+        [
+            ("equal", 0, 1, 0, 1),
+            ("delete", 1, 2, 1, 1),
+            ("equal", 2, 7, 1, 6),
+            ("insert", 7, 7, 6, 9),
+        ],
+        7,
+        9,
+    )
+    ops_before = ops.as_list()
+
+    ops[0].src_start = 999
+    assert ops.as_list() == ops_before
+
+    for op in ops:
+        op.src_start = 999
+    assert ops.as_list() == ops_before
+
+    ops.copy()[0].src_start = 999
+    assert ops.as_list() == ops_before
 
 
 @pytest.mark.parametrize("module", [distance_py, distance_cpp])
