@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import heapq
+import operator
+import struct
+import sys
 
 from rapidfuzz._utils import ScorerFlag, is_none, setupPandas
 from rapidfuzz.fuzz import WRatio, ratio
@@ -14,8 +17,46 @@ def _get_scorer_flags_py(scorer, scorer_kwargs):
     params = getattr(scorer, "_RF_ScorerPy", None)
     if params is not None:
         flags = params["get_scorer_flags"](**scorer_kwargs)
-        return (flags["worst_score"], flags["optimal_score"])
-    return (0, 100)
+        return (flags["worst_score"], flags["optimal_score"], flags["flags"])
+    return (0, 100, None)
+
+
+def _validate_score_cutoff(score_cutoff, worst_score, optimal_score, scorer_flags):
+    if score_cutoff is None or scorer_flags is None:
+        return score_cutoff
+
+    if scorer_flags & ScorerFlag.RESULT_F64:
+        if not hasattr(score_cutoff, "__float__"):
+            error_message = f"must be real number, not {type(score_cutoff).__name__}"
+            raise TypeError(error_message)
+        score_cutoff = struct.unpack("f", struct.pack("f", float(score_cutoff)))[0]
+        worst_score = struct.unpack("f", struct.pack("f", float(worst_score)))[0]
+        optimal_score = struct.unpack("f", struct.pack("f", float(optimal_score)))[0]
+    else:
+        try:
+            score_cutoff = operator.index(score_cutoff)
+        except TypeError:
+            error_message = "an integer is required"
+            raise TypeError(error_message) from None
+        if scorer_flags & ScorerFlag.RESULT_SIZE_T:
+            if score_cutoff < 0:
+                error_message = "can't convert negative value to uint64_t"
+                raise OverflowError(error_message)
+            size_t_max = 2 * sys.maxsize + 1
+            if score_cutoff > size_t_max:
+                error_message = "Python int too large to convert to C unsigned long"
+                raise OverflowError(error_message)
+            if optimal_score > worst_score:
+                optimal_score = size_t_max
+            else:
+                worst_score = size_t_max
+
+    lowest_score = min(worst_score, optimal_score)
+    highest_score = max(worst_score, optimal_score)
+    if score_cutoff < lowest_score or score_cutoff > highest_score:
+        error_message = f"score_cutoff has to be in the range of {lowest_score} - {highest_score}"
+        raise TypeError(error_message)
+    return score_cutoff
 
 
 def extract_iter(
@@ -85,15 +126,17 @@ def extract_iter(
           * The `key of choice` when choices is a mapping like a dict, or a pandas Series
 
     """
-    _ = score_hint
     scorer_kwargs = scorer_kwargs or {}
-    worst_score, optimal_score = _get_scorer_flags_py(scorer, scorer_kwargs)
+    worst_score, optimal_score, scorer_flags = _get_scorer_flags_py(scorer, scorer_kwargs)
     lowest_score_worst = optimal_score > worst_score
 
     setupPandas()
 
     if is_none(query):
         return
+
+    score_cutoff = _validate_score_cutoff(score_cutoff, worst_score, optimal_score, scorer_flags)
+    _validate_score_cutoff(score_hint, worst_score, optimal_score, scorer_flags)
 
     if score_cutoff is None:
         score_cutoff = worst_score
@@ -251,15 +294,17 @@ def extractOne(
     None
 
     """
-    _ = score_hint
     scorer_kwargs = scorer_kwargs or {}
-    worst_score, optimal_score = _get_scorer_flags_py(scorer, scorer_kwargs)
+    worst_score, optimal_score, scorer_flags = _get_scorer_flags_py(scorer, scorer_kwargs)
     lowest_score_worst = optimal_score > worst_score
 
     setupPandas()
 
     if is_none(query):
         return None
+
+    score_cutoff = _validate_score_cutoff(score_cutoff, worst_score, optimal_score, scorer_flags)
+    _validate_score_cutoff(score_hint, worst_score, optimal_score, scorer_flags)
 
     if score_cutoff is None:
         score_cutoff = worst_score
@@ -376,7 +421,7 @@ def extract(
 
     """
     scorer_kwargs = scorer_kwargs or {}
-    worst_score, optimal_score = _get_scorer_flags_py(scorer, scorer_kwargs)
+    worst_score, optimal_score, _ = _get_scorer_flags_py(scorer, scorer_kwargs)
     lowest_score_worst = optimal_score > worst_score
 
     if limit == 1:
@@ -514,8 +559,12 @@ def cdist(
     """
     import numpy as np
 
-    _ = workers, score_hint
+    _ = workers
     scorer_kwargs = scorer_kwargs or {}
+    if getattr(scorer, "_RF_OriginalScorer", None) is scorer:
+        worst_score, optimal_score, scorer_flags = _get_scorer_flags_py(scorer, scorer_kwargs)
+        score_cutoff = _validate_score_cutoff(score_cutoff, worst_score, optimal_score, scorer_flags)
+        _validate_score_cutoff(score_hint, worst_score, optimal_score, scorer_flags)
     dtype = _dtype_to_type_num(dtype, scorer, scorer_kwargs)
     results = np.zeros((len(queries), len(choices)), dtype=dtype)
 
@@ -649,8 +698,12 @@ def cpdist(
         error_message = "Length of queries and choices must be the same!"
         raise ValueError(error_message)
 
-    _ = workers, score_hint
+    _ = workers
     scorer_kwargs = scorer_kwargs or {}
+    if getattr(scorer, "_RF_OriginalScorer", None) is scorer:
+        worst_score, optimal_score, scorer_flags = _get_scorer_flags_py(scorer, scorer_kwargs)
+        score_cutoff = _validate_score_cutoff(score_cutoff, worst_score, optimal_score, scorer_flags)
+        _validate_score_cutoff(score_hint, worst_score, optimal_score, scorer_flags)
     dtype = _dtype_to_type_num(dtype, scorer, scorer_kwargs)
     results = np.zeros((len_queries,), dtype=dtype)
 

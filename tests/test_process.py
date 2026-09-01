@@ -97,6 +97,54 @@ def test_extractOne_exceptions():
         process_py.extractOne("", {1: 1})
 
 
+def call_process(process_impl, function, scorer, **kwargs):
+    if function == "extract_iter":
+        return list(process_impl.extract_iter("a", ["a"], scorer=scorer, **kwargs))
+    if function in {"cdist", "cpdist"}:
+        return getattr(process_impl, function)(["a"], ["a"], scorer=scorer, **kwargs)
+    return getattr(process_impl, function)("a", ["a"], scorer=scorer, **kwargs)
+
+
+@pytest.mark.parametrize("process_impl", [process_cpp, process_py])
+@pytest.mark.parametrize("function", ["extractOne", "extract", "extract_iter", "cdist", "cpdist"])
+@pytest.mark.parametrize("argument", ["score_cutoff", "score_hint"])
+@pytest.mark.parametrize(
+    ("scorer", "value", "score_range"),
+    [
+        (fuzz.ratio, -0.1, "0.0 - 100.0"),
+        (fuzz.ratio, 100.1, "0.0 - 100.0"),
+        (Levenshtein.normalized_similarity, -0.1, "0.0 - 1.0"),
+        (Levenshtein.normalized_similarity, 1.1, "0.0 - 1.0"),
+    ],
+)
+def test_process_score_range(process_impl, function, argument, scorer, value, score_range):
+    with pytest.raises(TypeError, match=f"score_cutoff has to be in the range of {score_range}"):
+        call_process(process_impl, function, scorer, **{argument: value})
+
+
+@pytest.mark.parametrize("process_impl", [process_cpp, process_py])
+def test_process_score_cutoff_float32_rounding(process_impl):
+    result = process_impl.extractOne("a", ["a"], scorer=fuzz.ratio, score_cutoff=100.000001)
+    assert result == ("a", 100.0, 0)
+
+
+@pytest.mark.parametrize("process_impl", [process_cpp, process_py])
+@pytest.mark.parametrize(
+    ("scorer", "value", "error_message"),
+    [(fuzz.ratio, "50", "must be real number, not str"), (Levenshtein.distance, "1", "an integer is required")],
+)
+def test_process_score_cutoff_rejects_string(process_impl, scorer, value, error_message):
+    with pytest.raises(TypeError, match=error_message):
+        process_impl.extractOne("a", ["a"], scorer=scorer, score_cutoff=value)
+
+
+@pytest.mark.parametrize("process_impl", [process_cpp, process_py])
+@pytest.mark.parametrize("function", ["extractOne", "extract", "extract_iter", "cdist", "cpdist"])
+def test_process_distance_score_hint_range(process_impl, function):
+    with pytest.raises(OverflowError, match="can't convert negative value to uint64_t"):
+        call_process(process_impl, function, Levenshtein.distance, score_hint=-1)
+
+
 def test_extract_exceptions():
     with pytest.raises(TypeError):
         process_cpp.extract()
