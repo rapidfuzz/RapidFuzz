@@ -94,7 +94,7 @@ def ratio(s1, s2, *, processor=None, score_cutoff=None):
     return ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
-def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
+def partial_ratio(s1, s2, *, processor=None, score_cutoff=None, scorer="indel"):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
@@ -102,17 +102,25 @@ def partial_ratio(s1, s2, *, processor=None, score_cutoff=None):
     if is_none(s1) or is_none(s2):
         return 0
 
+    # For non-indel scorers, fall back to Python implementation
+    if scorer is not None and scorer != "indel":
+        return fuzz_py.partial_ratio(s1, s2, processor=processor, score_cutoff=score_cutoff, scorer=scorer)
+
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return partial_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
-def partial_ratio_alignment(s1, s2, *, processor=None, score_cutoff=None):
+def partial_ratio_alignment(s1, s2, *, processor=None, score_cutoff=None, scorer="indel"):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
     setupPandas()
     if is_none(s1) or is_none(s2):
         return None
+
+    # For non-indel scorers, fall back to Python implementation
+    if scorer is not None and scorer != "indel":
+        return fuzz_py.partial_ratio_alignment(s1, s2, processor=processor, score_cutoff=score_cutoff, scorer=scorer)
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     res = partial_ratio_alignment_func(s1_proc.string, s2_proc.string, c_score_cutoff)
@@ -159,49 +167,65 @@ def token_ratio(s1, s2, *, processor=None, score_cutoff=None):
     return token_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
-def partial_token_sort_ratio(s1, s2, *, processor=None, score_cutoff=None):
+def partial_token_sort_ratio(s1, s2, *, processor=None, score_cutoff=None, scorer="indel"):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
     setupPandas()
     if is_none(s1) or is_none(s2):
         return 0
+
+    # For non-indel scorers, fall back to Python implementation
+    if scorer is not None and scorer != "indel":
+        return fuzz_py.partial_token_sort_ratio(s1, s2, processor=processor, score_cutoff=score_cutoff, scorer=scorer)
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return partial_token_sort_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
-def partial_token_set_ratio(s1, s2, *, processor=None, score_cutoff=None):
+def partial_token_set_ratio(s1, s2, *, processor=None, score_cutoff=None, scorer="indel"):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
     setupPandas()
     if is_none(s1) or is_none(s2):
         return 0
+
+    # For non-indel scorers, fall back to Python implementation
+    if scorer is not None and scorer != "indel":
+        return fuzz_py.partial_token_set_ratio(s1, s2, processor=processor, score_cutoff=score_cutoff, scorer=scorer)
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return partial_token_set_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
-def partial_token_ratio(s1, s2, *, processor=None, score_cutoff=None):
+def partial_token_ratio(s1, s2, *, processor=None, score_cutoff=None, scorer="indel"):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
     setupPandas()
     if is_none(s1) or is_none(s2):
         return 0
+
+    # For non-indel scorers, fall back to Python implementation
+    if scorer is not None and scorer != "indel":
+        return fuzz_py.partial_token_ratio(s1, s2, processor=processor, score_cutoff=score_cutoff, scorer=scorer)
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return partial_token_ratio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
 
 
-def WRatio(s1, s2, *, processor=None, score_cutoff=None):
+def WRatio(s1, s2, *, processor=None, score_cutoff=None, scorer="indel"):
     cdef double c_score_cutoff = 0.0 if score_cutoff is None else score_cutoff
     cdef RF_StringWrapper s1_proc, s2_proc
 
     setupPandas()
     if is_none(s1) or is_none(s2):
         return 0
+
+    # For non-indel scorers, fall back to Python implementation
+    if scorer is not None and scorer != "indel":
+        return fuzz_py.WRatio(s1, s2, processor=processor, score_cutoff=score_cutoff, scorer=scorer)
 
     preprocess_strings(s1, s2, processor, &s1_proc, &s2_proc)
     return WRatio_func(s1_proc.string, s2_proc.string, c_score_cutoff)
