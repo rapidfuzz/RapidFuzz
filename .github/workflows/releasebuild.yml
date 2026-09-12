@@ -118,7 +118,7 @@ jobs:
 
       - name: Build wheels
         if: matrix.archs != 'ppc64le' && matrix.archs != 's390x'
-        uses: pypa/cibuildwheel@v4.2.0
+        uses: pypa/cibuildwheel@v4.2.1
         env:
           CIBW_PLATFORM: ${{ matrix.platform || 'auto' }}
           CIBW_ARCHS: ${{ matrix.archs || 'auto' }}
@@ -132,7 +132,7 @@ jobs:
           CIBW_PLATFORM: linux
           CIBW_ARCHS: ${{ matrix.archs }}
         run: |
-          python -m pip install cibuildwheel==3.4.1
+          python -m pip install cibuildwheel==4.2.1
           python -m cibuildwheel --output-dir wheelhouse rapidfuzz.tar.gz
 
       - uses: actions/upload-artifact@v7
@@ -156,7 +156,7 @@ jobs:
 
       - name: Build wheels
         if: matrix.archs != 'riscv64'
-        uses: pypa/cibuildwheel@v4.2.0
+        uses: pypa/cibuildwheel@v4.2.1
         env:
           CIBW_PLATFORM: pyodide
           CIBW_ARCHS: auto
