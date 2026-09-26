@@ -129,8 +129,16 @@ def normalized_distance(
     if is_none(s1) or is_none(s2):
         return 1.0
 
-    norm_sim = normalized_similarity(s1, s2, processor=processor)
-    norm_dist = 1.0 - norm_sim
+    if processor is not None:
+        s1 = processor(s1)
+        s2 = processor(s2)
+
+    # as the C++ implementation computes it: 1.0 - norm_sim can differ in
+    # the last bit (1.0 - 0.8 == 0.19999999999999996, not 0.2)
+    s1, s2 = conv_sequences(s1, s2)
+    maximum = max(len(s1), len(s2))
+    dist = distance(s1, s2)
+    norm_dist = dist / maximum if maximum else 0.0
 
     return norm_dist if (score_cutoff is None or norm_dist <= score_cutoff) else 1.0
 
