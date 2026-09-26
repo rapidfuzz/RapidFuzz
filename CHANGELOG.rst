@@ -6,6 +6,9 @@ Fixed
 ~~~~~
 * keep the ``score_cutoff`` of normalized scorers in double precision: a score equal to the
   cutoff was rejected when the cutoff rounded up in single precision, e.g. 0.8 (#494)
+* compute ``normalized_distance`` of the pure Python ``Prefix`` and ``Postfix`` as the C++
+  implementation does, ``distance / maximum``: ``1.0 - normalized_similarity`` could differ in the
+  last bit (0.19999999999999996 instead of 0.2)
 
 [3.14.6] - 2026-08-30
 ^^^^^^^^^^^^^^^^^^^^^
