@@ -1,5 +1,12 @@
 Changelog
 ---------
+[Unreleased]
+^^^^^^^^^^^^
+Fixed
+~~~~~
+* keep the ``score_cutoff`` of normalized scorers in double precision: a score equal to the
+  cutoff was rejected when the cutoff rounded up in single precision, e.g. 0.8 (#494)
+
 [3.14.6] - 2026-08-30
 ^^^^^^^^^^^^^^^^^^^^^
 Fixed
