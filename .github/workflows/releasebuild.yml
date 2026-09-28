@@ -111,7 +111,7 @@ jobs:
         shell: bash
         run: cp dist/*.tar.gz rapidfuzz.tar.gz
 
-      - uses: IBM/setup-python-pz@291287e36d7c893a50c857d8bc014d67edd58ada
+      - uses: IBM/setup-python-pz@215953086fd0ad7561068a3f8fa7fbcd8bc0e3e3
         if: matrix.archs == 'ppc64le' || matrix.archs == 's390x'
         with:
           python-version: '3.11'
