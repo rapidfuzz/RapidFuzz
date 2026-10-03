@@ -443,6 +443,17 @@ def _is_symmetric(scorer, scorer_kwargs):
     return False
 
 
+def _round_score(score):
+    # Match the C++ implementation's rounding of halfway values away from zero.
+    rounded = int(score)
+    doubled_fraction = 2 * (score - rounded)
+    if doubled_fraction >= 1:
+        return rounded + 1
+    if doubled_fraction <= -1:
+        return rounded - 1
+    return rounded
+
+
 def cdist(
     queries,
     choices,
@@ -531,7 +542,7 @@ def cdist(
             score = scorer(proc_query, proc_query, score_cutoff=score_cutoff, **scorer_kwargs) * score_multiplier
 
             if np.issubdtype(dtype, np.integer):
-                score = round(score)
+                score = _round_score(score)
 
             results[i, i] = score
             for j in range(i + 1, len(proc_choices)):
@@ -546,7 +557,7 @@ def cdist(
                 )
 
                 if np.issubdtype(dtype, np.integer):
-                    score = round(score)
+                    score = _round_score(score)
 
                 results[i, j] = results[j, i] = score
     else:
@@ -564,7 +575,7 @@ def cdist(
                 )
 
                 if np.issubdtype(dtype, np.integer):
-                    score = round(score)
+                    score = _round_score(score)
 
                 results[i, j] = score
 
@@ -671,7 +682,7 @@ def cpdist(
 
         # Round the result if dtype is integral
         if np.issubdtype(dtype, np.integer):
-            score = round(score)
+            score = _round_score(score)
 
         # Store the score in the results matrix
         results[i] = score
