@@ -772,3 +772,93 @@ def test_cpdist_integral_dtype_rounding():
     assert float_result % 1 >= 0.5
     # Check if the rounded float result is equal to the integer result
     assert round(float_result) == int_result
+
+
+@pytest.mark.parametrize("func", [process.cdist, process.cpdist])
+@pytest.mark.parametrize("score_multiplier", [1, 5, -1, -5])
+def test_matrix_integral_dtype_half_rounding(func, score_multiplier):
+    np = pytest.importorskip("numpy")
+    result = func(
+        ["ab"],
+        ["ac"],
+        scorer=Levenshtein.normalized_similarity,
+        score_multiplier=score_multiplier,
+        dtype=np.int32,
+    )
+    expected = {1: 1, 5: 3, -1: -1, -5: -3}[score_multiplier]
+    assert result.item() == expected
+
+
+@pytest.mark.parametrize(("score_multiplier", "expected"), [(1, [[1, 1], [1, 1]]), (0.5, [[1, 0], [0, 1]])])
+def test_cdist_symmetric_integral_dtype_half_rounding(score_multiplier, expected):
+    np = pytest.importorskip("numpy")
+    strings = ["ab", "ac"]
+    result = process.cdist(
+        strings,
+        strings,
+        scorer=Levenshtein.normalized_similarity,
+        score_multiplier=score_multiplier,
+        dtype=np.uint8,
+    )
+    assert np.array_equal(result, expected)
+
+
+@pytest.mark.parametrize("func", [process.cdist, process.cpdist])
+@pytest.mark.parametrize("scalar_type", ["float32", "float64", "Decimal", "Fraction"])
+@pytest.mark.parametrize("score", [0.5, 2.5, 0.49, 0.51])
+def test_matrix_custom_scorer_integral_dtype_rounding(func, scalar_type, score):
+    from decimal import Decimal
+    from fractions import Fraction
+
+    np = pytest.importorskip("numpy")
+    scalar = {"float32": np.float32, "float64": np.float64, "Decimal": Decimal, "Fraction": Fraction}[scalar_type]
+
+    def scorer(*args, **kwargs):
+        return scalar(score)
+
+    result = func(["ab"], ["ac"], scorer=scorer, dtype=np.uint8)
+    expected = {0.5: 1, 2.5: 3, 0.49: 0, 0.51: 1}[score]
+    assert result.item() == expected
+
+
+@pytest.mark.parametrize("func", [process_py.cdist, process_py.cpdist])
+def test_python_matrix_integral_scorer_precision(func):
+    np = pytest.importorskip("numpy")
+    score = 2**53 + 1
+
+    def scorer(*args, **kwargs):
+        return score
+
+    result = func(["ab"], ["ac"], scorer=scorer, dtype=np.int64)
+    assert result.item() == score
+
+
+@pytest.mark.parametrize("func", [process.cdist, process.cpdist])
+@pytest.mark.parametrize(("score", "expected"), [("2.5", 3), ("-2.5", -3)])
+def test_matrix_decimal_scorer_float_operation_trap(func, score, expected):
+    from decimal import Decimal, FloatOperation, localcontext
+
+    np = pytest.importorskip("numpy")
+
+    def scorer(*args, **kwargs):
+        return Decimal(score)
+
+    with localcontext() as context:
+        context.traps[FloatOperation] = True
+        result = func(["ab"], ["ac"], scorer=scorer, dtype=np.int32)
+
+    assert result.item() == expected
+
+
+@pytest.mark.parametrize("func", [process_py.cdist, process_py.cpdist])
+@pytest.mark.parametrize(
+    ("score", "error"), [(float("inf"), OverflowError), (float("-inf"), OverflowError), (float("nan"), ValueError)]
+)
+def test_python_matrix_nonfinite_integral_scorer(func, score, error):
+    np = pytest.importorskip("numpy")
+
+    def scorer(*args, **kwargs):
+        return score
+
+    with pytest.raises(error):
+        func(["ab"], ["ac"], scorer=scorer, dtype=np.int32)
