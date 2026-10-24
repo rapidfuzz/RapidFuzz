@@ -26,7 +26,7 @@ def _levenshtein_maximum(s1, s2, weights):
 def _uniform_generic(s1, s2, weights):
     len1 = len(s1)
     insert, delete, replace = weights
-    cache = list(range(0, (len1 + 1) * delete, delete))
+    cache = [i * delete for i in range(len1 + 1)]
 
     for ch2 in s2:
         temp = cache[0]
