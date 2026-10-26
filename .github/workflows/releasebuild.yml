@@ -111,14 +111,14 @@ jobs:
         shell: bash
         run: cp dist/*.tar.gz rapidfuzz.tar.gz
 
-      - uses: IBM/setup-python-pz@e4075f01b6fdcbd539dc28fedd3fb74be633d615
+      - uses: IBM/setup-python-pz@ffeb5bd6be7cfdd1e12f86d9f2b8b7d3d027a34e
         if: matrix.archs == 'ppc64le' || matrix.archs == 's390x'
         with:
           python-version: '3.11'
 
       - name: Build wheels
         if: matrix.archs != 'ppc64le' && matrix.archs != 's390x'
-        uses: pypa/cibuildwheel@v4.3.1
+        uses: pypa/cibuildwheel@v4.3.4
         env:
           CIBW_PLATFORM: ${{ matrix.platform || 'auto' }}
           CIBW_ARCHS: ${{ matrix.archs || 'auto' }}
@@ -156,7 +156,7 @@ jobs:
 
       - name: Build wheels
         if: matrix.archs != 'riscv64'
-        uses: pypa/cibuildwheel@v4.3.1
+        uses: pypa/cibuildwheel@v4.3.4
         env:
           CIBW_PLATFORM: pyodide
           CIBW_ARCHS: auto
@@ -186,6 +186,6 @@ jobs:
           pattern: artifact-*
           merge-multiple: true
 
-      - uses: pypa/gh-action-pypi-publish@v1.14.2
+      - uses: pypa/gh-action-pypi-publish@v1.14.3
         with:
           verbose: true
