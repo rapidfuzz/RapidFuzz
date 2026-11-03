@@ -345,8 +345,8 @@ cdef inline RF_String conv_sequence(seq) except *:
 
     return move(c_seq)
 
-cdef inline double get_score_cutoff_f64(score_cutoff, float worst_score, float optimal_score) except *:
-    cdef float c_score_cutoff = worst_score
+cdef inline double get_score_cutoff_f64(score_cutoff, double worst_score, double optimal_score) except *:
+    cdef double c_score_cutoff = worst_score
 
     if score_cutoff is not None:
         c_score_cutoff = score_cutoff
