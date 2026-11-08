@@ -772,3 +772,68 @@ def test_cpdist_integral_dtype_rounding():
     assert float_result % 1 >= 0.5
     # Check if the rounded float result is equal to the integer result
     assert round(float_result) == int_result
+
+
+class _FalseBoolProcessor:
+    def __call__(self, value):
+        return value.lower()
+
+    def __bool__(self):
+        return False
+
+
+class _EmptyProcessor:
+    def __call__(self, value):
+        return value.lower()
+
+    def __len__(self):
+        return 0
+
+
+class _NoTruthTestProcessor:
+    def __call__(self, value):
+        return value.lower()
+
+    def __bool__(self):
+        message = "processor truth value must not be tested"
+        raise AssertionError(message)
+
+
+@pytest.mark.parametrize("module", [process_py, process_cpp])
+@pytest.mark.parametrize("method", ["cdist", "cpdist"])
+@pytest.mark.parametrize("processor_type", [_FalseBoolProcessor, _EmptyProcessor, _NoTruthTestProcessor])
+@pytest.mark.parametrize("custom_scorer", [False, True])
+def test_pairwise_processor_truth_value(module, method, processor_type, custom_scorer):
+    pytest.importorskip("numpy")
+
+    def scorer(first, second, **kwargs):
+        return fuzz.ratio(first, second, **kwargs)
+
+    result = getattr(module, method)(
+        ["A"], ["a"], processor=processor_type(), scorer=scorer if custom_scorer else fuzz.ratio
+    )
+    assert result.item() == 100
+
+
+@pytest.mark.parametrize("module", [process_py, process_cpp])
+@pytest.mark.parametrize("processor_type", [_FalseBoolProcessor, _EmptyProcessor, _NoTruthTestProcessor])
+def test_cdist_symmetric_processor_truth_value(module, processor_type):
+    np = pytest.importorskip("numpy")
+
+    values = ["A", "a", None]
+    result = module.cdist(values, values, processor=processor_type())
+    np.testing.assert_array_equal(result, [[100, 100, 0], [100, 100, 0], [0, 0, 0]])
+
+
+@pytest.mark.parametrize("module", [process_py, process_cpp])
+@pytest.mark.parametrize("method", ["cdist", "cpdist"])
+@pytest.mark.parametrize("processor", [None, False, str.lower])
+@pytest.mark.parametrize("custom_scorer", [False, True])
+def test_pairwise_processor_compatibility(module, method, processor, custom_scorer):
+    pytest.importorskip("numpy")
+
+    def scorer(first, second, **kwargs):
+        return fuzz.ratio(first, second, **kwargs)
+
+    result = getattr(module, method)(["A"], ["a"], processor=processor, scorer=scorer if custom_scorer else fuzz.ratio)
+    assert result.item() == (100 if processor is str.lower else 0)
