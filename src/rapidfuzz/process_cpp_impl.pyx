@@ -1671,8 +1671,8 @@ cdef inline vector[PyObjectWrapper] preprocess_py(queries, processor) except *:
     cdef int64_t queries_len = <int64_t>len(queries)
     proc_queries.reserve(queries_len)
 
-    # processor None/False
-    if not processor:
+    # Preserve the legacy False sentinel without truth-testing callables.
+    if processor is None or processor is False:
         for query in queries:
             proc_queries.emplace_back(<PyObject*>query)
     # processor has to be called through python
@@ -1691,8 +1691,8 @@ cdef inline vector[RF_StringWrapper] preprocess(const RF_ScorerFlags* scorer_fla
     flags = scorer_flags.flags
     proc_queries.reserve(queries_len)
 
-    # No processor
-    if not processor:
+    # Preserve the legacy False sentinel without truth-testing callables.
+    if processor is None or processor is False:
         for query in queries:
             conv_sequence_with_none(query, &proc_str)
             if proc_str.data == NULL:
