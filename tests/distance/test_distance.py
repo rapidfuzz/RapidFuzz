@@ -133,3 +133,17 @@ def test_custom_hashable(scorer):
         )
         != 1.0
     )
+
+
+@pytest.mark.parametrize("scorer", all_scorer_modules)
+def test_score_cutoff_equal_to_score(scorer):
+    """
+    A normalized score equal to score_cutoff passes the cutoff: the cutoff
+    keeps double precision (0.8 would round up to 0.800000011920929 in a
+    single-precision float, and reject a similarity of exactly 0.8)
+    """
+    for s1, s2 in [("abcde", "abcdZ"), ("abcdefghijklmnopqrstuvwxy", "abcdefghijklmnopqrstVWXYZ")]:
+        sim = scorer.normalized_similarity(s1, s2)
+        assert scorer.normalized_similarity(s1, s2, score_cutoff=sim) == sim
+        dist = scorer.normalized_distance(s1, s2)
+        assert scorer.normalized_distance(s1, s2, score_cutoff=dist) == dist
