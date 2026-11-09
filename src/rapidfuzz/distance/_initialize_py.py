@@ -456,6 +456,14 @@ class Editops:
             modified source_string
 
         """
+        if not isinstance(source_string, (str, bytes)) or not isinstance(destination_string, (str, bytes)):
+            msg = "expected strings or bytes object"
+            raise TypeError(msg)
+        if isinstance(source_string, bytes):
+            source_string = bytes.decode(source_string, "latin-1")
+        if isinstance(destination_string, bytes):
+            destination_string = bytes.decode(destination_string, "latin-1")
+
         res_str = ""
         src_pos = 0
 
@@ -772,6 +780,14 @@ class Opcodes:
             modified source_string
 
         """
+        if not isinstance(source_string, (str, bytes)) or not isinstance(destination_string, (str, bytes)):
+            msg = "expected strings or bytes object"
+            raise TypeError(msg)
+        if isinstance(source_string, bytes):
+            source_string = bytes.decode(source_string, "latin-1")
+        if isinstance(destination_string, bytes):
+            destination_string = bytes.decode(destination_string, "latin-1")
+
         res_str = ""
 
         for op in self._opcodes:

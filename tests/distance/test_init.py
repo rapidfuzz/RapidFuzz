@@ -451,3 +451,64 @@ def test_remove_non_subsequence(module):
         module.Editops(edit_operations, str_len, str_len).remove_subsequence(
             module.Editops(not_a_subsequence, str_len, str_len)
         )
+
+
+@pytest.mark.parametrize("module", [distance_py, distance_cpp])
+@pytest.mark.parametrize("kind", ["Editops", "Opcodes"])
+@pytest.mark.parametrize(
+    ("source", "destination", "expected"),
+    [
+        (b"ab", b"ac", "ac"),
+        ("ab", b"ac", "ac"),
+        (b"ab", "ac", "ac"),
+        (b"\xffa", b"\xffb", "ÿb"),
+        (b"a", b"ab", "ab"),
+        (b"ab", b"a", "a"),
+        (b"", b"", ""),
+        (b"", b"\x00\xff", "\x00ÿ"),
+        (b"\x00\xff", b"", ""),
+        (b"\x00\xff", b"\x00\xff", "\x00ÿ"),
+    ],
+)
+def test_apply_bytes(module, kind, source, destination, expected):
+    operations = Levenshtein.editops(source, destination).as_list()
+    edits = module.Editops(operations, len(source), len(destination))
+    if kind == "Opcodes":
+        edits = edits.as_opcodes()
+    assert edits.apply(source, destination) == expected
+
+
+@pytest.mark.parametrize("module", [distance_py, distance_cpp])
+@pytest.mark.parametrize("kind", ["Editops", "Opcodes"])
+@pytest.mark.parametrize("invalid", [None, 123, [], bytearray(b"ab")])
+@pytest.mark.parametrize("invalid_source", [False, True])
+def test_apply_rejects_non_strings(module, kind, invalid, invalid_source):
+    edits = module.Editops([], 2, 2)
+    if kind == "Opcodes":
+        edits = edits.as_opcodes()
+    args = (invalid, "ab") if invalid_source else ("ab", invalid)
+    with pytest.raises(TypeError, match="expected strings or bytes object"):
+        edits.apply(*args)
+
+
+@pytest.mark.parametrize("module", [distance_py, distance_cpp])
+@pytest.mark.parametrize("kind", ["Editops", "Opcodes"])
+@given(source=st.binary(max_size=30), destination=st.binary(max_size=30))
+def test_apply_bytes_property(module, kind, source, destination):
+    operations = Levenshtein.editops(source, destination).as_list()
+    edits = module.Editops(operations, len(source), len(destination))
+    if kind == "Opcodes":
+        edits = edits.as_opcodes()
+    assert edits.apply(source, destination) == destination.decode("latin-1")
+
+
+@pytest.mark.parametrize("module", [distance_py, distance_cpp])
+@pytest.mark.parametrize("kind", ["Editops", "Opcodes"])
+def test_apply_all_byte_values(module, kind):
+    source = bytes(range(256))
+    destination = source[::-1]
+    operations = Levenshtein.editops(source, destination).as_list()
+    edits = module.Editops(operations, len(source), len(destination))
+    if kind == "Opcodes":
+        edits = edits.as_opcodes()
+    assert edits.apply(source, destination) == destination.decode("latin-1")
