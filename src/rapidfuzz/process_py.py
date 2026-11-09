@@ -516,6 +516,8 @@ def cdist(
 
     _ = workers, score_hint
     scorer_kwargs = scorer_kwargs or {}
+    if processor is False:
+        processor = None
     dtype = _dtype_to_type_num(dtype, scorer, scorer_kwargs)
     results = np.zeros((len(queries), len(choices)), dtype=dtype)
 
@@ -551,7 +553,7 @@ def cdist(
                 results[i, j] = results[j, i] = score
     else:
         for i, query in enumerate(queries):
-            proc_query = processor(query) if (processor and not is_none(query)) else query
+            proc_query = processor(query) if (processor is not None and not is_none(query)) else query
             for j, choice in enumerate(proc_choices):
                 score = (
                     scorer(
@@ -651,14 +653,16 @@ def cpdist(
 
     _ = workers, score_hint
     scorer_kwargs = scorer_kwargs or {}
+    if processor is False:
+        processor = None
     dtype = _dtype_to_type_num(dtype, scorer, scorer_kwargs)
     results = np.zeros((len_queries,), dtype=dtype)
 
     setupPandas()
 
     for i, (query, choice) in enumerate(zip(queries, choices)):
-        proc_query = processor(query) if (processor and not is_none(query)) else query
-        proc_choice = processor(choice) if (processor and not is_none(choice)) else choice
+        proc_query = processor(query) if (processor is not None and not is_none(query)) else query
+        proc_choice = processor(choice) if (processor is not None and not is_none(choice)) else choice
         score = scorer(
             proc_query,
             proc_choice,
