@@ -6,6 +6,8 @@ Fixed
 ~~~~~
 * keep the ``score_cutoff`` of normalized scorers in double precision: a score equal to the
   cutoff was rejected when the cutoff rounded up in single precision, e.g. 0.8 (#494)
+* ``partial_ratio`` and ``partial_ratio_alignment`` in the pure Python fallback returned a perfect
+  score for two empty strings even when ``score_cutoff`` was above 100
 
 [3.14.6] - 2026-08-30
 ^^^^^^^^^^^^^^^^^^^^^

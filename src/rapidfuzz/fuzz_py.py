@@ -312,6 +312,9 @@ def partial_ratio_alignment(
     if score_cutoff is None:
         score_cutoff = 0
 
+    if score_cutoff > 100:
+        return None
+
     if not s1 and not s2:
         return ScoreAlignment(100.0, 0, 0, 0, 0)
     s1, s2 = conv_sequences(s1, s2)

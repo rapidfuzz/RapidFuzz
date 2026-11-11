@@ -250,6 +250,16 @@ def test_score_cutoff_above_100(impl, scorer_name):
     assert scorer("abcd", "abcd") == 100.0
     assert scorer("abcd", "abcd", score_cutoff=100) == 100.0
     assert scorer("abcd", "abcd", score_cutoff=100.1) == 0.0
+    # two empty strings take an early exit, which must respect the cutoff as well
+    assert scorer("", "", score_cutoff=100.1) == 0.0
+
+
+def test_partial_ratio_alignment_score_cutoff_above_100():
+    """
+    a score_cutoff above 100 can never be reached, not even by two empty strings
+    """
+    assert fuzz.partial_ratio_alignment("abcd", "abcd", score_cutoff=100.1) is None
+    assert fuzz.partial_ratio_alignment("", "", score_cutoff=100.1) is None
 
 
 def test_issue231():
