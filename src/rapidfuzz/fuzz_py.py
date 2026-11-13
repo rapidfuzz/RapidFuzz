@@ -312,7 +312,7 @@ def partial_ratio_alignment(
     if score_cutoff is None:
         score_cutoff = 0
 
-    if not s1 and not s2:
+    if len(s1) == 0 and len(s2) == 0:
         return ScoreAlignment(100.0, 0, 0, 0, 0)
     s1, s2 = conv_sequences(s1, s2)
     len1 = len(s1)
@@ -793,7 +793,7 @@ def WRatio(
 
     # in FuzzyWuzzy this returns 0. For sake of compatibility return 0 here as well
     # see https://github.com/rapidfuzz/RapidFuzz/issues/110
-    if not s1 or not s2:
+    if len(s1) == 0 or len(s2) == 0:
         return 0
 
     if score_cutoff is None:
@@ -871,7 +871,7 @@ def QRatio(
         s2 = processor(s2)
     # in FuzzyWuzzy this returns 0. For sake of compatibility return 0 here as well
     # see https://github.com/rapidfuzz/RapidFuzz/issues/110
-    if not s1 or not s2:
+    if len(s1) == 0 or len(s2) == 0:
         return 0
 
     return ratio(s1, s2, score_cutoff=score_cutoff)
