@@ -317,6 +317,9 @@ def partial_ratio_alignment(
     s1, s2 = conv_sequences(s1, s2)
     len1 = len(s1)
     len2 = len(s2)
+    if type(s1) in (str, bytes) and type(s2) is type(s1) and s1 == s2 and score_cutoff <= 100:
+        return ScoreAlignment(100, 0, len1, 0, len2)
+
     if len1 <= len2:
         shorter = s1
         longer = s2
