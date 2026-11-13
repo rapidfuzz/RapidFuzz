@@ -41,7 +41,7 @@ def similarity(
         s1 = processor(s1)
         s2 = processor(s2)
 
-    if not s1:
+    if len(s1) == 0:
         return 0
 
     s1, s2 = conv_sequences(s1, s2)
@@ -182,7 +182,7 @@ def normalized_distance(
         s1 = processor(s1)
         s2 = processor(s2)
 
-    if not s1 and not s2:
+    if len(s1) == 0 and len(s2) == 0:
         return 0
 
     s1, s2 = conv_sequences(s1, s2)
