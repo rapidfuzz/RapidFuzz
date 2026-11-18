@@ -190,6 +190,15 @@ def test_issue90():
     assert pytest.approx(fuzz.partial_ratio("ax b", "a b a c b")) == 85.71428
 
 
+@pytest.mark.parametrize("impl", [fuzz_cpp, fuzz_py])
+def test_partial_ratio_at_exact_score_cutoff(impl):
+    left, right = "aaaaba", "aab aaa bab"
+    alignment = impl.partial_ratio_alignment(left, right)
+    assert 0 < alignment.score < 100
+    assert impl.partial_ratio_alignment(left, right, score_cutoff=alignment.score) == alignment
+    assert impl.partial_ratio(left, right, score_cutoff=alignment.score) == alignment.score
+
+
 def test_issue138():
     str1 = "a" * 65
     str2 = "a" + chr(256) + "a" * 63
