@@ -126,6 +126,7 @@ generate(
     "rapidfuzz.utils",
     [
         "default_process",
+        "default_process_with_marks",
     ],
 )
 

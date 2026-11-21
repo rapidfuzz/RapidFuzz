@@ -2,6 +2,11 @@ Changelog
 ---------
 [Unreleased]
 ^^^^^^^^^^^^
+Added
+~~~~~
+* add ``utils.default_process_with_marks``, an opt-in processor that preserves Unicode
+  marks used by scripts such as Sinhala, Tamil, and Devanagari (#515)
+
 Fixed
 ~~~~~
 * keep the ``score_cutoff`` of normalized scorers in double precision: a score equal to the
