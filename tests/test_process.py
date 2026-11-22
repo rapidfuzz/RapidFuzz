@@ -837,3 +837,53 @@ def test_pairwise_processor_compatibility(module, method, processor, custom_scor
 
     result = getattr(module, method)(["A"], ["a"], processor=processor, scorer=scorer if custom_scorer else fuzz.ratio)
     assert result.item() == (100 if processor is str.lower else 0)
+
+
+@pytest.mark.parametrize("workers", [0, 1, 2])
+@pytest.mark.parametrize("processor", [None, default_process])
+@pytest.mark.parametrize(
+    ("scorer", "score_cutoff", "dtype", "score_multiplier"),
+    [
+        (fuzz.WRatio, 50, "float64", 1),
+        (fuzz.token_set_ratio, 80, "uint8", 2),
+        (fuzz.partial_ratio, 90, "float32", 1),
+        (DamerauLevenshtein.distance, 2, "uint32", 1),
+    ],
+)
+def test_cdist_single_choice(scorer, score_cutoff, dtype, score_multiplier, processor, workers):
+    pytest.importorskip("numpy")
+    queries = ["", "blue moon", "BLUE MOON", "moon blue", "blue", "green apple", "café 🌙"]
+    result = process.cdist(
+        queries,
+        ["blue moon"],
+        scorer=scorer,
+        processor=processor,
+        workers=workers,
+        score_cutoff=score_cutoff,
+        score_hint=score_cutoff,
+        score_multiplier=score_multiplier,
+        dtype=dtype,
+    )
+    assert result.shape == (len(queries), 1)
+
+
+@pytest.mark.parametrize("workers", [0, 1, 2])
+@pytest.mark.parametrize("scorer", [fuzz.WRatio, DamerauLevenshtein.normalized_similarity])
+@pytest.mark.parametrize("choice", ["blue moon", None])
+def test_cdist_single_choice_missing_values(scorer, choice, workers):
+    pytest.importorskip("numpy")
+    process.cdist([None, "blue", float("nan"), ""], [choice], scorer=scorer, workers=workers)
+    process.cdist([None, float("nan")], [choice], scorer=scorer, workers=workers)
+
+
+@pytest.mark.parametrize("workers", [0, 1, 2])
+def test_cdist_single_choice_asymmetric(workers):
+    np = pytest.importorskip("numpy")
+    result = process.cdist(
+        ["a", "aaaa", "aab"],
+        ["aa"],
+        scorer=Levenshtein.distance,
+        scorer_kwargs={"weights": (1, 2, 1)},
+        workers=workers,
+    )
+    np.testing.assert_array_equal(result, [[1], [4], [2]])
