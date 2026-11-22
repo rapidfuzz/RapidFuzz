@@ -656,6 +656,13 @@ static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_
         });
     }
     else {
+        // A serial comparison against one choice can reuse that choice's cache.
+        // Keep the query order for asymmetric scorers and parallel workers.
+        bool cache_choice = cols == 1 && rows > 1 && (workers == 0 || workers == 1) &&
+                            (scorer_flags->flags & RF_SCORER_FLAG_SYMMETRIC);
+        RF_ScorerWrapper ChoiceScorer;
+        bool choice_scorer_initialized = false;
+
         run_parallel(workers, rows, 1, [&](int64_t row, int64_t row_end) {
             for (; row < row_end; ++row) {
                 if (queries[row].is_none()) {
@@ -665,14 +672,27 @@ static Matrix cdist_two_lists_impl(const RF_ScorerFlags* scorer_flags, const RF_
                     continue;
                 }
 
-                RF_ScorerFunc scorer_func;
-                PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, 1, &queries[row].string));
-                RF_ScorerWrapper ScorerFunc(scorer_func);
+                RF_ScorerWrapper ScorerFunc;
+                if (!cache_choice) {
+                    RF_ScorerFunc scorer_func;
+                    PyErr2RuntimeExn(scorer->scorer_func_init(&scorer_func, kwargs, 1, &queries[row].string));
+                    ScorerFunc = RF_ScorerWrapper(scorer_func);
+                }
 
                 for (int64_t col = 0; col < cols; ++col) {
                     T score;
                     if (choices[col].is_none())
                         score = worst_score;
+                    else if (cache_choice) {
+                        if (!choice_scorer_initialized) {
+                            RF_ScorerFunc scorer_func;
+                            PyErr2RuntimeExn(
+                                scorer->scorer_func_init(&scorer_func, kwargs, 1, &choices[col].string));
+                            ChoiceScorer = RF_ScorerWrapper(scorer_func);
+                            choice_scorer_initialized = true;
+                        }
+                        ChoiceScorer.call(&queries[row].string, score_cutoff, score_hint, &score);
+                    }
                     else
                         ScorerFunc.call(&choices[col].string, score_cutoff, score_hint, &score);
 
