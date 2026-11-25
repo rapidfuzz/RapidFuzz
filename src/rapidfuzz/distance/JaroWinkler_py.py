@@ -2,7 +2,7 @@
 # Copyright (C) 2022 Max Bachmann
 from __future__ import annotations
 
-from rapidfuzz._common_py import conv_sequences
+from rapidfuzz._common_py import conv_sequences, validate_score_cutoff_f64, validate_score_cutoff_size_t
 from rapidfuzz._utils import is_none, setupPandas
 from rapidfuzz.distance import Jaro_py as Jaro
 
@@ -45,6 +45,7 @@ def similarity(
     ValueError
         If prefix_weight is invalid
     """
+    validate_score_cutoff_f64(score_cutoff, 0.0, 1.0)
     setupPandas()
     if is_none(s1) or is_none(s2):
         return 0.0
@@ -127,6 +128,7 @@ def normalized_similarity(
     ValueError
         If prefix_weight is invalid
     """
+    validate_score_cutoff_f64(score_cutoff, 0.0, 1.0)
     return similarity(
         s1,
         s2,
@@ -174,6 +176,7 @@ def distance(
     ValueError
         If prefix_weight is invalid
     """
+    validate_score_cutoff_f64(score_cutoff, 1.0, 0.0)
     setupPandas()
     if is_none(s1) or is_none(s2):
         return 1.0
@@ -226,6 +229,7 @@ def normalized_distance(
     ValueError
         If prefix_weight is invalid
     """
+    validate_score_cutoff_f64(score_cutoff, 1.0, 0.0)
     return distance(
         s1,
         s2,

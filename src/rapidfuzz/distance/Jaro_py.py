@@ -2,7 +2,7 @@
 # Copyright (C) 2022 Max Bachmann
 from __future__ import annotations
 
-from rapidfuzz._common_py import conv_sequences
+from rapidfuzz._common_py import conv_sequences, validate_score_cutoff_f64, validate_score_cutoff_size_t
 from rapidfuzz._utils import is_none, setupPandas
 
 
@@ -87,6 +87,7 @@ def similarity(
     similarity : float
         similarity between s1 and s2 as a float between 0 and 1.0
     """
+    validate_score_cutoff_f64(score_cutoff, 0.0, 1.0)
     setupPandas()
     if is_none(s1) or is_none(s2):
         return 0.0
@@ -178,6 +179,7 @@ def normalized_similarity(
     normalized similarity : float
         normalized similarity between s1 and s2 as a float between 0 and 1.0
     """
+    validate_score_cutoff_f64(score_cutoff, 0.0, 1.0)
     return similarity(s1, s2, processor=processor, score_cutoff=score_cutoff)
 
 
@@ -210,6 +212,7 @@ def distance(
     distance : float
         distance between s1 and s2 as a float between 1.0 and 0.0
     """
+    validate_score_cutoff_f64(score_cutoff, 1.0, 0.0)
     setupPandas()
     if is_none(s1) or is_none(s2):
         return 1.0
@@ -253,4 +256,5 @@ def normalized_distance(
     normalized distance : float
         normalized distance between s1 and s2 as a float between 1.0 and 0.0
     """
+    validate_score_cutoff_f64(score_cutoff, 1.0, 0.0)
     return distance(s1, s2, processor=processor, score_cutoff=score_cutoff)
