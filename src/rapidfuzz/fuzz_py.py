@@ -107,7 +107,10 @@ def ratio(
         return 0
 
     if score_cutoff is not None:
-        score_cutoff /= 100
+        if score_cutoff > 100:
+            return 0
+
+        score_cutoff = max(score_cutoff, 0) / 100
 
     score = indel_normalized_similarity(s1, s2, processor=processor, score_cutoff=score_cutoff)
     return score * 100
