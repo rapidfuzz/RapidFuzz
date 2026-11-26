@@ -183,8 +183,8 @@ def normalized_distance(
     s1, s2 = conv_sequences(s1, s2)
     maximum = max(len(s1), len(s2))
     dist = distance(s1, s2)
-    norm_dist = dist / maximum if maximum else 0
-    return norm_dist if (score_cutoff is None or norm_dist <= score_cutoff) else 1
+    norm_dist = dist / maximum if maximum else 0.0
+    return norm_dist if (score_cutoff is None or norm_dist <= score_cutoff) else 1.0
 
 
 def normalized_similarity(
@@ -229,4 +229,4 @@ def normalized_similarity(
     s1, s2 = conv_sequences(s1, s2)
     norm_dist = normalized_distance(s1, s2)
     norm_sim = 1.0 - norm_dist
-    return norm_sim if (score_cutoff is None or norm_sim >= score_cutoff) else 0
+    return norm_sim if (score_cutoff is None or norm_sim >= score_cutoff) else 0.0
