@@ -2,7 +2,7 @@
 # Copyright (C) 2022 Max Bachmann
 from __future__ import annotations
 
-from math import ceil
+from math import ceil, nextafter
 
 from rapidfuzz._common_py import conv_sequences
 from rapidfuzz._utils import ScorerFlag, add_scorer_attrs, is_none, setupPandas
@@ -121,6 +121,9 @@ def _partial_ratio_impl(s1, s2, score_cutoff):
     len1 = len(s1)
     len2 = len(s2)
 
+    # Division by 100 can round the cutoff up in the normalized scale.
+    # The caller enforces the original cutoff against the final score.
+    score_cutoff = nextafter(score_cutoff, 0.0)
     res = ScoreAlignment(0, 0, len1, 0, len1)
 
     block = {}
