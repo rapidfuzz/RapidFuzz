@@ -2,7 +2,7 @@
 # Copyright (C) 2022 Max Bachmann
 from __future__ import annotations
 
-from rapidfuzz._common_py import conv_sequences, validate_score_cutoff_f64, validate_score_cutoff_size_t
+from rapidfuzz._common_py import conv_sequences, validate_score_cutoff_f64
 from rapidfuzz._utils import is_none, setupPandas
 from rapidfuzz.distance import Jaro_py as Jaro
 
@@ -87,7 +87,7 @@ def similarity(
         Sim += prefix * prefix_weight * (1.0 - Sim)
         Sim = min(Sim, 1.0)
 
-    return Sim if Sim >= score_cutoff else 0
+    return Sim if Sim >= score_cutoff else 0.0
 
 
 def normalized_similarity(
@@ -129,13 +129,12 @@ def normalized_similarity(
         If prefix_weight is invalid
     """
     validate_score_cutoff_f64(score_cutoff, 0.0, 1.0)
-    return similarity(
-        s1,
-        s2,
-        prefix_weight=prefix_weight,
-        processor=processor,
-        score_cutoff=score_cutoff,
+    cutoff_distance = None if score_cutoff is None else min(1.0, 1.0 - score_cutoff + 0.00001)
+    norm_dist = normalized_distance(
+        s1, s2, prefix_weight=prefix_weight, processor=processor, score_cutoff=cutoff_distance
     )
+    norm_sim = 1.0 - norm_dist
+    return norm_sim if (score_cutoff is None or norm_sim >= score_cutoff) else 0.0
 
 
 def distance(
@@ -185,8 +184,8 @@ def distance(
         s1 = processor(s1)
         s2 = processor(s2)
 
-    cutoff_distance = None if (score_cutoff is None or score_cutoff > 1.0) else 1.0 - score_cutoff
-    sim = similarity(s1, s2, prefix_weight=prefix_weight, score_cutoff=cutoff_distance)
+    cutoff_similarity = None if (score_cutoff is None or score_cutoff > 1.0) else max(0.0, 1.0 - score_cutoff - 0.00001)
+    sim = similarity(s1, s2, prefix_weight=prefix_weight, score_cutoff=cutoff_similarity)
     dist = 1.0 - sim
     return dist if (score_cutoff is None or dist <= score_cutoff) else 1.0
 
@@ -230,10 +229,11 @@ def normalized_distance(
         If prefix_weight is invalid
     """
     validate_score_cutoff_f64(score_cutoff, 1.0, 0.0)
-    return distance(
+    norm_dist = distance(
         s1,
         s2,
         prefix_weight=prefix_weight,
         processor=processor,
         score_cutoff=score_cutoff,
     )
+    return norm_dist if (score_cutoff is None or norm_dist <= score_cutoff) else 1.0

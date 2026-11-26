@@ -2,7 +2,7 @@
 # Copyright (C) 2022 Max Bachmann
 from __future__ import annotations
 
-from rapidfuzz._common_py import conv_sequences, validate_score_cutoff_f64, validate_score_cutoff_size_t
+from rapidfuzz._common_py import conv_sequences, validate_score_cutoff_f64
 from rapidfuzz._utils import is_none, setupPandas
 
 
@@ -108,7 +108,7 @@ def similarity(
 
     # short circuit if score_cutoff can not be reached
     if not _jaro_length_filter(pattern_len, text_len, score_cutoff):
-        return 0
+        return 0.0
 
     if pattern_len == 1 and text_len == 1:
         return float(s1[0] == s2[0])
@@ -132,7 +132,7 @@ def similarity(
 
     # short circuit if score_cutoff can not be reached
     if not _jaro_common_char_filter(pattern_len, text_len, common_chars, score_cutoff):
-        return 0
+        return 0.0
 
     # todo use bitparallel implementation
     # count transpositions
@@ -147,7 +147,7 @@ def similarity(
                 trans_count += 1
 
     sim = _jaro_calculate_similarity(pattern_len, text_len, common_chars, trans_count)
-    return sim if sim >= score_cutoff else 0
+    return sim if sim >= score_cutoff else 0.0
 
 
 def normalized_similarity(
@@ -180,7 +180,10 @@ def normalized_similarity(
         normalized similarity between s1 and s2 as a float between 0 and 1.0
     """
     validate_score_cutoff_f64(score_cutoff, 0.0, 1.0)
-    return similarity(s1, s2, processor=processor, score_cutoff=score_cutoff)
+    cutoff_distance = None if score_cutoff is None else min(1.0, 1.0 - score_cutoff + 0.00001)
+    norm_dist = normalized_distance(s1, s2, processor=processor, score_cutoff=cutoff_distance)
+    norm_sim = 1.0 - norm_dist
+    return norm_sim if (score_cutoff is None or norm_sim >= score_cutoff) else 0.0
 
 
 def distance(
@@ -221,8 +224,8 @@ def distance(
         s1 = processor(s1)
         s2 = processor(s2)
 
-    cutoff_distance = None if (score_cutoff is None or score_cutoff > 1.0) else 1.0 - score_cutoff
-    sim = similarity(s1, s2, score_cutoff=cutoff_distance)
+    cutoff_similarity = None if (score_cutoff is None or score_cutoff > 1.0) else max(0.0, 1.0 - score_cutoff - 0.00001)
+    sim = similarity(s1, s2, score_cutoff=cutoff_similarity)
     dist = 1.0 - sim
     return dist if (score_cutoff is None or dist <= score_cutoff) else 1.0
 
@@ -257,4 +260,5 @@ def normalized_distance(
         normalized distance between s1 and s2 as a float between 1.0 and 0.0
     """
     validate_score_cutoff_f64(score_cutoff, 1.0, 0.0)
-    return distance(s1, s2, processor=processor, score_cutoff=score_cutoff)
+    norm_dist = distance(s1, s2, processor=processor, score_cutoff=score_cutoff)
+    return norm_dist if (score_cutoff is None or norm_dist <= score_cutoff) else 1.0
