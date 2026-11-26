@@ -13,6 +13,8 @@ from array import array
 
 from . import utils_py
 
+default_process_with_marks = utils_py.default_process_with_marks
+
 
 cdef extern from "utils_cpp.hpp":
     object default_process_impl(object) except + nogil

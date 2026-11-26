@@ -8,58 +8,64 @@ import os
 
 from rapidfuzz._feature_detector import AVX2, SSE2, supports
 
-__all__ = ["default_process"]
+__all__ = ["default_process", "default_process_with_marks"]
 
 _impl = os.environ.get("RAPIDFUZZ_IMPLEMENTATION")
 if _impl == "cpp":
     _imported = False
     if supports(AVX2):
         with contextlib.suppress(ImportError):
-            from rapidfuzz.utils_cpp_avx2 import (
-                default_process,  # pyright: ignore[reportMissingImports]
+            from rapidfuzz.utils_cpp_avx2 import (  # pyright: ignore[reportMissingImports]
+                default_process,
+                default_process_with_marks,
             )
 
             _imported = True
 
     if not _imported and supports(SSE2):
         with contextlib.suppress(ImportError):
-            from rapidfuzz.utils_cpp_sse2 import (
-                default_process,  # pyright: ignore[reportMissingImports]
+            from rapidfuzz.utils_cpp_sse2 import (  # pyright: ignore[reportMissingImports]
+                default_process,
+                default_process_with_marks,
             )
 
             _imported = True
 
     if not _imported:
-        from rapidfuzz.utils_cpp import (
-            default_process,  # pyright: ignore[reportMissingImports]
+        from rapidfuzz.utils_cpp import (  # pyright: ignore[reportMissingImports]
+            default_process,
+            default_process_with_marks,
         )
 elif _impl == "python":
-    from rapidfuzz.utils_py import default_process
+    from rapidfuzz.utils_py import default_process, default_process_with_marks
 else:
     _imported = False
     if supports(AVX2):
         with contextlib.suppress(ImportError):
-            from rapidfuzz.utils_cpp_avx2 import (
-                default_process,  # pyright: ignore[reportMissingImports]
+            from rapidfuzz.utils_cpp_avx2 import (  # pyright: ignore[reportMissingImports]
+                default_process,
+                default_process_with_marks,
             )
 
             _imported = True
 
     if not _imported and supports(SSE2):
         with contextlib.suppress(ImportError):
-            from rapidfuzz.utils_cpp_sse2 import (
-                default_process,  # pyright: ignore[reportMissingImports]
+            from rapidfuzz.utils_cpp_sse2 import (  # pyright: ignore[reportMissingImports]
+                default_process,
+                default_process_with_marks,
             )
 
             _imported = True
 
     if not _imported:
         with contextlib.suppress(ImportError):
-            from rapidfuzz.utils_cpp import (
-                default_process,  # pyright: ignore[reportMissingImports]
+            from rapidfuzz.utils_cpp import (  # pyright: ignore[reportMissingImports]
+                default_process,
+                default_process_with_marks,
             )
 
             _imported = True
 
     if not _imported:
-        from rapidfuzz.utils_py import default_process
+        from rapidfuzz.utils_py import default_process, default_process_with_marks
