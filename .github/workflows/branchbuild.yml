@@ -140,7 +140,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.11", "3.12", "3.13", "3.14", "3.14t"]
-        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, windows-11-arm, macos-15-intel, macos-14]
+        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, windows-11-arm, macos-15-intel, macos-latest]
 
     steps:
       - uses: "actions/checkout@v7"
@@ -193,7 +193,9 @@ jobs:
   # validate sse2 code on gcc
   sde_tests:
     name: "Test sse2 code on Linux (gcc)"
-    runs-on: ubuntu-latest
+    # ubuntu-26.04 runners use the amd64v3 (x86-64-v3) package variant, so even
+    # ld.so executes AVX instructions and nothing runs on the emulated Nehalem
+    runs-on: ubuntu-24.04
     steps:
       - uses: "actions/checkout@v7"
         with:
