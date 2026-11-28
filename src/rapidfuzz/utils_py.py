@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import re
 
-_alnum_regex = re.compile(r"(?ui)\W")
+_alnum_regex = re.compile(r"(?ui)[\W_]")
 
 
 def default_process(sentence: str) -> str:

@@ -182,13 +182,11 @@ def normalized_distance(
         s1 = processor(s1)
         s2 = processor(s2)
 
-    if len(s1) == 0 and len(s2) == 0:
-        return 0
-
     s1, s2 = conv_sequences(s1, s2)
     maximum = max(len(s1), len(s2))
-    norm_sim = distance(s1, s2) / maximum
-    return norm_sim if (score_cutoff is None or norm_sim <= score_cutoff) else 1
+    dist = distance(s1, s2)
+    norm_dist = dist / maximum if maximum else 0.0
+    return norm_dist if (score_cutoff is None or norm_dist <= score_cutoff) else 1.0
 
 
 def normalized_similarity(
@@ -250,7 +248,7 @@ def normalized_similarity(
         s2 = processor(s2)
 
     norm_sim = 1.0 - normalized_distance(s1, s2)
-    return norm_sim if (score_cutoff is None or norm_sim >= score_cutoff) else 0
+    return norm_sim if (score_cutoff is None or norm_sim >= score_cutoff) else 0.0
 
 
 def _matrix(s1, s2):

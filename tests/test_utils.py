@@ -26,3 +26,12 @@ def test_fullProcess():
     for string, proc_string in zip(mixed_strings, mixed_strings_proc):
         assert utils_cpp.default_process(string) == proc_string
         assert utils_py.default_process(string) == proc_string
+
+
+def test_fullProcess_underscore():
+    """
+    An underscore is not alphanumeric, so it is replaced like any other punctuation
+    """
+    for string, proc_string in [("hello_world", "hello world"), ("__init__", "init"), ("a_B_c", "a b c")]:
+        assert utils_cpp.default_process(string) == proc_string
+        assert utils_py.default_process(string) == proc_string
