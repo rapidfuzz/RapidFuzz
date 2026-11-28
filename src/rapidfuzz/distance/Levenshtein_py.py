@@ -45,36 +45,42 @@ def _uniform_distance(s1, s2):
     if not s1:
         return len(s2)
 
-    VP = (1 << len(s1)) - 1
+    if type(s1) is str and type(s2) is str and s1 == s2:
+        return 0
+
+    if type(s1) is str and type(s2) is str and len(s1) < len(s2):
+        s1, s2 = s2, s1
+
+    mask = (1 << len(s1)) - 1
+    VP = -1
     VN = 0
-    currDist = len(s1)
-    mask = 1 << (len(s1) - 1)
 
     block = {}
     block_get = block.get
     x = 1
     for ch1 in s1:
-        block[ch1] = block_get(ch1, 0) | x
+        block[ch1] = block_get(ch1, 0) + x
         x <<= 1
 
-    for ch2 in s2:
+    matches = map(block_get, s2)
+    if type(s2) is not str:
+        matches = list(matches)
+        row = len(matches)
+    else:
+        row = len(s2)
+
+    for X in matches:
         # Step 1: Computing D0
-        PM_j = block_get(ch2, 0)
-        X = PM_j
-        D0 = (((X & VP) + VP) ^ VP) | X | VN
+        D0 = ((((X & VP) + VP) ^ VP) | X | VN) if X else VN
         # Step 2: Computing HP and HN
         HP = VN | ~(D0 | VP)
-        HN = D0 & VP
-        # Step 3: Computing the value D[m,j]
-        currDist += (HP & mask) != 0
-        currDist -= (HN & mask) != 0
-        # Step 4: Computing Vp and VN
+        # Step 3: Computing VP and VN
         HP = (HP << 1) | 1
-        HN = HN << 1
-        VP = HN | ~(D0 | HP)
+        VP = ((D0 & VP) << 1) | ~(D0 | HP)
         VN = HP & D0
 
-    return currDist
+    # Sum the vertical differences in the final column.
+    return row + (VP & mask).bit_count() - (VN & mask).bit_count()
 
 
 def distance(
