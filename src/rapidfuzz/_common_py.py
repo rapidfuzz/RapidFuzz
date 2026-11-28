@@ -71,3 +71,24 @@ def common_affix(s1: Sequence[Hashable], s2: Sequence[Hashable]) -> tuple[int, i
     prefix_len = common_prefix(s1, s2)
     suffix_len = common_suffix(s1[prefix_len:], s2[prefix_len:])
     return (prefix_len, suffix_len)
+
+
+def validate_score_cutoff_f64(score_cutoff, worst_score, optimal_score):
+    if score_cutoff is None:
+        return
+
+    if optimal_score > worst_score:
+        # e.g. 0.0 - 100.0
+        if score_cutoff < worst_score or score_cutoff > optimal_score:
+            msg = f"score_cutoff has to be in the range of {worst_score} - {optimal_score}"
+            raise TypeError(msg)
+    # e.g. DBL_MAX - 0
+    elif score_cutoff > worst_score or score_cutoff < optimal_score:
+        msg = f"score_cutoff has to be in the range of {optimal_score} - {worst_score}"
+        raise TypeError(msg)
+
+
+def validate_score_cutoff_size_t(score_cutoff):
+    if score_cutoff is not None and score_cutoff < 0:
+        msg = "can't convert negative value to uint64_t"
+        raise OverflowError(msg)

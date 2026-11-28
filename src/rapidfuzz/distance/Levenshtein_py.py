@@ -2,7 +2,7 @@
 # Copyright (C) 2022 Max Bachmann
 from __future__ import annotations
 
-from rapidfuzz._common_py import common_affix, conv_sequences
+from rapidfuzz._common_py import common_affix, conv_sequences, validate_score_cutoff_f64, validate_score_cutoff_size_t
 from rapidfuzz._utils import is_none, setupPandas
 from rapidfuzz.distance import Indel_py as Indel
 from rapidfuzz.distance._initialize_py import Editop, Editops
@@ -143,6 +143,7 @@ def distance(
     >>> Levenshtein.distance("lewenstein", "levenshtein", weights=(1,1,2))
     3
     """
+    validate_score_cutoff_size_t(score_cutoff)
     _ = score_hint
     if processor is not None:
         s1 = processor(s1)
@@ -207,6 +208,7 @@ def similarity(
     ValueError
         If unsupported weights are provided a ValueError is thrown
     """
+    validate_score_cutoff_size_t(score_cutoff)
     _ = score_hint
     if processor is not None:
         s1 = processor(s1)
@@ -267,6 +269,7 @@ def normalized_distance(
     ValueError
         If unsupported weights are provided a ValueError is thrown
     """
+    validate_score_cutoff_f64(score_cutoff, 1.0, 0.0)
     _ = score_hint
     setupPandas()
     if is_none(s1) or is_none(s2):
@@ -355,6 +358,7 @@ def normalized_similarity(
     >>> Levenshtein.normalized_similarity(["lewenstein"], ["levenshtein"], processor=lambda s: s[0])
     0.81818181818181
     """
+    validate_score_cutoff_f64(score_cutoff, 0.0, 1.0)
     _ = score_hint
     setupPandas()
     if is_none(s1) or is_none(s2):

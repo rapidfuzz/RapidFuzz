@@ -2,7 +2,7 @@
 # Copyright (C) 2022 Max Bachmann
 from __future__ import annotations
 
-from rapidfuzz._common_py import conv_sequences
+from rapidfuzz._common_py import conv_sequences, validate_score_cutoff_f64, validate_score_cutoff_size_t
 from rapidfuzz._utils import is_none, setupPandas
 from rapidfuzz.distance._initialize_py import Editop, Editops
 
@@ -50,6 +50,7 @@ def distance(
     ValueError
         If s1 and s2 have a different length
     """
+    validate_score_cutoff_size_t(score_cutoff)
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -110,6 +111,7 @@ def similarity(
     ValueError
         If s1 and s2 have a different length
     """
+    validate_score_cutoff_size_t(score_cutoff)
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -163,6 +165,7 @@ def normalized_distance(
     ValueError
         If s1 and s2 have a different length
     """
+    validate_score_cutoff_f64(score_cutoff, 1.0, 0.0)
     setupPandas()
     if is_none(s1) or is_none(s2):
         return 1.0
@@ -220,6 +223,7 @@ def normalized_similarity(
     ValueError
         If s1 and s2 have a different length
     """
+    validate_score_cutoff_f64(score_cutoff, 0.0, 1.0)
     setupPandas()
     if is_none(s1) or is_none(s2):
         return 0.0

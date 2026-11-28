@@ -2,7 +2,7 @@
 # Copyright (C) 2022 Max Bachmann
 from __future__ import annotations
 
-from rapidfuzz._common_py import common_affix, conv_sequences
+from rapidfuzz._common_py import common_affix, conv_sequences, validate_score_cutoff_f64, validate_score_cutoff_size_t
 from rapidfuzz._utils import is_none, setupPandas
 from rapidfuzz.distance._initialize_py import Editop, Editops
 
@@ -37,6 +37,7 @@ def similarity(
     similarity : int
         similarity between s1 and s2
     """
+    validate_score_cutoff_size_t(score_cutoff)
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -132,6 +133,7 @@ def distance(
     2
 
     """
+    validate_score_cutoff_size_t(score_cutoff)
     if processor is not None:
         s1 = processor(s1)
         s2 = processor(s2)
@@ -174,6 +176,7 @@ def normalized_distance(
     norm_dist : float
         normalized distance between s1 and s2 as a float between 0 and 1.0
     """
+    validate_score_cutoff_f64(score_cutoff, 1.0, 0.0)
     setupPandas()
     if is_none(s1) or is_none(s2):
         return 1.0
@@ -239,6 +242,7 @@ def normalized_similarity(
     >>> LCSseq.normalized_similarity(["lewenstein"], ["levenshtein"], processor=lambda s: s[0])
     0.81818181818181
     """
+    validate_score_cutoff_f64(score_cutoff, 0.0, 1.0)
     setupPandas()
     if is_none(s1) or is_none(s2):
         return 0.0
