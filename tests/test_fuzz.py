@@ -207,6 +207,45 @@ def test_partial_ratio_alignment():
     assert fuzz.partial_ratio_alignment("test", "tesx", score_cutoff=90) is None
 
 
+@pytest.mark.parametrize("impl", [fuzz_cpp, fuzz_py])
+@pytest.mark.parametrize("value", ["hello" * 20, "€漢🙂\0", b"\x00\xffhello", [1, 2, 3]])
+@pytest.mark.parametrize("score_cutoff", [None, 0, 100, 100.1])
+def test_partial_ratio_equal_inputs(impl, value, score_cutoff):
+    alignment = impl.partial_ratio_alignment(value, value, score_cutoff=score_cutoff)
+    score = impl.partial_ratio(value, value, score_cutoff=score_cutoff)
+    if score_cutoff is not None and score_cutoff > 100:
+        assert alignment is None
+        assert score == 0
+    else:
+        assert alignment == ScoreAlignment(100, 0, len(value), 0, len(value))
+        assert score == 100
+
+
+@pytest.mark.parametrize("impl", [fuzz_cpp, fuzz_py])
+def test_partial_ratio_equal_processed_inputs(impl):
+    calls = []
+
+    def processor(value):
+        calls.append(value)
+        return value[0].strip().lower()
+
+    first = (" HELLO ",)
+    second = ("hello",)
+    assert impl.partial_ratio_alignment(first, second, processor=processor) == ScoreAlignment(100, 0, 5, 0, 5)
+    assert calls == [first, second]
+
+
+@pytest.mark.parametrize("impl", [fuzz_cpp, fuzz_py])
+@pytest.mark.parametrize("base", [str, bytes])
+def test_partial_ratio_ignores_overridden_sequence_equality(impl, base):
+    class EqualSequence(base):
+        def __eq__(self, other):
+            return True
+
+    first, second = ("ab", "xy") if base is str else (b"ab", b"xy")
+    assert impl.partial_ratio(EqualSequence(first), EqualSequence(second)) == 0
+
+
 def test_issue196():
     """
     fuzz.WRatio did not work correctly with score_cutoffs
